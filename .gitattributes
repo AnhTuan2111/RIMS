@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+backend/rms-api/mvnw text eol=lf
+backend/rms-api/*.cmd text eol=crlf
