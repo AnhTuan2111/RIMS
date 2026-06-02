@@ -1,4 +1,4 @@
-package com.anhtuan.miniproject.rmsapi;
+package com.anhtuan.miniproject.rmsapi.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
