@@ -31,7 +31,7 @@ public class User
     private RoleType role;
 
     @NotBlank
-    @Column(nullable = false, length = 20,  unique = true)
+    @Column(nullable = false, length = 20, unique = true)
     private String username;
 
     @NotBlank
@@ -46,10 +46,10 @@ public class User
 
     @NotBlank
     @Pattern(regexp = "^0[0-9]{9}$")
-    @Column(nullable = false, unique = true,  length = 10)
+    @Column(nullable = false, unique = true, length = 10)
     private String phone;
 
-    @Column(name="password_hash")
+    @Column(name = "password_hash")
     private String passwordHash;
 
     @Column(name = "is_active")
@@ -62,20 +62,4 @@ public class User
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @Override
-    public String toString()
-    {
-        return "User{" +
-                "id=" + id +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                ", passwordHash='" + passwordHash + '\'' +
-                ", phone='" + phone + '\'' +
-                ", role=" + role +
-                ", isActive=" + isActive +
-                ", updatedAt=" + updatedAt +
-                ", createdAt=" + createdAt +
-                '}';
-    }
 }
