@@ -1,7 +1,9 @@
+import { LoginPage } from './pages/login/LoginPage'
+
 function App() {
     return (
         <main>
-            <h1>RMS</h1>
+            <LoginPage />
         </main>
     )
 }

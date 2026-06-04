@@ -1,12 +1,14 @@
 package com.anhtuan.miniproject.rmsapi.dto.response;
 
 import com.anhtuan.miniproject.rmsapi.enums.RoleType;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 
 @Getter
 @Builder
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class LoginResponse
 {
     private Integer userId;
