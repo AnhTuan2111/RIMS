@@ -1,4 +1,4 @@
-# RMS — Restaurant Management System
+# RIMS — Restaurant Internal Management System
 
 Dự án môn học: quản lý nhà hàng (full-stack).
 
