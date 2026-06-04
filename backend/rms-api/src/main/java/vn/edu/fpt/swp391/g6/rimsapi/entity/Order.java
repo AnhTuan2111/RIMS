@@ -1,0 +1,83 @@
+package vn.edu.fpt.swp391.g6.rimsapi.entity;
+
+import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+@Entity
+@Table(name = "orders")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
+public class Order
+{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long orderId;
+
+    @ManyToOne
+    @JoinColumn(name = "table_id", nullable = false)
+    private RestaurantTable table;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
+
+    @Column(nullable = false, name = "total_amount")
+    private BigDecimal totalAmount;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Invoice invoice;
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    // Thêm món vào đơn hàng và tự động thiết lập liên kết ngược lại ở phía OrderItem
+    public void addOrderItem(OrderItem orderItem) {
+        if (this.orderItems == null) {
+            this.orderItems = new java.util.ArrayList<>();
+        }
+        this.orderItems.add(orderItem);
+        orderItem.setOrder(this); // Thiết lập mối quan hệ 2 chiều ở phía OrderItem
+    }
+
+    // Xóa món khỏi đơn hàng và gỡ bỏ liên kết ngược lại ở phía OrderItem
+    public void removeOrderItem(OrderItem orderItem) {
+        if (this.orderItems != null) {
+            this.orderItems.remove(orderItem);
+            orderItem.setOrder(null); // Gỡ bỏ mối quan hệ 2 chiều ở phía OrderItem
+        }
+    }
+
+    // Gán hóa đơn cho đơn hàng và đồng bộ hóa liên kết ngược lại từ hóa đơn về đơn hàng này
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+        if (invoice != null && invoice.getOrder() != this) {
+            invoice.setOrder(this); // Thiết lập liên kết ngược lại ở phía Invoice (tránh vòng lặp vô hạn)
+        }
+    }
+}
