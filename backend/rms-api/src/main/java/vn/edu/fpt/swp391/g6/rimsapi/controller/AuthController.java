@@ -3,6 +3,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.LoginRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LoginResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LogoutResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,12 @@ public class AuthController
     public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest)
     {
         return authService.login(loginRequest);
+    }
+
+    @PostMapping("/logout")
+    public LogoutResponse logout()
+    {
+        return authService.logout();
     }
 
 }

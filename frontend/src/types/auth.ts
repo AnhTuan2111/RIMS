@@ -19,3 +19,7 @@ export interface LoginResponse {
     email: string | null
     role: RoleType
 }
+
+export interface LogoutResponse {
+    message: string
+}
