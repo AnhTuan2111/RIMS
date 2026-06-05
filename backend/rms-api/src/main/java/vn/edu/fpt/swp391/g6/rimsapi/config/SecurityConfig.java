@@ -21,6 +21,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/api/cashier/*").permitAll()
                     // chỗ này ai làm feature gì mà muốn test tạm thời thì thêm dòng bên trên vào nhé, có thể thay admin = waiter, chef, cashier...  login = create, update,...
                     // miễn là có format .requestMatchers("/api/*/*").permitAll()
                 .anyRequest().authenticated()
