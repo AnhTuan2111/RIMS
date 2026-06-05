@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.LoginRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LoginResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LogoutResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.mapper.AuthMapper;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
@@ -40,5 +41,13 @@ public class AuthServiceImpl implements AuthService
         }
 
         return authMapper.toLoginResponse(user);
+    }
+
+    @Override
+    public LogoutResponse logout()
+    {
+        return LogoutResponse.builder()
+                .message("Logged out successfully")
+                .build();
     }
 }
