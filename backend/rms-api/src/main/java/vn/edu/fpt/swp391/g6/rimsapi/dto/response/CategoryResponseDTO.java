@@ -1,0 +1,13 @@
+package vn.edu.fpt.swp391.g6.rimsapi.dto.response;
+
+import lombok.Data;
+import java.time.LocalDateTime;
+
+@Data
+public class CategoryResponseDTO {
+    private Integer id;
+    private String name;
+    private String description;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}

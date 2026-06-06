@@ -23,6 +23,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login").permitAll()
                     // chỗ này ai làm feature gì mà muốn test tạm thời thì thêm dòng bên trên vào nhé, có thể thay admin = waiter, chef, cashier...  login = create, update,...
                     // miễn là có format .requestMatchers("/api/*/*").permitAll()
+                    .requestMatchers("/api/dishes/**").permitAll()
+                    .requestMatchers("/api/categories/**").permitAll()
                 .anyRequest().authenticated()
             );
 
