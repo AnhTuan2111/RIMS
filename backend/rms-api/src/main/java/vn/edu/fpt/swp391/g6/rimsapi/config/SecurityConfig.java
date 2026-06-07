@@ -16,15 +16,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(Customizer.withDefaults())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login").permitAll()
-                    // chỗ này ai làm feature gì mà muốn test tạm thời thì thêm dòng bên trên vào nhé, có thể thay admin = waiter, chef, cashier...  login = create, update,...
-                    // miễn là có format .requestMatchers("/api/*/*").permitAll()
-                .anyRequest().authenticated()
-            );
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/login").permitAll()
+
+                        // API Chef để test
+                        .requestMatchers("/api/chef/**").permitAll()
+
+                        .anyRequest().authenticated()
+                );
 
         return http.build();
     }
