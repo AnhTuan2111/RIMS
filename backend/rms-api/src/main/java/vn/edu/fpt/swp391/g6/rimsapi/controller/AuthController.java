@@ -1,8 +1,8 @@
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.LoginRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LoginResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.AuthenticationRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.AuthenticationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LogoutResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AuthService;
 import jakarta.validation.Valid;
@@ -21,7 +21,7 @@ public class AuthController
     private final AuthService authService;
 
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest)
+    public AuthenticationResponse login(@Valid @RequestBody AuthenticationRequest loginRequest)
     {
         return authService.login(loginRequest);
     }
