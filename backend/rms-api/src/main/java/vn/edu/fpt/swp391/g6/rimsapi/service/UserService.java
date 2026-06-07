@@ -1,10 +1,13 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserResponse;
 
 import java.util.List;
 
-public interface UserService
-{
+public interface UserService {
+
     List<UserResponse> getAllUsers();
+
+    UserProfileResponse getProfile(String username);
 }
