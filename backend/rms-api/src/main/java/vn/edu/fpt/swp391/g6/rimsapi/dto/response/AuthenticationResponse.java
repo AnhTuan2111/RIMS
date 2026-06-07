@@ -9,15 +9,8 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginResponse
+public class AuthenticationResponse
 {
-    private Integer userId;
-
-    private String fullName;
-
-    private String phone;
-
-    private String email;
-
+    private String token;
     private RoleType role;
 }

@@ -1,11 +1,12 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
+import com.nimbusds.jose.JWSObject;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.LoginRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LoginResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.AuthenticationRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.AuthenticationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LogoutResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.mapper.AuthMapper;
@@ -23,7 +24,7 @@ public class AuthServiceImpl implements AuthService
     private final AuthMapper authMapper;
 
     @Override
-    public LoginResponse login(LoginRequest loginRequest)
+    public AuthenticationResponse login(AuthenticationRequest loginRequest)
     {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(
@@ -49,5 +50,12 @@ public class AuthServiceImpl implements AuthService
         return LogoutResponse.builder()
                 .message("Logged out successfully")
                 .build();
+    }
+
+    public String generateToken()
+    {
+        
+
+        JWSObject jwsObject = new JWSObject();
     }
 }
