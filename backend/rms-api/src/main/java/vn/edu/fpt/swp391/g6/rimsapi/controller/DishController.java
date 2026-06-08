@@ -1,5 +1,8 @@
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.DishCreateDTO;
+import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishResponseDTO;
 import vn.edu.fpt.swp391.g6.rimsapi.service.DishService;
 import lombok.RequiredArgsConstructor;
@@ -43,5 +46,10 @@ public class DishController {
     @GetMapping("/{id}")
     public ResponseEntity<DishResponseDTO> getDishById(@PathVariable Integer id) {
         return ResponseEntity.ok(dishService.getDishById(id));
+    }
+    @PostMapping
+    public ResponseEntity<DishResponseDTO> createDish(@Valid @RequestBody DishCreateDTO dishCreateDTO) {
+        DishResponseDTO createdDish = dishService.createDish(dishCreateDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdDish);
     }
 }
