@@ -1,5 +1,8 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.DishCreateDTO;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishResponseDTO;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
@@ -15,6 +18,7 @@ import java.util.stream.Collectors;
 public class DishServiceImpl implements DishService {
 
     private final DishRepository dishRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<DishResponseDTO> getAllDishes() {
@@ -72,4 +76,27 @@ public class DishServiceImpl implements DishService {
 
         return dto;
     }
+    public DishResponseDTO createDish(DishCreateDTO dishCreateDTO) {
+        // Kiểm tra tên món ăn đã tồn tại chưa
+        if (dishRepository.existsByName(dishCreateDTO.getName())) {
+            throw new IllegalArgumentException("Tên món ăn '" + dishCreateDTO.getName() + "' đã tồn tại");
+        }
+
+        // Tìm category theo ID
+        Category category = categoryRepository.findById(dishCreateDTO.getCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy danh mục với ID: " + dishCreateDTO.getCategoryId()));
+
+        // Tạo mới món ăn
+        Dish dish = new Dish();
+        dish.setName(dishCreateDTO.getName());
+        dish.setDescription(dishCreateDTO.getDescription());
+        dish.setPrice(dishCreateDTO.getPrice());
+        dish.setImageUrl(dishCreateDTO.getImageUrl());
+        dish.setAvailable(dishCreateDTO.getIsAvailable() != null ? dishCreateDTO.getIsAvailable() : true);
+        dish.setCategory(category);
+
+        Dish savedDish = dishRepository.save(dish);
+        return convertToDTO(savedDish);
+    }
+
 }
