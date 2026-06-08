@@ -1,15 +1,22 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.BestSellingDishItemResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.BestSellingReportResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.RevenueReportResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.service.RevenueReportService;
 
+import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -99,4 +106,57 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                 fromDate + " - " + toDate
         );
     }
+
+    //Best selling
+
+    @Override
+    public BestSellingReportResponse getBestSellingReport() {
+
+        LocalDate fromDate =
+                LocalDate.now().withDayOfMonth(1);
+
+        LocalDate toDate =
+                LocalDate.now();
+
+        LocalDateTime start =
+                fromDate.atStartOfDay();
+
+        LocalDateTime end =
+                LocalDateTime.now();
+
+        Pageable top10 =
+                PageRequest.of(0, 10);
+
+        List<BestSellingDishProjection> result =
+                invoiceRepository.getBestSellingDishes(
+                        start,
+                        end,
+                        top10
+                );
+
+        List<BestSellingDishItemResponse> items =
+                new ArrayList<>();
+
+        int rank = 1;
+
+        for (BestSellingDishProjection row : result) {
+
+            items.add(
+                    new BestSellingDishItemResponse(
+                            rank++,
+                            row.getDishName(),
+                            row.getTotalQuantity(),
+                            row.getTotalRevenue()
+                    )
+            );
+        }
+
+        return new BestSellingReportResponse(
+                fromDate,
+                toDate,
+                "Current month until now",
+                items
+        );
+    }
+
 }
