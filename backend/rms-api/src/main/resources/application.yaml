@@ -2,11 +2,11 @@ spring:
   application:
     name: rms-api
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=RMS_DB;encrypt=true;trustServerCertificate=true
+    url: "jdbc:sqlserver://localhost:1433;databaseName=RMS_DB;encrypt=true;trustServerCertificate=true"
     username: sa
     password: 123
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     open-in-view: false
     show-sql: true
