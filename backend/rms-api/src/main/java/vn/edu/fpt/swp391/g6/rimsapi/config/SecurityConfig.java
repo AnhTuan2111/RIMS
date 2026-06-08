@@ -12,19 +12,48 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+//Đây là hàm chính
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//            .csrf(AbstractHttpConfigurer::disable)
+//            .cors(Customizer.withDefaults())
+//            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//            .authorizeHttpRequests(auth -> auth
+//                .requestMatchers("/api/auth/login").permitAll()
+//                    // chỗ này ai làm feature gì mà muốn test tạm thời thì thêm dòng bên trên vào nhé, có thể thay admin = waiter, chef, cashier...  login = create, update,...
+//                    // miễn là có format .requestMatchers("/api/*/*").permitAll()
+//                .anyRequest().authenticated()
+//            );
+//
+//        return http.build();
+//    }
 
+
+    //Đây là hàm test.
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(Customizer.withDefaults())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login").permitAll()
-                    // chỗ này ai làm feature gì mà muốn test tạm thời thì thêm dòng bên trên vào nhé, có thể thay admin = waiter, chef, cashier...  login = create, update,...
-                    // miễn là có format .requestMatchers("/api/*/*").permitAll()
-                .anyRequest().authenticated()
-            );
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+
+                        // Login luôn được phép gọi
+                        .requestMatchers("/api/auth/login").permitAll()
+
+                        // Revenue Report
+                        .requestMatchers("/api/reports/**").permitAll()
+
+                        // Các API khác muốn test thì thêm vào đây
+                        // .requestMatchers("/api/orders/**").permitAll()
+                        // .requestMatchers("/api/reservations/**").permitAll()
+                        // .requestMatchers("/api/users/**").permitAll()
+
+                        .anyRequest().authenticated()
+                );
 
         return http.build();
     }
