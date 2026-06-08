@@ -3,6 +3,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.BestSellingReportResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.RevenueReportResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.RevenueReportService;
 
@@ -60,4 +61,12 @@ public class RevenueReportController {
                         toDate
                 );
     }
+    //get bestselling.
+    @GetMapping("/best-selling")
+    public BestSellingReportResponse getBestSellingReport() {
+
+        return revenueReportService
+                .getBestSellingReport();
+    }
+
 }
