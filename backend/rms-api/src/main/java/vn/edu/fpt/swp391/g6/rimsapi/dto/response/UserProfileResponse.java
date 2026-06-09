@@ -1,20 +1,17 @@
 package vn.edu.fpt.swp391.g6.rimsapi.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 
 @Getter
 @Builder
-@ToString
-@AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse
+@AllArgsConstructor
+public class UserProfileResponse
 {
-    private String accessToken;
-    private String refreshToken;
-    private String tokenType;
-    private long expiresIn;
-    private boolean authenticated;
     private Integer userId;
     private String username;
     private String fullName;
