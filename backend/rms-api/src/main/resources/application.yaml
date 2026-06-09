@@ -12,3 +12,6 @@ spring:
     show-sql: true
 jwt:
   signerKey: REMOVED-JWT-SIGNER-KEY
+restaurant:
+  home:
+    file-path: data/home-content.json

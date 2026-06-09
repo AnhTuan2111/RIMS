@@ -1,16 +1,25 @@
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 export function LoginPage() {
-    const { login, isLoading, error, clearError } = useAuth()
+    const { login, isLoading, error, clearError, isAuthenticated } = useAuth()
+    const navigate = useNavigate()
     const [username, setUsername] = useState('')
     const [rawPassword, setRawPassword] = useState('')
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/dashboard', { replace: true })
+        }
+    }, [isAuthenticated, navigate])
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         clearError()
         try {
             await login({ username, rawPassword })
+            navigate('/dashboard', { replace: true })
         } catch {
             // Error message is handled in AuthContext
         }
@@ -57,6 +66,10 @@ export function LoginPage() {
                 <p className="auth-hint">
                     Tài khoản demo: admin / chef / waiter / cashier — mật khẩu: 123456
                 </p>
+
+                <Link className="auth-back-link" to="/">
+                    ← Về trang chủ
+                </Link>
             </form>
         </div>
     )

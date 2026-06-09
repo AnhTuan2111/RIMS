@@ -1,6 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ErrorResponse;
 
 import java.io.IOException;
