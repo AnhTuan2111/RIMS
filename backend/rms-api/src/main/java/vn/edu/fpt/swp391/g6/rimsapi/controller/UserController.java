@@ -1,15 +1,15 @@
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.UpdateProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 
 import java.util.List;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/admin/users")
@@ -29,6 +29,14 @@ public class UserController
             @PathVariable String username) {
 
         return userService.getProfile(username);
+    }
+
+    @PutMapping("/profile/{username}")
+    public UserProfileResponse updateProfile(
+            @PathVariable String username,
+            @Valid @RequestBody UpdateProfileRequest request) {
+
+        return userService.updateProfile(username, request);
     }
 
 }
