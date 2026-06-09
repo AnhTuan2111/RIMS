@@ -1,5 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.UpdateProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserResponse;
 
@@ -10,4 +11,6 @@ public interface UserService {
     List<UserResponse> getAllUsers();
 
     UserProfileResponse getProfile(String username);
+
+    UserProfileResponse updateProfile(String username, UpdateProfileRequest request);
 }
