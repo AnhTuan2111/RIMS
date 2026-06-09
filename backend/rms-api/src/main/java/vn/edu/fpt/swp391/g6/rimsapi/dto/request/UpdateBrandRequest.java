@@ -1,0 +1,23 @@
+package vn.edu.fpt.swp391.g6.rimsapi.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateBrandRequest
+{
+    @NotBlank
+    private String brandName;
+
+    private String tagline;
+
+    private String description;
+
+    private String heroImageUrl;
+}

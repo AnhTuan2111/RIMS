@@ -1,3 +1,4 @@
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { RoleType } from '../types/auth'
 
@@ -10,6 +11,12 @@ const ROLE_LABELS: Record<string, string> = {
 
 export function DashboardPage() {
     const { user, logout, isLoading } = useAuth()
+    const navigate = useNavigate()
+
+    async function handleLogout() {
+        await logout()
+        navigate('/', { replace: true })
+    }
 
     if (!user) {
         return null
@@ -24,9 +31,14 @@ export function DashboardPage() {
                         Vai trò: {ROLE_LABELS[user.role] ?? user.role} · {user.username}
                     </p>
                 </div>
-                <button className="dashboard-logout" onClick={() => void logout()} disabled={isLoading}>
-                    Đăng xuất
-                </button>
+                <div className="dashboard-actions">
+                    <Link className="dashboard-home-link" to="/">
+                        Trang chủ
+                    </Link>
+                    <button className="dashboard-logout" onClick={() => void handleLogout()} disabled={isLoading}>
+                        Đăng xuất
+                    </button>
+                </div>
             </header>
 
             <section className="dashboard-card">
