@@ -12,6 +12,3 @@ spring:
     show-sql: true
 jwt:
   signerKey: Bkvw045nqvIXbwCtsf9fNAH8olxBeipBnof4Ar5cyxo=
-restaurant:
-  home:
-    file-path: data/home-content.json
