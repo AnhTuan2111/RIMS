@@ -16,8 +16,7 @@ public class OrderDetailResponse {
     private LocalDateTime createdAt;
     private List<OrderItemResponse> orderItems;
 
-    // Thuế và dòng tiền tài chính
-    private BigDecimal totalAmountBeforeVat; // Tiền món ăn gốc
-    private BigDecimal vatAmount;             // Tiền thuế 10%
-    private BigDecimal finalAmount;           // Tổng số tiền cuối cùng phải trả
+    private BigDecimal totalAmountBeforeVat; // amount đầu
+    private BigDecimal vatAmount;             // VAT 10%
+    private BigDecimal finalAmount;           // tổng sau
 }

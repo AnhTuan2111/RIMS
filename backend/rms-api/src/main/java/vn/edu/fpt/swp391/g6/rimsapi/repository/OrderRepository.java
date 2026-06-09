@@ -10,7 +10,6 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // Tìm các đơn hàng chưa thanh toán dựa theo trạng thái đơn
     List<Order> findByStatus(OrderStatus status);
 
     // Giải quyết triệt để lỗi Lazy Loading bằng cách FETCH JOIN dữ liệu liên kết
