@@ -37,7 +37,6 @@ public class SecurityConfig
                 .accessDeniedHandler(jwtAccessDeniedHandler)
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/auth/login", "/api/auth/logout", "/api/auth/refresh").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/chef/**").hasRole("CHEF")
