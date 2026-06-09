@@ -2,10 +2,8 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 
@@ -23,12 +21,4 @@ public class UserController
     {
         return userService.getAllUsers();
     }
-
-    @GetMapping("/profile/{username}")
-    public UserProfileResponse getProfile(
-            @PathVariable String username) {
-
-        return userService.getProfile(username);
-    }
-
 }
