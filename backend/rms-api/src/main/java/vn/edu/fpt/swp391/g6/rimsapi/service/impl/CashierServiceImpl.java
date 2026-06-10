@@ -92,17 +92,14 @@ public class CashierServiceImpl implements CashierService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        RestaurantTable table = order.getTable();
-        if (table != null) {
-            table.setStatus(TableStatus.AVAILABLE);
-            tableRepository.save(table);
+        if (order.getStatus() != OrderStatus.SERVING) {
+            throw new RuntimeException("Đơn hàng này đã được thanh toán hoặc không tồn tại!");
         }
-
-        order.setStatus(OrderStatus.COMPLETED);
+        order.setStatus(OrderStatus.LOCKED);
         orderRepository.save(order);
 
         String methodChosen = request.getPaymentMethod();
-        String notification = "Choose method payment " + methodChosen + " success";
+        String notification = " Locked order.Choose method payment " + methodChosen + " success";
 
         PaymentResponse response = new PaymentResponse();
         response.setMessage(notification);

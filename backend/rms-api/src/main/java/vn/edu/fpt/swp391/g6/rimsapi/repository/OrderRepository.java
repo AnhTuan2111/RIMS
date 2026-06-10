@@ -11,8 +11,7 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByStatus(OrderStatus status);
-
-    // Giải quyết triệt để lỗi Lazy Loading bằng cách FETCH JOIN dữ liệu liên kết
+    
     @Query("SELECT o FROM Order o " +
             "JOIN FETCH o.table t " +
             "LEFT JOIN FETCH o.orderItems oi " +
