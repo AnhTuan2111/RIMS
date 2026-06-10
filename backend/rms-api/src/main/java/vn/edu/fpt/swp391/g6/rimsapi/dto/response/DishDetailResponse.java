@@ -10,13 +10,21 @@ public class DishDetailResponse {
 
     private Long orderItemId;
 
+    // Bàn gọi món
+    private String tableNumber;
+
+    // Tên món
     private String dishName;
 
+    // Mô tả món
     private String description;
 
+    // Số lượng
     private Integer quantity;
 
+    // Ghi chú của khách
     private String note;
 
+    // Trạng thái món
     private OrderItemStatus status;
 }
