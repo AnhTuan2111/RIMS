@@ -12,6 +12,8 @@ import java.util.List;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.UpdateDishStatusRequest;
+import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/chef")
 @RequiredArgsConstructor
@@ -33,9 +35,11 @@ public class ChefController {
     @PutMapping("/orders/{id}/status")
     public String updateDishStatus(
             @PathVariable Long id,
-            @RequestParam OrderItemStatus status) {
+            @RequestBody UpdateDishStatusRequest request) {
 
-        chefService.updateDishStatus(id, status);
+        chefService.updateDishStatus(
+                id,
+                request.getStatus());
 
         return "Status updated successfully";
     }
