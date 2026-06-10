@@ -102,11 +102,12 @@ public class CashierServiceImpl implements CashierService {
         orderRepository.save(order);
 
         String methodChosen = request.getPaymentMethod();
-        String notification = "Thanh toán thành công bằng phương thức: " + methodChosen;
+        String notification = "Choose method payment " + methodChosen + " success";
 
-        return PaymentResponse.builder()
-                .success(true)
-                .message(notification)
-                .build();
+        PaymentResponse response = new PaymentResponse();
+        response.setMessage(notification);
+        response.setSuccess(true);
+
+        return response;
     }
 }
