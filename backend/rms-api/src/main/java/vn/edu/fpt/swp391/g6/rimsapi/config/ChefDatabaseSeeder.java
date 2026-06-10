@@ -146,66 +146,154 @@ public class ChefDatabaseSeeder implements CommandLineRunner {
             return;
         }
 
-        RestaurantTable table =
-                tableRepository.findAll().get(0);
+        List<RestaurantTable> tables = tableRepository.findAll();
+        List<Dish> dishes = dishRepository.findAll();
+        User user = userRepository.findAll().get(0);
 
-        User user =
-                userRepository.findAll().get(0);
+        // ===== ORDER T01 =====
+        Order order1 = new Order();
+        order1.setTable(tables.get(0));
+        order1.setCreatedBy(user);
+        order1.setStatus(OrderStatus.SERVING);
+        order1.setTotalAmount(BigDecimal.valueOf(140000));
+        orderRepository.save(order1);
 
-        List<Dish> dishes =
-                dishRepository.findAll();
+        // ===== ORDER T02 =====
+        Order order2 = new Order();
+        order2.setTable(tables.get(1));
+        order2.setCreatedBy(user);
+        order2.setStatus(OrderStatus.SERVING);
+        order2.setTotalAmount(BigDecimal.valueOf(200000));
+        orderRepository.save(order2);
 
-        Order order = new Order();
+        // ===== ORDER T03 =====
+        Order order3 = new Order();
+        order3.setTable(tables.get(2));
+        order3.setCreatedBy(user);
+        order3.setStatus(OrderStatus.SERVING);
+        order3.setTotalAmount(BigDecimal.valueOf(180000));
+        orderRepository.save(order3);
 
-        order.setTable(table);
-        order.setCreatedBy(user);
-        order.setStatus(OrderStatus.SERVING);
-        order.setTotalAmount(
-                BigDecimal.valueOf(165000));
+        // ===== ORDER T04 =====
+        Order order4 = new Order();
+        order4.setTable(tables.get(3));
+        order4.setCreatedBy(user);
+        order4.setStatus(OrderStatus.SERVING);
+        order4.setTotalAmount(BigDecimal.valueOf(220000));
+        orderRepository.save(order4);
 
-        orderRepository.save(order);
-
+        // ================= T01 =================
         OrderItem item1 = new OrderItem();
-
-        item1.setOrder(order);
-        item1.setDish(dishes.get(0));
+        item1.setOrder(order1);
+        item1.setDish(dishes.get(0)); // Fried Rice
         item1.setQuantity(2);
-
-        item1.setUnitPrice(
-                BigDecimal.valueOf(
-                        dishes.get(0).getPrice()));
-
-        item1.setSubTotal(
-                BigDecimal.valueOf(
-                        dishes.get(0).getPrice() * 2));
-
+        item1.setUnitPrice(BigDecimal.valueOf(dishes.get(0).getPrice()));
+        item1.setSubTotal(BigDecimal.valueOf(dishes.get(0).getPrice() * 2));
         item1.setNote("Less spicy");
-        item1.setStatus(
-                OrderItemStatus.PREPARING);
+        item1.setStatus(OrderItemStatus.PREPARING);
 
         OrderItem item2 = new OrderItem();
+        item2.setOrder(order1);
+        item2.setDish(dishes.get(3)); // Coca Cola
+        item2.setQuantity(2);
+        item2.setUnitPrice(BigDecimal.valueOf(dishes.get(3).getPrice()));
+        item2.setSubTotal(BigDecimal.valueOf(dishes.get(3).getPrice() * 2));
+        item2.setNote("");
+        item2.setStatus(OrderItemStatus.PREPARING);
 
-        item2.setOrder(order);
-        item2.setDish(dishes.get(1));
-        item2.setQuantity(1);
+        OrderItem item3 = new OrderItem();
+        item3.setOrder(order1);
+        item3.setDish(dishes.get(4)); // Orange Juice
+        item3.setQuantity(1);
+        item3.setUnitPrice(BigDecimal.valueOf(dishes.get(4).getPrice()));
+        item3.setSubTotal(BigDecimal.valueOf(dishes.get(4).getPrice()));
+        item3.setStatus(OrderItemStatus.COMPLETED);
 
-        item2.setUnitPrice(
-                BigDecimal.valueOf(
-                        dishes.get(1).getPrice()));
+        // ================= T02 =================
+        OrderItem item4 = new OrderItem();
+        item4.setOrder(order2);
+        item4.setDish(dishes.get(1)); // Pho Bo
+        item4.setQuantity(1);
+        item4.setUnitPrice(BigDecimal.valueOf(dishes.get(1).getPrice()));
+        item4.setSubTotal(BigDecimal.valueOf(dishes.get(1).getPrice()));
+        item4.setStatus(OrderItemStatus.PREPARING);
 
-        item2.setSubTotal(
-                BigDecimal.valueOf(
-                        dishes.get(1).getPrice()));
+        OrderItem item5 = new OrderItem();
+        item5.setOrder(order2);
+        item5.setDish(dishes.get(2)); // Bun Cha
+        item5.setQuantity(2);
+        item5.setUnitPrice(BigDecimal.valueOf(dishes.get(2).getPrice()));
+        item5.setSubTotal(BigDecimal.valueOf(dishes.get(2).getPrice() * 2));
+        item5.setStatus(OrderItemStatus.PREPARING);
 
-        item2.setNote("No onion");
-        item2.setStatus(
-                OrderItemStatus.COMPLETED);
+        OrderItem item6 = new OrderItem();
+        item6.setOrder(order2);
+        item6.setDish(dishes.get(3)); // Coca Cola
+        item6.setQuantity(1);
+        item6.setUnitPrice(BigDecimal.valueOf(dishes.get(3).getPrice()));
+        item6.setSubTotal(BigDecimal.valueOf(dishes.get(3).getPrice()));
+        item6.setStatus(OrderItemStatus.COMPLETED);
 
-        orderItemRepository.save(item1);
-        orderItemRepository.save(item2);
+        // ================= T03 =================
+        OrderItem item7 = new OrderItem();
+        item7.setOrder(order3);
+        item7.setDish(dishes.get(0)); // Fried Rice
+        item7.setQuantity(1);
+        item7.setUnitPrice(BigDecimal.valueOf(dishes.get(0).getPrice()));
+        item7.setSubTotal(BigDecimal.valueOf(dishes.get(0).getPrice()));
+        item7.setStatus(OrderItemStatus.PREPARING);
 
-        System.out.println(
-                "Seeded orders and order items.");
+        OrderItem item8 = new OrderItem();
+        item8.setOrder(order3);
+        item8.setDish(dishes.get(1)); // Pho Bo
+        item8.setQuantity(1);
+        item8.setUnitPrice(BigDecimal.valueOf(dishes.get(1).getPrice()));
+        item8.setSubTotal(BigDecimal.valueOf(dishes.get(1).getPrice()));
+        item8.setStatus(OrderItemStatus.PREPARING);
+
+        OrderItem item9 = new OrderItem();
+        item9.setOrder(order3);
+        item9.setDish(dishes.get(4)); // Orange Juice
+        item9.setQuantity(2);
+        item9.setUnitPrice(BigDecimal.valueOf(dishes.get(4).getPrice()));
+        item9.setSubTotal(BigDecimal.valueOf(dishes.get(4).getPrice() * 2));
+        item9.setStatus(OrderItemStatus.COMPLETED);
+
+        // ================= T04 =================
+        OrderItem item10 = new OrderItem();
+        item10.setOrder(order4);
+        item10.setDish(dishes.get(2)); // Bun Cha
+        item10.setQuantity(3);
+        item10.setUnitPrice(BigDecimal.valueOf(dishes.get(2).getPrice()));
+        item10.setSubTotal(BigDecimal.valueOf(dishes.get(2).getPrice() * 3));
+        item10.setStatus(OrderItemStatus.PREPARING);
+
+        OrderItem item11 = new OrderItem();
+        item11.setOrder(order4);
+        item11.setDish(dishes.get(0)); // Fried Rice
+        item11.setQuantity(2);
+        item11.setUnitPrice(BigDecimal.valueOf(dishes.get(0).getPrice()));
+        item11.setSubTotal(BigDecimal.valueOf(dishes.get(0).getPrice() * 2));
+        item11.setStatus(OrderItemStatus.PREPARING);
+
+        OrderItem item12 = new OrderItem();
+        item12.setOrder(order4);
+        item12.setDish(dishes.get(3)); // Coca Cola
+        item12.setQuantity(2);
+        item12.setUnitPrice(BigDecimal.valueOf(dishes.get(3).getPrice()));
+        item12.setSubTotal(BigDecimal.valueOf(dishes.get(3).getPrice() * 2));
+        item12.setStatus(OrderItemStatus.COMPLETED);
+
+        orderItemRepository.saveAll(
+                List.of(
+                        item1, item2, item3,
+                        item4, item5, item6,
+                        item7, item8, item9,
+                        item10, item11, item12
+                )
+        );
+
+        System.out.println("Seeded orders and order items.");
     }
 
     private void printDatabaseInfo() {

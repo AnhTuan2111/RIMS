@@ -19,7 +19,9 @@ public class ChefServiceImpl implements ChefService {
     @Override
     public List<KitchenOrderResponse> getKitchenOrders() {
 
-        return orderItemRepository.findAll()
+        return orderItemRepository
+                //return orderItemRepository.findAll()
+                .findByStatus(OrderItemStatus.PREPARING)
                 .stream()
                 .map(item -> {
 
@@ -32,7 +34,6 @@ public class ChefServiceImpl implements ChefService {
                     response.setOrderId(
                             item.getOrder().getOrderId());
 
-                    // THÊM DÒNG NÀY
                     response.setTableNumber(
                             item.getOrder()
                                     .getTable()
@@ -58,25 +59,29 @@ public class ChefServiceImpl implements ChefService {
                 .findById(orderItemId)
                 .orElseThrow();
 
-        DishDetailResponse response =
-                new DishDetailResponse();
+        // Chỉ cho xem món đang PREPARING
+        if (item.getStatus() != OrderItemStatus.PREPARING) {
+            throw new RuntimeException("Dish already completed");
+        }
+
+        DishDetailResponse response = new DishDetailResponse();
 
         response.setOrderItemId(item.getOrderItemId());
 
-        response.setDishName(
-                item.getDish().getName());
+        response.setTableNumber(
+                item.getOrder()
+                        .getTable()
+                        .getTableNumber());
 
-        response.setDescription(
-                item.getDish().getDescription());
+        response.setDishName(item.getDish().getName());
 
-        response.setQuantity(
-                item.getQuantity());
+        response.setDescription(item.getDish().getDescription());
 
-        response.setNote(
-                item.getNote());
+        response.setQuantity(item.getQuantity());
 
-        response.setStatus(
-                item.getStatus());
+        response.setNote(item.getNote());
+
+        response.setStatus(item.getStatus());
 
         return response;
     }
@@ -87,6 +92,12 @@ public class ChefServiceImpl implements ChefService {
         OrderItem item = orderItemRepository
                 .findById(orderItemId)
                 .orElseThrow();
+
+        // Chỉ cập nhật món đang PREPARING
+        if (item.getStatus() != OrderItemStatus.PREPARING) {
+            throw new RuntimeException(
+                    "Dish has already been completed");
+        }
 
         item.setStatus(status);
 
