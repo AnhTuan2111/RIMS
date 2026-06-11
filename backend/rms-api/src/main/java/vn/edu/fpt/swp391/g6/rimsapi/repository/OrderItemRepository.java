@@ -10,6 +10,7 @@ import java.util.List;
 public interface OrderItemRepository
         extends JpaRepository<OrderItem, Long> {
 
-    List<OrderItem> findByStatus(OrderItemStatus status);
+    List<OrderItem> findByStatusOrderByCreatedAtAsc(
+            OrderItemStatus status);
 
 }

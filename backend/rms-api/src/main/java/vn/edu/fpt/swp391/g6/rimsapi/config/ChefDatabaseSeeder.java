@@ -1,5 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.config;
-
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ public class ChefDatabaseSeeder implements CommandLineRunner {
     private final OrderItemRepository orderItemRepository;
 
     @Override
-    public void run(String... args) {
+    public void run(String... args)  throws Exception {
 
         seedTables();
         seedUsers();
@@ -140,7 +141,7 @@ public class ChefDatabaseSeeder implements CommandLineRunner {
         System.out.println("Seeded categories and dishes.");
     }
 
-    private void seedOrders() {
+    private void seedOrders() throws InterruptedException{
 
         if (orderRepository.count() > 0) {
             return;
@@ -284,14 +285,52 @@ public class ChefDatabaseSeeder implements CommandLineRunner {
         item12.setSubTotal(BigDecimal.valueOf(dishes.get(3).getPrice() * 2));
         item12.setStatus(OrderItemStatus.COMPLETED);
 
-        orderItemRepository.saveAll(
-                List.of(
-                        item1, item2, item3,
-                        item4, item5, item6,
-                        item7, item8, item9,
-                        item10, item11, item12
-                )
-        );
+        item1.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item1);
+        TimeUnit.SECONDS.sleep(2);
+
+        item2.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item2);
+        TimeUnit.SECONDS.sleep(2);
+
+        item3.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item3);
+        TimeUnit.SECONDS.sleep(2);
+
+        item4.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item4);
+        TimeUnit.SECONDS.sleep(2);
+
+        item5.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item5);
+        TimeUnit.SECONDS.sleep(2);
+
+        item6.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item6);
+        TimeUnit.SECONDS.sleep(2);
+
+        item7.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item7);
+        TimeUnit.SECONDS.sleep(2);
+
+        item8.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item8);
+        TimeUnit.SECONDS.sleep(2);
+
+        item9.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item9);
+        TimeUnit.SECONDS.sleep(2);
+
+        item10.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item10);
+        TimeUnit.SECONDS.sleep(2);
+
+        item11.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item11);
+        TimeUnit.SECONDS.sleep(2);
+
+        item12.setCreatedAt(LocalDateTime.now());
+        orderItemRepository.save(item12);
 
         System.out.println("Seeded orders and order items.");
     }

@@ -21,7 +21,8 @@ public class ChefServiceImpl implements ChefService {
 
         return orderItemRepository
                 //return orderItemRepository.findAll()
-                .findByStatus(OrderItemStatus.PREPARING)
+                .findByStatusOrderByCreatedAtAsc(
+                        OrderItemStatus.PREPARING)
                 .stream()
                 .map(item -> {
 
@@ -47,6 +48,8 @@ public class ChefServiceImpl implements ChefService {
 
                     response.setStatus(
                             item.getStatus());
+                    response.setCreatedAt(
+                            item.getCreatedAt());
 
                     return response;
                 })
@@ -82,6 +85,8 @@ public class ChefServiceImpl implements ChefService {
         response.setNote(item.getNote());
 
         response.setStatus(item.getStatus());
+        response.setCreatedAt(
+                item.getCreatedAt());
 
         return response;
     }
