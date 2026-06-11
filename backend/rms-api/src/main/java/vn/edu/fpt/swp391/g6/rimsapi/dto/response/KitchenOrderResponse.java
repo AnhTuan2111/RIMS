@@ -3,6 +3,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.dto.response;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,4 +20,5 @@ public class KitchenOrderResponse {
     private Integer quantity;
 
     private OrderItemStatus status;
+    private LocalDateTime createdAt;
 }
