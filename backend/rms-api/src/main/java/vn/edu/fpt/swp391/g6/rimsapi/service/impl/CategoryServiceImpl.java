@@ -1,5 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.CategoryCreateDTO;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.CategoryResponseDTO;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
@@ -29,7 +30,24 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy category với ID: " + id));
         return convertToDTO(category);
     }
+    @Override
+    public CategoryResponseDTO createCategory(CategoryCreateDTO categoryCreateDTO) {
+        // Kiểm tra tên đã tồn tại chưa?
+        if (categoryRepository.existsByName(categoryCreateDTO.getName())) {
+            throw new IllegalArgumentException("Tên danh mục '" + categoryCreateDTO.getName() + "' đã tồn tại!");
+        }
 
+        // Tạo entity từ DTO
+        Category category = new Category();
+        category.setName(categoryCreateDTO.getName());
+        category.setDescription(categoryCreateDTO.getDescription());
+
+        // Lưu vào database
+        Category savedCategory = categoryRepository.save(category);
+
+        // Convert sang DTO và trả về
+        return convertToDTO(savedCategory);
+    }
     private CategoryResponseDTO convertToDTO(Category category) {
         CategoryResponseDTO dto = new CategoryResponseDTO();
         dto.setId(category.getId());
