@@ -8,3 +8,5 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+jwt:
+  signerKey: test-signer-key-for-unit-tests-only-32chars
