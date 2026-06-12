@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,8 +25,9 @@ import java.util.List;
 public class Order
 {
     @Id
+    @Column(name = "order_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "table_id", nullable = false)
@@ -57,8 +59,10 @@ public class Order
     private LocalDateTime updatedAt;
 
     // Thêm món vào đơn hàng và tự động thiết lập liên kết ngược lại ở phía OrderItem
-    public void addOrderItem(OrderItem orderItem) {
-        if (this.orderItems == null) {
+    public void addOrderItem(OrderItem orderItem)
+    {
+        if (this.orderItems == null)
+        {
             this.orderItems = new java.util.ArrayList<>();
         }
         this.orderItems.add(orderItem);
@@ -66,17 +70,21 @@ public class Order
     }
 
     // Xóa món khỏi đơn hàng và gỡ bỏ liên kết ngược lại ở phía OrderItem
-    public void removeOrderItem(OrderItem orderItem) {
-        if (this.orderItems != null) {
+    public void removeOrderItem(OrderItem orderItem)
+    {
+        if (this.orderItems != null)
+        {
             this.orderItems.remove(orderItem);
             orderItem.setOrder(null); // Gỡ bỏ mối quan hệ 2 chiều ở phía OrderItem
         }
     }
 
     // Gán hóa đơn cho đơn hàng và đồng bộ hóa liên kết ngược lại từ hóa đơn về đơn hàng này
-    public void setInvoice(Invoice invoice) {
+    public void setInvoice(Invoice invoice)
+    {
         this.invoice = invoice;
-        if (invoice != null && invoice.getOrder() != this) {
+        if (invoice != null && invoice.getOrder() != this)
+        {
             invoice.setOrder(this); // Thiết lập liên kết ngược lại ở phía Invoice (tránh vòng lặp vô hạn)
         }
     }

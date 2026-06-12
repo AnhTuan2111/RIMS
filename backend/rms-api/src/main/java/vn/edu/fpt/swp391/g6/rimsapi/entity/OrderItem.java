@@ -1,5 +1,7 @@
 package vn.edu.fpt.swp391.g6.rimsapi.entity;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,8 +24,9 @@ import java.math.BigDecimal;
 public class OrderItem
 {
     @Id
+    @Column(name = "order_item_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderItemId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -33,15 +36,21 @@ public class OrderItem
     @JoinColumn(name = "dish_id", nullable = false)
     private Dish dish;
 
+    @Min(1)
+    @Column(nullable = false)
     private Integer quantity;
 
+    @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
+    @Column(name = "sub_total", nullable = false)
     private BigDecimal subTotal;
 
+    @Size(max = 2000)
     @Nationalized
     private String note;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderItemStatus status;
 }

@@ -1,33 +1,38 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.LoginRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LoginResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.AuthenticationRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.RefreshTokenRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.AuthenticationResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LogoutResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
-import vn.edu.fpt.swp391.g6.rimsapi.mapper.AuthMapper;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.InvalidTokenException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AuthService;
-import lombok.RequiredArgsConstructor;
-
+import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService
 {
+    private static final long ACCESS_TOKEN_EXPIRES_IN_SECONDS = 900;
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthMapper authMapper;
+    private final JwtService jwtService;
 
     @Override
-    public LoginResponse login(LoginRequest loginRequest)
+    public AuthenticationResponse login(AuthenticationRequest loginRequest)
     {
         User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(
-                        () -> new BadCredentialsException("Invalid username or password")
-                );
+                .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
 
         if (!user.isActive())
         {
@@ -39,6 +44,81 @@ public class AuthServiceImpl implements AuthService
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        return authMapper.toLoginResponse(user);
+        return buildAuthenticationResponse(user);
+    }
+
+    @Override
+    public AuthenticationResponse refresh(RefreshTokenRequest request)
+    {
+        JWTClaimsSet claims = jwtService.parseAndValidate(request.getRefreshToken());
+
+        if (!jwtService.isRefreshToken(claims))
+        {
+            throw new InvalidTokenException("Invalid refresh token");
+        }
+
+        Integer userId = jwtService.extractUserId(claims);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidTokenException("User not found"));
+
+        if (!user.isActive())
+        {
+            throw new DisabledException("Account is disabled");
+        }
+
+        return buildAuthenticationResponse(user);
+    }
+
+    @Override
+    public UserProfileResponse getCurrentUser(UserPrincipal principal)
+    {
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+        return toUserProfile(user);
+    }
+
+    @Override
+    public LogoutResponse logout()
+    {
+        return LogoutResponse.builder()
+                .message("Logged out successfully")
+                .build();
+    }
+
+    private AuthenticationResponse buildAuthenticationResponse(User user)
+    {
+        String accessToken = jwtService.generateAccessToken(
+                user.getId(),
+                user.getUsername(),
+                user.getRole().name()
+        );
+        String refreshToken = jwtService.generateRefreshToken(user.getId());
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresIn(ACCESS_TOKEN_EXPIRES_IN_SECONDS)
+                .authenticated(true)
+                .userId(user.getId())
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
+    }
+
+    private UserProfileResponse toUserProfile(User user)
+    {
+        return UserProfileResponse.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
     }
 }
