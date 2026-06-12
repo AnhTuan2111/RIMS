@@ -8,11 +8,11 @@
         <version>4.0.6</version>
         <relativePath/>
     </parent>
-    <groupId>com.anhtuan.miniproject</groupId>
-    <artifactId>rms-api</artifactId>
+    <groupId>vn.edu.fpt.swp391.g6</groupId>
+    <artifactId>rims-api</artifactId>
     <version>1.0.0</version>
-    <name>rms-api</name>
-    <description>Restaurant Management System API</description>
+    <name>rims-api</name>
+    <description>Restaurant Internal Management System API</description>
 
     <properties>
         <java.version>21</java.version>

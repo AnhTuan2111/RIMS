@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:rms_test;MODE=MSSQLServer;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:rims_test;MODE=MSSQLServer;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
-    password:
+    password: 123
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
 jwt:
-  signerKey: test-signer-key-for-unit-tests-only-32chars
+  signerKey: Bkvw045nqvIXbwCtsf9fNAH8olxBeipB

@@ -12,7 +12,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 @RequiredArgsConstructor
 public class UserDatabaseSeeder implements CommandLineRunner
 {
-    private static final String DEFAULT_PASSWORD = "123456";
+    private static final String DEFAULT_PASSWORD = "12345678";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

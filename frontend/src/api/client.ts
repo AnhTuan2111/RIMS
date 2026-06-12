@@ -3,7 +3,7 @@ import type { LoginResponse } from '../types/auth'
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '../utils/tokenStorage'
 
 export const apiClient = axios.create({
-    baseURL: '/api',
+    baseURL: '/rims',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -25,7 +25,7 @@ async function refreshAccessToken(): Promise<string> {
         throw new Error('Missing refresh token')
     }
 
-    const { data } = await axios.post<LoginResponse>('/api/auth/refresh', {
+    const { data } = await axios.post<LoginResponse>('/rims/auth/refresh', {
         refreshToken: storedRefreshToken,
     })
 
