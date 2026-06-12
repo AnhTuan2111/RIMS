@@ -11,7 +11,7 @@ Dự án môn học: quản lý nhà hàng (full-stack).
 ## Chạy backend
 
 ```bash
-cd backend/rms-api
+cd backend/rims-api
 ./mvnw spring-boot:run
 ```
 
@@ -30,6 +30,6 @@ UI: http://localhost:5173 (proxy `/api` → backend)
 ## Test backend (không cần SQL Server)
 
 ```bash
-cd backend/rms-api
+cd backend/rims-api
 ./mvnw test
 ```

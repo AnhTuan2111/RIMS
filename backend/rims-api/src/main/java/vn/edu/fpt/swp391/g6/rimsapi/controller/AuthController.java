@@ -17,7 +17,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/rims/auth")
 @RequiredArgsConstructor
 public class AuthController
 {

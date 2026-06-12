@@ -37,11 +37,11 @@ public class SecurityConfig
                 .accessDeniedHandler(jwtAccessDeniedHandler)
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/logout", "/api/auth/refresh").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/chef/**").hasRole("CHEF")
-                .requestMatchers("/api/waiter/**").hasRole("WAITER")
-                .requestMatchers("/api/cashier/**").hasRole("CASHIER")
+                .requestMatchers("/rims/auth/login", "/rims/auth/logout", "/rims/auth/refresh").permitAll()
+                .requestMatchers("/rims/admin/**").hasRole("ADMIN")
+                .requestMatchers("/rims/chef/**").hasRole("CHEF")
+                .requestMatchers("/rims/waiter/**").hasRole("WAITER")
+                .requestMatchers("/rims/cashier/**").hasRole("CASHIER")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

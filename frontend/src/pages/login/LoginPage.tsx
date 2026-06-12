@@ -53,7 +53,7 @@ export function LoginPage() {
                         type="password"
                         value={rawPassword}
                         onChange={(e) => setRawPassword(e.target.value)}
-                        placeholder="••••••"
+                        placeholder="••••••••"
                         autoComplete="current-password"
                         required
                     />
