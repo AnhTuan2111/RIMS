@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import org.springframework.data.annotation.CreatedDate;
+import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
 
@@ -53,4 +54,7 @@ public class OrderItem
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderItemStatus status;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 }
