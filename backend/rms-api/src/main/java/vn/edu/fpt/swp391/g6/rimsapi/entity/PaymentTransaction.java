@@ -20,21 +20,22 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class PaymentTransaction
 {
-
     @Id
     @Column(name = "transaction_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long transactionId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 
+    @Column(name = "transaction_code", nullable = false)
     private String transactionCode;
 
     private String gateway;
 
     @Lob
+    @Column(name = "gateway_response", nullable = false)
     private String gatewayResponse;
 
     @Column(name = "is_success")

@@ -9,6 +9,7 @@ import org.hibernate.annotations.Nationalized;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.LocalDateTime;
 
 
@@ -39,7 +40,7 @@ public class Dish
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(nullable = false)
+    @Column(name = "is_available", nullable = false)
     private boolean isAvailable = true;
 
     @ManyToOne

@@ -24,8 +24,9 @@ public class Invoice
 {
 
     @Id
+    @Column(name = "invoice_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long invoiceId;
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -42,16 +43,20 @@ public class Invoice
     private List<Payment> payments;
 
     // Thiết lập đơn hàng cho hóa đơn này và đồng bộ hóa liên kết ngược lại từ đơn hàng về hóa đơn
-    public void setOrder(Order order) {
+    public void setOrder(Order order)
+    {
         this.order = order;
-        if (order != null && order.getInvoice() != this) {
+        if (order != null && order.getInvoice() != this)
+        {
             order.setInvoice(this); // Thiết lập liên kết ngược lại ở phía Order (tránh vòng lặp vô hạn)
         }
     }
 
     // Thêm thanh toán vào hóa đơn và tự động thiết lập liên kết ngược lại ở phía Payment
-    public void addPayment(Payment payment) {
-        if (this.payments == null) {
+    public void addPayment(Payment payment)
+    {
+        if (this.payments == null)
+        {
             this.payments = new java.util.ArrayList<>();
         }
         this.payments.add(payment);
@@ -59,8 +64,10 @@ public class Invoice
     }
 
     // Xóa thanh toán khỏi hóa đơn và gỡ bỏ liên kết ngược lại ở phía Payment
-    public void removePayment(Payment payment) {
-        if (this.payments != null) {
+    public void removePayment(Payment payment)
+    {
+        if (this.payments != null)
+        {
             this.payments.remove(payment);
             payment.setInvoice(null); // Gỡ bỏ mối quan hệ 2 chiều ở phía Payment
         }
