@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import org.springframework.core.annotation.Order;
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Component
+@Order(1)
 @RequiredArgsConstructor
 public class TableDatabaseSeeder implements CommandLineRunner
 {

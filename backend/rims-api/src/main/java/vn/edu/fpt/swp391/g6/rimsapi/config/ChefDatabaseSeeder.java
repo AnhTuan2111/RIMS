@@ -1,7 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.config;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -9,18 +8,16 @@ import org.springframework.stereotype.Component;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-
 @Component
+@org.springframework.core.annotation.Order(3)
 @RequiredArgsConstructor
-public class ChefDatabaseSeeder implements CommandLineRunner
-{
+public class ChefDatabaseSeeder implements CommandLineRunner {
 
     private final RestaurantTableRepository tableRepository;
     private final UserRepository userRepository;
@@ -30,27 +27,20 @@ public class ChefDatabaseSeeder implements CommandLineRunner
     private final OrderItemRepository orderItemRepository;
 
     @Override
-    public void run(String... args) throws Exception
-    {
+    public void run(String... args) throws Exception {
 
         seedTables();
-        seedUsers();
         seedCategoriesAndDishes();
         seedOrders();
-
-        printDatabaseInfo();
     }
 
-    private void seedTables()
-    {
+    private void seedTables() {
 
-        if (tableRepository.count() > 0)
-        {
+        if (tableRepository.count() > 0) {
             return;
         }
 
-        for (int i = 1; i <= 12; i++)
-        {
+        for (int i = 1; i <= 12; i++) {
 
             RestaurantTable table = new RestaurantTable();
 
@@ -64,34 +54,9 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         System.out.println("Seeded restaurant tables.");
     }
 
-    private void seedUsers()
-    {
+    private void seedCategoriesAndDishes() {
 
-        if (userRepository.count() > 0)
-        {
-            return;
-        }
-
-        User chef = new User();
-
-        chef.setUsername("chef01");
-        chef.setFullName("Chef Manager");
-        chef.setEmail("chef@gmail.com");
-        chef.setPhone("0123456789");
-        chef.setPasswordHash("123456");
-        chef.setRole(RoleType.CHEF);
-        chef.setActive(true);
-
-        userRepository.save(chef);
-
-        System.out.println("Seeded chef user.");
-    }
-
-    private void seedCategoriesAndDishes()
-    {
-
-        if (dishRepository.count() > 0)
-        {
+        if (dishRepository.count() > 0) {
             return;
         }
 
@@ -147,17 +112,14 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         d5.setCategory(drink);
 
         dishRepository.saveAll(
-                List.of(d1, d2, d3, d4, d5)
-        );
+                List.of(d1, d2, d3, d4, d5));
 
         System.out.println("Seeded categories and dishes.");
     }
 
-    private void seedOrders() throws InterruptedException
-    {
+    private void seedOrders() throws InterruptedException {
 
-        if (orderRepository.count() > 0)
-        {
+        if (orderRepository.count() > 0) {
             return;
         }
 
@@ -203,7 +165,7 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         item1.setDish(dishes.get(0)); // Fried Rice
         item1.setQuantity(2);
         item1.setUnitPrice(BigDecimal.valueOf(dishes.get(0).getPrice()));
-        item1.setSubTotal(BigDecimal.valueOf(dishes.get(0).getPrice() * 2));
+        item1.setSubTotal(BigDecimal.valueOf(dishes.get(0).getPrice() * 2L));
         item1.setNote("Less spicy");
         item1.setStatus(OrderItemStatus.PREPARING);
 
@@ -212,7 +174,7 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         item2.setDish(dishes.get(3)); // Coca Cola
         item2.setQuantity(2);
         item2.setUnitPrice(BigDecimal.valueOf(dishes.get(3).getPrice()));
-        item2.setSubTotal(BigDecimal.valueOf(dishes.get(3).getPrice() * 2));
+        item2.setSubTotal(BigDecimal.valueOf(dishes.get(3).getPrice() * 2L));
         item2.setNote("");
         item2.setStatus(OrderItemStatus.PREPARING);
 
@@ -238,7 +200,7 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         item5.setDish(dishes.get(2)); // Bun Cha
         item5.setQuantity(2);
         item5.setUnitPrice(BigDecimal.valueOf(dishes.get(2).getPrice()));
-        item5.setSubTotal(BigDecimal.valueOf(dishes.get(2).getPrice() * 2));
+        item5.setSubTotal(BigDecimal.valueOf(dishes.get(2).getPrice() * 2L));
         item5.setStatus(OrderItemStatus.PREPARING);
 
         OrderItem item6 = new OrderItem();
@@ -254,8 +216,8 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         item7.setOrder(order3);
         item7.setDish(dishes.get(0)); // Fried Rice
         item7.setQuantity(1);
-        item7.setUnitPrice(BigDecimal.valueOf(dishes.get(0).getPrice()));
-        item7.setSubTotal(BigDecimal.valueOf(dishes.get(0).getPrice()));
+        item7.setUnitPrice(BigDecimal.valueOf(dishes.getFirst().getPrice()));
+        item7.setSubTotal(BigDecimal.valueOf(dishes.getFirst().getPrice()));
         item7.setStatus(OrderItemStatus.PREPARING);
 
         OrderItem item8 = new OrderItem();
@@ -271,7 +233,7 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         item9.setDish(dishes.get(4)); // Orange Juice
         item9.setQuantity(2);
         item9.setUnitPrice(BigDecimal.valueOf(dishes.get(4).getPrice()));
-        item9.setSubTotal(BigDecimal.valueOf(dishes.get(4).getPrice() * 2));
+        item9.setSubTotal(BigDecimal.valueOf(dishes.get(4).getPrice() * 2L));
         item9.setStatus(OrderItemStatus.COMPLETED);
 
         // ================= T04 =================
@@ -280,7 +242,7 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         item10.setDish(dishes.get(2)); // Bun Cha
         item10.setQuantity(3);
         item10.setUnitPrice(BigDecimal.valueOf(dishes.get(2).getPrice()));
-        item10.setSubTotal(BigDecimal.valueOf(dishes.get(2).getPrice() * 3));
+        item10.setSubTotal(BigDecimal.valueOf(dishes.get(2).getPrice() * 3L));
         item10.setStatus(OrderItemStatus.PREPARING);
 
         OrderItem item11 = new OrderItem();
@@ -288,7 +250,7 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         item11.setDish(dishes.get(0)); // Fried Rice
         item11.setQuantity(2);
         item11.setUnitPrice(BigDecimal.valueOf(dishes.get(0).getPrice()));
-        item11.setSubTotal(BigDecimal.valueOf(dishes.get(0).getPrice() * 2));
+        item11.setSubTotal(BigDecimal.valueOf(dishes.get(0).getPrice() * 2L));
         item11.setStatus(OrderItemStatus.PREPARING);
 
         OrderItem item12 = new OrderItem();
@@ -296,90 +258,27 @@ public class ChefDatabaseSeeder implements CommandLineRunner
         item12.setDish(dishes.get(3)); // Coca Cola
         item12.setQuantity(2);
         item12.setUnitPrice(BigDecimal.valueOf(dishes.get(3).getPrice()));
-        item12.setSubTotal(BigDecimal.valueOf(dishes.get(3).getPrice() * 2));
+        item12.setSubTotal(BigDecimal.valueOf(dishes.get(3).getPrice() * 2L));
         item12.setStatus(OrderItemStatus.COMPLETED);
 
-        item1.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item1);
-        TimeUnit.SECONDS.sleep(2);
+        LocalDateTime now = LocalDateTime.now();
+        item1.setCreatedAt(now.minusSeconds(22));
+        item2.setCreatedAt(now.minusSeconds(20));
+        item3.setCreatedAt(now.minusSeconds(18));
+        item4.setCreatedAt(now.minusSeconds(16));
+        item5.setCreatedAt(now.minusSeconds(14));
+        item6.setCreatedAt(now.minusSeconds(12));
+        item7.setCreatedAt(now.minusSeconds(10));
+        item8.setCreatedAt(now.minusSeconds(8));
+        item9.setCreatedAt(now.minusSeconds(6));
+        item10.setCreatedAt(now.minusSeconds(4));
+        item11.setCreatedAt(now.minusSeconds(2));
+        item12.setCreatedAt(now);
 
-        item2.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item2);
-        TimeUnit.SECONDS.sleep(2);
-
-        item3.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item3);
-        TimeUnit.SECONDS.sleep(2);
-
-        item4.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item4);
-        TimeUnit.SECONDS.sleep(2);
-
-        item5.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item5);
-        TimeUnit.SECONDS.sleep(2);
-
-        item6.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item6);
-        TimeUnit.SECONDS.sleep(2);
-
-        item7.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item7);
-        TimeUnit.SECONDS.sleep(2);
-
-        item8.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item8);
-        TimeUnit.SECONDS.sleep(2);
-
-        item9.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item9);
-        TimeUnit.SECONDS.sleep(2);
-
-        item10.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item10);
-        TimeUnit.SECONDS.sleep(2);
-
-        item11.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item11);
-        TimeUnit.SECONDS.sleep(2);
-
-        item12.setCreatedAt(LocalDateTime.now());
-        orderItemRepository.save(item12);
+        orderItemRepository.saveAll(List.of(
+                item1, item2, item3, item4, item5, item6,
+                item7, item8, item9, item10, item11, item12));
 
         System.out.println("Seeded orders and order items.");
-    }
-
-    private void printDatabaseInfo()
-    {
-
-        System.out.println("\n=================================");
-        System.out.println("CHEF DATABASE CHECK");
-        System.out.println("=================================");
-
-        System.out.println(
-                "Tables     : " +
-                        tableRepository.count());
-
-        System.out.println(
-                "Users      : " +
-                        userRepository.count());
-
-        System.out.println(
-                "Categories : " +
-                        categoryRepository.count());
-
-        System.out.println(
-                "Dishes     : " +
-                        dishRepository.count());
-
-        System.out.println(
-                "Orders     : " +
-                        orderRepository.count());
-
-        System.out.println(
-                "OrderItems : " +
-                        orderItemRepository.count());
-
-        System.out.println("=================================\n");
     }
 }

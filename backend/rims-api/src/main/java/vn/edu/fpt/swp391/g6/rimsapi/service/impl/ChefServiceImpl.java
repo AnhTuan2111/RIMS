@@ -30,10 +30,10 @@ public class ChefServiceImpl implements ChefService {
                             new KitchenOrderResponse();
 
                     response.setOrderItemId(
-                            item.getOrderItemId());
+                            item.getId());
 
                     response.setOrderId(
-                            item.getOrder().getOrderId());
+                            item.getOrder().getId());
 
                     response.setTableNumber(
                             item.getOrder()
@@ -69,7 +69,7 @@ public class ChefServiceImpl implements ChefService {
 
         DishDetailResponse response = new DishDetailResponse();
 
-        response.setOrderItemId(item.getOrderItemId());
+        response.setOrderItemId(item.getId());
 
         response.setTableNumber(
                 item.getOrder()

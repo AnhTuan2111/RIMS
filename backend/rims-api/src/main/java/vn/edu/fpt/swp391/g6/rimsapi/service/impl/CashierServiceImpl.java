@@ -14,16 +14,19 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
-public class CashierServiceImpl implements CashierService {
+public class CashierServiceImpl implements CashierService
+{
 
     private final OrderRepository orderRepository;
     private final RestaurantTableRepository tableRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public List<TableDashboardResponse> getTablesDashboard() {
+    public List<TableDashboardResponse> getTablesDashboard()
+    {
 
         List<RestaurantTable> tables = tableRepository.findAll();
 
@@ -33,12 +36,13 @@ public class CashierServiceImpl implements CashierService {
                 .filter(o -> o.getTable() != null)
                 .collect(Collectors.toMap(
                         o -> o.getTable().getId(),
-                        Order::getOrderId,
+                        Order::getId,
                         (existing, replacement) -> existing
                 ));
 
         return tables.stream()
-                .map(t -> {
+                .map(t ->
+                {
                     Long orderId = tableOrderMap.get(t.getId());
 
                     TableStatus cashierStatus = (orderId != null) ? TableStatus.SERVING : TableStatus.AVAILABLE;
@@ -55,13 +59,14 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderDetailResponse getOrderDetail(Long orderId) {
+    public OrderDetailResponse getOrderDetail(Long orderId)
+    {
         Order order = orderRepository.findOrderWithDetailsById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng tương ứng"));
 
         List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
                 .map(oi -> OrderItemResponse.builder()
-                        .orderItemId(oi.getOrderItemId())
+                        .orderItemId(oi.getId())
                         .dishName(oi.getDish() != null ? oi.getDish().getName() : "Món ăn không xác định")
                         .quantity(oi.getQuantity())
                         .unitPrice(oi.getUnitPrice())
@@ -75,7 +80,7 @@ public class CashierServiceImpl implements CashierService {
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
         return OrderDetailResponse.builder()
-                .orderId(order.getOrderId())
+                .orderId(order.getId())
                 .tableName(order.getTable() != null ? order.getTable().getTableNumber() : "N/A")
                 .createdAt(order.getCreatedAt())
                 .orderItems(itemResponses)
@@ -87,12 +92,14 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional
-    public PaymentResponse processPayment(Long orderId, PaymentRequest request) {
+    public PaymentResponse processPayment(Long orderId, PaymentRequest request)
+    {
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        if (order.getStatus() != OrderStatus.SERVING) {
+        if (order.getStatus() != OrderStatus.SERVING)
+        {
             throw new RuntimeException("Đơn hàng này đã được thanh toán hoặc không tồn tại!");
         }
         order.setStatus(OrderStatus.LOCKED);

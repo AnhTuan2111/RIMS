@@ -3,16 +3,18 @@ package vn.edu.fpt.swp391.g6.rimsapi.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 
 @Component
+@Order(2)
 @RequiredArgsConstructor
 public class UserDatabaseSeeder implements CommandLineRunner
 {
-    private static final String DEFAULT_PASSWORD = "12345678";
+    private static final String DEFAULT_PASSWORD = "123456";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
