@@ -6,7 +6,7 @@ Dự án môn học: quản lý nhà hàng (full-stack).
 
 - JDK 21
 - Node.js 20+
-- SQL Server (database `RMS_DB`)
+- SQL Server (database `RIMS_DB`)
 
 ## Chạy backend
 

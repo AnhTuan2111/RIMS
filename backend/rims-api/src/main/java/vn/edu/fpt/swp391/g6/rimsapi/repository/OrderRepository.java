@@ -21,7 +21,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>
             JOIN FETCH o.table t
             LEFT JOIN FETCH o.orderItems oi
             LEFT JOIN FETCH oi.dish d
-            WHERE o.orderId = :orderId
+            WHERE o.id = :orderId
             """)
     Optional<Order> findOrderWithDetailsById(@Param("orderId") Long orderId);
 }
