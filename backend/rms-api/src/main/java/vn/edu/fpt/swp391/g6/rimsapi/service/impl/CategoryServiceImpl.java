@@ -5,7 +5,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.CategoryResponseDTO;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CategoryService;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.CategoryUpdateDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,55 +19,35 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryResponseDTO> getAllCategories() {
-        return categoryRepository.findAllByIsDeletedFalse()
-                .stream()
+        return categoryRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CategoryResponseDTO getCategoryById(Integer id) {
-        Category category = categoryRepository.findByIdAndIsDeletedFalse(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy category với ID: " + id));
         return convertToDTO(category);
     }
     @Override
     public CategoryResponseDTO createCategory(CategoryCreateDTO categoryCreateDTO) {
-        if (categoryRepository.existsByNameAndIsDeletedFalse(categoryCreateDTO.getName())) {
+        // Kiểm tra tên đã tồn tại chưa?
+        if (categoryRepository.existsByName(categoryCreateDTO.getName())) {
             throw new IllegalArgumentException("Tên danh mục '" + categoryCreateDTO.getName() + "' đã tồn tại!");
         }
 
+        // Tạo entity từ DTO
         Category category = new Category();
         category.setName(categoryCreateDTO.getName());
         category.setDescription(categoryCreateDTO.getDescription());
 
-        return convertToDTO(categoryRepository.save(category));
+        // Lưu vào database
+        Category savedCategory = categoryRepository.save(category);
+
+        // Convert sang DTO và trả về
+        return convertToDTO(savedCategory);
     }
-    @Override
-    public CategoryResponseDTO updateCategory(Integer id, CategoryUpdateDTO categoryUpdateDTO) {
-        Category category = categoryRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy category với ID: " + id));
-
-        if (!category.getName().equals(categoryUpdateDTO.getName())
-                && categoryRepository.existsByNameAndIsDeletedFalse(categoryUpdateDTO.getName())) {
-            throw new IllegalArgumentException("Tên danh mục '" + categoryUpdateDTO.getName() + "' đã tồn tại!");
-        }
-
-        category.setName(categoryUpdateDTO.getName());
-        category.setDescription(categoryUpdateDTO.getDescription());
-
-        return convertToDTO(categoryRepository.save(category));
-    }
-
-    @Override
-    public void deleteCategory(Integer id) {
-        Category category = categoryRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy category với ID: " + id));
-
-        category.setDeleted(true);
-        categoryRepository.save(category);
-    }
-
     private CategoryResponseDTO convertToDTO(Category category) {
         CategoryResponseDTO dto = new CategoryResponseDTO();
         dto.setId(category.getId());
