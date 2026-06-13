@@ -105,7 +105,7 @@ public class CashierServiceImpl implements CashierService
         order.setStatus(OrderStatus.LOCKED);
         orderRepository.save(order);
 
-        String methodChosen = request.getPaymentMethod();
+        String methodChosen = request.getPaymentMethod().name();
         String notification = " Locked order.Choose method payment " + methodChosen + " success";
 
         PaymentResponse response = new PaymentResponse();
