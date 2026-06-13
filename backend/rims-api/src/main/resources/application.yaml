@@ -14,3 +14,10 @@ spring:
     show-sql: true
 jwt:
   signerKey: REMOVED-JWT-SIGNER-KEY
+
+vnpay:
+  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  tmn-code: 3M78B7N6
+  hash-secret: REMOVED-VNPAY-HASH-SECRET
+  version: 2.1.0
+  command: pay

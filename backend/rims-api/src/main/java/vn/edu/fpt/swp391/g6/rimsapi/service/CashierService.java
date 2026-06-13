@@ -17,4 +17,6 @@ public interface CashierService
     PaymentResponse processPayment(Long orderId, PaymentRequest request);
 
     PaymentResponse completeCashPayment(Long orderId);
+
+    VNPayResponse createVNPayPaymentUrl(Long orderId);
 }
