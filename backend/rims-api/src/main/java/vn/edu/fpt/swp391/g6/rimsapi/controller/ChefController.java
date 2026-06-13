@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@RequestMapping("/api/chef")
+@RequestMapping("/rims/chef")
 @RequiredArgsConstructor
 public class ChefController
 {
