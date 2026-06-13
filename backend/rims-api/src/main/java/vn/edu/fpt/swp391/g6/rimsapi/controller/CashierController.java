@@ -38,9 +38,17 @@ public class CashierController {
         return ResponseEntity.ok(cashierService.processPayment(id, request));
     }
 
+    // API 4: Lấy danh sách phương thức thanh toán
     @GetMapping("/payment-methods")
     public ResponseEntity<PaymentMethod[]> getPaymentMethods() {
         return ResponseEntity.ok(PaymentMethod.values());
     }
+
+    // API 5: Hoàn tất thanh toán Tiền mặt (Tạo Invoice, Order -> COMPLETED, Table -> AVAILABLE)
+    @PostMapping("/orders/{id}/complete-cash")
+    public ResponseEntity<PaymentResponse> completeCashPayment(@PathVariable Long id) {
+        return ResponseEntity.ok(cashierService.completeCashPayment(id));
+    }
+
 
 }
