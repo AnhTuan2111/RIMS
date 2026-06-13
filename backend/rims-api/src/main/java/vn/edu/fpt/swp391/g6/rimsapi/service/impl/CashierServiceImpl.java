@@ -22,6 +22,7 @@ public class CashierServiceImpl implements CashierService
 
     private final OrderRepository orderRepository;
     private final RestaurantTableRepository tableRepository;
+    private final InvoiceRepository invoiceRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -110,6 +111,58 @@ public class CashierServiceImpl implements CashierService
 
         PaymentResponse response = new PaymentResponse();
         response.setMessage(notification);
+        response.setSuccess(true);
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponse completeCashPayment(Long orderId) {
+        // 1. Tìm đơn hàng xem có tồn tại không
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng tương ứng"));
+
+        // 2. Kiểm tra điều kiện: BẮT BUỘC phải đang ở trạng thái LOCKED mới cho thanh toán
+        if (order.getStatus() != OrderStatus.LOCKED) {
+            throw new RuntimeException("Đơn hàng chưa được chốt (LOCKED) hoặc đã thanh toán xong!");
+        }
+
+        // 3. KHỞI TẠO HÓA ĐƠN CHÍNH THỨC (INVOICE) KHỚP VỚI ENTITY
+        Invoice invoice = new Invoice();
+
+        invoice.setOrder(order);
+        
+        invoice.setFinalAmount(order.getTotalAmount());
+
+        // Điền ngày giờ tạo hóa đơn
+        invoice.setInvoiceDate(java.time.LocalDateTime.now());
+
+        // 4. KHỞI TẠO BẢN GHI THANH TOÁN (PAYMENT) ĐỂ ADD VÀO INVOICE
+        Payment payment = new Payment();
+        payment.setAmount(order.getTotalAmount());            // Số tiền thanh toán
+        payment.setPaymentMethod(PaymentMethod.CASH);          // Phương thức tiền mặt
+        payment.setSuccess(true);                        // Trạng thái thanh toán thành công
+
+        invoice.addPayment(payment);
+
+        // Lưu Invoice xuống DB
+        invoiceRepository.save(invoice);
+
+        // 5. CHUYỂN TRẠNG THÁI ORDER THÀNH COMPLETED
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
+
+        // 6. GIẢI PHÓNG BÀN (Chuyển thành AVAILABLE)
+        if (order.getTable() != null) {
+            RestaurantTable table = order.getTable();
+            table.setStatus(TableStatus.AVAILABLE);
+            tableRepository.save(table);
+        }
+
+        // 7. Trả về kết quả thông báo thành công cho Frontend
+        PaymentResponse response = new PaymentResponse();
+        response.setMessage("Thanh toán tiền mặt thành công. Đã xuất hóa đơn, ghi nhận lịch sử giao dịch và giải phóng bàn!");
         response.setSuccess(true);
 
         return response;

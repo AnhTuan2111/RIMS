@@ -15,4 +15,6 @@ public interface CashierService
     OrderDetailResponse getOrderDetail(Long orderId);
 
     PaymentResponse processPayment(Long orderId, PaymentRequest request);
+
+    PaymentResponse completeCashPayment(Long orderId);
 }
