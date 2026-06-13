@@ -5,7 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.*;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
+
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -33,6 +36,11 @@ public class CashierController {
             @RequestBody PaymentRequest request
     ) {
         return ResponseEntity.ok(cashierService.processPayment(id, request));
+    }
+
+    @GetMapping("/payment-methods")
+    public ResponseEntity<PaymentMethod[]> getPaymentMethods() {
+        return ResponseEntity.ok(PaymentMethod.values());
     }
 
 }
