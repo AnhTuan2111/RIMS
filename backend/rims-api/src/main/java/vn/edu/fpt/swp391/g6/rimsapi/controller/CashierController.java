@@ -8,7 +8,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -48,6 +47,12 @@ public class CashierController {
     @PostMapping("/orders/{id}/complete-cash")
     public ResponseEntity<PaymentResponse> completeCashPayment(@PathVariable Long id) {
         return ResponseEntity.ok(cashierService.completeCashPayment(id));
+    }
+
+    // API sinh link QR Code VNPay dựa vào Order ID
+    @GetMapping("/orders/{id}/vnpay-qr")
+    public ResponseEntity<VNPayResponse> getVNPayQrCode(@PathVariable Long id) {
+        return ResponseEntity.ok(cashierService.createVNPayPaymentUrl(id));
     }
 
 
