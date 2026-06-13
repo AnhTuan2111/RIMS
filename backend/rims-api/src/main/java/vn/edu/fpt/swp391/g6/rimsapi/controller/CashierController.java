@@ -9,14 +9,14 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/rims/cashier")
 @RequiredArgsConstructor
 public class CashierController {
 
     private final CashierService cashierService;
 
     // API 1 xem danh sách 12 bàn
-    @GetMapping("/cashier/tables")
+    @GetMapping("/tables")
     public ResponseEntity<List<TableDashboardResponse>> getTablesDashboard() {
         return ResponseEntity.ok(cashierService.getTablesDashboard());
     }
