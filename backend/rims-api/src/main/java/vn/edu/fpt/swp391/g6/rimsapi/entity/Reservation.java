@@ -1,7 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.entity;
 
 import jakarta.validation.constraints.*;
-import jdk.jfr.Timestamp;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,11 +41,6 @@ public class Reservation
     private String phone;
 
     private LocalDateTime reservationTime;
-
-    @Min(1)
-    @Max(8)
-    @Column(nullable = false, name = "number_of_guests")
-    private Integer numberOfGuests;
 
     @Size(max = 2000)
     @Nationalized
