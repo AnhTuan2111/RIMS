@@ -38,7 +38,7 @@ public class DishDatabaseSeeder implements CommandLineRunner {
             }
 
             List<Dish> dishes = Arrays.asList(
-                    createDish("Gỏi cuốn tôm thịt", "Gỏi cuốn tươi ngon, chấm nước mắm chua ngọt", 35000, true, null, khaiVi),
+                    createDish("Gỏi cuốn tôm thịt", "Gỏi cuốn tươi ngon, chấm nước mắm chua ngọt", 35000, false, null, khaiVi),
                     createDish("Chả giò chiên giòn", "Chả giò nhân thịt, tôm, miến", 45000, true, null, khaiVi),
                     createDish("Phở bò đặc biệt", "Phở bò với thịt bò thượng hạng", 85000, true, null, monChinh),
                     createDish("Cơm tấm sườn", "Cơm tấm sườn bì chả", 55000, true, null, monChinh),

@@ -13,4 +13,6 @@ public interface DishRepository extends JpaRepository<Dish, Integer> {
     @Query("SELECT d FROM Dish d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Dish> searchByName(@Param("keyword") String keyword);
     boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, Integer id);
+    List<Dish> findByCategoryIdAndIsAvailableTrue(Integer categoryId);
 }

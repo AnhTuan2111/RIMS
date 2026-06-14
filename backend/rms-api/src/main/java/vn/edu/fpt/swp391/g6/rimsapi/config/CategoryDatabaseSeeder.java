@@ -34,6 +34,7 @@ public class CategoryDatabaseSeeder implements CommandLineRunner {
         Category category = new Category();
         category.setName(name);
         category.setDescription(description);
+        category.setAvailable(true);
         return category;
     }
 }
