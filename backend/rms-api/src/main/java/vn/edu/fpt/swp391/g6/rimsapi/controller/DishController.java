@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishResponseDTO;
 import vn.edu.fpt.swp391.g6.rimsapi.service.DishService;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.DishUpdateDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +52,20 @@ public class DishController {
     public ResponseEntity<DishResponseDTO> createDish(@Valid @RequestBody DishCreateDTO dishCreateDTO) {
         DishResponseDTO createdDish = dishService.createDish(dishCreateDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDish);
+    }
+    // Cập nhật món ăn
+    @PutMapping("/{id}")
+    public ResponseEntity<DishResponseDTO> updateDish(
+            @PathVariable Integer id,
+            @Valid @RequestBody DishUpdateDTO dishUpdateDTO) {
+        DishResponseDTO updatedDish = dishService.updateDish(id, dishUpdateDTO);
+        return ResponseEntity.ok(updatedDish);
+    }
+
+    // Xóa mềm món ăn (ẩn trên menu nhưng vẫn còn trong DB)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDish(@PathVariable Integer id) {
+        dishService.deleteDish(id);
+        return ResponseEntity.noContent().build();
     }
 }
