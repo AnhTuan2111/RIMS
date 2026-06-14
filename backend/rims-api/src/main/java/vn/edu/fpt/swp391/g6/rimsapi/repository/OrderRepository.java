@@ -1,6 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.repository;
 
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,9 +9,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
 import java.util.List;
 import java.util.Optional;
 
-
-public interface OrderRepository extends JpaRepository<Order, Long>
-{
+public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByStatus(OrderStatus status);
 
