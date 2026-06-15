@@ -30,7 +30,7 @@ public class VNPayConfig
     private String vnpCommand;
 
     // Đường dẫn callback của bạn (có thể để static hoặc đưa ra yaml tùy bạn)
-    public static final String VNP_RETURN_URL = "http://localhost:8080/api/cashier/payments/vnpay-callback";
+    public static final String VNP_RETURN_URL = "http://localhost:8080/rims/cashier/payments/vnpay-callback";
 
     public String hmacSHA512(final String key, final String data)
     {

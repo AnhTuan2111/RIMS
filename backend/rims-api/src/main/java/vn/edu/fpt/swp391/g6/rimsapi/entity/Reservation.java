@@ -1,7 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.entity;
 
 import jakarta.validation.constraints.*;
-import jdk.jfr.Timestamp;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

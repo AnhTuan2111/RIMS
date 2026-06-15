@@ -9,4 +9,5 @@ public class PaymentResponse
 {
     private String message;
     private boolean success;
+    private Long invoiceId;
 }

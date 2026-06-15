@@ -167,7 +167,8 @@ public class CashierServiceImpl implements CashierService
 
         // 7. Trả về kết quả thông báo thành công cho Frontend
         PaymentResponse response = new PaymentResponse();
-        response.setMessage("Thanh toán tiền mặt thành công. Đã xuất hóa đơn, ghi nhận lịch sử giao dịch và giải phóng bàn!");
+        response.setMessage("Payment cash sucessfull");
+        response.setInvoiceId(invoice.getId());
         response.setSuccess(true);
 
         return response;
@@ -257,5 +258,49 @@ public class CashierServiceImpl implements CashierService
         String paymentUrl = vnpayConfig.getVnpUrl() + "?" + queryUrl;
 
         return new VNPayResponse(paymentUrl, "Sinh mã QR thanh toán VNPay thành công!", true);
+    }
+
+    @Override
+    @Transactional
+    public Long processVnPaySuccess(String vnpTxnRef) {
+        // 1. Cắt chuỗi vnpTxnRef (VD: "RIMS_ORDER_15_171542..." -> Lấy phần tử số 2 là "15")
+        String[] parts = vnpTxnRef.split("_");
+        Long orderId = Long.parseLong(parts[2]);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng từ VNPay trả về"));
+
+        // Nếu đơn hàng đã hoàn thành rồi thì không xử lý lại (tránh lỗi spam callback)
+        if (order.getStatus() == OrderStatus.COMPLETED) {
+            throw new RuntimeException("Đơn hàng này đã được thanh toán rồi!");
+        }
+
+        // 2. TẠO HÓA ĐƠN (INVOICE)
+        Invoice invoice = new Invoice();
+        invoice.setOrder(order);
+        invoice.setFinalAmount(order.getTotalAmount());
+        invoice.setInvoiceDate(java.time.LocalDateTime.now());
+
+        // 3. TẠO THANH TOÁN (PAYMENT)
+        Payment payment = new Payment();
+        payment.setAmount(order.getTotalAmount());
+        payment.setPaymentMethod(PaymentMethod.QRCODE); // Nhớ đảm bảo Enum PaymentMethod của bạn có chữ VNPAY nhé
+        payment.setSuccess(true);
+        invoice.addPayment(payment);
+
+        invoiceRepository.save(invoice);
+
+        // 4. CHUYỂN TRẠNG THÁI ORDER & GIẢI PHÓNG BÀN
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
+
+        if (order.getTable() != null) {
+            RestaurantTable table = order.getTable();
+            table.setStatus(TableStatus.AVAILABLE);
+            tableRepository.save(table);
+        }
+
+        // 5. TRẢ VỀ ID HÓA ĐƠN
+        return invoice.getId();
     }
 }
