@@ -5,9 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.CreateOrderRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.OrderItemRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.CreateOrderResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.MenuItemResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.TableDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.*;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
@@ -131,5 +129,36 @@ public class WaiterServiceImpl implements WaiterService
                         .categoryName(dish.getCategory().getName())
                         .build())
                 .toList();
+    }
+
+    @Override
+    public List<OrderDetailResponse> getServingOrders(int tableID)
+    {
+        List<Order> orders = orderRepository.findServingOrdersWithDetails(tableID);
+        List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+        for (Order order : orders)
+        {
+            orderDetailResponses.add(
+                    OrderDetailResponse.builder().
+                            orderId(order.getId())
+                            .tableName(order.getTable().getTableNumber())
+                            .createdAt(order.getCreatedAt())
+                            .orderItems(order.getOrderItems().stream().map(
+                                    orderItem ->
+                                    {
+                                        OrderItemResponse response = new OrderItemResponse();
+                                        response.setOrderItemId(orderItem.getId());
+                                        response.setDishName(orderItem.getDish().getName());
+                                        response.setQuantity(orderItem.getQuantity());
+                                        response.setUnitPrice(orderItem.getUnitPrice());
+                                        response.setSubTotal(orderItem.getSubTotal());
+                                        response.setNote(orderItem.getNote());
+                                        return response;
+                                    }
+                            ).toList())
+                            .build()
+            );
+        }
+        return orderDetailResponses;
     }
 }
