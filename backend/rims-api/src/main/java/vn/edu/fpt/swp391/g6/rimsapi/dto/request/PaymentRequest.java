@@ -10,4 +10,5 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 public class PaymentRequest
 {
     private PaymentMethod paymentMethod;
+    private Double amountPaid;
 }

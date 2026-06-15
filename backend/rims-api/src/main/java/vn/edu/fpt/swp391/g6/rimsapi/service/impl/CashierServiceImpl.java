@@ -123,53 +123,61 @@ public class CashierServiceImpl implements CashierService
 
     @Override
     @Transactional
-    public PaymentResponse completeCashPayment(Long orderId) {
-        // 1. Tìm đơn hàng xem có tồn tại không
+    public PaymentResponse completeCashPayment(Long orderId, PaymentRequest request) {
+        // 1. Tìm đơn hàng
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng tương ứng"));
 
-        // 2. Kiểm tra điều kiện: BẮT BUỘC phải đang ở trạng thái LOCKED mới cho thanh toán
         if (order.getStatus() != OrderStatus.LOCKED) {
             throw new RuntimeException("Đơn hàng chưa được chốt (LOCKED) hoặc đã thanh toán xong!");
         }
 
-        // 3. KHỞI TẠO HÓA ĐƠN CHÍNH THỨC (INVOICE) KHỚP VỚI ENTITY
+        // 2. Logic tính tiền
+        BigDecimal finalAmount = order.getTotalAmount();
+        BigDecimal amountPaid = BigDecimal.valueOf(request.getAmountPaid());
+
+        // Kiểm tra xem khách có đưa thiếu tiền không
+        if (amountPaid.compareTo(finalAmount) < 0) {
+            throw new RuntimeException("Khách đưa thiếu tiền! Cần thanh toán: " + finalAmount + ", Khách đưa: " + amountPaid);
+        }
+
+        // Tính tiền thừa trả khách
+        BigDecimal excessAmount = amountPaid.subtract(finalAmount);
+
+        // 3. TẠO HÓA ĐƠN
         Invoice invoice = new Invoice();
-
         invoice.setOrder(order);
-
-        invoice.setFinalAmount(order.getTotalAmount());
-
-        // Điền ngày giờ tạo hóa đơn
+        invoice.setFinalAmount(finalAmount);
         invoice.setInvoiceDate(java.time.LocalDateTime.now());
 
-        // 4. KHỞI TẠO BẢN GHI THANH TOÁN (PAYMENT) ĐỂ ADD VÀO INVOICE
+        // 4. TẠO PAYMENT RECORD
         Payment payment = new Payment();
-        payment.setAmount(order.getTotalAmount());            // Số tiền thanh toán
-        payment.setPaymentMethod(PaymentMethod.CASH);          // Phương thức tiền mặt
-        payment.setSuccess(true);                        // Trạng thái thanh toán thành công
-
+        payment.setAmount(amountPaid); // Lưu số tiền khách thực đưa
+        payment.setPaymentMethod(PaymentMethod.CASH);
+        payment.setSuccess(true);
         invoice.addPayment(payment);
 
-        // Lưu Invoice xuống DB
         invoiceRepository.save(invoice);
 
-        // 5. CHUYỂN TRẠNG THÁI ORDER THÀNH COMPLETED
+        // 5. CHUYỂN TRẠNG THÁI ORDER & BÀN
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
-        // 6. GIẢI PHÓNG BÀN (Chuyển thành AVAILABLE)
         if (order.getTable() != null) {
             RestaurantTable table = order.getTable();
             table.setStatus(TableStatus.AVAILABLE);
             tableRepository.save(table);
         }
 
-        // 7. Trả về kết quả thông báo thành công cho Frontend
+        // 6. TRẢ VỀ RESPONSE KÈM TIỀN THỪA
         PaymentResponse response = new PaymentResponse();
-        response.setMessage("Payment cash sucessfull");
+        response.setMessage("Thanh toán tiền mặt thành công");
         response.setInvoiceId(invoice.getId());
         response.setSuccess(true);
+
+        // Nhớ set 2 biến này để Postman và Frontend nhận được dữ liệu
+        response.setAmountPaid(amountPaid);
+        response.setExcessAmount(excessAmount);
 
         return response;
     }
