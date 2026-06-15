@@ -3,14 +3,17 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.edu.fpt.swp391.g6.rimsapi.config.VNPayConfig;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.*;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.*;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.VNPayResponse;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,6 +25,9 @@ public class CashierServiceImpl implements CashierService
 
     private final OrderRepository orderRepository;
     private final RestaurantTableRepository tableRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final VNPayConfig vnpayConfig;
+    private final jakarta.servlet.http.HttpServletRequest httpRequest;
 
     @Override
     @Transactional(readOnly = true)
@@ -105,7 +111,7 @@ public class CashierServiceImpl implements CashierService
         order.setStatus(OrderStatus.LOCKED);
         orderRepository.save(order);
 
-        String methodChosen = request.getPaymentMethod();
+        String methodChosen = request.getPaymentMethod().name();
         String notification = " Locked order.Choose method payment " + methodChosen + " success";
 
         PaymentResponse response = new PaymentResponse();
@@ -113,5 +119,196 @@ public class CashierServiceImpl implements CashierService
         response.setSuccess(true);
 
         return response;
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponse completeCashPayment(Long orderId, PaymentRequest request) {
+        // 1. Tìm đơn hàng
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng tương ứng"));
+
+        if (order.getStatus() != OrderStatus.LOCKED) {
+            throw new RuntimeException("Đơn hàng chưa được chốt (LOCKED) hoặc đã thanh toán xong!");
+        }
+
+        // 2. Logic tính tiền
+        BigDecimal finalAmount = order.getTotalAmount();
+        BigDecimal amountPaid = BigDecimal.valueOf(request.getAmountPaid());
+
+        // Kiểm tra xem khách có đưa thiếu tiền không
+        if (amountPaid.compareTo(finalAmount) < 0) {
+            throw new RuntimeException("Khách đưa thiếu tiền! Cần thanh toán: " + finalAmount + ", Khách đưa: " + amountPaid);
+        }
+
+        // Tính tiền thừa trả khách
+        BigDecimal excessAmount = amountPaid.subtract(finalAmount);
+
+        // 3. TẠO HÓA ĐƠN
+        Invoice invoice = new Invoice();
+        invoice.setOrder(order);
+        invoice.setFinalAmount(finalAmount);
+        invoice.setInvoiceDate(java.time.LocalDateTime.now());
+
+        // 4. TẠO PAYMENT RECORD
+        Payment payment = new Payment();
+        payment.setAmount(amountPaid); // Lưu số tiền khách thực đưa
+        payment.setPaymentMethod(PaymentMethod.CASH);
+        payment.setSuccess(true);
+        invoice.addPayment(payment);
+
+        invoiceRepository.save(invoice);
+
+        // 5. CHUYỂN TRẠNG THÁI ORDER & BÀN
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
+
+        if (order.getTable() != null) {
+            RestaurantTable table = order.getTable();
+            table.setStatus(TableStatus.AVAILABLE);
+            tableRepository.save(table);
+        }
+
+        // 6. TRẢ VỀ RESPONSE KÈM TIỀN THỪA
+        PaymentResponse response = new PaymentResponse();
+        response.setMessage("Thanh toán tiền mặt thành công");
+        response.setInvoiceId(invoice.getId());
+        response.setSuccess(true);
+
+        // Nhớ set 2 biến này để Postman và Frontend nhận được dữ liệu
+        response.setAmountPaid(amountPaid);
+        response.setExcessAmount(excessAmount);
+
+        return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public VNPayResponse createVNPayPaymentUrl(Long orderId) {
+        // 1. Tìm đơn hàng xem có tồn tại không
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        // Chốt chặn an toàn: Phải khóa đơn (LOCKED) thì mới cho thanh toán quét mã
+        if (order.getStatus() != OrderStatus.LOCKED) {
+            throw new RuntimeException("Đơn hàng chưa được chốt khóa (LOCKED) để thanh toán!");
+        }
+
+        // 2. Lấy các thông số từ cấu hình động (file YAML) thông qua VNPayConfig của bạn
+        String vnp_Version = vnpayConfig.getVnpVersion();
+        String vnp_Command = vnpayConfig.getVnpCommand();
+        String vnp_TmnCode = vnpayConfig.getVnpTmnCode();
+
+        // VNPay bắt buộc số tiền nhân thêm 100 (Ví dụ: 50.000đ thì phải truyền sang là 5000000)
+        long amount = order.getTotalAmount().multiply(new java.math.BigDecimal(100)).longValue();
+
+        // Tạo mã giao dịch duy nhất dựa trên ID đơn hàng kết hợp thời gian hệ thống
+        String vnp_TxnRef = "RIMS_ORDER_" + order.getId() + "_" + System.currentTimeMillis();
+        String vnp_OrderInfo = "Thanh toan don hang RIMS ID " + order.getId(); // Ghi chú không dấu tránh lỗi font ngân hàng
+        String vnp_OrderType = "other";
+        String vnp_Locale = "vn";
+
+        // Lấy đường link Callback đã đổi tên viết hoa từ file Config của bạn
+        String vnp_ReturnUrl = VNPayConfig.VNP_RETURN_URL;
+
+        // Lấy IP của máy đang thực hiện giao dịch qua hàm có sẵn của bạn
+        String vnp_IpAddr = vnpayConfig.getIpAddress(httpRequest);
+
+        // Định dạng ngày giờ tạo theo đúng chuẩn bắt buộc của VNPay: yyyyMMddHHmmss
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String vnp_CreateDate = now.format(formatter);
+
+        // 3. Đưa tất cả dữ liệu vào Map để tiến hành sắp xếp Alphabet (Luật bắt buộc của VNPay)
+        Map<String, String> vnp_Params = new HashMap<>();
+        vnp_Params.put("vnp_Version", vnp_Version);
+        vnp_Params.put("vnp_Command", vnp_Command);
+        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+        vnp_Params.put("vnp_Amount", String.valueOf(amount));
+        vnp_Params.put("vnp_CurrCode", "VND");
+        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+        vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
+        vnp_Params.put("vnp_OrderType", vnp_OrderType);
+        vnp_Params.put("vnp_Locale", vnp_Locale);
+        vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
+        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+        // Tiến hành sắp xếp các tham số theo thứ tự chữ cái của Key
+        List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+        Collections.sort(fieldNames);
+
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
+        Iterator<String> itr = fieldNames.iterator();
+
+        while (itr.hasNext()) {
+            String fieldName = itr.next();
+            String fieldValue = vnp_Params.get(fieldName);
+            if ((fieldValue != null) && (!fieldValue.isEmpty())) {
+                // Xây dựng chuỗi dữ liệu gốc để băm bảo mật
+                hashData.append(fieldName).append('=').append(java.net.URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                // Xây dựng chuỗi query string gắn lên URL
+                query.append(java.net.URLEncoder.encode(fieldName, StandardCharsets.US_ASCII)).append('=').append(java.net.URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                if (itr.hasNext()) {
+                    query.append('&');
+                    hashData.append('&');
+                }
+            }
+        }
+
+        // 4. Thực hiện ký chữ ký số HMAC-SHA512 để bảo mật thông tin đơn hàng
+        String queryUrl = query.toString();
+        String vnp_SecureHash = vnpayConfig.hmacSHA512(vnpayConfig.getVnpHashSecret(), hashData.toString());
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+
+        // 5. Nối với link cổng test VNPay để ra đường dẫn cuối cùng
+        String paymentUrl = vnpayConfig.getVnpUrl() + "?" + queryUrl;
+
+        return new VNPayResponse(paymentUrl, "Sinh mã QR thanh toán VNPay thành công!", true);
+    }
+
+    @Override
+    @Transactional
+    public Long processVnPaySuccess(String vnpTxnRef) {
+        // 1. Cắt chuỗi vnpTxnRef (VD: "RIMS_ORDER_15_171542..." -> Lấy phần tử số 2 là "15")
+        String[] parts = vnpTxnRef.split("_");
+        Long orderId = Long.parseLong(parts[2]);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng từ VNPay trả về"));
+
+        // Nếu đơn hàng đã hoàn thành rồi thì không xử lý lại (tránh lỗi spam callback)
+        if (order.getStatus() == OrderStatus.COMPLETED) {
+            throw new RuntimeException("Đơn hàng này đã được thanh toán rồi!");
+        }
+
+        // 2. TẠO HÓA ĐƠN (INVOICE)
+        Invoice invoice = new Invoice();
+        invoice.setOrder(order);
+        invoice.setFinalAmount(order.getTotalAmount());
+        invoice.setInvoiceDate(java.time.LocalDateTime.now());
+
+        // 3. TẠO THANH TOÁN (PAYMENT)
+        Payment payment = new Payment();
+        payment.setAmount(order.getTotalAmount());
+        payment.setPaymentMethod(PaymentMethod.QRCODE); // Nhớ đảm bảo Enum PaymentMethod của bạn có chữ VNPAY nhé
+        payment.setSuccess(true);
+        invoice.addPayment(payment);
+
+        invoiceRepository.save(invoice);
+
+        // 4. CHUYỂN TRẠNG THÁI ORDER & GIẢI PHÓNG BÀN
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
+
+        if (order.getTable() != null) {
+            RestaurantTable table = order.getTable();
+            table.setStatus(TableStatus.AVAILABLE);
+            tableRepository.save(table);
+        }
+
+        // 5. TRẢ VỀ ID HÓA ĐƠN
+        return invoice.getId();
     }
 }
