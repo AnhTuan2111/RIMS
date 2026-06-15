@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.UpdateMenuStatusRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.KitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
 import org.springframework.web.bind.annotation.PathVariable;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishDetailResponse;
-
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishListResponse;
 import java.util.List;
 
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
@@ -42,5 +43,21 @@ public class ChefController
     {
         chefService.updateDishStatus(id, request.getStatus());
         return "Status updated successfully";
+    }
+    @GetMapping("/dishes")
+    public List<DishListResponse> getDishList()
+    {
+        return chefService.getDishList();
+    }
+    @PutMapping("/dishes/{id}/status")
+    public String updateMenuStatus(
+            @PathVariable Integer id,
+            @RequestBody UpdateMenuStatusRequest request)
+    {
+        chefService.updateMenuStatus(
+                id,
+                request.getAvailable());
+
+        return "Menu status updated successfully";
     }
 }
