@@ -47,6 +47,12 @@ public class SecurityConfig {
                         // Revenue Report
                         .requestMatchers("/api/reports/**").permitAll()
 
+                        // Invoice History
+                        .requestMatchers("/api/invoices/**").permitAll()
+
+                        // Reservation Performance Score
+                        .requestMatchers("/api/reservations/**").permitAll()
+
                         // Các API khác muốn test thì thêm vào đây
                         // .requestMatchers("/api/orders/**").permitAll()
                         // .requestMatchers("/api/reservations/**").permitAll()

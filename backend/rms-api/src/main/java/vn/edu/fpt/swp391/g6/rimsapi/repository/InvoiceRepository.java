@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 
 import org.springframework.data.domain.Pageable;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.InvoiceHistoryProjection;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,6 +53,23 @@ ORDER BY
             Pageable pageable
     );
 
+    //Get invoice history for a specific table.
+    @Query("""
+SELECT
+    i.invoiceId as invoiceId,
+    o.orderId as orderId,
+    t.tableNumber as tableNumber,
+    p.paymentMethod as paymentMethod,
+    i.finalAmount as amount,
+    i.invoiceDate as paymentDate
+FROM Invoice i
+JOIN i.order o
+JOIN o.table t
+JOIN i.payments p
+WHERE p.isSuccess = true
+ORDER BY i.invoiceDate DESC
+""")
+    List<InvoiceHistoryProjection> getInvoiceHistory();
 
 
 }

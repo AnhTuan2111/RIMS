@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.BestSellingReportResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.RevenueComparisonResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.RevenueReportResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.RevenueReportService;
 
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 public class RevenueReportController {
 
     private final RevenueReportService revenueReportService;
-
+    
     private boolean checkAdmin(String username, String password) {
 
         return "admin01".equals(username)
@@ -61,6 +62,36 @@ public class RevenueReportController {
                         toDate
                 );
     }
+    //compare revenue between 2 periods.
+    @GetMapping("/compare")
+    public RevenueComparisonResponse compareRevenue(
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate startDate1,
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate endDate1,
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate startDate2,
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate endDate2
+    ) {
+
+        return revenueReportService.compareRevenue(
+                startDate1,
+                endDate1,
+                startDate2,
+                endDate2
+        );
+    }
+
+
     //get bestselling.
     @GetMapping("/best-selling")
     public BestSellingReportResponse getBestSellingReport() {
