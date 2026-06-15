@@ -2,14 +2,14 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishListResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.KitchenOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.KitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderItemRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import java.util.List;
 

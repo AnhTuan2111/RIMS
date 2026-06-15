@@ -1,10 +1,10 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.AuthenticationRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.RefreshTokenRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.AuthenticationResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.LogoutResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserProfileResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.AuthenticationRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.RefreshTokenRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.auth.AuthenticationResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.auth.LogoutResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 
 public interface AuthService

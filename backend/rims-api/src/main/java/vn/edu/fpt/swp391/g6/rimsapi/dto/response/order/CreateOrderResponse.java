@@ -1,4 +1,4 @@
-package vn.edu.fpt.swp391.g6.rimsapi.dto.response;
+package vn.edu.fpt.swp391.g6.rimsapi.dto.response.order;
 
 import lombok.*;
 

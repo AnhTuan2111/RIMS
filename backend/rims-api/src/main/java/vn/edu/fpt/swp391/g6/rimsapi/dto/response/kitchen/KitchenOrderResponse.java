@@ -1,4 +1,4 @@
-package vn.edu.fpt.swp391.g6.rimsapi.dto.response;
+package vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen;
 
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import lombok.Getter;
