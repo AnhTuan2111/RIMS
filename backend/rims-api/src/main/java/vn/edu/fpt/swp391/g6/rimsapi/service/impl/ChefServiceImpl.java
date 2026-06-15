@@ -2,8 +2,11 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishListResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.KitchenOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderItemRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishDetailResponse;
@@ -15,6 +18,7 @@ import java.util.List;
 public class ChefServiceImpl implements ChefService {
 
     private final OrderItemRepository orderItemRepository;
+    private final DishRepository dishRepository;
 
     @Override
     public List<KitchenOrderResponse> getKitchenOrders() {
@@ -107,5 +111,49 @@ public class ChefServiceImpl implements ChefService {
         item.setStatus(status);
 
         orderItemRepository.save(item);
+    }
+    @Override
+    public List<DishListResponse> getDishList() {
+
+        return dishRepository.findAll()
+                .stream()
+                .map(dish -> {
+
+                    DishListResponse response =
+                            new DishListResponse();
+
+                    response.setDishId(
+                            dish.getId());
+
+                    response.setDishName(
+                            dish.getName());
+
+                    response.setCategory(
+                            dish.getCategory()
+                                    .getName());
+
+                    response.setPrice(
+                            dish.getPrice());
+
+                    response.setAvailable(
+                            dish.isAvailable());
+                    return response;
+
+                })
+                .toList();
+    }
+    @Override
+    public void updateMenuStatus(
+            Integer dishId,
+            Boolean available)
+    {
+        Dish dish =
+                dishRepository.findById(dishId)
+                        .orElseThrow(
+                                () -> new RuntimeException("Dish not found"));
+
+        dish.setAvailable(available);
+
+        dishRepository.save(dish);
     }
 }

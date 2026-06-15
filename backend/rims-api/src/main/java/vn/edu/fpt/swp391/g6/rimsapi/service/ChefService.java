@@ -1,6 +1,7 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishListResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.KitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 
@@ -15,5 +16,8 @@ public interface ChefService
     DishDetailResponse getDishDetail(Long orderItemId);
 
     void updateDishStatus(Long orderItemId, OrderItemStatus status);
-
+    List<DishListResponse> getDishList();
+    void updateMenuStatus(
+            Integer dishId,
+            Boolean available);
 }
