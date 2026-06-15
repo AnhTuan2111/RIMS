@@ -4,13 +4,13 @@ spring:
   application:
     name: rims-api
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=RIMS_DB;encrypt=true;trustServerCertificate=true
+    url: jdbc:sqlserver://LAPTOP-7CM6C92O:1433;databaseName=RIMS_DB;encrypt=true;trustServerCertificate=true
     username: sa
-    password: 123
+    password: bongdem
   jpa:
     hibernate:
       ddl-auto: create
-    open-in-view: false
+    open-in-view: true
     show-sql: true
 jwt:
   signerKey: Bkvw045nqvIXbwCtsf9fNAH8olxBeipB
