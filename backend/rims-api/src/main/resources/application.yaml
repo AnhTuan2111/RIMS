@@ -4,13 +4,20 @@ spring:
   application:
     name: rims-api
   datasource:
-    url: jdbc:sqlserver://LAPTOP-7CM6C92O:1433;databaseName=RIMS_DB;encrypt=true;trustServerCertificate=true
+    url: jdbc:sqlserver://localhost:1433;databaseName=RIMS_DB;encrypt=true;trustServerCertificate=true
     username: sa
-    password: bongdem
+    password: 123
   jpa:
     hibernate:
       ddl-auto: create
-    open-in-view: true
+    open-in-view: false
     show-sql: true
 jwt:
   signerKey: Bkvw045nqvIXbwCtsf9fNAH8olxBeipB
+
+vnpay:
+  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  tmn-code: 3M78B7N6
+  hash-secret: Y9E8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4
+  version: 2.1.0
+  command: pay
