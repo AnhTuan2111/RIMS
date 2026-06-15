@@ -44,14 +44,21 @@ public class CashierController {
 
     // API 4: Lấy danh sách phương thức thanh toán
     @GetMapping("/payment-methods")
-    public ResponseEntity<PaymentMethod[]> getPaymentMethods() {
-        return ResponseEntity.ok(PaymentMethod.values());
+    public ResponseEntity<List<String>> getPaymentMethods() {
+        List<String> methods = java.util.Arrays.stream(PaymentMethod.values())
+                .map(Enum::name)
+                .toList();
+        return ResponseEntity.ok(methods);
     }
 
     // API 5: Hoàn tất thanh toán Tiền mặt (Tạo Invoice, Order -> COMPLETED, Table -> AVAILABLE)
     @PostMapping("/orders/{id}/complete-cash")
-    public ResponseEntity<PaymentResponse> completeCashPayment(@PathVariable Long id) {
-        return ResponseEntity.ok(cashierService.completeCashPayment(id));
+    public ResponseEntity<PaymentResponse> completeCashPayment(
+            @PathVariable Long id,
+            @RequestBody PaymentRequest request
+    ) {
+        // Truyền request vào service để xử lý logic tính tiền
+        return ResponseEntity.ok(cashierService.completeCashPayment(id, request));
     }
 
     // API 6 sinh link QR Code VNPay dựa vào Order ID
@@ -64,7 +71,7 @@ public class CashierController {
     @GetMapping("/invoices/{invoiceId}/pdf")
     public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId) {
         // 1. Tìm hóa đơn trong DB
-        Invoice invoice = invoiceRepository.findById(invoiceId)
+        Invoice invoice = invoiceRepository.findWithOrderAndItemsById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
 
         // 2. Gọi Service để sinh ra mảng byte của file PDF

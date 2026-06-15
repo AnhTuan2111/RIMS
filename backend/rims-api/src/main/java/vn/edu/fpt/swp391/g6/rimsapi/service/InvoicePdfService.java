@@ -25,12 +25,12 @@ public class InvoicePdfService {
             document.open();
 
             // 1. Nạp Font tiếng Việt Times New Roman từ thư mục của bạn
-            InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts/font-times-new-roman/times.ttf");
+            InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts.fonts/times.ttf");
             if (fontStream == null) {
-                throw new RuntimeException("Không tìm thấy file font times.ttf!");
+                throw new RuntimeException("Không tìm thấy file! Hãy chắc chắn file times.ttf nằm trong thư mục src/main/resources");
             }
             byte[] fontBytes = fontStream.readAllBytes();
-            BaseFont bf = BaseFont.createFont("times.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, true, fontBytes, null);
+            BaseFont bf = BaseFont.createFont(null, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, true, fontBytes, null);
 
             Font fontTitle = new Font(bf, 14, Font.BOLD);
             Font fontBold = new Font(bf, 9, Font.BOLD);
@@ -68,7 +68,8 @@ public class InvoicePdfService {
             table.addCell(createCell("T.Tiền", fontBold, Element.ALIGN_RIGHT, false));
 
             for (OrderItem item : invoice.getOrder().getOrderItems()) {
-                table.addCell(createCell(item.getDish().getName(), fontNormal, Element.ALIGN_LEFT, false));
+                String dishName = (item.getDish() != null) ? item.getDish().getName() : "Món ăn chưa đặt tên";
+                table.addCell(createCell(dishName, fontNormal, Element.ALIGN_LEFT, false));
                 table.addCell(createCell(String.valueOf(item.getQuantity()), fontNormal, Element.ALIGN_CENTER, false));
                 table.addCell(createCell(String.format("%,.0f đ", item.getSubTotal()), fontNormal, Element.ALIGN_RIGHT, false));
             }
