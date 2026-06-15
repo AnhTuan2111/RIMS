@@ -5,8 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.*;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
 
 import java.util.List;
 
@@ -16,6 +19,8 @@ import java.util.List;
 public class CashierController {
 
     private final CashierService cashierService;
+    private final InvoicePdfService invoicePdfService;
+    private final InvoiceRepository invoiceRepository;
 
     // API 1 xem danh sách 12 bàn
     @GetMapping("/tables")
@@ -49,10 +54,51 @@ public class CashierController {
         return ResponseEntity.ok(cashierService.completeCashPayment(id));
     }
 
-    // API sinh link QR Code VNPay dựa vào Order ID
+    // API 6 sinh link QR Code VNPay dựa vào Order ID
     @GetMapping("/orders/{id}/vnpay-qr")
     public ResponseEntity<VNPayResponse> getVNPayQrCode(@PathVariable Long id) {
         return ResponseEntity.ok(cashierService.createVNPayPaymentUrl(id));
+    }
+
+    //API 7 xuất file PDF
+    @GetMapping("/invoices/{invoiceId}/pdf")
+    public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId) {
+        // 1. Tìm hóa đơn trong DB
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+
+        // 2. Gọi Service để sinh ra mảng byte của file PDF
+        byte[] pdfBytes = invoicePdfService.generateInvoicePdf(invoice);
+
+        // 3. Cấu hình Header để trình duyệt tự động mở tab PDF
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("inline", "invoice-" + invoiceId + ".pdf");
+
+        return new ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
+    }
+
+    // API 8: Đón kết quả Callback từ VNPay trả về
+    @GetMapping("/payments/vnpay-callback")
+    public void vnpayCallback(
+            @RequestParam java.util.Map<String, String> vnpayParams,
+            jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+
+        String vnp_ResponseCode = vnpayParams.get("vnp_ResponseCode");
+        String vnp_TxnRef = vnpayParams.get("vnp_TxnRef");
+
+        if ("00".equals(vnp_ResponseCode)) {
+            // Mã "00" là khách quét mã THÀNH CÔNG -> Gọi Service lưu hóa đơn
+            Long invoiceId = cashierService.processVnPaySuccess(vnp_TxnRef);
+
+            // Bắn link về Frontend để Quang bên Web Development bắt lấy invoiceId hiển thị thông báo & mở PDF
+            String frontendSuccessUrl = "http://localhost:3000/payment-success?invoiceId=" + invoiceId;
+            response.sendRedirect(frontendSuccessUrl);
+
+        } else {
+            // Giao dịch thất bại / khách bấm hủy thanh toán
+            response.sendRedirect("http://localhost:3000/payment-failed");
+        }
     }
 
 
