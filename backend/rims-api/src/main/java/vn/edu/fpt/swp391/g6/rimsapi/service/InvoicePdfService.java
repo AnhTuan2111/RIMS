@@ -25,7 +25,7 @@ public class InvoicePdfService {
             document.open();
 
             // 1. Nạp Font tiếng Việt Times New Roman từ thư mục của bạn
-            InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts.fonts/times.ttf");
+            InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts/times.ttf");
             if (fontStream == null) {
                 throw new RuntimeException("Không tìm thấy file! Hãy chắc chắn file times.ttf nằm trong thư mục src/main/resources");
             }
