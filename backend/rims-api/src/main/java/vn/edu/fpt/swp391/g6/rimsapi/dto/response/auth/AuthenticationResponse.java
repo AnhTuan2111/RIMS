@@ -1,4 +1,4 @@
-package vn.edu.fpt.swp391.g6.rimsapi.dto.response;
+package vn.edu.fpt.swp391.g6.rimsapi.dto.response.auth;
 
 import lombok.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;

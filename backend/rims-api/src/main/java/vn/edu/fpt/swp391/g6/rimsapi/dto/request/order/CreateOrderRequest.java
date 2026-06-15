@@ -1,4 +1,4 @@
-package vn.edu.fpt.swp391.g6.rimsapi.dto.request;
+package vn.edu.fpt.swp391.g6.rimsapi.dto.request.order;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

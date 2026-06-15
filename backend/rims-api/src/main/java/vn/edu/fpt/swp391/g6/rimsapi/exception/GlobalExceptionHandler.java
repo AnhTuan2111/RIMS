@@ -1,6 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.exception;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ErrorResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

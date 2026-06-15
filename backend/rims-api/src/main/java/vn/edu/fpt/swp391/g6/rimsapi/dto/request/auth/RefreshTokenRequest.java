@@ -1,4 +1,4 @@
-package vn.edu.fpt.swp391.g6.rimsapi.dto.request;
+package vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

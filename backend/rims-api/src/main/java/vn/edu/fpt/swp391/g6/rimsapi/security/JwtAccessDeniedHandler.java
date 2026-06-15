@@ -9,7 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ErrorResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.ErrorResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
