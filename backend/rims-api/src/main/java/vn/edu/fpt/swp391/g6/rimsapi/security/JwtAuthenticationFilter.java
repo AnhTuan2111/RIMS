@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +18,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
 import java.io.IOException;
 import java.util.List;
 
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter
@@ -27,10 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException
     {
         String authHeader = request.getHeader("Authorization");
 
@@ -42,7 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
             {
                 JWTClaimsSet claims = jwtService.parseAndValidate(token);
 
-                if (jwtService.isAccessToken(claims) && SecurityContextHolder.getContext().getAuthentication() == null)
+                if (jwtService.isAccessToken(claims)
+                        && SecurityContextHolder.getContext().getAuthentication() == null)
                 {
                     Integer userId = jwtService.extractUserId(claims);
                     String username = jwtService.extractUsername(claims);
@@ -51,13 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
                     UserPrincipal principal = new UserPrincipal(userId, username, RoleType.valueOf(role));
                     List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(principal, null, authorities);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            principal, null, authorities);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            }
-            catch (Exception ignored)
+            } catch (Exception ignored)
             {
                 SecurityContextHolder.clearContext();
             }
