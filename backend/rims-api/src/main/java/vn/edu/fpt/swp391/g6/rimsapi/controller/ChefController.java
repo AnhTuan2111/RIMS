@@ -12,9 +12,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishListResponse;
 import java.util.List;
 
-import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.UpdateDishStatusRequest;
 import org.springframework.web.bind.annotation.RequestBody;
 
