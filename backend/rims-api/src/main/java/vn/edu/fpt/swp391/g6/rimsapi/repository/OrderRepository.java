@@ -12,7 +12,6 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long>
 {
-
     List<Order> findByStatus(OrderStatus status);
 
     @Query("""
@@ -23,4 +22,14 @@ public interface OrderRepository extends JpaRepository<Order, Long>
             WHERE o.id = :orderId
             """)
     Optional<Order> findOrderWithDetailsById(@Param("orderId") Long orderId);
+
+    @Query("""
+            SELECT DISTINCT o FROM Order o
+            JOIN FETCH o.table t
+            LEFT JOIN FETCH o.orderItems oi
+            LEFT JOIN FETCH oi.dish d
+            WHERE o.status = SERVING 
+            AND t.id = :tableID
+            """)
+    List<Order> findServingOrdersWithDetails(@Param("tableID") int tableID);
 }

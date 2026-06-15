@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.CreateOrderRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.CreateOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
@@ -42,6 +43,12 @@ public class WaiterController
     public ResponseEntity<List<MenuItemResponse>> getMenu()
     {
         return ResponseEntity.ok(waiterService.getMenu());
+    }
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<List<OrderDetailResponse>> getOrderDetailByTableId(@PathVariable int id)
+    {
+        return ResponseEntity.ok(waiterService.getServingOrders(id));
     }
 }
 
