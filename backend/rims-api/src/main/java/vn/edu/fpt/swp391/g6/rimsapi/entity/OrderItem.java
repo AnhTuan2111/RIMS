@@ -57,4 +57,8 @@ public class OrderItem
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    @Column(length = 500)
+    private String cancelReason;
+
+    private LocalDateTime cancelRequestedAt;
 }
