@@ -1,10 +1,12 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ChefDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishListResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.KitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
-
+import java.util.List;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.KitchenOrderResponse;
 import java.util.List;
 
 
@@ -20,4 +22,7 @@ public interface ChefService
     void updateMenuStatus(
             Integer dishId,
             Boolean available);
+    ChefDashboardResponse getDashboard();
+    void requestCancel(Long orderItemId, String reason);
+    List<KitchenOrderResponse> getCompletedOrders();
 }

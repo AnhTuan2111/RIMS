@@ -12,5 +12,5 @@ public interface OrderItemRepository
 
     List<OrderItem> findByStatusOrderByCreatedAtAsc(
             OrderItemStatus status);
-
+    long countByStatus(OrderItemStatus status);
 }

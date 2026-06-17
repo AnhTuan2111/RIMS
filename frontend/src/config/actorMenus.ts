@@ -20,8 +20,18 @@ export const actorMenus: Record<ActorRole, ActorMenuItem[]> = {
     ],
 
     CHEF: [
-        { label: 'Đơn cần chế biến', path: '/chef/orders' },
-        { label: 'Danh sách món ăn', path: '/chef/dishes' },
+        {
+            label: 'Dashboard',
+            path: '/chef/dashboard',
+        },
+        {
+            label: 'Danh sách món đang chuẩn bị',
+            path: '/chef/orders',
+        },
+        {
+            label: 'Quản lý món ăn',
+            path: '/chef/dishes',
+        },
     ],
 
     WAITER: [

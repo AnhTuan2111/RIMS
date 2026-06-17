@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishListResponse;
 import java.util.List;
-
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ChefDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.UpdateDishStatusRequest;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PostMapping;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.CancelDishRequest;
 
 @RestController
 @RequestMapping("/rims/chef")
@@ -60,4 +62,22 @@ public class ChefController
 
         return "Menu status updated successfully";
     }
+    @GetMapping("/dashboard")
+    public ChefDashboardResponse getDashboard() {
+        return chefService.getDashboard();
+    }
+    @PostMapping("/orders/{id}/cancel-request")
+    public String requestCancel(
+            @PathVariable Long id,
+            @Valid @RequestBody CancelDishRequest request
+    ) {
+        chefService.requestCancel(id, request.getReason());
+
+        return "Cancel request submitted successfully";
+    }
+    @GetMapping("/orders/completed")
+    public List<KitchenOrderResponse> getCompletedOrders() {
+        return chefService.getCompletedOrders();
+    }
+
 }
