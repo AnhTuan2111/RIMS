@@ -39,6 +39,10 @@ public class CashierServiceImpl implements CashierService
     {
 
         List<RestaurantTable> tables = tableRepository.findAll();
+        System.out.println("=================================");
+        System.out.println("TABLE COUNT = " + tables.size());
+        System.out.println("TABLE DATA = " + tables);
+        System.out.println("=================================");
 
         List<Order> activeOrders = orderRepository.findByStatus(OrderStatus.SERVING);
 
