@@ -1,5 +1,9 @@
+
 import { NavLink } from 'react-router-dom'
-import { ACTOR_LABELS, actorMenus } from '../../config/actorMenus'
+import {
+    ACTOR_LABELS,
+    actorMenus,
+} from '../../config/actorMenus'
 import { useActor } from '../../context/ActorContext'
 
 export function Sidebar() {
@@ -14,24 +18,19 @@ export function Sidebar() {
             </div>
 
             <nav className="app-sidebar-nav">
-                <NavLink
-                    to="/dashboard"
-                    className={({ isActive }) =>
-                        isActive ? 'app-sidebar-link active' : 'app-sidebar-link'
-                    }
-                >
-                    Tổng quan
-                </NavLink>
-
                 <div className="app-menu-group">
-                    <p className="app-menu-title">{ACTOR_LABELS[actor]}</p>
+                    <p className="app-menu-title">
+                        {ACTOR_LABELS[actor]}
+                    </p>
 
                     {menus.map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
                             className={({ isActive }) =>
-                                isActive ? 'app-sidebar-link active' : 'app-sidebar-link'
+                                isActive
+                                    ? 'app-sidebar-link active'
+                                    : 'app-sidebar-link'
                             }
                         >
                             {item.label}
