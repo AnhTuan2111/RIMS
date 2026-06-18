@@ -26,11 +26,14 @@ public class InvoicePdfService {
 
             // 1. Nạp Font tiếng Việt Times New Roman từ thư mục của bạn
             InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts/times.ttf");
+
             if (fontStream == null) {
-                throw new RuntimeException("Không tìm thấy file! Hãy chắc chắn file times.ttf nằm trong thư mục src/main/resources");
+                throw new RuntimeException("Không tìm thấy file fonts/times.ttf");
             }
             byte[] fontBytes = fontStream.readAllBytes();
-            BaseFont bf = BaseFont.createFont(null, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, true, fontBytes, null);
+            System.out.println("FONT = " +
+                    getClass().getClassLoader().getResource("fonts/times.ttf"));
+            BaseFont bf = BaseFont.createFont("times.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, true, fontBytes, null);
 
             Font fontTitle = new Font(bf, 14, Font.BOLD);
             Font fontBold = new Font(bf, 9, Font.BOLD);
