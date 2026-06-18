@@ -5,6 +5,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateOrderRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.UpdateOrderResponse;
 
 import java.util.List;
 
@@ -14,6 +16,8 @@ public interface WaiterService
     List<TableDetailResponse> getAllTables();
 
     CreateOrderResponse createOrder(CreateOrderRequest request, Integer waiterId);
+
+    UpdateOrderResponse updateOrder(Long orderId, UpdateOrderRequest request, Integer waiterId);
 
     List<MenuItemResponse> getMenu();
 

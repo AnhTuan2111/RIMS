@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.CreateOrderRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateOrderRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.UpdateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
@@ -39,16 +41,26 @@ public class WaiterController
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("/orders/{orderId}")
+    public ResponseEntity<UpdateOrderResponse> updateOrder(
+            @PathVariable Long orderId,
+            @Valid @RequestBody UpdateOrderRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal)
+    {
+        UpdateOrderResponse response = waiterService.updateOrder(orderId, request, userPrincipal.getId());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/menu")
     public ResponseEntity<List<MenuItemResponse>> getMenu()
     {
         return ResponseEntity.ok(waiterService.getMenu());
     }
 
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<List<OrderDetailResponse>> getOrderDetailByTableId(@PathVariable int id)
+    @GetMapping("/detail/{orderId}")
+    public ResponseEntity<List<OrderDetailResponse>> getOrderDetailByTableId(@PathVariable int orderId)
     {
-        return ResponseEntity.ok(waiterService.getServingOrders(id));
+        return ResponseEntity.ok(waiterService.getServingOrders(orderId));
     }
 }
 
