@@ -5,8 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.CreateOrderRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.OrderItemRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateOrderRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateOrderItemRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.UpdateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
@@ -21,6 +24,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -118,6 +122,141 @@ public class WaiterServiceImpl implements WaiterService
                 .itemSummary(itemSummary)
                 .totalAmount(total)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public UpdateOrderResponse updateOrder(Long id, UpdateOrderRequest updateOrderRequest, Integer waiterId)
+    {
+        // nhận order id để validate (order đang serving và table đang serving)
+        // update order request là danh sách (update order items request) bao gồm các món (dish) số lượng món (quantity) và note của món tương ứng
+
+        // các món đã trong trạng thái COMPLETE thì chỉ có thêm số lượng chứ không giảm đi được, tức là số lượng lúc sau phải luôn >= số lượng ban đầu, nếu không thì lỗi
+        // còn các món mà trong trạng thái PREPARING thì thêm bớt tùy ý
+
+        Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("order Id " + id + " not found"));
+
+        User waiter = userRepository.findById(waiterId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhân viên với ID: " + waiterId));
+
+        if (order.getStatus() != OrderStatus.SERVING)
+        {
+            throw new IllegalArgumentException("cannot update order that not in serving status");
+        }
+
+        if (order.getTable().getStatus() != TableStatus.SERVING)
+        {
+            throw new IllegalArgumentException("you can only update table that its status is SERVING");
+        }
+
+        // bây giờ đã validate xong order, việc cần làm tiếp theo là đối chiếu order request với order gốc, xem có thay đổi cập nhật gì, lúc này sẽ validate các item trong order
+
+        // vì bên trong order request có các order item request và trong order có các order item, nên bản chất cả bên trong cả 2 là 2 object khác nhau nên không thể so sánh bình thường được.
+        // thay vào đó, ta sẽ sử dụng order item id để lọc và tạo trung gian
+        for (UpdateOrderItemRequest itemRequest : updateOrderRequest.getItems())
+        {
+            // cập nhật món cũ
+            if (itemRequest.getOrderItemId() != null)
+            {
+                // kiểm tra validate order item phải ở trong order, nếu không tìm thấy thì để null
+                OrderItem existedItem = isExist(itemRequest.getOrderItemId(), order);
+
+                if (existedItem == null)
+                {
+                    throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " not found");
+                }
+
+                if (itemRequest.getQuantity() == null || itemRequest.getDishId() == null)
+                {
+                    throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " cannot have empty quantity or dish");
+                }
+
+                switch (existedItem.getStatus())
+                {
+                    case COMPLETED: // chỉ có thể thêm số lượng chứ không bớt đi được. nếu thêm số lượng thì sẽ tạo order item mới với số lượng bằng phần dư khi trừ (để không bị trùng)
+                    {
+                        if (itemRequest.getQuantity() < existedItem.getQuantity())
+                        {
+                            throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " is COMPLETE, cannot reduce quantity");
+                        }
+                        else if (itemRequest.getQuantity() > existedItem.getQuantity())
+                        {
+                            // tạo order item mới đế không bị nhầm lẫn với order item khác
+                            OrderItem orderItem = new OrderItem();
+                            orderItem.setDish(existedItem.getDish());
+                            orderItem.setQuantity(itemRequest.getQuantity() - existedItem.getQuantity());
+                            orderItem.setUnitPrice(existedItem.getUnitPrice());
+                            orderItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())));
+                            orderItem.setNote(itemRequest.getNote());
+                            orderItem.setStatus(OrderItemStatus.PREPARING);
+                            order.addOrderItem(orderItem);
+                        }
+                        break;
+                    }
+                    case PREPARING:
+                    {
+                        if (itemRequest.getQuantity() == 0) {
+                            order.removeOrderItem(existedItem);
+                        } else {
+                            existedItem.setQuantity(itemRequest.getQuantity());
+                            existedItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
+                            existedItem.setNote(itemRequest.getNote());
+                        }
+                        break;
+                    }
+                    case CANCELLED:
+                    {
+                        throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " is CANCELLED, cannot update");
+                    }
+                }
+            } else // món mới khi gửi đi sẽ có orderitem id là null
+            {
+                Dish dish = dishRepository.findById(itemRequest.getDishId())
+                        .orElseThrow(() -> new IllegalArgumentException("not found dishID: " + itemRequest.getDishId()));
+
+                OrderItem orderItem = new OrderItem();
+                orderItem.setDish(dish);
+                orderItem.setQuantity(itemRequest.getQuantity());
+                BigDecimal unitPrice = BigDecimal.valueOf(dish.getPrice());
+                orderItem.setUnitPrice(unitPrice);
+                orderItem.setSubTotal(unitPrice.multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
+                orderItem.setNote(itemRequest.getNote());
+                orderItem.setStatus(OrderItemStatus.PREPARING);
+
+                order.addOrderItem(orderItem);
+            }
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+        List<String> itemSummary = new ArrayList<>();
+        for (OrderItem item : order.getOrderItems())
+        {
+            total = total.add(item.getSubTotal());
+            itemSummary.add(item.getQuantity() + " x " + item.getDish().getName());
+        }
+        order.setTotalAmount(total);
+
+        orderRepository.save(order);
+
+        return UpdateOrderResponse.builder()
+                .orderId(order.getId())
+                .tableNumber(order.getTable().getTableNumber())
+                .message("Cập nhật đơn hàng thành công cho bàn " + order.getTable().getTableNumber())
+                .itemSummary(itemSummary)
+                .totalAmount(total)
+                .build();
+    }
+
+    private OrderItem isExist(Long itemId, Order order)
+    {
+        for (OrderItem orderItem : order.getOrderItems())
+        {
+            if (orderItem.getId().equals(itemId))
+            {
+                return orderItem;
+            }
+        }
+        return null;
     }
 
     @Override
