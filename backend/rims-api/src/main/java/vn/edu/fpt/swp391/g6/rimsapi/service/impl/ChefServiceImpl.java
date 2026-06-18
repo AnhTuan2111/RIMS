@@ -199,7 +199,7 @@ public class ChefServiceImpl implements ChefService {
             );
         }
 
-        item.setStatus(OrderItemStatus.CANCEL_REQUESTED);
+        item.setStatus(OrderItemStatus.CANCELLED);
         item.setCancelReason(reason.trim());
         item.setCancelRequestedAt(LocalDateTime.now());
 
