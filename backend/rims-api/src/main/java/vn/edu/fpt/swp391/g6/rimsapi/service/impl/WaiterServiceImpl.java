@@ -292,6 +292,7 @@ public class WaiterServiceImpl implements WaiterService
                                         OrderItemResponse response = new OrderItemResponse();
                                         response.setOrderItemId(orderItem.getId());
                                         response.setDishName(orderItem.getDish().getName());
+                                        response.setStatus(orderItem.getStatus());
                                         response.setQuantity(orderItem.getQuantity());
                                         response.setUnitPrice(orderItem.getUnitPrice());
                                         response.setSubTotal(orderItem.getSubTotal());
