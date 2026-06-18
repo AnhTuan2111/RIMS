@@ -27,13 +27,11 @@ export default function KitchenQueuePage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    // Search & Filter
     const [searchText, setSearchText] = useState('')
     const [selectedTable, setSelectedTable] = useState('ALL')
     const [sortOrder, setSortOrder] =
         useState<SortOrder>('OLDEST')
 
-    // Modal chi tiết món
     const [selectedDish, setSelectedDish] =
         useState<DishDetailResponse | null>(null)
 
@@ -43,11 +41,11 @@ export default function KitchenQueuePage() {
     const [detailError, setDetailError] =
         useState<string | null>(null)
 
-    // Cancel Request
     const [showCancelForm, setShowCancelForm] =
         useState(false)
 
     const [cancelReason, setCancelReason] = useState('')
+
     const [cancelError, setCancelError] =
         useState<string | null>(null)
 
@@ -112,7 +110,7 @@ export default function KitchenQueuePage() {
             console.error(error)
 
             setError(
-                'Không thể tải danh sách món cần chế biến. Hãy kiểm tra backend hoặc đăng nhập bằng tài khoản Chef.',
+                'Không thể tải danh sách món cần chế biến.',
             )
         } finally {
             setIsLoading(false)
@@ -124,7 +122,6 @@ export default function KitchenQueuePage() {
             setIsDetailLoading(true)
             setDetailError(null)
             setSelectedDish(null)
-
             resetCancelForm()
 
             const data = await getDishDetail(orderItemId)
@@ -214,12 +211,12 @@ export default function KitchenQueuePage() {
             setSelectedDish(null)
             resetCancelForm()
 
-            alert('Đã gửi yêu cầu hủy món thành công.')
+            alert('Đã gửi yêu cầu hủy món.')
         } catch (error) {
             console.error(error)
 
             setCancelError(
-                'Không thể gửi yêu cầu hủy món. Vui lòng thử lại.',
+                'Không thể gửi yêu cầu hủy món.',
             )
         } finally {
             setIsCancelling(false)
@@ -228,16 +225,16 @@ export default function KitchenQueuePage() {
 
     if (isLoading) {
         return (
-            <div className="page-card">
+            <section className="page-card kitchen-loading-state">
                 Đang tải danh sách món cần chế biến...
-            </div>
+            </section>
         )
     }
 
     if (error) {
         return (
-            <div className="page-card">
-                <h2>Lỗi tải dữ liệu</h2>
+            <section className="page-card kitchen-error-state">
+                <h2>Không thể tải dữ liệu</h2>
                 <p>{error}</p>
 
                 <button
@@ -249,120 +246,106 @@ export default function KitchenQueuePage() {
                 >
                     Thử lại
                 </button>
-            </div>
+            </section>
         )
     }
 
     return (
         <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
-                    <div>
-                        <h2>Đơn cần chế biến</h2>
+            <section className="kitchen-page-header">
+                <div>
+                    <h2>Hàng đợi bếp</h2>
 
-                        <p>
-                            Click vào món để xem chi tiết.
-                            Bấm “Xong món” để cập nhật hoàn
-                            thành.
-                        </p>
-                    </div>
-
-                    <div className="chef-summary">
-                        <div>
-                            <strong>{items.length}</strong>
-                            <span>Đang chờ làm</span>
-                        </div>
-
-                        <div>
-                            <strong>
-                                {filteredItems.length}
-                            </strong>
-                            <span>Kết quả hiển thị</span>
-                        </div>
-                    </div>
+                    <p>
+                        Theo dõi và xử lý các món đang chờ chế biến.
+                    </p>
                 </div>
-            </section>
 
-            <section className="page-card">
-                <div className="chef-filter-bar">
-                    <input
-                        type="text"
-                        value={searchText}
-                        onChange={(event) =>
-                            setSearchText(
-                                event.target.value,
-                            )
-                        }
-                        placeholder="Tìm theo tên món, bàn, mã order..."
-                    />
-
-                    <select
-                        value={selectedTable}
-                        onChange={(event) =>
-                            setSelectedTable(
-                                event.target.value,
-                            )
-                        }
-                    >
-                        <option value="ALL">
-                            Tất cả bàn
-                        </option>
-
-                        {tableNumbers.map(
-                            (tableNumber) => (
-                                <option
-                                    key={tableNumber}
-                                    value={tableNumber}
-                                >
-                                    Bàn {tableNumber}
-                                </option>
-                            ),
-                        )}
-                    </select>
-
-                    <select
-                        value={sortOrder}
-                        onChange={(event) =>
-                            setSortOrder(
-                                event.target
-                                    .value as SortOrder,
-                            )
-                        }
-                    >
-                        <option value="OLDEST">
-                            Cũ nhất trước
-                        </option>
-
-                        <option value="NEWEST">
-                            Mới nhất trước
-                        </option>
-                    </select>
+                <div className="kitchen-header-actions">
+                    <div className="kitchen-count-box">
+                        <span>Đang chờ</span>
+                        <strong>{items.length}</strong>
+                    </div>
 
                     <button
                         type="button"
                         className="secondary-button"
-                        onClick={clearFilters}
+                        onClick={() =>
+                            void loadKitchenOrders()
+                        }
                     >
-                        Xóa bộ lọc
+                        Làm mới
                     </button>
                 </div>
             </section>
 
-            {items.length === 0 ? (
-                <section className="page-card">
-                    <h2>Không có món đang chờ</h2>
+            <section className="page-card kitchen-filter-panel">
+                <input
+                    type="text"
+                    value={searchText}
+                    onChange={(event) =>
+                        setSearchText(event.target.value)
+                    }
+                    placeholder="Tìm tên món, số bàn hoặc mã order"
+                />
 
-                    <p>
-                        Tất cả món hiện tại đã được xử lý.
-                    </p>
+                <select
+                    value={selectedTable}
+                    onChange={(event) =>
+                        setSelectedTable(event.target.value)
+                    }
+                >
+                    <option value="ALL">
+                        Tất cả bàn
+                    </option>
+
+                    {tableNumbers.map((tableNumber) => (
+                        <option
+                            key={tableNumber}
+                            value={tableNumber}
+                        >
+                            Bàn {tableNumber}
+                        </option>
+                    ))}
+                </select>
+
+                <select
+                    value={sortOrder}
+                    onChange={(event) =>
+                        setSortOrder(
+                            event.target.value as SortOrder,
+                        )
+                    }
+                >
+                    <option value="OLDEST">
+                        Cũ nhất trước
+                    </option>
+
+                    <option value="NEWEST">
+                        Mới nhất trước
+                    </option>
+                </select>
+
+                <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={clearFilters}
+                >
+                    Xóa bộ lọc
+                </button>
+            </section>
+
+            {items.length === 0 ? (
+                <section className="page-card kitchen-empty-state">
+                    <h3>Không có món đang chờ</h3>
+                    <p>Tất cả món hiện tại đã được xử lý.</p>
                 </section>
             ) : filteredItems.length === 0 ? (
-                <section className="page-card">
-                    <h2>Không tìm thấy món</h2>
+                <section className="page-card kitchen-empty-state">
+                    <h3>Không tìm thấy món</h3>
 
                     <p>
-                        Không có món nào phù hợp với bộ lọc
-                        hiện tại.
+                        Không có món nào phù hợp với bộ lọc.
                     </p>
 
                     <button
@@ -374,10 +357,10 @@ export default function KitchenQueuePage() {
                     </button>
                 </section>
             ) : (
-                <div className="kitchen-board">
+                <div className="kitchen-simple-grid">
                     {filteredItems.map((item) => (
-                        <section
-                            className="kitchen-order-card clickable-card"
+                        <article
+                            className="kitchen-simple-card"
                             key={item.orderItemId}
                             onClick={() =>
                                 void openDishDetail(
@@ -385,63 +368,49 @@ export default function KitchenQueuePage() {
                                 )
                             }
                         >
-                            <div className="kitchen-order-header">
+                            <div className="kitchen-card-top">
                                 <div>
-                                    <h3>
+                                    <span className="kitchen-table-label">
                                         Bàn {item.tableNumber}
-                                    </h3>
+                                    </span>
 
-                                    <p>
-                                        Order #{item.orderId} ·
-                                        Item #
-                                        {item.orderItemId} ·{' '}
+                                    <small>
+                                        Order #{item.orderId} ·{' '}
                                         {formatTime(
                                             item.createdAt,
                                         )}
-                                    </p>
+                                    </small>
                                 </div>
 
-                                <span className="status-badge preparing">
+                                <span className="kitchen-status">
                                     Đang làm
                                 </span>
                             </div>
 
-                            <div className="kitchen-item-list">
-                                <div className="kitchen-item">
-                                    <div>
-                                        <strong>
-                                            {item.dishName}
-                                        </strong>
+                            <div className="kitchen-card-body">
+                                <div>
+                                    <h3>{item.dishName}</h3>
 
-                                        <p>
-                                            Số lượng: x
-                                            {item.quantity}
-                                        </p>
-
-                                        <small>
-                                            Click để xem chi
-                                            tiết
-                                        </small>
-                                    </div>
-
-                                    <div className="kitchen-item-actions">
-                                        <button
-                                            type="button"
-                                            className="primary-button"
-                                            onClick={(event) => {
-                                                event.stopPropagation()
-
-                                                void handleComplete(
-                                                    item.orderItemId,
-                                                )
-                                            }}
-                                        >
-                                            Xong món
-                                        </button>
-                                    </div>
+                                    <p>
+                                        Số lượng: x{item.quantity}
+                                    </p>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    className="kitchen-complete-button"
+                                    onClick={(event) => {
+                                        event.stopPropagation()
+
+                                        void handleComplete(
+                                            item.orderItemId,
+                                        )
+                                    }}
+                                >
+                                    Xong món
+                                </button>
                             </div>
-                        </section>
+                        </article>
                     ))}
                 </div>
             )}
@@ -454,19 +423,16 @@ export default function KitchenQueuePage() {
                     onClick={closeDishDetail}
                 >
                     <div
-                        className="modal-card"
+                        className="modal-card kitchen-detail-modal"
                         onClick={(event) =>
                             event.stopPropagation()
                         }
                     >
                         <div className="modal-header">
                             <div>
-                                <h2>
-                                    Chi tiết món cần chế biến
-                                </h2>
-
+                                <h2>Chi tiết món</h2>
                                 <p>
-                                    Thông tin chi tiết từ bếp.
+                                    Thông tin món cần chế biến.
                                 </p>
                             </div>
 
@@ -482,9 +448,7 @@ export default function KitchenQueuePage() {
 
                         {isDetailLoading && (
                             <div className="modal-body">
-                                <p>
-                                    Đang tải chi tiết món...
-                                </p>
+                                Đang tải chi tiết món...
                             </div>
                         )}
 
@@ -499,7 +463,7 @@ export default function KitchenQueuePage() {
                         {selectedDish && (
                             <>
                                 <div className="modal-body">
-                                    <div className="detail-grid">
+                                    <div className="kitchen-detail-grid">
                                         <div>
                                             <span>Bàn</span>
                                             <strong>
@@ -539,9 +503,7 @@ export default function KitchenQueuePage() {
                                         </div>
 
                                         <div>
-                                            <span>
-                                                Trạng thái
-                                            </span>
+                                            <span>Trạng thái</span>
                                             <strong>
                                                 {
                                                     selectedDish.status
@@ -550,9 +512,7 @@ export default function KitchenQueuePage() {
                                         </div>
 
                                         <div>
-                                            <span>
-                                                Thời gian tạo
-                                            </span>
+                                            <span>Thời gian</span>
                                             <strong>
                                                 {formatTime(
                                                     selectedDish.createdAt,
@@ -561,7 +521,7 @@ export default function KitchenQueuePage() {
                                         </div>
                                     </div>
 
-                                    <div className="detail-section">
+                                    <div className="kitchen-detail-section">
                                         <h3>Mô tả món</h3>
 
                                         <p>
@@ -570,10 +530,8 @@ export default function KitchenQueuePage() {
                                         </p>
                                     </div>
 
-                                    <div className="detail-section">
-                                        <h3>
-                                            Ghi chú từ phục vụ
-                                        </h3>
+                                    <div className="kitchen-detail-section">
+                                        <h3>Ghi chú</h3>
 
                                         <p>
                                             {selectedDish.note ||
@@ -582,16 +540,8 @@ export default function KitchenQueuePage() {
                                     </div>
 
                                     {showCancelForm && (
-                                        <div className="cancel-request-box">
-                                            <h3>
-                                                Yêu cầu hủy món
-                                            </h3>
-
-                                            <p>
-                                                Nhập lý do không
-                                                thể tiếp tục chế
-                                                biến món này.
-                                            </p>
+                                        <div className="kitchen-cancel-form">
+                                            <h3>Yêu cầu hủy món</h3>
 
                                             <textarea
                                                 value={
@@ -605,11 +555,12 @@ export default function KitchenQueuePage() {
                                                             .target
                                                             .value,
                                                     )
+
                                                     setCancelError(
                                                         null,
                                                     )
                                                 }}
-                                                placeholder="Ví dụ: Hết nguyên liệu để chế biến món..."
+                                                placeholder="Nhập lý do yêu cầu hủy món"
                                                 maxLength={500}
                                                 rows={4}
                                             />
@@ -618,7 +569,7 @@ export default function KitchenQueuePage() {
                                                 {
                                                     cancelReason.length
                                                 }
-                                                /500 ký tự
+                                                /500
                                             </small>
 
                                             {cancelError && (
@@ -680,16 +631,13 @@ export default function KitchenQueuePage() {
                                             <button
                                                 type="button"
                                                 className="danger-button"
-                                                onClick={() => {
+                                                onClick={() =>
                                                     setShowCancelForm(
                                                         true,
                                                     )
-                                                    setCancelError(
-                                                        null,
-                                                    )
-                                                }}
+                                                }
                                             >
-                                                Yêu cầu hủy món
+                                                Yêu cầu hủy
                                             </button>
 
                                             <button
