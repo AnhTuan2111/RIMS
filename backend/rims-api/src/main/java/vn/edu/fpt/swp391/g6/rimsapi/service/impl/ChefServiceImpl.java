@@ -1,6 +1,7 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.KitchenOrderResponse;
@@ -21,6 +22,7 @@ public class ChefServiceImpl implements ChefService {
 
     private final OrderItemRepository orderItemRepository;
     private final DishRepository dishRepository;
+    private final RepositoryMethodInvocationListener repositoryMethodInvocationListener;
 
     @Override
     public List<KitchenOrderResponse> getKitchenOrders() {
@@ -199,9 +201,15 @@ public class ChefServiceImpl implements ChefService {
             );
         }
 
-        item.setStatus(OrderItemStatus.CANCEL_REQUESTED);
+        item.setStatus(OrderItemStatus.CANCELLED);
         item.setCancelReason(reason.trim());
         item.setCancelRequestedAt(LocalDateTime.now());
+
+        // anh xem qua nhé, bên chức năng là set dish status = false của màn hình dish list ấy, thì cập nhật hết các đơn hàng (order item) thành cancelled luôn. vì nó ở bên frontend mà em chưa biết viết như nào nên em viết tạm vào đây nhé
+        // chuyển trạng thái của dish luôn vì cancelled chỉ có thể do hết hàng
+        Dish unavailableDish = item.getDish();
+        unavailableDish.setAvailable(false);
+        dishRepository.save(unavailableDish);
 
         orderItemRepository.save(item);
     }
