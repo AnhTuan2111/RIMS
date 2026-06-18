@@ -51,7 +51,7 @@ export default function DishListPage() {
             console.error(error)
 
             setError(
-                'Không thể tải danh sách món ăn. Hãy kiểm tra backend hoặc đăng nhập bằng tài khoản Chef.',
+                'Không thể tải danh sách món ăn. Hãy kiểm tra backend hoặc tài khoản Chef.',
             )
         } finally {
             setIsLoading(false)
@@ -87,16 +87,16 @@ export default function DishListPage() {
 
     if (isLoading) {
         return (
-            <div className="page-card">
+            <section className="page-card dish-loading-state">
                 Đang tải danh sách món ăn...
-            </div>
+            </section>
         )
     }
 
     if (error) {
         return (
-            <div className="page-card">
-                <h2>Lỗi tải dữ liệu</h2>
+            <section className="page-card dish-error-state">
+                <h2>Không thể tải dữ liệu</h2>
                 <p>{error}</p>
 
                 <button
@@ -106,61 +106,87 @@ export default function DishListPage() {
                 >
                     Thử lại
                 </button>
-            </div>
+            </section>
         )
     }
 
     return (
         <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
+            <section className="dish-page-header">
+                <div>
+                    <h2>
+                        {showUnavailableOnly
+                            ? 'Món đang tạm hết'
+                            : 'Quản lý món ăn'}
+                    </h2>
+
+                    <p>
+                        {showUnavailableOnly
+                            ? 'Danh sách các món hiện đang tạm ngừng phục vụ.'
+                            : 'Cập nhật trạng thái phục vụ của từng món trong thực đơn.'}
+                    </p>
+                </div>
+
+                <div className="dish-page-actions">
+                    {showUnavailableOnly && (
+                        <Link
+                            className="secondary-button"
+                            to="/chef/dishes"
+                        >
+                            Xem tất cả món
+                        </Link>
+                    )}
+
+                    <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => void loadDishes()}
+                    >
+                        Làm mới
+                    </button>
+                </div>
+            </section>
+
+            <section className="dish-summary-simple">
+                <article>
+                    <span>Đang bán</span>
+                    <strong>{availableCount}</strong>
+                </article>
+
+                <article>
+                    <span>Tạm hết</span>
+                    <strong>{unavailableCount}</strong>
+                </article>
+
+                <article>
+                    <span>Tổng số món</span>
+                    <strong>{dishes.length}</strong>
+                </article>
+            </section>
+
+            <section className="page-card dish-table-panel">
+                <div className="dish-table-heading">
                     <div>
-                        <h2>
-                            {showUnavailableOnly
-                                ? 'Món đang tạm hết'
-                                : 'Danh sách món ăn'}
-                        </h2>
-
+                        <h2>Danh sách món ăn</h2>
                         <p>
-                            {showUnavailableOnly
-                                ? 'Danh sách các món hiện đang tạm ngừng phục vụ.'
-                                : 'Chef có thể bật hoặc tắt trạng thái phục vụ của món.'}
+                            Hiển thị {displayedDishes.length} món
                         </p>
-                    </div>
-
-                    <div className="chef-summary">
-                        <div>
-                            <strong>{availableCount}</strong>
-                            <span>Đang bán</span>
-                        </div>
-
-                        <div>
-                            <strong>{unavailableCount}</strong>
-                            <span>Tạm hết</span>
-                        </div>
                     </div>
                 </div>
 
-                {showUnavailableOnly && (
-                    <Link
-                        className="secondary-button"
-                        to="/chef/dishes"
-                    >
-                        Xem tất cả món
-                    </Link>
-                )}
-            </section>
-
-            <section className="page-card">
                 {displayedDishes.length === 0 ? (
-                    <p>
-                        {showUnavailableOnly
-                            ? 'Hiện không có món nào đang tạm hết.'
-                            : 'Chưa có món ăn nào.'}
-                    </p>
+                    <div className="dish-empty-state">
+                        <h3>Không có món nào</h3>
+
+                        <p>
+                            {showUnavailableOnly
+                                ? 'Hiện tại không có món nào đang tạm hết.'
+                                : 'Danh sách món ăn hiện đang trống.'}
+                        </p>
+                    </div>
                 ) : (
-                    <div className="simple-table chef-dish-table">
-                        <div className="simple-table-header">
+                    <div className="dish-simple-table">
+                        <div className="dish-simple-table-header">
                             <span>Tên món</span>
                             <span>Danh mục</span>
                             <span>Giá</span>
@@ -170,14 +196,18 @@ export default function DishListPage() {
 
                         {displayedDishes.map((dish) => (
                             <div
-                                className="simple-table-row"
+                                className="dish-simple-table-row"
                                 key={dish.dishId}
                             >
-                                <span>{dish.dishName}</span>
-
-                                <span>{dish.category}</span>
+                                <span className="dish-name">
+                                    {dish.dishName}
+                                </span>
 
                                 <span>
+                                    {dish.category}
+                                </span>
+
+                                <span className="dish-price">
                                     {formatCurrency(dish.price)}
                                 </span>
 
@@ -185,8 +215,8 @@ export default function DishListPage() {
                                     <span
                                         className={
                                             dish.available
-                                                ? 'status-badge completed'
-                                                : 'status-badge danger'
+                                                ? 'dish-status available'
+                                                : 'dish-status unavailable'
                                         }
                                     >
                                         {dish.available
@@ -200,8 +230,8 @@ export default function DishListPage() {
                                         type="button"
                                         className={
                                             dish.available
-                                                ? 'secondary-button'
-                                                : 'primary-button'
+                                                ? 'dish-stop-button'
+                                                : 'dish-open-button'
                                         }
                                         onClick={() =>
                                             void handleToggleDish(
@@ -210,7 +240,7 @@ export default function DishListPage() {
                                         }
                                     >
                                         {dish.available
-                                            ? 'Tạm hết'
+                                            ? 'Tạm ngừng'
                                             : 'Mở bán'}
                                     </button>
                                 </span>
