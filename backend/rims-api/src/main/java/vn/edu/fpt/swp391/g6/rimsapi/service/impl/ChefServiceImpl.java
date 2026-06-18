@@ -1,7 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.KitchenOrderResponse;
@@ -22,7 +21,6 @@ public class ChefServiceImpl implements ChefService {
 
     private final OrderItemRepository orderItemRepository;
     private final DishRepository dishRepository;
-    private final RepositoryMethodInvocationListener repositoryMethodInvocationListener;
 
     @Override
     public List<KitchenOrderResponse> getKitchenOrders() {
