@@ -38,17 +38,18 @@ public class DishDatabaseSeeder implements CommandLineRunner {
             }
 
             List<Dish> dishes = Arrays.asList(
-                    createDish("Gỏi cuốn tôm thịt", "Gỏi cuốn tươi ngon, chấm nước mắm chua ngọt", 35000, false, null, khaiVi),
-                    createDish("Chả giò chiên giòn", "Chả giò nhân thịt, tôm, miến", 45000, true, null, khaiVi),
-                    createDish("Phở bò đặc biệt", "Phở bò với thịt bò thượng hạng", 85000, true, null, monChinh),
-                    createDish("Cơm tấm sườn", "Cơm tấm sườn bì chả", 55000, true, null, monChinh),
-                    createDish("Bún bò Huế", "Bún bò Huế cay đậm đà", 75000, true, null, monChinh),
-                    createDish("Chè bưởi", "Chè bưởi Huế thơm ngon", 30000, true, null, trangMieng),
-                    createDish("Kem dừa", "Kem dừa tươi mát lạnh", 25000, true, null, trangMieng),
-                    createDish("Cà phê sữa đá", "Cà phê Việt Nam đậm đà", 25000, true, null, doUong),
-                    createDish("Trà đào cam sả", "Trà đào thơm mát", 35000, true, null, doUong),
-                    createDish("Tôm hấp bia", "Tôm hấp bia thơm ngon", 120000, true, null, haiSan),
-                    createDish("Mực chiên mắm tỏi", "Mực tươi chiên giòn", 110000, true, null, haiSan)
+                    // ✅ Đã sửa: bỏ tham số isAvailable, mặc định là true
+                    createDish("Gỏi cuốn tôm thịt", "Gỏi cuốn tươi ngon, chấm nước mắm chua ngọt", 35000, null, khaiVi),
+                    createDish("Chả giò chiên giòn", "Chả giò nhân thịt, tôm, miến", 45000, null, khaiVi),
+                    createDish("Phở bò đặc biệt", "Phở bò với thịt bò thượng hạng", 85000, null, monChinh),
+                    createDish("Cơm tấm sườn", "Cơm tấm sườn bì chả", 55000, null, monChinh),
+                    createDish("Bún bò Huế", "Bún bò Huế cay đậm đà", 75000, null, monChinh),
+                    createDish("Chè bưởi", "Chè bưởi Huế thơm ngon", 30000, null, trangMieng),
+                    createDish("Kem dừa", "Kem dừa tươi mát lạnh", 25000, null, trangMieng),
+                    createDish("Cà phê sữa đá", "Cà phê Việt Nam đậm đà", 25000, null, doUong),
+                    createDish("Trà đào cam sả", "Trà đào thơm mát", 35000, null, doUong),
+                    createDish("Tôm hấp bia", "Tôm hấp bia thơm ngon", 120000, null, haiSan),
+                    createDish("Mực chiên mắm tỏi", "Mực tươi chiên giòn", 110000, null, haiSan)
             );
 
             dishRepository.saveAll(dishes);
@@ -56,12 +57,13 @@ public class DishDatabaseSeeder implements CommandLineRunner {
         }
     }
 
-    private Dish createDish(String name, String description, int price, boolean isAvailable, String imageUrl, Category category) {
+    // ✅ SỬA: Bỏ tham số isAvailable, mặc định là true
+    private Dish createDish(String name, String description, int price, String imageUrl, Category category) {
         Dish dish = new Dish();
         dish.setName(name);
         dish.setDescription(description);
         dish.setPrice(price);
-        dish.setAvailable(isAvailable);
+        dish.setAvailable(true);  // ✅ Mặc định là true
         dish.setImageUrl(imageUrl);
         dish.setCategory(category);
         return dish;

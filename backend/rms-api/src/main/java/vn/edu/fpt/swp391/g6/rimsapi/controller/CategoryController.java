@@ -19,41 +19,34 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    // Lấy TẤT CẢ categories (kể cả đã xóa mềm)
     @GetMapping
     public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {
         return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
-    // Chỉ lấy categories đang hoạt động (chưa bị xóa mềm)
     @GetMapping("/available")
     public ResponseEntity<List<CategoryResponseDTO>> getAvailableCategories() {
         return ResponseEntity.ok(categoryService.getAvailableCategories());
     }
 
-    // Lấy category theo id (kể cả đã xóa)
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable Integer id) {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
-    // Tạo mới category
+
     @PostMapping
     public ResponseEntity<CategoryResponseDTO> createCategory(
-            @Valid @RequestBody CategoryCreateDTO categoryCreateDTO) {
-        CategoryResponseDTO createdCategory = categoryService.createCategory(categoryCreateDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+            @RequestBody @Valid CategoryCreateDTO categoryCreateDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(categoryCreateDTO));
     }
 
-    // Cập nhật category
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> updateCategory(
             @PathVariable Integer id,
-            @Valid @RequestBody CategoryUpdateDTO categoryUpdateDTO) {
-        CategoryResponseDTO updatedCategory = categoryService.updateCategory(id, categoryUpdateDTO);
-        return ResponseEntity.ok(updatedCategory);
+            @RequestBody @Valid CategoryUpdateDTO categoryUpdateDTO) {
+        return ResponseEntity.ok(categoryService.updateCategory(id, categoryUpdateDTO));
     }
 
-    // Xóa mềm category (ẩn trên menu nhưng vẫn còn trong DB)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Integer id) {
         categoryService.deleteCategory(id);
