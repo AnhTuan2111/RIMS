@@ -1,6 +1,7 @@
 package vn.edu.fpt.swp391.g6.rimsapi.config;
 
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -46,7 +47,7 @@ public class DatabaseSeeder implements CommandLineRunner
 
 
     @Override
-    public void run(String... args)
+    public void run(String @NonNull ... args)
     {
         seedTables();
         seedUsers();
@@ -80,7 +81,15 @@ public class DatabaseSeeder implements CommandLineRunner
         RestaurantTable table = new RestaurantTable();
         table.setTableNumber(tableNumber);
         table.setCapacity(capacity);
-        table.setStatus(TableStatus.AVAILABLE);
+
+        if (capacity == 2)
+        {
+            table.setStatus(TableStatus.SERVING);
+        } else
+        {
+            table.setStatus(TableStatus.AVAILABLE);
+        }
+
         return table;
     }
 
@@ -173,18 +182,15 @@ public class DatabaseSeeder implements CommandLineRunner
         Dish cocaCola = dishes.get(3);
         Dish orangeJuice = dishes.get(4);
 
-        record OrderDef(RestaurantTable table, BigDecimal total)
-        {
-        }
         record ItemDef(Order order, Dish dish, int qty, String note, OrderItemStatus status)
         {
         }
 
         // Build orders
-        Order order1 = buildOrder(tables.get(0), waiter, OrderStatus.SERVING, 140_000);
-        Order order2 = buildOrder(tables.get(1), waiter, OrderStatus.SERVING, 200_000);
-        Order order3 = buildOrder(tables.get(2), waiter, OrderStatus.SERVING, 180_000);
-        Order order4 = buildOrder(tables.get(3), waiter, OrderStatus.SERVING, 220_000);
+        Order order1 = buildOrder(tables.get(0), waiter, 140_000);
+        Order order2 = buildOrder(tables.get(1), waiter, 200_000);
+        Order order3 = buildOrder(tables.get(2), waiter, 180_000);
+        Order order4 = buildOrder(tables.get(3), waiter, 220_000);
         orderRepository.saveAll(List.of(order1, order2, order3, order4));
 
         // Build order items
@@ -220,12 +226,12 @@ public class DatabaseSeeder implements CommandLineRunner
         orderItemRepository.saveAll(items);
     }
 
-    private Order buildOrder(RestaurantTable table, User createdBy, OrderStatus status, long totalAmount)
+    private Order buildOrder(RestaurantTable table, User createdBy, long totalAmount)
     {
         Order order = new Order();
         order.setTable(table);
         order.setCreatedBy(createdBy);
-        order.setStatus(status);
+        order.setStatus(OrderStatus.SERVING);
         order.setTotalAmount(BigDecimal.valueOf(totalAmount));
         return order;
     }
