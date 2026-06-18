@@ -11,4 +11,5 @@ import java.util.List;
 public interface DishRepository extends JpaRepository<Dish, Integer>
 {
     List<Dish> findByIsAvailableTrue();
+    long countByIsAvailableFalse();
 }

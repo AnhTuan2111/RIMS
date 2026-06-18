@@ -21,7 +21,8 @@ import WaiterOrdersPage from './pages/waiter/WaiterOrdersPage'
 
 import CashierPaymentsPage from './pages/cashier/CashierPaymentsPage'
 import CashierInvoicesPage from './pages/cashier/CashierInvoicesPage'
-
+import ChefDashboardPage from "./pages/chef/ChefDashboardPage.tsx";
+import CompletedOrdersPage from './pages/chef/CompletedOrdersPage'
 function App() {
     return (
         <BrowserRouter>
@@ -43,9 +44,13 @@ function App() {
                         <Route path="/admin/dishes" element={<AdminDishesPage />} />
 
                         {/* CHEF */}
+                        <Route
+                            path="/chef/dashboard"
+                            element={<ChefDashboardPage />}
+                        />
                         <Route path="/chef/orders" element={<KitchenQueuePage />} />
                         <Route path="/chef/dishes" element={<DishListPage />} />
-
+                        <Route path="/chef/completed-orders" element={<CompletedOrdersPage />} />
                         {/* WAITER */}
                         <Route path="/waiter/tables" element={<WaiterTablesPage />} />
                         <Route path="/waiter/orders/new" element={<WaiterCreateOrderPage />} />

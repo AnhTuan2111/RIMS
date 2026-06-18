@@ -13,6 +13,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import java.util.List;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ChefDashboardResponse;
+import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class ChefServiceImpl implements ChefService {
@@ -156,4 +158,91 @@ public class ChefServiceImpl implements ChefService {
 
         dishRepository.save(dish);
     }
+    @Override
+    public ChefDashboardResponse getDashboard() {
+
+        long preparingCount =
+                orderItemRepository.countByStatus(
+                        OrderItemStatus.PREPARING);
+
+        long completedCount =
+                orderItemRepository.countByStatus(
+                        OrderItemStatus.COMPLETED);
+
+        long unavailableDishCount =
+                dishRepository.countByIsAvailableFalse();
+
+        return ChefDashboardResponse.builder()
+                .preparingCount(preparingCount)
+                .completedCount(completedCount)
+                .unavailableDishCount(unavailableDishCount)
+                .build();
+    }
+    @Override
+    public void requestCancel(Long orderItemId, String reason) {
+
+        OrderItem item = orderItemRepository
+                .findById(orderItemId)
+                .orElseThrow(
+                        () -> new RuntimeException("Order item not found")
+                );
+
+        if (item.getStatus() != OrderItemStatus.PREPARING) {
+            throw new RuntimeException(
+                    "Only preparing dishes can request cancellation"
+            );
+        }
+
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new RuntimeException(
+                    "Cancel reason is required"
+            );
+        }
+
+        item.setStatus(OrderItemStatus.CANCEL_REQUESTED);
+        item.setCancelReason(reason.trim());
+        item.setCancelRequestedAt(LocalDateTime.now());
+
+        orderItemRepository.save(item);
+    }
+    @Override
+    public List<KitchenOrderResponse> getCompletedOrders() {
+
+        return orderItemRepository
+                .findByStatusOrderByCreatedAtAsc(
+                        OrderItemStatus.COMPLETED)
+                .stream()
+                .map(item -> {
+
+                    KitchenOrderResponse response =
+                            new KitchenOrderResponse();
+
+                    response.setOrderItemId(item.getId());
+
+                    response.setOrderId(
+                            item.getOrder().getId());
+
+                    response.setTableNumber(
+                            item.getOrder()
+                                    .getTable()
+                                    .getTableNumber());
+
+                    response.setDishName(
+                            item.getDish().getName());
+
+                    response.setQuantity(
+                            item.getQuantity());
+
+                    response.setStatus(
+                            item.getStatus());
+
+                    response.setCreatedAt(
+                            item.getCreatedAt());
+
+                    return response;
+                })
+                .toList();
+    }
+
+
 }
