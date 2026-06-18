@@ -4,6 +4,5 @@ public enum OrderItemStatus
 {
     PREPARING,
     COMPLETED,
-    CANCEL_REQUESTED,
     CANCELLED
 }
