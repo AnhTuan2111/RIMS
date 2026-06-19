@@ -16,6 +16,8 @@ public interface RevenueReportService {
 
     RevenueReportResponse getMonthlyRevenue();
 
+    RevenueReportResponse getYearlyRevenue();
+
     RevenueReportResponse getRevenueBetween(
             LocalDate fromDate,
             LocalDate toDate

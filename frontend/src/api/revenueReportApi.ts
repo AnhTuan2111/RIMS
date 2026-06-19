@@ -13,6 +13,9 @@ export const revenueReportApi = {
     getMonthlyRevenue: () =>
         axiosClient.get("/reports/monthly"),
 
+    getYearlyRevenue: () =>
+        axiosClient.get("/reports/yearly"),
+
     getCustomRevenue: (
         fromDate: string,
         toDate: string
@@ -23,5 +26,4 @@ export const revenueReportApi = {
 
     getBestSelling: () =>
         axiosClient.get("/reports/best-selling"),
-
 };

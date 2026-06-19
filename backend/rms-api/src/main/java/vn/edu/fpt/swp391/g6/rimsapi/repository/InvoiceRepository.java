@@ -13,13 +13,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
-
+        //Get total Revenue
     @Query("""
     SELECT COALESCE(SUM(i.finalAmount),0)
     FROM Invoice i
     """)
     BigDecimal getTotalRevenue();
 
+    //Get revenue according period
     @Query("""
     SELECT COALESCE(SUM(i.finalAmount),0)
     FROM Invoice i
@@ -52,6 +53,7 @@ ORDER BY
             LocalDateTime endDate,
             Pageable pageable
     );
+
 
     //Get invoice history for a specific table.
     @Query("""

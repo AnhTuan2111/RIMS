@@ -28,6 +28,7 @@ public class RevenueReportController {
         return revenueReportService.getTotalRevenue();
     }
 
+
     @GetMapping("/today")
     public RevenueReportResponse getTodayRevenue() {
         return revenueReportService.getTodayRevenue();
@@ -41,6 +42,11 @@ public class RevenueReportController {
     @GetMapping("/monthly")
     public RevenueReportResponse getMonthlyRevenue() {
         return revenueReportService.getMonthlyRevenue();
+    }
+
+    @GetMapping("/yearly")
+    public RevenueReportResponse getYearlyRevenue() {
+        return revenueReportService.getYearlyRevenue();
     }
 
     @GetMapping("/custom")
@@ -67,19 +73,23 @@ public class RevenueReportController {
     public RevenueComparisonResponse compareRevenue(
 
             @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE)
             LocalDate startDate1,
 
             @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate1,
 
             @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE)
             LocalDate startDate2,
 
             @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate2
     ) {
 
@@ -91,8 +101,7 @@ public class RevenueReportController {
         );
     }
 
-
-    //get bestselling.
+    //best selling
     @GetMapping("/best-selling")
     public BestSellingReportResponse getBestSellingReport() {
 

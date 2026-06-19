@@ -3,10 +3,12 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ReservationPerformanceScoreResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ReservationPerformanceScoreService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -18,9 +20,17 @@ public class ReservationPerformanceScoreController {
 
     @GetMapping("/performance-score")
     public List<ReservationPerformanceScoreResponse>
-    getReservationPerformanceScore() {
+    getReservationPerformanceScore(
+
+            @RequestParam LocalDate fromDate,
+
+            @RequestParam LocalDate toDate
+    ) {
 
         return reservationPerformanceScoreService
-                .getReservationPerformanceScore();
+                .getReservationPerformanceScore(
+                        fromDate,
+                        toDate
+                );
     }
 }

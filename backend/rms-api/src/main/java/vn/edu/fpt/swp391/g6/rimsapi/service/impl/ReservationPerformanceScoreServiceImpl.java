@@ -7,6 +7,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.ReservationPerformanceScoreReposi
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.ReservationPerformanceScoreProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ReservationPerformanceScoreService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,37 +20,39 @@ public class ReservationPerformanceScoreServiceImpl
 
     @Override
     public List<ReservationPerformanceScoreResponse>
-    getReservationPerformanceScore() {
+    getReservationPerformanceScore(
+            LocalDate fromDate,
+            LocalDate toDate) {
 
         List<ReservationPerformanceScoreProjection> rows =
-                reservationRepository.getReservationPerformanceScore();
+                reservationRepository.getReservationPerformanceScore(
+                        fromDate.atStartOfDay(),
+                        toDate.atTime(23, 59, 59)
+                );
 
-        long maxConfirm =
-                rows.stream()
-                        .mapToLong(
-                                ReservationPerformanceScoreProjection::getConfirmCount
-                        )
-                        .max()
-                        .orElse(1);
+        long maxConfirm = 1;
+
+        for (ReservationPerformanceScoreProjection row : rows) {
+            if (row.getConfirmCount() > maxConfirm) {
+                maxConfirm = row.getConfirmCount();
+            }
+        }
 
         List<ReservationPerformanceScoreResponse> result =
                 new ArrayList<>();
 
         for (ReservationPerformanceScoreProjection row : rows) {
 
-            long confirm =
-                    row.getConfirmCount();
+            long confirm = row.getConfirmCount();
+            long cancelled = row.getCancelledCount();
 
-            long cancelled =
-                    row.getCancelledCount();
+            long total = confirm + cancelled;
 
-            long totalBookings =
-                    confirm + cancelled;
+            double successRate = 0;
 
-            double successRate =
-                    totalBookings == 0
-                            ? 0
-                            : (confirm * 100.0) / totalBookings;
+            if (total > 0) {
+                successRate = (confirm * 100.0) / total;
+            }
 
             double volumeScore =
                     (confirm * 100.0) / maxConfirm;
@@ -70,7 +73,7 @@ public class ReservationPerformanceScoreServiceImpl
                 performanceLevel = "Poor";
             }
 
-            result.add(
+            ReservationPerformanceScoreResponse response =
                     new ReservationPerformanceScoreResponse(
                             getDayName(row.getDayOfWeek()),
                             confirm,
@@ -78,23 +81,23 @@ public class ReservationPerformanceScoreServiceImpl
                             round(successRate),
                             round(performanceScore),
                             performanceLevel
-                    )
-            );
+                    );
+
+            result.add(response);
         }
 
         return result;
     }
 
     private String getDayName(Integer day) {
-
         return switch (day) {
-            case 1 -> "Sunday";
-            case 2 -> "Monday";
-            case 3 -> "Tuesday";
-            case 4 -> "Wednesday";
-            case 5 -> "Thursday";
-            case 6 -> "Friday";
-            case 7 -> "Saturday";
+            case 1 -> "Monday";
+            case 2 -> "Tuesday";
+            case 3 -> "Wednesday";
+            case 4 -> "Thursday";
+            case 5 -> "Friday";
+            case 6 -> "Saturday";
+            case 7 -> "Sunday";
             default -> "Unknown";
         };
     }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Reservation;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.ReservationPerformanceScoreProjection;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ReservationPerformanceScoreRepository
@@ -12,7 +13,11 @@ public interface ReservationPerformanceScoreRepository
 
     @Query(value = """
         SELECT
-            DATEPART(WEEKDAY, reservation_time) AS dayOfWeek,
+            CASE
+                WHEN DATEPART(WEEKDAY, reservation_time) = 1
+                THEN 7
+                ELSE DATEPART(WEEKDAY, reservation_time) - 1
+            END AS dayOfWeek,
 
             SUM(
                 CASE
@@ -32,10 +37,21 @@ public interface ReservationPerformanceScoreRepository
 
         FROM reservations
 
-        GROUP BY DATEPART(WEEKDAY, reservation_time)
+        WHERE reservation_time
+              BETWEEN :startDate AND :endDate
 
-        ORDER BY DATEPART(WEEKDAY, reservation_time)
+        GROUP BY
+            CASE
+                WHEN DATEPART(WEEKDAY, reservation_time) = 1
+                THEN 7
+                ELSE DATEPART(WEEKDAY, reservation_time) - 1
+            END
+
+        ORDER BY dayOfWeek
         """, nativeQuery = true)
     List<ReservationPerformanceScoreProjection>
-    getReservationPerformanceScore();
+    getReservationPerformanceScore(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
 }
