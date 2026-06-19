@@ -1,15 +1,13 @@
+
 export type TableStatus = 'AVAILABLE' | 'SERVING';
 export type OrderStatus = 'SERVING' | 'LOCKED' | 'COMPLETED';
-
-// Đồng bộ với vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod
 export type PaymentMethodType = 'CASH' | 'QRCODE';
 
 export interface TableDashboardResponse {
     tableId: number;
     tableNumber: string;
-    capacity: number;
     status: TableStatus;
-    currentOrderId?: number | null; // ID đơn hàng nếu bàn đang SERVING
+    orderId?: number | null; // SỬA: Đổi từ currentOrderId thành orderId để khớp Java
 }
 
 export interface OrderItemResponse {
@@ -21,19 +19,20 @@ export interface OrderItemResponse {
 
 export interface OrderDetailResponse {
     orderId: number;
-    tableNumber: string;
-    status: OrderStatus;
-    items: OrderItemResponse[];
-    totalAmount: number;
+    tableName: string; // SỬA: Đổi từ tableNumber thành tableName
+    createdAt: string; // Java LocalDateTime sẽ trả về ISO String
+    orderItems: OrderItemResponse[]; // SỬA: Đổi từ items thành orderItems
+
+    totalAmountBeforeVat: number;
+    vatAmount: number;
+    finalAmount: number; // SỬA: Đổi từ totalAmount thành finalAmount
 }
 
-// Khớp với PaymentRequest.java
 export interface PaymentRequest {
     paymentMethod: PaymentMethodType;
     amountPaid: number;
 }
 
-// Khớp với PaymentResponse.java
 export interface PaymentResponse {
     message: string;
     success: boolean;
@@ -42,7 +41,6 @@ export interface PaymentResponse {
     excessAmount: number;
 }
 
-// Khớp với VNPayResponse.java
 export interface VNPayResponse {
     paymentUrl: string;
     message: string;

@@ -5,12 +5,12 @@ import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -24,16 +24,14 @@ public class InvoicePdfService {
             PdfWriter.getInstance(document, out);
             document.open();
 
-            // 1. Nạp Font tiếng Việt Times New Roman từ thư mục của bạn
-            InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts/times.ttf");
+            // 1. Nạp Font tiếng Việt Times New Roman chuẩn xác bằng Spring Boot
+            ClassPathResource fontResource = new ClassPathResource("fonts/times.ttf");
+            String fontPath = fontResource.getFile().getAbsolutePath();
 
-            if (fontStream == null) {
-                throw new RuntimeException("Không tìm thấy file fonts/times.ttf");
-            }
-            byte[] fontBytes = fontStream.readAllBytes();
-            System.out.println("FONT = " +
-                    getClass().getClassLoader().getResource("fonts/times.ttf"));
-            BaseFont bf = BaseFont.createFont("times.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, true, fontBytes, null);
+            // In ra console để ông yên tâm là nó lấy đúng ổ E:\...
+            System.out.println("Đường dẫn Font tuyệt đối: " + fontPath);
+
+            BaseFont bf = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
 
             Font fontTitle = new Font(bf, 14, Font.BOLD);
             Font fontBold = new Font(bf, 9, Font.BOLD);
@@ -97,6 +95,7 @@ public class InvoicePdfService {
             document.close();
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tạo file PDF: " + e.getMessage());
         }
 
         return out.toByteArray();
