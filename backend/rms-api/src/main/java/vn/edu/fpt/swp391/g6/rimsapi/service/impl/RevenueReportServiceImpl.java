@@ -48,16 +48,22 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         return getRevenueBetween(today, today);
     }
 
+    @Override
     public RevenueReportResponse getWeeklyRevenue() {
+
         LocalDate now = LocalDate.now();
 
-        // Tìm ngày Thứ Hai của tuần này
-        LocalDate startWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate startWeek =
+                now.with(
+                        TemporalAdjusters.previousOrSame(
+                                DayOfWeek.MONDAY
+                        )
+                );
 
-        // Tìm ngày Chủ Nhật của tuần này
-        LocalDate endWeek = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-
-        return getRevenueBetween(startWeek, endWeek);
+        return getRevenueBetween(
+                startWeek,
+                now
+        );
     }
 
     @Override
@@ -68,14 +74,23 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         LocalDate startMonth =
                 now.withDayOfMonth(1);
 
-        LocalDate endMonth =
-                now.withDayOfMonth(
-                        now.lengthOfMonth()
-                );
-
         return getRevenueBetween(
                 startMonth,
-                endMonth
+                now
+        );
+    }
+
+    @Override
+    public RevenueReportResponse getYearlyRevenue() {
+
+        LocalDate now = LocalDate.now();
+
+        LocalDate startYear =
+                now.withDayOfYear(1);
+
+        return getRevenueBetween(
+                startYear,
+                now
         );
     }
 
@@ -84,9 +99,17 @@ public class RevenueReportServiceImpl implements RevenueReportService {
             LocalDate fromDate,
             LocalDate toDate) {
 
+        LocalDate today = LocalDate.now();
+
+        //Don't allow future dates
+        if (toDate.isAfter(today)) {
+            toDate = today;
+        }
+
+        // Validate date range
         if (fromDate.isAfter(toDate)) {
             throw new RuntimeException(
-                    "fromDate must be before toDate"
+                    "fromDate must be before or equal to toDate"
             );
         }
 
@@ -108,6 +131,9 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         );
     }
 
+
+    //compare revenue
+
     @Override
     public RevenueComparisonResponse compareRevenue(
             LocalDate startDate1,
@@ -116,15 +142,76 @@ public class RevenueReportServiceImpl implements RevenueReportService {
             LocalDate endDate2
     ) {
 
+        System.out.println("===== COMPARE =====");
+
+        System.out.println("Period A");
+        System.out.println(startDate1 + " -> " + endDate1);
+
+        System.out.println("Period B");
+        System.out.println(startDate2 + " -> " + endDate2);
+
+        LocalDate today = LocalDate.now();
+
+        // Không cho phép ngày kết thúc ở tương lai
+        if (endDate1.isAfter(today)) {
+            endDate1 = today;
+        }
+
+        if (endDate2.isAfter(today)) {
+            endDate2 = today;
+        }
+
+        // Validate period 1
+        if (startDate1.isAfter(endDate1)) {
+            throw new RuntimeException(
+                    "Period A start date must be before end date"
+            );
+        }
+
+        // Validate period 2
+        if (startDate2.isAfter(endDate2)) {
+            throw new RuntimeException(
+                    "Period B start date must be before end date"
+            );
+        }
+
         long days1 =
-                ChronoUnit.DAYS.between(startDate1, endDate1) + 1;
+                ChronoUnit.DAYS.between(
+                        startDate1,
+                        endDate1
+                ) + 1;
 
         long days2 =
-                ChronoUnit.DAYS.between(startDate2, endDate2) + 1;
+                ChronoUnit.DAYS.between(
+                        startDate2,
+                        endDate2
+                ) + 1;
 
-        if (Math.abs(days1 - days2) > 3) {
+        System.out.println("days1 = " + days1);
+        System.out.println("days2 = " + days2);
+        System.out.println(
+                "differenceDays = "
+                        + Math.abs(days1 - days2)
+        );
+
+        long differenceDays =
+                Math.abs(days1 - days2);
+
+
+
+
+        // Nếu khoảng hiện tại quá ngắn so với khoảng còn lại
+        if (differenceDays > 3) {
+
+            if (days1 < days2) {
+
+                throw new RuntimeException(
+                        "The current period does not have enough data for comparison yet"
+                );
+            }
+
             throw new RuntimeException(
-                    "The difference in days must not exceed 3"
+                    "The selected periods are too different in length to compare"
             );
         }
 
@@ -140,16 +227,24 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                         endDate2.atTime(23, 59, 59)
                 );
 
+        if (revenue1 == null) {
+            revenue1 = BigDecimal.ZERO;
+        }
+
+        if (revenue2 == null) {
+            revenue2 = BigDecimal.ZERO;
+        }
+
         BigDecimal difference =
-                revenue2.subtract(revenue1);
+                revenue1.subtract(revenue2);
 
         double growthRate = 0;
 
-        if (revenue1.compareTo(BigDecimal.ZERO) > 0) {
+        if (revenue2.compareTo(BigDecimal.ZERO) > 0) {
 
             growthRate =
                     difference.doubleValue()
-                            / revenue1.doubleValue()
+                            / revenue2.doubleValue()
                             * 100;
         }
 
@@ -180,8 +275,13 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         response.setDays1(days1);
         response.setDays2(days2);
 
-        response.setAverageRevenue1(averageRevenue1);
-        response.setAverageRevenue2(averageRevenue2);
+        response.setAverageRevenue1(
+                averageRevenue1
+        );
+
+        response.setAverageRevenue2(
+                averageRevenue2
+        );
 
         return response;
     }

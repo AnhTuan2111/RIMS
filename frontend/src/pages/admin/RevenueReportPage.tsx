@@ -5,7 +5,6 @@ import "./RevenueReportPage.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
-
 interface RevenueData {
     revenue: number;
     period: string;
@@ -38,24 +37,35 @@ export default function RevenueReportPage() {
             let response;
 
             switch (period) {
+
                 case "daily":
                     response =
-                        await revenueReportApi.getTodayRevenue();
+                        await revenueReportApi
+                            .getTodayRevenue();
                     break;
 
                 case "weekly":
                     response =
-                        await revenueReportApi.getWeeklyRevenue();
+                        await revenueReportApi
+                            .getWeeklyRevenue();
                     break;
 
                 case "monthly":
                     response =
-                        await revenueReportApi.getMonthlyRevenue();
+                        await revenueReportApi
+                            .getMonthlyRevenue();
                     break;
 
                 case "yearly":
                     response =
-                        await revenueReportApi.getTotalRevenue();
+                        await revenueReportApi
+                            .getYearlyRevenue();
+                    break;
+
+                case "total":
+                    response =
+                        await revenueReportApi
+                            .getTotalRevenue();
                     break;
 
                 default:
@@ -108,6 +118,27 @@ export default function RevenueReportPage() {
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const formatPeriod = (period: string) => {
+
+        if (!period.includes(" - ")) {
+            return period;
+        }
+
+        const [start, end] = period.split(" - ");
+
+        const formattedStart =
+            format(new Date(start), "dd/MM/yyyy");
+
+        const formattedEnd =
+            format(new Date(end), "dd/MM/yyyy");
+
+        if (start === end) {
+            return formattedStart;
+        }
+
+        return `${formattedStart} - ${formattedEnd}`;
     };
 
     return (
@@ -191,8 +222,7 @@ export default function RevenueReportPage() {
 
                     <button
                         className={
-                            selectedPeriod ===
-                            "yearly"
+                            selectedPeriod === "yearly"
                                 ? "tab active"
                                 : "tab"
                         }
@@ -203,6 +233,22 @@ export default function RevenueReportPage() {
                         }
                     >
                         Yearly
+                    </button>
+
+                    <button
+                        className={
+                            selectedPeriod ===
+                            "total"
+                                ? "tab active"
+                                : "tab"
+                        }
+                        onClick={() =>
+                            handlePeriodChange(
+                                "total"
+                            )
+                        }
+                    >
+                        Total
                     </button>
 
                     <button
@@ -244,6 +290,7 @@ export default function RevenueReportPage() {
                                 dateFormat="dd/MM/yyyy"
                                 placeholderText="dd/MM/yyyy"
                                 className="date-picker"
+                                maxDate={new Date()}
                             />
                         </div>
 
@@ -255,10 +302,12 @@ export default function RevenueReportPage() {
                             <DatePicker
                                 selected={toDate}
                                 onChange={(date: Date | null) =>
-                                    setToDate(date)}
+                                    setToDate(date)
+                                }
                                 dateFormat="dd/MM/yyyy"
                                 placeholderText="dd/MM/yyyy"
                                 className="date-picker"
+                                maxDate={new Date()}
                             />
                         </div>
 
@@ -285,7 +334,7 @@ export default function RevenueReportPage() {
         </span>
 
                     <p className="card-period">
-                        {revenue.period}
+                        {formatPeriod(revenue.period)}
                     </p>
 
                     <h2 className="card-value">
@@ -294,9 +343,6 @@ export default function RevenueReportPage() {
                         VND
                     </h2>
 
-                    <div className="card-title">
-                        TOTAL REVENUE
-                    </div>
 
                 </div>
 
