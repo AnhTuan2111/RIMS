@@ -17,7 +17,7 @@ jwt:
 
 vnpay:
   url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-  tmn-code: 3M78B7N6
+  tmn-code: D90AVGT4
   hash-secret: REMOVED-VNPAY-HASH-SECRET
   version: 2.1.0
   command: pay

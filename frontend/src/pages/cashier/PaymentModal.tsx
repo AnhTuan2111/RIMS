@@ -2,17 +2,10 @@ import { useState } from 'react';
 import { cashierApi } from '../../api/cashier';
 import type { OrderDetailResponse, PaymentMethodType } from '../../types/cashier';
 
-// 1. Tạo Interface đọc dữ liệu an toàn để né quy tắc no-explicit-any
-interface SafeOrderDetail {
-    finalAmount?: number;
-    totalAmount?: number;
-}
-
 interface PaymentModalProps {
     orderId: number;
     orderDetail: OrderDetailResponse;
     onClose: () => void;
-    // 🔥 ĐIỂM SỬA CHÍ MẠNG: Khai báo rõ hàm này sẽ nhận vào 1 số (invoiceId)
     onSuccess: (invoiceId: number) => void;
 }
 
@@ -22,10 +15,7 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
     const [vnpayQrUrl, setVnpayQrUrl] = useState<string>('');
     const [processing, setProcessing] = useState<boolean>(false);
 
-    const safeDetail = orderDetail as unknown as SafeOrderDetail;
-    const finalAmount = safeDetail.finalAmount ?? safeDetail.totalAmount ?? 0;
-
-    // Tính tiền trả khách
+    const finalAmount = orderDetail.finalAmount;
     const changeReturned = amountReceived >= finalAmount ? amountReceived - finalAmount : 0;
 
     const handleConfirmCash = async () => {
@@ -35,25 +25,20 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
         }
         setProcessing(true);
         try {
-            // Đóng gói data chuẩn theo DTO PaymentRequest
-            const reqData = {
-                paymentMethod: 'CASH' as PaymentMethodType,
-                amountPaid: amountReceived
-            };
+            const reqData = { paymentMethod: 'CASH' as PaymentMethodType, amountPaid: amountReceived };
 
-            // BƯỚC 1: Gọi API "Chốt đơn" (API 3)
+            // Fix: Đổi thành processPaymentLock
             await cashierApi.processPaymentLock(orderId, reqData);
-
-            // BƯỚC 2: Gọi API "Hoàn tất thanh toán" (API 5)
             const res = await cashierApi.completeCashPayment(orderId, reqData);
 
             if (res.data.success) {
-                // Đã hết lỗi đỏ vì phía trên đã khai báo nhận 1 biến number
                 onSuccess(res.data.invoiceId);
+            } else {
+                alert(res.data.message || 'Có lỗi xảy ra từ Server!');
             }
         } catch (err) {
             console.error(err);
-            alert('Lỗi thanh toán: Kiểm tra trạng thái đơn hàng (Có thể đã bị khóa trước đó)!');
+            alert('Lỗi thanh toán: Kiểm tra trạng thái đơn hàng!');
         } finally {
             setProcessing(false);
         }
@@ -62,19 +47,21 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
     const handleSelectVNPay = async () => {
         setMethod('QRCODE');
         try {
-            // VNPay cũng cần phải chốt đơn trước
-            await cashierApi.processPaymentLock(orderId, {
-                paymentMethod: 'QRCODE',
-                amountPaid: finalAmount
-            });
+            const reqData = { paymentMethod: 'QRCODE' as PaymentMethodType, amountPaid: finalAmount };
+
+            // Fix: Đổi thành processPaymentLock
+            await cashierApi.processPaymentLock(orderId, reqData);
 
             const res = await cashierApi.getVNPayQrCode(orderId);
+
             if (res.data.success) {
                 setVnpayQrUrl(res.data.paymentUrl);
+            } else {
+                alert(res.data.message || 'Không thể lấy mã QR VNPay.');
             }
         } catch (err) {
             console.error(err);
-            alert('Không thể tạo mã QR VNPay!');
+            alert('Không thể tạo cổng VNPay!');
             setMethod(null);
         }
     };
@@ -93,7 +80,7 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
                     {method === null && (
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <button type="button" className="secondary-button" style={{ height: '70px', fontSize: '1.05rem', cursor: 'pointer' }} onClick={() => setMethod('CASH')}>💵 Tiền mặt</button>
-                            <button type="button" className="secondary-button" style={{ height: '70px', fontSize: '1.05rem', cursor: 'pointer' }} onClick={handleSelectVNPay}>💳 VNPay QR</button>
+                            <button type="button" className="secondary-button" style={{ height: '70px', fontSize: '1.05rem', cursor: 'pointer' }} onClick={() => void handleSelectVNPay()}>💳 VNPay QR</button>
                         </div>
                     )}
 
@@ -109,7 +96,7 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
                             </div>
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                                 <button type="button" className="secondary-button" style={{ flex: 1 }} onClick={() => setMethod(null)}>Quay lại</button>
-                                <button type="button" style={{ flex: 2, background: '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }} disabled={amountReceived < finalAmount || processing} onClick={handleConfirmCash}>
+                                <button type="button" style={{ flex: 2, background: '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }} disabled={amountReceived < finalAmount || processing} onClick={() => void handleConfirmCash()}>
                                     {processing ? 'Đang xử lý...' : 'Xác nhận & In Hóa Đơn'}
                                 </button>
                             </div>

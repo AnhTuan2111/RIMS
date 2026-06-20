@@ -5,53 +5,41 @@ import OrderPanel from './OrderPanel';
 import PaymentModal from './PaymentModal';
 import PaymentResultManager from './PaymentResultManager';
 
-// 1. Khai báo interface để lách luật "any" an toàn
-interface ApiResponseWrapper {
-    result?: unknown;
-    data?: unknown;
-}
-
-interface ExtendedTableResponse extends TableDashboardResponse {
-    orderId?: number | null;
-    order_id?: number | null;
-}
-
 export default function CashierPaymentsPage() {
     const [tables, setTables] = useState<TableDashboardResponse[]>([]);
     const [selectedTable, setSelectedTable] = useState<TableDashboardResponse | null>(null);
     const [orderDetail, setOrderDetail] = useState<OrderDetailResponse | null>(null);
+
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
-    const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
-
-    // Quản lý trạng thái màn hình thành công
     const [finalInvoiceId, setFinalInvoiceId] = useState<number | null>(null);
 
-    const loadTables = useCallback(() => {
-        setRefreshTrigger((prev) => prev + 1);
+    const loadTables = useCallback(async (isRefresh = false) => {
+        try {
+            if (isRefresh) {
+                setIsLoading(true);
+            }
+            setError(null);
+            const res = await cashierApi.getTables();
+            setTables(res.data);
+        } catch (err) {
+            console.error(err);
+            setError('Không thể tải danh mục bàn ăn.');
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
 
+    // Áp dụng cách viết chuẩn của ông để triệt tiêu lỗi render của useEffect
     useEffect(() => {
-        let isMounted = true;
-        const fetchTablesData = async () => {
-            try {
-                const res = await cashierApi.getTables();
-                if (isMounted) {
-                    const rawData = res.data as unknown as ApiResponseWrapper;
-                    const actualTables = Array.isArray(res.data)
-                        ? res.data
-                        : (rawData?.result || rawData?.data || []);
-
-                    setTables(actualTables as TableDashboardResponse[]);
-                }
-            } catch (err) {
-                console.error("Lỗi tải danh mục bàn ăn:", err);
-            }
+        const fetchData = async () => {
+            await loadTables(false);
         };
-        void fetchTablesData();
-        return () => { isMounted = false; };
-    }, [refreshTrigger]);
+        void fetchData();
+    }, [loadTables]);
 
     const handleSelectTable = async (table: TableDashboardResponse) => {
         if (table.status !== 'SERVING') {
@@ -63,36 +51,27 @@ export default function CashierPaymentsPage() {
         setSelectedTable(table);
         setOrderDetail(null);
 
-        const extendedTable = table as unknown as ExtendedTableResponse;
-        const targetOrderId = extendedTable.currentOrderId || extendedTable.orderId || extendedTable.order_id;
+        // Khớp chuẩn trường orderId từ Java DTO
+        const targetOrderId = table.orderId;
 
         if (targetOrderId) {
             setLoadingDetails(true);
             try {
                 const res = await cashierApi.getOrderDetail(targetOrderId);
-                const rawData = res.data as unknown as ApiResponseWrapper;
-                const actualDetail = (Array.isArray(res.data) ? res.data[0] : (rawData?.result || rawData?.data || res.data)) as OrderDetailResponse;
-
-                setOrderDetail(actualDetail);
+                setOrderDetail(res.data);
             } catch (err) {
-                console.error("Lỗi khi lấy thông tin chi tiết hóa đơn:", err);
-                alert("Không thể lấy thông tin chi tiết cho đơn hàng này!");
+                console.error("Lỗi khi lấy thông tin chi tiết:", err);
+                alert('Không thể lấy chi tiết đơn hàng.');
             } finally {
                 setLoadingDetails(false);
             }
         }
     };
 
-    const handleClosePanel = () => {
-        setSelectedTable(null);
-        setOrderDetail(null);
-    };
-
-    // 2. DIỆT LỖI TẢI PDF: Ép kiểu res.data thành BlobPart để né lỗi no-explicit-any
     const handleDownloadPdf = async (invoiceId: number) => {
         try {
             const res = await cashierApi.downloadInvoicePdf(invoiceId);
-            const blob = new Blob([res.data as BlobPart], { type: 'application/pdf' });
+            const blob = new Blob([res.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -111,6 +90,25 @@ export default function CashierPaymentsPage() {
         ? { display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1.5rem' }
         : { display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' };
 
+    if (isLoading) {
+        return (
+            <section className="page-card">
+                <p>Đang tải sơ đồ quầy thu ngân...</p>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="page-card">
+                <p className="modal-error">{error}</p>
+                <button type="button" className="primary-button" onClick={() => void loadTables(true)}>
+                    Thử lại
+                </button>
+            </section>
+        );
+    }
+
     return (
         <div className="dashboard-page" style={gridLayoutLayout}>
             <div className="page-card">
@@ -121,14 +119,11 @@ export default function CashierPaymentsPage() {
                     {tables.map((table) => {
                         const isSelected = selectedTable?.tableId === table.tableId;
                         const isServing = table.status === 'SERVING';
-                        const extendedTable = table as unknown as ExtendedTableResponse;
-                        const displayOrderId = extendedTable.currentOrderId || extendedTable.orderId || extendedTable.order_id;
 
                         return (
                             <button
                                 key={table.tableId}
                                 type="button"
-                                className="table-card clickable-card"
                                 onClick={() => void handleSelectTable(table)}
                                 style={{
                                     border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0',
@@ -140,7 +135,7 @@ export default function CashierPaymentsPage() {
                             >
                                 <strong style={{ fontSize: '1.2rem' }}>{table.tableNumber}</strong>
                                 <span style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '8px' }}>
-                                    ID Đơn: {isServing ? (displayOrderId || 'Đang quét...') : 'null'}
+                                    ID Đơn: {isServing ? (table.orderId || 'Đang quét...') : 'null'}
                                 </span>
                                 <small style={{ color: isServing ? '#ea580c' : '#16a34a', marginTop: 'auto', fontWeight: 'bold' }}>
                                     {isServing ? '● Đang Phục Vụ' : '○ Bàn Trống'}
@@ -156,15 +151,14 @@ export default function CashierPaymentsPage() {
                     selectedTable={selectedTable}
                     orderDetail={orderDetail}
                     loading={loadingDetails}
-                    onClose={handleClosePanel}
+                    onClose={() => { setSelectedTable(null); setOrderDetail(null); }}
                     onCheckout={() => setShowPaymentModal(true)}
                 />
             )}
 
-            {/* MODAL NHẬP TIỀN */}
             {showPaymentModal && selectedTable && orderDetail && (
                 <PaymentModal
-                    orderId={orderDetail?.orderId || 0}
+                    orderId={orderDetail.orderId}
                     orderDetail={orderDetail}
                     onClose={() => setShowPaymentModal(false)}
                     onSuccess={(invoiceId: number) => {
@@ -174,17 +168,16 @@ export default function CashierPaymentsPage() {
                 />
             )}
 
-            {/* MÀN HÌNH THÀNH CÔNG TOÀN MÀN HÌNH */}
             {finalInvoiceId && orderDetail && (
                 <PaymentResultManager
                     invoiceId={finalInvoiceId}
                     orderDetail={orderDetail}
-                    onDownload={handleDownloadPdf}
+                    onDownload={(id) => void handleDownloadPdf(id)}
                     onClose={() => {
                         setFinalInvoiceId(null);
                         setSelectedTable(null);
                         setOrderDetail(null);
-                        loadTables();
+                        void loadTables(true);
                     }}
                 />
             )}
