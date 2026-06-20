@@ -27,10 +27,8 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
     ],
 
     [RoleType.WAITER]: [
-        { label: 'Tổng quan', path: '/dashboard' },
         { label: 'Danh sách bàn', path: '/waiter/tables' },
-        { label: 'Tạo order', path: '/waiter/orders/new' },
-        { label: 'Order đang phục vụ', path: '/waiter/orders' },
+        { label: 'Đặt bàn', path: '/waiter/reservations' },
     ],
 
     [RoleType.CASHIER]: [
