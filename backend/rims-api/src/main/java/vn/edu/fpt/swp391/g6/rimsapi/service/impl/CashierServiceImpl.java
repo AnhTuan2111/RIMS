@@ -95,7 +95,7 @@ public class CashierServiceImpl implements CashierService
 
         return OrderDetailResponse.builder()
                 .orderId(order.getId())
-                .tableName(order.getTable() != null ? order.getTable().getTableNumber() : "N/A")
+                .tableNumber(order.getTable() != null ? order.getTable().getTableNumber() : "N/A")
                 .createdAt(order.getCreatedAt())
                 .orderItems(itemResponses)
                 .totalAmountBeforeVat(totalBeforeVat)

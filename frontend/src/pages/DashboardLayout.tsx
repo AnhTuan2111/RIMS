@@ -1,43 +1,42 @@
+import {Outlet, useNavigate} from 'react-router-dom'
+import {Sidebar} from '../components/common/Sidebar'
+import {ROLE_LABELS} from '../config/roleMenus'
+import {RoleType} from '../types/auth'
+import {useActor} from '../context/ActorContext'
 
-import { Outlet, useNavigate } from 'react-router-dom'
-import { Sidebar } from '../components/common/Sidebar'
-import { ACTOR_LABELS } from '../config/actorMenus'
-import type { ActorRole } from '../config/actorMenus'
-import { useActor } from '../context/ActorContext'
-
-function getActorIcon(actor: ActorRole) {
+function getActorIcon(actor: RoleType) {
     switch (actor) {
-        case 'CHEF':
+        case RoleType.CHEF:
             return '👨‍🍳'
-        case 'WAITER':
+        case RoleType.WAITER:
             return '🍽️'
-        case 'CASHIER':
+        case RoleType.CASHIER:
             return '💳'
-        case 'ADMIN':
+        case RoleType.ADMIN:
         default:
             return '🛡️'
     }
 }
 
-function getActorHomePath(actor: ActorRole) {
+function getActorHomePath(actor: RoleType) {
     switch (actor) {
-        case 'CHEF':
+        case RoleType.CHEF:
             return '/chef/dashboard'
-        case 'WAITER':
+        case RoleType.WAITER:
             return '/waiter/tables'
-        case 'CASHIER':
+        case RoleType.CASHIER:
             return '/cashier/payments'
-        case 'ADMIN':
+        case RoleType.ADMIN:
         default:
             return '/dashboard'
     }
 }
 
 export default function DashboardLayout() {
-    const { actor, setActor } = useActor()
+    const {actor, setActor} = useActor()
     const navigate = useNavigate()
 
-    function handleChangeActor(nextActor: ActorRole) {
+    function handleChangeActor(nextActor: RoleType) {
         setActor(nextActor)
         localStorage.setItem('selectedActor', nextActor)
         navigate(getActorHomePath(nextActor))
@@ -45,13 +44,13 @@ export default function DashboardLayout() {
 
     return (
         <div className="app-layout">
-            <Sidebar />
+            <Sidebar/>
 
             <div className="app-main">
                 <header className="rims-topbar">
                     <div className="rims-topbar-heading">
                         <span className="rims-topbar-eyebrow">
-                            <span className="rims-topbar-live-dot" />
+                            <span className="rims-topbar-live-dot"/>
                             RIMS CONTROL CENTER
                         </span>
 
@@ -71,7 +70,7 @@ export default function DashboardLayout() {
 
                             <div>
                                 <small>Vai trò hiện tại</small>
-                                <strong>{ACTOR_LABELS[actor]}</strong>
+                                <strong>{ROLE_LABELS[actor]}</strong>
                             </div>
                         </div>
 
@@ -82,7 +81,7 @@ export default function DashboardLayout() {
                                 value={actor}
                                 onChange={(event) =>
                                     handleChangeActor(
-                                        event.target.value as ActorRole,
+                                        event.target.value as RoleType,
                                     )
                                 }
                             >
@@ -96,7 +95,7 @@ export default function DashboardLayout() {
                 </header>
 
                 <main className="app-content rims-app-content">
-                    <Outlet />
+                    <Outlet/>
                 </main>
             </div>
         </div>
