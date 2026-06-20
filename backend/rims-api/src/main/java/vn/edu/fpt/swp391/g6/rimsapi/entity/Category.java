@@ -35,9 +35,6 @@ public class Category
     @OneToMany(mappedBy = "category")
     private List<Dish> dishes;
 
-    @Column(name = "is_available", nullable = false)
-    private boolean isAvailable = true;
-
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

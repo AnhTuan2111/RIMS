@@ -19,13 +19,7 @@ public interface UserRepository extends JpaRepository<User, Integer>
 
     List<User> findByRole(RoleType role);
 
-    List<User> findByRoleNot(RoleType role);
-
-    boolean existsByUsername(String username);
-
     boolean existsByPhone(String phone);
 
     boolean existsByEmail(String email);
-
-    Integer id(Integer id);
 }
