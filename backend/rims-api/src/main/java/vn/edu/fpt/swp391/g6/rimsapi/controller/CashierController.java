@@ -104,12 +104,9 @@ public class CashierController {
             // Bắn link về Frontend để Quang bên Web Development bắt lấy invoiceId hiển thị thông báo & mở PDF
             String frontendSuccessUrl = "http://localhost:3000/payment-success?invoiceId=" + invoiceId;
             response.sendRedirect(frontendSuccessUrl);
-
         } else {
             // Giao dịch thất bại / khách bấm hủy thanh toán
             response.sendRedirect("http://localhost:3000/payment-failed");
         }
     }
-
-
 }
