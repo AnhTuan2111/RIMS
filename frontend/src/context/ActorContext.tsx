@@ -1,27 +1,27 @@
 import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { ActorRole } from '../config/actorMenus'
+import { RoleType } from '../types/auth'
 
 type ActorContextType = {
-    actor: ActorRole
-    setActor: (actor: ActorRole) => void
+    actor: RoleType
+    setActor: (actor: RoleType) => void
 }
 
 const ActorContext = createContext<ActorContextType | null>(null)
 
-const DEFAULT_ACTOR: ActorRole = 'ADMIN'
+const DEFAULT_ACTOR: RoleType = RoleType.ADMIN
 
-function isActorRole(value: string | null): value is ActorRole {
-    return value === 'ADMIN' || value === 'CHEF' || value === 'WAITER' || value === 'CASHIER'
+function isActorRole(value: string | null): value is RoleType {
+    return value === RoleType.ADMIN || value === RoleType.CHEF || value === RoleType.WAITER || value === RoleType.CASHIER
 }
 
 export function ActorProvider({ children }: { children: ReactNode }) {
-    const [actor, setActorState] = useState<ActorRole>(() => {
+    const [actor, setActorState] = useState<RoleType>(() => {
         const savedActor = localStorage.getItem('selectedActor')
         return isActorRole(savedActor) ? savedActor : DEFAULT_ACTOR
     })
 
-    function setActor(nextActor: ActorRole) {
+    function setActor(nextActor: RoleType) {
         localStorage.setItem('selectedActor', nextActor)
         setActorState(nextActor)
     }
