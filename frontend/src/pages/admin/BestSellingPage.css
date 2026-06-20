@@ -1,0 +1,169 @@
+.best-selling-page {
+    min-height: 100vh;
+    background: #f0f4f8;
+    padding: 32px;
+    font-family: Inter, system-ui, sans-serif;
+}
+
+.header-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.back-button {
+    width: 44px;
+    height: 44px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    font-size: 18px;
+    color: #374151;
+    transition: 0.2s;
+}
+
+.back-button:hover {
+    background: #f8fafc;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 48px;
+    font-weight: 800;
+    color: #0a1d37;
+    line-height: 1.1;
+}
+
+.page-subtitle {
+    margin-top: 8px;
+    font-size: 18px;
+    color: #6b7280;
+}
+
+.table-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+            0 1px 2px rgba(0, 0, 0, 0.05),
+            0 8px 24px rgba(15, 23, 42, 0.06);
+    border: 1px solid #e5e7eb;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead tr {
+    background: #ebf1f6;
+}
+
+thead th {
+    padding: 18px 24px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #4b5563;
+}
+
+tbody td {
+    padding: 18px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.rank-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.rank-1 {
+    background: #ea580c;
+    color: white;
+}
+
+.rank-2 {
+    background: #0f172a;
+    color: white;
+}
+
+.rank-3 {
+    background: #6366f1;
+    color: white;
+}
+
+.rank-default {
+    background: #eff6ff;
+    color: #1e3a8a;
+}
+
+.dish-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dish-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.best-seller-badge {
+    background: #ffedd5;
+    color: #ea580c;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.qty {
+    color: #0f172a;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.revenue {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+}
+
+.date-picker {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.date-picker:focus {
+    border-color: #f26600;
+}
+
+.react-datepicker-wrapper {
+    width: 100%;
+}
