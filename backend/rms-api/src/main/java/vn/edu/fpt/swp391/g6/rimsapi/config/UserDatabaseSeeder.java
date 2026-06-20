@@ -28,6 +28,7 @@ public class UserDatabaseSeeder implements CommandLineRunner {
             users.add(createUser("waiter1", "Waiter One", "waiter1@rims.com", "0123456790", "waiterpass", RoleType.WAITER));
             users.add(createUser("cashier1", "Cashier One", "cashier1@rims.com", "0123456791", "cashierpass", RoleType.CASHIER));
             users.add(createUser("chef1", "Chef One", "chef1@rims.com", "0123456792", "chefpass", RoleType.CHEF));
+            users.add(createUser("customer1", "Customer One", "customer1@rims.com", "0123456793", "customerpass", RoleType.CUSTOMER));
 
 
             userRepository.saveAll(users);
