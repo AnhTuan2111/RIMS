@@ -1,0 +1,84 @@
+.payment-history-page {
+    padding: 24px;
+}
+
+.header-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.back-button {
+    border: none;
+    background: white;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.page-title {
+    margin: 0;
+}
+
+.page-subtitle {
+    margin-top: 4px;
+    color: #666;
+}
+
+.table-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 16px;
+}
+
+thead {
+    background: #f8fafc;
+}
+
+tbody tr {
+    border-top: 1px solid #eee;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover {
+    background: #f8fafc;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.amount {
+    font-weight: 600;
+}
+
+.method-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.method-badge.qr {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.method-badge.cash {
+    background: #dcfce7;
+    color: #15803d;
+}
