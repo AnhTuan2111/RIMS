@@ -178,8 +178,7 @@ public class WaiterServiceImpl implements WaiterService
                         if (itemRequest.getQuantity() < existedItem.getQuantity())
                         {
                             throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " is COMPLETE, cannot reduce quantity");
-                        }
-                        else if (itemRequest.getQuantity() > existedItem.getQuantity())
+                        } else if (itemRequest.getQuantity() > existedItem.getQuantity())
                         {
                             // tạo order item mới đế không bị nhầm lẫn với order item khác
                             OrderItem orderItem = new OrderItem();
@@ -195,9 +194,11 @@ public class WaiterServiceImpl implements WaiterService
                     }
                     case PREPARING:
                     {
-                        if (itemRequest.getQuantity() == 0) {
+                        if (itemRequest.getQuantity() == 0)
+                        {
                             order.removeOrderItem(existedItem);
-                        } else {
+                        } else
+                        {
                             existedItem.setQuantity(itemRequest.getQuantity());
                             existedItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
                             existedItem.setNote(itemRequest.getNote());
@@ -281,10 +282,18 @@ public class WaiterServiceImpl implements WaiterService
         List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
         for (Order order : orders)
         {
+            BigDecimal totalBeforeVat = order.getTotalAmount() != null
+                    ? order.getTotalAmount()
+                    : order.getOrderItems().stream()
+                    .map(orderItem -> orderItem.getSubTotal() != null ? orderItem.getSubTotal() : BigDecimal.ZERO)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
+            BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
+
             orderDetailResponses.add(
                     OrderDetailResponse.builder().
                             orderId(order.getId())
-                            .tableName(order.getTable().getTableNumber())
+                            .tableNumber(order.getTable().getTableNumber())
                             .createdAt(order.getCreatedAt())
                             .orderItems(order.getOrderItems().stream().map(
                                     orderItem ->
@@ -292,6 +301,7 @@ public class WaiterServiceImpl implements WaiterService
                                         OrderItemResponse response = new OrderItemResponse();
                                         response.setOrderItemId(orderItem.getId());
                                         response.setDishName(orderItem.getDish().getName());
+                                        response.setStatus(orderItem.getStatus());
                                         response.setQuantity(orderItem.getQuantity());
                                         response.setUnitPrice(orderItem.getUnitPrice());
                                         response.setSubTotal(orderItem.getSubTotal());
@@ -299,6 +309,9 @@ public class WaiterServiceImpl implements WaiterService
                                         return response;
                                     }
                             ).toList())
+                            .totalAmountBeforeVat(totalBeforeVat)
+                            .vatAmount(vatAmount)
+                            .finalAmount(finalAmount)
                             .build()
             );
         }

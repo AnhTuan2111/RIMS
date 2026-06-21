@@ -15,7 +15,7 @@ import java.util.List;
 public class OrderDetailResponse
 {
     private Long orderId;
-    private String tableName;
+    private String tableNumber;
     private LocalDateTime createdAt;
     private List<OrderItemResponse> orderItems;
 

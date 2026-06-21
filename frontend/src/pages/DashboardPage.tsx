@@ -1,14 +1,13 @@
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import {
-    ACTOR_LABELS,
-    actorDescriptions,
-    actorMenus,
-} from '../config/actorMenus'
-import { useActor } from '../context/ActorContext'
+    ROLE_LABELS,
+    roleMenus,
+} from '../config/roleMenus'
+import {useActor} from '../context/ActorContext'
 
 export function DashboardPage() {
-    const { actor } = useActor()
-    const menus = actorMenus[actor]
+    const {actor} = useActor()
+    const menus = roleMenus[actor]
 
     return (
         <div className="dashboard-page">
@@ -23,8 +22,8 @@ export function DashboardPage() {
             <section className="page-card actor-card">
                 <div className="actor-card-header">
                     <div>
-                        <h2>{ACTOR_LABELS[actor]}</h2>
-                        <p>{actorDescriptions[actor]}</p>
+                        <h2>{ROLE_LABELS[actor]}</h2>
+                        <p>Trang tổng quan cho quyền {ROLE_LABELS[actor]}</p>
                     </div>
 
                     <span className="current-role-badge">{actor}</span>

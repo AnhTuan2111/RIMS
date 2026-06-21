@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../../api/auth'
 import { useActor } from '../../context/ActorContext'
-import type { ActorRole } from '../../config/actorMenus'
+import { RoleType } from '../../types/auth'
 
 export default function LoginPage() {
     const navigate = useNavigate()
@@ -25,25 +25,25 @@ export default function LoginPage() {
                 rawPassword,
             })
 
-            const role = user.role as ActorRole
+            const role = user.role as RoleType
 
             setActor(role)
             localStorage.setItem('selectedActor', role)
 
             switch (role) {
-                case 'ADMIN':
+                case RoleType.ADMIN:
                     navigate('/dashboard', { replace: true })
                     return
 
-                case 'CHEF':
+                case RoleType.CHEF:
                     navigate('/chef/orders', { replace: true })
                     return
 
-                case 'WAITER':
+                case RoleType.WAITER:
                     navigate('/waiter/tables', { replace: true })
                     return
 
-                case 'CASHIER':
+                case RoleType.CASHIER:
                     navigate('/cashier/payments', { replace: true })
                     return
 

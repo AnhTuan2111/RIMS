@@ -1,9 +1,8 @@
-
 import { NavLink } from 'react-router-dom'
 import {
-    ACTOR_LABELS,
-    actorMenus,
-} from '../../config/actorMenus'
+    ROLE_LABELS,
+    roleMenus,
+} from '../../config/roleMenus'
 import { useActor } from '../../context/ActorContext'
 
 function getMenuIcon(path: string) {
@@ -12,6 +11,7 @@ function getMenuIcon(path: string) {
     if (path.includes('orders')) return '⌁'
     if (path.includes('dishes')) return '◉'
     if (path.includes('tables')) return '▤'
+    if (path.includes('reservations')) return '◷'
     if (path.includes('payments')) return '₫'
     if (path.includes('invoices')) return '▧'
     if (path.includes('users')) return '♙'
@@ -21,7 +21,7 @@ function getMenuIcon(path: string) {
 
 export function Sidebar() {
     const { actor } = useActor()
-    const menus = actorMenus[actor]
+    const menus = roleMenus[actor]
 
     return (
         <aside className="app-sidebar rims-sidebar">
@@ -43,7 +43,7 @@ export function Sidebar() {
 
                 <div>
                     <small>Không gian làm việc</small>
-                    <strong>{ACTOR_LABELS[actor]}</strong>
+                    <strong>{ROLE_LABELS[actor]}</strong>
                 </div>
             </div>
 
