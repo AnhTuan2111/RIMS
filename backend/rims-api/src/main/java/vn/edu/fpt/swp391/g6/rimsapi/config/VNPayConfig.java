@@ -10,10 +10,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
-@Getter // Lombok tự tạo các hàm getVnpUrl(), getVnpTmnCode() để Service gọi đến
-public class VNPayConfig
-{
-    // Spring Boot sẽ tự động vào file application.yaml đọc dữ liệu nạp vào đây
+@Getter
+public class VNPayConfig {
+
     @Value("${vnpay.url}")
     private String vnpUrl;
 
@@ -29,39 +28,31 @@ public class VNPayConfig
     @Value("${vnpay.command}")
     private String vnpCommand;
 
-    // Đường dẫn callback của bạn (có thể để static hoặc đưa ra yaml tùy bạn)
-    public static final String VNP_RETURN_URL = "http://localhost:8080/rims/cashier/payments/vnpay-callback";
+    // Lấy trực tiếp từ file YAML để đồng bộ
+    @Value("${vnpay.return-url}")
+    private String vnpReturnUrl;
 
-    public String hmacSHA512(final String key, final String data)
-    {
-        try
-        {
-            if (key == null || data == null) return null;
+    public String hmacSHA512(final String key, final String data) {
+        try {
+            if (key == null || data == null) return "";
+
             final Mac hmac512 = Mac.getInstance("HmacSHA512");
-            byte[] hmacKeyBytes = key.getBytes(StandardCharsets.UTF_8);
-            final SecretKeySpec secretKey = new SecretKeySpec(hmacKeyBytes, "HmacSHA512");
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
             hmac512.init(secretKey);
-            byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
-            byte[] result = hmac512.doFinal(dataBytes);
+
+            byte[] result = hmac512.doFinal(data.getBytes(StandardCharsets.UTF_8));
+
             StringBuilder sb = new StringBuilder(2 * result.length);
-            for (byte b : result)
-            {
+            for (byte b : result) {
                 sb.append(String.format("%02x", b & 0xff));
             }
             return sb.toString();
-        } catch (Exception ex)
-        {
-            return "";
+        } catch (Exception ex) {
+            throw new RuntimeException("Lỗi băm chữ ký VNPay: " + ex.getMessage());
         }
     }
 
-    public String getIpAddress(HttpServletRequest request)
-    {
-        String ipAddress = request.getHeader("X-FORWARDED-FOR");
-        if (ipAddress == null)
-        {
-            ipAddress = request.getRemoteAddr();
-        }
-        return ipAddress != null ? ipAddress : "127.0.0.1";
+    public String getIpAddress(HttpServletRequest request) {
+        return "127.0.0.1";
     }
 }

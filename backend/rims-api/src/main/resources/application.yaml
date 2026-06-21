@@ -9,15 +9,16 @@ spring:
     password: 123
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     open-in-view: false
     show-sql: true
 jwt:
-  signerKey: Bkvw045nqvIXbwCtsf9fNAH8olxBeipB
+  signerKey: "Bkvw045nqvIXbwCtsf9fNAH8olxBeipB"
 
 vnpay:
-  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-  tmn-code: D90AVGT4
-  hash-secret: K59NG1LQGULO1QPDG2LU6BO3YU41XDLJ
-  version: 2.1.0
-  command: pay
+  url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  tmn-code: "D90AVGT4"
+  hash-secret: "8BJJ73AOD4FMOY3DKHD0ST66RCKY488C"
+  version: "2.1.0"
+  command: "pay"
+  return-url: "http://localhost:8080/rims/cashier/payments/vnpay-callback"

@@ -12,7 +12,6 @@ interface PaymentModalProps {
 export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess }: PaymentModalProps) {
     const [method, setMethod] = useState<PaymentMethodType | null>(null);
     const [amountReceived, setAmountReceived] = useState<number>(0);
-    const [vnpayQrUrl, setVnpayQrUrl] = useState<string>('');
     const [processing, setProcessing] = useState<boolean>(false);
 
     const finalAmount = orderDetail.finalAmount;
@@ -27,42 +26,39 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
         try {
             const reqData = { paymentMethod: 'CASH' as PaymentMethodType, amountPaid: amountReceived };
 
-            // Fix: Đổi thành processPaymentLock
             await cashierApi.processPaymentLock(orderId, reqData);
             const res = await cashierApi.completeCashPayment(orderId, reqData);
 
-            if (res.data.success) {
+            if (res && res.data && res.data.success) {
                 onSuccess(res.data.invoiceId);
             } else {
-                alert(res.data.message || 'Có lỗi xảy ra từ Server!');
+                alert('Có lỗi xảy ra từ Server!');
             }
         } catch (err) {
             console.error(err);
-            alert('Lỗi thanh toán: Kiểm tra trạng thái đơn hàng!');
+            alert('Lỗi thanh toán: Kiểm tra lại mạng hoặc đơn hàng!');
         } finally {
             setProcessing(false);
         }
     };
 
-    const handleSelectVNPay = async () => {
-        setMethod('QRCODE');
+    const handleRedirectToVNPay = async () => {
+        setProcessing(true);
         try {
-            const reqData = { paymentMethod: 'QRCODE' as PaymentMethodType, amountPaid: finalAmount };
-
-            // Fix: Đổi thành processPaymentLock
-            await cashierApi.processPaymentLock(orderId, reqData);
-
             const res = await cashierApi.getVNPayQrCode(orderId);
 
-            if (res.data.success) {
-                setVnpayQrUrl(res.data.paymentUrl);
+            if (res?.data?.success && res?.data?.paymentUrl) {
+                // Chuyển hướng thẳng sang trang VNPay
+                window.location.href = res.data.paymentUrl;
             } else {
-                alert(res.data.message || 'Không thể lấy mã QR VNPay.');
+                alert(res?.data?.message || 'Không thể khởi tạo cổng VNPay.');
+                setProcessing(false);
             }
         } catch (err) {
             console.error(err);
-            alert('Không thể tạo cổng VNPay!');
+            alert('Lỗi tạo cổng VNPay! (Kiểm tra lại mạng hoặc F5 tải lại trang)');
             setMethod(null);
+            setProcessing(false);
         }
     };
 
@@ -80,7 +76,7 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
                     {method === null && (
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <button type="button" className="secondary-button" style={{ height: '70px', fontSize: '1.05rem', cursor: 'pointer' }} onClick={() => setMethod('CASH')}>💵 Tiền mặt</button>
-                            <button type="button" className="secondary-button" style={{ height: '70px', fontSize: '1.05rem', cursor: 'pointer' }} onClick={() => void handleSelectVNPay()}>💳 VNPay QR</button>
+                            <button type="button" className="secondary-button" style={{ height: '70px', fontSize: '1.05rem', cursor: 'pointer' }} onClick={() => setMethod('QRCODE')}>💳 Thẻ / VNPay</button>
                         </div>
                     )}
 
@@ -105,11 +101,18 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
 
                     {method === 'QRCODE' && (
                         <div style={{ textAlign: 'center' }}>
-                            {vnpayQrUrl ? (
-                                <iframe src={vnpayQrUrl} title="VNPay QR" style={{ width: '100%', height: '340px', border: 'none' }}></iframe>
-                            ) : <p>Đang tạo cổng quét mã QR VNPay...</p>}
-                            <p style={{ fontSize: '0.85rem', color: '#ea580c', marginTop: '1rem' }}>⚠️ Khách quét xong hệ thống sẽ tự động điều hướng.</p>
-                            <button type="button" className="secondary-button" style={{ width: '100%', marginTop: '1rem' }} onClick={() => setMethod(null)}>Đổi phương thức</button>
+                            <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '8px', border: '1px solid #cbd5e1', marginBottom: '1rem' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🌐</div>
+                                <h3 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>Cổng thanh toán VNPay</h3>
+                                <p style={{ fontSize: '0.9rem', color: '#64748b' }}>Hệ thống sẽ chuyển hướng sang VNPay để nhập thông tin thẻ. Hóa đơn sẽ được in sau khi thanh toán thành công.</p>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button type="button" className="secondary-button" style={{ flex: 1 }} onClick={() => setMethod(null)} disabled={processing}>Hủy bỏ</button>
+                                <button type="button" style={{ flex: 2, background: '#005baa', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => void handleRedirectToVNPay()} disabled={processing}>
+                                    {processing ? 'Đang kết nối...' : 'Chuyển hướng ngay'}
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

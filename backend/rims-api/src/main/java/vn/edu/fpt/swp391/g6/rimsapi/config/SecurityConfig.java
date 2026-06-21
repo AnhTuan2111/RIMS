@@ -37,6 +37,7 @@ public class SecurityConfig
                 .accessDeniedHandler(jwtAccessDeniedHandler)
             )
             .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/rims/cashier/payments/vnpay-callback").permitAll()
                 .requestMatchers("/rims/auth/login", "/rims/auth/logout", "/rims/auth/refresh").permitAll()
                 .requestMatchers("/rims/admin/**").hasRole("ADMIN")
                 .requestMatchers("/rims/chef/**").hasRole("CHEF")
