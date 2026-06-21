@@ -6,8 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,6 +18,4 @@ public class UserProfileResponse {
     private String email;
     private String phone;
     private RoleType role;
-    private boolean isActive;
-    private LocalDateTime createdAt;
 }
