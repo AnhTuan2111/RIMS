@@ -1,37 +1,171 @@
+import {useState, useEffect, useMemo} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import {waiterApi, type MenuItemResponse, type OrderItemRequest} from "../../api/waiter";
+import {WaiterHeader, BackArrow, WaiterToast, ConfirmModal, fmtPrice} from "../../components/waiter";
+import {fulfillReservationForTable} from "./mockReservations";
+
 export default function WaiterCreateOrderPage() {
+    const navigate = useNavigate();
+    const {tableId} = useParams();
+    const tid = parseInt(tableId || "0");
+    const [menu, setMenu] = useState<MenuItemResponse[]>([]);
+    const [orderDraft, setOrderDraft] = useState<Record<number, { qty: number; note: string }>>({});
+    const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
+    }, []);
+
+    function showToast(msg: string, type = "success") {
+        setToast({msg, type});
+        setTimeout(() => setToast(null), 3000);
+    }
+
+    const selectedItems = useMemo(() => {
+        return menu
+            .map((dish) => {
+                const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
+                if (d.qty <= 0) return null;
+                return {...dish, qty: d.qty, note: d.note};
+            })
+            .filter(Boolean) as (MenuItemResponse & { qty: number; note: string })[];
+    }, [menu, orderDraft]);
+
+    const orderTotal = selectedItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+    function openConfirm() {
+        if (!selectedItems.length) {
+            showToast("Vui lòng chọn ít nhất 1 món", "error");
+            return;
+        }
+        setShowConfirm(true);
+    }
+
+    const [successData, setSuccessData] = useState<{message: string; itemSummary: string} | null>(null);
+
+    async function submitCreateOrder() {
+        const items: OrderItemRequest[] = selectedItems.map((item) => ({
+            dishId: item.dishId,
+            quantity: item.qty,
+            note: item.note || "",
+        }));
+
+        setSubmitting(true);
+        try {
+            const res = await waiterApi.createOrder({tableId: tid, items});
+            fulfillReservationForTable(tid);
+            setSuccessData({
+                message: res.data.message || "Tạo order thành công",
+                itemSummary: res.data.itemSummary || "",
+            });
+        } catch {
+            showToast("Lỗi khi tạo order", "error");
+        } finally {
+            setSubmitting(false);
+            setShowConfirm(false);
+        }
+    }
+
+    function changeDraftQty(dishId: number, delta: number, min = 0) {
+        setOrderDraft((prev) => {
+            const cur = prev[dishId] || {qty: 0, note: ""};
+            const qty = Math.max(min, cur.qty + delta);
+            return {...prev, [dishId]: {...cur, qty}};
+        });
+    }
+
+    function setDraftNote(dishId: number, note: string) {
+        setOrderDraft((prev) => ({
+            ...prev,
+            [dishId]: {...(prev[dishId] || {qty: 0}), note},
+        }));
+    }
+
     return (
-        <div className="page-card">
-            <h2>Tạo order</h2>
-            <p>Phục vụ chọn bàn, chọn món và gửi order xuống bếp.</p>
+        <div className="waiter-container">
+            <WaiterHeader/>
+            <main className="waiter-main">
+                <div className="waiter-sub-header">
+                    <BackArrow onClick={() => navigate("/waiter/tables")}/>
+                    <h2 className="waiter-title">Tạo Order - Bàn {tid}</h2>
+                    <button onClick={openConfirm} className="waiter-action-btn">Tạo Order</button>
+                </div>
+                <div className="waiter-menu-grid">
+                    {menu.map((dish) => {
+                        const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
+                        return (
+                            <div key={dish.dishId} className="waiter-menu-card">
+                                <div className="waiter-menu-card-top">
+                                    {dish.imageUrl ? (
+                                        <img src={dish.imageUrl} alt={dish.name} className="waiter-menu-img"/>
+                                    ) : (
+                                        <span className="waiter-menu-emoji">🍽️</span>
+                                    )}
+                                    <div className="waiter-menu-info">
+                                        <h4>{dish.name}</h4>
+                                        <p>{fmtPrice(dish.price)}</p>
+                                    </div>
+                                </div>
+                                <div className="waiter-qty-controls">
+                                    <button
+                                        onClick={() => changeDraftQty(dish.dishId, -1)}
+                                        disabled={d.qty <= 0}
+                                        className="waiter-qty-btn"
+                                    >-
+                                    </button>
+                                    <span className="waiter-qty-val">{d.qty}</span>
+                                    <button onClick={() => changeDraftQty(dish.dishId, 1)} className="waiter-qty-btn">+
+                                    </button>
+                                </div>
+                                <input
+                                    placeholder="Ghi chú (ít cay, ...)"
+                                    value={d.note}
+                                    onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
+                                    className="waiter-note-input"
+                                />
+                            </div>
+                        );
+                    })}
+                </div>
+            </main>
 
-            <form className="simple-form">
-                <label>
-                    Chọn bàn
-                    <select>
-                        <option>T01</option>
-                        <option>T02</option>
-                        <option>T03</option>
-                    </select>
-                </label>
+            {showConfirm && (
+                <ConfirmModal
+                    title="Xác nhận tạo Order"
+                    message={`Bàn ${tid} — ${selectedItems.length} món, tổng tạm tính ${fmtPrice(orderTotal)}`}
+                    confirmLabel={submitting ? "Đang tạo..." : "Xác nhận"}
+                    onCancel={() => !submitting && setShowConfirm(false)}
+                    onConfirm={() => !submitting && submitCreateOrder()}
+                >
+                    <ul className="waiter-confirm-list">
+                        {selectedItems.map((item) => (
+                            <li key={item.dishId}>
+                                <span>{item.name} × {item.qty}</span>
+                                {item.note && <small>Ghi chú: {item.note}</small>}
+                            </li>
+                        ))}
+                    </ul>
+                </ConfirmModal>
+            )}
 
-                <label>
-                    Chọn món
-                    <select>
-                        <option>Fried Rice</option>
-                        <option>Pho Bo</option>
-                        <option>Bun Cha</option>
-                    </select>
-                </label>
+            {successData && (
+                <ConfirmModal
+                    title="Thành công"
+                    message={successData.message}
+                    confirmLabel="Đóng"
+                    cancelLabel=""
+                    onConfirm={() => navigate("/waiter/tables")}
+                    onCancel={() => navigate("/waiter/tables")}
+                >
+                    <div style={{marginTop: "1rem", whiteSpace: "pre-wrap", color: "#475569"}}>
+                        {successData.itemSummary}
+                    </div>
+                </ConfirmModal>
+            )}
 
-                <label>
-                    Ghi chú
-                    <input placeholder="Ví dụ: ít cay, không hành..." />
-                </label>
-
-                <button type="button" className="primary-button">
-                    Tạo order
-                </button>
-            </form>
+            <WaiterToast toast={toast}/>
         </div>
-    )
+    );
 }
