@@ -187,10 +187,10 @@ public class DatabaseSeeder implements CommandLineRunner
         }
 
         // Build orders
-        Order order1 = buildOrder(tables.get(0), waiter, 140_000);
+        Order order1 = buildOrder(tables.get(0), waiter, 155_000);
         Order order2 = buildOrder(tables.get(1), waiter, 200_000);
-        Order order3 = buildOrder(tables.get(2), waiter, 180_000);
-        Order order4 = buildOrder(tables.get(3), waiter, 220_000);
+        Order order3 = buildOrder(tables.get(2), waiter, 165_000);
+        Order order4 = buildOrder(tables.get(3), waiter, 310_000);
         orderRepository.saveAll(List.of(order1, order2, order3, order4));
 
         // Build order items

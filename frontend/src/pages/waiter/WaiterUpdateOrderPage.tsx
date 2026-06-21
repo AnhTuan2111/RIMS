@@ -1,0 +1,268 @@
+import {useState, useEffect} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import {
+    waiterApi,
+    type MenuItemResponse,
+    type OrderDetailResponse,
+    type OrderItemStatus,
+} from "../../api/waiter";
+import {WaiterHeader, BackArrow, WaiterToast, ConfirmModal, fmtPrice} from "../../components/waiter";
+import type {AxiosError} from "axios";
+
+type DraftItem = {
+    qty: number;
+    note: string;
+    orderItemId?: number | null;
+    status?: OrderItemStatus;
+};
+
+export default function WaiterUpdateOrderPage() {
+    const navigate = useNavigate();
+    const {tableId} = useParams();
+    const tid = parseInt(tableId || "0");
+    const [menu, setMenu] = useState<MenuItemResponse[]>([]);
+    const [servingOrders, setServingOrders] = useState<OrderDetailResponse[]>([]);
+    const [orderDraft, setOrderDraft] = useState<Record<number, DraftItem>>({});
+    const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [successData, setSuccessData] = useState<{message: string; itemSummary: string} | null>(null);
+
+    useEffect(() => {
+        Promise.all([waiterApi.getMenu(), waiterApi.getServingOrders(tid)])
+            .then(([menuRes, orderRes]) => {
+                setMenu(menuRes.data);
+                setServingOrders(orderRes.data);
+
+                const draft: Record<number, DraftItem> = {};
+                orderRes.data.forEach((o) => {
+                    o.orderItems.forEach((item) => {
+                        const dish = menuRes.data.find((m) => m.name === item.dishName);
+                        if (dish) {
+                            draft[dish.dishId] = {
+                                qty: item.quantity,
+                                note: item.note || "",
+                                orderItemId: item.orderItemId,
+                                status: item.status,
+                            };
+                        }
+                    });
+                });
+                setOrderDraft(draft);
+            })
+            .catch(console.error);
+    }, [tid]);
+
+    function showToast(msg: string, type = "success") {
+        setToast({msg, type});
+        setTimeout(() => setToast(null), 3000);
+    }
+
+    function getMinQty(dishId: number): number {
+        const cur = orderDraft[dishId];
+        if (!cur) return 0;
+        if (cur.status === "CANCELLED" || cur.status === "COMPLETE") {
+            const dish = menu.find(m => m.dishId === dishId);
+            if (!dish) return 0;
+            for (const o of servingOrders) {
+                for (const item of o.orderItems) {
+                    if (item.dishName === dish.name) {
+                        return item.quantity;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    function isItemLocked(dishId: number): boolean {
+        return orderDraft[dishId]?.status === "CANCELLED";
+    }
+
+    const updateItems = Object.entries(orderDraft)
+        .filter(([, v]) => {
+            if (!v.orderItemId) return v.qty > 0;
+            return true;
+        })
+        .filter(([, v]) => v.qty > 0 || (v.orderItemId && v.status === "PREPARING"))
+        .map(([dishId, v]) => ({
+            orderItemId: v.orderItemId ?? null,
+            dishId: parseInt(dishId),
+            quantity: v.qty,
+            note: v.note || "",
+            // for display in confirm modal
+            name: menu.find(m => m.dishId === parseInt(dishId))?.name || "Món"
+        }));
+
+    function openConfirm() {
+        if (!servingOrders.length) return;
+        if (updateItems.length === 0) {
+            showToast("Không có món nào để cập nhật.", "error");
+            return;
+        }
+        setShowConfirm(true);
+    }
+
+    async function submitUpdateOrder() {
+        if (!servingOrders.length) return;
+        const targetOrderId = servingOrders[0].orderId;
+
+        setSubmitting(true);
+
+        try {
+            const res = await waiterApi.updateOrder(targetOrderId, {items: updateItems});
+            setSuccessData({
+                message: res.data?.message || "Cập nhật order thành công!",
+                itemSummary: res.data?.itemSummary || "",
+            });
+        } catch (err) {
+            // Backend ErrorResponse: { message, details: Record<string,string> }
+            const axiosErr = err as AxiosError<{message?: string; details?: Record<string, string>}>;
+            let reason = "Lỗi không xác định";
+            if (axiosErr.response?.data) {
+                const data = axiosErr.response.data;
+                if (data.details && Object.keys(data.details).length > 0) {
+                    // Validation errors: format "field: message"
+                    reason = Object.entries(data.details)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join("; ");
+                } else if (data.message) {
+                    reason = data.message;
+                }
+            } else if (axiosErr.message) {
+                reason = axiosErr.message;
+            }
+            showToast(`Cập nhật thất bại: ${reason}`, "error");
+        } finally {
+            setSubmitting(false);
+            setShowConfirm(false);
+        }
+    }
+
+    function changeDraftQty(dishId: number, delta: number) {
+        setOrderDraft((prev) => {
+            const cur = prev[dishId] || {qty: 0, note: "", orderItemId: null};
+            if (cur.status === "CANCELLED") return prev;
+            const min = getMinQty(dishId);
+            const qty = Math.max(min, cur.qty + delta);
+            return {...prev, [dishId]: {...cur, qty}};
+        });
+    }
+
+    function setDraftNote(dishId: number, note: string) {
+        if (isItemLocked(dishId)) return;
+        setOrderDraft((prev) => ({
+            ...prev,
+            [dishId]: {...(prev[dishId] || {qty: 0, orderItemId: null}), note},
+        }));
+    }
+
+    return (
+        <div className="waiter-container">
+            <WaiterHeader/>
+            <main className="waiter-main">
+                <div className="waiter-sub-header">
+                    <BackArrow onClick={() => navigate(`/waiter/tables/${tid}/order/detail`)}/>
+                    <h2 className="waiter-title">Cập nhật Order - Bàn {tid}</h2>
+                    <button onClick={openConfirm} className="waiter-action-btn">Lưu Cập Nhật</button>
+                </div>
+                <div className="waiter-menu-grid">
+                    {menu.map((dish) => {
+                        const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
+                        const locked = isItemLocked(dish.dishId);
+                        const minQty = getMinQty(dish.dishId);
+                        const hasExisting = Boolean(d.status);
+                        return (
+                            <div
+                                key={dish.dishId}
+                                className={`waiter-menu-card${locked ? " waiter-menu-card-locked" : ""}`}
+                            >
+                                <div className="waiter-menu-card-top">
+                                    {dish.imageUrl ? (
+                                        <img src={dish.imageUrl} alt={dish.name} className="waiter-menu-img"/>
+                                    ) : (
+                                        <span className="waiter-menu-emoji">🍽️</span>
+                                    )}
+                                    <div className="waiter-menu-info">
+                                        <h4>{dish.name}</h4>
+                                        <p>{fmtPrice(dish.price)}</p>
+                                        {hasExisting && d.status && (
+                                            <span className={`waiter-badge waiter-badge-${d.status.toLowerCase()}`}>
+                                                {d.status}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="waiter-qty-controls">
+                                    <button
+                                        onClick={() => changeDraftQty(dish.dishId, -1)}
+                                        disabled={locked || d.qty <= minQty}
+                                        className="waiter-qty-btn"
+                                    >-
+                                    </button>
+                                    <span className="waiter-qty-val">{d.qty}</span>
+                                    <button
+                                        onClick={() => changeDraftQty(dish.dishId, 1)}
+                                        disabled={locked}
+                                        className="waiter-qty-btn"
+                                    >+
+                                    </button>
+                                </div>
+                                <input
+                                    placeholder="Ghi chú (ít cay, ...)"
+                                    value={d.note}
+                                    onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
+                                    className="waiter-note-input"
+                                    disabled={locked}
+                                />
+                                {d.status === "COMPLETE" && (
+                                    <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng.</p>
+                                )}
+                                {locked && (
+                                    <p className="waiter-item-hint">Món đã hủy — không thể chỉnh sửa.</p>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </main>
+
+            {showConfirm && (
+                <ConfirmModal
+                    title="Xác nhận cập nhật Order"
+                    message={`Bàn ${tid} — Bạn đang gửi yêu cầu cập nhật các món sau:`}
+                    confirmLabel={submitting ? "Đang gửi..." : "Xác nhận"}
+                    onCancel={() => !submitting && setShowConfirm(false)}
+                    onConfirm={() => !submitting && submitUpdateOrder()}
+                >
+                    <ul className="waiter-confirm-list">
+                        {updateItems.map((item) => (
+                            <li key={item.dishId}>
+                                <span>{item.name} × {item.quantity}</span>
+                                {item.note && <small>Ghi chú: {item.note}</small>}
+                                {!item.quantity && <small> (Hủy món)</small>}
+                            </li>
+                        ))}
+                    </ul>
+                </ConfirmModal>
+            )}
+
+            {successData && (
+                <ConfirmModal
+                    title="Thành công"
+                    message={successData.message}
+                    confirmLabel="Đóng"
+                    cancelLabel=""
+                    onConfirm={() => navigate("/waiter/tables")}
+                    onCancel={() => navigate("/waiter/tables")}
+                >
+                    <div style={{marginTop: "1rem", whiteSpace: "pre-wrap", color: "#475569"}}>
+                        {successData.itemSummary}
+                    </div>
+                </ConfirmModal>
+            )}
+
+            <WaiterToast toast={toast}/>
+        </div>
+    );
+}
