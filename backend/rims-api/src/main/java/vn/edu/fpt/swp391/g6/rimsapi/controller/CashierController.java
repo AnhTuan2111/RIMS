@@ -94,19 +94,20 @@ public class CashierController {
             @RequestParam java.util.Map<String, String> vnpayParams,
             jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
 
-        String vnp_ResponseCode = vnpayParams.get("vnp_ResponseCode");
-        String vnp_TxnRef = vnpayParams.get("vnp_TxnRef");
+        try {
 
-        if ("00".equals(vnp_ResponseCode)) {
-            // Mã "00" là khách quét mã THÀNH CÔNG -> Gọi Service lưu hóa đơn
-            Long invoiceId = cashierService.processVnPaySuccess(vnp_TxnRef);
+            String vnp_ResponseCode = vnpayParams.get("vnp_ResponseCode");
+            String vnp_TxnRef = vnpayParams.get("vnp_TxnRef");
 
-            // Bắn link về Frontend để Quang bên Web Development bắt lấy invoiceId hiển thị thông báo & mở PDF
-            String frontendSuccessUrl = "http://localhost:3000/payment-success?invoiceId=" + invoiceId;
-            response.sendRedirect(frontendSuccessUrl);
-        } else {
-            // Giao dịch thất bại / khách bấm hủy thanh toán
-            response.sendRedirect("http://localhost:3000/payment-failed");
+            if ("00".equals(vnp_ResponseCode)) {
+                Long invoiceId = cashierService.processVnPaySuccess(vnp_TxnRef);
+                String frontendSuccessUrl = "http://localhost:5173/payment-success?invoiceId=" + invoiceId;
+                response.sendRedirect(frontendSuccessUrl);
+            } else {
+                response.sendRedirect("http://localhost:5173/payment-failed");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -7,12 +7,14 @@ import java.math.BigDecimal;
 
 @Getter
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PaymentResponse
 {
     private String message;
     private boolean success;
     private Long invoiceId;
-
     private BigDecimal amountPaid;
     private BigDecimal excessAmount;
 }
