@@ -1,8 +1,8 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.BestSellingReportResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.RevenueComparisonResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.RevenueReportResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.BestSellingReportResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueComparisonResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueReportResponse;
 
 import java.time.LocalDate;
 

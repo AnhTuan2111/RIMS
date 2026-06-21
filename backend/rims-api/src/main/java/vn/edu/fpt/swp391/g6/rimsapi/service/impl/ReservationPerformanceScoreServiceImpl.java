@@ -2,7 +2,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ReservationPerformanceScoreResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.ReservationPerformanceScoreResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.ReservationPerformanceScoreRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.ReservationPerformanceScoreProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ReservationPerformanceScoreService;

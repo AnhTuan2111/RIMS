@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 
@@ -65,8 +64,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
     //Get invoice history for a specific table.
     @Query("""
             SELECT
-                i.invoiceId as invoiceId,
-                o.orderId as orderId,
+                i.id as invoiceId,
+                o.id as orderId,
                 t.tableNumber as tableNumber,
                 p.paymentMethod as paymentMethod,
                 i.finalAmount as amount,
