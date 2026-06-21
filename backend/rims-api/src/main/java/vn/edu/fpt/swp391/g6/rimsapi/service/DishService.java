@@ -1,17 +1,17 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.DishResponseDTO;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.DishCreateDTO;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.DishUpdateDTO;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
 import java.util.List;
 
 public interface DishService {
-    List<DishResponseDTO> getAllDishes();
-    List<DishResponseDTO> getDishesByCategory(Integer categoryId);
-    List<DishResponseDTO> getAvailableDishes();
-    DishResponseDTO getDishById(Integer id);
-    List<DishResponseDTO> searchDishes(String keyword);
-    DishResponseDTO createDish(DishCreateDTO dishCreateDTO);
-    DishResponseDTO updateDish(Integer id, DishUpdateDTO dishUpdateDTO);  // ✅ Thêm
+    List<DishResponse> getAllDishes();
+    List<DishResponse> getDishesByCategory(Integer categoryId);
+    List<DishResponse> getAvailableDishes();
+    DishResponse getDishById(Integer id);
+    List<DishResponse> searchDishes(String keyword);
+    DishResponse createDish(CreateDishRequest createDishRequest);
+    DishResponse updateDish(Integer id, UpdateDishRequest updateDishRequest);  // ✅ Thêm
     void deleteDish(Integer id);
 }

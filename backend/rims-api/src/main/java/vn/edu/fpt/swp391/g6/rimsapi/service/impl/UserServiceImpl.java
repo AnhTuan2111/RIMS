@@ -3,21 +3,15 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.ChangePasswordRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.CreateCustomerAccountRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.CreateStaffAccountRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.SetAccountStatusRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.UpdateAccountRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.UpdateProfileRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.AccountDetailResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserProfileResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.UserResponse;
+
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.UpdateProfileRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
+
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -38,63 +32,22 @@ public class UserServiceImpl implements UserService
                 .toList();
     }
 
-    // ================= VIEW PROFILE =================
     @Override
     public UserProfileResponse getProfile(Integer id)
     {
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("User not found"));
-
-        return toProfileResponse(user);
+        return null;
     }
-
     @Override
-    public UserProfileResponse updateProfile(
-            Integer id,
-            UpdateProfileRequest request)
+    public UserProfileResponse updateProfile(Integer id, UpdateProfileRequest request)
     {
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("User not found"));
-
-        if (request.getPhone() != null
-                && !request.getPhone().equals(user.getPhone()))
-        {
-
-            if (userRepository.existsByPhone(request.getPhone()))
-            {
-                throw new IllegalArgumentException("Phone already in use");
-            }
-
-            user.setPhone(request.getPhone());
-        }
-
-        if (request.getEmail() != null
-                && !request.getEmail().equals(user.getEmail()))
-        {
-
-            if (userRepository.existsByEmail(request.getEmail()))
-            {
-                throw new IllegalArgumentException("Email already in use");
-            }
-
-            user.setEmail(request.getEmail());
-        }
-
-        if (request.getFullName() != null)
-        {
-            user.setFullName(request.getFullName());
-        }
-
-        user.setUpdatedAt(LocalDateTime.now());
-
-        User saved = userRepository.save(user);
-
-        return toProfileResponse(saved);
+        return null;
     }
+    @Override
+    public List<UserResponse> getStaffAccounts()
+    {
+        return List.of();
+    }
+
 
     private UserResponse convertToResponse(User user)
     {

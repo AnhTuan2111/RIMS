@@ -2,9 +2,9 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.InvoiceDetailResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.InvoiceHistoryResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.InvoiceItemResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceHistoryResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoiceService;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
@@ -12,14 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+
 @Service
 @RequiredArgsConstructor
-public class InvoiceServiceImpl implements InvoiceService {
+public class InvoiceServiceImpl implements InvoiceService
+{
 
     private final InvoiceRepository invoiceRepository;
 
     @Override
-    public List<InvoiceHistoryResponse> getInvoiceHistory() {
+    public List<InvoiceHistoryResponse> getInvoiceHistory()
+    {
 
         return invoiceRepository
                 .getInvoiceHistory()
@@ -37,7 +40,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     @Transactional(readOnly = true)
-    public InvoiceDetailResponse getInvoiceDetail(Long invoiceId) {
+    public InvoiceDetailResponse getInvoiceDetail(Long invoiceId)
+    {
 
         Invoice invoice = invoiceRepository
                 .findById(invoiceId)
@@ -48,12 +52,12 @@ public class InvoiceServiceImpl implements InvoiceService {
                 new InvoiceDetailResponse();
 
         response.setInvoiceId(
-                invoice.getInvoiceId()
+                invoice.getId()
         );
 
         response.setOrderId(
                 invoice.getOrder()
-                        .getOrderId()
+                        .getId()
         );
 
         response.setTableNumber(
@@ -74,17 +78,18 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoice.getPayments().isEmpty()
                         ? "UNKNOWN"
                         : invoice.getPayments()
-                          .get(0)
-                          .getPaymentMethod()
-                          .name()
+                        .get(0)
+                        .getPaymentMethod()
+                        .name()
         );
-;
+        ;
 
         List<InvoiceItemResponse> items =
                 invoice.getOrder()
                         .getOrderItems()
                         .stream()
-                        .map(orderItem -> {
+                        .map(orderItem ->
+                        {
 
                             InvoiceItemResponse item =
                                     new InvoiceItemResponse();

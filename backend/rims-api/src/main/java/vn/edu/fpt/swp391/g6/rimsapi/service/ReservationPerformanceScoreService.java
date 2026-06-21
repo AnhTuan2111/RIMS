@@ -1,6 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.ReservationPerformanceScoreResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.ReservationPerformanceScoreResponse;
 
 import java.time.LocalDate;
 import java.util.List;
