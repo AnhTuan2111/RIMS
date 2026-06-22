@@ -35,7 +35,7 @@ public class Category
     @OneToMany(mappedBy = "category")
     private List<Dish> dishes;
 
-    @Column(name = "is_available", nullable = false)
+    @Column(name = "is_available", nullable = false,columnDefinition = "bit default 1")
     private boolean isAvailable = true;
 
     @CreatedDate
