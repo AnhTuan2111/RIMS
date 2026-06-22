@@ -2,6 +2,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
@@ -72,6 +73,7 @@ public class CashierController {
 
     //API 7 xuất file PDF
     @GetMapping("/invoices/{invoiceId}/pdf")
+    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId) {
         // 1. Tìm hóa đơn trong DB
         Invoice invoice = invoiceRepository.findWithOrderAndItemsById(invoiceId)
