@@ -106,10 +106,17 @@ public class CashierController {
                 String frontendSuccessUrl = "http://localhost:5173/payment-success?invoiceId=" + invoiceId;
                 response.sendRedirect(frontendSuccessUrl);
             } else {
+                cashierService.processVnPayFailed(vnp_TxnRef);
                 response.sendRedirect("http://localhost:5173/payment-failed");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // API 9 Mở khóa đơn hàng khi bấm back hay bị thất bại
+    @PostMapping("/orders/{id}/unlock")
+    public ResponseEntity<PaymentResponse> unlockOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(cashierService.unlockOrder(id));
     }
 }

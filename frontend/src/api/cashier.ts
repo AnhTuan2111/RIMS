@@ -28,9 +28,11 @@ export const cashierApi = {
     getVNPayQrCode: (orderId: number) =>
         apiClient.get<VNPayResponse>(`/cashier/orders/${orderId}/vnpay-qr`),
 
-    // API 7: Tải hóa đơn PDF
     downloadInvoicePdf: (invoiceId: number) =>
         apiClient.get(`/cashier/invoices/${invoiceId}/pdf`, {
             responseType: 'blob'
-        })
+        }),
+
+    unlockOrder: (orderId: number) =>
+        apiClient.post<PaymentResponse>(`/cashier/orders/${orderId}/unlock`)
 };

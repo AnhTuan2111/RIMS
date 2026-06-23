@@ -1,4 +1,6 @@
 import type { TableDashboardResponse, OrderDetailResponse } from '../../types/cashier';
+import {useState} from "react";
+import {cashierApi} from "../../api/cashier.ts";
 
 interface OrderPanelProps {
     selectedTable: TableDashboardResponse;
@@ -11,6 +13,25 @@ interface OrderPanelProps {
 export default function OrderPanel({ selectedTable, orderDetail, loading, onClose, onCheckout }: OrderPanelProps) {
     const itemsList = orderDetail?.orderItems || [];
     const totalAmount = orderDetail?.finalAmount || 0;
+    const [isLocking, setIsLocking] = useState(false);
+
+    const handleCheckoutClick = async () => {
+        setIsLocking(true);
+        try {
+            // Gọi API khóa đơn hàng (ông cần thêm hàm này vào file cashierApi nhé)
+            const res = await cashierApi.processPaymentLock(orderDetail!.orderId, { paymentMethod: 'CASH', amountPaid: 0 });
+            if (res.data.success) {
+                onCheckout(); // Bật PaymentModal lên
+            } else {
+                alert(res.data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Không thể khóa đơn hàng để thanh toán!');
+        } finally {
+            setIsLocking(false);
+        }
+    };
 
     // Fix: Dùng trạng thái của bàn thay vì của order
     const displayStatus = selectedTable.status === 'SERVING' ? 'Đang Phục Vụ' : 'Bàn Trống';
@@ -78,10 +99,11 @@ export default function OrderPanel({ selectedTable, orderDetail, loading, onClos
                             <button
                                 type="button"
                                 className="primary-button"
-                                style={{ width: '100%', marginTop: '1.2rem', padding: '0.85rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}
-                                onClick={onCheckout}
+                                style={{ /*... css cũ ...*/ opacity: isLocking ? 0.7 : 1 }}
+                                onClick={() => void handleCheckoutClick()}
+                                disabled={isLocking}
                             >
-                                CheckOut
+                                {isLocking ? 'Đang khóa đơn...' : 'CheckOut'}
                             </button>
                         )}
                     </div>

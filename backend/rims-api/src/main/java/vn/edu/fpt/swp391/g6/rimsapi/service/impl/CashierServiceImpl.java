@@ -17,7 +17,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -169,6 +168,42 @@ public class CashierServiceImpl implements CashierService {
                 .amountPaid(amountPaid)
                 .excessAmount(excessAmount)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponse unlockOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        if (order.getStatus() == OrderStatus.LOCKED) {
+            order.setStatus(OrderStatus.SERVING);
+            orderRepository.save(order);
+
+            return PaymentResponse.builder()
+                    .message("Đã hủy quá trình thanh toán, bàn tiếp tục phục vụ.")
+                    .success(true)
+                    .build();
+        }
+
+        return PaymentResponse.builder()
+                .message("Đơn hàng không ở trạng thái khóa.")
+                .success(false)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void processVnPayFailed(String vnpTxnRef) {
+        String[] parts = vnpTxnRef.split("_");
+        Long orderId = Long.parseLong(parts[1]);
+
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        if (order != null && order.getStatus() == OrderStatus.LOCKED) {
+            order.setStatus(OrderStatus.SERVING);
+            orderRepository.save(order);
+        }
     }
 
     @Override
