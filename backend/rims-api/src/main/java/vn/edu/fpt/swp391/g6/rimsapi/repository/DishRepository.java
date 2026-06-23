@@ -26,4 +26,15 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
     List<Dish> findByCategoryIdAndIsAvailableTrue(Integer categoryId);
 
     long countByIsAvailableFalse();
+    // Đếm số món ăn theo trạng thái hoạt động
+    long countByIsAvailable(boolean isAvailable);
+
+    // Lấy ra 4 món ăn mới nhất dựa trên ngày tạo giảm dần
+    List<Dish> findTop4ByOrderByCreatedAtDesc();
+
+    // THAY ĐỔI TẠI ĐÂY: Dùng d.category.isAvailable thay vì d.category.status cũ
+    @Query("SELECT d.category.name, d.category.isAvailable, COUNT(d) " +
+            "FROM Dish d " +
+            "GROUP BY d.category.id, d.category.name, d.category.isAvailable")
+    List<Object[]> getCategoryStatistics();
 }

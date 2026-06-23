@@ -11,7 +11,7 @@ import {DashboardPage} from './pages/DashboardPage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminTablesPage from './pages/admin/AdminTablesPage'
 import AdminDishesPage from './pages/admin/AdminDishesPage'
-
+import AdminMenuDashboardPage from './pages/admin/AdminMenuDashboardPage';
 import KitchenQueuePage from './pages/chef/KitchenQueuePage'
 import DishListPage from './pages/chef/DishListPage'
 
@@ -53,6 +53,7 @@ function App() {
                         <Route path="/admin/users" element={<AdminUsersPage/>}/>
                         <Route path="/admin/tables" element={<AdminTablesPage/>}/>
                         <Route path="/admin/dishes" element={<AdminDishesPage/>}/>
+                        <Route path="/admin/menu" element={<AdminMenuDashboardPage />} />
 
                         {/* CHEF */}
                         <Route path="/chef/dashboard" element={<ChefDashboardPage />} />
