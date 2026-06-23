@@ -11,6 +11,7 @@ import type {AxiosError} from "axios";
 
 type DraftItem = {
     qty: number;
+    originalQty?: number;
     note: string;
     orderItemId?: number | null;
     status?: OrderItemStatus;
@@ -41,6 +42,7 @@ export default function WaiterUpdateOrderPage() {
                         if (dish) {
                             draft[dish.dishId] = {
                                 qty: item.quantity,
+                                originalQty: item.quantity,
                                 note: item.note || "",
                                 orderItemId: item.orderItemId,
                                 status: item.status,
@@ -61,16 +63,8 @@ export default function WaiterUpdateOrderPage() {
     function getMinQty(dishId: number): number {
         const cur = orderDraft[dishId];
         if (!cur) return 0;
-        if (cur.status === "CANCELLED" || cur.status === "COMPLETE") {
-            const dish = menu.find(m => m.dishId === dishId);
-            if (!dish) return 0;
-            for (const o of servingOrders) {
-                for (const item of o.orderItems) {
-                    if (item.dishName === dish.name) {
-                        return item.quantity;
-                    }
-                }
-            }
+        if (cur.status === "CANCELLED" || cur.status === "COMPLETED") {
+            return cur.originalQty || 0;
         }
         return 0;
     }
@@ -215,8 +209,8 @@ export default function WaiterUpdateOrderPage() {
                                     className="waiter-note-input"
                                     disabled={locked}
                                 />
-                                {d.status === "COMPLETE" && (
-                                    <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng.</p>
+                                {d.status === "COMPLETED" && (
+                                    <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng dưới {minQty}.</p>
                                 )}
                                 {locked && (
                                     <p className="waiter-item-hint">Món đã hủy — không thể chỉnh sửa.</p>
