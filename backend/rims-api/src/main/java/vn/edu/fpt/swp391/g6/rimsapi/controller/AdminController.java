@@ -17,7 +17,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.*;
-
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -34,6 +34,7 @@ public class AdminController
     private final CategoryService categoryService;
     private final RevenueReportService revenueReportService;
     private final ReservationPerformanceScoreService reservationPerformanceScoreService;
+    private final DashboardService dashboardService;
 
     @GetMapping("/user/all")
     public List<UserResponse> getAllUsers()
@@ -278,5 +279,10 @@ public class AdminController
     {
         dishService.deleteDish(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/menu")
+    public ResponseEntity<MenuDashboardResponse> getMenuDashboard() {
+        MenuDashboardResponse data = dashboardService.getMenuDashboardData();
+        return ResponseEntity.ok(data);
     }
 }
