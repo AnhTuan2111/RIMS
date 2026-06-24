@@ -1,5 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.dto.response.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class UserResponse
 
     private RoleType role;
 
+    @JsonProperty("isActive")
     private boolean isActive;
 
     private LocalDateTime createdAt;

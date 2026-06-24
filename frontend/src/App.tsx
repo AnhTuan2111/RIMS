@@ -4,9 +4,11 @@ import {ActorProvider} from './context/ActorContext'
 
 import HomePage from './pages/home/HomePage'
 import LoginPage from './pages/login/LoginPage'
+import ForgotPasswordPage from './pages/login/ForgotPasswordPage'
 
 import DashboardLayout from './pages/DashboardLayout'
 import {DashboardPage} from './pages/DashboardPage'
+import ProfilePage from './pages/profile/ProfilePage'
 
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminTablesPage from './pages/admin/AdminTablesPage'
@@ -39,8 +41,9 @@ function App() {
                     {/* Homepage chung */}
                     <Route path="/" element={<HomePage/>}/>
 
-                    {/* Login */}
+                    {/* Auth */}
                     <Route path="/login" element={<LoginPage/>}/>
+                    <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
 
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     <Route path="/payment-failed" element={<PaymentFailed />} />
@@ -48,6 +51,7 @@ function App() {
                     {/* Khu vực sau đăng nhập */}
                     <Route element={<DashboardLayout/>}>
                         <Route path="/dashboard" element={<DashboardPage/>}/>
+                        <Route path="/profile" element={<ProfilePage/>}/>
 
                         {/* ADMIN */}
                         <Route path="/admin/users" element={<AdminUsersPage/>}/>

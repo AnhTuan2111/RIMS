@@ -1,9 +1,7 @@
-import { NavLink } from 'react-router-dom'
-import {
-    ROLE_LABELS,
-    roleMenus,
-} from '../../config/roleMenus'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { ROLE_LABELS, roleMenus } from '../../config/roleMenus'
 import { useActor } from '../../context/ActorContext'
+import { logout } from '../../api/auth'
 
 function getMenuIcon(path: string) {
     if (path.includes('dashboard')) return '▦'
@@ -15,21 +13,27 @@ function getMenuIcon(path: string) {
     if (path.includes('payments')) return '₫'
     if (path.includes('invoices')) return '▧'
     if (path.includes('users')) return '♙'
-
+    if (path.includes('profile')) return '👤'
     return '•'
 }
 
 export function Sidebar() {
     const { actor } = useActor()
-    const menus = roleMenus[actor]
+    const navigate = useNavigate()
+    const menus = roleMenus[actor] ?? []
+
+    const stored = localStorage.getItem('currentUser')
+    const currentUser = stored ? JSON.parse(stored) as { fullName: string; username: string } : null
+
+    const handleLogout = () => {
+        logout()
+        navigate('/login', { replace: true })
+    }
 
     return (
         <aside className="app-sidebar rims-sidebar">
             <div className="rims-sidebar-brand">
-                <div className="rims-sidebar-logo">
-                    R
-                </div>
-
+                <div className="rims-sidebar-logo">R</div>
                 <div>
                     <h2>RIMS</h2>
                     <p>Restaurant Operations</p>
@@ -37,10 +41,7 @@ export function Sidebar() {
             </div>
 
             <div className="rims-sidebar-role">
-                <div className="rims-role-icon">
-                    ✦
-                </div>
-
+                <div className="rims-role-icon">✦</div>
                 <div>
                     <small>Không gian làm việc</small>
                     <strong>{ROLE_LABELS[actor]}</strong>
@@ -48,43 +49,48 @@ export function Sidebar() {
             </div>
 
             <nav className="rims-sidebar-nav">
-                <p className="rims-sidebar-title">
-                    CHỨC NĂNG
-                </p>
+                <p className="rims-sidebar-title">CHỨC NĂNG</p>
 
                 {menus.map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}
                         className={({ isActive }) =>
-                            isActive
-                                ? 'rims-sidebar-link active'
-                                : 'rims-sidebar-link'
+                            isActive ? 'rims-sidebar-link active' : 'rims-sidebar-link'
                         }
                     >
-                        <span className="rims-menu-icon">
-                            {getMenuIcon(item.path)}
-                        </span>
-
-                        <span className="rims-menu-label">
-                            {item.label}
-                        </span>
-
-                        <span className="rims-menu-arrow">
-                            ›
-                        </span>
+                        <span className="rims-menu-icon">{getMenuIcon(item.path)}</span>
+                        <span className="rims-menu-label">{item.label}</span>
+                        <span className="rims-menu-arrow">›</span>
                     </NavLink>
                 ))}
             </nav>
 
             <div className="rims-sidebar-status">
                 <span className="rims-online-dot" />
-
                 <div>
-                    <strong>Hệ thống hoạt động</strong>
-                    <small>Kết nối backend ổn định</small>
+                    <strong>{currentUser?.fullName ?? currentUser?.username ?? 'Người dùng'}</strong>
+                    <small>Hệ thống hoạt động</small>
                 </div>
             </div>
+
+            <button
+                onClick={handleLogout}
+                style={{
+                    margin: '8px 16px 16px',
+                    padding: '10px',
+                    background: '#fee2e2',
+                    color: '#991b1b',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    width: 'calc(100% - 32px)',
+                }}
+            >
+                🚪 Đăng xuất
+            </button>
         </aside>
     )
 }

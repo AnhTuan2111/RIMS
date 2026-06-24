@@ -8,8 +8,8 @@ export default function LoginPage() {
     const navigate = useNavigate()
     const { setActor } = useActor()
 
-    const [username, setUsername] = useState('chef')
-    const [rawPassword, setRawPassword] = useState('123456')
+    const [username, setUsername] = useState('')
+    const [rawPassword, setRawPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -20,13 +20,8 @@ export default function LoginPage() {
             setIsLoading(true)
             setError(null)
 
-            const user = await login({
-                username,
-                rawPassword,
-            })
-
+            const user = await login({ username, rawPassword })
             const role = user.role as RoleType
-
             setActor(role)
             localStorage.setItem('selectedActor', role)
 
@@ -34,25 +29,23 @@ export default function LoginPage() {
                 case RoleType.ADMIN:
                     navigate('/dashboard', { replace: true })
                     return
-
                 case RoleType.CHEF:
                     navigate('/chef/orders', { replace: true })
                     return
-
                 case RoleType.WAITER:
                     navigate('/waiter/tables', { replace: true })
                     return
-
                 case RoleType.CASHIER:
                     navigate('/cashier/payments', { replace: true })
                     return
-
+                case RoleType.CUSTOMER:
+                    navigate('/profile', { replace: true })
+                    return
                 default:
                     navigate('/dashboard', { replace: true })
                     return
             }
-        } catch (error) {
-            console.error(error)
+        } catch {
             setError('Đăng nhập thất bại. Vui lòng kiểm tra tài khoản hoặc mật khẩu.')
         } finally {
             setIsLoading(false)
@@ -78,8 +71,9 @@ export default function LoginPage() {
                         Username
                         <input
                             value={username}
-                            onChange={(event) => setUsername(event.target.value)}
-                            placeholder="chef"
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Nhập tên đăng nhập"
+                            required
                         />
                     </label>
 
@@ -88,10 +82,17 @@ export default function LoginPage() {
                         <input
                             type="password"
                             value={rawPassword}
-                            onChange={(event) => setRawPassword(event.target.value)}
-                            placeholder="123456"
+                            onChange={(e) => setRawPassword(e.target.value)}
+                            placeholder="Nhập mật khẩu"
+                            required
                         />
                     </label>
+
+                    <div style={{ textAlign: 'right', marginBottom: '8px' }}>
+                        <Link to="/forgot-password" style={{ fontSize: '13px', color: '#4f46e5', textDecoration: 'none' }}>
+                            Quên mật khẩu?
+                        </Link>
+                    </div>
 
                     <button className="auth-submit" disabled={isLoading}>
                         {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
@@ -100,8 +101,8 @@ export default function LoginPage() {
 
                 <div className="login-demo">
                     <p>Tài khoản test:</p>
-                    <span>chef / 123456</span>
                     <span>admin / 123456</span>
+                    <span>chef / 123456</span>
                     <span>waiter / 123456</span>
                     <span>cashier / 123456</span>
                 </div>
