@@ -13,7 +13,7 @@ public class RevenueComparisonResponse {
 
     private BigDecimal difference;
 
-    private BigDecimal growthRate;
+    private double growthRate;
 
     private long days1;
 
@@ -22,6 +22,4 @@ public class RevenueComparisonResponse {
     private BigDecimal averageRevenue1;
 
     private BigDecimal averageRevenue2;
-
-    private String message;
 }

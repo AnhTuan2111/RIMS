@@ -18,8 +18,6 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
         { label: 'Quản lý nhân viên', path: '/admin/users' },
         { label: 'Quản lý bàn', path: '/admin/tables' },
         { label: 'Quản lý món ăn', path: '/admin/dishes' },
-        { label: 'Statistics', path: '/admin/statistics' },
-        { label: 'Invoice History', path: '/admin/invoice-history' },
     ],
 
     [RoleType.CHEF]: [

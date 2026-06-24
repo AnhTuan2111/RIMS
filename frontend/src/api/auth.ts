@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { AuthUser, LoginRequest, LoginResponse } from '../types/auth'
+import type { LoginRequest, LoginResponse } from '../types/auth'
 import { clearTokens, setTokens } from '../utils/tokenStorage'
 
 export async function login(request: LoginRequest): Promise<LoginResponse> {
@@ -22,14 +22,4 @@ export async function login(request: LoginRequest): Promise<LoginResponse> {
 export function logout() {
     clearTokens()
     localStorage.removeItem('currentUser')
-}
-
-export async function getCurrentUser(): Promise<AuthUser> {
-    const currentUser = localStorage.getItem('currentUser')
-
-    if (!currentUser) {
-        throw new Error('Current user not found')
-    }
-
-    return JSON.parse(currentUser) as AuthUser
 }

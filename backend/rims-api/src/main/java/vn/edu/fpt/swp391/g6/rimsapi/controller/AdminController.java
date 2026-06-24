@@ -18,7 +18,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -63,8 +62,6 @@ public class AdminController
 
         return userService.updateProfile(id, request);
     }
-
-
 
     @GetMapping("/invoice/history")
     public List<InvoiceHistoryResponse> getInvoiceHistory()
@@ -133,8 +130,6 @@ public class AdminController
     }
 
 
-
-
     @GetMapping("/revenue/compare")
     public RevenueComparisonResponse compareRevenue(
 
@@ -165,66 +160,6 @@ public class AdminController
                 endDate1,
                 startDate2,
                 endDate2
-        );
-    }
-
-    @GetMapping("/revenue/anomaly")
-    public RevenueAnomalyResponse detectRevenueAnomaly(
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate targetDate,
-
-            @RequestParam(defaultValue = "7")
-            Integer referenceDays,
-
-            @RequestParam(defaultValue = "30")
-            BigDecimal spikeThresholdPercent,
-
-            @RequestParam(defaultValue = "30")
-            BigDecimal dropThresholdPercent
-    )
-    {
-
-        return revenueReportService.detectRevenueAnomaly(
-                targetDate,
-                referenceDays,
-                spikeThresholdPercent,
-                dropThresholdPercent
-        );
-    }
-
-    @GetMapping("/revenue/chart")
-    public List<RevenueChartPointResponse> getRevenueChartData(
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate fromDate,
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate toDate,
-
-            @RequestParam(defaultValue = "7")
-            Integer referenceDays,
-
-            @RequestParam(defaultValue = "30")
-            BigDecimal spikeThresholdPercent,
-
-            @RequestParam(defaultValue = "30")
-            BigDecimal dropThresholdPercent
-    )
-    {
-
-        return revenueReportService.getRevenueChartData(
-                fromDate,
-                toDate,
-                referenceDays,
-                spikeThresholdPercent,
-                dropThresholdPercent
         );
     }
 

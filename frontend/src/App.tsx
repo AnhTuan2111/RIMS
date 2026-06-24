@@ -3,7 +3,7 @@ import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
 import {ActorProvider} from './context/ActorContext'
 
 import HomePage from './pages/home/HomePage'
-// import LoginPage from './pages/login/LoginPage'
+import LoginPage from './pages/login/LoginPage'
 
 import DashboardLayout from './pages/DashboardLayout'
 import {DashboardPage} from './pages/DashboardPage'
@@ -11,7 +11,6 @@ import {DashboardPage} from './pages/DashboardPage'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminTablesPage from './pages/admin/AdminTablesPage'
 import AdminDishesPage from './pages/admin/AdminDishesPage'
-import AdminInvoiceHistoryPage from './pages/admin/AdminInvoiceHistoryPage'
 
 import KitchenQueuePage from './pages/chef/KitchenQueuePage'
 import DishListPage from './pages/chef/DishListPage'
@@ -20,6 +19,7 @@ import ChefDashboardPage from "./pages/chef/ChefDashboardPage.tsx"
 import CompletedOrdersPage from './pages/chef/CompletedOrdersPage'
 
 import CashierPaymentsPage from './pages/cashier/CashierPaymentsPage'
+import CashierInvoicesPage from './pages/cashier/CashierInvoicesPage'
 import PaymentSuccess from './pages/cashier/PaymentSuccess'
 import PaymentFailed from './pages/cashier/PaymentFailed'
 
@@ -37,13 +37,10 @@ function App() {
             <ActorProvider>
                 <Routes>
                     {/* Homepage chung */}
-                    {/* <Route path="/" element={<HomePage/>}/> */}
-                    <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
-                    <Route path="/home" element={<HomePage/>}/>
+                    <Route path="/" element={<HomePage/>}/>
 
                     {/* Login */}
-                    {/* <Route path="/login" element={<LoginPage/>}/> */}
-                    <Route path="/login" element={<Navigate to="/" replace/>}/>
+                    <Route path="/login" element={<LoginPage/>}/>
 
                     <Route path="/payment-success" element={<PaymentSuccess />} />
                     <Route path="/payment-failed" element={<PaymentFailed />} />
@@ -56,8 +53,6 @@ function App() {
                         <Route path="/admin/users" element={<AdminUsersPage/>}/>
                         <Route path="/admin/tables" element={<AdminTablesPage/>}/>
                         <Route path="/admin/dishes" element={<AdminDishesPage/>}/>
-                        <Route path="/admin/statistics" element={<DashboardPage/>}/>
-                        <Route path="/admin/invoice-history" element={<AdminInvoiceHistoryPage/>}/>
 
                         {/* CHEF */}
                         <Route path="/chef/dashboard" element={<ChefDashboardPage />} />
@@ -76,7 +71,7 @@ function App() {
 
                         {/* CASHIER */}
                         <Route path="/cashier/payments" element={<CashierPaymentsPage/>}/>
-                        <Route path="/cashier/invoices" element={<AdminInvoiceHistoryPage/>}/>
+                        <Route path="/cashier/invoices" element={<CashierInvoicesPage/>}/>
                     </Route>
 
                     <Route path="*" element={<Navigate to="/" replace/>}/>

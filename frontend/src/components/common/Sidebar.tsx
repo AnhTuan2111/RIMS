@@ -5,48 +5,7 @@ import {
 } from '../../config/roleMenus'
 import { useActor } from '../../context/ActorContext'
 
-function StatisticsIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            className="rims-menu-svg-icon"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-        >
-            <rect x="5" y="11" width="3.5" height="7" rx="1" fill="currentColor" />
-            <rect x="10.25" y="7" width="3.5" height="11" rx="1" fill="currentColor" />
-            <rect x="15.5" y="4" width="3.5" height="14" rx="1" fill="currentColor" />
-        </svg>
-    )
-}
-
-function InvoiceHistoryIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            className="rims-menu-svg-icon"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M7 4.5h10a1.5 1.5 0 0 1 1.5 1.5v13l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2-2 1.2V6A1.5 1.5 0 0 1 7 4.5Z" />
-            <path d="M9 8.5h6" />
-            <path d="M9 12h6" />
-            <path d="M9 15.5h4" />
-        </svg>
-    )
-}
-
-function getMenuIcon(label: string, path: string) {
-    if (label === 'Statistics') return <StatisticsIcon />
-    if (label === 'Invoice History') return <InvoiceHistoryIcon />
+function getMenuIcon(path: string) {
     if (path.includes('dashboard')) return '▦'
     if (path.includes('completed')) return '✓'
     if (path.includes('orders')) return '⌁'
@@ -104,7 +63,7 @@ export function Sidebar() {
                         }
                     >
                         <span className="rims-menu-icon">
-                            {getMenuIcon(item.label, item.path)}
+                            {getMenuIcon(item.path)}
                         </span>
 
                         <span className="rims-menu-label">
