@@ -82,7 +82,6 @@ export default function AdminMenuDashboardPage() {
 
             {/* TIÊU ĐỀ TRANG */}
             <div style={{ marginBottom: '20px' }}>
-                <small style={{ color: '#6c757d', fontSize: '13px' }}>Home &gt; Menu Management</small>
                 <h2 style={{ margin: '4px 0 0 0', fontSize: '18px', fontWeight: 'bold', color: '#1e293b' }}>
                     📋 QUẢN LÝ MENU
                 </h2>
