@@ -1,10 +1,14 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.BestSellingReportResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueAnomalyResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueChartPointResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueComparisonResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueReportResponse;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 
 public interface RevenueReportService
@@ -31,6 +35,21 @@ public interface RevenueReportService
             LocalDate endDate1,
             LocalDate startDate2,
             LocalDate endDate2
+    );
+
+    RevenueAnomalyResponse detectRevenueAnomaly(
+            LocalDate targetDate,
+            Integer referenceDays,
+            BigDecimal spikeThresholdPercent,
+            BigDecimal dropThresholdPercent
+    );
+
+    List<RevenueChartPointResponse> getRevenueChartData(
+            LocalDate fromDate,
+            LocalDate toDate,
+            Integer referenceDays,
+            BigDecimal spikeThresholdPercent,
+            BigDecimal dropThresholdPercent
     );
 
     // best-selling
