@@ -11,8 +11,10 @@ const ActorContext = createContext<ActorContextType | null>(null)
 
 const DEFAULT_ACTOR: RoleType = RoleType.ADMIN
 
+const ALL_ROLES = Object.values(RoleType)
+
 function isActorRole(value: string | null): value is RoleType {
-    return value === RoleType.ADMIN || value === RoleType.CHEF || value === RoleType.WAITER || value === RoleType.CASHIER
+    return ALL_ROLES.includes(value as RoleType)
 }
 
 export function ActorProvider({ children }: { children: ReactNode }) {
@@ -35,10 +37,8 @@ export function ActorProvider({ children }: { children: ReactNode }) {
 
 export function useActor() {
     const context = useContext(ActorContext)
-
     if (!context) {
         throw new Error('useActor must be used inside ActorProvider')
     }
-
     return context
 }
