@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from 'react'
 import {
     getDishDetail,
@@ -9,6 +8,8 @@ import {
     type KitchenOrderItemResponse,
 } from '../../api/chef'
 
+const ITEMS_PER_PAGE = 6
+
 type SortOrder = 'OLDEST' | 'NEWEST'
 
 function formatTime(value?: string) {
@@ -16,14 +17,22 @@ function formatTime(value?: string) {
         return '—'
     }
 
-    return new Date(value).toLocaleTimeString('vi-VN', {
+    const date = new Date(value)
+
+    if (Number.isNaN(date.getTime())) {
+        return value
+    }
+
+    return date.toLocaleTimeString('vi-VN', {
         hour: '2-digit',
         minute: '2-digit',
     })
 }
 
 export default function KitchenQueuePage() {
-    const [items, setItems] = useState<KitchenOrderItemResponse[]>([])
+    const [items, setItems] =
+        useState<KitchenOrderItemResponse[]>([])
+
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -31,35 +40,190 @@ export default function KitchenQueuePage() {
     const [selectedTable, setSelectedTable] = useState('ALL')
     const [sortOrder, setSortOrder] =
         useState<SortOrder>('OLDEST')
+    const [currentPage, setCurrentPage] = useState(1)
 
     const [selectedDish, setSelectedDish] =
         useState<DishDetailResponse | null>(null)
-
     const [isDetailLoading, setIsDetailLoading] =
         useState(false)
-
     const [detailError, setDetailError] =
         useState<string | null>(null)
 
-    const [showCancelForm, setShowCancelForm] =
-        useState(false)
+    const [completingItemId, setCompletingItemId] =
+        useState<number | null>(null)
 
     const [cancelReason, setCancelReason] = useState('')
-
     const [cancelError, setCancelError] =
         useState<string | null>(null)
-
-    const [isCancelling, setIsCancelling] =
+    const [isCancelSubmitting, setIsCancelSubmitting] =
         useState(false)
 
     useEffect(() => {
-        void loadKitchenOrders()
+        let isCancelled = false
+
+        getKitchenOrders()
+            .then((data) => {
+                if (!isCancelled) {
+                    setItems(data)
+                    setError(null)
+                }
+            })
+            .catch((requestError) => {
+                console.error(requestError)
+
+                if (!isCancelled) {
+                    setError(
+                        'Không thể tải danh sách món cần chế biến. Hãy kiểm tra backend hoặc đăng nhập bằng tài khoản Chef.',
+                    )
+                }
+            })
+            .finally(() => {
+                if (!isCancelled) {
+                    setIsLoading(false)
+                }
+            })
+
+        return () => {
+            isCancelled = true
+        }
     }, [])
 
-    const tableNumbers = useMemo(() => {
+    async function loadKitchenOrders() {
+        try {
+            setIsLoading(true)
+            setError(null)
+
+            const data = await getKitchenOrders()
+            setItems(data)
+            setCurrentPage(1)
+        } catch (requestError) {
+            console.error(requestError)
+            setError(
+                'Không thể tải danh sách món cần chế biến. Hãy kiểm tra backend hoặc đăng nhập bằng tài khoản Chef.',
+            )
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    async function openDishDetail(orderItemId: number) {
+        try {
+            setIsDetailLoading(true)
+            setDetailError(null)
+            setSelectedDish(null)
+            setCancelReason('')
+            setCancelError(null)
+
+            const data = await getDishDetail(orderItemId)
+            setSelectedDish(data)
+        } catch (requestError) {
+            console.error(requestError)
+            setDetailError('Không thể tải chi tiết món.')
+        } finally {
+            setIsDetailLoading(false)
+        }
+    }
+
+    function closeDishDetail() {
+        setSelectedDish(null)
+        setDetailError(null)
+        setIsDetailLoading(false)
+        setCancelReason('')
+        setCancelError(null)
+        setIsCancelSubmitting(false)
+    }
+
+    async function handleComplete(orderItemId: number) {
+        try {
+            setCompletingItemId(orderItemId)
+
+            await updateOrderItemStatus(
+                orderItemId,
+                'COMPLETED',
+            )
+
+            setItems((currentItems) =>
+                currentItems.filter(
+                    (item) =>
+                        item.orderItemId !== orderItemId,
+                ),
+            )
+
+            if (selectedDish?.orderItemId === orderItemId) {
+                closeDishDetail()
+            }
+        } catch (requestError) {
+            console.error(requestError)
+            alert('Không thể cập nhật trạng thái món.')
+        } finally {
+            setCompletingItemId(null)
+        }
+    }
+
+    async function handleCancelRequest() {
+        if (!selectedDish) {
+            return
+        }
+
+        const normalizedReason = cancelReason.trim()
+
+        if (!normalizedReason) {
+            setCancelError('Vui lòng nhập lý do hủy món.')
+            return
+        }
+
+        if (normalizedReason.length > 500) {
+            setCancelError(
+                'Lý do hủy không được vượt quá 500 ký tự.',
+            )
+            return
+        }
+
+        try {
+            setIsCancelSubmitting(true)
+            setCancelError(null)
+
+            await requestCancelDish(
+                selectedDish.orderItemId,
+                normalizedReason,
+            )
+
+            setItems((currentItems) =>
+                currentItems.filter(
+                    (item) =>
+                        item.orderItemId !==
+                        selectedDish.orderItemId,
+                ),
+            )
+
+            closeDishDetail()
+        } catch (requestError) {
+            console.error(requestError)
+            setCancelError(
+                'Không thể gửi yêu cầu hủy món.',
+            )
+        } finally {
+            setIsCancelSubmitting(false)
+        }
+    }
+
+    function clearFilters() {
+        setSearchText('')
+        setSelectedTable('ALL')
+        setSortOrder('OLDEST')
+        setCurrentPage(1)
+    }
+
+    const tableNumbers = useMemo<string[]>(() => {
         return Array.from(
             new Set(items.map((item) => item.tableNumber)),
-        ).sort()
+        ).sort((firstTable, secondTable) =>
+            firstTable.localeCompare(
+                secondTable,
+                'vi',
+                { numeric: true },
+            ),
+        )
     }, [items])
 
     const filteredItems = useMemo(() => {
@@ -99,254 +263,138 @@ export default function KitchenQueuePage() {
             })
     }, [items, searchText, selectedTable, sortOrder])
 
-    async function loadKitchenOrders() {
-        try {
-            setIsLoading(true)
-            setError(null)
+    const totalPages = Math.max(
+        1,
+        Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
+    )
 
-            const data = await getKitchenOrders()
-            setItems(data)
-        } catch (error) {
-            console.error(error)
+    const safeCurrentPage = Math.min(
+        currentPage,
+        totalPages,
+    )
 
-            setError(
-                'Không thể tải danh sách món cần chế biến.',
-            )
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    const startIndex =
+        (safeCurrentPage - 1) * ITEMS_PER_PAGE
 
-    async function openDishDetail(orderItemId: number) {
-        try {
-            setIsDetailLoading(true)
-            setDetailError(null)
-            setSelectedDish(null)
-            resetCancelForm()
+    const paginatedItems = filteredItems.slice(
+        startIndex,
+        startIndex + ITEMS_PER_PAGE,
+    )
 
-            const data = await getDishDetail(orderItemId)
-            setSelectedDish(data)
-        } catch (error) {
-            console.error(error)
-            setDetailError('Không thể tải chi tiết món.')
-        } finally {
-            setIsDetailLoading(false)
-        }
-    }
+    const firstVisibleItem =
+        filteredItems.length === 0 ? 0 : startIndex + 1
 
-    function resetCancelForm() {
-        setShowCancelForm(false)
-        setCancelReason('')
-        setCancelError(null)
-    }
-
-    function closeDishDetail() {
-        if (isCancelling) {
-            return
-        }
-
-        setSelectedDish(null)
-        setDetailError(null)
-        setIsDetailLoading(false)
-        resetCancelForm()
-    }
-
-    function clearFilters() {
-        setSearchText('')
-        setSelectedTable('ALL')
-        setSortOrder('OLDEST')
-    }
-
-    async function handleComplete(orderItemId: number) {
-        try {
-            await updateOrderItemStatus(
-                orderItemId,
-                'COMPLETED',
-            )
-
-            setItems((currentItems) =>
-                currentItems.filter(
-                    (item) =>
-                        item.orderItemId !== orderItemId,
-                ),
-            )
-
-            if (
-                selectedDish?.orderItemId ===
-                orderItemId
-            ) {
-                closeDishDetail()
-            }
-        } catch (error) {
-            console.error(error)
-            alert('Không thể cập nhật trạng thái món.')
-        }
-    }
-
-    async function handleCancelRequest(
-        orderItemId: number,
-    ) {
-        const reason = cancelReason.trim()
-
-        if (!reason) {
-            setCancelError(
-                'Vui lòng nhập lý do yêu cầu hủy món.',
-            )
-            return
-        }
-
-        try {
-            setIsCancelling(true)
-            setCancelError(null)
-
-            await requestCancelDish(orderItemId, reason)
-
-            setItems((currentItems) =>
-                currentItems.filter(
-                    (item) =>
-                        item.orderItemId !== orderItemId,
-                ),
-            )
-
-            setSelectedDish(null)
-            resetCancelForm()
-
-            alert('Đã gửi yêu cầu hủy món.')
-        } catch (error) {
-            console.error(error)
-
-            setCancelError(
-                'Không thể gửi yêu cầu hủy món.',
-            )
-        } finally {
-            setIsCancelling(false)
-        }
-    }
+    const lastVisibleItem = Math.min(
+        startIndex + ITEMS_PER_PAGE,
+        filteredItems.length,
+    )
 
     if (isLoading) {
         return (
-            <section className="page-card kitchen-loading-state">
+            <div className="page-card">
                 Đang tải danh sách món cần chế biến...
-            </section>
+            </div>
         )
     }
 
     if (error) {
         return (
-            <section className="page-card kitchen-error-state">
-                <h2>Không thể tải dữ liệu</h2>
+            <div className="page-card">
+                <h2>Lỗi tải dữ liệu</h2>
                 <p>{error}</p>
 
                 <button
                     type="button"
                     className="primary-button"
-                    onClick={() =>
-                        void loadKitchenOrders()
-                    }
+                    onClick={() => void loadKitchenOrders()}
                 >
                     Thử lại
                 </button>
-            </section>
+            </div>
         )
     }
 
     return (
         <div className="chef-page">
-            <section className="kitchen-page-header">
-                <div>
-                    <h2>Hàng đợi bếp</h2>
-
-                    <p>
-                        Theo dõi và xử lý các món đang chờ chế biến.
-                    </p>
-                </div>
-
-                <div className="kitchen-header-actions">
-                    <div className="kitchen-count-box">
-                        <span>Đang chờ</span>
-                        <strong>{items.length}</strong>
+            <section className="page-card">
+                <div className="page-header">
+                    <div>
+                        <h2>Đơn cần chế biến</h2>
+                        <p>
+                            Chọn món để xem chi tiết, hoàn
+                            thành món hoặc gửi yêu cầu hủy.
+                        </p>
                     </div>
 
-                    <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={() =>
-                            void loadKitchenOrders()
-                        }
-                    >
-                        Làm mới
-                    </button>
+                    <div className="chef-summary">
+                        <div>
+                            <strong>{items.length}</strong>
+                            <span>Đang chờ làm</span>
+                        </div>
+
+                        <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() =>
+                                void loadKitchenOrders()
+                            }
+                        >
+                            Làm mới
+                        </button>
+                    </div>
                 </div>
             </section>
 
-            <section className="page-card kitchen-filter-panel">
-                <input
-                    type="text"
-                    value={searchText}
-                    onChange={(event) =>
-                        setSearchText(event.target.value)
-                    }
-                    placeholder="Tìm tên món, số bàn hoặc mã order"
-                />
+            <section className="page-card">
+                <div className="chef-filter-bar">
+                    <input
+                        type="search"
+                        value={searchText}
+                        placeholder="Tìm tên món, bàn hoặc mã đơn..."
+                        onChange={(event) => {
+                            setSearchText(event.target.value)
+                            setCurrentPage(1)
+                        }}
+                    />
 
-                <select
-                    value={selectedTable}
-                    onChange={(event) =>
-                        setSelectedTable(event.target.value)
-                    }
-                >
-                    <option value="ALL">
-                        Tất cả bàn
-                    </option>
-
-                    {tableNumbers.map((tableNumber) => (
-                        <option
-                            key={tableNumber}
-                            value={tableNumber}
-                        >
-                            Bàn {tableNumber}
+                    <select
+                        value={selectedTable}
+                        onChange={(event) => {
+                            setSelectedTable(event.target.value)
+                            setCurrentPage(1)
+                        }}
+                    >
+                        <option value="ALL">
+                            Tất cả bàn
                         </option>
-                    ))}
-                </select>
 
-                <select
-                    value={sortOrder}
-                    onChange={(event) =>
-                        setSortOrder(
-                            event.target.value as SortOrder,
-                        )
-                    }
-                >
-                    <option value="OLDEST">
-                        Cũ nhất trước
-                    </option>
+                        {tableNumbers.map((tableNumber) => (
+                            <option
+                                key={tableNumber}
+                                value={tableNumber}
+                            >
+                                Bàn {tableNumber}
+                            </option>
+                        ))}
+                    </select>
 
-                    <option value="NEWEST">
-                        Mới nhất trước
-                    </option>
-                </select>
+                    <select
+                        value={sortOrder}
+                        onChange={(event) => {
+                            setSortOrder(
+                                event.target.value as SortOrder,
+                            )
+                            setCurrentPage(1)
+                        }}
+                    >
+                        <option value="OLDEST">
+                            Cũ nhất trước
+                        </option>
 
-                <button
-                    type="button"
-                    className="secondary-button"
-                    onClick={clearFilters}
-                >
-                    Xóa bộ lọc
-                </button>
-            </section>
-
-            {items.length === 0 ? (
-                <section className="page-card kitchen-empty-state">
-                    <h3>Không có món đang chờ</h3>
-                    <p>Tất cả món hiện tại đã được xử lý.</p>
-                </section>
-            ) : filteredItems.length === 0 ? (
-                <section className="page-card kitchen-empty-state">
-                    <h3>Không tìm thấy món</h3>
-
-                    <p>
-                        Không có món nào phù hợp với bộ lọc.
-                    </p>
+                        <option value="NEWEST">
+                            Mới nhất trước
+                        </option>
+                    </select>
 
                     <button
                         type="button"
@@ -355,91 +403,178 @@ export default function KitchenQueuePage() {
                     >
                         Xóa bộ lọc
                     </button>
+                </div>
+            </section>
+
+            {filteredItems.length === 0 ? (
+                <section className="page-card">
+                    <h2>Không tìm thấy món phù hợp</h2>
+                    <p>
+                        Hãy thay đổi từ khóa hoặc xóa bộ lọc.
+                    </p>
                 </section>
             ) : (
-                <div className="kitchen-simple-grid">
-                    {filteredItems.map((item) => (
-                        <article
-                            className="kitchen-simple-card"
-                            key={item.orderItemId}
-                            onClick={() =>
-                                void openDishDetail(
-                                    item.orderItemId,
-                                )
-                            }
-                        >
-                            <div className="kitchen-card-top">
-                                <div>
-                                    <span className="kitchen-table-label">
-                                        Bàn {item.tableNumber}
+                <>
+                    <div className="kitchen-board">
+                        {paginatedItems.map((item) => (
+                            <section
+                                className="kitchen-order-card clickable-card"
+                                key={item.orderItemId}
+                                onClick={() =>
+                                    void openDishDetail(
+                                        item.orderItemId,
+                                    )
+                                }
+                            >
+                                <div className="kitchen-order-header">
+                                    <div>
+                                        <h3>
+                                            Bàn {item.tableNumber}
+                                        </h3>
+
+                                        <p>
+                                            Order #{item.orderId} · Item #
+                                            {item.orderItemId} ·{' '}
+                                            {formatTime(item.createdAt)}
+                                        </p>
+                                    </div>
+
+                                    <span className="status-badge preparing">
+                                        Đang làm
                                     </span>
-
-                                    <small>
-                                        Order #{item.orderId} ·{' '}
-                                        {formatTime(
-                                            item.createdAt,
-                                        )}
-                                    </small>
                                 </div>
 
-                                <span className="kitchen-status">
-                                    Đang làm
-                                </span>
-                            </div>
+                                <div className="kitchen-item-list">
+                                    <div className="kitchen-item">
+                                        <div>
+                                            <strong>
+                                                {item.dishName}
+                                            </strong>
 
-                            <div className="kitchen-card-body">
-                                <div>
-                                    <h3>{item.dishName}</h3>
+                                            <p>
+                                                Số lượng: x
+                                                {item.quantity}
+                                            </p>
 
-                                    <p>
-                                        Số lượng: x{item.quantity}
-                                    </p>
+                                            <small>
+                                                Chọn để xem chi tiết
+                                            </small>
+                                        </div>
+
+                                        <div className="kitchen-item-actions">
+                                            <button
+                                                type="button"
+                                                className="primary-button"
+                                                disabled={
+                                                    completingItemId ===
+                                                    item.orderItemId
+                                                }
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    void handleComplete(
+                                                        item.orderItemId,
+                                                    )
+                                                }}
+                                            >
+                                                {completingItemId ===
+                                                item.orderItemId
+                                                    ? 'Đang cập nhật...'
+                                                    : 'Xong món'}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
+                            </section>
+                        ))}
+                    </div>
 
-                                <button
-                                    type="button"
-                                    className="kitchen-complete-button"
-                                    onClick={(event) => {
-                                        event.stopPropagation()
+                    <div className="chef-pagination">
+                        <div className="pagination-result-info">
+                            Hiển thị {firstVisibleItem}–
+                            {lastVisibleItem} trong{' '}
+                            {filteredItems.length} món
+                        </div>
 
-                                        void handleComplete(
-                                            item.orderItemId,
-                                        )
-                                    }}
-                                >
-                                    Xong món
-                                </button>
+                        <div className="pagination-controls">
+                            <button
+                                type="button"
+                                className="pagination-button"
+                                disabled={safeCurrentPage === 1}
+                                onClick={() =>
+                                    setCurrentPage(
+                                        safeCurrentPage - 1,
+                                    )
+                                }
+                            >
+                                ← Trang trước
+                            </button>
+
+                            <div className="pagination-pages">
+                                {Array.from(
+                                    { length: totalPages },
+                                    (_, index) => index + 1,
+                                ).map((pageNumber) => (
+                                    <button
+                                        type="button"
+                                        key={pageNumber}
+                                        className={
+                                            pageNumber ===
+                                            safeCurrentPage
+                                                ? 'pagination-number active'
+                                                : 'pagination-number'
+                                        }
+                                        onClick={() =>
+                                            setCurrentPage(
+                                                pageNumber,
+                                            )
+                                        }
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                ))}
                             </div>
-                        </article>
-                    ))}
-                </div>
+
+                            <button
+                                type="button"
+                                className="pagination-button"
+                                disabled={
+                                    safeCurrentPage === totalPages
+                                }
+                                onClick={() =>
+                                    setCurrentPage(
+                                        safeCurrentPage + 1,
+                                    )
+                                }
+                            >
+                                Trang sau →
+                            </button>
+                        </div>
+                    </div>
+                </>
             )}
 
-            {(isDetailLoading ||
-                detailError ||
-                selectedDish) && (
+            {(isDetailLoading || detailError || selectedDish) && (
                 <div
                     className="modal-backdrop"
                     onClick={closeDishDetail}
                 >
                     <div
-                        className="modal-card kitchen-detail-modal"
+                        className="modal-card"
                         onClick={(event) =>
                             event.stopPropagation()
                         }
                     >
                         <div className="modal-header">
                             <div>
-                                <h2>Chi tiết món</h2>
-                                <p>
-                                    Thông tin món cần chế biến.
-                                </p>
+                                <h2>
+                                    Chi tiết món cần chế biến
+                                </h2>
+                                <p>Thông tin chi tiết từ bếp.</p>
                             </div>
 
                             <button
                                 type="button"
                                 className="modal-close"
-                                disabled={isCancelling}
                                 onClick={closeDishDetail}
                             >
                                 ×
@@ -448,7 +583,7 @@ export default function KitchenQueuePage() {
 
                         {isDetailLoading && (
                             <div className="modal-body">
-                                Đang tải chi tiết món...
+                                <p>Đang tải chi tiết món...</p>
                             </div>
                         )}
 
@@ -463,13 +598,11 @@ export default function KitchenQueuePage() {
                         {selectedDish && (
                             <>
                                 <div className="modal-body">
-                                    <div className="kitchen-detail-grid">
+                                    <div className="detail-grid">
                                         <div>
                                             <span>Bàn</span>
                                             <strong>
-                                                {
-                                                    selectedDish.tableNumber
-                                                }
+                                                {selectedDish.tableNumber}
                                             </strong>
                                         </div>
 
@@ -486,9 +619,7 @@ export default function KitchenQueuePage() {
                                         <div>
                                             <span>Tên món</span>
                                             <strong>
-                                                {
-                                                    selectedDish.dishName
-                                                }
+                                                {selectedDish.dishName}
                                             </strong>
                                         </div>
 
@@ -496,18 +627,14 @@ export default function KitchenQueuePage() {
                                             <span>Số lượng</span>
                                             <strong>
                                                 x
-                                                {
-                                                    selectedDish.quantity
-                                                }
+                                                {selectedDish.quantity}
                                             </strong>
                                         </div>
 
                                         <div>
                                             <span>Trạng thái</span>
                                             <strong>
-                                                {
-                                                    selectedDish.status
-                                                }
+                                                {selectedDish.status}
                                             </strong>
                                         </div>
 
@@ -521,138 +648,90 @@ export default function KitchenQueuePage() {
                                         </div>
                                     </div>
 
-                                    <div className="kitchen-detail-section">
+                                    <div className="detail-section">
                                         <h3>Mô tả món</h3>
-
                                         <p>
                                             {selectedDish.description ||
                                                 'Không có mô tả.'}
                                         </p>
                                     </div>
 
-                                    <div className="kitchen-detail-section">
+                                    <div className="detail-section">
                                         <h3>Ghi chú</h3>
-
                                         <p>
                                             {selectedDish.note ||
                                                 'Không có ghi chú.'}
                                         </p>
                                     </div>
 
-                                    {showCancelForm && (
-                                        <div className="kitchen-cancel-form">
-                                            <h3>Yêu cầu hủy món</h3>
+                                    <div className="cancel-request-box">
+                                        <h3>Yêu cầu hủy món</h3>
 
-                                            <textarea
-                                                value={
-                                                    cancelReason
-                                                }
-                                                onChange={(
-                                                    event,
-                                                ) => {
-                                                    setCancelReason(
-                                                        event
-                                                            .target
-                                                            .value,
-                                                    )
+                                        <textarea
+                                            rows={4}
+                                            maxLength={500}
+                                            value={cancelReason}
+                                            placeholder="Nhập lý do hủy món..."
+                                            onChange={(event) => {
+                                                setCancelReason(
+                                                    event.target.value,
+                                                )
+                                                setCancelError(null)
+                                            }}
+                                        />
 
-                                                    setCancelError(
-                                                        null,
-                                                    )
-                                                }}
-                                                placeholder="Nhập lý do yêu cầu hủy món"
-                                                maxLength={500}
-                                                rows={4}
-                                            />
-
-                                            <small>
-                                                {
-                                                    cancelReason.length
-                                                }
-                                                /500
-                                            </small>
-
-                                            {cancelError && (
-                                                <p className="modal-error">
-                                                    {
-                                                        cancelError
-                                                    }
-                                                </p>
-                                            )}
+                                        <div className="cancel-reason-count">
+                                            {cancelReason.length}/500
                                         </div>
-                                    )}
+
+                                        {cancelError && (
+                                            <p className="modal-error">
+                                                {cancelError}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="modal-footer">
-                                    {showCancelForm ? (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className="secondary-button"
-                                                disabled={
-                                                    isCancelling
-                                                }
-                                                onClick={
-                                                    resetCancelForm
-                                                }
-                                            >
-                                                Quay lại
-                                            </button>
+                                    <button
+                                        type="button"
+                                        className="secondary-button"
+                                        onClick={closeDishDetail}
+                                    >
+                                        Quay lại
+                                    </button>
 
-                                            <button
-                                                type="button"
-                                                className="danger-button"
-                                                disabled={
-                                                    isCancelling
-                                                }
-                                                onClick={() =>
-                                                    void handleCancelRequest(
-                                                        selectedDish.orderItemId,
-                                                    )
-                                                }
-                                            >
-                                                {isCancelling
-                                                    ? 'Đang gửi...'
-                                                    : 'Gửi yêu cầu hủy'}
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className="secondary-button"
-                                                onClick={
-                                                    closeDishDetail
-                                                }
-                                            >
-                                                Đóng
-                                            </button>
+                                    <button
+                                        type="button"
+                                        className="danger-button"
+                                        disabled={isCancelSubmitting}
+                                        onClick={() =>
+                                            void handleCancelRequest()
+                                        }
+                                    >
+                                        {isCancelSubmitting
+                                            ? 'Đang gửi...'
+                                            : 'Gửi yêu cầu hủy'}
+                                    </button>
 
-                                            <button
-                                                type="button"
-                                                className="danger-button"
-                                                onClick={() =>
-                                                    setShowCancelForm(
-                                                        true,
-                                                    )
-                                                }
-                                            >
-                                                Yêu cầu hủy
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                className="primary-button"
-                                                onClick={() =>
-                                                    void handleComplete(
-                                                        selectedDish.orderItemId,
-                                                    )
-                                                }
-                                            >
-                                                Xong món
-                                            </button>
-                                        </>
-                                    )}
+                                    <button
+                                        type="button"
+                                        className="primary-button"
+                                        disabled={
+                                            completingItemId ===
+                                            selectedDish.orderItemId
+                                        }
+                                        onClick={() =>
+                                            void handleComplete(
+                                                selectedDish.orderItemId,
+                                            )
+                                        }
+                                    >
+                                        {completingItemId ===
+                                        selectedDish.orderItemId
+                                            ? 'Đang cập nhật...'
+                                            : 'Xong món'}
+                                    </button>
                                 </div>
                             </>
                         )}

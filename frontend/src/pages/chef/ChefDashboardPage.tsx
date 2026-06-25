@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
     getChefDashboard,
@@ -11,250 +11,207 @@ export default function ChefDashboardPage() {
         useState<ChefDashboardResponse | null>(null)
 
     const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
 
-    const loadDashboard = useCallback(async () => {
+    const [error, setError] =
+        useState<string | null>(null)
+
+    /*
+     * Hàm này được sử dụng khi người dùng:
+     * - Bấm nút "Làm mới"
+     * - Bấm nút "Thử lại"
+     */
+    async function loadDashboard() {
+        setIsLoading(true)
+        setError(null)
+
         try {
-            setIsLoading(true)
-            setError(null)
-
             const data = await getChefDashboard()
+
             setDashboard(data)
-        } catch (error) {
-            console.error(error)
-            setError('Không thể tải dữ liệu Dashboard.')
+        } catch (requestError) {
+            console.error(
+                'Lỗi tải Chef Dashboard:',
+                requestError,
+            )
+
+            setError(
+                'Không thể tải dữ liệu Dashboard.',
+            )
         } finally {
             setIsLoading(false)
         }
+    }
+
+    /*
+     * Tự động tải dữ liệu một lần
+     * khi ChefDashboardPage được mở.
+     */
+    useEffect(() => {
+        let isCancelled = false
+
+        async function fetchInitialDashboard() {
+            try {
+                const data =
+                    await getChefDashboard()
+
+                if (!isCancelled) {
+                    setDashboard(data)
+                    setError(null)
+                }
+            } catch (requestError) {
+                console.error(
+                    'Lỗi tải Chef Dashboard:',
+                    requestError,
+                )
+
+                if (!isCancelled) {
+                    setError(
+                        'Không thể tải dữ liệu Dashboard.',
+                    )
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsLoading(false)
+                }
+            }
+        }
+
+        void fetchInitialDashboard()
+
+        return () => {
+            isCancelled = true
+        }
     }, [])
 
-    useEffect(() => {
-        void loadDashboard()
-    }, [loadDashboard])
-
+    /*
+     * Giao diện trong lúc đang gọi API.
+     */
     if (isLoading) {
         return (
-            <section className="page-card chef-loading-panel">
-                <div className="chef-loading-spinner" />
-                <p>Đang tải dữ liệu bếp...</p>
-            </section>
+            <div className="chef-page">
+                <section className="page-card">
+                    <p>
+                        Đang tải dữ liệu Dashboard...
+                    </p>
+                </section>
+            </div>
         )
     }
 
+    /*
+     * Giao diện khi gọi API bị lỗi.
+     */
     if (error) {
         return (
-            <section className="page-card chef-error-panel">
-                <div className="chef-error-icon">!</div>
+            <div className="chef-page">
+                <section className="page-card">
+                    <p className="modal-error">
+                        {error}
+                    </p>
 
-                <h2>Không thể tải Dashboard</h2>
-
-                <p>{error}</p>
-
-                <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => void loadDashboard()}
-                >
-                    Thử lại
-                </button>
-            </section>
+                    <button
+                        type="button"
+                        className="primary-button"
+                        onClick={() =>
+                            void loadDashboard()
+                        }
+                    >
+                        Thử lại
+                    </button>
+                </section>
+            </div>
         )
     }
 
+    /*
+     * Giao diện Dashboard khi API thành công.
+     */
     return (
         <div className="chef-page">
-            <section className="chef-dashboard-hero">
-                <div className="chef-dashboard-hero-content">
-                    <span className="chef-dashboard-label">
-                        KITCHEN CONTROL CENTER
-                    </span>
-
-                    <h2>Chào mừng trở lại, Chef!</h2>
-
-                    <p>
-                        Theo dõi hàng đợi bếp, món đã hoàn thành và
-                        tình trạng phục vụ của thực đơn trong một màn
-                        hình duy nhất.
-                    </p>
-
-                    <div className="chef-dashboard-hero-actions">
-                        <Link
-                            className="chef-dashboard-main-button"
-                            to="/chef/orders"
-                        >
-                            Mở hàng đợi bếp
-                        </Link>
-
-                        <button
-                            type="button"
-                            className="chef-dashboard-refresh-button"
-                            onClick={() => void loadDashboard()}
-                        >
-                            ↻ Làm mới dữ liệu
-                        </button>
-                    </div>
-                </div>
-
-                <div className="chef-dashboard-visual">
-                    <div className="chef-dashboard-circle circle-one" />
-                    <div className="chef-dashboard-circle circle-two" />
-
-                    <div className="chef-dashboard-avatar">
-                        👨‍🍳
-                    </div>
-                </div>
-            </section>
-
-            <section className="chef-dashboard-stat-grid">
-                <Link
-                    className="chef-dashboard-stat-card chef-stat-preparing"
-                    to="/chef/orders"
-                >
-                    <span className="chef-dashboard-stat-icon">
-                        ♨
-                    </span>
-
+            <section className="page-card">
+                <div className="page-header">
                     <div>
-                        <small>ĐANG CHUẨN BỊ</small>
-
-                        <strong>
-                            {dashboard?.preparingCount ?? 0}
-                        </strong>
+                        <h2>Chef Dashboard</h2>
 
                         <p>
-                            Món đang nằm trong hàng đợi bếp
+                            Tổng quan hoạt động của khu vực
+                            bếp.
                         </p>
-
-                        <span className="chef-dashboard-stat-link">
-                            Xem danh sách →
-                        </span>
                     </div>
-                </Link>
 
-                <Link
-                    className="chef-dashboard-stat-card chef-stat-completed"
-                    to="/chef/completed-orders"
-                >
-                    <span className="chef-dashboard-stat-icon">
-                        ✓
-                    </span>
-
-                    <div>
-                        <small>ĐÃ HOÀN THÀNH</small>
-
-                        <strong>
-                            {dashboard?.completedCount ?? 0}
-                        </strong>
-
-                        <p>
-                            Món đã được bếp xử lý xong
-                        </p>
-
-                        <span className="chef-dashboard-stat-link">
-                            Xem danh sách →
-                        </span>
-                    </div>
-                </Link>
-
-                <Link
-                    className="chef-dashboard-stat-card chef-stat-unavailable"
-                    to="/chef/dishes?status=unavailable"
-                >
-                    <span className="chef-dashboard-stat-icon">
-                        !
-                    </span>
-
-                    <div>
-                        <small>ĐANG TẠM HẾT</small>
-
-                        <strong>
-                            {dashboard?.unavailableDishCount ?? 0}
-                        </strong>
-
-                        <p>
-                            Món hiện tạm ngừng phục vụ
-                        </p>
-
-                        <span className="chef-dashboard-stat-link">
-                            Kiểm tra thực đơn →
-                        </span>
-                    </div>
-                </Link>
-            </section>
-
-            <section className="page-card chef-quick-panel">
-                <div className="chef-section-heading">
-                    <span>QUICK ACTIONS</span>
-
-                    <h2>Thao tác nhanh</h2>
-
-                    <p>
-                        Đi đến các công việc Chef sử dụng thường xuyên.
-                    </p>
+                    <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() =>
+                            void loadDashboard()
+                        }
+                    >
+                        Làm mới
+                    </button>
                 </div>
 
-                <div className="chef-quick-grid">
+                <div className="stat-grid">
                     <Link
-                        className="chef-quick-card quick-orange"
+                        className="
+                            stat-card
+                            dashboard-stat-link
+                        "
                         to="/chef/orders"
                     >
-                        <span className="chef-quick-icon">
-                            ⌁
+                        <strong>
+                            {dashboard
+                                ?.preparingCount ?? 0}
+                        </strong>
+
+                        <span>
+                            Món đang chuẩn bị
                         </span>
 
-                        <div>
-                            <strong>Hàng đợi bếp</strong>
-
-                            <small>
-                                Xem và xử lý món đang chuẩn bị
-                            </small>
-                        </div>
-
-                        <span className="chef-quick-arrow">
-                            →
-                        </span>
+                        <small>
+                            Xem danh sách →
+                        </small>
                     </Link>
 
                     <Link
-                        className="chef-quick-card quick-blue"
-                        to="/chef/dishes"
-                    >
-                        <span className="chef-quick-icon">
-                            ◉
-                        </span>
-
-                        <div>
-                            <strong>Quản lý món ăn</strong>
-
-                            <small>
-                                Bật hoặc tắt trạng thái phục vụ
-                            </small>
-                        </div>
-
-                        <span className="chef-quick-arrow">
-                            →
-                        </span>
-                    </Link>
-
-                    <Link
-                        className="chef-quick-card quick-green"
+                        className="
+                            stat-card
+                            dashboard-stat-link
+                        "
                         to="/chef/completed-orders"
                     >
-                        <span className="chef-quick-icon">
-                            ✓
+                        <strong>
+                            {dashboard
+                                ?.completedCount ?? 0}
+                        </strong>
+
+                        <span>
+                            Món đã hoàn thành
                         </span>
 
-                        <div>
-                            <strong>Món đã hoàn thành</strong>
+                        <small>
+                            Xem danh sách →
+                        </small>
+                    </Link>
 
-                            <small>
-                                Kiểm tra lịch sử xử lý món
-                            </small>
-                        </div>
+                    <Link
+                        className="
+                            stat-card
+                            dashboard-stat-link
+                        "
+                        to="/chef/dishes?status=unavailable"
+                    >
+                        <strong>
+                            {dashboard
+                                ?.unavailableDishCount ?? 0}
+                        </strong>
 
-                        <span className="chef-quick-arrow">
-                            →
+                        <span>
+                            Món đang tạm hết
                         </span>
+
+                        <small>
+                            Xem danh sách →
+                        </small>
                     </Link>
                 </div>
             </section>

@@ -1,20 +1,17 @@
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CancelDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateMenuStatusRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.ChefDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.KitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
-import org.springframework.web.bind.annotation.PathVariable;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
 import java.util.List;
 
-import org.springframework.web.bind.annotation.PutMapping;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishStatusRequest;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
@@ -58,4 +55,15 @@ public class ChefController
 
         return "Menu status updated successfully";
     }
+    @GetMapping("/dashboard")
+    public ChefDashboardResponse getDashboard()
+    { return chefService.getDashboard(); }
+    @GetMapping("/orders/completed")
+    public List<KitchenOrderResponse> getCompletedOrders() {
+        return chefService.getCompletedOrders();
+    }
+    @PostMapping("/orders/{id}/cancel-request")
+    public String requestCancelDish( @PathVariable Long id, @RequestBody CancelDishRequest request )
+    { chefService.requestCancel( id, request.getReason() );
+        return "Cancel request sent successfully"; }
 }
