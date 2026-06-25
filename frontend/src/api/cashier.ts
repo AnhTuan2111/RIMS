@@ -16,18 +16,19 @@ export const cashierApi = {
     getOrderDetail: (orderId: number) =>
         apiClient.get<OrderDetailResponse>(`/cashier/orders/${orderId}`),
 
-    // API 3: Chốt đơn (LOCKED) trước khi thanh toán
+    // API 3: LOCKED trước khi thanh toán
     processPaymentLock: (orderId: number, request: PaymentRequest) =>
         apiClient.post<PaymentResponse>(`/cashier/orders/${orderId}/payment`, request),
 
-    // API 5: Hoàn tất thanh toán tiền mặt
+    // API 4: Hoàn tất thanh toán tiền mặt
     completeCashPayment: (orderId: number, request: PaymentRequest) =>
         apiClient.post<PaymentResponse>(`/cashier/orders/${orderId}/complete-cash`, request),
 
-    // API 6: Lấy mã QR VNPay
+    // API 5: Lấy mã QR VNPay
     getVNPayQrCode: (orderId: number) =>
         apiClient.get<VNPayResponse>(`/cashier/orders/${orderId}/vnpay-qr`),
 
+    //API 6 : dowloand invoice pdf
     downloadInvoicePdf: (invoiceId: number) =>
         apiClient.get(`/cashier/invoices/${invoiceId}/pdf`, {
             responseType: 'blob'

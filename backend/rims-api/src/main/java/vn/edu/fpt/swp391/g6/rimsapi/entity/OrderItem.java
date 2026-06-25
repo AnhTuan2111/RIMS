@@ -14,7 +14,6 @@ import org.springframework.data.annotation.CreatedDate;
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
-
 @Entity
 @Table(name = "order_items")
 @Getter

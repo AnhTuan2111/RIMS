@@ -55,17 +55,16 @@ public class CashierController {
         return ResponseEntity.ok(methods);
     }
 
-    // API 5: Hoàn tất thanh toán Tiền mặt (Tạo Invoice, Order -> COMPLETED, Table -> AVAILABLE)
+    // API 5: Hoàn tất thanh toán Tiền mặt
     @PostMapping("/orders/{id}/complete-cash")
     public ResponseEntity<PaymentResponse> completeCashPayment(
             @PathVariable Long id,
             @RequestBody PaymentRequest request
     ) {
-        // Truyền request vào service để xử lý logic tính tiền
         return ResponseEntity.ok(cashierService.completeCashPayment(id, request));
     }
 
-    // API 6 sinh link QR Code VNPay dựa vào Order ID
+    // API 6 sinh link Code VNPay dựa vào Order ID
     @GetMapping("/orders/{id}/vnpay-qr")
     public ResponseEntity<VNPayResponse> getVNPayQrCode(@PathVariable Long id) {
         return ResponseEntity.ok(cashierService.createVNPayPaymentUrl(id));

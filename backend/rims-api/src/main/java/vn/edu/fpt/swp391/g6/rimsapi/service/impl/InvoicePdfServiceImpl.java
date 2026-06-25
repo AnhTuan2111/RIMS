@@ -24,7 +24,6 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
 
     @Override
     public byte[] generateInvoicePdf(Invoice invoice) {
-        // Thu hẹp lề để giống giấy in nhiệt máy POS hơn
         Document document = new Document(PageSize.A6, 10, 10, 15, 15);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -32,7 +31,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
             PdfWriter.getInstance(document, out);
             document.open();
 
-            // 1. Nạp Font tiếng Việt
+            // front tiếng việt
             ClassPathResource fontResource = new ClassPathResource("fonts/times.ttf");
             String fontPath = fontResource.getFile().getAbsolutePath();
             BaseFont bf = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
@@ -43,12 +42,11 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
             Font fontNormal = new Font(bf, 9, Font.NORMAL);
             Font fontItalic = new Font(bf, 9, Font.ITALIC);
 
-            // 2. Viết Tiêu đề nhà hàng (Mock data)
             Paragraph restaurantName = new Paragraph("RIMS RESTAURANT", fontTitle);
             restaurantName.setAlignment(Element.ALIGN_CENTER);
             document.add(restaurantName);
 
-            Paragraph address = new Paragraph("Khu Công Nghệ Cao Hòa Lạc, Thạch Thất, Hà Nội\nĐT: 0987.654.321 - 0123.456.789\n", fontNormal);
+            Paragraph address = new Paragraph("Đại học FPT, Khu Công Nghệ Cao Hòa Lạc, Thạch Thất, Hà Nội\nĐT: 0987.654.321 - 0123.456.789\n", fontNormal);
             address.setAlignment(Element.ALIGN_CENTER);
             document.add(address);
 
@@ -61,7 +59,6 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
             // 3. Thông tin meta (Số HĐ, Ngày, Bàn, Thu ngân)
             Order order = invoice.getOrder();
             String tableName = (order.getTable() != null) ? order.getTable().getTableNumber() : "Mang về";
-            // Lấy tên thu ngân an toàn (nếu null thì để mặc định)
             String cashierName = (order.getCreatedBy() != null && order.getCreatedBy().getFullName() != null)
                     ? order.getCreatedBy().getFullName() : "Admin";
 
@@ -78,12 +75,11 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
 
             document.add(infoTable);
 
-            // Đường kẻ ngang đứt nét
             Paragraph lineSeparator = new Paragraph("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", fontNormal);
             lineSeparator.setAlignment(Element.ALIGN_CENTER);
             document.add(lineSeparator);
 
-            // 4. Bảng danh sách món ăn (4 cột: Tên, SL, Đ.Giá, T.Tiền)
+            //Bảng danh sách món ăn (4 cột: Tên, SL, Đ.Giá, T.Tiền)
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
             table.setWidths(new float[]{40, 12, 23, 25});
@@ -112,8 +108,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
             BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
             BigDecimal finalAmount = invoice.getFinalAmount();
 
-            // Lấy thông tin thanh toán (Tiền mặt hay chuyển khoản)
-            PaymentMethod method = PaymentMethod.CASH; // Default
+            PaymentMethod method = PaymentMethod.CASH;
             BigDecimal amountPaid = finalAmount;
             List<Payment> payments = invoice.getPayments();
             if (payments != null && !payments.isEmpty()) {

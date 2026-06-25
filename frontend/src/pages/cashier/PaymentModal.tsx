@@ -20,12 +20,11 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
 
     const handleCloseModal = async () => {
         try {
-            // Gọi API nhả khóa đơn hàng
             await cashierApi.unlockOrder(orderId);
         } catch (err) {
             console.error("Lỗi mở khóa đơn hàng", err);
         } finally {
-            onClose(); // Tắt giao diện Modal
+            onClose();
         }
     };
 
@@ -38,8 +37,6 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
         try {
             const reqData = { paymentMethod: 'CASH' as PaymentMethodType, amountPaid: amountReceived };
 
-            // XÓA dòng cashierApi.processPaymentLock ở đây đi,
-            // vì mình đã khóa nó ở ngoài OrderPanel rồi!
 
             const res = await cashierApi.completeCashPayment(orderId, reqData);
             if (res && res.data && res.data.success) {
