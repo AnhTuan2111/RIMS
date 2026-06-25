@@ -177,7 +177,6 @@ export default function AdminCategoryPage() {
                     {/* Header */}
                     <div style={headerStyle}>
                         <div>
-                            <div style={breadcrumbStyle}>Dashboard &gt; Menu</div>
                             <h2 style={pageTitleStyle}>📁 QUẢN LÝ DANH MỤC</h2>
                         </div>
                         <button
