@@ -18,7 +18,7 @@ export default function OrderPanel({ selectedTable, orderDetail, loading, onClos
     const handleCheckoutClick = async () => {
         setIsLocking(true);
         try {
-            // Gọi API khóa đơn hàng (ông cần thêm hàm này vào file cashierApi nhé)
+            // Gọi API khóa đơn hàng
             const res = await cashierApi.processPaymentLock(orderDetail!.orderId, { paymentMethod: 'CASH', amountPaid: 0 });
             if (res.data.success) {
                 onCheckout(); // Bật PaymentModal lên
@@ -33,7 +33,6 @@ export default function OrderPanel({ selectedTable, orderDetail, loading, onClos
         }
     };
 
-    // Fix: Dùng trạng thái của bàn thay vì của order
     const displayStatus = selectedTable.status === 'SERVING' ? 'Đang Phục Vụ' : 'Bàn Trống';
 
     return (
