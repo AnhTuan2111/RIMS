@@ -28,7 +28,7 @@ public class RestaurantTable
     @Column(name = "table_id", nullable = false)
     private int id;
 
-    @Column(name = "table_number", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String tableNumber;
 
     private Integer capacity;
@@ -43,10 +43,10 @@ public class RestaurantTable
     private List<Order> orders;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 }

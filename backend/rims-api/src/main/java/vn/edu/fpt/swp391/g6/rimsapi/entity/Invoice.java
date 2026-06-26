@@ -32,11 +32,11 @@ public class Invoice
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @Column(nullable = false, name = "final_amount")
+    @Column(nullable = false)
     private BigDecimal finalAmount;
 
     @CreatedDate
-    @Column(name = "invoice_date", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime invoiceDate;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)

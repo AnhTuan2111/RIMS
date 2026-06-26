@@ -1,7 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.entity;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,26 +35,26 @@ public class OrderItem
     @JoinColumn(name = "dish_id", nullable = false)
     private Dish dish;
 
-    @Min(1)
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(name = "unit_price", nullable = false)
+    @Column(nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(name = "sub_total", nullable = false)
+    @Column(nullable = false)
     private BigDecimal subTotal;
 
-    @Size(max = 2000)
     @Nationalized
     private String note;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderItemStatus status;
+
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     @Column(length = 500)
     private String cancelReason;
 
