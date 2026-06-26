@@ -29,19 +29,18 @@ public class PaymentTransaction
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
 
-    @Column(name = "transaction_code", nullable = false)
+    @Column(nullable = false)
     private String transactionCode;
 
     private String gateway;
 
     @Lob
-    @Column(name = "gateway_response", nullable = false)
+    @Column(nullable = false)
     private String gatewayResponse;
 
-    @Column(name = "is_success")
     private boolean isSuccess;
 
     @CreatedDate
-    @Column(name = "transaction_date", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime transactionDate;
 }

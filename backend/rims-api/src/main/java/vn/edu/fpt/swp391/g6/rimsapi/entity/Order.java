@@ -40,7 +40,7 @@ public class Order
     @Column(nullable = false)
     private OrderStatus status;
 
-    @Column(nullable = false, name = "total_amount")
+    @Column(nullable = false)
     private BigDecimal totalAmount;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
@@ -50,7 +50,7 @@ public class Order
     private Invoice invoice;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     // Thêm món vào đơn hàng và tự động thiết lập liên kết ngược lại ở phía OrderItem

@@ -33,18 +33,17 @@ public class Payment
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
-    @Column(name = "payment_method", nullable = false)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "is_success")
     private boolean isSuccess;
 
     @CreatedDate
-    @Column(name = "payment_date", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime paymentDate;
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)

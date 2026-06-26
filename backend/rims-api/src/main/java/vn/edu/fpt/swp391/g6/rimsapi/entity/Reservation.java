@@ -1,6 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.entity;
 
-import jakarta.validation.constraints.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,20 +23,15 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     @Nationalized
-    @Pattern(regexp = "^\\p{L}+(?: \\p{L}+)*$")
-    @Column(name = "customer_name", nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String customerName;
 
-    @NotBlank
-    @Pattern(regexp = "^0[0-9]{9}$")
     @Column(nullable = false, length = 10)
     private String phone;
 
     private LocalDateTime reservationTime;
 
-    @Size(max = 2000)
     @Nationalized
     private String note;
 
@@ -49,10 +43,10 @@ public class Reservation {
     private RestaurantTable table;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 }

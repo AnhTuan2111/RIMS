@@ -28,7 +28,7 @@ public class Dish
     private Integer id;
 
     @Nationalized
-    @Column(name = "dish_name", length = 50, nullable = false, unique = true)
+    @Column(length = 50, nullable = false, unique = true)
     private String name;
 
     @Nationalized
@@ -37,10 +37,9 @@ public class Dish
     @Column(nullable = false)
     private int price;
 
-    @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "is_available", nullable = false)
+    @Column(nullable = false)
     private boolean isAvailable = true;
 
     @ManyToOne
@@ -48,10 +47,10 @@ public class Dish
     private Category category;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 }
