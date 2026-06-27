@@ -14,7 +14,9 @@ public class CreateCustomerRequest {
 
     @NotBlank
     @Email
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|fpt\\.edu\\.vn)$")
     private String email;
+
 
     @NotBlank
     @Pattern(regexp = "^0[0-9]{9}$")
