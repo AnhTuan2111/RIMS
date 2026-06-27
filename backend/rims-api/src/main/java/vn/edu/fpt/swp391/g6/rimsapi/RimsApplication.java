@@ -7,10 +7,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class RmsApiApplication {
+public class RimsApplication
+{
 
 	public static void main(String[] args) {
-		SpringApplication.run(RmsApiApplication.class, args);
+		SpringApplication.run(RimsApplication.class, args);
 	}
 
 }

@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+
 @Service
 public class JwtServiceImpl implements JwtService
 {
@@ -45,8 +46,7 @@ public class JwtServiceImpl implements JwtService
                     .build();
 
             return signClaims(claimsSet);
-        }
-        catch (JOSEException e)
+        } catch (JOSEException e)
         {
             throw new RuntimeException("Cannot generate access token", e);
         }
@@ -66,8 +66,7 @@ public class JwtServiceImpl implements JwtService
                     .build();
 
             return signClaims(claimsSet);
-        }
-        catch (JOSEException e)
+        } catch (JOSEException e)
         {
             throw new RuntimeException("Cannot generate refresh token", e);
         }
@@ -98,8 +97,7 @@ public class JwtServiceImpl implements JwtService
             }
 
             return claims;
-        }
-        catch (ParseException | JOSEException e)
+        } catch (ParseException | JOSEException e)
         {
             throw new InvalidTokenException("Invalid token");
         }
@@ -120,7 +118,7 @@ public class JwtServiceImpl implements JwtService
     @Override
     public Integer extractUserId(JWTClaimsSet claims)
     {
-        return Integer.parseInt(claims.getSubject());
+        return Integer.valueOf(claims.getSubject());
     }
 
     @Override
