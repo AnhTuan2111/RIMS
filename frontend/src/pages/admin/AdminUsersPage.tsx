@@ -88,7 +88,7 @@ export default function AdminUsersPage() {
 
     const openEdit = (user: UserResponse) => {
         setSelectedUser(user)
-        setForm({ ...form, fullName: user.fullName, email: user.email ?? '', phone: user.phone })
+        setForm({ ...form, fullName: user.fullName, email: user.email ?? '', phone: user.phone, role: user.role })
         setFormError(null)
         setModal('edit')
     }
@@ -153,7 +153,13 @@ export default function AdminUsersPage() {
         }
         setFormLoading(true); setFormError(null)
         try {
-            await adminApi.updateAccount(selectedUser.id, { fullName: form.fullName, email: form.email, phone: form.phone })
+            const isStaff = selectedUser.role !== 'CUSTOMER' && selectedUser.role !== 'ADMIN'
+            await adminApi.updateAccount(selectedUser.id, {
+                fullName: form.fullName,
+                email: form.email,
+                phone: form.phone,
+                role: isStaff ? form.role : undefined,
+            })
             setModal(null)
             showSuccess('Cập nhật tài khoản thành công!')
             void loadData()
@@ -375,6 +381,19 @@ export default function AdminUsersPage() {
                         <Field label="Họ tên *"><input value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} placeholder="Nguyễn Văn A" /></Field>
                         <Field label="Email"><input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" /></Field>
                         <Field label="Số điện thoại *"><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="0xxxxxxxxx" /></Field>
+                        {selectedUser.role !== 'CUSTOMER' && selectedUser.role !== 'ADMIN' && (
+                            <Field label="Vai trò *">
+                                <select
+                                    value={form.role}
+                                    onChange={e => setForm({ ...form, role: e.target.value })}
+                                    style={{ padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, background: '#fff' }}
+                                >
+                                    <option value="CHEF">Đầu bếp</option>
+                                    <option value="WAITER">Phục vụ</option>
+                                    <option value="CASHIER">Thu ngân</option>
+                                </select>
+                            </Field>
+                        )}
                     </FieldGroup>
                     {formError && <ErrBox msg={formError} />}
                     <ModalActions>
