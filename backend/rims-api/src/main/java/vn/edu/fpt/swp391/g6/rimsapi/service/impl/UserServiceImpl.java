@@ -34,6 +34,11 @@ public class UserServiceImpl implements UserService {
             RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER, RoleType.ADMIN
     );
 
+    // Role được phép gán khi update staff (không bao gồm ADMIN và CUSTOMER)
+    private static final List<RoleType> ASSIGNABLE_STAFF_ROLES = List.of(
+            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER
+    );
+
     // ===================== EXISTING =====================
 
     @Override
@@ -92,7 +97,7 @@ public class UserServiceImpl implements UserService {
 
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setFullName(request.getUsername()); // default full name = username
+        user.setFullName(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setRole(RoleType.CUSTOMER);
@@ -143,12 +148,33 @@ public class UserServiceImpl implements UserService {
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
+
+        // Cập nhật role — chỉ cho phép với staff không phải Admin
+        if (request.getRole() != null) {
+            if (user.getRole() == RoleType.ADMIN) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Không thể thay đổi vai trò của tài khoản Admin");
+            }
+            if (user.getRole() == RoleType.CUSTOMER) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Không thể thay đổi vai trò của tài khoản khách hàng");
+            }
+            if (!ASSIGNABLE_STAFF_ROLES.contains(request.getRole())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Vai trò không hợp lệ. Chỉ được chọn: CHEF, WAITER, CASHIER");
+            }
+            user.setRole(request.getRole());
+        }
+
         return convertToResponse(userRepository.save(user));
     }
 
     @Override
     public void setAccountStatus(Integer id, SetAccountStatusRequest request) {
         User user = findUserById(id);
+        if (user.getRole() == RoleType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Không thể khóa tài khoản Admin");
+        }
         user.setActive(request.isActive());
         userRepository.save(user);
     }

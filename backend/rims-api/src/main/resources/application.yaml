@@ -16,7 +16,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: REMOVED-EMAIL
-    password: 123456
+    password: REMOVED-MAIL-APP-PASSWORD
     properties:
       mail:
         smtp:
