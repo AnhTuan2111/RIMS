@@ -290,7 +290,6 @@ public class CashierServiceImpl implements CashierService {
     @Override
     @Transactional
     public Long processVnPaySuccess(String vnpTxnRef) {
-        // Tách chuỗi theo định dạng: "RIMS"_"OrderId"_"Time" -> Lấy phần tử số 1
         String[] parts = vnpTxnRef.split("_");
         Long orderId = Long.parseLong(parts[1]);
 

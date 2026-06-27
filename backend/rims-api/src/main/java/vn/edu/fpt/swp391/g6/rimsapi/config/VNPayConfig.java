@@ -28,7 +28,6 @@ public class VNPayConfig {
     @Value("${vnpay.command}")
     private String vnpCommand;
 
-    // Lấy trực tiếp từ file YAML để đồng bộ
     @Value("${vnpay.return-url}")
     private String vnpReturnUrl;
 
