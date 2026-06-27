@@ -1,9 +1,59 @@
+import { Fragment } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
     ROLE_LABELS,
     roleMenus,
 } from '../../config/roleMenus'
 import { useActor } from '../../context/ActorContext'
+
+const adminQuickLinks = [
+    {
+        label: 'Thống kê',
+        path: '/admin/statistics',
+        variant: 'primary',
+        icon: <StatisticsQuickIcon />,
+    },
+    {
+        label: 'Lịch sử hóa đơn',
+        path: '/admin/invoices',
+        variant: 'secondary',
+        icon: <InvoiceStackIcon />,
+    },
+]
+
+function StatisticsQuickIcon() {
+    return (
+        <svg
+            aria-hidden="true"
+            className="rims-quick-svg"
+            focusable="false"
+            viewBox="0 0 24 24"
+        >
+            <path d="M4.5 18.5h14" />
+            <path d="M6.5 18.5v-6" />
+            <path d="M10.5 18.5v-9" />
+            <path d="M14.5 18.5v-4" />
+            <circle cx="16.5" cy="7.5" r="3" />
+            <path d="m19 10 2.2 2.2" />
+        </svg>
+    )
+}
+
+function InvoiceStackIcon() {
+    return (
+        <svg
+            aria-hidden="true"
+            className="rims-quick-svg"
+            focusable="false"
+            viewBox="0 0 24 24"
+        >
+            <path d="M7 5h10a2 2 0 0 1 2 2v11H7z" />
+            <path d="M5 8h10a2 2 0 0 1 2 2v9H5z" />
+            <path d="M8.5 12h5.5" />
+            <path d="M8.5 15h4" />
+        </svg>
+    )
+}
 
 function getMenuIcon(path: string) {
     if (path.includes('dashboard')) return '▦'
@@ -53,27 +103,60 @@ export function Sidebar() {
                 </p>
 
                 {menus.map((item) => (
-                    <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) =>
-                            isActive
-                                ? 'rims-sidebar-link active'
-                                : 'rims-sidebar-link'
-                        }
-                    >
-                        <span className="rims-menu-icon">
-                            {getMenuIcon(item.path)}
-                        </span>
+                    <Fragment key={item.path}>
+                        <NavLink
+                            to={item.path}
+                            className={({ isActive }) =>
+                                isActive
+                                    ? 'rims-sidebar-link active'
+                                    : 'rims-sidebar-link'
+                            }
+                        >
+                            <span className="rims-menu-icon">
+                                {getMenuIcon(item.path)}
+                            </span>
 
-                        <span className="rims-menu-label">
-                            {item.label}
-                        </span>
+                            <span className="rims-menu-label">
+                                {item.label}
+                            </span>
 
-                        <span className="rims-menu-arrow">
-                            ›
-                        </span>
-                    </NavLink>
+                            <span className="rims-menu-arrow">
+                                ›
+                            </span>
+                        </NavLink>
+
+                        {item.path === '/admin/dishes' && (
+                            <div className="rims-sidebar-quick-links">
+                                {adminQuickLinks.map((quickLink) => (
+                                    <NavLink
+                                        key={quickLink.path}
+                                        to={quickLink.path}
+                                        className={({ isActive }) =>
+                                            [
+                                                'rims-sidebar-quick-link',
+                                                `quick-${quickLink.variant}`,
+                                                isActive ? 'active' : '',
+                                            ]
+                                                .filter(Boolean)
+                                                .join(' ')
+                                        }
+                                    >
+                                        <span className="rims-sidebar-quick-icon">
+                                            {quickLink.icon}
+                                        </span>
+
+                                        <span className="rims-sidebar-quick-label">
+                                            {quickLink.label}
+                                        </span>
+
+                                        <span className="rims-sidebar-quick-arrow">
+                                            ›
+                                        </span>
+                                    </NavLink>
+                                ))}
+                            </div>
+                        )}
+                    </Fragment>
                 ))}
             </nav>
 
