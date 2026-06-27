@@ -33,7 +33,6 @@ public class AdminController
     private final InvoiceService invoiceService;
     private final CategoryService categoryService;
     private final RevenueReportService revenueReportService;
-    private final ReservationPerformanceScoreService reservationPerformanceScoreService;
 
     @GetMapping("/user/all")
     public List<UserResponse> getAllUsers()
@@ -136,56 +135,103 @@ public class AdminController
             @RequestParam
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE)
-            LocalDate startDate1,
+            LocalDate previousStartDate,
 
             @RequestParam
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE)
-            LocalDate endDate1,
+            LocalDate previousEndDate,
 
             @RequestParam
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE)
-            LocalDate startDate2,
+            LocalDate currentStartDate,
 
             @RequestParam
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE)
-            LocalDate endDate2
+            LocalDate currentEndDate
     )
     {
 
         return revenueReportService.compareRevenue(
-                startDate1,
-                endDate1,
-                startDate2,
-                endDate2
+                previousStartDate,
+                previousEndDate,
+                currentStartDate,
+                currentEndDate
         );
     }
 
     @GetMapping("/revenue/best-selling")
-    public BestSellingReportResponse getBestSellingReport()
-    {
+    public BestSellingReportResponse getBestSellingReport(
+            @RequestParam(
+                    defaultValue = "WEEK"
+            )
+            String period,
 
-        return revenueReportService
-                .getBestSellingReport();
-    }
+            @RequestParam(
+                    required = false
+            )
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate fromDate,
 
-    @GetMapping("/reservation/performance-score")
-    public List<ReservationPerformanceScoreResponse>
-    getReservationPerformanceScore(
-
-            @RequestParam LocalDate fromDate,
-
-            @RequestParam LocalDate toDate
+            @RequestParam(
+                    required = false
+            )
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate toDate
     )
     {
+        if (fromDate != null && toDate != null) {
+            return revenueReportService
+                    .getBestSellingReport(
+                            fromDate,
+                            toDate
+                    );
+        }
 
-        return reservationPerformanceScoreService
-                .getReservationPerformanceScore(
-                        fromDate,
-                        toDate
-                );
+        return revenueReportService
+                .getBestSellingReport(period);
+    }
+
+    @GetMapping("/revenue/order-shifts")
+    public OrderShiftReportResponse getOrderShiftReport(
+            @RequestParam(
+                    defaultValue = "WEEK"
+            )
+            String period,
+
+            @RequestParam(
+                    required = false
+            )
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate fromDate,
+
+            @RequestParam(
+                    required = false
+            )
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate toDate
+    )
+    {
+        if (fromDate != null && toDate != null) {
+            return revenueReportService
+                    .getOrderShiftReport(
+                            fromDate,
+                            toDate
+                    );
+        }
+
+        return revenueReportService
+                .getOrderShiftReport(period);
     }
 
     @GetMapping("/category/all")

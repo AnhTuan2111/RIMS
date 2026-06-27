@@ -60,6 +60,17 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             Pageable pageable
     );
 
+    @Query("""
+            SELECT o.createdAt
+            FROM Invoice i
+            JOIN i.order o
+            WHERE o.createdAt BETWEEN :startDate AND :endDate
+            """)
+    List<LocalDateTime> getPaidOrderCreatedTimesBetween(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
 
     //Get invoice history for a specific table.
     @Query("""
@@ -74,7 +85,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             JOIN i.order o
             JOIN o.table t
             JOIN i.payments p
-            WHERE p.isSuccess = true
             ORDER BY i.invoiceDate DESC
             """)
     List<InvoiceHistoryProjection> getInvoiceHistory();
