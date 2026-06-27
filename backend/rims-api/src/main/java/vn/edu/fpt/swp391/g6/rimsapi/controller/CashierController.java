@@ -74,14 +74,11 @@ public class CashierController {
     @GetMapping("/invoices/{invoiceId}/pdf")
     @Transactional(readOnly = true)
     public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId) {
-        // 1. Tìm hóa đơn trong DB
         Invoice invoice = invoiceRepository.findWithOrderAndItemsById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
 
-        // 2. Gọi Service để sinh ra mảng byte của file PDF
         byte[] pdfBytes = invoicePdfService.generateInvoicePdf(invoice);
 
-        // 3. Cấu hình Header để trình duyệt tự động mở tab PDF
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("inline", "invoice-" + invoiceId + ".pdf");
@@ -113,7 +110,7 @@ public class CashierController {
         }
     }
 
-    // API 9 Mở khóa đơn hàng khi bấm back hay bị thất bại
+    // API9 mở khóa đơn hàng khi bấm back hay bị thất bại
     @PostMapping("/orders/{id}/unlock")
     public ResponseEntity<PaymentResponse> unlockOrder(@PathVariable Long id) {
         return ResponseEntity.ok(cashierService.unlockOrder(id));
