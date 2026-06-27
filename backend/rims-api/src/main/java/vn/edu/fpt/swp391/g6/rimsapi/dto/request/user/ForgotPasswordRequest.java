@@ -9,7 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 public class ForgotPasswordRequest {
 
-    @NotBlank
+    @NotBlank(message = "Email không được để trống")
     @Email
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|fpt\\.edu\\.vn)$")
     private String email;
 }

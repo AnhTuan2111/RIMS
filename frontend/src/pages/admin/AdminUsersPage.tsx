@@ -161,7 +161,7 @@ export default function AdminUsersPage() {
         finally { setFormLoading(false) }
     }
 
-    const raw = tab === 'staff' ? staffList : customerList
+    const raw = tab === 'staff' ? staffList.filter(user => user.role!== 'ADMIN') : customerList
     const currentList = raw.filter(u => {
         const q = search.toLowerCase()
         const matchSearch = !q || u.fullName.toLowerCase().includes(q) || u.username.toLowerCase().includes(q) || (u.email ?? '').toLowerCase().includes(q) || u.phone.includes(q)
@@ -209,7 +209,7 @@ export default function AdminUsersPage() {
                                 fontWeight: tab === t ? 700 : 400, marginBottom: -2, fontSize: 14,
                             }}>
                         {t === 'staff'
-                            ? `Nhân viên  (${staffList.length})`
+                            ? `Nhân viên  (${staffList.filter(u => u.role !== RoleType .ADMIN).length})`
                             : `Khách hàng  (${customerList.length})`}
                     </button>
                 ))}

@@ -18,6 +18,7 @@ public class UpdateProfileRequest {
     @Pattern(regexp = "^\\p{L}+(?: \\p{L}+)*$")
     private String fullName;
 
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|fpt\\.edu\\.vn)$")
     @Email
     private String email;
 
