@@ -17,7 +17,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,7 +28,6 @@ public class CashierServiceImpl implements CashierService {
     private final RestaurantTableRepository tableRepository;
     private final InvoiceRepository invoiceRepository;
     private final VNPayConfig vnpayConfig;
-    private final jakarta.servlet.http.HttpServletRequest httpRequest;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,8 +40,7 @@ public class CashierServiceImpl implements CashierService {
                 .collect(Collectors.toMap(
                         o -> o.getTable().getId(),
                         Order::getId,
-                        (existing, replacement) -> existing
-                ));
+                        (existing, replacement) -> existing));
 
         return tables.stream()
                 .map(t -> {
