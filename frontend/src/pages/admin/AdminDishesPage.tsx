@@ -247,11 +247,16 @@ export default function AdminDishesPage() {
                         />
                         <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} style={selectStyle}>
                             <option value="ALL">Tất cả danh mục</option>
-                            {categories.map(cat => (
-                                <option key={cat.id} value={cat.name}>
-                                    {cat.name} {!cat.isAvailable ? '(Đang ẩn)' : ''}
-                                </option>
-                            ))}
+                            {categories.map(cat => {
+                                const displayName = cat.name.length > 25
+                                    ? cat.name.slice(0, 25) + '...'
+                                    : cat.name;
+                                return (
+                                    <option key={cat.id} value={cat.name}>
+                                        {displayName} {!cat.isAvailable ? '(Đang ẩn)' : ''}
+                                    </option>
+                                );
+                            })}
                         </select>
                         <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} style={selectStyle}>
                             <option value="ALL">Tất cả trạng thái</option>
@@ -411,8 +416,7 @@ export default function AdminDishesPage() {
             )}
 
             {/* ========================================================= */}
-            {/* 2. INTERFACE: MODAL XEM CHI TIẾT MÓN ĂN */}
-            {/* ========================================================= */}
+            {/* MODAL XEM CHI TIẾT MÓN ĂN */}
             {activeModal === 'VIEW' && selectedDish && (
                 <div style={backdropStyle}>
                     <div style={{ ...modalCardStyle, width: '700px', display: 'grid', gridTemplateColumns: '1.2fr 1.5fr', gap: '28px', padding: '32px' }}>
@@ -420,8 +424,8 @@ export default function AdminDishesPage() {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                                 <button onClick={() => setActiveModal('NONE')} style={backBtnStyle}>&larr;</button>
                                 <span style={{ padding: '5px 12px', background: selectedDish.isAvailable ? '#dcfce7':'#fef3c7', color: selectedDish.isAvailable ? '#15803d':'#d97706', borderRadius: '20px', fontSize: '11.5px', fontWeight: '700' }}>
-                                    {selectedDish.isAvailable ? '● Đang bán' : '● Tạm ngưng'}
-                                </span>
+                        {selectedDish.isAvailable ? '● Đang bán' : '● Tạm ngưng'}
+                    </span>
                             </div>
                             <div style={{ width: '100%', height: '230px', borderRadius: '16px', overflow: 'hidden', border: '1px solid #cbd5e1', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                                 <img src={selectedDish.imageUrl.startsWith('http') ? selectedDish.imageUrl : `/image/${selectedDish.imageUrl}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={selectedDish.name} />
@@ -438,7 +442,18 @@ export default function AdminDishesPage() {
                                 <h3 style={{ margin: '0 0 16px 0', color: '#0052cc', fontSize: '22px', fontWeight: '800' }}>{selectedDish.price.toLocaleString('vi-VN')}đ</h3>
                                 <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: '20px 0' }} />
                                 <h4 style={{ margin: '0 0 8px 0', fontSize: '11px', color: '#94a3b8', fontWeight: '800', letterSpacing: '0.05em' }}>MÔ TẢ CHI TIẾT</h4>
-                                <p style={{ fontSize: '13.5px', color: '#475569', lineHeight: '1.6', margin: 0, maxHeight:'140px', overflowY:'auto' }}>{selectedDish.description || "Không có mô tả thông tin cụ thể cho món ăn này."}</p>
+                                <div style={{
+                                    fontSize: '13.5px',
+                                    color: '#475569',
+                                    lineHeight: '1.6',
+                                    maxHeight: '140px',
+                                    overflowY: 'auto',
+                                    paddingRight: '8px',
+                                    wordBreak: 'break-word',
+                                    whiteSpace: 'pre-wrap'
+                                }}>
+                                    {selectedDish.description || "Không có mô tả thông tin cụ thể cho món ăn này."}
+                                </div>
                             </div>
 
                             <div style={{ display: 'flex', gap: '12px', marginTop: '24px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
@@ -644,7 +659,10 @@ const selectStyle: React.CSSProperties = {
     cursor: 'pointer',
     fontSize: '13.5px',
     color: '#475569',
-    outline: 'none'
+    outline: 'none',
+    maxWidth: '220px',      // ← thêm
+    overflow: 'hidden',     // ← thêm
+    textOverflow: 'ellipsis' // ← thêm
 };
 
 const primaryBtnStyle: React.CSSProperties = {
