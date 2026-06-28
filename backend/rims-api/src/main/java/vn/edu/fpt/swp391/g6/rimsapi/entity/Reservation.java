@@ -24,7 +24,7 @@ public class Reservation {
     private Long id;
 
     @Nationalized
-    @Column(nullable = false, length = 50)
+    @Column(name = "customer_name", nullable = false, length = 50)
     private String customerName;
 
     @Column(nullable = false, length = 10)
@@ -43,10 +43,10 @@ public class Reservation {
     private RestaurantTable table;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }
