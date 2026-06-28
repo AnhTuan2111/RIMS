@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.UpdateProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
@@ -21,7 +22,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.*;
-
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class AdminController
     private final InvoiceService invoiceService;
     private final CategoryService categoryService;
     private final RevenueReportService revenueReportService;
+    private final DashboardService dashboardService;
 
     // =================== USER / ACCOUNT ===================
 
@@ -379,5 +381,10 @@ public class AdminController
     {
         dishService.deleteDish(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/menu")
+    public ResponseEntity<MenuDashboardResponse> getMenuDashboard() {
+        MenuDashboardResponse data = dashboardService.getMenuDashboardData();
+        return ResponseEntity.ok(data);
     }
 }
