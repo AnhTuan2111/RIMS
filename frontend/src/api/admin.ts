@@ -46,6 +46,18 @@ export interface RevenueComparisonResponse {
     currentAverageRevenue: number
 }
 
+export interface DailyRevenueItem {
+    dayLabel: string
+    date: string
+    revenue: number
+}
+
+export interface WeeklyRevenueChartResponse {
+    fromDate: string
+    toDate: string
+    items: DailyRevenueItem[]
+}
+
 export interface BestSellingDishItem {
     rank: number
     dishName: string
@@ -104,6 +116,20 @@ export const adminApi = {
     getWeeklyRevenue: () =>
         apiClient.get<RevenueReportResponse>(
             '/admin/revenue/weekly',
+        ),
+
+    getDailyRevenue: (
+        fromDate: string,
+        toDate: string,
+    ) =>
+        apiClient.get<WeeklyRevenueChartResponse>(
+            '/admin/revenue/daily',
+            {
+                params: {
+                    fromDate,
+                    toDate,
+                },
+            },
         ),
 
     getMonthlyRevenue: () =>

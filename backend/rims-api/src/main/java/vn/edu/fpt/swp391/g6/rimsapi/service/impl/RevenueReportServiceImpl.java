@@ -5,13 +5,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.BestSellingDishItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.BestSellingReportResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.DailyRevenueItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.HighestOrderShiftResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.OrderShiftItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.OrderShiftReportResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueComparisonResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueReportResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.WeeklyRevenueChartResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.service.RevenueReportService;
 
 import org.springframework.data.domain.Pageable;
@@ -25,6 +28,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -135,6 +139,85 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         return new RevenueReportResponse(
                 revenue,
                 fromDate + " - " + toDate
+        );
+    }
+
+    @Override
+    public WeeklyRevenueChartResponse getDailyRevenue(
+            LocalDate fromDate,
+            LocalDate toDate
+    ) {
+
+        LocalDate today =
+                LocalDate.now();
+
+        if (toDate.isAfter(today)) {
+            toDate =
+                    today;
+        }
+
+        if (fromDate.isAfter(toDate)) {
+            throw new RuntimeException(
+                    "fromDate must be before or equal to toDate"
+            );
+        }
+
+        LocalDateTime start =
+                fromDate.atStartOfDay();
+
+        LocalDateTime end =
+                toDate.atTime(23, 59, 59);
+
+        List<DailyRevenueProjection> rows =
+                invoiceRepository.getDailyRevenueBetween(
+                        start,
+                        end
+                );
+
+        Map<LocalDate, BigDecimal> revenueByDate =
+                new HashMap<>();
+
+        for (DailyRevenueProjection row : rows) {
+            if (row.getRevenueDate() == null) {
+                continue;
+            }
+
+            revenueByDate.put(
+                    row.getRevenueDate(),
+                    row.getRevenue() == null
+                            ? BigDecimal.ZERO
+                            : row.getRevenue()
+            );
+        }
+
+        List<DailyRevenueItemResponse> items =
+                new ArrayList<>();
+
+        LocalDate currentDate =
+                fromDate;
+
+        while (!currentDate.isAfter(toDate)) {
+            items.add(
+                    new DailyRevenueItemResponse(
+                            getDayLabel(
+                                    currentDate.getDayOfWeek()
+                            ),
+                            currentDate,
+                            revenueByDate.getOrDefault(
+                                    currentDate,
+                                    BigDecimal.ZERO
+                            )
+                    )
+            );
+
+            currentDate =
+                    currentDate.plusDays(1);
+        }
+
+        return new WeeklyRevenueChartResponse(
+                fromDate,
+                toDate,
+                items
         );
     }
 
@@ -704,6 +787,18 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                         1,
                         RoundingMode.HALF_UP
                 );
+    }
+
+    private String getDayLabel(DayOfWeek dayOfWeek) {
+        return switch (dayOfWeek) {
+            case MONDAY -> "T2";
+            case TUESDAY -> "T3";
+            case WEDNESDAY -> "T4";
+            case THURSDAY -> "T5";
+            case FRIDAY -> "T6";
+            case SATURDAY -> "T7";
+            case SUNDAY -> "CN";
+        };
     }
 
     private enum OrderShift {

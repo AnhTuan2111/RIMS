@@ -4707,7 +4707,7 @@ body {
     margin: 0 auto;
 }
 
-/* 4 Cards Grid - side by side */
+/* Report selector cards */
 .rims-stats-cards-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -6197,6 +6197,654 @@ body {
 .bar-container-vertical:hover .bar-info-hover {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+}
+
+/* Weekly revenue overview dashboard */
+.weekly-overview-dashboard {
+    display: grid;
+    gap: 22px;
+    padding: 28px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #f8fafc;
+}
+
+.weekly-overview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.weekly-overview-header h2 {
+    margin: 0;
+    color: #0f2a33;
+    font-size: 30px;
+    font-weight: 950;
+    line-height: 1.15;
+    letter-spacing: 0;
+}
+
+.weekly-overview-header p {
+    max-width: 720px;
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+.weekly-overview-date-select {
+    min-height: 44px;
+    display: grid;
+    grid-template-columns: 20px minmax(210px, 1fr) 18px;
+    align-items: center;
+    gap: 9px;
+    padding: 0 13px;
+    border: 1px solid #dbe3ea;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #64748b;
+    box-shadow: 0 8px 18px -16px rgba(15, 42, 51, 0.24);
+}
+
+.weekly-overview-date-select svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.1;
+}
+
+.weekly-overview-date-select select {
+    min-width: 0;
+    height: 42px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    appearance: none;
+    background: transparent;
+    color: #334155;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.weekly-overview-date-select select:disabled {
+    cursor: not-allowed;
+    opacity: 0.72;
+}
+
+.weekly-overview-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.weekly-overview-alert button {
+    min-height: 34px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: #991b1b;
+    color: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.weekly-overview-alert button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.weekly-overview-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.weekly-overview-kpi-card {
+    min-width: 0;
+    min-height: 152px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 14px 28px -24px rgba(15, 42, 51, 0.35);
+}
+
+.weekly-overview-kpi-card.featured {
+    border-color: #fed7aa;
+    background: #fff7ed;
+}
+
+.weekly-overview-kpi-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.weekly-overview-kpi-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+}
+
+.weekly-overview-kpi-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.2;
+}
+
+.weekly-overview-kpi-icon .comparison-status-icon,
+.weekly-comparison-card-icon .comparison-status-icon {
+    width: auto;
+    height: auto;
+    background: transparent;
+    border-radius: 0;
+    color: inherit;
+}
+
+.weekly-overview-kpi-icon .comparison-status-icon svg,
+.weekly-comparison-card-icon .comparison-status-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.weekly-overview-kpi-card.tone-orange .weekly-overview-kpi-icon {
+    background: #ffedd5;
+    color: #f97316;
+}
+
+.weekly-overview-kpi-card.tone-green .weekly-overview-kpi-icon {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.weekly-overview-kpi-card.tone-red .weekly-overview-kpi-icon {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.weekly-overview-kpi-card.tone-blue .weekly-overview-kpi-icon {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.weekly-overview-kpi-marker {
+    color: #94a3b8;
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.weekly-overview-kpi-content {
+    min-width: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.weekly-overview-kpi-content > span {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 850;
+    line-height: 1.25;
+}
+
+.weekly-overview-kpi-content strong {
+    color: #0f2a33;
+    font-size: 23px;
+    font-weight: 950;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+}
+
+.weekly-overview-kpi-card.tone-green .weekly-overview-kpi-content strong {
+    color: #15803d;
+}
+
+.weekly-overview-kpi-card.tone-red .weekly-overview-kpi-content strong {
+    color: #b91c1c;
+}
+
+.weekly-overview-kpi-card.tone-blue .weekly-overview-kpi-content strong {
+    color: #1d4ed8;
+}
+
+.weekly-overview-kpi-card.featured .weekly-overview-kpi-content strong {
+    color: #c2410c;
+}
+
+.weekly-overview-kpi-content small {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.weekly-overview-kpi-card.tone-red .weekly-overview-kpi-content small {
+    color: #b91c1c;
+}
+
+.weekly-overview-kpi-card.featured .weekly-overview-kpi-content small {
+    color: #c2410c;
+}
+
+.weekly-overview-main-grid,
+.weekly-overview-bottom-grid {
+    display: grid;
+    gap: 18px;
+    align-items: stretch;
+}
+
+.weekly-overview-main-grid {
+    grid-template-columns: minmax(0, 1.5fr) minmax(360px, 0.9fr);
+}
+
+.weekly-overview-bottom-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+}
+
+.weekly-overview-panel {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 14px 28px -24px rgba(15, 42, 51, 0.32);
+}
+
+.weekly-overview-panel h3 {
+    margin: 0 0 12px;
+    color: #0f2a33;
+    font-size: 18px;
+    font-weight: 950;
+    line-height: 1.2;
+}
+
+.weekly-overview-chart-shell {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.weekly-overview-chart {
+    width: 100%;
+    min-width: 660px;
+    height: auto;
+    display: block;
+}
+
+.weekly-overview-chart-grid {
+    stroke: #e5e7eb;
+    stroke-width: 1;
+}
+
+.weekly-overview-chart-axis-label,
+.weekly-overview-chart-day-label {
+    fill: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.weekly-overview-chart-area {
+    fill: url(#weekly-revenue-area);
+}
+
+.weekly-overview-chart-line {
+    fill: none;
+    stroke: #f97316;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 4;
+}
+
+.weekly-overview-chart-point {
+    fill: #f97316;
+    stroke: #ffffff;
+    stroke-width: 3;
+}
+
+.weekly-comparison-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.weekly-comparison-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    flex: 1;
+}
+
+.weekly-comparison-card {
+    min-width: 0;
+    min-height: 108px;
+    display: grid;
+    align-content: space-between;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.weekly-comparison-card.tone-green {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.weekly-comparison-card.tone-blue {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+
+.weekly-comparison-card.tone-red {
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.weekly-comparison-card > span {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.weekly-comparison-card strong {
+    color: #0f2a33;
+    font-size: 20px;
+    font-weight: 950;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.weekly-comparison-card.tone-green strong {
+    color: #15803d;
+}
+
+.weekly-comparison-card.tone-blue strong {
+    color: #1d4ed8;
+}
+
+.weekly-comparison-card.tone-red strong {
+    color: #b91c1c;
+}
+
+.weekly-comparison-card small {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.weekly-comparison-card-icon {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    color: currentColor;
+}
+
+.weekly-comparison-card.tone-green .weekly-comparison-card-icon {
+    color: #16a34a;
+}
+
+.weekly-comparison-card.tone-blue .weekly-comparison-card-icon {
+    color: #60a5fa;
+}
+
+.weekly-comparison-card.tone-red .weekly-comparison-card-icon {
+    color: #f87171;
+}
+
+.weekly-comparison-card-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.2;
+}
+
+.weekly-bestseller-list {
+    display: grid;
+    gap: 14px;
+}
+
+.weekly-bestseller-row {
+    display: grid;
+    grid-template-columns: 44px 38px minmax(0, 1fr) minmax(42px, auto);
+    align-items: center;
+    gap: 12px;
+}
+
+.weekly-bestseller-rank {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.weekly-bestseller-avatar {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 950;
+}
+
+.weekly-bestseller-info {
+    min-width: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.weekly-bestseller-info strong {
+    color: #0f2a33;
+    font-size: 14px;
+    font-weight: 900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.weekly-bestseller-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e5e7eb;
+}
+
+.weekly-bestseller-track span {
+    height: 100%;
+    display: block;
+    border-radius: inherit;
+    background: #f97316;
+}
+
+.weekly-bestseller-count {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 950;
+    text-align: right;
+}
+
+.weekly-overview-empty {
+    padding: 20px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 750;
+    text-align: center;
+}
+
+.weekly-shift-content {
+    display: grid;
+    grid-template-columns: minmax(170px, 220px) minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+}
+
+.weekly-shift-donut {
+    width: 210px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgba(15, 42, 51, 0.05);
+}
+
+.weekly-shift-donut-hole {
+    width: 112px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px #e5e7eb;
+}
+
+.weekly-shift-donut-hole strong {
+    color: #0f2a33;
+    font-size: 28px;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.weekly-shift-donut-hole span {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.weekly-shift-legend {
+    display: grid;
+    gap: 13px;
+}
+
+.weekly-shift-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.weekly-shift-dot {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    border-radius: 999px;
+}
+
+.weekly-shift-legend-item div {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.weekly-shift-legend-item strong {
+    color: #0f2a33;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.weekly-shift-legend-item span:last-child {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+@media (max-width: 1280px) {
+    .weekly-overview-kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .weekly-overview-main-grid,
+    .weekly-overview-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 860px) {
+    .weekly-overview-dashboard {
+        padding: 22px;
+    }
+
+    .weekly-overview-header {
+        align-items: stretch;
+    }
+
+    .weekly-overview-date-select {
+        width: 100%;
+        grid-template-columns: 20px minmax(0, 1fr) 18px;
+    }
+
+    .weekly-overview-kpi-grid,
+    .weekly-comparison-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .weekly-shift-content {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    .weekly-shift-legend {
+        width: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    .weekly-overview-dashboard,
+    .weekly-overview-panel {
+        padding: 18px;
+    }
+
+    .weekly-overview-header h2 {
+        font-size: 25px;
+    }
+
+    .weekly-overview-kpi-grid,
+    .weekly-comparison-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .weekly-bestseller-row {
+        grid-template-columns: 38px 34px minmax(0, 1fr) minmax(36px, auto);
+        gap: 10px;
+    }
+
+    .weekly-shift-donut {
+        width: min(210px, 100%);
+    }
 }
 
 /* Order shift dashboard */
