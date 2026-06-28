@@ -19,6 +19,10 @@ public interface CashierService
 
     PaymentResponse processPayment(Long orderId, PaymentRequest request);
 
+    void processVnPayFailed(String vnpTxnRef);
+
+    PaymentResponse unlockOrder(Long orderId);
+
     PaymentResponse completeCashPayment(Long orderId, PaymentRequest request);
 
     VNPayResponse createVNPayPaymentUrl(Long orderId);

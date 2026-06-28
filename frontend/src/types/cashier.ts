@@ -7,7 +7,7 @@ export interface TableDashboardResponse {
     tableId: number;
     tableNumber: string;
     status: TableStatus;
-    orderId?: number | null; // SỬA: Đổi từ currentOrderId thành orderId để khớp Java
+    orderId?: number | null;
 }
 
 export interface OrderItemResponse {
@@ -19,13 +19,13 @@ export interface OrderItemResponse {
 
 export interface OrderDetailResponse {
     orderId: number;
-    tableName: string; // SỬA: Đổi từ tableNumber thành tableName
-    createdAt: string; // Java LocalDateTime sẽ trả về ISO String
-    orderItems: OrderItemResponse[]; // SỬA: Đổi từ items thành orderItems
+    tableName: string;
+    createdAt: string;
+    orderItems: OrderItemResponse[];
 
     totalAmountBeforeVat: number;
     vatAmount: number;
-    finalAmount: number; // SỬA: Đổi từ totalAmount thành finalAmount
+    finalAmount: number;
 }
 
 export interface PaymentRequest {

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VNPayResponse {
-    private String paymentUrl; // Đường link dùng để Frontend vẽ ra mã QR
+    private String paymentUrl;
     private String message;
     private boolean success;
 }

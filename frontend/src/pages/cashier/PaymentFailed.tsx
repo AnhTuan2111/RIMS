@@ -9,7 +9,7 @@ export default function PaymentFailed() {
                 <div style={{ fontSize: '5rem', color: '#dc2626', marginBottom: '1rem' }}>✖</div>
                 <h1 style={{ color: '#dc2626', marginBottom: '1rem' }}>Giao Dịch Thất Bại</h1>
                 <p style={{ color: '#475569', marginBottom: '2rem' }}>
-                    Khách hàng đã hủy giao dịch hoặc có lỗi xảy ra từ ngân hàng. Đơn hàng vẫn được giữ nguyên trạng thái chưa thanh toán.
+                    Khách hàng đã hủy giao dịch hoặc có lỗi xảy ra từ ngân hàng.
                 </p>
                 <button type="button" onClick={() => navigate('/cashier/payments')} style={{ padding: '0.8rem 1.5rem', background: '#64748b', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
                     Quay lại màn hình Thu Ngân
