@@ -71,8 +71,8 @@ export default function AdminCategoryPage() {
             const formattedData = catRes.data.map((cat: any) => ({
                 ...cat,
                 dishCount: processedDishes.filter((d: any) => d.categoryName === cat.name).length
-            }));
-
+            }))
+                .sort((a: any, b: any) => a.id - b.id);
             setCategories(formattedData);
             setError(null);
         } catch (err: any) {
@@ -114,7 +114,7 @@ export default function AdminCategoryPage() {
                     description: formData.description,
                     isAvailable: formData.isAvailable
                 };
-                await axios.put(`http://localhost:8080/rims/admin/category/update/${selectedCategory.id}`, body, { headers });
+                await axios.put(`http://localhost:8080/rims/admin/category/${selectedCategory.id}`, body, { headers });
                 alert("Cập nhật danh mục thành công!");
             }
 
@@ -239,7 +239,7 @@ export default function AdminCategoryPage() {
                             <thead>
                             <tr style={tableHeaderRowStyle}>
                                 <th style={{ padding: '16px', textAlign: 'center', width: '100px' }}>ID</th>
-                                <th style={{ padding: '16px' }}>DANH MỤC & MÔ TẢ</th>
+                                <th style={{ padding: '16px', width: '35%' }}>DANH MỤC & MÔ TẢ</th>
                                 <th style={{ padding: '16px', textAlign: 'center', width: '120px' }}>SỐ MÓN</th>
                                 <th style={{ padding: '16px', textAlign: 'center', width: '140px' }}>TRẠNG THÁI</th>
                                 <th style={{ padding: '16px', width: '140px' }}>NGÀY TẠO</th>
@@ -252,40 +252,88 @@ export default function AdminCategoryPage() {
                                     <td style={tableCellIdStyle}>
                                         CAT-{String(item.id).padStart(3, '0')}
                                     </td>
-                                    <td style={{ padding: '16px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                    <td style={{ padding: '16px', maxWidth: '400px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
                                             <div style={tableIconBoxStyle}>📁</div>
-                                            <div>
-                                                <strong style={{ color: '#0f172a', fontSize: '14.5px', display: 'block' }}>{item.name}</strong>
-                                                <span style={{ color: '#64748b', fontSize: '12.5px', display: 'block', marginTop: '3px', lineHeight: '1.4' }}>{item.description || "Không có mô tả"}</span>
+                                            <div style={{ minWidth: 0, flex: 1 }}>
+                                                <strong style={{
+                                                    color: '#0f172a',
+                                                    fontSize: '14.5px',
+                                                    display: 'block',
+                                                    wordBreak: 'break-word',   // ← thêm
+                                                    whiteSpace: 'normal',       // ← thêm
+                                                    overflowWrap: 'break-word'  // ← thêm
+                                                }}>
+                                                    {item.name}
+                                                </strong>
+                                                <div style={{
+                                                    color: '#64748b',
+                                                    fontSize: '12.5px',
+                                                    marginTop: '3px',
+                                                    lineHeight: '1.5',
+                                                    wordBreak: 'break-word',
+                                                    whiteSpace: 'pre-wrap',
+                                                    maxHeight: '60px',
+                                                    overflowY: 'auto'
+                                                }}>
+                                                    {item.description || "Không có mô tả"}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td style={{ padding: '16px', textAlign: 'center' }}>
-                                            <span style={dishCountBadgeStyle}>
-                                                {item.dishCount || 0} món
-                                            </span>
+                    <span style={dishCountBadgeStyle}>
+                        {item.dishCount || 0} món
+                    </span>
                                     </td>
                                     <td style={{ padding: '16px', textAlign: 'center' }}>
-                                            <span style={statusBadgeStyle(item.isAvailable)}>
-                                                {item.isAvailable ? '● Hoạt động' : '● Đã ẩn'}
-                                            </span>
+                    <span style={statusBadgeStyle(item.isAvailable)}>
+                        {item.isAvailable ? '● Hoạt động' : '● Đã ẩn'}
+                    </span>
                                     </td>
                                     <td style={{ padding: '16px', color: '#64748b', fontWeight: '500' }}>
                                         {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '---'}
                                     </td>
                                     <td style={{ padding: '16px', textAlign: 'center' }}>
                                         <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
-                                            <button onClick={() => { setSelectedCategory(item); setView('DETAIL'); }} style={actionBtnStyle} title="Xem chi tiết">👁️</button>
+                                            {/* Button Xem chi tiết */}
                                             <button
-                                                onClick={() => { setSelectedCategory(item); setFormData({ name: item.name, description: item.description, isAvailable: item.isAvailable }); setView('EDIT'); }}
+                                                onClick={() => {
+                                                    setSelectedCategory(item);
+                                                    setView('DETAIL');
+                                                }}
+                                                style={actionBtnStyle}
+                                                title="Xem chi tiết"
+                                            >
+                                                👁️
+                                            </button>
+
+                                            {/* Button Chỉnh sửa */}
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedCategory(item);
+                                                    setFormData({
+                                                        name: item.name,
+                                                        description: item.description,
+                                                        isAvailable: item.isAvailable
+                                                    });
+                                                    setView('EDIT');
+                                                }}
                                                 disabled={!item.isAvailable}
                                                 style={editBtnStyle(item.isAvailable)}
                                                 title={item.isAvailable ? "Chỉnh sửa" : "Không thể sửa danh mục đã ẩn"}
                                             >
                                                 ✏️
                                             </button>
-                                            <button onClick={() => setDeleteModal({ open: true, id: item.id })} style={{ ...actionBtnStyle, color: '#ef4444' }} title="Xóa">🗑️</button>
+
+                                            {/* Button Xóa */}
+                                            <button
+                                                onClick={() => setDeleteModal({ open: true, id: item.id })}
+                                                style={{ ...actionBtnStyle, color: '#ef4444' }}
+                                                title="Xóa"
+                                            >
+                                                🗑️
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -319,21 +367,36 @@ export default function AdminCategoryPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '24px', marginBottom: '32px' }}>
                         <div style={cardStyle}>
                             <span style={inputLabelStyle}>TÊN DANH MỤC</span>
-                            <p style={{ margin: '4px 0 18px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>{selectedCategory.name}</p>
+                            <p style={{ margin: '4px 0 18px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>
+                                {selectedCategory.name}
+                            </p>
 
                             <span style={inputLabelStyle}>MÔ TẢ DANH MỤC</span>
-                            <p style={{ margin: '4px 0 0 0', fontSize: '13.5px', color: '#475569', lineHeight: '1.6' }}>{selectedCategory.description || 'Không có mô tả chi tiết cho danh mục này.'}</p>
+                            <p style={{
+                                margin: '4px 0 0 0',
+                                fontSize: '13.5px',
+                                color: '#475569',
+                                lineHeight: '1.6',
+                                wordBreak: 'break-word',    // Cho phép ngắt từ
+                                whiteSpace: 'pre-wrap',      // Giữ định dạng xuống dòng
+                                maxHeight: '200px',          // Giới hạn chiều cao (tùy chọn)
+                                overflowY: 'auto'            // Thêm scroll nếu quá dài (tùy chọn)
+                            }}>
+                                {selectedCategory.description || 'Không có mô tả chi tiết cho danh mục này.'}
+                            </p>
 
                             <div style={detailDividerMetricsStyle}>
                                 <div>
                                     <span style={inputLabelStyle}>TRẠNG THÁI HIỂN THỊ</span>
                                     <span style={{ display: 'block', marginTop: '6px', fontWeight: '700', fontSize: '14px', color: selectedCategory.isAvailable ? '#16a34a' : '#64748b' }}>
-                                        {selectedCategory.isAvailable ? '🟢 Đang hoạt động' : '⚫ Đang tạm ẩn'}
-                                    </span>
+                    {selectedCategory.isAvailable ? '🟢 Đang hoạt động' : '⚫ Đang tạm ẩn'}
+                </span>
                                 </div>
                                 <div>
                                     <span style={inputLabelStyle}>SỐ MÓN LIÊN KẾT</span>
-                                    <span style={{ display: 'block', marginTop: '6px', fontWeight: '700', fontSize: '14px', color: '#0052cc' }}>{categoryDishes.length} món ăn</span>
+                                    <span style={{ display: 'block', marginTop: '6px', fontWeight: '700', fontSize: '14px', color: '#0052cc' }}>
+                    {categoryDishes.length} món ăn
+                </span>
                                 </div>
                             </div>
                         </div>
@@ -356,12 +419,6 @@ export default function AdminCategoryPage() {
                             <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>
                                 🍽️ DANH SÁCH MÓN TRONG DANH MỤC ({categoryDishes.length} món)
                             </h4>
-                            <button
-                                onClick={() => alert('Chuyển đến trang quản lý món ăn để thêm mới')}
-                                style={{ ...primaryBtnStyle, padding: '6px 14px', fontSize: '12px' }}
-                            >
-                                + Thêm món
-                            </button>
                         </div>
 
                         {categoryDishes.length > 0 ? (
@@ -435,12 +492,6 @@ export default function AdminCategoryPage() {
                             <div style={emptyDishStateStyle}>
                                 <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}>🍽️</span>
                                 <p style={{ color: '#94a3b8', fontWeight: '600', margin: 0 }}>Chưa có món ăn nào trong danh mục này</p>
-                                <button
-                                    onClick={() => alert('Chuyển đến trang quản lý món ăn để thêm mới')}
-                                    style={{ ...secondaryBtnStyle, marginTop: '12px', padding: '8px 20px', fontSize: '12px' }}
-                                >
-                                    + Thêm món ăn đầu tiên
-                                </button>
                             </div>
                         )}
                     </div>
@@ -473,7 +524,7 @@ export default function AdminCategoryPage() {
                         <div style={{ marginBottom: '24px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                                 <label style={{ ...inputLabelStyle, marginBottom: 0 }}>MÔ TẢ CHI TIẾT</label>
-                                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700' }}>{formData.description.length}/255</span>
+                                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700' }}>{formData.description.length}/100</span>
                             </div>
                             <textarea
                                 maxLength={255}

@@ -175,7 +175,13 @@ export default function AdminMenuDashboardPage() {
                             {data?.categoryStats.map((cat, idx) => (
                                 <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: idx !== data.categoryStats.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
                                     <div>
-                                        <div style={{ fontWeight: '700', fontSize: '14px', color: '#0f172a' }}>{cat.categoryName}</div>
+                                        <div style={{
+                                            fontWeight: '700',
+                                            fontSize: '14px',
+                                            color: '#0f172a',
+                                            wordBreak: 'break-word',
+                                            overflowWrap: 'break-word'
+                                        }}>{cat.categoryName}</div>
                                         <small style={{ color: '#64748b', fontSize: '12px', marginTop: '2px', display: 'block' }}>{cat.dishCount} món ăn liên kết</small>
                                     </div>
                                     <span style={statusBadgeStyle(cat.status === 'ACTIVE')}>
