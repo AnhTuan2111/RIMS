@@ -2,7 +2,7 @@ import {apiClient} from './client';
 
 // Enums
 export type TableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED';
-export type OrderItemStatus = 'PREPARING' | 'COMPLETE' | 'CANCELLED';
+export type OrderItemStatus = 'PREPARING' | 'COMPLETED' | 'CANCELLED';
 
 // Responses
 export type TableDetailResponse = {

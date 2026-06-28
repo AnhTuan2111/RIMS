@@ -5,3 +5,4 @@ export * from "./WaiterToast";
 export * from "./ConfirmModal";
 export * from "./utils";
 export * from "./hooks";
+export * from "./WaiterTableCard";

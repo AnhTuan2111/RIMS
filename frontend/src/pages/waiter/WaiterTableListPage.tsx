@@ -1,7 +1,7 @@
 import {useState, useEffect, useCallback} from "react";
 import {useNavigate} from "react-router-dom";
 import {waiterApi, type TableDetailResponse} from "../../api/waiter";
-import {WaiterHeader, useReservationTick} from "../../components/waiter";
+import {WaiterHeader, useReservationTick, WaiterTableCard} from "../../components/waiter";
 import {
     getActiveReservations,
     getEffectiveTableStatus,
@@ -69,21 +69,13 @@ export default function WaiterTableListPage() {
                                 .filter((r) => r.tableId === table.tableId)
                                 .sort((a, b) => a.time.localeCompare(b.time))[0];
                         return (
-                            <button
+                            <WaiterTableCard
                                 key={table.tableId}
-                                onClick={() => handleTableClick(table)}
-                                className={`waiter-table-card waiter-table-${st}`}
-                            >
-                                <div className="waiter-table-header">
-                                    Bàn {table.tableNumber} - {table.capacity} chỗ
-                                </div>
-                                <div className="waiter-table-body">
-                                    <p className="waiter-table-status">{st}</p>
-                                    {st === "reserved" && nextRes && (
-                                        <p className="waiter-table-res-time">{nextRes.time}</p>
-                                    )}
-                                </div>
-                            </button>
+                                table={table}
+                                statusLabel={st}
+                                nextReservationTime={nextRes?.time}
+                                onClick={handleTableClick}
+                            />
                         );
                     })}
                 </div>
