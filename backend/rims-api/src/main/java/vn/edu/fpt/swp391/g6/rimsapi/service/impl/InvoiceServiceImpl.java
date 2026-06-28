@@ -2,13 +2,13 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceHistoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceItemResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoiceService;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -82,7 +82,6 @@ public class InvoiceServiceImpl implements InvoiceService
                         .getPaymentMethod()
                         .name()
         );
-        ;
 
         List<InvoiceItemResponse> items =
                 invoice.getOrder()

@@ -1,10 +1,6 @@
-
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import {
-    getCompletedOrders,
-    type KitchenOrderItemResponse,
-} from '../../api/chef'
+import {useEffect, useState} from 'react'
+import {Link} from 'react-router-dom'
+import {getCompletedOrders, type KitchenOrderItemResponse,} from '../../api/chef'
 
 function formatDateTime(value?: string) {
     if (!value) {

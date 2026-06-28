@@ -1,7 +1,10 @@
 package vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Data

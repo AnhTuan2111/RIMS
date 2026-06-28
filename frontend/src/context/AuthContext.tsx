@@ -1,16 +1,8 @@
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-    type ReactNode,
-} from 'react'
+import {createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState,} from 'react'
 import * as authApi from '../api/auth'
-import type { AuthUser, LoginRequest } from '../types/auth'
-import { clearTokens, hasAccessToken } from '../utils/tokenStorage'
-import { getErrorMessage } from '../utils/error'
+import type {AuthUser, LoginRequest} from '../types/auth'
+import {clearTokens, hasAccessToken} from '../utils/tokenStorage'
+import {getErrorMessage} from '../utils/error'
 
 interface AuthContextValue {
     user: AuthUser | null
@@ -24,7 +16,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({children}: { children: ReactNode }) {
     const [user, setUser] = useState<AuthUser | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -91,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
+
 /* eslint-disable react-refresh/only-export-components */
 export function useAuth(): AuthContextValue {
     const context = useContext(AuthContext)

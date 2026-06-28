@@ -1,6 +1,6 @@
-import { createContext, useContext, useState } from 'react'
-import type { ReactNode } from 'react'
-import { RoleType } from '../types/auth'
+import type {ReactNode} from 'react'
+import {createContext, useContext, useState} from 'react'
+import {RoleType} from '../types/auth'
 
 type ActorContextType = {
     actor: RoleType
@@ -17,7 +17,7 @@ function isActorRole(value: string | null): value is RoleType {
     return ALL_ROLES.includes(value as RoleType)
 }
 
-export function ActorProvider({ children }: { children: ReactNode }) {
+export function ActorProvider({children}: { children: ReactNode }) {
     const [actor, setActorState] = useState<RoleType>(() => {
         const savedActor = localStorage.getItem('selectedActor')
         return isActorRole(savedActor) ? savedActor : DEFAULT_ACTOR
@@ -29,7 +29,7 @@ export function ActorProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <ActorContext.Provider value={{ actor, setActor }}>
+        <ActorContext.Provider value={{actor, setActor}}>
             {children}
         </ActorContext.Provider>
     )

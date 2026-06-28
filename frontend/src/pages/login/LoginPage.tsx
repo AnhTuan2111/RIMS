@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../../api/auth'
-import { useActor } from '../../context/ActorContext'
-import { RoleType } from '../../types/auth'
+import {useState} from 'react'
+import {Link, useNavigate} from 'react-router-dom'
+import {login} from '../../api/auth'
+import {useActor} from '../../context/ActorContext'
+import {RoleType} from '../../types/auth'
 
 export default function LoginPage() {
     const navigate = useNavigate()
-    const { setActor } = useActor()
+    const {setActor} = useActor()
 
     const [username, setUsername] = useState('')
     const [rawPassword, setRawPassword] = useState('')
@@ -20,29 +20,29 @@ export default function LoginPage() {
             setIsLoading(true)
             setError(null)
 
-            const user = await login({ username, rawPassword })
+            const user = await login({username, rawPassword})
             const role = user.role as RoleType
             setActor(role)
             localStorage.setItem('selectedActor', role)
 
             switch (role) {
                 case RoleType.ADMIN:
-                    navigate('/dashboard', { replace: true })
+                    navigate('/dashboard', {replace: true})
                     return
                 case RoleType.CHEF:
-                    navigate('/chef/orders', { replace: true })
+                    navigate('/chef/orders', {replace: true})
                     return
                 case RoleType.WAITER:
-                    navigate('/waiter/tables', { replace: true })
+                    navigate('/waiter/tables', {replace: true})
                     return
                 case RoleType.CASHIER:
-                    navigate('/cashier/payments', { replace: true })
+                    navigate('/cashier/payments', {replace: true})
                     return
                 case RoleType.CUSTOMER:
-                    navigate('/profile', { replace: true })
+                    navigate('/profile', {replace: true})
                     return
                 default:
-                    navigate('/dashboard', { replace: true })
+                    navigate('/dashboard', {replace: true})
                     return
             }
         } catch {
@@ -88,8 +88,9 @@ export default function LoginPage() {
                         />
                     </label>
 
-                    <div style={{ textAlign: 'right', marginBottom: '8px' }}>
-                        <Link to="/forgot-password" style={{ fontSize: '13px', color: '#4f46e5', textDecoration: 'none' }}>
+                    <div style={{textAlign: 'right', marginBottom: '8px'}}>
+                        <Link to="/forgot-password"
+                              style={{fontSize: '13px', color: '#4f46e5', textDecoration: 'none'}}>
                             Quên mật khẩu?
                         </Link>
                     </div>
@@ -105,6 +106,7 @@ export default function LoginPage() {
                     <span>chef / 123456</span>
                     <span>waiter / 123456</span>
                     <span>cashier / 123456</span>
+                    <span>customer / 123456</span>
                 </div>
             </section>
         </main>

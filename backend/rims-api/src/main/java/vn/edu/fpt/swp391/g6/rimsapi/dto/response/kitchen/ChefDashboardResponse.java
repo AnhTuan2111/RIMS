@@ -1,18 +1,15 @@
-
 package vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChefDashboardResponse {
+public class ChefDashboardResponse
+{
 
     // Số món đang chuẩn bị
     private long preparingCount;

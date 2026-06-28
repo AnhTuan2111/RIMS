@@ -10,19 +10,29 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.PaymentResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.VNPayResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.*;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Payment;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
-public class CashierServiceImpl implements CashierService {
+public class CashierServiceImpl implements CashierService
+{
 
     private final OrderRepository orderRepository;
     private final RestaurantTableRepository tableRepository;
@@ -31,7 +41,8 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TableDashboardResponse> getTablesDashboard() {
+    public List<TableDashboardResponse> getTablesDashboard()
+    {
         List<RestaurantTable> tables = tableRepository.findAll();
         List<Order> activeOrders = orderRepository.findByStatus(OrderStatus.SERVING);
 
@@ -43,7 +54,8 @@ public class CashierServiceImpl implements CashierService {
                         (existing, replacement) -> existing));
 
         return tables.stream()
-                .map(t -> {
+                .map(t ->
+                {
                     Long orderId = tableOrderMap.get(t.getId());
                     TableStatus cashierStatus = (orderId != null) ? TableStatus.SERVING : TableStatus.AVAILABLE;
                     return TableDashboardResponse.builder()
@@ -58,7 +70,8 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderDetailResponse getOrderDetail(Long orderId) {
+    public OrderDetailResponse getOrderDetail(Long orderId)
+    {
         Order order = orderRepository.findOrderWithDetailsById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng tương ứng"));
 
@@ -90,12 +103,14 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional
-    public PaymentResponse processPayment(Long orderId, PaymentRequest request) {
+    public PaymentResponse processPayment(Long orderId, PaymentRequest request)
+    {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
         //Nếu đơn hàng đã bị khóa từ trước (do khách thao tác lại)
-        if (order.getStatus() == OrderStatus.LOCKED) {
+        if (order.getStatus() == OrderStatus.LOCKED)
+        {
             return PaymentResponse.builder()
                     .message("Đơn hàng đã được khóa từ trước. Sẵn sàng thanh toán!")
                     .success(true)
@@ -103,7 +118,8 @@ public class CashierServiceImpl implements CashierService {
         }
 
         // Nếu đơn hàng đã hoàn thành (COMPLETED) thì mới chặn lại
-        if (order.getStatus() != OrderStatus.SERVING) {
+        if (order.getStatus() != OrderStatus.SERVING)
+        {
             throw new RuntimeException("Đơn hàng này đã thanh toán xong hoặc không tồn tại!");
         }
 
@@ -118,11 +134,13 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional
-    public PaymentResponse completeCashPayment(Long orderId, PaymentRequest request) {
+    public PaymentResponse completeCashPayment(Long orderId, PaymentRequest request)
+    {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        if (order.getStatus() != OrderStatus.LOCKED) {
+        if (order.getStatus() != OrderStatus.LOCKED)
+        {
             throw new RuntimeException("Đơn hàng chưa được chốt (LOCKED) hoặc đã thanh toán xong!");
         }
 
@@ -132,7 +150,8 @@ public class CashierServiceImpl implements CashierService {
 
         BigDecimal amountPaid = BigDecimal.valueOf(request.getAmountPaid());
 
-        if (amountPaid.compareTo(finalAmount) < 0) {
+        if (amountPaid.compareTo(finalAmount) < 0)
+        {
             throw new RuntimeException("Khách đưa thiếu tiền!");
         }
         BigDecimal excessAmount = amountPaid.subtract(finalAmount);
@@ -153,7 +172,8 @@ public class CashierServiceImpl implements CashierService {
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
-        if (order.getTable() != null) {
+        if (order.getTable() != null)
+        {
             RestaurantTable table = order.getTable();
             table.setStatus(TableStatus.AVAILABLE);
             tableRepository.save(table);
@@ -170,11 +190,13 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional
-    public PaymentResponse unlockOrder(Long orderId) {
+    public PaymentResponse unlockOrder(Long orderId)
+    {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        if (order.getStatus() == OrderStatus.LOCKED) {
+        if (order.getStatus() == OrderStatus.LOCKED)
+        {
             order.setStatus(OrderStatus.SERVING);
             orderRepository.save(order);
 
@@ -192,13 +214,15 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional
-    public void processVnPayFailed(String vnpTxnRef) {
+    public void processVnPayFailed(String vnpTxnRef)
+    {
         String[] parts = vnpTxnRef.split("_");
         Long orderId = Long.parseLong(parts[1]);
 
         Order order = orderRepository.findById(orderId).orElse(null);
 
-        if (order != null && order.getStatus() == OrderStatus.LOCKED) {
+        if (order != null && order.getStatus() == OrderStatus.LOCKED)
+        {
             order.setStatus(OrderStatus.SERVING);
             orderRepository.save(order);
         }
@@ -206,17 +230,20 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional(readOnly = true)
-    public VNPayResponse createVNPayPaymentUrl(Long orderId) {
+    public VNPayResponse createVNPayPaymentUrl(Long orderId)
+    {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        if (order.getStatus() != OrderStatus.SERVING && order.getStatus() != OrderStatus.LOCKED) {
+        if (order.getStatus() != OrderStatus.SERVING && order.getStatus() != OrderStatus.LOCKED)
+        {
             throw new RuntimeException("Đơn hàng này đã thanh toán xong hoặc không hợp lệ!");
         }
 
         BigDecimal totalBeforeVat = order.getTotalAmount();
 
-        if (totalBeforeVat == null || totalBeforeVat.compareTo(BigDecimal.ZERO) <= 0) {
+        if (totalBeforeVat == null || totalBeforeVat.compareTo(BigDecimal.ZERO) <= 0)
+        {
             throw new RuntimeException("Đơn hàng chưa có món ăn (Tổng tiền = 0đ)!");
         }
 
@@ -250,29 +277,34 @@ public class CashierServiceImpl implements CashierService {
         StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
 
-        try {
+        try
+        {
             Iterator<Map.Entry<String, String>> itr = sortedParams.entrySet().iterator();
-            while (itr.hasNext()) {
+            while (itr.hasNext())
+            {
                 Map.Entry<String, String> entry = itr.next();
                 String fieldName = entry.getKey();
                 String fieldValue = entry.getValue();
 
-                if ((fieldValue != null) && (!fieldValue.trim().isEmpty())) {
+                if ((fieldValue != null) && (!fieldValue.trim().isEmpty()))
+                {
                     hashData.append(fieldName);
                     hashData.append('=');
-                    hashData.append(java.net.URLEncoder.encode(fieldValue, "US-ASCII"));
+                    hashData.append(java.net.URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
 
-                    query.append(java.net.URLEncoder.encode(fieldName, "US-ASCII"));
+                    query.append(java.net.URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
                     query.append('=');
-                    query.append(java.net.URLEncoder.encode(fieldValue, "US-ASCII"));
+                    query.append(java.net.URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
 
-                    if (itr.hasNext()) {
+                    if (itr.hasNext())
+                    {
                         query.append('&');
                         hashData.append('&');
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             throw new RuntimeException("Lỗi mã hóa dữ liệu VNPay", e);
         }
 
@@ -287,14 +319,16 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional
-    public Long processVnPaySuccess(String vnpTxnRef) {
+    public Long processVnPaySuccess(String vnpTxnRef)
+    {
         String[] parts = vnpTxnRef.split("_");
         Long orderId = Long.parseLong(parts[1]);
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng từ VNPay"));
 
-        if (order.getStatus() == OrderStatus.COMPLETED) {
+        if (order.getStatus() == OrderStatus.COMPLETED)
+        {
             throw new RuntimeException("Đơn hàng này đã được thanh toán rồi!");
         }
 
@@ -319,7 +353,8 @@ public class CashierServiceImpl implements CashierService {
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
-        if (order.getTable() != null) {
+        if (order.getTable() != null)
+        {
             RestaurantTable table = order.getTable();
             table.setStatus(TableStatus.AVAILABLE);
             tableRepository.save(table);

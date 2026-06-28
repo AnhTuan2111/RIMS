@@ -71,7 +71,8 @@ public class DatabaseSeeder implements CommandLineRunner
                 new UserDef("admin", "Quản trị viên", "admin@rims.local", "0900000001", RoleType.ADMIN),
                 new UserDef("chef", "Đầu bếp", "chef@rims.local", "0900000002", RoleType.CHEF),
                 new UserDef("waiter", "Phục vụ", "waiter@rims.local", "0900000003", RoleType.WAITER),
-                new UserDef("cashier", "Thu ngân", "cashier@rims.local", "0900000004", RoleType.CASHIER)
+                new UserDef("cashier", "Thu ngân", "cashier@rims.local", "0900000004", RoleType.CASHIER),
+                new UserDef("customer", "Khách hàng", "customer@rims.local", "0900000005", RoleType.CUSTOMER)
         );
 
         List<User> users = defs.stream()

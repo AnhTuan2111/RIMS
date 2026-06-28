@@ -1,4 +1,4 @@
-import { mockTables } from '../../data/mockData'
+import {mockTables} from '../../data/mockData'
 
 export default function AdminTablesPage() {
     const totalTables = mockTables.length

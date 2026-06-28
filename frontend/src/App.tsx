@@ -50,8 +50,8 @@ function App() {
                     <Route path="/login" element={<LoginPage/>}/>
                     <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
 
-                    <Route path="/payment-success" element={<PaymentSuccess />} />
-                    <Route path="/payment-failed" element={<PaymentFailed />} />
+                    <Route path="/payment-success" element={<PaymentSuccess/>}/>
+                    <Route path="/payment-failed" element={<PaymentFailed/>}/>
 
                     {/* Khu vực sau đăng nhập */}
                     <Route element={<DashboardLayout/>}>
@@ -65,14 +65,14 @@ function App() {
                         <Route path="/admin/statistics" element={<AdminStatisticsPage/>}/>
                         <Route path="/admin/invoices" element={<AdminPaymentHistoryPage/>}/>
                         <Route path="/admin/invoices/:invoiceId" element={<AdminPaymentDetailPage/>}/>
-                        <Route path="/admin/menu" element={<AdminMenuDashboardPage />} />
-                        <Route path="/admin/categories" element={<AdminCategoryPage />} />
+                        <Route path="/admin/menu" element={<AdminMenuDashboardPage/>}/>
+                        <Route path="/admin/categories" element={<AdminCategoryPage/>}/>
 
                         {/* CHEF */}
-                        <Route path="/chef/dashboard" element={<ChefDashboardPage />} />
-                        <Route path="/chef/orders" element={<KitchenQueuePage />} />
-                        <Route path="/chef/dishes" element={<DishListPage />} />
-                        <Route path="/chef/completed-orders" element={<CompletedOrdersPage />} />
+                        <Route path="/chef/dashboard" element={<ChefDashboardPage/>}/>
+                        <Route path="/chef/orders" element={<KitchenQueuePage/>}/>
+                        <Route path="/chef/dishes" element={<DishListPage/>}/>
+                        <Route path="/chef/completed-orders" element={<CompletedOrdersPage/>}/>
 
                         {/* WAITER */}
                         <Route path="/waiter/tables" element={<WaiterTableListPage/>}/>

@@ -6,7 +6,9 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceHistoryResponse;
 
 import java.util.List;
 
-public interface InvoiceService {
+
+public interface InvoiceService
+{
 
     List<InvoiceHistoryResponse> getInvoiceHistory();
 

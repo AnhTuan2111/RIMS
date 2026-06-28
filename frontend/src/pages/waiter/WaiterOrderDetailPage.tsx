@@ -1,7 +1,7 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {waiterApi, type OrderDetailResponse} from "../../api/waiter";
-import {WaiterHeader, BackArrow, fmtPrice} from "../../components/waiter";
+import {type OrderDetailResponse, waiterApi} from "../../api/waiter";
+import {BackArrow, fmtPrice, WaiterHeader} from "../../components/waiter";
 
 export default function WaiterOrderDetailPage() {
     const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import {useNavigate, useParams} from "react-router-dom";
-import {WaiterHeader, BackArrow, useReservationTick} from "../../components/waiter";
+import {BackArrow, useReservationTick, WaiterHeader} from "../../components/waiter";
 import {getActiveReservationForTable, processAutoCancellations} from "./mockReservations";
 
 export default function WaiterReservationDetailPage() {
@@ -23,9 +23,11 @@ export default function WaiterReservationDetailPage() {
                     <div className="waiter-card" style={{maxWidth: "600px"}}>
                         <div className="waiter-card-body">
                             <p style={{color: "#64748b"}}>
-                                Không có đặt bàn đang hoạt động cho bàn này. Bàn có thể đã hết thời gian chờ hoặc đã được phục vụ.
+                                Không có đặt bàn đang hoạt động cho bàn này. Bàn có thể đã hết thời gian chờ hoặc đã
+                                được phục vụ.
                             </p>
-                            <button onClick={() => navigate("/waiter/tables")} className="waiter-btn-primary" style={{marginTop: "1rem"}}>
+                            <button onClick={() => navigate("/waiter/tables")} className="waiter-btn-primary"
+                                    style={{marginTop: "1rem"}}>
                                 Về danh sách bàn
                             </button>
                         </div>

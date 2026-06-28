@@ -1,14 +1,14 @@
 import type {ReactNode} from "react";
 
 export function ConfirmModal({
-    title,
-    message,
-    confirmLabel = "Xác nhận",
-    cancelLabel = "Hủy",
-    onConfirm,
-    onCancel,
-    children,
-}: {
+                                 title,
+                                 message,
+                                 confirmLabel = "Xác nhận",
+                                 cancelLabel = "Hủy",
+                                 onConfirm,
+                                 onCancel,
+                                 children,
+                             }: {
     title: string;
     message?: string;
     confirmLabel?: string;

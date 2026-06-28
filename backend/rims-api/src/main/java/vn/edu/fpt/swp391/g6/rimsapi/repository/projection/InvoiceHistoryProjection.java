@@ -5,7 +5,9 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public interface InvoiceHistoryProjection {
+
+public interface InvoiceHistoryProjection
+{
 
     Long getInvoiceId();
 

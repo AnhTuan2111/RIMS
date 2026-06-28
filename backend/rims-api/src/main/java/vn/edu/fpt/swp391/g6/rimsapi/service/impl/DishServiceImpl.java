@@ -1,108 +1,133 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.service.DishService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityNotFoundException;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.service.DishService;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class DishServiceImpl implements DishService {
+public class DishServiceImpl implements DishService
+{
 
     private final DishRepository dishRepository;
     private final CategoryRepository categoryRepository;
 
     @Override
-    public List<DishResponse> getAllDishes() {
-        try {
+    public List<DishResponse> getAllDishes()
+    {
+        try
+        {
             return dishRepository.findAll().stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("Lỗi khi lấy danh sách dishes: {}", e.getMessage());
             throw new RuntimeException("Không thể lấy danh sách món ăn: " + e.getMessage());
         }
     }
 
     @Override
-    public List<DishResponse> getDishesByCategory(Integer categoryId) {
-        try {
+    public List<DishResponse> getDishesByCategory(Integer categoryId)
+    {
+        try
+        {
             // Kiểm tra category tồn tại
-            if (!categoryRepository.existsById(categoryId)) {
+            if (!categoryRepository.existsById(categoryId))
+            {
                 throw new EntityNotFoundException("Không tìm thấy danh mục với ID: " + categoryId);
             }
             return dishRepository.findByCategoryId(categoryId).stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException e)
+        {
             log.warn("Không tìm thấy category với ID: {}", categoryId);
             throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("Lỗi khi lấy dishes theo category ID {}: {}", categoryId, e.getMessage());
             throw new RuntimeException("Không thể lấy danh sách món ăn theo danh mục: " + e.getMessage());
         }
     }
 
     @Override
-    public List<DishResponse> getAvailableDishes() {
-        try {
+    public List<DishResponse> getAvailableDishes()
+    {
+        try
+        {
             return dishRepository.findByIsAvailableTrue().stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("Lỗi khi lấy danh sách dishes đang có sẵn: {}", e.getMessage());
             throw new RuntimeException("Không thể lấy danh sách món ăn đang có sẵn: " + e.getMessage());
         }
     }
 
     @Override
-    public DishResponse getDishById(Integer id) {
-        try {
+    public DishResponse getDishById(Integer id)
+    {
+        try
+        {
             Dish dish = dishRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy món ăn với ID: " + id));
             return convertToDTO(dish);
-        } catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException e)
+        {
             log.warn("Không tìm thấy dish với ID: {}", id);
             throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("Lỗi khi lấy dish với ID {}: {}", id, e.getMessage());
             throw new RuntimeException("Không thể lấy thông tin món ăn: " + e.getMessage());
         }
     }
 
     @Override
-    public List<DishResponse> searchDishes(String keyword) {
-        try {
-            if (keyword == null || keyword.trim().isEmpty()) {
+    public List<DishResponse> searchDishes(String keyword)
+    {
+        try
+        {
+            if (keyword == null || keyword.trim().isEmpty())
+            {
                 return getAllDishes();
             }
             return dishRepository.searchByName(keyword).stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("Lỗi khi tìm kiếm dishes với keyword '{}': {}", keyword, e.getMessage());
             throw new RuntimeException("Không thể tìm kiếm món ăn: " + e.getMessage());
         }
     }
 
     @Override
-    public DishResponse createDish(CreateDishRequest createDishRequest) {
-        try {
+    public DishResponse createDish(CreateDishRequest createDishRequest)
+    {
+        try
+        {
             // Kiểm tra tên món ăn đã tồn tại chưa
-            if (dishRepository.existsByName(createDishRequest.getName())) {
+            if (dishRepository.existsByName(createDishRequest.getName()))
+            {
                 throw new IllegalArgumentException("Tên món ăn '" + createDishRequest.getName() + "' đã tồn tại");
             }
 
@@ -123,25 +148,30 @@ public class DishServiceImpl implements DishService {
             log.info("Tạo món ăn thành công: {}", savedDish.getName());
             return convertToDTO(savedDish);
 
-        } catch (IllegalArgumentException | EntityNotFoundException e) {
+        } catch (IllegalArgumentException | EntityNotFoundException e)
+        {
             log.warn("Lỗi khi tạo dish: {}", e.getMessage());
             throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("Lỗi khi tạo dish: {}", e.getMessage());
             throw new RuntimeException("Không thể tạo món ăn mới: " + e.getMessage());
         }
     }
 
     @Override
-    public DishResponse updateDish(Integer id, UpdateDishRequest updateDishRequest) {
-        try {
+    public DishResponse updateDish(Integer id, UpdateDishRequest updateDishRequest)
+    {
+        try
+        {
             // Tìm món ăn cần update
             Dish dish = dishRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy món ăn với ID: " + id));
 
             // Kiểm tra tên mới có bị trùng không (bỏ qua chính nó)
             if (!dish.getName().equals(updateDishRequest.getName())
-                    && dishRepository.existsByNameAndIdNot(updateDishRequest.getName(), id)) {
+                    && dishRepository.existsByNameAndIdNot(updateDishRequest.getName(), id))
+            {
                 throw new IllegalArgumentException("Tên món ăn '" + updateDishRequest.getName() + "' đã tồn tại!");
             }
 
@@ -149,19 +179,22 @@ public class DishServiceImpl implements DishService {
             dish.setName(updateDishRequest.getName());
             dish.setDescription(updateDishRequest.getDescription());
 
-            if (updateDishRequest.getPrice() != null) {
+            if (updateDishRequest.getPrice() != null)
+            {
                 dish.setPrice(updateDishRequest.getPrice());
             }
 
             dish.setImageUrl(updateDishRequest.getImageUrl());
 
             // Cập nhật trạng thái nếu có
-            if (updateDishRequest.getIsAvailable() != null) {
+            if (updateDishRequest.getIsAvailable() != null)
+            {
                 dish.setAvailable(updateDishRequest.getIsAvailable());
             }
 
             // Cập nhật category nếu có thay đổi
-            if (updateDishRequest.getCategoryId() != null) {
+            if (updateDishRequest.getCategoryId() != null)
+            {
                 Category category = categoryRepository.findById(updateDishRequest.getCategoryId())
                         .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy danh mục với ID: " + updateDishRequest.getCategoryId()));
                 dish.setCategory(category);
@@ -171,18 +204,22 @@ public class DishServiceImpl implements DishService {
             log.info("Cập nhật món ăn thành công: {}", updatedDish.getName());
             return convertToDTO(updatedDish);
 
-        } catch (EntityNotFoundException | IllegalArgumentException e) {
+        } catch (EntityNotFoundException | IllegalArgumentException e)
+        {
             log.warn("Lỗi khi cập nhật dish ID {}: {}", id, e.getMessage());
             throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("Lỗi khi cập nhật dish ID {}: {}", id, e.getMessage());
             throw new RuntimeException("Không thể cập nhật món ăn: " + e.getMessage());
         }
     }
 
     @Override
-    public void deleteDish(Integer id) {
-        try {
+    public void deleteDish(Integer id)
+    {
+        try
+        {
             Dish dish = dishRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy món ăn với ID: " + id));
 
@@ -191,16 +228,19 @@ public class DishServiceImpl implements DishService {
             dishRepository.save(dish);
             log.info("Xóa mềm món ăn thành công: {}", dish.getName());
 
-        } catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException e)
+        {
             log.warn("Không tìm thấy dish với ID: {}", id);
             throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("Lỗi khi xóa dish ID {}: {}", id, e.getMessage());
             throw new RuntimeException("Không thể xóa món ăn: " + e.getMessage());
         }
     }
 
-    private DishResponse convertToDTO(Dish dish) {
+    private DishResponse convertToDTO(Dish dish)
+    {
         DishResponse dto = new DishResponse();
         dto.setId(dish.getId());
         dto.setName(dish.getName());
@@ -211,7 +251,8 @@ public class DishServiceImpl implements DishService {
         dto.setCreatedAt(dish.getCreatedAt());
         dto.setUpdatedAt(dish.getUpdatedAt());
 
-        if (dish.getCategory() != null) {
+        if (dish.getCategory() != null)
+        {
             dto.setCategoryId(dish.getCategory().getId());
             dto.setCategoryName(dish.getCategory().getName());
         }

@@ -1,7 +1,7 @@
-import {useState, useEffect, useMemo} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {waiterApi, type MenuItemResponse, type OrderItemRequest} from "../../api/waiter";
-import {WaiterHeader, BackArrow, WaiterToast, ConfirmModal, fmtPrice} from "../../components/waiter";
+import {type MenuItemResponse, type OrderItemRequest, waiterApi} from "../../api/waiter";
+import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
 import {fulfillReservationForTable} from "./mockReservations";
 
 export default function WaiterCreateOrderPage() {
@@ -43,7 +43,7 @@ export default function WaiterCreateOrderPage() {
         setShowConfirm(true);
     }
 
-    const [successData, setSuccessData] = useState<{message: string; itemSummary: string} | null>(null);
+    const [successData, setSuccessData] = useState<{ message: string; itemSummary: string } | null>(null);
 
     async function submitCreateOrder() {
         const items: OrderItemRequest[] = selectedItems.map((item) => ({

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
 // --- 1. INTERFACES TYPES ---
@@ -42,7 +42,7 @@ export default function AdminCategoryPage() {
         isAvailable: true
     });
 
-    const [deleteModal, setDeleteModal] = useState({ open: false, id: null as number | null });
+    const [deleteModal, setDeleteModal] = useState({open: false, id: null as number | null});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     // --- 3. API SYNCHRONIZATION ---
@@ -50,11 +50,11 @@ export default function AdminCategoryPage() {
         try {
             setLoading(true);
             const token = localStorage.getItem('accessToken');
-            const headers = { Authorization: token ? `Bearer ${token}` : '' };
+            const headers = {Authorization: token ? `Bearer ${token}` : ''};
 
             const [catRes, dishRes] = await Promise.all([
-                axios.get('http://localhost:8080/rims/admin/category/all', { headers }),
-                axios.get('http://localhost:8080/rims/admin/dish/all', { headers })
+                axios.get('http://localhost:8080/rims/admin/category/all', {headers}),
+                axios.get('http://localhost:8080/rims/admin/dish/all', {headers})
             ]);
 
             const dishesData: any[] = dishRes.data;
@@ -99,14 +99,14 @@ export default function AdminCategoryPage() {
         try {
             setIsSubmitting(true);
             const token = localStorage.getItem('accessToken');
-            const headers = { Authorization: token ? `Bearer ${token}` : '' };
+            const headers = {Authorization: token ? `Bearer ${token}` : ''};
 
             if (view === 'CREATE') {
                 const body = {
                     name: formData.name.trim(),
                     description: formData.description
                 };
-                await axios.post('http://localhost:8080/rims/admin/category/new', body, { headers });
+                await axios.post('http://localhost:8080/rims/admin/category/new', body, {headers});
                 alert("Tạo danh mục mới thành công! 🎉");
             } else if (view === 'EDIT' && selectedCategory) {
                 const body = {
@@ -114,7 +114,7 @@ export default function AdminCategoryPage() {
                     description: formData.description,
                     isAvailable: formData.isAvailable
                 };
-                await axios.put(`http://localhost:8080/rims/admin/category/${selectedCategory.id}`, body, { headers });
+                await axios.put(`http://localhost:8080/rims/admin/category/${selectedCategory.id}`, body, {headers});
                 alert("Cập nhật danh mục thành công!");
             }
 
@@ -133,19 +133,19 @@ export default function AdminCategoryPage() {
         if (deleteModal.id === null) return;
         try {
             const token = localStorage.getItem('accessToken');
-            const headers = { Authorization: token ? `Bearer ${token}` : '' };
+            const headers = {Authorization: token ? `Bearer ${token}` : ''};
 
-            await axios.delete(`http://localhost:8080/rims/admin/category/${deleteModal.id}`, { headers });
+            await axios.delete(`http://localhost:8080/rims/admin/category/${deleteModal.id}`, {headers});
 
             alert("Xóa danh mục thành công! 🎉");
 
-            setDeleteModal({ open: false, id: null });
+            setDeleteModal({open: false, id: null});
             loadCategories();
         } catch (err: any) {
             console.error("Lỗi khi xóa danh mục:", err);
             const errMsg = err.response?.data?.message || "Không thể thực hiện xóa danh mục!";
             alert(errMsg);
-            setDeleteModal({ open: false, id: null });
+            setDeleteModal({open: false, id: null});
         }
     };
 
@@ -166,7 +166,7 @@ export default function AdminCategoryPage() {
         : [];
 
     if (loading) return <div style={statusContainerStyle}>🔄 Đang tải dữ liệu danh mục thực đơn...</div>;
-    if (error) return <div style={{ ...statusContainerStyle, color: '#ef4444' }}>❌ {error}</div>;
+    if (error) return <div style={{...statusContainerStyle, color: '#ef4444'}}>❌ {error}</div>;
 
     return (
         <div style={pageContainerStyle}>
@@ -180,7 +180,10 @@ export default function AdminCategoryPage() {
                             <h2 style={pageTitleStyle}>📁 QUẢN LÝ DANH MỤC</h2>
                         </div>
                         <button
-                            onClick={() => { setFormData({ name: '', description: '', isAvailable: true }); setView('CREATE'); }}
+                            onClick={() => {
+                                setFormData({name: '', description: '', isAvailable: true});
+                                setView('CREATE');
+                            }}
                             style={primaryBtnStyle}
                         >
                             <span>+</span> Thêm Danh Mục
@@ -190,16 +193,22 @@ export default function AdminCategoryPage() {
                     {/* Stats & Filters Row */}
                     <div style={topGridStyle}>
                         <div style={cardStyle}>
-                            <div style={{ display: 'flex', gap: '20px', alignItems: 'center', height: '100%' }}>
-                                <div style={{ flex: 1 }}>
+                            <div style={{display: 'flex', gap: '20px', alignItems: 'center', height: '100%'}}>
+                                <div style={{flex: 1}}>
                                     <span style={filterLabelStyle}>TRẠNG THÁI</span>
                                     <div style={filterGroupStyle}>
-                                        <button onClick={() => setFilterStatus('ALL')} style={filterBtnStyle(filterStatus === 'ALL')}>Tất cả</button>
-                                        <button onClick={() => setFilterStatus('ACTIVE')} style={filterBtnStyle(filterStatus === 'ACTIVE')}>Hoạt động</button>
-                                        <button onClick={() => setFilterStatus('HIDDEN')} style={filterBtnStyle(filterStatus === 'HIDDEN')}>Đã ẩn</button>
+                                        <button onClick={() => setFilterStatus('ALL')}
+                                                style={filterBtnStyle(filterStatus === 'ALL')}>Tất cả
+                                        </button>
+                                        <button onClick={() => setFilterStatus('ACTIVE')}
+                                                style={filterBtnStyle(filterStatus === 'ACTIVE')}>Hoạt động
+                                        </button>
+                                        <button onClick={() => setFilterStatus('HIDDEN')}
+                                                style={filterBtnStyle(filterStatus === 'HIDDEN')}>Đã ẩn
+                                        </button>
                                     </div>
                                 </div>
-                                <div style={{ flex: 1.2 }}>
+                                <div style={{flex: 1.2}}>
                                     <span style={filterLabelStyle}>TÌM KIẾM NHANH</span>
                                     <input
                                         type="text"
@@ -212,21 +221,49 @@ export default function AdminCategoryPage() {
                             </div>
                         </div>
 
-                        <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)', border: 'none' }}>
+                        <div style={{
+                            ...cardStyle,
+                            background: 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)',
+                            border: 'none'
+                        }}>
                             <div style={statsCardInnerStyle}>
                                 <div>
-                                    <span style={{ fontSize: '12px', color: '#4338ca', fontWeight: '700' }}>TỔNG DANH MỤC</span>
-                                    <h2 style={{ margin: '4px 0 0 0', fontSize: '32px', fontWeight: '800', color: '#1e1b4b', letterSpacing: '-0.03em' }}>{categories.length}</h2>
+                                    <span style={{
+                                        fontSize: '12px',
+                                        color: '#4338ca',
+                                        fontWeight: '700'
+                                    }}>TỔNG DANH MỤC</span>
+                                    <h2 style={{
+                                        margin: '4px 0 0 0',
+                                        fontSize: '32px',
+                                        fontWeight: '800',
+                                        color: '#1e1b4b',
+                                        letterSpacing: '-0.03em'
+                                    }}>{categories.length}</h2>
                                 </div>
                                 <span style={badgeIconStyle('#ffffff')}>🗂️</span>
                             </div>
                         </div>
 
-                        <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)', border: 'none' }}>
+                        <div style={{
+                            ...cardStyle,
+                            background: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)',
+                            border: 'none'
+                        }}>
                             <div style={statsCardInnerStyle}>
                                 <div>
-                                    <span style={{ fontSize: '12px', color: '#c2410c', fontWeight: '700' }}>TỔNG MÓN ĂN</span>
-                                    <h2 style={{ margin: '4px 0 0 0', fontSize: '32px', fontWeight: '800', color: '#7c2d12', letterSpacing: '-0.03em' }}>{totalDishes}</h2>
+                                    <span style={{
+                                        fontSize: '12px',
+                                        color: '#c2410c',
+                                        fontWeight: '700'
+                                    }}>TỔNG MÓN ĂN</span>
+                                    <h2 style={{
+                                        margin: '4px 0 0 0',
+                                        fontSize: '32px',
+                                        fontWeight: '800',
+                                        color: '#7c2d12',
+                                        letterSpacing: '-0.03em'
+                                    }}>{totalDishes}</h2>
                                 </div>
                                 <span style={badgeIconStyle('#ffffff')}>🍳</span>
                             </div>
@@ -234,16 +271,21 @@ export default function AdminCategoryPage() {
                     </div>
 
                     {/* Table View */}
-                    <div style={{ ...cardStyle, padding: '0', overflow: 'hidden', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.03)' }}>
+                    <div style={{
+                        ...cardStyle,
+                        padding: '0',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 12px rgba(15, 23, 42, 0.03)'
+                    }}>
                         <table style={tableStyle}>
                             <thead>
                             <tr style={tableHeaderRowStyle}>
-                                <th style={{ padding: '16px', textAlign: 'center', width: '100px' }}>ID</th>
-                                <th style={{ padding: '16px', width: '35%' }}>DANH MỤC & MÔ TẢ</th>
-                                <th style={{ padding: '16px', textAlign: 'center', width: '120px' }}>SỐ MÓN</th>
-                                <th style={{ padding: '16px', textAlign: 'center', width: '140px' }}>TRẠNG THÁI</th>
-                                <th style={{ padding: '16px', width: '140px' }}>NGÀY TẠO</th>
-                                <th style={{ padding: '16px', textAlign: 'center', width: '140px' }}>THAO TÁC</th>
+                                <th style={{padding: '16px', textAlign: 'center', width: '100px'}}>ID</th>
+                                <th style={{padding: '16px', width: '35%'}}>DANH MỤC & MÔ TẢ</th>
+                                <th style={{padding: '16px', textAlign: 'center', width: '120px'}}>SỐ MÓN</th>
+                                <th style={{padding: '16px', textAlign: 'center', width: '140px'}}>TRẠNG THÁI</th>
+                                <th style={{padding: '16px', width: '140px'}}>NGÀY TẠO</th>
+                                <th style={{padding: '16px', textAlign: 'center', width: '140px'}}>THAO TÁC</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -252,10 +294,10 @@ export default function AdminCategoryPage() {
                                     <td style={tableCellIdStyle}>
                                         CAT-{String(item.id).padStart(3, '0')}
                                     </td>
-                                    <td style={{ padding: '16px', maxWidth: '400px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+                                    <td style={{padding: '16px', maxWidth: '400px'}}>
+                                        <div style={{display: 'flex', alignItems: 'flex-start', gap: '14px'}}>
                                             <div style={tableIconBoxStyle}>📁</div>
-                                            <div style={{ minWidth: 0, flex: 1 }}>
+                                            <div style={{minWidth: 0, flex: 1}}>
                                                 <strong style={{
                                                     color: '#0f172a',
                                                     fontSize: '14.5px',
@@ -281,21 +323,21 @@ export default function AdminCategoryPage() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '16px', textAlign: 'center' }}>
+                                    <td style={{padding: '16px', textAlign: 'center'}}>
                     <span style={dishCountBadgeStyle}>
                         {item.dishCount || 0} món
                     </span>
                                     </td>
-                                    <td style={{ padding: '16px', textAlign: 'center' }}>
+                                    <td style={{padding: '16px', textAlign: 'center'}}>
                     <span style={statusBadgeStyle(item.isAvailable)}>
                         {item.isAvailable ? '● Hoạt động' : '● Đã ẩn'}
                     </span>
                                     </td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontWeight: '500' }}>
+                                    <td style={{padding: '16px', color: '#64748b', fontWeight: '500'}}>
                                         {item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '---'}
                                     </td>
-                                    <td style={{ padding: '16px', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
+                                    <td style={{padding: '16px', textAlign: 'center'}}>
+                                        <div style={{display: 'flex', justifyContent: 'center', gap: '6px'}}>
                                             {/* Button Xem chi tiết */}
                                             <button
                                                 onClick={() => {
@@ -328,8 +370,8 @@ export default function AdminCategoryPage() {
 
                                             {/* Button Xóa */}
                                             <button
-                                                onClick={() => setDeleteModal({ open: true, id: item.id })}
-                                                style={{ ...actionBtnStyle, color: '#ef4444' }}
+                                                onClick={() => setDeleteModal({open: true, id: item.id})}
+                                                style={{...actionBtnStyle, color: '#ef4444'}}
                                                 title="Xóa"
                                             >
                                                 🗑️
@@ -349,25 +391,44 @@ export default function AdminCategoryPage() {
 
             {/* ----------------- MÀN HÌNH CHI TIẾT DANH MỤC ----------------- */}
             {view === 'DETAIL' && selectedCategory && (
-                <div style={{ maxWidth: '950px', margin: '40px auto' }}>
+                <div style={{maxWidth: '950px', margin: '40px auto'}}>
                     <div style={detailHeaderStyle}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '14px'}}>
                             <button onClick={() => setView('LIST')} style={backBtnStyle}>&larr;</button>
-                            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.01em' }}>CHI TIẾT DANH MỤC</h3>
+                            <h3 style={{
+                                margin: 0,
+                                fontSize: '18px',
+                                fontWeight: '800',
+                                color: '#0f172a',
+                                letterSpacing: '-0.01em'
+                            }}>CHI TIẾT DANH MỤC</h3>
                         </div>
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                        <div style={{display: 'flex', gap: '10px'}}>
                             {selectedCategory.isAvailable && (
-                                <button onClick={() => { setFormData({ name: selectedCategory.name, description: selectedCategory.description, isAvailable: selectedCategory.isAvailable }); setView('EDIT'); }} style={secondaryBtnStyle}>✏️ Sửa danh mục</button>
+                                <button onClick={() => {
+                                    setFormData({
+                                        name: selectedCategory.name,
+                                        description: selectedCategory.description,
+                                        isAvailable: selectedCategory.isAvailable
+                                    });
+                                    setView('EDIT');
+                                }} style={secondaryBtnStyle}>✏️ Sửa danh mục</button>
                             )}
-                            <button onClick={() => setDeleteModal({ open: true, id: selectedCategory.id })} style={{ ...secondaryBtnStyle, backgroundColor: '#fee2e2', color: '#ef4444', borderColor: '#fca5a5' }}>🗑️ Xóa danh mục</button>
+                            <button onClick={() => setDeleteModal({open: true, id: selectedCategory.id})} style={{
+                                ...secondaryBtnStyle,
+                                backgroundColor: '#fee2e2',
+                                color: '#ef4444',
+                                borderColor: '#fca5a5'
+                            }}>🗑️ Xóa danh mục
+                            </button>
                         </div>
                     </div>
 
                     {/* Thông tin chi tiết danh mục */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '24px', marginBottom: '32px' }}>
+                    <div style={{display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '24px', marginBottom: '32px'}}>
                         <div style={cardStyle}>
                             <span style={inputLabelStyle}>TÊN DANH MỤC</span>
-                            <p style={{ margin: '4px 0 18px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>
+                            <p style={{margin: '4px 0 18px 0', fontSize: '18px', fontWeight: '800', color: '#0f172a'}}>
                                 {selectedCategory.name}
                             </p>
 
@@ -388,35 +449,62 @@ export default function AdminCategoryPage() {
                             <div style={detailDividerMetricsStyle}>
                                 <div>
                                     <span style={inputLabelStyle}>TRẠNG THÁI HIỂN THỊ</span>
-                                    <span style={{ display: 'block', marginTop: '6px', fontWeight: '700', fontSize: '14px', color: selectedCategory.isAvailable ? '#16a34a' : '#64748b' }}>
+                                    <span style={{
+                                        display: 'block',
+                                        marginTop: '6px',
+                                        fontWeight: '700',
+                                        fontSize: '14px',
+                                        color: selectedCategory.isAvailable ? '#16a34a' : '#64748b'
+                                    }}>
                     {selectedCategory.isAvailable ? '🟢 Đang hoạt động' : '⚫ Đang tạm ẩn'}
                 </span>
                                 </div>
                                 <div>
                                     <span style={inputLabelStyle}>SỐ MÓN LIÊN KẾT</span>
-                                    <span style={{ display: 'block', marginTop: '6px', fontWeight: '700', fontSize: '14px', color: '#0052cc' }}>
+                                    <span style={{
+                                        display: 'block',
+                                        marginTop: '6px',
+                                        fontWeight: '700',
+                                        fontSize: '14px',
+                                        color: '#0052cc'
+                                    }}>
                     {categoryDishes.length} món ăn
                 </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ ...cardStyle, backgroundColor: '#f8fafc' }}>
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
+                            <div style={{...cardStyle, backgroundColor: '#f8fafc'}}>
                                 <span style={inputLabelStyle}>NGÀY KHỞI TẠO</span>
-                                <p style={{ margin: '4px 0 0 0', fontWeight: '600', fontSize: '13.5px', color: '#334155' }}>{selectedCategory.createdAt ? new Date(selectedCategory.createdAt).toLocaleString('vi-VN') : '---'}</p>
+                                <p style={{
+                                    margin: '4px 0 0 0',
+                                    fontWeight: '600',
+                                    fontSize: '13.5px',
+                                    color: '#334155'
+                                }}>{selectedCategory.createdAt ? new Date(selectedCategory.createdAt).toLocaleString('vi-VN') : '---'}</p>
                             </div>
-                            <div style={{ ...cardStyle, backgroundColor: '#f8fafc' }}>
+                            <div style={{...cardStyle, backgroundColor: '#f8fafc'}}>
                                 <span style={inputLabelStyle}>CẬP NHẬT CUỐI MÁY CHỦ</span>
-                                <p style={{ margin: '4px 0 0 0', fontWeight: '600', fontSize: '13.5px', color: '#334155' }}>{selectedCategory.updatedAt ? new Date(selectedCategory.updatedAt).toLocaleString('vi-VN') : '---'}</p>
+                                <p style={{
+                                    margin: '4px 0 0 0',
+                                    fontWeight: '600',
+                                    fontSize: '13.5px',
+                                    color: '#334155'
+                                }}>{selectedCategory.updatedAt ? new Date(selectedCategory.updatedAt).toLocaleString('vi-VN') : '---'}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* --- DANH SÁCH MÓN ĂN TRONG DANH MỤC --- */}
                     <div style={cardStyle}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '16px'
+                        }}>
+                            <h4 style={{margin: 0, fontSize: '15px', fontWeight: '800', color: '#0f172a'}}>
                                 🍽️ DANH SÁCH MÓN TRONG DANH MỤC ({categoryDishes.length} món)
                             </h4>
                         </div>
@@ -426,19 +514,20 @@ export default function AdminCategoryPage() {
                                 <table style={dishTableStyle}>
                                     <thead>
                                     <tr style={tableHeaderRowStyle}>
-                                        <th style={{ padding: '12px', textAlign: 'left', width: '30%' }}>TÊN MÓN</th>
-                                        <th style={{ padding: '12px', textAlign: 'right', width: '20%' }}>GIÁ (VND)</th>
-                                        <th style={{ padding: '12px', textAlign: 'center', width: '18%' }}>TRẠNG THÁI</th>
-                                        <th style={{ padding: '12px', textAlign: 'center', width: '20%' }}>NGÀY TẠO</th>
-                                        <th style={{ padding: '12px', textAlign: 'center', width: '12%' }}>THAO TÁC</th>
+                                        <th style={{padding: '12px', textAlign: 'left', width: '30%'}}>TÊN MÓN</th>
+                                        <th style={{padding: '12px', textAlign: 'right', width: '20%'}}>GIÁ (VND)</th>
+                                        <th style={{padding: '12px', textAlign: 'center', width: '18%'}}>TRẠNG THÁI</th>
+                                        <th style={{padding: '12px', textAlign: 'center', width: '20%'}}>NGÀY TẠO</th>
+                                        <th style={{padding: '12px', textAlign: 'center', width: '12%'}}>THAO TÁC</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {categoryDishes.map((dish) => {
                                         return (
-                                            <tr key={dish.id} style={{ ...tableRowStyle, borderBottom: '1px solid #f1f5f9' }}>
-                                                <td style={{ padding: '12px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <tr key={dish.id}
+                                                style={{...tableRowStyle, borderBottom: '1px solid #f1f5f9'}}>
+                                                <td style={{padding: '12px'}}>
+                                                    <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
                                                         <div style={dishImageContainerStyle}>
                                                             <img
                                                                 src={dish.imageUrl && dish.imageUrl.startsWith('http') ? dish.imageUrl : `/image/${dish.imageUrl}`}
@@ -456,30 +545,58 @@ export default function AdminCategoryPage() {
                                                             />
                                                         </div>
                                                         <div>
-                                                            <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>{dish.name}</strong>
+                                                            <strong style={{
+                                                                fontSize: '13.5px',
+                                                                color: '#0f172a'
+                                                            }}>{dish.name}</strong>
                                                             {dish.description && (
-                                                                <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                                <div style={{
+                                                                    fontSize: '11px',
+                                                                    color: '#94a3b8',
+                                                                    marginTop: '2px',
+                                                                    maxWidth: '200px',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap'
+                                                                }}>
                                                                     {dish.description}
                                                                 </div>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td style={{ padding: '12px', textAlign: 'right', fontWeight: '700', color: '#0052cc' }}>
+                                                <td style={{
+                                                    padding: '12px',
+                                                    textAlign: 'right',
+                                                    fontWeight: '700',
+                                                    color: '#0052cc'
+                                                }}>
                                                     {dish.price.toLocaleString('vi-VN')}đ
                                                 </td>
-                                                <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                <td style={{padding: '12px', textAlign: 'center'}}>
                 <span style={statusBadgeStyle(dish.isAvailable)}>
                     {dish.isAvailable ? '● Đang bán' : '● Tạm dừng'}
                 </span>
                                                 </td>
-                                                <td style={{ padding: '12px', textAlign: 'center', color: '#64748b', fontSize: '12px' }}>
+                                                <td style={{
+                                                    padding: '12px',
+                                                    textAlign: 'center',
+                                                    color: '#64748b',
+                                                    fontSize: '12px'
+                                                }}>
                                                     {dish.createdAt ? new Date(dish.createdAt).toLocaleDateString('vi-VN') : '---'}
                                                 </td>
-                                                <td style={{ padding: '12px', textAlign: 'center' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
-                                                        <button style={smallActionBtnStyle} title="Xem chi tiết">👁️</button>
-                                                        <button style={{ ...smallActionBtnStyle, color: dish.isAvailable ? '#475569' : '#cbd5e1', cursor: dish.isAvailable ? 'pointer' : 'not-allowed' }} title="Chỉnh sửa">✏️</button>
+                                                <td style={{padding: '12px', textAlign: 'center'}}>
+                                                    <div
+                                                        style={{display: 'flex', justifyContent: 'center', gap: '4px'}}>
+                                                        <button style={smallActionBtnStyle} title="Xem chi tiết">👁️
+                                                        </button>
+                                                        <button style={{
+                                                            ...smallActionBtnStyle,
+                                                            color: dish.isAvailable ? '#475569' : '#cbd5e1',
+                                                            cursor: dish.isAvailable ? 'pointer' : 'not-allowed'
+                                                        }} title="Chỉnh sửa">✏️
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -490,8 +607,9 @@ export default function AdminCategoryPage() {
                             </div>
                         ) : (
                             <div style={emptyDishStateStyle}>
-                                <span style={{ fontSize: '32px', display: 'block', marginBottom: '8px' }}>🍽️</span>
-                                <p style={{ color: '#94a3b8', fontWeight: '600', margin: 0 }}>Chưa có món ăn nào trong danh mục này</p>
+                                <span style={{fontSize: '32px', display: 'block', marginBottom: '8px'}}>🍽️</span>
+                                <p style={{color: '#94a3b8', fontWeight: '600', margin: 0}}>Chưa có món ăn nào trong
+                                    danh mục này</p>
                             </div>
                         )}
                     </div>
@@ -500,17 +618,24 @@ export default function AdminCategoryPage() {
 
             {/* ----------------- MÀN HÌNH THÊM MỚI & SỬA DANH MỤC ----------------- */}
             {(view === 'CREATE' || view === 'EDIT') && (
-                <div style={{ maxWidth: '550px', margin: '40px auto' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
+                <div style={{maxWidth: '550px', margin: '40px auto'}}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px'}}>
                         <button onClick={() => setView('LIST')} style={backBtnStyle}>&larr;</button>
-                        <h3 style={{ margin: 0, fontWeight: '800', fontSize: '18px', color: '#0f172a', letterSpacing: '-0.02em' }}>
+                        <h3 style={{
+                            margin: 0,
+                            fontWeight: '800',
+                            fontSize: '18px',
+                            color: '#0f172a',
+                            letterSpacing: '-0.02em'
+                        }}>
                             {view === 'CREATE' ? '➕ THÊM DANH MỤC MỚI' : '✏️ CHỈNH SỬA DANH MỤC'}
                         </h3>
                     </div>
 
-                    <form onSubmit={handleSave} style={{ ...cardStyle, padding: '28px' }}>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={inputLabelStyle}>TÊN DANH MỤC <span style={{ color: '#ef4444' }}>*</span></label>
+                    <form onSubmit={handleSave} style={{...cardStyle, padding: '28px'}}>
+                        <div style={{marginBottom: '20px'}}>
+                            <label style={inputLabelStyle}>TÊN DANH MỤC <span
+                                style={{color: '#ef4444'}}>*</span></label>
                             <input
                                 type="text"
                                 required
@@ -521,10 +646,19 @@ export default function AdminCategoryPage() {
                             />
                         </div>
 
-                        <div style={{ marginBottom: '24px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                                <label style={{ ...inputLabelStyle, marginBottom: 0 }}>MÔ TẢ CHI TIẾT</label>
-                                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700' }}>{formData.description.length}/100</span>
+                        <div style={{marginBottom: '24px'}}>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: '6px'
+                            }}>
+                                <label style={{...inputLabelStyle, marginBottom: 0}}>MÔ TẢ CHI TIẾT</label>
+                                <span style={{
+                                    fontSize: '11px',
+                                    color: '#94a3b8',
+                                    fontWeight: '700'
+                                }}>{formData.description.length}/100</span>
                             </div>
                             <textarea
                                 maxLength={255}
@@ -532,15 +666,21 @@ export default function AdminCategoryPage() {
                                 placeholder="Nhập tóm tắt thông tin mô tả về nhóm món ăn này..."
                                 value={formData.description}
                                 onChange={e => setFormData({...formData, description: e.target.value})}
-                                style={{ ...inputFormStyle, resize: 'none', lineHeight: '1.5' }}
+                                style={{...inputFormStyle, resize: 'none', lineHeight: '1.5'}}
                             />
                         </div>
 
                         {view === 'EDIT' && (
                             <div style={toggleRowStyle}>
                                 <div>
-                                    <strong style={{ fontSize: '13.5px', display: 'block', color: '#0f172a' }}>Kích hoạt công khai</strong>
-                                    <small style={{ color: '#64748b', fontSize: '11.5px', marginTop: '2px', display: 'block' }}>Hiển thị danh mục này trên menu trực tuyến hệ thống công khai</small>
+                                    <strong style={{fontSize: '13.5px', display: 'block', color: '#0f172a'}}>Kích hoạt
+                                        công khai</strong>
+                                    <small style={{
+                                        color: '#64748b',
+                                        fontSize: '11.5px',
+                                        marginTop: '2px',
+                                        display: 'block'
+                                    }}>Hiển thị danh mục này trên menu trực tuyến hệ thống công khai</small>
                                 </div>
                                 <input
                                     type="checkbox"
@@ -551,8 +691,15 @@ export default function AdminCategoryPage() {
                             </div>
                         )}
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
-                            <button type="button" onClick={() => setView('LIST')} style={secondaryBtnStyle}>Hủy bỏ</button>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            gap: '12px',
+                            borderTop: '1px solid #f1f5f9',
+                            paddingTop: '20px'
+                        }}>
+                            <button type="button" onClick={() => setView('LIST')} style={secondaryBtnStyle}>Hủy bỏ
+                            </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
@@ -574,13 +721,16 @@ export default function AdminCategoryPage() {
             {deleteModal.open && (
                 <div style={backdropStyle}>
                     <div style={modalCardStyle}>
-                        <div style={{ fontSize: '36px', marginBottom: '12px', textAlign: 'center' }}>⚠️</div>
+                        <div style={{fontSize: '36px', marginBottom: '12px', textAlign: 'center'}}>⚠️</div>
                         <h4 style={modalTitleStyle}>XÓA DANH MỤC THỰC ĐƠN</h4>
                         <p style={modalTextStyle}>
-                            Bạn có chắc chắn muốn xóa danh mục này? Hành động này sẽ thực hiện ẩn danh mục (xóa mềm). Hệ thống sẽ chặn nếu có các món ăn đang liên kết trực tiếp.
+                            Bạn có chắc chắn muốn xóa danh mục này? Hành động này sẽ thực hiện ẩn danh mục (xóa mềm). Hệ
+                            thống sẽ chặn nếu có các món ăn đang liên kết trực tiếp.
                         </p>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                            <button onClick={() => setDeleteModal({ open: false, id: null })} style={{ ...secondaryBtnStyle, flex: 1 }}>Hủy quay lại</button>
+                        <div style={{display: 'flex', gap: '12px'}}>
+                            <button onClick={() => setDeleteModal({open: false, id: null})}
+                                    style={{...secondaryBtnStyle, flex: 1}}>Hủy quay lại
+                            </button>
                             <button onClick={confirmDelete} style={modalDeleteBtnStyle}>XÁC NHẬN XÓA</button>
                         </div>
                     </div>

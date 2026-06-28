@@ -1,12 +1,7 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {
-    waiterApi,
-    type MenuItemResponse,
-    type OrderDetailResponse,
-    type OrderItemStatus,
-} from "../../api/waiter";
-import {WaiterHeader, BackArrow, WaiterToast, ConfirmModal, fmtPrice} from "../../components/waiter";
+import {type MenuItemResponse, type OrderDetailResponse, type OrderItemStatus, waiterApi,} from "../../api/waiter";
+import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
 import type {AxiosError} from "axios";
 
 type DraftItem = {
@@ -27,7 +22,7 @@ export default function WaiterUpdateOrderPage() {
     const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [successData, setSuccessData] = useState<{message: string; itemSummary: string} | null>(null);
+    const [successData, setSuccessData] = useState<{ message: string; itemSummary: string } | null>(null);
 
     useEffect(() => {
         Promise.all([waiterApi.getMenu(), waiterApi.getServingOrders(tid)])
@@ -111,7 +106,7 @@ export default function WaiterUpdateOrderPage() {
             });
         } catch (err) {
             // Backend ErrorResponse: { message, details: Record<string,string> }
-            const axiosErr = err as AxiosError<{message?: string; details?: Record<string, string>}>;
+            const axiosErr = err as AxiosError<{ message?: string; details?: Record<string, string> }>;
             let reason = "Lỗi không xác định";
             if (axiosErr.response?.data) {
                 const data = axiosErr.response.data;
@@ -210,7 +205,8 @@ export default function WaiterUpdateOrderPage() {
                                     disabled={locked}
                                 />
                                 {d.status === "COMPLETED" && (
-                                    <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng dưới {minQty}.</p>
+                                    <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng
+                                        dưới {minQty}.</p>
                                 )}
                                 {locked && (
                                     <p className="waiter-item-hint">Món đã hủy — không thể chỉnh sửa.</p>

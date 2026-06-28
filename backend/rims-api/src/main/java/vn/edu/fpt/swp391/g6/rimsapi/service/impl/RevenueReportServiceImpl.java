@@ -2,22 +2,14 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.BestSellingDishItemResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.BestSellingReportResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.DailyRevenueItemResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.HighestOrderShiftResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.OrderShiftItemResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.OrderShiftReportResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueComparisonResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueReportResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.WeeklyRevenueChartResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.service.RevenueReportService;
 
-import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
@@ -26,33 +18,32 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+
 
 @Service
 @RequiredArgsConstructor
-public class RevenueReportServiceImpl implements RevenueReportService {
+public class RevenueReportServiceImpl implements RevenueReportService
+{
 
     private final InvoiceRepository invoiceRepository;
 
-            @Override
-            public RevenueReportResponse getTotalRevenue() {
+    @Override
+    public RevenueReportResponse getTotalRevenue()
+    {
 
-                BigDecimal revenue =
-                        invoiceRepository.getTotalRevenue();
+        BigDecimal revenue =
+                invoiceRepository.getTotalRevenue();
 
-                return new RevenueReportResponse(
-                        revenue,
-                        "ALL"
-                );
-            }
+        return new RevenueReportResponse(
+                revenue,
+                "ALL"
+        );
+    }
 
     @Override
-    public RevenueReportResponse getTodayRevenue() {
+    public RevenueReportResponse getTodayRevenue()
+    {
 
         LocalDate today = LocalDate.now();
 
@@ -60,7 +51,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     }
 
     @Override
-    public RevenueReportResponse getWeeklyRevenue() {
+    public RevenueReportResponse getWeeklyRevenue()
+    {
 
         LocalDate now = LocalDate.now();
 
@@ -78,7 +70,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     }
 
     @Override
-    public RevenueReportResponse getMonthlyRevenue() {
+    public RevenueReportResponse getMonthlyRevenue()
+    {
 
         LocalDate now = LocalDate.now();
 
@@ -92,7 +85,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     }
 
     @Override
-    public RevenueReportResponse getYearlyRevenue() {
+    public RevenueReportResponse getYearlyRevenue()
+    {
 
         LocalDate now = LocalDate.now();
 
@@ -108,17 +102,20 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     @Override
     public RevenueReportResponse getRevenueBetween(
             LocalDate fromDate,
-            LocalDate toDate) {
+            LocalDate toDate)
+    {
 
         LocalDate today = LocalDate.now();
 
         //Don't allow future dates
-        if (toDate.isAfter(today)) {
+        if (toDate.isAfter(today))
+        {
             toDate = today;
         }
 
         // Validate date range
-        if (fromDate.isAfter(toDate)) {
+        if (fromDate.isAfter(toDate))
+        {
             throw new RuntimeException(
                     "fromDate must be before or equal to toDate"
             );
@@ -146,17 +143,20 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     public WeeklyRevenueChartResponse getDailyRevenue(
             LocalDate fromDate,
             LocalDate toDate
-    ) {
+    )
+    {
 
         LocalDate today =
                 LocalDate.now();
 
-        if (toDate.isAfter(today)) {
+        if (toDate.isAfter(today))
+        {
             toDate =
                     today;
         }
 
-        if (fromDate.isAfter(toDate)) {
+        if (fromDate.isAfter(toDate))
+        {
             throw new RuntimeException(
                     "fromDate must be before or equal to toDate"
             );
@@ -177,8 +177,10 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         Map<LocalDate, BigDecimal> revenueByDate =
                 new HashMap<>();
 
-        for (DailyRevenueProjection row : rows) {
-            if (row.getRevenueDate() == null) {
+        for (DailyRevenueProjection row : rows)
+        {
+            if (row.getRevenueDate() == null)
+            {
                 continue;
             }
 
@@ -196,7 +198,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         LocalDate currentDate =
                 fromDate;
 
-        while (!currentDate.isAfter(toDate)) {
+        while (!currentDate.isAfter(toDate))
+        {
             items.add(
                     new DailyRevenueItemResponse(
                             getDayLabel(
@@ -230,7 +233,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
             LocalDate previousEndDate,
             LocalDate currentStartDate,
             LocalDate currentEndDate
-    ) {
+    )
+    {
 
         System.out.println("===== COMPARE =====");
 
@@ -243,29 +247,34 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         LocalDate today = LocalDate.now();
 
         // Không cho phép ngày kết thúc ở tương lai
-        if (previousEndDate.isAfter(today)) {
+        if (previousEndDate.isAfter(today))
+        {
             previousEndDate = today;
         }
 
-        if (currentEndDate.isAfter(today)) {
+        if (currentEndDate.isAfter(today))
+        {
             currentEndDate = today;
         }
 
         // Validate previous period
-        if (previousStartDate.isAfter(previousEndDate)) {
+        if (previousStartDate.isAfter(previousEndDate))
+        {
             throw new RuntimeException(
                     "Previous period start date must be before end date"
             );
         }
 
         // Validate current period
-        if (currentStartDate.isAfter(currentEndDate)) {
+        if (currentStartDate.isAfter(currentEndDate))
+        {
             throw new RuntimeException(
                     "Current period start date must be before end date"
             );
         }
 
-        if (!previousEndDate.isBefore(currentStartDate)) {
+        if (!previousEndDate.isBefore(currentStartDate))
+        {
             throw new RuntimeException(
                     "Previous period must be before current period"
             );
@@ -287,9 +296,11 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                 Math.abs(previousDays - currentDays);
 
         // Nếu khoảng hiện tại quá ngắn so với khoảng trước đó
-        if (differenceDays > 3) {
+        if (differenceDays > 3)
+        {
 
-            if (currentDays < previousDays) {
+            if (currentDays < previousDays)
+            {
 
                 throw new RuntimeException(
                         "The current period does not have enough data for comparison yet"
@@ -313,11 +324,13 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                         currentEndDate.atTime(23, 59, 59)
                 );
 
-        if (previousRevenue == null) {
+        if (previousRevenue == null)
+        {
             previousRevenue = BigDecimal.ZERO;
         }
 
-        if (currentRevenue == null) {
+        if (currentRevenue == null)
+        {
             currentRevenue = BigDecimal.ZERO;
         }
 
@@ -330,7 +343,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                         RoundingMode.HALF_UP
                 );
 
-        if (previousRevenue.compareTo(BigDecimal.ZERO) > 0) {
+        if (previousRevenue.compareTo(BigDecimal.ZERO) > 0)
+        {
 
             growthRate =
                     difference
@@ -389,7 +403,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     //Best selling
 
     @Override
-    public BestSellingReportResponse getBestSellingReport(String period) {
+    public BestSellingReportResponse getBestSellingReport(String period)
+    {
 
         LocalDate today =
                 LocalDate.now();
@@ -403,8 +418,10 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         LocalDate toDate;
         String dataRangeNote;
 
-        switch (normalizedPeriod) {
-            case "WEEK" -> {
+        switch (normalizedPeriod)
+        {
+            case "WEEK" ->
+            {
                 fromDate =
                         today.with(
                                 TemporalAdjusters.previousOrSame(
@@ -423,7 +440,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                         "Current week until now";
             }
 
-            case "MONTH" -> {
+            case "MONTH" ->
+            {
                 fromDate =
                         today.withDayOfMonth(1);
 
@@ -436,7 +454,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                         "Current month until now";
             }
 
-            case "YEAR" -> {
+            case "YEAR" ->
+            {
                 fromDate =
                         today.withDayOfYear(1);
 
@@ -454,7 +473,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
             );
         }
 
-        if (toDate.isAfter(today)) {
+        if (toDate.isAfter(today))
+        {
             toDate =
                     today;
         }
@@ -480,7 +500,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
 
         int rank = 1;
 
-        for (BestSellingDishProjection row : result) {
+        for (BestSellingDishProjection row : result)
+        {
 
             items.add(
                     new BestSellingDishItemResponse(
@@ -504,17 +525,20 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     public BestSellingReportResponse getBestSellingReport(
             LocalDate fromDate,
             LocalDate toDate
-    ) {
+    )
+    {
 
         LocalDate today =
                 LocalDate.now();
 
-        if (toDate.isAfter(today)) {
+        if (toDate.isAfter(today))
+        {
             toDate =
                     today;
         }
 
-        if (fromDate.isAfter(toDate)) {
+        if (fromDate.isAfter(toDate))
+        {
             throw new RuntimeException(
                     "fromDate must be before or equal to toDate"
             );
@@ -542,7 +566,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         int rank =
                 1;
 
-        for (BestSellingDishProjection row : result) {
+        for (BestSellingDishProjection row : result)
+        {
             items.add(
                     new BestSellingDishItemResponse(
                             rank++,
@@ -562,7 +587,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     }
 
     @Override
-    public OrderShiftReportResponse getOrderShiftReport(String period) {
+    public OrderShiftReportResponse getOrderShiftReport(String period)
+    {
 
         LocalDate today =
                 LocalDate.now();
@@ -574,7 +600,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
 
         LocalDate fromDate;
 
-        switch (normalizedPeriod) {
+        switch (normalizedPeriod)
+        {
             case "WEEK" -> fromDate =
                     today.with(
                             TemporalAdjusters.previousOrSame(
@@ -600,7 +627,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     public OrderShiftReportResponse getOrderShiftReport(
             LocalDate fromDate,
             LocalDate toDate
-    ) {
+    )
+    {
 
         LocalDateTime now =
                 LocalDateTime.now();
@@ -608,12 +636,14 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         LocalDate today =
                 now.toLocalDate();
 
-        if (toDate.isAfter(today)) {
+        if (toDate.isAfter(today))
+        {
             toDate =
                     today;
         }
 
-        if (fromDate.isAfter(toDate)) {
+        if (fromDate.isAfter(toDate))
+        {
             throw new RuntimeException(
                     "fromDate must be before or equal to toDate"
             );
@@ -636,20 +666,23 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         Map<OrderShift, Long> orderCountByShift =
                 new EnumMap<>(OrderShift.class);
 
-        for (OrderShift shift : OrderShift.values()) {
+        for (OrderShift shift : OrderShift.values())
+        {
             orderCountByShift.put(
                     shift,
                     0L
             );
         }
 
-        for (LocalDateTime createdAt : paidOrderCreatedTimes) {
+        for (LocalDateTime createdAt : paidOrderCreatedTimes)
+        {
             OrderShift shift =
                     findOrderShift(
                             createdAt.toLocalTime()
                     );
 
-            if (shift != null) {
+            if (shift != null)
+            {
                 orderCountByShift.compute(
                         shift,
                         (key, value) -> value == null ? 1L : value + 1
@@ -713,11 +746,13 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     private List<OrderShiftItemResponse> buildOrderShiftItems(
             Map<OrderShift, Long> orderCountByShift,
             long totalPaidOrders
-    ) {
+    )
+    {
         List<OrderShiftItemResponse> shifts =
                 new ArrayList<>();
 
-        for (OrderShift shift : OrderShift.values()) {
+        for (OrderShift shift : OrderShift.values())
+        {
             long orderCount =
                     orderCountByShift.get(
                             shift
@@ -741,9 +776,12 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         return shifts;
     }
 
-    private OrderShift findOrderShift(LocalTime time) {
-        for (OrderShift shift : OrderShift.values()) {
-            if (shift.contains(time)) {
+    private OrderShift findOrderShift(LocalTime time)
+    {
+        for (OrderShift shift : OrderShift.values())
+        {
+            if (shift.contains(time))
+            {
                 return shift;
             }
         }
@@ -753,12 +791,15 @@ public class RevenueReportServiceImpl implements RevenueReportService {
 
     private OrderShift findHighestOrderShift(
             Map<OrderShift, Long> orderCountByShift
-    ) {
+    )
+    {
         OrderShift highestShift =
                 OrderShift.MORNING;
 
-        for (OrderShift shift : OrderShift.values()) {
-            if (orderCountByShift.get(shift) > orderCountByShift.get(highestShift)) {
+        for (OrderShift shift : OrderShift.values())
+        {
+            if (orderCountByShift.get(shift) > orderCountByShift.get(highestShift))
+            {
                 highestShift =
                         shift;
             }
@@ -770,8 +811,10 @@ public class RevenueReportServiceImpl implements RevenueReportService {
     private BigDecimal calculatePercentage(
             long orderCount,
             long totalPaidOrders
-    ) {
-        if (totalPaidOrders == 0) {
+    )
+    {
+        if (totalPaidOrders == 0)
+        {
             return BigDecimal.ZERO.setScale(
                     1,
                     RoundingMode.HALF_UP
@@ -789,8 +832,10 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                 );
     }
 
-    private String getDayLabel(DayOfWeek dayOfWeek) {
-        return switch (dayOfWeek) {
+    private String getDayLabel(DayOfWeek dayOfWeek)
+    {
+        return switch (dayOfWeek)
+        {
             case MONDAY -> "T2";
             case TUESDAY -> "T3";
             case WEDNESDAY -> "T4";
@@ -801,7 +846,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
         };
     }
 
-    private enum OrderShift {
+    private enum OrderShift
+    {
         MORNING(
                 "MORNING",
                 "Ca sáng",
@@ -854,7 +900,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                 LocalTime endExclusive,
                 String startTime,
                 String endTime
-        ) {
+        )
+        {
             this.shiftName =
                     shiftName;
             this.displayName =
@@ -869,7 +916,8 @@ public class RevenueReportServiceImpl implements RevenueReportService {
                     endTime;
         }
 
-        private boolean contains(LocalTime time) {
+        private boolean contains(LocalTime time)
+        {
             return !time.isBefore(startInclusive)
                     && time.isBefore(endExclusive);
         }

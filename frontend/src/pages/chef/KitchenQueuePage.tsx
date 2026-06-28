@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {
+    type DishDetailResponse,
     getDishDetail,
     getKitchenOrders,
+    type KitchenOrderItemResponse,
     requestCancelDish,
     updateOrderItemStatus,
-    type DishDetailResponse,
-    type KitchenOrderItemResponse,
 } from '../../api/chef'
 
 const ITEMS_PER_PAGE = 6
@@ -221,7 +221,7 @@ export default function KitchenQueuePage() {
             firstTable.localeCompare(
                 secondTable,
                 'vi',
-                { numeric: true },
+                {numeric: true},
             ),
         )
     }, [items])
@@ -511,7 +511,7 @@ export default function KitchenQueuePage() {
 
                             <div className="pagination-pages">
                                 {Array.from(
-                                    { length: totalPages },
+                                    {length: totalPages},
                                     (_, index) => index + 1,
                                 ).map((pageNumber) => (
                                     <button

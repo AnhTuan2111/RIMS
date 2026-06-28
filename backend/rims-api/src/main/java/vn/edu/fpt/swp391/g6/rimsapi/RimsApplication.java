@@ -10,8 +10,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class RimsApplication
 {
 
-	public static void main(String[] args) {
-		SpringApplication.run(RimsApplication.class, args);
-	}
+    public static void main(String[] args)
+    {
+        SpringApplication.run(RimsApplication.class, args);
+    }
 
 }

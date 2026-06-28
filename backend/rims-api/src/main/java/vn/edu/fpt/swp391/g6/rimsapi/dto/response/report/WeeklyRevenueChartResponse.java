@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeeklyRevenueChartResponse {
+public class WeeklyRevenueChartResponse
+{
 
     private LocalDate fromDate;
 

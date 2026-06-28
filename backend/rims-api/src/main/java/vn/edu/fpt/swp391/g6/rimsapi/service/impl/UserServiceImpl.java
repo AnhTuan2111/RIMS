@@ -21,50 +21,54 @@ import vn.edu.fpt.swp391.g6.rimsapi.util.OtpStore;
 import java.security.SecureRandom;
 import java.util.List;
 
+
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService
+{
 
+    private static final List<RoleType> STAFF_ROLES = List.of(
+            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER, RoleType.ADMIN
+    );
+    // Role được phép gán khi update staff (không bao gồm ADMIN và CUSTOMER)
+    private static final List<RoleType> ASSIGNABLE_STAFF_ROLES = List.of(
+            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER
+    );
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final OtpStore otpStore;
 
-    private static final List<RoleType> STAFF_ROLES = List.of(
-            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER, RoleType.ADMIN
-    );
-
-    // Role được phép gán khi update staff (không bao gồm ADMIN và CUSTOMER)
-    private static final List<RoleType> ASSIGNABLE_STAFF_ROLES = List.of(
-            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER
-    );
-
     // ===================== EXISTING =====================
-
     @Override
-    public List<UserResponse> getAllUsers() {
+    public List<UserResponse> getAllUsers()
+    {
         return userRepository.findAll().stream()
                 .map(this::convertToResponse)
                 .toList();
     }
 
     @Override
-    public UserProfileResponse getProfile(Integer id) {
+    public UserProfileResponse getProfile(Integer id)
+    {
         User user = findUserById(id);
         return toUserProfile(user);
     }
 
     @Override
-    public UserProfileResponse updateProfile(Integer id, UpdateProfileRequest request) {
+    public UserProfileResponse updateProfile(Integer id, UpdateProfileRequest request)
+    {
         User user = findUserById(id);
 
         if (!user.getPhone().equals(request.getPhone())
-                && userRepository.existsByPhone(request.getPhone())) {
+                && userRepository.existsByPhone(request.getPhone()))
+        {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Số điện thoại đã được sử dụng");
         }
         if (request.getEmail() != null
                 && !request.getEmail().equals(user.getEmail())
-                && userRepository.existsByEmail(request.getEmail())) {
+                && userRepository.existsByEmail(request.getEmail()))
+        {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã được sử dụng");
         }
 
@@ -76,7 +80,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getStaffAccounts() {
+    public List<UserResponse> getStaffAccounts()
+    {
         return userRepository.findByRoleIn(STAFF_ROLES).stream()
                 .map(this::convertToResponse)
                 .toList();
@@ -85,14 +90,16 @@ public class UserServiceImpl implements UserService {
     // ===================== NEW =====================
 
     @Override
-    public List<UserResponse> getCustomerAccounts() {
+    public List<UserResponse> getCustomerAccounts()
+    {
         return userRepository.findByRole(RoleType.CUSTOMER).stream()
                 .map(this::convertToResponse)
                 .toList();
     }
 
     @Override
-    public UserResponse createCustomer(CreateCustomerRequest request) {
+    public UserResponse createCustomer(CreateCustomerRequest request)
+    {
         validateUniqueFields(request.getUsername(), request.getEmail(), request.getPhone(), null);
 
         User user = new User();
@@ -108,8 +115,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse createStaff(CreateStaffRequest request) {
-        if (request.getRole() == RoleType.CUSTOMER) {
+    public UserResponse createStaff(CreateStaffRequest request)
+    {
+        if (request.getRole() == RoleType.CUSTOMER)
+        {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể tạo nhân viên với vai trò CUSTOMER");
         }
         validateUniqueFields(request.getUsername(), request.getEmail(), request.getPhone(), null);
@@ -127,21 +136,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getAccountDetail(Integer id) {
+    public UserResponse getAccountDetail(Integer id)
+    {
         return convertToResponse(findUserById(id));
     }
 
     @Override
-    public UserResponse updateAccount(Integer id, UpdateAccountRequest request) {
+    public UserResponse updateAccount(Integer id, UpdateAccountRequest request)
+    {
         User user = findUserById(id);
 
         if (!user.getPhone().equals(request.getPhone())
-                && userRepository.existsByPhone(request.getPhone())) {
+                && userRepository.existsByPhone(request.getPhone()))
+        {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Số điện thoại đã được sử dụng");
         }
         if (request.getEmail() != null
                 && !request.getEmail().equals(user.getEmail())
-                && userRepository.existsByEmail(request.getEmail())) {
+                && userRepository.existsByEmail(request.getEmail()))
+        {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã được sử dụng");
         }
 
@@ -150,16 +163,20 @@ public class UserServiceImpl implements UserService {
         user.setPhone(request.getPhone());
 
         // Cập nhật role — chỉ cho phép với staff không phải Admin
-        if (request.getRole() != null) {
-            if (user.getRole() == RoleType.ADMIN) {
+        if (request.getRole() != null)
+        {
+            if (user.getRole() == RoleType.ADMIN)
+            {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "Không thể thay đổi vai trò của tài khoản Admin");
             }
-            if (user.getRole() == RoleType.CUSTOMER) {
+            if (user.getRole() == RoleType.CUSTOMER)
+            {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Không thể thay đổi vai trò của tài khoản khách hàng");
             }
-            if (!ASSIGNABLE_STAFF_ROLES.contains(request.getRole())) {
+            if (!ASSIGNABLE_STAFF_ROLES.contains(request.getRole()))
+            {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Vai trò không hợp lệ. Chỉ được chọn: CHEF, WAITER, CASHIER");
             }
@@ -170,9 +187,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void setAccountStatus(Integer id, SetAccountStatusRequest request) {
+    public void setAccountStatus(Integer id, SetAccountStatusRequest request)
+    {
         User user = findUserById(id);
-        if (user.getRole() == RoleType.ADMIN) {
+        if (user.getRole() == RoleType.ADMIN)
+        {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Không thể khóa tài khoản Admin");
         }
         user.setActive(request.isActive());
@@ -180,9 +199,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(UserPrincipal principal, ChangePasswordRequest request) {
+    public void changePassword(UserPrincipal principal, ChangePasswordRequest request)
+    {
         User user = findUserById(principal.getId());
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash()))
+        {
             throw new BadCredentialsException("Mật khẩu hiện tại không đúng");
         }
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
@@ -190,11 +211,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void sendForgotPasswordOtp(ForgotPasswordRequest request) {
+    public void sendForgotPasswordOtp(ForgotPasswordRequest request)
+    {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email không tồn tại"));
 
-        if (user.getRole() != RoleType.CUSTOMER) {
+        if (user.getRole() != RoleType.CUSTOMER)
+        {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Chức năng quên mật khẩu chỉ dành cho khách hàng");
         }
 
@@ -204,8 +227,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void verifyOtpAndResetPassword(VerifyOtpRequest request) {
-        if (!otpStore.verify(request.getEmail(), request.getOtp())) {
+    public void verifyOtpAndResetPassword(VerifyOtpRequest request)
+    {
+        if (!otpStore.verify(request.getEmail(), request.getOtp()))
+        {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP không hợp lệ hoặc đã hết hạn");
         }
 
@@ -219,35 +244,43 @@ public class UserServiceImpl implements UserService {
 
     // ===================== HELPERS =====================
 
-    private User findUserById(Integer id) {
+    private User findUserById(Integer id)
+    {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Người dùng không tồn tại"));
     }
 
-    private void validateUniqueFields(String username, String email, String phone, Integer excludeId) {
-        userRepository.findByUsername(username).ifPresent(u -> {
-            if (excludeId == null || !u.getId().equals(excludeId))
+    private void validateUniqueFields(String username, String email, String phone, Integer excludeId)
+    {
+        userRepository.findByUsername(username).ifPresent(u ->
+        {
+            if (!u.getId().equals(excludeId))
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên đăng nhập đã được sử dụng");
         });
-        if (email != null) {
-            userRepository.findByEmail(email).ifPresent(u -> {
-                if (excludeId == null || !u.getId().equals(excludeId))
+        if (email != null)
+        {
+            userRepository.findByEmail(email).ifPresent(u ->
+            {
+                if (!u.getId().equals(excludeId))
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã được sử dụng");
             });
         }
-        userRepository.findByPhone(phone).ifPresent(u -> {
-            if (excludeId == null || !u.getId().equals(excludeId))
+        userRepository.findByPhone(phone).ifPresent(u ->
+        {
+            if (!u.getId().equals(excludeId))
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Số điện thoại đã được sử dụng");
         });
     }
 
-    private String generateOtp() {
+    private String generateOtp()
+    {
         SecureRandom random = new SecureRandom();
         int otp = 100000 + random.nextInt(900000);
         return String.valueOf(otp);
     }
 
-    private UserProfileResponse toUserProfile(User user) {
+    private UserProfileResponse toUserProfile(User user)
+    {
         return UserProfileResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
@@ -258,7 +291,8 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    private UserResponse convertToResponse(User user) {
+    private UserResponse convertToResponse(User user)
+    {
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())

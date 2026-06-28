@@ -1,10 +1,6 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-    adminApi,
-    type AdminPaymentHistoryItem,
-    type AdminPaymentMethod,
-} from '../../api/admin'
+import {useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
+import {adminApi, type AdminPaymentHistoryItem, type AdminPaymentMethod,} from '../../api/admin'
 
 function formatCurrency(value: number) {
     return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
@@ -46,9 +42,9 @@ function WalletIcon() {
             focusable="false"
             viewBox="0 0 24 24"
         >
-            <path d="M4.5 7.5h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z" />
-            <path d="M16.5 12h4v3h-4a1.5 1.5 0 0 1 0-3z" />
-            <path d="M5.5 7.5 15 4.8a1.8 1.8 0 0 1 2.2 1.3l.4 1.4" />
+            <path d="M4.5 7.5h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"/>
+            <path d="M16.5 12h4v3h-4a1.5 1.5 0 0 1 0-3z"/>
+            <path d="M5.5 7.5 15 4.8a1.8 1.8 0 0 1 2.2 1.3l.4 1.4"/>
         </svg>
     )
 }
@@ -61,21 +57,21 @@ function QrIcon() {
             focusable="false"
             viewBox="0 0 24 24"
         >
-            <path d="M4 4h6v6H4z" />
-            <path d="M14 4h6v6h-6z" />
-            <path d="M4 14h6v6H4z" />
-            <path d="M14 14h2.5" />
-            <path d="M19 14h1" />
-            <path d="M14 17h6" />
-            <path d="M14 20h1.5" />
-            <path d="M18 20h2" />
+            <path d="M4 4h6v6H4z"/>
+            <path d="M14 4h6v6h-6z"/>
+            <path d="M4 14h6v6H4z"/>
+            <path d="M14 14h2.5"/>
+            <path d="M19 14h1"/>
+            <path d="M14 17h6"/>
+            <path d="M14 20h1.5"/>
+            <path d="M18 20h2"/>
         </svg>
     )
 }
 
 function PaymentMethodBadge({
-    method,
-}: {
+                                method,
+                            }: {
     method: AdminPaymentMethod
 }) {
     const isCash = method === 'CASH'
@@ -89,7 +85,7 @@ function PaymentMethodBadge({
             }
         >
             <span className="admin-payment-method-icon">
-                {isCash ? <WalletIcon /> : <QrIcon />}
+                {isCash ? <WalletIcon/> : <QrIcon/>}
             </span>
 
             {method}
@@ -115,7 +111,7 @@ export default function AdminPaymentHistoryPage() {
             setIsLoading(true)
             setError(null)
 
-            const { data } = await adminApi.getPaymentHistory()
+            const {data} = await adminApi.getPaymentHistory()
             setPayments(data)
         } catch (error) {
             console.error(error)
@@ -180,7 +176,7 @@ export default function AdminPaymentHistoryPage() {
                         <span>Phương thức</span>
                         <span>Số tiền</span>
                         <span>Ngày thanh toán</span>
-                        <span />
+                        <span/>
                     </div>
 
                     {payments.length === 0 ? (

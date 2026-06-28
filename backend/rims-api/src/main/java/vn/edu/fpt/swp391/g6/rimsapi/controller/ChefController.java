@@ -3,15 +3,15 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CancelDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishStatusRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateMenuStatusRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.ChefDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.KitchenOrderResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
-import java.util.List;
+import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishStatusRequest;
+import java.util.List;
 
 
 @RestController
@@ -57,13 +57,18 @@ public class ChefController
     }
     @GetMapping("/dashboard")
     public ChefDashboardResponse getDashboard()
-    { return chefService.getDashboard(); }
+    {
+        return chefService.getDashboard();
+    }
     @GetMapping("/orders/completed")
-    public List<KitchenOrderResponse> getCompletedOrders() {
+    public List<KitchenOrderResponse> getCompletedOrders()
+    {
         return chefService.getCompletedOrders();
     }
     @PostMapping("/orders/{id}/cancel-request")
-    public String requestCancelDish( @PathVariable Long id, @RequestBody CancelDishRequest request )
-    { chefService.requestCancel( id, request.getReason() );
-        return "Cancel request sent successfully"; }
+    public String requestCancelDish(@PathVariable Long id, @RequestBody CancelDishRequest request)
+    {
+        chefService.requestCancel(id, request.getReason());
+        return "Cancel request sent successfully";
+    }
 }

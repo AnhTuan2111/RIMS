@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
 // --- 1. INTERFACES TYPES ---
@@ -53,11 +53,11 @@ export default function AdminDishesPage() {
     const loadAllData = async () => {
         try {
             const token = localStorage.getItem('accessToken');
-            const headers = { Authorization: token ? `Bearer ${token}` : '' };
+            const headers = {Authorization: token ? `Bearer ${token}` : ''};
 
             const [dishRes, catRes] = await Promise.all([
-                axios.get('http://localhost:8080/rims/admin/dish/all', { headers }),
-                axios.get('http://localhost:8080/rims/admin/category/all', { headers })
+                axios.get('http://localhost:8080/rims/admin/dish/all', {headers}),
+                axios.get('http://localhost:8080/rims/admin/category/all', {headers})
             ]);
 
             setDishes(dishRes.data);
@@ -107,7 +107,7 @@ export default function AdminDishesPage() {
             };
 
             await axios.post('http://localhost:8080/rims/admin/dish/new', body, {
-                headers: { Authorization: token ? `Bearer ${token}` : '' }
+                headers: {Authorization: token ? `Bearer ${token}` : ''}
             });
             setActiveModal('NONE');
             loadAllData();
@@ -150,7 +150,7 @@ export default function AdminDishesPage() {
             };
 
             await axios.put(`http://localhost:8080/rims/admin/dish/update/${selectedDish.id}`, body, {
-                headers: { Authorization: token ? `Bearer ${token}` : '' }
+                headers: {Authorization: token ? `Bearer ${token}` : ''}
             });
             setActiveModal('NONE');
             loadAllData();
@@ -167,7 +167,7 @@ export default function AdminDishesPage() {
         try {
             const token = localStorage.getItem('accessToken');
             await axios.delete(`http://localhost:8080/rims/admin/dish/delete/${selectedDish.id}`, {
-                headers: { Authorization: token ? `Bearer ${token}` : '' }
+                headers: {Authorization: token ? `Bearer ${token}` : ''}
             });
             setActiveModal('NONE');
             loadAllData();
@@ -206,13 +206,13 @@ export default function AdminDishesPage() {
     const activeCategories = categories.filter(c => c.isAvailable);
 
     if (loading) return <div style={statusContainerStyle}>🔄 Đang tải danh sách món ăn hệ thống...</div>;
-    if (error) return <div style={{ ...statusContainerStyle, color: '#ef4444' }}>❌ {error}</div>;
+    if (error) return <div style={{...statusContainerStyle, color: '#ef4444'}}>❌ {error}</div>;
 
     return (
         <div style={pageContainerStyle}>
 
             {/* TIÊU ĐỀ TRANG & NÚT MỞ FORM THÊM MÓN MỚI */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px'}}>
                 <div>
                     <h2 style={pageTitleStyle}>🍳 QUẢN LÝ MÓN ĂN</h2>
                 </div>
@@ -235,9 +235,9 @@ export default function AdminDishesPage() {
             </div>
 
             {/* THANH BỘ LỌC TÌM KIẾM & THẺ THỐNG KÊ */}
-            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '20px', marginBottom: '28px' }}>
+            <div style={{display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '20px', marginBottom: '28px'}}>
                 <div style={cardStyle}>
-                    <div style={{ display: 'flex', gap: '14px', alignItems: 'center', height: '100%' }}>
+                    <div style={{display: 'flex', gap: '14px', alignItems: 'center', height: '100%'}}>
                         <input
                             type="text"
                             placeholder="Tìm theo tên món ăn hoặc mã SKU..."
@@ -245,7 +245,8 @@ export default function AdminDishesPage() {
                             onChange={(e) => setSearchKeyword(e.target.value)}
                             style={searchInputStyle}
                         />
-                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} style={selectStyle}>
+                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}
+                                style={selectStyle}>
                             <option value="ALL">Tất cả danh mục</option>
                             {categories.map(cat => {
                                 const displayName = cat.name.length > 25
@@ -258,36 +259,58 @@ export default function AdminDishesPage() {
                                 );
                             })}
                         </select>
-                        <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} style={selectStyle}>
+                        <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}
+                                style={selectStyle}>
                             <option value="ALL">Tất cả trạng thái</option>
                             <option value="AVAILABLE">Đang bán</option>
                             <option value="PAUSED">Tạm dừng</option>
                         </select>
                     </div>
                 </div>
-                <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #0052cc 0%, #0747a6 100%)', border: 'none', color: '#fff' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '100%' }}>
+                <div style={{
+                    ...cardStyle,
+                    background: 'linear-gradient(135deg, #0052cc 0%, #0747a6 100%)',
+                    border: 'none',
+                    color: '#fff'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        height: '100%'
+                    }}>
                         <div>
-                            <span style={{ fontSize: '11px', opacity: 0.8, fontWeight: '700', letterSpacing: '0.05em' }}>MÓN TÌM THẤY</span>
-                            <h2 style={{ margin: '2px 0 0 0', fontSize: '28px', fontWeight: '800', letterSpacing: '-0.02em' }}>{filteredDishes.length}</h2>
+                            <span style={{fontSize: '11px', opacity: 0.8, fontWeight: '700', letterSpacing: '0.05em'}}>MÓN TÌM THẤY</span>
+                            <h2 style={{
+                                margin: '2px 0 0 0',
+                                fontSize: '28px',
+                                fontWeight: '800',
+                                letterSpacing: '-0.02em'
+                            }}>{filteredDishes.length}</h2>
                         </div>
-                        <span style={{ fontSize: '22px', background: 'rgba(255,255,255,0.18)', padding: '8px 12px', borderRadius: '12px', lineHeight: '1' }}>🍴</span>
+                        <span style={{
+                            fontSize: '22px',
+                            background: 'rgba(255,255,255,0.18)',
+                            padding: '8px 12px',
+                            borderRadius: '12px',
+                            lineHeight: '1'
+                        }}>🍴</span>
                     </div>
                 </div>
             </div>
 
             {/* BẢNG DỮ LIỆU CHÍNH */}
-            <div style={{ ...cardStyle, padding: '0', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+            <div style={{...cardStyle, padding: '0', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.02)'}}>
                 <table style={tableStyle}>
                     <thead>
                     <tr style={tableHeaderRowStyle}>
-                        <th style={{ padding: '16px', width: '90px' }}>HÌNH ẢNH</th>
-                        <th style={{ padding: '16px' }}>TÊN MÓN ĂN</th>
-                        <th style={{ padding: '16px' }}>DANH MỤC</th>
-                        <th style={{ padding: '16px' }}>GIÁ NIÊM YẾT</th>
-                        <th style={{ padding: '16px', textAlign: 'center', width: '130px' }}>TRẠNG THÁI</th>
-                        <th style={{ padding: '16px', width: '130px' }}>NGÀY TẠO</th>
-                        <th style={{ padding: '16px', textAlign: 'center', width: '140px' }}>THAO TÁC</th>
+                        <th style={{padding: '16px', width: '90px'}}>HÌNH ẢNH</th>
+                        <th style={{padding: '16px'}}>TÊN MÓN ĂN</th>
+                        <th style={{padding: '16px'}}>DANH MỤC</th>
+                        <th style={{padding: '16px'}}>GIÁ NIÊM YẾT</th>
+                        <th style={{padding: '16px', textAlign: 'center', width: '130px'}}>TRẠNG THÁI</th>
+                        <th style={{padding: '16px', width: '130px'}}>NGÀY TẠO</th>
+                        <th style={{padding: '16px', textAlign: 'center', width: '140px'}}>THAO TÁC</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -296,39 +319,53 @@ export default function AdminDishesPage() {
 
                         return (
                             <tr key={dish.id} style={tableRowStyle}>
-                                <td style={{ padding: '16px' }}>
+                                <td style={{padding: '16px'}}>
                                     <div style={dishImageContainerStyle}>
                                         <img
                                             src={dish.imageUrl.startsWith('http') ? dish.imageUrl : `/image/${dish.imageUrl}`}
                                             alt={dish.name}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            onError={(e)=>{(e.target as HTMLImageElement).src='https://placehold.co/48x48?text=🍲'}}
+                                            style={{width: '100%', height: '100%', objectFit: 'cover'}}
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = 'https://placehold.co/48x48?text=🍲'
+                                            }}
                                         />
                                     </div>
                                 </td>
-                                <td style={{ padding: '16px' }}>
-                                    <div style={{ fontWeight: '700', color: '#0f172a', fontSize: '14.5px' }}>{dish.name}</div>
-                                    <small style={{ color: '#94a3b8', fontSize: '11.5px', fontFamily: 'monospace', display: 'block', marginTop: '2px' }}>SKU-{String(dish.id).padStart(5, '0')}</small>
+                                <td style={{padding: '16px'}}>
+                                    <div style={{
+                                        fontWeight: '700',
+                                        color: '#0f172a',
+                                        fontSize: '14.5px'
+                                    }}>{dish.name}</div>
+                                    <small style={{
+                                        color: '#94a3b8',
+                                        fontSize: '11.5px',
+                                        fontFamily: 'monospace',
+                                        display: 'block',
+                                        marginTop: '2px'
+                                    }}>SKU-{String(dish.id).padStart(5, '0')}</small>
                                 </td>
-                                <td style={{ padding: '16px' }}>
+                                <td style={{padding: '16px'}}>
                                         <span style={categoryBadgeStyle(isParentCategoryHidden)}>
                                             {dish.categoryName} {isParentCategoryHidden ? '(Ẩn)' : ''}
                                         </span>
                                 </td>
-                                <td style={{ padding: '16px', fontWeight: '700', color: '#0052cc', fontSize: '15px' }}>
+                                <td style={{padding: '16px', fontWeight: '700', color: '#0052cc', fontSize: '15px'}}>
                                     {dish.price.toLocaleString('vi-VN')}đ
                                 </td>
-                                <td style={{ padding: '16px', textAlign: 'center' }}>
+                                <td style={{padding: '16px', textAlign: 'center'}}>
                                         <span style={statusBadgeStyle(dish.isAvailable)}>
                                             {dish.isAvailable ? '● Đang bán' : '● Tạm dừng'}
                                         </span>
                                 </td>
-                                <td style={{ padding: '16px', color: '#64748b', fontWeight: '500' }}>
+                                <td style={{padding: '16px', color: '#64748b', fontWeight: '500'}}>
                                     {new Date(dish.createdAt).toLocaleDateString('vi-VN')}
                                 </td>
-                                <td style={{ padding: '16px', textAlign: 'center' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
-                                        <button onClick={() => openFormWithDish(dish, 'VIEW')} style={actionBtnStyle} title="Xem chi tiết">👁️</button>
+                                <td style={{padding: '16px', textAlign: 'center'}}>
+                                    <div style={{display: 'flex', justifyContent: 'center', gap: '6px'}}>
+                                        <button onClick={() => openFormWithDish(dish, 'VIEW')} style={actionBtnStyle}
+                                                title="Xem chi tiết">👁️
+                                        </button>
                                         <button
                                             onClick={() => openFormWithDish(dish, 'EDIT')}
                                             disabled={!dish.isAvailable || isParentCategoryHidden}
@@ -337,7 +374,11 @@ export default function AdminDishesPage() {
                                         >
                                             ✏️
                                         </button>
-                                        <button onClick={() => { setSelectedDish(dish); setActiveModal('DELETE'); }} style={{ ...actionBtnStyle, color: '#ef4444' }} title="Xóa món">🗑️</button>
+                                        <button onClick={() => {
+                                            setSelectedDish(dish);
+                                            setActiveModal('DELETE');
+                                        }} style={{...actionBtnStyle, color: '#ef4444'}} title="Xóa món">🗑️
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -346,7 +387,8 @@ export default function AdminDishesPage() {
                     </tbody>
                 </table>
                 {filteredDishes.length === 0 && (
-                    <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', fontWeight: '600' }}>Không tìm thấy món ăn nào phù hợp với bộ lọc.</div>
+                    <div style={{padding: '40px', textAlign: 'center', color: '#94a3b8', fontWeight: '600'}}>Không tìm
+                        thấy món ăn nào phù hợp với bộ lọc.</div>
                 )}
             </div>
 
@@ -355,60 +397,120 @@ export default function AdminDishesPage() {
             {/* ========================================================= */}
             {activeModal === 'CREATE' && (
                 <div style={backdropStyle}>
-                    <form onSubmit={handleCreateDish} style={{ ...modalCardStyle, width: '800px', display: 'grid', gridTemplateColumns: '1.7fr 1fr', gap: '24px' }}>
+                    <form onSubmit={handleCreateDish} style={{
+                        ...modalCardStyle,
+                        width: '800px',
+                        display: 'grid',
+                        gridTemplateColumns: '1.7fr 1fr',
+                        gap: '24px'
+                    }}>
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                                <button type="button" onClick={() => setActiveModal('NONE')} style={backBtnStyle}>&larr;</button>
-                                <h3 style={{ margin: 0, fontWeight: '800', fontSize: '18px', color: '#0f172a' }}>➕ THÊM MÓN ĂN MỚI</h3>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
+                                <button type="button" onClick={() => setActiveModal('NONE')}
+                                        style={backBtnStyle}>&larr;</button>
+                                <h3 style={{margin: 0, fontWeight: '800', fontSize: '18px', color: '#0f172a'}}>➕ THÊM
+                                    MÓN ĂN MỚI</h3>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '18px'}}>
                                 <div>
                                     <label style={inputLabelStyle}>TÊN MÓN ĂN *</label>
-                                    <input type="text" required placeholder="Ví dụ: Phở Bò Tái Lăn" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={inputFormStyle} />
+                                    <input type="text" required placeholder="Ví dụ: Phở Bò Tái Lăn"
+                                           value={formData.name}
+                                           onChange={e => setFormData({...formData, name: e.target.value})}
+                                           style={inputFormStyle}/>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
                                     <div>
                                         <label style={inputLabelStyle}>DANH MỤC THỰC ĐƠN</label>
-                                        <select value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value})} style={selectFormStyle}>
-                                            {activeCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        <select value={formData.categoryId}
+                                                onChange={e => setFormData({...formData, categoryId: e.target.value})}
+                                                style={selectFormStyle}>
+                                            {activeCategories.map(c => <option key={c.id}
+                                                                               value={c.id}>{c.name}</option>)}
                                         </select>
-                                        {activeCategories.length === 0 && <small style={{color:'#ef4444', display:'block', marginTop:'4px'}}>Không có danh mục khả dụng!</small>}
+                                        {activeCategories.length === 0 &&
+                                            <small style={{color: '#ef4444', display: 'block', marginTop: '4px'}}>Không
+                                                có danh mục khả dụng!</small>}
                                     </div>
                                     <div>
                                         <label style={inputLabelStyle}>GIÁ BÁN (VNĐ) *</label>
-                                        <input type="number" required value={formData.price || ''} placeholder="0" onChange={e => setFormData({...formData, price: parseInt(e.target.value) || 0})} style={inputFormStyle} />
+                                        <input type="number" required value={formData.price || ''} placeholder="0"
+                                               onChange={e => setFormData({
+                                                   ...formData,
+                                                   price: parseInt(e.target.value) || 0
+                                               })} style={inputFormStyle}/>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label style={inputLabelStyle}>MÔ TẢ MÓN ĂN</label>
-                                    <textarea rows={4} placeholder="Mô tả tóm tắt hương vị, các thành phần nguyên liệu đặc biệt..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ ...inputFormStyle, resize: 'none', lineHeight: '1.5' }} />
+                                    <textarea rows={4}
+                                              placeholder="Mô tả tóm tắt hương vị, các thành phần nguyên liệu đặc biệt..."
+                                              value={formData.description}
+                                              onChange={e => setFormData({...formData, description: e.target.value})}
+                                              style={{...inputFormStyle, resize: 'none', lineHeight: '1.5'}}/>
                                 </div>
 
                                 <div style={toggleRowStyle}>
                                     <div>
-                                        <strong style={{ fontSize: '13.5px', display: 'block', color: '#0f172a' }}>Trạng thái công khai</strong>
-                                        <small style={{ color: '#64748b' }}>Cho phép hiển thị và đặt món trên menu trực tuyến</small>
+                                        <strong style={{fontSize: '13.5px', display: 'block', color: '#0f172a'}}>Trạng
+                                            thái công khai</strong>
+                                        <small style={{color: '#64748b'}}>Cho phép hiển thị và đặt món trên menu trực
+                                            tuyến</small>
                                     </div>
-                                    <input type="checkbox" checked={formData.isAvailable} onChange={e => setFormData({...formData, isAvailable: e.target.checked})} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                                    <input type="checkbox" checked={formData.isAvailable}
+                                           onChange={e => setFormData({...formData, isAvailable: e.target.checked})}
+                                           style={{width: '18px', height: '18px', cursor: 'pointer'}}/>
                                 </div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderLeft: '1px solid #f1f5f9', paddingLeft: '24px' }}>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            borderLeft: '1px solid #f1f5f9',
+                            paddingLeft: '24px'
+                        }}>
                             <div>
                                 <label style={inputLabelStyle}>HÌNH ẢNH MINH HỌA</label>
                                 <div style={imagePreviewWrapperStyle}>
-                                    {formData.imageUrl ? <img src={formData.imageUrl} style={{width:'100%', height:'100%', objectFit:'cover'}} alt="Preview" /> : <div style={{textAlign:'center', color:'#94a3b8'}}><span>🖼️</span><small style={{display:'block', marginTop:'4px'}}>Chưa có hình ảnh</small></div>}
+                                    {formData.imageUrl ? <img src={formData.imageUrl} style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover'
+                                        }} alt="Preview"/> :
+                                        <div style={{textAlign: 'center', color: '#94a3b8'}}><span>🖼️</span><small
+                                            style={{display: 'block', marginTop: '4px'}}>Chưa có hình ảnh</small></div>}
                                 </div>
-                                <input type="text" placeholder="Dán URL hình ảnh đường dẫn công khai (https://...)" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} style={inputFormStyle} />
+                                <input type="text" placeholder="Dán URL hình ảnh đường dẫn công khai (https://...)"
+                                       value={formData.imageUrl}
+                                       onChange={e => setFormData({...formData, imageUrl: e.target.value})}
+                                       style={inputFormStyle}/>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
-                                <button type="submit" disabled={activeCategories.length === 0} style={{ ...primaryBtnStyle, width: '100%', justifyContent: 'center', padding: '12px', backgroundColor: activeCategories.length === 0 ? '#94a3b8' : '#0052cc', cursor: activeCategories.length === 0 ? 'not-allowed' : 'pointer' }}>💾 Thêm món ăn</button>
-                                <button type="button" onClick={() => setActiveModal('NONE')} style={{ ...secondaryBtnStyle, width: '100%' }}>Hủy bỏ</button>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '10px',
+                                marginTop: '20px',
+                                borderTop: '1px solid #f1f5f9',
+                                paddingTop: '16px'
+                            }}>
+                                <button type="submit" disabled={activeCategories.length === 0} style={{
+                                    ...primaryBtnStyle,
+                                    width: '100%',
+                                    justifyContent: 'center',
+                                    padding: '12px',
+                                    backgroundColor: activeCategories.length === 0 ? '#94a3b8' : '#0052cc',
+                                    cursor: activeCategories.length === 0 ? 'not-allowed' : 'pointer'
+                                }}>💾 Thêm món ăn
+                                </button>
+                                <button type="button" onClick={() => setActiveModal('NONE')}
+                                        style={{...secondaryBtnStyle, width: '100%'}}>Hủy bỏ
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -419,29 +521,93 @@ export default function AdminDishesPage() {
             {/* MODAL XEM CHI TIẾT MÓN ĂN */}
             {activeModal === 'VIEW' && selectedDish && (
                 <div style={backdropStyle}>
-                    <div style={{ ...modalCardStyle, width: '700px', display: 'grid', gridTemplateColumns: '1.2fr 1.5fr', gap: '28px', padding: '32px' }}>
+                    <div style={{
+                        ...modalCardStyle,
+                        width: '700px',
+                        display: 'grid',
+                        gridTemplateColumns: '1.2fr 1.5fr',
+                        gap: '28px',
+                        padding: '32px'
+                    }}>
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                marginBottom: '20px'
+                            }}>
                                 <button onClick={() => setActiveModal('NONE')} style={backBtnStyle}>&larr;</button>
-                                <span style={{ padding: '5px 12px', background: selectedDish.isAvailable ? '#dcfce7':'#fef3c7', color: selectedDish.isAvailable ? '#15803d':'#d97706', borderRadius: '20px', fontSize: '11.5px', fontWeight: '700' }}>
+                                <span style={{
+                                    padding: '5px 12px',
+                                    background: selectedDish.isAvailable ? '#dcfce7' : '#fef3c7',
+                                    color: selectedDish.isAvailable ? '#15803d' : '#d97706',
+                                    borderRadius: '20px',
+                                    fontSize: '11.5px',
+                                    fontWeight: '700'
+                                }}>
                         {selectedDish.isAvailable ? '● Đang bán' : '● Tạm ngưng'}
                     </span>
                             </div>
-                            <div style={{ width: '100%', height: '230px', borderRadius: '16px', overflow: 'hidden', border: '1px solid #cbd5e1', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                                <img src={selectedDish.imageUrl.startsWith('http') ? selectedDish.imageUrl : `/image/${selectedDish.imageUrl}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={selectedDish.name} />
+                            <div style={{
+                                width: '100%',
+                                height: '230px',
+                                borderRadius: '16px',
+                                overflow: 'hidden',
+                                border: '1px solid #cbd5e1',
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                            }}>
+                                <img
+                                    src={selectedDish.imageUrl.startsWith('http') ? selectedDish.imageUrl : `/image/${selectedDish.imageUrl}`}
+                                    style={{width: '100%', height: '100%', objectFit: 'cover'}}
+                                    alt={selectedDish.name}/>
                             </div>
-                            <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '10px', marginTop: '16px', textAlign: 'center', fontSize: '12.5px', border: '1px solid #e2e8f0' }}>
-                                <span style={{ color: '#94a3b8', fontWeight: '700' }}>MÃ SKU:</span> <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>#SKU-{String(selectedDish.id).padStart(5, '0')}</strong>
+                            <div style={{
+                                backgroundColor: '#f8fafc',
+                                padding: '12px',
+                                borderRadius: '10px',
+                                marginTop: '16px',
+                                textAlign: 'center',
+                                fontSize: '12.5px',
+                                border: '1px solid #e2e8f0'
+                            }}>
+                                <span style={{color: '#94a3b8', fontWeight: '700'}}>MÃ SKU:</span> <strong style={{
+                                color: '#0f172a',
+                                fontFamily: 'monospace'
+                            }}>#SKU-{String(selectedDish.id).padStart(5, '0')}</strong>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
                             <div>
-                                <span style={{ padding: '4px 10px', background: '#e0e7ff', color: '#4338ca', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>{selectedDish.categoryName.toUpperCase()}</span>
-                                <h2 style={{ margin: '10px 0 6px 0', fontSize: '24px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>{selectedDish.name}</h2>
-                                <h3 style={{ margin: '0 0 16px 0', color: '#0052cc', fontSize: '22px', fontWeight: '800' }}>{selectedDish.price.toLocaleString('vi-VN')}đ</h3>
-                                <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: '20px 0' }} />
-                                <h4 style={{ margin: '0 0 8px 0', fontSize: '11px', color: '#94a3b8', fontWeight: '800', letterSpacing: '0.05em' }}>MÔ TẢ CHI TIẾT</h4>
+                                <span style={{
+                                    padding: '4px 10px',
+                                    background: '#e0e7ff',
+                                    color: '#4338ca',
+                                    borderRadius: '20px',
+                                    fontSize: '11px',
+                                    fontWeight: '700'
+                                }}>{selectedDish.categoryName.toUpperCase()}</span>
+                                <h2 style={{
+                                    margin: '10px 0 6px 0',
+                                    fontSize: '24px',
+                                    fontWeight: '800',
+                                    color: '#0f172a',
+                                    letterSpacing: '-0.02em'
+                                }}>{selectedDish.name}</h2>
+                                <h3 style={{
+                                    margin: '0 0 16px 0',
+                                    color: '#0052cc',
+                                    fontSize: '22px',
+                                    fontWeight: '800'
+                                }}>{selectedDish.price.toLocaleString('vi-VN')}đ</h3>
+                                <hr style={{border: 'none', borderTop: '1px solid #f1f5f9', margin: '20px 0'}}/>
+                                <h4 style={{
+                                    margin: '0 0 8px 0',
+                                    fontSize: '11px',
+                                    color: '#94a3b8',
+                                    fontWeight: '800',
+                                    letterSpacing: '0.05em'
+                                }}>MÔ TẢ CHI TIẾT</h4>
                                 <div style={{
                                     fontSize: '13.5px',
                                     color: '#475569',
@@ -456,20 +622,44 @@ export default function AdminDishesPage() {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '24px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+                            <div style={{
+                                display: 'flex',
+                                gap: '12px',
+                                marginTop: '24px',
+                                borderTop: '1px solid #f1f5f9',
+                                paddingTop: '16px'
+                            }}>
                                 {selectedDish.isAvailable && (categories.find(c => c.name === selectedDish.categoryName)?.isAvailable !== false) ? (
                                     <button
                                         onClick={() => setActiveModal('EDIT')}
-                                        style={{ ...primaryBtnStyle, flex: 1, justifyContent: 'center' }}
+                                        style={{...primaryBtnStyle, flex: 1, justifyContent: 'center'}}
                                     >
                                         📝 Chỉnh sửa
                                     </button>
                                 ) : (
-                                    <div style={{ flex: 1, color: '#ef4444', fontSize: '12.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fef2f2', borderRadius: '8px', fontWeight: '700', border: '1px solid #fca5a5', padding: '8px' }}>
+                                    <div style={{
+                                        flex: 1,
+                                        color: '#ef4444',
+                                        fontSize: '12.5px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        background: '#fef2f2',
+                                        borderRadius: '8px',
+                                        fontWeight: '700',
+                                        border: '1px solid #fca5a5',
+                                        padding: '8px'
+                                    }}>
                                         🔒 Ngưng bán / Mục cha ẩn
                                     </div>
                                 )}
-                                <button onClick={() => setActiveModal('DELETE')} style={{ ...secondaryBtnStyle, backgroundColor: '#fee2e2', color: '#ef4444', borderColor: '#fca5a5' }}>🗑️ Xóa</button>
+                                <button onClick={() => setActiveModal('DELETE')} style={{
+                                    ...secondaryBtnStyle,
+                                    backgroundColor: '#fee2e2',
+                                    color: '#ef4444',
+                                    borderColor: '#fca5a5'
+                                }}>🗑️ Xóa
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -481,22 +671,34 @@ export default function AdminDishesPage() {
             {/* ========================================================= */}
             {activeModal === 'EDIT' && selectedDish && (
                 <div style={backdropStyle}>
-                    <form onSubmit={handleUpdateDish} style={{ ...modalCardStyle, width: '850px', display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '28px' }}>
+                    <form onSubmit={handleUpdateDish} style={{
+                        ...modalCardStyle,
+                        width: '850px',
+                        display: 'grid',
+                        gridTemplateColumns: '1.6fr 1fr',
+                        gap: '28px'
+                    }}>
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                                <button type="button" onClick={() => setActiveModal('NONE')} style={backBtnStyle}>&larr;</button>
-                                <h3 style={{ margin: 0, fontWeight: '800', fontSize: '18px', color: '#0f172a' }}>✏️ CHỈNH SỬA MÓN ĂN</h3>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
+                                <button type="button" onClick={() => setActiveModal('NONE')}
+                                        style={backBtnStyle}>&larr;</button>
+                                <h3 style={{margin: 0, fontWeight: '800', fontSize: '18px', color: '#0f172a'}}>✏️ CHỈNH
+                                    SỬA MÓN ĂN</h3>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '18px'}}>
+                                <div style={{display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px'}}>
                                     <div>
                                         <label style={inputLabelStyle}>TÊN MÓN ĂN</label>
-                                        <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={inputFormStyle} />
+                                        <input type="text" value={formData.name}
+                                               onChange={e => setFormData({...formData, name: e.target.value})}
+                                               style={inputFormStyle}/>
                                     </div>
                                     <div>
                                         <label style={inputLabelStyle}>DANH MỤC</label>
-                                        <select value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value})} style={selectFormStyle}>
+                                        <select value={formData.categoryId}
+                                                onChange={e => setFormData({...formData, categoryId: e.target.value})}
+                                                style={selectFormStyle}>
                                             <option value="">-- Chọn danh mục --</option>
                                             {activeCategories.map(c => (
                                                 <option key={c.id} value={c.id}>{c.name}</option>
@@ -505,19 +707,48 @@ export default function AdminDishesPage() {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '16px' }}>
+                                <div style={{display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '16px'}}>
                                     <div>
                                         <label style={inputLabelStyle}>GIÁ BÁN (VNĐ)</label>
-                                        <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: parseInt(e.target.value) || 0})} style={inputFormStyle} />
+                                        <input type="number" value={formData.price} onChange={e => setFormData({
+                                            ...formData,
+                                            price: parseInt(e.target.value) || 0
+                                        })} style={inputFormStyle}/>
                                     </div>
                                     <div>
                                         <label style={inputLabelStyle}>TRẠNG THÁI KINH DOANH</label>
-                                        <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', cursor:'pointer', fontWeight:'600', color: '#334155' }}>
-                                                <input type="radio" name="availability" checked={formData.isAvailable === true} onChange={() => setFormData({...formData, isAvailable: true})} /> 🟢 Có sẵn
+                                        <div style={{display: 'flex', gap: '16px', marginTop: '10px'}}>
+                                            <label style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                fontSize: '13.5px',
+                                                cursor: 'pointer',
+                                                fontWeight: '600',
+                                                color: '#334155'
+                                            }}>
+                                                <input type="radio" name="availability"
+                                                       checked={formData.isAvailable === true}
+                                                       onChange={() => setFormData({
+                                                           ...formData,
+                                                           isAvailable: true
+                                                       })}/> 🟢 Có sẵn
                                             </label>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', cursor:'pointer', fontWeight:'600', color: '#334155' }}>
-                                                <input type="radio" name="availability" checked={formData.isAvailable === false} onChange={() => setFormData({...formData, isAvailable: false})} /> 🔴 Tạm dừng
+                                            <label style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                fontSize: '13.5px',
+                                                cursor: 'pointer',
+                                                fontWeight: '600',
+                                                color: '#334155'
+                                            }}>
+                                                <input type="radio" name="availability"
+                                                       checked={formData.isAvailable === false}
+                                                       onChange={() => setFormData({
+                                                           ...formData,
+                                                           isAvailable: false
+                                                       })}/> 🔴 Tạm dừng
                                             </label>
                                         </div>
                                     </div>
@@ -525,24 +756,52 @@ export default function AdminDishesPage() {
 
                                 <div>
                                     <label style={inputLabelStyle}>MÔ TẢ CHI TIẾT</label>
-                                    <textarea rows={4} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ ...inputFormStyle, resize: 'none', lineHeight:'1.5' }} />
+                                    <textarea rows={4} value={formData.description}
+                                              onChange={e => setFormData({...formData, description: e.target.value})}
+                                              style={{...inputFormStyle, resize: 'none', lineHeight: '1.5'}}/>
                                 </div>
 
                                 <div>
                                     <label style={inputLabelStyle}>ĐƯỜNG DẪN HÌNH ANH (URL)</label>
-                                    <div style={{ display: 'flex', gap: '10px' }}>
-                                        <input type="text" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} style={{ ...inputFormStyle, margin: 0 }} />
-                                        <button type="button" style={{ padding: '0 16px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontSize:'13px', fontWeight:'600', color:'#475569' }}>Tải lên</button>
+                                    <div style={{display: 'flex', gap: '10px'}}>
+                                        <input type="text" value={formData.imageUrl}
+                                               onChange={e => setFormData({...formData, imageUrl: e.target.value})}
+                                               style={{...inputFormStyle, margin: 0}}/>
+                                        <button type="button" style={{
+                                            padding: '0 16px',
+                                            background: '#e2e8f0',
+                                            border: '1px solid #cbd5e1',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '13px',
+                                            fontWeight: '600',
+                                            color: '#475569'
+                                        }}>Tải lên
+                                        </button>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '32px', justifyContent: 'flex-end', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
-                                <button type="button" onClick={() => setActiveModal('NONE')} style={secondaryBtnStyle}>HỦY</button>
+                            <div style={{
+                                display: 'flex',
+                                gap: '12px',
+                                marginTop: '32px',
+                                justifyContent: 'flex-end',
+                                borderTop: '1px solid #f1f5f9',
+                                paddingTop: '20px'
+                            }}>
+                                <button type="button" onClick={() => setActiveModal('NONE')}
+                                        style={secondaryBtnStyle}>HỦY
+                                </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    style={{ ...primaryBtnStyle, padding: '10px 24px', backgroundColor: isSubmitting ? '#94a3b8' : '#0052cc', cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                                    style={{
+                                        ...primaryBtnStyle,
+                                        padding: '10px 24px',
+                                        backgroundColor: isSubmitting ? '#94a3b8' : '#0052cc',
+                                        cursor: isSubmitting ? 'not-allowed' : 'pointer'
+                                    }}
                                 >
                                     {isSubmitting ? '⏳ ĐANG LƯU...' : '💾 CẬP NHẬT'}
                                 </button>
@@ -550,24 +809,97 @@ export default function AdminDishesPage() {
                         </div>
 
                         {/* Cột phải xem trước hình ảnh */}
-                        <div style={{ borderLeft: '1px solid #f1f5f9', paddingLeft: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div style={{
+                            borderLeft: '1px solid #f1f5f9',
+                            paddingLeft: '24px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between'
+                        }}>
                             <div>
-                                <div style={{ background: '#f1f5f9', padding: '10px 14px', borderRadius: '8px 8px 0 0', fontWeight: '700', fontSize: '11.5px', color: '#475569', letterSpacing:'0.03em' }}>XEM TRƯỚC HIỂN THỊ CHUẨN</div>
-                                <div style={{ border: '1px solid #cbd5e1', borderTop: 'none', borderRadius: '0 0 12px 12px', background: '#fff', padding: '16px', boxSizing:'border-box' }}>
-                                    <div style={{ width: '100%', height: '180px', borderRadius: '8px', overflow: 'hidden', marginBottom: '14px', boxShadow:'inset 0 0 4px rgba(0,0,0,0.05)' }}>
-                                        <img src={formData.imageUrl || 'https://placehold.co/300x200?text=No+Image'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Preview" />
+                                <div style={{
+                                    background: '#f1f5f9',
+                                    padding: '10px 14px',
+                                    borderRadius: '8px 8px 0 0',
+                                    fontWeight: '700',
+                                    fontSize: '11.5px',
+                                    color: '#475569',
+                                    letterSpacing: '0.03em'
+                                }}>XEM TRƯỚC HIỂN THỊ CHUẨN
+                                </div>
+                                <div style={{
+                                    border: '1px solid #cbd5e1',
+                                    borderTop: 'none',
+                                    borderRadius: '0 0 12px 12px',
+                                    background: '#fff',
+                                    padding: '16px',
+                                    boxSizing: 'border-box'
+                                }}>
+                                    <div style={{
+                                        width: '100%',
+                                        height: '180px',
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                        marginBottom: '14px',
+                                        boxShadow: 'inset 0 0 4px rgba(0,0,0,0.05)'
+                                    }}>
+                                        <img src={formData.imageUrl || 'https://placehold.co/300x200?text=No+Image'}
+                                             style={{width: '100%', height: '100%', objectFit: 'cover'}} alt="Preview"/>
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '11px', background: '#ef4444', color: '#fff', padding: '3px 8px', borderRadius: '20px', fontWeight: '700' }}>BÁN CHẠY</span>
-                                        <strong style={{ color: '#0f172a', fontSize: '16px', fontWeight:'800' }}>{formData.price.toLocaleString()}đ</strong>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <span style={{
+                                            fontSize: '11px',
+                                            background: '#ef4444',
+                                            color: '#fff',
+                                            padding: '3px 8px',
+                                            borderRadius: '20px',
+                                            fontWeight: '700'
+                                        }}>BÁN CHẠY</span>
+                                        <strong style={{
+                                            color: '#0f172a',
+                                            fontSize: '16px',
+                                            fontWeight: '800'
+                                        }}>{formData.price.toLocaleString()}đ</strong>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style={{ marginTop: '24px', padding: '16px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px' }}>
-                                <h5 style={{ margin: '0 0 6px 0', color: '#991b1b', fontWeight: '800', fontSize:'13.5px' }}>🚨 KHU VỰC NGUY HIỂM</h5>
-                                <p style={{ fontSize: '12px', color: '#7f1d1d', margin: '0 0 14px 0', lineHeight:'1.5' }}>Thực hiện xóa sẽ gỡ bỏ hoàn toàn dữ liệu món ăn này khỏi hệ thống cơ sở dữ liệu.</p>
-                                <button type="button" onClick={() => setActiveModal('DELETE')} style={{ width: '100%', backgroundColor: '#dc2626', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', fontSize:'13px', boxShadow:'0 4px 10px rgba(220,38,38,0.15)' }}>XÓA MÓN ĂN KHỎI MENU</button>
+                            <div style={{
+                                marginTop: '24px',
+                                padding: '16px',
+                                background: '#fef2f2',
+                                border: '1px solid #fca5a5',
+                                borderRadius: '12px'
+                            }}>
+                                <h5 style={{
+                                    margin: '0 0 6px 0',
+                                    color: '#991b1b',
+                                    fontWeight: '800',
+                                    fontSize: '13.5px'
+                                }}>🚨 KHU VỰC NGUY HIỂM</h5>
+                                <p style={{
+                                    fontSize: '12px',
+                                    color: '#7f1d1d',
+                                    margin: '0 0 14px 0',
+                                    lineHeight: '1.5'
+                                }}>Thực hiện xóa sẽ gỡ bỏ hoàn toàn dữ liệu món ăn này khỏi hệ thống cơ sở dữ liệu.</p>
+                                <button type="button" onClick={() => setActiveModal('DELETE')} style={{
+                                    width: '100%',
+                                    backgroundColor: '#dc2626',
+                                    color: '#fff',
+                                    border: 'none',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    fontSize: '13px',
+                                    boxShadow: '0 4px 10px rgba(220,38,38,0.15)'
+                                }}>XÓA MÓN ĂN KHỎI MENU
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -579,15 +911,19 @@ export default function AdminDishesPage() {
             {/* ========================================================= */}
             {activeModal === 'DELETE' && selectedDish && (
                 <div style={backdropStyle}>
-                    <div style={{ ...modalCardStyle, width: '400px', textAlign: 'center', padding: '32px' }}>
-                        <div style={{ fontSize: '36px', marginBottom: '12px' }}>⚠️</div>
-                        <h3 style={{ margin: '0 0 10px 0', fontWeight: '800', color: '#991b1b', fontSize:'17px' }}>XÓA MÓN ĂN</h3>
-                        <p style={{ color: '#64748b', fontSize: '13.5px', lineHeight: '1.6', marginBottom: '28px' }}>
-                            Bạn có chắc chắn muốn xóa món ăn <strong style={{color:'#0f172a'}}>“{selectedDish.name}”</strong>? Hành động gỡ bỏ này không thể hoàn tác.
+                    <div style={{...modalCardStyle, width: '400px', textAlign: 'center', padding: '32px'}}>
+                        <div style={{fontSize: '36px', marginBottom: '12px'}}>⚠️</div>
+                        <h3 style={{margin: '0 0 10px 0', fontWeight: '800', color: '#991b1b', fontSize: '17px'}}>XÓA
+                            MÓN ĂN</h3>
+                        <p style={{color: '#64748b', fontSize: '13.5px', lineHeight: '1.6', marginBottom: '28px'}}>
+                            Bạn có chắc chắn muốn xóa món ăn <strong
+                            style={{color: '#0f172a'}}>“{selectedDish.name}”</strong>? Hành động gỡ bỏ này không thể
+                            hoàn tác.
                         </p>
-                        <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{display: 'flex', gap: '12px'}}>
                             <button onClick={handleDeleteDish} style={modalDeleteBtnStyle}>Xác nhận xóa</button>
-                            <button onClick={() => setActiveModal('NONE')} style={{ ...secondaryBtnStyle, flex: 1 }}>Hủy</button>
+                            <button onClick={() => setActiveModal('NONE')} style={{...secondaryBtnStyle, flex: 1}}>Hủy
+                            </button>
                         </div>
                     </div>
                 </div>

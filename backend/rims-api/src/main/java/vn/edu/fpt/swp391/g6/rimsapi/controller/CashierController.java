@@ -17,10 +17,12 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/rims/cashier")
 @RequiredArgsConstructor
-public class CashierController {
+public class CashierController
+{
 
     private final CashierService cashierService;
     private final InvoicePdfService invoicePdfService;
@@ -28,13 +30,15 @@ public class CashierController {
 
     // API 1 xem danh sách 12 bàn
     @GetMapping("/tables")
-    public ResponseEntity<List<TableDashboardResponse>> getTablesDashboard() {
+    public ResponseEntity<List<TableDashboardResponse>> getTablesDashboard()
+    {
         return ResponseEntity.ok(cashierService.getTablesDashboard());
     }
 
     // API 2 xem chi tiết từng bàn
     @GetMapping("/orders/{orderId}")
-    public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable Long orderId) {
+    public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable Long orderId)
+    {
         return ResponseEntity.ok(cashierService.getOrderDetail(orderId));
     }
     //API 3 chọn method thanh toán
@@ -42,13 +46,15 @@ public class CashierController {
     public ResponseEntity<PaymentResponse> processPayment(
             @PathVariable Long id,
             @RequestBody PaymentRequest request
-    ) {
+    )
+    {
         return ResponseEntity.ok(cashierService.processPayment(id, request));
     }
 
     // API 4: Lấy danh sách phương thức thanh toán
     @GetMapping("/payment-methods")
-    public ResponseEntity<List<String>> getPaymentMethods() {
+    public ResponseEntity<List<String>> getPaymentMethods()
+    {
         List<String> methods = java.util.Arrays.stream(PaymentMethod.values())
                 .map(Enum::name)
                 .toList();
@@ -60,20 +66,23 @@ public class CashierController {
     public ResponseEntity<PaymentResponse> completeCashPayment(
             @PathVariable Long id,
             @RequestBody PaymentRequest request
-    ) {
+    )
+    {
         return ResponseEntity.ok(cashierService.completeCashPayment(id, request));
     }
 
     // API 6 sinh link Code VNPay dựa vào Order ID
     @GetMapping("/orders/{id}/vnpay-qr")
-    public ResponseEntity<VNPayResponse> getVNPayQrCode(@PathVariable Long id) {
+    public ResponseEntity<VNPayResponse> getVNPayQrCode(@PathVariable Long id)
+    {
         return ResponseEntity.ok(cashierService.createVNPayPaymentUrl(id));
     }
 
     //API 7 xuất file PDF
     @GetMapping("/invoices/{invoiceId}/pdf")
     @Transactional(readOnly = true)
-    public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId) {
+    public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId)
+    {
         Invoice invoice = invoiceRepository.findWithOrderAndItemsById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
 
@@ -90,29 +99,35 @@ public class CashierController {
     @GetMapping("/payments/vnpay-callback")
     public void vnpayCallback(
             @RequestParam java.util.Map<String, String> vnpayParams,
-            jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+            jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException
+    {
 
-        try {
+        try
+        {
 
             String vnp_ResponseCode = vnpayParams.get("vnp_ResponseCode");
             String vnp_TxnRef = vnpayParams.get("vnp_TxnRef");
 
-            if ("00".equals(vnp_ResponseCode)) {
+            if ("00".equals(vnp_ResponseCode))
+            {
                 Long invoiceId = cashierService.processVnPaySuccess(vnp_TxnRef);
                 String frontendSuccessUrl = "http://localhost:5173/payment-success?invoiceId=" + invoiceId;
                 response.sendRedirect(frontendSuccessUrl);
-            } else {
+            } else
+            {
                 cashierService.processVnPayFailed(vnp_TxnRef);
                 response.sendRedirect("http://localhost:5173/payment-failed");
             }
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
 
     // API9 mở khóa đơn hàng khi bấm back hay bị thất bại
     @PostMapping("/orders/{id}/unlock")
-    public ResponseEntity<PaymentResponse> unlockOrder(@PathVariable Long id) {
+    public ResponseEntity<PaymentResponse> unlockOrder(@PathVariable Long id)
+    {
         return ResponseEntity.ok(cashierService.unlockOrder(id));
     }
 }

@@ -1,11 +1,6 @@
-
-import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import {
-    getChefDishes,
-    updateMenuStatus,
-    type DishListResponse,
-} from '../../api/chef'
+import {useEffect, useState} from 'react'
+import {Link, useSearchParams} from 'react-router-dom'
+import {type DishListResponse, getChefDishes, updateMenuStatus,} from '../../api/chef'
 
 function formatCurrency(value: number) {
     return new Intl.NumberFormat('vi-VN', {
@@ -73,9 +68,9 @@ export default function DishListPage() {
                 currentDishes.map((item) =>
                     item.dishId === dish.dishId
                         ? {
-                              ...item,
-                              available: nextAvailable,
-                          }
+                            ...item,
+                            available: nextAvailable,
+                        }
                         : item,
                 ),
             )

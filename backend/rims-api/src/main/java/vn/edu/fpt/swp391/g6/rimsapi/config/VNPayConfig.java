@@ -9,9 +9,11 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
+
 @Configuration
 @Getter
-public class VNPayConfig {
+public class VNPayConfig
+{
 
     @Value("${vnpay.url}")
     private String vnpUrl;
@@ -31,8 +33,10 @@ public class VNPayConfig {
     @Value("${vnpay.return-url}")
     private String vnpReturnUrl;
 
-    public String hmacSHA512(final String key, final String data) {
-        try {
+    public String hmacSHA512(final String key, final String data)
+    {
+        try
+        {
             if (key == null || data == null) return "";
 
             final Mac hmac512 = Mac.getInstance("HmacSHA512");
@@ -42,16 +46,19 @@ public class VNPayConfig {
             byte[] result = hmac512.doFinal(data.getBytes(StandardCharsets.UTF_8));
 
             StringBuilder sb = new StringBuilder(2 * result.length);
-            for (byte b : result) {
+            for (byte b : result)
+            {
                 sb.append(String.format("%02x", b & 0xff));
             }
             return sb.toString();
-        } catch (Exception ex) {
+        } catch (Exception ex)
+        {
             throw new RuntimeException("Lỗi băm chữ ký VNPay: " + ex.getMessage());
         }
     }
 
-    public String getIpAddress(HttpServletRequest request) {
+    public String getIpAddress(HttpServletRequest request)
+    {
         return "127.0.0.1";
     }
 }

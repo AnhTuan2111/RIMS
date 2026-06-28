@@ -1,11 +1,6 @@
-
-
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import {
-    adminApi,
-    type AdminPaymentDetail,
-} from '../../api/admin'
+import {useEffect, useState} from 'react'
+import {useNavigate, useParams} from 'react-router-dom'
+import {adminApi, type AdminPaymentDetail,} from '../../api/admin'
 
 function formatCurrency(value: number) {
     return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
@@ -29,7 +24,7 @@ function formatDateTime(value: string) {
 
 export default function AdminPaymentDetailPage() {
     const navigate = useNavigate()
-    const { invoiceId } = useParams()
+    const {invoiceId} = useParams()
     const parsedInvoiceId = Number(invoiceId)
     const hasValidInvoiceId =
         Boolean(invoiceId) && !Number.isNaN(parsedInvoiceId)
@@ -44,7 +39,7 @@ export default function AdminPaymentDetailPage() {
             setIsLoading(true)
             setError(null)
 
-            const { data } = await adminApi.getPaymentDetail(
+            const {data} = await adminApi.getPaymentDetail(
                 parsedInvoiceId,
             )
             setPayment(data)
@@ -65,7 +60,7 @@ export default function AdminPaymentDetailPage() {
 
         adminApi
             .getPaymentDetail(parsedInvoiceId)
-            .then(({ data }) => {
+            .then(({data}) => {
                 if (!isActive) {
                     return
                 }
