@@ -17,6 +17,17 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
     const finalAmount = orderDetail.finalAmount;
     const changeReturned = amountReceived >= finalAmount ? amountReceived - finalAmount : 0;
 
+
+    const handleCloseModal = async () => {
+        try {
+            await cashierApi.unlockOrder(orderId);
+        } catch (err) {
+            console.error("Lỗi mở khóa đơn hàng", err);
+        } finally {
+            onClose();
+        }
+    };
+
     const handleConfirmCash = async () => {
         if (amountReceived < finalAmount) {
             alert('Tiền khách đưa chưa đủ!');
@@ -26,9 +37,8 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
         try {
             const reqData = { paymentMethod: 'CASH' as PaymentMethodType, amountPaid: amountReceived };
 
-            await cashierApi.processPaymentLock(orderId, reqData);
-            const res = await cashierApi.completeCashPayment(orderId, reqData);
 
+            const res = await cashierApi.completeCashPayment(orderId, reqData);
             if (res && res.data && res.data.success) {
                 onSuccess(res.data.invoiceId);
             } else {
@@ -67,7 +77,7 @@ export default function PaymentModal({ orderId, orderDetail, onClose, onSuccess 
             <div className="modal-card" style={{ background: '#fff', padding: '2rem', borderRadius: '12px', width: '100%', maxWidth: '480px' }}>
                 <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
                     <h2 style={{ margin: 0 }}>Thanh Toán</h2>
-                    <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                    <button type="button" onClick={() => void handleCloseModal()} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                 </div>
 
                 <div className="modal-body" style={{ marginTop: '1.5rem' }}>

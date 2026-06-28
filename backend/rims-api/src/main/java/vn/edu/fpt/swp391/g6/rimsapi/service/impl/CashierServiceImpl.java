@@ -94,7 +94,7 @@ public class CashierServiceImpl implements CashierService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        //Nếu đơn hàng đã bị khóa từ trước (do khách thao tác lại), thì CHO PHÉP ĐI TIẾP
+        //Nếu đơn hàng đã bị khóa từ trước (do khách thao tác lại)
         if (order.getStatus() == OrderStatus.LOCKED) {
             return PaymentResponse.builder()
                     .message("Đơn hàng đã được khóa từ trước. Sẵn sàng thanh toán!")
@@ -169,6 +169,42 @@ public class CashierServiceImpl implements CashierService {
     }
 
     @Override
+    @Transactional
+    public PaymentResponse unlockOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        if (order.getStatus() == OrderStatus.LOCKED) {
+            order.setStatus(OrderStatus.SERVING);
+            orderRepository.save(order);
+
+            return PaymentResponse.builder()
+                    .message("Đã hủy quá trình thanh toán, bàn tiếp tục phục vụ.")
+                    .success(true)
+                    .build();
+        }
+
+        return PaymentResponse.builder()
+                .message("Đơn hàng không ở trạng thái khóa.")
+                .success(false)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void processVnPayFailed(String vnpTxnRef) {
+        String[] parts = vnpTxnRef.split("_");
+        Long orderId = Long.parseLong(parts[1]);
+
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        if (order != null && order.getStatus() == OrderStatus.LOCKED) {
+            order.setStatus(OrderStatus.SERVING);
+            orderRepository.save(order);
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public VNPayResponse createVNPayPaymentUrl(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -180,7 +216,6 @@ public class CashierServiceImpl implements CashierService {
 
         BigDecimal totalBeforeVat = order.getTotalAmount();
 
-        // CHỐNG LỖI 1: Nếu đơn hàng trống (0đ), chặn lại ngay không cho gửi lên VNPay
         if (totalBeforeVat == null || totalBeforeVat.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Đơn hàng chưa có món ăn (Tổng tiền = 0đ)!");
         }
@@ -191,7 +226,6 @@ public class CashierServiceImpl implements CashierService {
 
         String vnp_TxnRef = "RIMS_" + order.getId() + "_" + System.currentTimeMillis();
 
-        // CHỐNG LỖI 2: Ép cứng IP an toàn (loại trừ lỗi IPv6 localhost)
         String ipAddress = "127.0.0.1";
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -206,7 +240,6 @@ public class CashierServiceImpl implements CashierService {
         vnp_Params.put("vnp_Locale", "vn");
         vnp_Params.put("vnp_IpAddr", ipAddress);
 
-        // CHỐNG LỖI 3: Ép cứng Link Callback (Đảm bảo 100% không bao giờ bị null)
         vnp_Params.put("vnp_ReturnUrl", "http://localhost:8080/rims/cashier/payments/vnpay-callback");
 
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
@@ -255,7 +288,6 @@ public class CashierServiceImpl implements CashierService {
     @Override
     @Transactional
     public Long processVnPaySuccess(String vnpTxnRef) {
-        // Tách chuỗi theo định dạng: "RIMS"_"OrderId"_"Time" -> Lấy phần tử số 1
         String[] parts = vnpTxnRef.split("_");
         Long orderId = Long.parseLong(parts[1]);
 

@@ -33,7 +33,6 @@ export default function CashierPaymentsPage() {
         }
     }, []);
 
-    // Áp dụng cách viết chuẩn của ông để triệt tiêu lỗi render của useEffect
     useEffect(() => {
         const fetchData = async () => {
             await loadTables(false);
@@ -50,8 +49,6 @@ export default function CashierPaymentsPage() {
 
         setSelectedTable(table);
         setOrderDetail(null);
-
-        // Khớp chuẩn trường orderId từ Java DTO
         const targetOrderId = table.orderId;
 
         if (targetOrderId) {

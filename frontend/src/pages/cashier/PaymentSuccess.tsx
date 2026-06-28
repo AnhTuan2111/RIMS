@@ -4,14 +4,15 @@ import { cashierApi } from '../../api/cashier';
 export default function PaymentSuccess() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    // Lấy ID hóa đơn từ URL do Backend trả về (VD: ?invoiceId=15)
+
     const invoiceId = searchParams.get('invoiceId');
 
     const handleDownloadPdf = async () => {
         if (!invoiceId) return;
         try {
             const res = await cashierApi.downloadInvoicePdf(Number(invoiceId));
-            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const blob = new Blob([res.data as BlobPart], { type: 'application/pdf' });
+
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -22,7 +23,7 @@ export default function PaymentSuccess() {
             window.URL.revokeObjectURL(url);
         } catch (err) {
             console.error(err);
-            alert("Không thể tải PDF!");
+            alert("Không thể tải PDF! Vui lòng thử lại.");
         }
     };
 
@@ -41,7 +42,7 @@ export default function PaymentSuccess() {
                 )}
                 <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                     <button type="button" onClick={() => void handleDownloadPdf()} style={{ padding: '0.8rem 1.5rem', background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-                        📥 Tải PDF
+                        📥 Tải PDF Hóa Đơn
                     </button>
                     <button type="button" onClick={() => navigate('/cashier/payments')} style={{ padding: '0.8rem 1.5rem', background: '#cbd5e1', color: '#1e293b', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
                         Về màn hình Thu Ngân

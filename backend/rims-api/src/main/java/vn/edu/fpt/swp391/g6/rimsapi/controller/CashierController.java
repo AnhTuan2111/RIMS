@@ -2,6 +2,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
@@ -54,17 +55,16 @@ public class CashierController {
         return ResponseEntity.ok(methods);
     }
 
-    // API 5: Hoàn tất thanh toán Tiền mặt (Tạo Invoice, Order -> COMPLETED, Table -> AVAILABLE)
+    // API 5: Hoàn tất thanh toán Tiền mặt
     @PostMapping("/orders/{id}/complete-cash")
     public ResponseEntity<PaymentResponse> completeCashPayment(
             @PathVariable Long id,
             @RequestBody PaymentRequest request
     ) {
-        // Truyền request vào service để xử lý logic tính tiền
         return ResponseEntity.ok(cashierService.completeCashPayment(id, request));
     }
 
-    // API 6 sinh link QR Code VNPay dựa vào Order ID
+    // API 6 sinh link Code VNPay dựa vào Order ID
     @GetMapping("/orders/{id}/vnpay-qr")
     public ResponseEntity<VNPayResponse> getVNPayQrCode(@PathVariable Long id) {
         return ResponseEntity.ok(cashierService.createVNPayPaymentUrl(id));
@@ -72,15 +72,13 @@ public class CashierController {
 
     //API 7 xuất file PDF
     @GetMapping("/invoices/{invoiceId}/pdf")
+    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId) {
-        // 1. Tìm hóa đơn trong DB
         Invoice invoice = invoiceRepository.findWithOrderAndItemsById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
 
-        // 2. Gọi Service để sinh ra mảng byte của file PDF
         byte[] pdfBytes = invoicePdfService.generateInvoicePdf(invoice);
 
-        // 3. Cấu hình Header để trình duyệt tự động mở tab PDF
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("inline", "invoice-" + invoiceId + ".pdf");
@@ -104,10 +102,17 @@ public class CashierController {
                 String frontendSuccessUrl = "http://localhost:5173/payment-success?invoiceId=" + invoiceId;
                 response.sendRedirect(frontendSuccessUrl);
             } else {
+                cashierService.processVnPayFailed(vnp_TxnRef);
                 response.sendRedirect("http://localhost:5173/payment-failed");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // API9 mở khóa đơn hàng khi bấm back hay bị thất bại
+    @PostMapping("/orders/{id}/unlock")
+    public ResponseEntity<PaymentResponse> unlockOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(cashierService.unlockOrder(id));
     }
 }
