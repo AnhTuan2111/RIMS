@@ -4,6 +4,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.BestSellingReportRespons
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.OrderShiftReportResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueComparisonResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.RevenueReportResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.WeeklyRevenueChartResponse;
 
 import java.time.LocalDate;
 
@@ -22,6 +23,11 @@ public interface RevenueReportService
     RevenueReportResponse getYearlyRevenue();
 
     RevenueReportResponse getRevenueBetween(
+            LocalDate fromDate,
+            LocalDate toDate
+    );
+
+    WeeklyRevenueChartResponse getDailyRevenue(
             LocalDate fromDate,
             LocalDate toDate
     );

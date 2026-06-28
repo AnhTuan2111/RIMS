@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 
 import org.springframework.data.domain.Pageable;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.InvoiceHistoryProjection;
 
 import java.math.BigDecimal;
@@ -33,6 +34,23 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             WHERE i.invoiceDate BETWEEN :startDate AND :endDate
             """)
     BigDecimal getRevenueBetween(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    @Query(
+            value = """
+                    SELECT
+                        CAST(i.invoice_date AS date) AS revenueDate,
+                        COALESCE(SUM(i.final_amount), 0) AS revenue
+                    FROM invoices i
+                    WHERE i.invoice_date BETWEEN :startDate AND :endDate
+                    GROUP BY CAST(i.invoice_date AS date)
+                    ORDER BY CAST(i.invoice_date AS date)
+                    """,
+            nativeQuery = true
+    )
+    List<DailyRevenueProjection> getDailyRevenueBetween(
             LocalDateTime startDate,
             LocalDateTime endDate
     );

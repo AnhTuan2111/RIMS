@@ -95,6 +95,25 @@ public class AdminController
         return revenueReportService.getWeeklyRevenue();
     }
 
+    @GetMapping("/revenue/daily")
+    public WeeklyRevenueChartResponse getDailyRevenue(
+            @RequestParam
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE)
+            LocalDate fromDate,
+
+            @RequestParam
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE)
+            LocalDate toDate
+    )
+    {
+        return revenueReportService.getDailyRevenue(
+                fromDate,
+                toDate
+        );
+    }
+
     @GetMapping("/revenue/monthly")
     public RevenueReportResponse getMonthlyRevenue()
     {
