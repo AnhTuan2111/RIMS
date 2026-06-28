@@ -10,14 +10,19 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.UpdateProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateCustomerRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateStaffRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.SetAccountStatusRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.*;
-
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -33,7 +38,9 @@ public class AdminController
     private final InvoiceService invoiceService;
     private final CategoryService categoryService;
     private final RevenueReportService revenueReportService;
-    private final ReservationPerformanceScoreService reservationPerformanceScoreService;
+    private final DashboardService dashboardService;
+
+    // =================== USER / ACCOUNT ===================
 
     @GetMapping("/user/all")
     public List<UserResponse> getAllUsers()
@@ -47,9 +54,52 @@ public class AdminController
         return userService.getStaffAccounts();
     }
 
+    @GetMapping("/user/customer")
+    public List<UserResponse> getCustomerAccounts()
+    {
+        return userService.getCustomerAccounts();
+    }
+
+    @GetMapping("/user/{id}")
+    public UserResponse getAccountDetail(@PathVariable Integer id)
+    {
+        return userService.getAccountDetail(id);
+    }
+
+    @PostMapping("/user/customer/new")
+    public ResponseEntity<UserResponse> createCustomer(
+            @RequestBody @Valid CreateCustomerRequest request)
+    {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createCustomer(request));
+    }
+
+    @PostMapping("/user/staff/new")
+    public ResponseEntity<UserResponse> createStaff(
+            @RequestBody @Valid CreateStaffRequest request)
+    {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createStaff(request));
+    }
+
+    @PutMapping("/user/{id}")
+    public UserResponse updateAccount(
+            @PathVariable Integer id,
+            @RequestBody @Valid UpdateAccountRequest request)
+    {
+        return userService.updateAccount(id, request);
+    }
+
+    @PatchMapping("/user/{id}/status")
+    public ResponseEntity<Void> setAccountStatus(
+            @PathVariable Integer id,
+            @RequestBody SetAccountStatusRequest request)
+    {
+        userService.setAccountStatus(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Legacy profile endpoints
     @GetMapping("/user/profile/{id}")
-    public UserProfileResponse getProfile(
-            @PathVariable Integer id)
+    public UserProfileResponse getProfile(@PathVariable Integer id)
     {
         return userService.getProfile(id);
     }
@@ -59,9 +109,10 @@ public class AdminController
             @PathVariable Integer id,
             @RequestBody UpdateProfileRequest request)
     {
-
         return userService.updateProfile(id, request);
     }
+
+    // =================== INVOICE ===================
 
     @GetMapping("/invoice/history")
     public List<InvoiceHistoryResponse> getInvoiceHistory()
@@ -77,12 +128,13 @@ public class AdminController
         return invoiceService.getInvoiceDetail(invoiceId);
     }
 
+    // =================== REVENUE ===================
+
     @GetMapping("/revenue/total")
     public RevenueReportResponse getTotalRevenue()
     {
         return revenueReportService.getTotalRevenue();
     }
-
 
     @GetMapping("/revenue/today")
     public RevenueReportResponse getTodayRevenue()
@@ -94,6 +146,25 @@ public class AdminController
     public RevenueReportResponse getWeeklyRevenue()
     {
         return revenueReportService.getWeeklyRevenue();
+    }
+
+    @GetMapping("/revenue/daily")
+    public WeeklyRevenueChartResponse getDailyRevenue(
+            @RequestParam
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE)
+            LocalDate fromDate,
+
+            @RequestParam
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE)
+            LocalDate toDate
+    )
+    {
+        return revenueReportService.getDailyRevenue(
+                fromDate,
+                toDate
+        );
     }
 
     @GetMapping("/revenue/monthly")
@@ -110,23 +181,10 @@ public class AdminController
 
     @GetMapping("/revenue/custom")
     public RevenueReportResponse getCustomRevenue(
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate fromDate,
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate toDate
-    )
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate)
     {
-
-        return revenueReportService
-                .getRevenueBetween(
-                        fromDate,
-                        toDate
-                );
+        return revenueReportService.getRevenueBetween(fromDate, toDate);
     }
 
 
@@ -136,56 +194,99 @@ public class AdminController
             @RequestParam
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE)
-            LocalDate startDate1,
+            LocalDate previousStartDate,
 
             @RequestParam
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE)
-            LocalDate endDate1,
+            LocalDate previousEndDate,
 
             @RequestParam
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE)
-            LocalDate startDate2,
+            LocalDate currentStartDate,
 
             @RequestParam
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE)
-            LocalDate endDate2
+            LocalDate currentEndDate
     )
     {
 
         return revenueReportService.compareRevenue(
-                startDate1,
-                endDate1,
-                startDate2,
-                endDate2
+                previousStartDate,
+                previousEndDate,
+                currentStartDate,
+                currentEndDate
         );
     }
 
     @GetMapping("/revenue/best-selling")
-    public BestSellingReportResponse getBestSellingReport()
-    {
+    public BestSellingReportResponse getBestSellingReport(
+            @RequestParam(
+                    defaultValue = "WEEK"
+            )
+            String period,
 
-        return revenueReportService
-                .getBestSellingReport();
-    }
+            @RequestParam(
+                    required = false
+            )
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate fromDate,
 
-    @GetMapping("/reservation/performance-score")
-    public List<ReservationPerformanceScoreResponse>
-    getReservationPerformanceScore(
-
-            @RequestParam LocalDate fromDate,
-
-            @RequestParam LocalDate toDate
+            @RequestParam(
+                    required = false
+            )
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate toDate
     )
     {
+        if (fromDate != null && toDate != null)
+        {
+            return revenueReportService.getBestSellingReport(fromDate, toDate);
+        }
+        return revenueReportService.getBestSellingReport(period);
+    }
 
-        return reservationPerformanceScoreService
-                .getReservationPerformanceScore(
-                        fromDate,
-                        toDate
-                );
+    @GetMapping("/revenue/order-shifts")
+    public OrderShiftReportResponse getOrderShiftReport(
+            @RequestParam(
+                    defaultValue = "WEEK"
+            )
+            String period,
+
+            @RequestParam(
+                    required = false
+            )
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate fromDate,
+
+            @RequestParam(
+                    required = false
+            )
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate toDate
+    )
+    {
+        if (fromDate != null && toDate != null)
+        {
+            return revenueReportService
+                    .getOrderShiftReport(
+                            fromDate,
+                            toDate
+                    );
+        }
+
+        return revenueReportService
+                .getOrderShiftReport(period);
     }
 
     @GetMapping("/category/all")
@@ -227,6 +328,8 @@ public class AdminController
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
+
+    // =================== DISH ===================
 
     @GetMapping("/dish/all")
     public ResponseEntity<List<DishResponse>> getAllDishes()
@@ -278,5 +381,10 @@ public class AdminController
     {
         dishService.deleteDish(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/menu")
+    public ResponseEntity<MenuDashboardResponse> getMenuDashboard() {
+        MenuDashboardResponse data = dashboardService.getMenuDashboardData();
+        return ResponseEntity.ok(data);
     }
 }

@@ -1,0 +1,291 @@
+import {apiClient} from './client'
+import type {UserResponse} from '../types/auth'
+
+export type AdminPaymentMethod = 'CASH' | 'QRCODE'
+export type BestSellingPeriod = 'WEEK' | 'MONTH' | 'YEAR'
+export type OrderShiftPeriod = 'WEEK' | 'YEAR'
+
+
+export interface AdminPaymentHistoryItem {
+    invoiceId: number
+    orderId: number
+    tableNumber: string
+    paymentMethod: AdminPaymentMethod
+    amount: number
+    paymentDate: string
+}
+
+export interface AdminPaymentDetailItem {
+    dishName: string
+    quantity: number
+    unitPrice: number
+    amount: number
+}
+
+export interface AdminPaymentDetail {
+    invoiceId: number
+    orderId: number
+    tableNumber: string
+    paymentMethod: string
+    finalAmount: number
+    invoiceDate: string
+    items: AdminPaymentDetailItem[]
+}
+
+export interface RevenueReportResponse {
+    revenue: number
+    period: string
+}
+
+export interface RevenueComparisonResponse {
+    previousRevenue: number
+    currentRevenue: number
+    difference: number
+    growthRate: number
+    previousDays: number
+    currentDays: number
+    previousAverageRevenue: number
+    currentAverageRevenue: number
+}
+
+export interface DailyRevenueItem {
+    dayLabel: string
+    date: string
+    revenue: number
+}
+
+export interface WeeklyRevenueChartResponse {
+    fromDate: string
+    toDate: string
+    items: DailyRevenueItem[]
+}
+
+export interface BestSellingDishItem {
+    rank: number
+    dishName: string
+    totalQuantity: number
+    totalRevenue: number
+}
+
+export interface BestSellingReportResponse {
+    fromDate: string
+    toDate: string
+    dataRangeNote: string
+    items: BestSellingDishItem[]
+}
+
+export interface HighestOrderShift {
+    shiftName: string
+    displayName: string
+    startTime: string
+    endTime: string
+    orderCount: number
+    percentage: number
+}
+
+export interface CreateCustomerRequest {
+    username: string
+    email: string
+    phone: string
+    password: string
+}
+
+export interface CreateStaffRequest {
+    username: string
+    email: string
+    phone: string
+    role: string
+    password: string
+}
+
+export interface UpdateAccountRequest {
+    fullName: string
+    email: string
+    phone: string
+}
+
+export interface SetAccountStatusRequest {
+    active: boolean
+}
+
+// Staff accounts
+export async function getStaffAccounts(): Promise<UserResponse[]> {
+    const res = await apiClient.get<UserResponse[]>('/admin/user/staff')
+    return res.data
+}
+
+// Customer accounts
+export async function getCustomerAccounts(): Promise<UserResponse[]> {
+    const res = await apiClient.get<UserResponse[]>('/admin/user/customer')
+    return res.data
+}
+
+export async function getAccountDetail(id: number): Promise<UserResponse> {
+    const res = await apiClient.get<UserResponse>(`/admin/user/${id}`)
+    return res.data
+}
+
+export async function createCustomer(data: CreateCustomerRequest): Promise<UserResponse> {
+    const res = await apiClient.post<UserResponse>('/admin/user/customer/new', data)
+    return res.data
+}
+
+export async function createStaff(data: CreateStaffRequest): Promise<UserResponse> {
+    const res = await apiClient.post<UserResponse>('/admin/user/staff/new', data)
+    return res.data
+}
+
+export async function updateAccount(id: number, data: UpdateAccountRequest): Promise<UserResponse> {
+    const res = await apiClient.put<UserResponse>(`/admin/user/${id}`, data)
+    return res.data
+}
+
+export type OrderShiftItem = HighestOrderShift
+
+export interface OrderShiftReportResponse {
+    startDate: string
+    endDate: string
+    totalPaidOrders: number
+    averageOrdersPerDay: number
+    highestOrderShift: HighestOrderShift
+    shifts: OrderShiftItem[]
+}
+
+export const adminApi = {
+    getPaymentHistory: () =>
+        apiClient.get<AdminPaymentHistoryItem[]>(
+            '/admin/invoice/history',
+        ),
+
+    getPaymentDetail: (invoiceId: number) =>
+        apiClient.get<AdminPaymentDetail>(
+            `/admin/invoice/${invoiceId}`,
+        ),
+
+    getTotalRevenue: () =>
+        apiClient.get<RevenueReportResponse>(
+            '/admin/revenue/total',
+        ),
+
+    getTodayRevenue: () =>
+        apiClient.get<RevenueReportResponse>(
+            '/admin/revenue/today',
+        ),
+
+    getWeeklyRevenue: () =>
+        apiClient.get<RevenueReportResponse>(
+            '/admin/revenue/weekly',
+        ),
+
+    getDailyRevenue: (
+        fromDate: string,
+        toDate: string,
+    ) =>
+        apiClient.get<WeeklyRevenueChartResponse>(
+            '/admin/revenue/daily',
+            {
+                params: {
+                    fromDate,
+                    toDate,
+                },
+            },
+        ),
+
+    getMonthlyRevenue: () =>
+        apiClient.get<RevenueReportResponse>(
+            '/admin/revenue/monthly',
+        ),
+
+    getYearlyRevenue: () =>
+        apiClient.get<RevenueReportResponse>(
+            '/admin/revenue/yearly',
+        ),
+
+    getCustomRevenue: (
+        fromDate: string,
+        toDate: string,
+    ) =>
+        apiClient.get<RevenueReportResponse>(
+            '/admin/revenue/custom',
+            {
+                params: {
+                    fromDate,
+                    toDate,
+                },
+            },
+        ),
+
+    compareRevenue: (
+        previousStartDate: string,
+        previousEndDate: string,
+        currentStartDate: string,
+        currentEndDate: string,
+    ) =>
+        apiClient.get<RevenueComparisonResponse>(
+            '/admin/revenue/compare',
+            {
+                params: {
+                    previousStartDate,
+                    previousEndDate,
+                    currentStartDate,
+                    currentEndDate,
+                },
+            },
+        ),
+
+    getBestSellingReport: (
+        period: BestSellingPeriod = 'WEEK',
+    ) =>
+        apiClient.get<BestSellingReportResponse>(
+            '/admin/revenue/best-selling',
+            {
+                params: {
+                    period,
+                },
+            },
+        ),
+
+    getBestSellingReportBetween: (
+        fromDate: string,
+        toDate: string,
+    ) =>
+        apiClient.get<BestSellingReportResponse>(
+            '/admin/revenue/best-selling',
+            {
+                params: {
+                    fromDate,
+                    toDate,
+                },
+            },
+        ),
+
+    getOrderShiftReport: (
+        period: OrderShiftPeriod = 'WEEK',
+    ) =>
+        apiClient.get<OrderShiftReportResponse>(
+            '/admin/revenue/order-shifts',
+            {
+                params: {
+                    period,
+                },
+            },
+        ),
+
+    getOrderShiftReportBetween: (
+        fromDate: string,
+        toDate: string,
+    ) =>
+        apiClient.get<OrderShiftReportResponse>(
+            '/admin/revenue/order-shifts',
+            {
+                params: {
+                    fromDate,
+                    toDate,
+                },
+            },
+        ),
+}
+
+export async function setAccountStatus(id: number, active: boolean): Promise<void> {
+    await apiClient.patch(`/admin/user/${id}/status`, {active})
+}

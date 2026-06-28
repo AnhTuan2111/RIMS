@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 
 import org.springframework.data.domain.Pageable;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.InvoiceHistoryProjection;
 
 import java.math.BigDecimal;
@@ -37,6 +38,23 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             LocalDateTime endDate
     );
 
+    @Query(
+            value = """
+                    SELECT
+                        CAST(i.invoice_date AS date) AS revenueDate,
+                        COALESCE(SUM(i.final_amount), 0) AS revenue
+                    FROM invoices i
+                    WHERE i.invoice_date BETWEEN :startDate AND :endDate
+                    GROUP BY CAST(i.invoice_date AS date)
+                    ORDER BY CAST(i.invoice_date AS date)
+                    """,
+            nativeQuery = true
+    )
+    List<DailyRevenueProjection> getDailyRevenueBetween(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
     //Best selling.
     @Query("""
             SELECT
@@ -60,6 +78,17 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             Pageable pageable
     );
 
+    @Query("""
+            SELECT o.createdAt
+            FROM Invoice i
+            JOIN i.order o
+            WHERE o.createdAt BETWEEN :startDate AND :endDate
+            """)
+    List<LocalDateTime> getPaidOrderCreatedTimesBetween(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
 
     //Get invoice history for a specific table.
     @Query("""
@@ -74,7 +103,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             JOIN i.order o
             JOIN o.table t
             JOIN i.payments p
-            WHERE p.isSuccess = true
             ORDER BY i.invoiceDate DESC
             """)
     List<InvoiceHistoryProjection> getInvoiceHistory();

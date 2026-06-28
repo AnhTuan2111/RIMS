@@ -3,6 +3,7 @@ export const RoleType = {
     CHEF: 'CHEF',
     WAITER: 'WAITER',
     CASHIER: 'CASHIER',
+    CUSTOMER: 'CUSTOMER',
 } as const
 
 export type RoleType = (typeof RoleType)[keyof typeof RoleType]
@@ -50,4 +51,15 @@ export interface AuthUser {
     phone: string
     email: string | null
     role: RoleType
+}
+
+export interface UserResponse {
+    id: number
+    username: string
+    fullName: string
+    email: string | null
+    phone: string
+    role: RoleType
+    isActive: boolean
+    createdAt: string
 }

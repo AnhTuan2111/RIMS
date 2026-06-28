@@ -7,19 +7,19 @@ import java.math.BigDecimal;
 @Data
 public class RevenueComparisonResponse {
 
-    private BigDecimal revenue1;
+    private BigDecimal previousRevenue;
 
-    private BigDecimal revenue2;
+    private BigDecimal currentRevenue;
 
     private BigDecimal difference;
 
-    private double growthRate;
+    private BigDecimal growthRate;
 
-    private long days1;
+    private long previousDays;
 
-    private long days2;
+    private long currentDays;
 
-    private BigDecimal averageRevenue1;
+    private BigDecimal previousAverageRevenue;
 
-    private BigDecimal averageRevenue2;
+    private BigDecimal currentAverageRevenue;
 }

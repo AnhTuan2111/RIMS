@@ -3,11 +3,21 @@ import {
     ROLE_LABELS,
     roleMenus,
 } from '../config/roleMenus'
+import AdminRevenueOverviewDashboard from '../components/admin/AdminRevenueOverviewDashboard'
 import {useActor} from '../context/ActorContext'
+import {RoleType} from '../types/auth'
 
 export function DashboardPage() {
     const {actor} = useActor()
     const menus = roleMenus[actor]
+
+    if (actor === RoleType.ADMIN) {
+        return (
+            <div className="rims-statistics-container">
+                <AdminRevenueOverviewDashboard />
+            </div>
+        )
+    }
 
     return (
         <div className="dashboard-page">

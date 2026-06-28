@@ -5,5 +5,7 @@ public enum RoleType
     ADMIN,
     CHEF,
     WAITER,
-    CASHIER
+    CASHIER,
+    CUSTOMER;
+
 }
