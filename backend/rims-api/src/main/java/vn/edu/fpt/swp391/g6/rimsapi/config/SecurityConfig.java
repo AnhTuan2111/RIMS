@@ -19,33 +19,39 @@ import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationFilter;
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
-public class SecurityConfig
-{
+public class SecurityConfig {
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
-    {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(Customizer.withDefaults())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                .accessDeniedHandler(jwtAccessDeniedHandler)
-            )
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/rims/cashier/payments/vnpay-callback").permitAll()
-                .requestMatchers("/rims/auth/login", "/rims/auth/logout", "/rims/auth/refresh").permitAll()
-                .requestMatchers("/rims/admin/**").hasRole("ADMIN")
-                .requestMatchers("/rims/chef/**").hasRole("CHEF")
-                .requestMatchers("/rims/waiter/**").hasRole("WAITER")
-                .requestMatchers("/rims/cashier/**").hasRole("CASHIER")
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/rims/cashier/payments/vnpay-callback").permitAll()
+                        .requestMatchers(
+                                "/rims/auth/login",
+                                "/rims/auth/logout",
+                                "/rims/auth/refresh",
+                                "/rims/auth/forgot-password",
+                                "/rims/auth/reset-password"
+                        ).permitAll()
+                        .requestMatchers("/rims/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/rims/chef/**").hasRole("CHEF")
+                        .requestMatchers("/rims/waiter/**").hasRole("WAITER")
+                        .requestMatchers("/rims/cashier/**").hasRole("CASHIER")
+                        .requestMatchers("/rims/customer/**").hasRole("CUSTOMER")
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
