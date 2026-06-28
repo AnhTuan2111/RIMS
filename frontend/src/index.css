@@ -4273,3 +4273,1180 @@ body {
     color: #0f172a;
     text-align: right;
 }
+       /* =========================================================
+          RIMS DASHBOARD LAYOUT
+          Dùng cho DashboardLayout.tsx
+          ========================================================= */
+
+   #root {
+       min-height: 100vh;
+   }
+
+/* Khung lớn gồm Sidebar và phần nội dung bên phải */
+.app-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background: #f1f5f9;
+}
+
+/* Sidebar bên trái */
+.app-sidebar {
+    width: 286px;
+    min-width: 286px;
+    min-height: 100vh;
+    flex-shrink: 0;
+
+    background: #0f172a;
+    color: #ffffff;
+}
+
+/* Toàn bộ phần bên phải Sidebar */
+.app-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+.rims-topbar {
+    min-height: 110px;
+    padding: 20px 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+
+/* Phần tiêu đề bên trái Topbar */
+.rims-topbar-heading {
+    min-width: 0;
+}
+
+.rims-topbar-heading h1 {
+    margin: 4px 0 6px;
+
+    color: #0f172a;
+    font-size: 24px;
+    font-weight: 750;
+    line-height: 1.25;
+}
+
+.rims-topbar-heading p {
+    margin: 0;
+
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Dòng chữ nhỏ RIMS CONTROL CENTER */
+.rims-topbar-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+/* Chấm xanh nhỏ */
+.rims-topbar-live-dot {
+    width: 8px;
+    height: 8px;
+
+    display: inline-block;
+    border-radius: 50%;
+
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.13);
+}
+
+/* Các thành phần bên phải Topbar */
+.rims-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+/* Ô hiển thị vai trò hiện tại */
+.rims-current-role {
+    min-height: 58px;
+    padding: 9px 14px;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    border: 1px solid #dbe4f0;
+    border-radius: 13px;
+    background: #f8fafc;
+}
+
+.rims-current-role-icon {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 10px;
+    background: #e8eef8;
+
+    font-size: 19px;
+}
+
+.rims-current-role div {
+    display: grid;
+    gap: 2px;
+}
+
+.rims-current-role small {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rims-current-role strong {
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 750;
+}
+
+/* Khung chọn vai trò */
+.rims-actor-switcher {
+    display: grid;
+    gap: 4px;
+}
+
+.rims-actor-switcher > span {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rims-actor-switcher select {
+    min-width: 130px;
+    height: 46px;
+    padding: 0 38px 0 14px;
+
+    border: 1px solid #dbe4f0;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #0f172a;
+
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+    outline: none;
+}
+
+.rims-actor-switcher select:hover {
+    border-color: #94a3b8;
+}
+
+.rims-actor-switcher select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* =========================================================
+   PHẦN NỘI DUNG CỦA OUTLET
+   ========================================================= */
+
+.app-content,
+.rims-app-content {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+
+    padding: 26px;
+
+    background:
+            radial-gradient(
+                    circle at 85% 5%,
+                    rgba(59, 130, 246, 0.1),
+                    transparent 32%
+            ),
+            radial-gradient(
+                    circle at 15% 90%,
+                    rgba(139, 92, 246, 0.06),
+                    transparent 30%
+            ),
+            #f1f5f9;
+}
+
+/*
+   Component được React Router đưa vào <Outlet />
+   sẽ chiếm toàn bộ chiều rộng
+*/
+.rims-app-content > * {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Các card cơ bản bên trong Dashboard */
+.rims-app-content .page-card,
+.rims-app-content .dashboard-card {
+    padding: 24px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+/* Khoảng cách giữa các phần trong trang */
+.rims-app-content .chef-page {
+    display: grid;
+    gap: 20px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+    .rims-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .rims-topbar-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-layout {
+        display: block;
+    }
+
+    .app-sidebar {
+        width: 100%;
+        min-width: 0;
+        min-height: auto;
+    }
+
+    .rims-topbar {
+        position: static;
+        padding: 18px;
+    }
+
+    .rims-topbar-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rims-current-role,
+    .rims-actor-switcher,
+    .rims-actor-switcher select {
+        width: 100%;
+    }
+
+    .app-content,
+    .rims-app-content {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rims-topbar-heading h1 {
+        font-size: 20px;
+    }
+
+    .rims-topbar-heading p {
+        font-size: 13px;
+    }
+
+    .app-content,
+    .rims-app-content {
+        padding: 12px;
+    }
+}
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    padding: 22px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.dashboard-stat-link {
+    display: grid;
+    gap: 8px;
+    color: #0f172a;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.dashboard-stat-link:hover {
+    border-color: #94a3b8;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.dashboard-stat-link strong {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.dashboard-stat-link span {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.dashboard-stat-link small {
+    color: #64748b;
+}
+
+@media (max-width: 768px) {
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* =========================================================
+   COMPLETED ORDERS PAGE
+   ========================================================= */
+
+.completed-page-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.completed-page-actions a {
+    text-decoration: none;
+}
+
+.completed-summary {
+    margin-top: 20px;
+    padding: 12px 16px;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #f8fafc;
+    color: #475569;
+    font-size: 14px;
+}
+
+.completed-summary strong {
+    color: #0f172a;
+    font-size: 17px;
+}
+
+.completed-orders-list {
+    margin-top: 16px;
+
+    display: grid;
+    gap: 12px;
+}
+
+.completed-order-card {
+    padding: 18px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            border-color 0.2s ease;
+}
+
+.completed-order-card:hover {
+    border-color: #86efac;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+            0 10px 24px
+            rgba(15, 23, 42, 0.07);
+}
+
+.completed-order-main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.completed-order-main h3 {
+    margin: 5px 0 0;
+
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.completed-order-id {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.completed-order-info {
+    margin-top: 16px;
+
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.completed-order-info > div {
+    padding: 11px 13px;
+
+    display: grid;
+    gap: 4px;
+
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.completed-order-info small {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.completed-order-info strong {
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.empty-state {
+    margin-top: 20px;
+    padding: 40px 20px;
+
+    text-align: center;
+
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+
+    background: #f8fafc;
+}
+
+.empty-state h3 {
+    margin: 0 0 6px;
+    color: #0f172a;
+}
+
+.empty-state p {
+    margin: 0;
+    color: #64748b;
+}
+
+@media (max-width: 900px) {
+    .completed-order-info {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .completed-page-actions {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .completed-page-actions a,
+    .completed-page-actions button {
+        width: 100%;
+        text-align: center;
+    }
+
+    .completed-order-main {
+        flex-direction: column;
+    }
+
+    .completed-order-info {
+        grid-template-columns: 1fr;
+    }
+}
+       /* =========================================================
+          CHEF PAGINATION
+          ========================================================= */
+
+   .chef-pagination {
+       margin-top: 20px;
+       padding-top: 16px;
+
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       flex-wrap: wrap;
+       gap: 10px;
+
+       border-top: 1px solid #e2e8f0;
+   }
+
+.pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pagination-button,
+.pagination-number {
+    min-height: 38px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    background: #ffffff;
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.pagination-button {
+    padding: 0 14px;
+}
+
+.pagination-number {
+    width: 38px;
+    padding: 0;
+}
+
+.pagination-button:hover:not(:disabled),
+.pagination-number:hover:not(.active) {
+    border-color: #2563eb;
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.pagination-number.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.pagination-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    padding: 0 6px;
+
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .chef-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pagination-pages {
+        justify-content: center;
+    }
+
+    .pagination-button {
+        width: 100%;
+    }
+
+    .pagination-info {
+        text-align: center;
+    }
+}
+/* =========================================================
+   KITCHEN QUEUE FILTER + PAGINATION
+   Thêm vào cuối src/index.css
+   ========================================================= */
+
+.chef-filter-bar {
+    display: grid;
+    grid-template-columns:
+        minmax(260px, 1fr)
+        180px
+        180px
+        auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.chef-filter-bar input,
+.chef-filter-bar select {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #0f172a;
+    font: inherit;
+    outline: none;
+}
+
+.chef-filter-bar input:focus,
+.chef-filter-bar select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.chef-pagination {
+    margin-top: 20px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.pagination-result-info {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pagination-controls,
+.pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.pagination-button,
+.pagination-number {
+    min-height: 38px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pagination-button {
+    padding: 0 14px;
+}
+
+.pagination-number {
+    width: 38px;
+    padding: 0;
+}
+
+.pagination-button:hover:not(:disabled),
+.pagination-number:hover:not(.active) {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.pagination-number.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.pagination-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.cancel-reason-count {
+    margin-top: 6px;
+    text-align: right;
+    color: #64748b;
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .chef-filter-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .chef-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pagination-controls {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 600px) {
+    .chef-filter-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .pagination-controls {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pagination-pages {
+        justify-content: center;
+    }
+
+    .pagination-button {
+        width: 100%;
+    }
+
+    .pagination-result-info {
+        text-align: center;
+    }
+}
+       /* =========================================================
+          KITCHEN QUEUE PAGE
+          Thêm vào CUỐI file index.css
+          ========================================================= */
+
+   .chef-page {
+       width: 100%;
+       display: grid;
+       gap: 18px;
+   }
+
+/* Tiêu đề trang */
+.chef-page .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.chef-page .page-header h2 {
+    margin: 0 0 6px;
+    color: #0f172a;
+    font-size: 24px;
+}
+
+.chef-page .page-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Số món đang chờ + nút làm mới */
+.chef-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.chef-summary > div {
+    min-width: 105px;
+    padding: 10px 14px;
+
+    display: grid;
+    gap: 2px;
+
+    border: 1px solid #dbe4f0;
+    border-radius: 11px;
+    background: #f8fafc;
+}
+
+.chef-summary strong {
+    color: #0f172a;
+    font-size: 20px;
+}
+
+.chef-summary span {
+    color: #64748b;
+    font-size: 11px;
+}
+
+/* =========================================================
+   DANH SÁCH CARD MÓN
+   ========================================================= */
+
+.chef-page .kitchen-board {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+/* Một card món */
+.chef-page .kitchen-order-card {
+    min-width: 0;
+    padding: 20px;
+
+    border: 1px solid #dfe7f1;
+    border-radius: 16px;
+
+    background: #ffffff;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.05);
+
+    transition:
+            transform 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.chef-page .kitchen-order-card.clickable-card {
+    cursor: pointer;
+}
+
+.chef-page .kitchen-order-card:hover {
+    border-color: #93b4ef;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.09);
+}
+
+/* Phần đầu card: bàn + trạng thái */
+.chef-page .kitchen-order-header {
+    padding-bottom: 15px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+
+    border-bottom: 1px solid #edf1f6;
+}
+
+.chef-page .kitchen-order-header h3 {
+    margin: 0 0 6px;
+
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 750;
+}
+
+.chef-page .kitchen-order-header p {
+    margin: 0;
+
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Badge trạng thái */
+.chef-page .status-badge {
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 30px;
+    padding: 0 12px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.chef-page .status-badge.preparing {
+    border: 1px solid #fde68a;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.chef-page .status-badge.completed {
+    border: 1px solid #86efac;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.chef-page .status-badge.danger {
+    border: 1px solid #fecaca;
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Nội dung món */
+.chef-page .kitchen-item-list {
+    margin-top: 16px;
+}
+
+.chef-page .kitchen-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.chef-page .kitchen-item > div:first-child {
+    min-width: 0;
+}
+
+.chef-page .kitchen-item strong {
+    display: block;
+
+    color: #0f172a;
+    font-size: 17px;
+    font-weight: 750;
+
+    overflow-wrap: anywhere;
+}
+
+.chef-page .kitchen-item p {
+    margin: 7px 0 4px;
+
+    color: #334155;
+    font-size: 14px;
+}
+
+.chef-page .kitchen-item small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+/* Nút Xong món */
+.chef-page .kitchen-item-actions {
+    flex-shrink: 0;
+}
+
+.chef-page .kitchen-item-actions .primary-button {
+    min-width: 105px;
+    min-height: 42px;
+    padding: 0 15px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.chef-page .kitchen-item-actions .primary-button:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.chef-page .kitchen-item-actions .primary-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+.chef-page .chef-filter-bar {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns:
+        minmax(260px, 1fr)
+        210px
+        210px
+        auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.chef-page .chef-filter-bar input,
+.chef-page .chef-filter-bar select {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 15px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 11px;
+
+    background: #ffffff;
+    color: #0f172a;
+
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.chef-page .chef-filter-bar input:focus,
+.chef-page .chef-filter-bar select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.chef-page .chef-filter-bar .secondary-button {
+    min-height: 48px;
+    padding: 0 16px;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   PHÂN TRANG
+   ========================================================= */
+
+.chef-page .chef-pagination {
+    width: 100%;
+    padding: 15px 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+.chef-page .pagination-result-info {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.chef-page .pagination-controls,
+.chef-page .pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.chef-page .pagination-button,
+.chef-page .pagination-number {
+    min-height: 38px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    background: #ffffff;
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.chef-page .pagination-button {
+    padding: 0 14px;
+}
+
+.chef-page .pagination-number {
+    width: 38px;
+    padding: 0;
+}
+
+.chef-page .pagination-number.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.chef-page .pagination-button:hover:not(:disabled),
+.chef-page .pagination-number:hover:not(.active) {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.chef-page .pagination-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+    .chef-page .chef-filter-bar {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .chef-page .kitchen-board {
+        grid-template-columns: 1fr;
+    }
+
+    .chef-page .chef-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .chef-page .pagination-controls {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 650px) {
+    .chef-page .page-header,
+    .chef-page .kitchen-item {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .chef-summary {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .chef-page .chef-filter-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .chef-page .kitchen-item-actions,
+    .chef-page .kitchen-item-actions button {
+        width: 100%;
+    }
+
+    .chef-page .pagination-controls {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .chef-page .pagination-pages {
+        justify-content: center;
+    }
+
+    .chef-page .pagination-button {
+        width: 100%;
+    }
+
+    .chef-page .pagination-result-info {
+        text-align: center;
+    }
+}
+

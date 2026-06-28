@@ -21,7 +21,7 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
     ],
 
     [RoleType.CHEF]: [
-        { label: 'Tổng quan', path: '/dashboard' },
+        { label: 'Tổng quan', path: '/chef/dashboard' },
         { label: 'Đơn cần chế biến', path: '/chef/orders' },
         { label: 'Danh sách món ăn', path: '/chef/dishes' },
     ],
