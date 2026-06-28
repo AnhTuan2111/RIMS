@@ -1,5 +1,5 @@
-
 package vn.edu.fpt.swp391.g6.rimsapi.dto.response.report;
+
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,10 +8,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
 @Getter
 @Setter
 @Data
-public class InvoiceDetailResponse {
+public class InvoiceDetailResponse
+{
 
     private Long invoiceId;
 

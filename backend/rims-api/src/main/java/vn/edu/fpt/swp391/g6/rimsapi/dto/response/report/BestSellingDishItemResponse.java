@@ -6,10 +6,12 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BestSellingDishItemResponse {
+public class BestSellingDishItemResponse
+{
 
     private Integer rank;
 

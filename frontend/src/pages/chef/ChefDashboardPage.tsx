@@ -1,10 +1,6 @@
-
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import {
-    getChefDashboard,
-    type ChefDashboardResponse,
-} from '../../api/chef'
+import {useEffect, useState} from 'react'
+import {Link} from 'react-router-dom'
+import {type ChefDashboardResponse, getChefDashboard,} from '../../api/chef'
 
 export default function ChefDashboardPage() {
     const [dashboard, setDashboard] =

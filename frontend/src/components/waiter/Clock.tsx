@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 
 export function Clock() {
     const [nowMs, setNowMs] = useState(Date.now());

@@ -1,16 +1,16 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {WaiterHeader, WaiterToast, useReservationTick} from "../../components/waiter";
+import {useReservationTick, WaiterHeader, WaiterToast} from "../../components/waiter";
 import {
-    getActiveReservations,
-    getReservation,
-    updateReservation,
     cancelReservation,
-    validateReservationForm,
+    getActiveReservations,
     getEffectiveTableStatus,
+    getReservation,
     hasTimeConflict,
+    updateReservation,
+    validateReservationForm,
 } from "./mockReservations";
-import {waiterApi, type TableDetailResponse} from "../../api/waiter";
+import {type TableDetailResponse, waiterApi} from "../../api/waiter";
 
 export default function WaiterEditReservationPage() {
     const navigate = useNavigate();
@@ -186,7 +186,8 @@ export default function WaiterEditReservationPage() {
                     </div>
                     <div className="waiter-card">
                         <div className="waiter-card-header">
-                            Lịch đặt cùng ngày (Bàn {tables.find((t) => t.tableId === resForm.tableId)?.tableNumber || "..."})
+                            Lịch đặt cùng ngày
+                            (Bàn {tables.find((t) => t.tableId === resForm.tableId)?.tableNumber || "..."})
                         </div>
                         <div className="waiter-card-body waiter-res-list">
                             {rightReservations.length === 0 ? (

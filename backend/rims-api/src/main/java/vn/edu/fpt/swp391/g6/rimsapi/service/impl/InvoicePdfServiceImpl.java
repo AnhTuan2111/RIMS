@@ -19,15 +19,19 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+
 @Service
-public class InvoicePdfServiceImpl implements InvoicePdfService {
+public class InvoicePdfServiceImpl implements InvoicePdfService
+{
 
     @Override
-    public byte[] generateInvoicePdf(Invoice invoice) {
+    public byte[] generateInvoicePdf(Invoice invoice)
+    {
         Document document = new Document(PageSize.A6, 10, 10, 15, 15);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        try {
+        try
+        {
             PdfWriter.getInstance(document, out);
             document.open();
 
@@ -91,7 +95,8 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
             table.addCell(createCell("T.TIỀN", fontBold, Element.ALIGN_RIGHT, false));
 
             int totalItems = 0;
-            for (OrderItem item : order.getOrderItems()) {
+            for (OrderItem item : order.getOrderItems())
+            {
                 String dishName = (item.getDish() != null) ? item.getDish().getName() : "Món ẩn";
                 totalItems += item.getQuantity();
 
@@ -111,10 +116,12 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
             PaymentMethod method = PaymentMethod.CASH;
             BigDecimal amountPaid = finalAmount;
             List<Payment> payments = invoice.getPayments();
-            if (payments != null && !payments.isEmpty()) {
+            if (payments != null && !payments.isEmpty())
+            {
                 Payment firstPayment = payments.get(0); // Lấy giao dịch đầu tiên
                 method = firstPayment.getPaymentMethod();
-                if (firstPayment.getAmount() != null) {
+                if (firstPayment.getAmount() != null)
+                {
                     amountPaid = firstPayment.getAmount();
                 }
             }
@@ -142,7 +149,8 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
             totalTable.addCell(createCell(methodStr, fontItalic, Element.ALIGN_RIGHT, false));
 
             // Xử lý riêng cho Tiền mặt (Tiền khách đưa & Tiền thừa)
-            if (method == PaymentMethod.CASH) {
+            if (method == PaymentMethod.CASH)
+            {
                 totalTable.addCell(createCell("Khách thanh toán:", fontNormal, Element.ALIGN_LEFT, false));
                 totalTable.addCell(createCell(String.format("%,.0f đ", amountPaid), fontNormal, Element.ALIGN_RIGHT, false));
 
@@ -161,7 +169,8 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
             document.add(footer);
 
             document.close();
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tạo file PDF: " + e.getMessage());
         }
@@ -169,7 +178,8 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
         return out.toByteArray();
     }
 
-    private PdfPCell createCell(String text, Font font, int alignment, boolean hasBorder) {
+    private PdfPCell createCell(String text, Font font, int alignment, boolean hasBorder)
+    {
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
         cell.setHorizontalAlignment(alignment);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);

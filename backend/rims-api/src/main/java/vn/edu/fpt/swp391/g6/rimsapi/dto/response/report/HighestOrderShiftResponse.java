@@ -6,10 +6,12 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class HighestOrderShiftResponse {
+public class HighestOrderShiftResponse
+{
 
     private String shiftName;
 

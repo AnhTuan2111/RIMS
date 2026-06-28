@@ -8,10 +8,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderShiftReportResponse {
+public class OrderShiftReportResponse
+{
 
     private LocalDate startDate;
 

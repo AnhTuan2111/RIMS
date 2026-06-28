@@ -1,10 +1,10 @@
 package vn.edu.fpt.swp391.g6.rimsapi.repository;
 
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 
 import java.util.List;
 
@@ -26,6 +26,7 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
     List<Dish> findByCategoryIdAndIsAvailableTrue(Integer categoryId);
 
     long countByIsAvailableFalse();
+
     // Đếm số món ăn theo trạng thái hoạt động
     long countByIsAvailable(boolean isAvailable);
 

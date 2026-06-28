@@ -8,11 +8,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateProfileRequest {
+public class UpdateProfileRequest
+{
 
     @NotBlank
     @Pattern(regexp = "^\\p{L}+(?: \\p{L}+)*$")

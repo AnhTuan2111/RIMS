@@ -4,8 +4,10 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+
 @Data
-public class RevenueComparisonResponse {
+public class RevenueComparisonResponse
+{
 
     private BigDecimal previousRevenue;
 

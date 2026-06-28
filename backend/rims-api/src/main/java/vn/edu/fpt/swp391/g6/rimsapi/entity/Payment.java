@@ -1,6 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.entity;
 
-import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

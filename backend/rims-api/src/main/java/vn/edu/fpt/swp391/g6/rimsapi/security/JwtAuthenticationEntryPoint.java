@@ -14,6 +14,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.ErrorResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint

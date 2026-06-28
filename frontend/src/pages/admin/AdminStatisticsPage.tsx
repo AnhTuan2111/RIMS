@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import {useEffect, useState} from 'react'
 import {
     adminApi,
     type BestSellingDishItem,
@@ -167,14 +167,14 @@ function buildWeekOptions(year: number): WeekOption[] {
     while (
         weekStart.getFullYear() === year
         && (year < currentYear || weekStart <= today)
-    ) {
+        ) {
         const weekEnd = getSundayOfWeek(weekStart)
         const boundedEnd =
             year === currentYear && weekEnd > today
                 ? today
                 : weekEnd > endOfYear
-                  ? endOfYear
-                  : weekEnd
+                    ? endOfYear
+                    : weekEnd
 
         options.push({
             value: formatDateForApi(weekStart),
@@ -487,9 +487,9 @@ function buildDonutGradient(rows: ShiftViewItem[]) {
 }
 
 function StatIcon({
-    children,
-    className,
-}: {
+                      children,
+                      className,
+                  }: {
     children: string
     className: string
 }) {
@@ -518,10 +518,10 @@ function CalendarIcon() {
             className="admin-revenue-calendar-icon"
             viewBox="0 0 24 24"
         >
-            <path d="M8 2v4" />
-            <path d="M16 2v4" />
-            <path d="M3 10h18" />
-            <path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+            <path d="M8 2v4"/>
+            <path d="M16 2v4"/>
+            <path d="M3 10h18"/>
+            <path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
         </svg>
     )
 }
@@ -532,10 +532,10 @@ function FileIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
-            <path d="M14 2v5h5" />
-            <path d="M9 13h6" />
-            <path d="M9 17h6" />
+            <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/>
+            <path d="M14 2v5h5"/>
+            <path d="M9 13h6"/>
+            <path d="M9 17h6"/>
         </svg>
     )
 }
@@ -546,11 +546,11 @@ function TrophyIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="M8 21h8" />
-            <path d="M12 17v4" />
-            <path d="M7 4h10v4a5 5 0 0 1-10 0z" />
-            <path d="M7 6H4a2 2 0 0 0 2 4h1" />
-            <path d="M17 6h3a2 2 0 0 1-2 4h-1" />
+            <path d="M8 21h8"/>
+            <path d="M12 17v4"/>
+            <path d="M7 4h10v4a5 5 0 0 1-10 0z"/>
+            <path d="M7 6H4a2 2 0 0 0 2 4h1"/>
+            <path d="M17 6h3a2 2 0 0 1-2 4h-1"/>
         </svg>
     )
 }
@@ -561,28 +561,28 @@ function TrendingIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="M3 17 9 11l4 4 7-8" />
-            <path d="M14 7h6v6" />
+            <path d="M3 17 9 11l4 4 7-8"/>
+            <path d="M14 7h6v6"/>
         </svg>
     )
 }
 
 function TrendStatusIcon({
-    tone,
-}: {
+                             tone,
+                         }: {
     tone: StatusTone
 }) {
     const isNegative = tone === 'negative'
     const path = isNegative
         ? 'M3 7l6 6 4-4 8 8'
         : tone === 'positive'
-          ? 'M3 17l6-6 4 4 8-8'
-          : 'M3 12h18'
+            ? 'M3 17l6-6 4 4 8-8'
+            : 'M3 12h18'
     const arrowPath = isNegative
         ? 'M15 17h6v-6'
         : tone === 'positive'
-          ? 'M15 7h6v6'
-          : ''
+            ? 'M15 7h6v6'
+            : ''
 
     return (
         <span className={`comparison-status-icon ${tone}`}>
@@ -590,20 +590,20 @@ function TrendStatusIcon({
                 aria-hidden="true"
                 viewBox="0 0 24 24"
             >
-                <path d={path} />
-                {arrowPath && <path d={arrowPath} />}
+                <path d={path}/>
+                {arrowPath && <path d={arrowPath}/>}
             </svg>
         </span>
     )
 }
 
 function StatisticsReportSelector({
-    activeReport,
-    totalRevenue,
-    bestSellerCount,
-    highestShiftName,
-    onSelectReport,
-}: {
+                                      activeReport,
+                                      totalRevenue,
+                                      bestSellerCount,
+                                      highestShiftName,
+                                      onSelectReport,
+                                  }: {
     activeReport: ReportKey
     totalRevenue?: number | null
     bestSellerCount: number
@@ -684,10 +684,10 @@ function StatisticsReportSelector({
 }
 
 function RevenueCard({
-    title,
-    amount,
-    className = '',
-}: {
+                         title,
+                         amount,
+                         className = '',
+                     }: {
     title: string
     amount?: number | null
     className?: string
@@ -696,7 +696,7 @@ function RevenueCard({
         <article className={`admin-revenue-card ${className}`.trim()}>
             <div className="admin-revenue-card-header">
                 <span>{title}</span>
-                <DollarIcon />
+                <DollarIcon/>
             </div>
 
             <strong>{formatRevenueCurrency(amount)}</strong>
@@ -705,11 +705,11 @@ function RevenueCard({
 }
 
 function RevenueDateInput({
-    id,
-    label,
-    value,
-    onChange,
-}: {
+                              id,
+                              label,
+                              value,
+                              onChange,
+                          }: {
     id: string
     label: string
     value: string
@@ -723,7 +723,7 @@ function RevenueDateInput({
             <span>{label}</span>
 
             <span className="admin-revenue-date-input-shell">
-                <CalendarIcon />
+                <CalendarIcon/>
                 <input
                     aria-label={`${label} dạng ngày/tháng/năm`}
                     id={id}
@@ -742,16 +742,16 @@ function RevenueDateInput({
 }
 
 function PresetButtonGroup({
-    activePreset,
-    selectedWeek,
-    selectedYear,
-    weekOptions,
-    yearOptions,
-    isLoading,
-    onChange,
-    onWeekChange,
-    onYearChange,
-}: {
+                               activePreset,
+                               selectedWeek,
+                               selectedYear,
+                               weekOptions,
+                               yearOptions,
+                               isLoading,
+                               onChange,
+                               onWeekChange,
+                               onYearChange,
+                           }: {
     activePreset: RangePreset
     selectedWeek: WeekOption
     selectedYear: number
@@ -857,18 +857,18 @@ function PresetButtonGroup({
 }
 
 function RevenueDashboard({
-    data,
-    fromDate,
-    toDate,
-    isLoading,
-    isCustomLoading,
-    error,
-    customRangeError,
-    onFromDateChange,
-    onToDateChange,
-    onReload,
-    onApplyCustomRange,
-}: {
+                              data,
+                              fromDate,
+                              toDate,
+                              isLoading,
+                              isCustomLoading,
+                              error,
+                              customRangeError,
+                              onFromDateChange,
+                              onToDateChange,
+                              onReload,
+                              onApplyCustomRange,
+                          }: {
     data: RevenueDashboardData
     fromDate: string
     toDate: string
@@ -983,13 +983,13 @@ function RevenueDashboard({
 }
 
 function RevenueComparisonReport({
-    range,
-    comparison,
-    isLoading,
-    error,
-    onRangeChange,
-    onCompare,
-}: {
+                                     range,
+                                     comparison,
+                                     isLoading,
+                                     error,
+                                     onRangeChange,
+                                     onCompare,
+                                 }: {
     range: RevenueComparisonRange
     comparison: RevenueComparisonResponse | null
     isLoading: boolean
@@ -1111,7 +1111,7 @@ function RevenueComparisonReport({
                     className={`revenue-comparison-result-card difference ${comparisonTone}`}
                 >
                     <div className="comparison-status-heading">
-                        <TrendStatusIcon tone={comparisonTone} />
+                        <TrendStatusIcon tone={comparisonTone}/>
                         <span className="comparison-result-label">
                             Revenue Difference
                         </span>
@@ -1126,7 +1126,7 @@ function RevenueComparisonReport({
                     className={`revenue-comparison-result-card growth ${comparisonTone}`}
                 >
                     <div className="comparison-status-heading">
-                        <TrendStatusIcon tone={comparisonTone} />
+                        <TrendStatusIcon tone={comparisonTone}/>
                         <span className="comparison-result-label">
                             Growth Rate
                         </span>
@@ -1142,18 +1142,18 @@ function RevenueComparisonReport({
 }
 
 function BestSellersReport({
-    items,
-    preset,
-    selectedWeek,
-    selectedYear,
-    weekOptions,
-    yearOptions,
-    isLoading,
-    error,
-    onPresetChange,
-    onWeekChange,
-    onYearChange,
-}: {
+                               items,
+                               preset,
+                               selectedWeek,
+                               selectedYear,
+                               weekOptions,
+                               yearOptions,
+                               isLoading,
+                               error,
+                               onPresetChange,
+                               onWeekChange,
+                               onYearChange,
+                           }: {
     items: BestSellingDishItem[]
     preset: RangePreset
     selectedWeek: WeekOption
@@ -1241,7 +1241,7 @@ function BestSellersReport({
                                                 8,
                                                 (item.totalQuantity
                                                     / maxQuantity)
-                                                    * 100,
+                                                * 100,
                                             )}%`,
                                         }}
                                     />
@@ -1263,18 +1263,18 @@ function BestSellersReport({
 }
 
 function OrderShiftDashboard({
-    report,
-    preset,
-    selectedWeek,
-    selectedYear,
-    weekOptions,
-    yearOptions,
-    isLoading,
-    error,
-    onPresetChange,
-    onWeekChange,
-    onYearChange,
-}: {
+                                 report,
+                                 preset,
+                                 selectedWeek,
+                                 selectedYear,
+                                 weekOptions,
+                                 yearOptions,
+                                 isLoading,
+                                 error,
+                                 onPresetChange,
+                                 onWeekChange,
+                                 onYearChange,
+                             }: {
     report: OrderShiftReportResponse | null
     preset: RangePreset
     selectedWeek: WeekOption
@@ -1329,7 +1329,7 @@ function OrderShiftDashboard({
             <div className="order-shift-kpi-grid">
                 <article className="order-shift-kpi-card">
                     <span className="order-shift-kpi-icon icon-green">
-                        <FileIcon />
+                        <FileIcon/>
                     </span>
                     <div>
                         <span>Tổng đơn đã thanh toán</span>
@@ -1339,7 +1339,7 @@ function OrderShiftDashboard({
 
                 <article className="order-shift-kpi-card featured">
                     <span className="order-shift-kpi-icon icon-orange">
-                        <TrophyIcon />
+                        <TrophyIcon/>
                     </span>
                     <div>
                         <span>Ca có nhiều đơn nhất</span>
@@ -1350,8 +1350,8 @@ function OrderShiftDashboard({
                         <small>
                             {formatNumber(highestShift?.orderCount ?? 0)} đơn
                             {' '}• {formatDecimal(
-                                highestShift?.percentage ?? 0,
-                            )}
+                            highestShift?.percentage ?? 0,
+                        )}
                             %
                         </small>
                     </div>
@@ -1359,7 +1359,7 @@ function OrderShiftDashboard({
 
                 <article className="order-shift-kpi-card">
                     <span className="order-shift-kpi-icon icon-green">
-                        <TrendingIcon />
+                        <TrendingIcon/>
                     </span>
                     <div>
                         <span>Trung bình mỗi ngày</span>
@@ -1391,7 +1391,7 @@ function OrderShiftDashboard({
                                 <div
                                     className={
                                         row.shiftName
-                                            === highestShift?.shiftName
+                                        === highestShift?.shiftName
                                             ? 'order-shift-table-row highlighted'
                                             : 'order-shift-table-row'
                                     }
@@ -1595,7 +1595,7 @@ export default function AdminStatisticsPage() {
             setIsComparisonLoading(true)
             setComparisonError(null)
 
-            const { data } = await adminApi.compareRevenue(
+            const {data} = await adminApi.compareRevenue(
                 apiRange.previousStartDate,
                 apiRange.previousEndDate,
                 apiRange.currentStartDate,
@@ -1626,7 +1626,7 @@ export default function AdminStatisticsPage() {
             setIsBestSellingLoading(true)
             setBestSellingError(null)
 
-            const { data } = await adminApi.getBestSellingReportBetween(
+            const {data} = await adminApi.getBestSellingReportBetween(
                 range.fromDate,
                 range.toDate,
             )
@@ -1655,7 +1655,7 @@ export default function AdminStatisticsPage() {
             setIsOrderShiftLoading(true)
             setOrderShiftError(null)
 
-            const { data } = await adminApi.getOrderShiftReportBetween(
+            const {data} = await adminApi.getOrderShiftReportBetween(
                 range.fromDate,
                 range.toDate,
             )
@@ -1766,7 +1766,7 @@ export default function AdminStatisticsPage() {
             setIsCustomLoading(true)
             setCustomRangeError(null)
 
-            const { data } = await adminApi.getCustomRevenue(
+            const {data} = await adminApi.getCustomRevenue(
                 apiFromDate,
                 apiToDate,
             )

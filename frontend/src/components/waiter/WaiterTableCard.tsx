@@ -1,4 +1,4 @@
-import type { TableDetailResponse } from "../../api/waiter";
+import type {TableDetailResponse} from "../../api/waiter";
 
 interface WaiterTableCardProps {
     table: TableDetailResponse;
@@ -7,7 +7,7 @@ interface WaiterTableCardProps {
     onClick: (table: TableDetailResponse) => void;
 }
 
-export function WaiterTableCard({ table, statusLabel, nextReservationTime, onClick }: WaiterTableCardProps) {
+export function WaiterTableCard({table, statusLabel, nextReservationTime, onClick}: WaiterTableCardProps) {
     return (
         <button
             onClick={() => onClick(table)}

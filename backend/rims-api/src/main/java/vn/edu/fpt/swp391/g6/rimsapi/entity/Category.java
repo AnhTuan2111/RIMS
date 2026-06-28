@@ -1,7 +1,10 @@
 package vn.edu.fpt.swp391.g6.rimsapi.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -35,7 +38,7 @@ public class Category
     @OneToMany(mappedBy = "category")
     private List<Dish> dishes;
 
-    @Column(nullable = false,columnDefinition = "bit default 1")
+    @Column(nullable = false, columnDefinition = "bit default 1")
     private boolean isAvailable = true;
 
     @CreatedDate

@@ -1,14 +1,18 @@
 package vn.edu.fpt.swp391.g6.rimsapi.entity;
 
-import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "reservations")
@@ -17,7 +21,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Reservation {
+public class Reservation
+{
     @Id
     @Column(name = "reservation_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

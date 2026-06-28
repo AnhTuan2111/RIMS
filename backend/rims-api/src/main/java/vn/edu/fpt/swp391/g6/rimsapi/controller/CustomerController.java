@@ -11,29 +11,34 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 
+
 @RestController
 @RequestMapping("/rims/customer")
 @RequiredArgsConstructor
-public class CustomerController {
+public class CustomerController
+{
 
     private final UserService userService;
 
     @GetMapping("/profile")
-    public UserResponse getMyProfile(@AuthenticationPrincipal UserPrincipal principal) {
+    public UserResponse getMyProfile(@AuthenticationPrincipal UserPrincipal principal)
+    {
         return userService.getAccountDetail(principal.getId());
     }
 
     @PutMapping("/profile")
     public UserResponse updateMyProfile(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody @Valid UpdateAccountRequest request) {
+            @RequestBody @Valid UpdateAccountRequest request)
+    {
         return userService.updateAccount(principal.getId(), request);
     }
 
     @PostMapping("/change-password")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody @Valid ChangePasswordRequest request) {
+            @RequestBody @Valid ChangePasswordRequest request)
+    {
         userService.changePassword(principal, request);
         return ResponseEntity.noContent().build();
     }

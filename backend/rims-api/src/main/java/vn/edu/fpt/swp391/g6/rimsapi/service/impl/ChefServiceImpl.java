@@ -2,35 +2,40 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.ChefDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.KitchenOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderItemRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishDetailResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.ChefDashboardResponse;
-import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
-public class ChefServiceImpl implements ChefService {
+public class ChefServiceImpl implements ChefService
+{
 
     private final OrderItemRepository orderItemRepository;
     private final DishRepository dishRepository;
 
     @Override
-    public List<KitchenOrderResponse> getKitchenOrders() {
+    public List<KitchenOrderResponse> getKitchenOrders()
+    {
 
         return orderItemRepository
                 //return orderItemRepository.findAll()
                 .findByStatusOrderByCreatedAtAsc(
                         OrderItemStatus.PREPARING)
                 .stream()
-                .map(item -> {
+                .map(item ->
+                {
 
                     KitchenOrderResponse response =
                             new KitchenOrderResponse();
@@ -62,14 +67,16 @@ public class ChefServiceImpl implements ChefService {
                 .toList();
     }
     @Override
-    public DishDetailResponse getDishDetail(Long orderItemId) {
+    public DishDetailResponse getDishDetail(Long orderItemId)
+    {
 
         OrderItem item = orderItemRepository
                 .findById(orderItemId)
                 .orElseThrow();
 
         // Chỉ cho xem món đang PREPARING
-        if (item.getStatus() != OrderItemStatus.PREPARING) {
+        if (item.getStatus() != OrderItemStatus.PREPARING)
+        {
             throw new RuntimeException("Dish already completed");
         }
 
@@ -98,14 +105,16 @@ public class ChefServiceImpl implements ChefService {
     }
     @Override
     public void updateDishStatus(Long orderItemId,
-                                 OrderItemStatus status) {
+                                 OrderItemStatus status)
+    {
 
         OrderItem item = orderItemRepository
                 .findById(orderItemId)
                 .orElseThrow();
 
         // Chỉ cập nhật món đang PREPARING
-        if (item.getStatus() != OrderItemStatus.PREPARING) {
+        if (item.getStatus() != OrderItemStatus.PREPARING)
+        {
             throw new RuntimeException(
                     "Dish has already been completed");
         }
@@ -115,11 +124,13 @@ public class ChefServiceImpl implements ChefService {
         orderItemRepository.save(item);
     }
     @Override
-    public List<DishListResponse> getDishList() {
+    public List<DishListResponse> getDishList()
+    {
 
         return dishRepository.findAll()
                 .stream()
-                .map(dish -> {
+                .map(dish ->
+                {
 
                     DishListResponse response =
                             new DishListResponse();
@@ -159,7 +170,8 @@ public class ChefServiceImpl implements ChefService {
         dishRepository.save(dish);
     }
     @Override
-    public ChefDashboardResponse getDashboard() {
+    public ChefDashboardResponse getDashboard()
+    {
 
         long preparingCount =
                 orderItemRepository.countByStatus(
@@ -179,7 +191,8 @@ public class ChefServiceImpl implements ChefService {
                 .build();
     }
     @Override
-    public void requestCancel(Long orderItemId, String reason) {
+    public void requestCancel(Long orderItemId, String reason)
+    {
 
         OrderItem item = orderItemRepository
                 .findById(orderItemId)
@@ -187,13 +200,15 @@ public class ChefServiceImpl implements ChefService {
                         () -> new RuntimeException("Order item not found")
                 );
 
-        if (item.getStatus() != OrderItemStatus.PREPARING) {
+        if (item.getStatus() != OrderItemStatus.PREPARING)
+        {
             throw new RuntimeException(
                     "Only preparing dishes can request cancellation"
             );
         }
 
-        if (reason == null || reason.trim().isEmpty()) {
+        if (reason == null || reason.trim().isEmpty())
+        {
             throw new RuntimeException(
                     "Cancel reason is required"
             );
@@ -212,13 +227,15 @@ public class ChefServiceImpl implements ChefService {
         orderItemRepository.save(item);
     }
     @Override
-    public List<KitchenOrderResponse> getCompletedOrders() {
+    public List<KitchenOrderResponse> getCompletedOrders()
+    {
 
         return orderItemRepository
                 .findByStatusOrderByCreatedAtAsc(
                         OrderItemStatus.COMPLETED)
                 .stream()
-                .map(item -> {
+                .map(item ->
+                {
 
                     KitchenOrderResponse response =
                             new KitchenOrderResponse();

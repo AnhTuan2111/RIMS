@@ -4,9 +4,9 @@ function Header() {
 
         <div
             style={{
-                height:"70px",
-                borderBottom:"1px solid gray",
-                padding:"20px"
+                height: "70px",
+                borderBottom: "1px solid gray",
+                padding: "20px"
             }}
         >
             Header

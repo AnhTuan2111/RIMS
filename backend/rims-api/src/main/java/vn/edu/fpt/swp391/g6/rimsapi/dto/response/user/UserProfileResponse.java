@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 
+
 @Getter
 @Builder
 @NoArgsConstructor

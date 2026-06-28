@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
 // --- 1. INTERFACES TYPES ---
@@ -41,13 +41,13 @@ export default function AdminMenuDashboardPage() {
         const fetchDashboardData = async () => {
             try {
                 const token = localStorage.getItem('accessToken');
-                const headers = { Authorization: token ? `Bearer ${token}` : '' };
+                const headers = {Authorization: token ? `Bearer ${token}` : ''};
 
                 // Gọi đồng thời cả 3 API: Dashboard, Toàn bộ Danh mục, và Toàn bộ Món ăn
                 const [menuRes, catRes, allDishesRes] = await Promise.all([
-                    axios.get('http://localhost:8080/rims/admin/menu', { signal: controller.signal, headers }),
-                    axios.get('http://localhost:8080/rims/admin/category/all', { signal: controller.signal, headers }),
-                    axios.get('http://localhost:8080/rims/admin/dish/all', { signal: controller.signal, headers })
+                    axios.get('http://localhost:8080/rims/admin/menu', {signal: controller.signal, headers}),
+                    axios.get('http://localhost:8080/rims/admin/category/all', {signal: controller.signal, headers}),
+                    axios.get('http://localhost:8080/rims/admin/dish/all', {signal: controller.signal, headers})
                 ]);
 
                 if (isMounted) {
@@ -106,52 +106,88 @@ export default function AdminMenuDashboardPage() {
     }, []);
 
     if (loading) return <div style={statusContainerStyle}>🔄 Đang tải dữ liệu hệ thống dashboard...</div>;
-    if (error) return <div style={{ ...statusContainerStyle, color: '#ef4444' }}>❌ {error}</div>;
+    if (error) return <div style={{...statusContainerStyle, color: '#ef4444'}}>❌ {error}</div>;
 
     return (
         <div style={pageContainerStyle}>
 
             {/* TIÊU ĐỀ TRANG */}
-            <div style={{ marginBottom: '28px' }}>
+            <div style={{marginBottom: '28px'}}>
                 <h2 style={pageTitleStyle}>📋 TỔNG QUAN THỰC ĐƠN</h2>
             </div>
 
             {/* KHỐI 1: 4 THẺ CHỈ SỐ THỐNG KÊ TRÊN CÙNG (Gradient Light) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '28px' }}>
-                <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', border: 'none' }}>
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '28px'}}>
+                <div style={{
+                    ...cardStyle,
+                    background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
+                    border: 'none'
+                }}>
                     <div style={statsCardInnerStyle}>
                         <div>
-                            <span style={{ color: '#4338ca', fontSize: '12px', fontWeight: '700', letterSpacing: '0.02em' }}>TỔNG SỐ MÓN</span>
+                            <span style={{
+                                color: '#4338ca',
+                                fontSize: '12px',
+                                fontWeight: '700',
+                                letterSpacing: '0.02em'
+                            }}>TỔNG SỐ MÓN</span>
                             <h2 style={statsNumberStyle}>{data?.totalDishes}</h2>
                         </div>
                         <span style={badgeIconStyle('#ffffff')}>🍴</span>
                     </div>
                 </div>
 
-                <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', border: 'none' }}>
+                <div style={{
+                    ...cardStyle,
+                    background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+                    border: 'none'
+                }}>
                     <div style={statsCardInnerStyle}>
                         <div>
-                            <span style={{ color: '#065f46', fontSize: '12px', fontWeight: '700', letterSpacing: '0.02em' }}>DANH MỤC</span>
+                            <span style={{
+                                color: '#065f46',
+                                fontSize: '12px',
+                                fontWeight: '700',
+                                letterSpacing: '0.02em'
+                            }}>DANH MỤC</span>
                             <h2 style={statsNumberStyle}>{data?.totalCategories}</h2>
                         </div>
                         <span style={badgeIconStyle('#ffffff')}>🗂️</span>
                     </div>
                 </div>
 
-                <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', border: 'none' }}>
+                <div style={{
+                    ...cardStyle,
+                    background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+                    border: 'none'
+                }}>
                     <div style={statsCardInnerStyle}>
                         <div>
-                            <span style={{ color: '#92400e', fontSize: '12px', fontWeight: '700', letterSpacing: '0.02em' }}>TẠM DỪNG BÁN</span>
+                            <span style={{
+                                color: '#92400e',
+                                fontSize: '12px',
+                                fontWeight: '700',
+                                letterSpacing: '0.02em'
+                            }}>TẠM DỪNG BÁN</span>
                             <h2 style={statsNumberStyle}>{data?.totalPausedDishes}</h2>
                         </div>
                         <span style={badgeIconStyle('#ffffff')}>⏸️</span>
                     </div>
                 </div>
 
-                <div style={{ ...cardStyle, background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', border: 'none' }}>
+                <div style={{
+                    ...cardStyle,
+                    background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
+                    border: 'none'
+                }}>
                     <div style={statsCardInnerStyle}>
                         <div>
-                            <span style={{ color: '#991b1b', fontSize: '12px', fontWeight: '700', letterSpacing: '0.02em' }}>DANH MỤC ẨN</span>
+                            <span style={{
+                                color: '#991b1b',
+                                fontSize: '12px',
+                                fontWeight: '700',
+                                letterSpacing: '0.02em'
+                            }}>DANH MỤC ẨN</span>
                             <h2 style={statsNumberStyle}>{data?.totalHiddenDishes}</h2>
                         </div>
                         <span style={badgeIconStyle('#ffffff')}>👁️‍🗨️</span>
@@ -160,20 +196,27 @@ export default function AdminMenuDashboardPage() {
             </div>
 
             {/* KHỐI 2: CHIA HAI CỘT LỚN CÓ SỬ DỤNG FLEX ĐỂ CĂN ĐỀU CHIỀU CAO HÀNG */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: '28px' }}>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: '28px'}}>
 
                 {/* CỘT TRÁI (Danh mục món ăn & Theo danh mục) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '28px'}}>
 
                     {/* HÀNG TRÊN: Danh mục món ăn */}
-                    <div style={{ ...cardStyle, flex: 1, display: 'flex', flexDirection: 'column', padding: '24px' }}>
+                    <div style={{...cardStyle, flex: 1, display: 'flex', flexDirection: 'column', padding: '24px'}}>
                         <div style={sectionHeaderStyle}>
                             <h3 style={sectionTitleStyle}>Danh mục thực đơn</h3>
-                            <span onClick={() => navigate('/admin/categories')} style={manageLinkStyle}>Quản lý danh mục &rarr;</span>
+                            <span onClick={() => navigate('/admin/categories')}
+                                  style={manageLinkStyle}>Quản lý danh mục &rarr;</span>
                         </div>
-                        <div style={{ flex: 1, overflowY: 'auto', maxHeight: '310px', paddingRight: '4px' }}>
+                        <div style={{flex: 1, overflowY: 'auto', maxHeight: '310px', paddingRight: '4px'}}>
                             {data?.categoryStats.map((cat, idx) => (
-                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: idx !== data.categoryStats.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                                <div key={idx} style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '14px 0',
+                                    borderBottom: idx !== data.categoryStats.length - 1 ? '1px solid #f1f5f9' : 'none'
+                                }}>
                                     <div>
                                         <div style={{
                                             fontWeight: '700',
@@ -182,7 +225,12 @@ export default function AdminMenuDashboardPage() {
                                             wordBreak: 'break-word',
                                             overflowWrap: 'break-word'
                                         }}>{cat.categoryName}</div>
-                                        <small style={{ color: '#64748b', fontSize: '12px', marginTop: '2px', display: 'block' }}>{cat.dishCount} món ăn liên kết</small>
+                                        <small style={{
+                                            color: '#64748b',
+                                            fontSize: '12px',
+                                            marginTop: '2px',
+                                            display: 'block'
+                                        }}>{cat.dishCount} món ăn liên kết</small>
                                     </div>
                                     <span style={statusBadgeStyle(cat.status === 'ACTIVE')}>
                                         {cat.status === 'ACTIVE' ? '● Hoạt động' : '● Đang ẩn'}
@@ -193,19 +241,27 @@ export default function AdminMenuDashboardPage() {
                     </div>
 
                     {/* HÀNG DƯỚI: Theo tỷ lệ phần trăm món ăn */}
-                    <div style={{ ...cardStyle, flex: 1, display: 'flex', flexDirection: 'column', padding: '24px' }}>
-                        <h3 style={{ ...sectionTitleStyle, marginBottom: '20px' }}>Tỷ lệ món theo danh mục</h3>
-                        <div style={{ flex: 1, overflowY: 'auto', maxHeight: '310px', paddingRight: '4px' }}>
+                    <div style={{...cardStyle, flex: 1, display: 'flex', flexDirection: 'column', padding: '24px'}}>
+                        <h3 style={{...sectionTitleStyle, marginBottom: '20px'}}>Tỷ lệ món theo danh mục</h3>
+                        <div style={{flex: 1, overflowY: 'auto', maxHeight: '310px', paddingRight: '4px'}}>
                             {data?.categoryStats.map((cat, idx) => {
                                 const percentage = data.totalDishes > 0 ? (cat.dishCount / data.totalDishes) * 100 : 0;
                                 return (
-                                    <div key={idx} style={{ marginBottom: '18px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px', fontWeight: '600', color: '#334155' }}>
+                                    <div key={idx} style={{marginBottom: '18px'}}>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            fontSize: '13px',
+                                            marginBottom: '6px',
+                                            fontWeight: '600',
+                                            color: '#334155'
+                                        }}>
                                             <span>{cat.categoryName}</span>
-                                            <span style={{ color: '#0052cc' }}>{cat.dishCount} ({percentage.toFixed(0)}%)</span>
+                                            <span
+                                                style={{color: '#0052cc'}}>{cat.dishCount} ({percentage.toFixed(0)}%)</span>
                                         </div>
                                         <div style={progressTrackStyle}>
-                                            <div style={progressBarStyle(percentage)} />
+                                            <div style={progressBarStyle(percentage)}/>
                                         </div>
                                     </div>
                                 );
@@ -215,52 +271,79 @@ export default function AdminMenuDashboardPage() {
                 </div>
 
                 {/* CỘT PHẢI (Món mới thêm & Cần chú ý) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '28px'}}>
 
                     {/* HÀNG TRÊN: Món mới thêm */}
-                    <div style={{ ...cardStyle, flex: 1.2, display: 'flex', flexDirection: 'column', padding: '24px', overflow: 'hidden' }}>
+                    <div style={{
+                        ...cardStyle,
+                        flex: 1.2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        padding: '24px',
+                        overflow: 'hidden'
+                    }}>
                         <div style={sectionHeaderStyle}>
                             <h3 style={sectionTitleStyle}>Món ăn mới cập nhật</h3>
-                            <span onClick={() => navigate('/admin/dishes')} style={manageLinkStyle}>Quản lý món &rarr;</span>
+                            <span onClick={() => navigate('/admin/dishes')}
+                                  style={manageLinkStyle}>Quản lý món &rarr;</span>
                         </div>
-                        <div style={{ flex: 1, overflowX: 'auto' }}>
+                        <div style={{flex: 1, overflowX: 'auto'}}>
                             <table style={tableStyle}>
                                 <thead>
                                 <tr style={tableHeaderRowStyle}>
-                                    <th style={{ padding: '12px 8px' }}>MÓN ĂN</th>
-                                    <th style={{ padding: '12px 8px' }}>DANH MỤC</th>
-                                    <th style={{ padding: '12px 8px' }}>GIÁ NIÊM YẾT</th>
-                                    <th style={{ padding: '12px 8px', textAlign: 'center' }}>TRẠNG THÁI</th>
+                                    <th style={{padding: '12px 8px'}}>MÓN ĂN</th>
+                                    <th style={{padding: '12px 8px'}}>DANH MỤC</th>
+                                    <th style={{padding: '12px 8px'}}>GIÁ NIÊM YẾT</th>
+                                    <th style={{padding: '12px 8px', textAlign: 'center'}}>TRẠNG THÁI</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {data?.latestDishes.map((dish) => (
                                     <tr key={dish.id} style={tableRowStyle}>
-                                        <td style={{ padding: '12px 8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <td style={{
+                                            padding: '12px 8px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px'
+                                        }}>
                                             <div style={dishImageWrapperStyle}>
                                                 {dish.imageUrl ? (
                                                     <img
                                                         src={dish.imageUrl.startsWith('http') ? dish.imageUrl : `/image/${dish.imageUrl}`} //  Sửa thành dòng này
                                                         alt={dish.name}
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        style={{width: '100%', height: '100%', objectFit: 'cover'}}
                                                         onError={(e) => {
                                                             (e.target as HTMLImageElement).onerror = null;
                                                             (e.target as HTMLImageElement).src = 'https://placehold.co/36x36?text=🍲';
                                                         }}
                                                     />
                                                 ) : (
-                                                    <span style={{ fontSize: '18px' }}>🍲</span>
+                                                    <span style={{fontSize: '18px'}}>🍲</span>
                                                 )}
                                             </div>
-                                            <span style={{ fontWeight: '700', color: '#1e293b', fontSize: '13.5px' }}>{dish.name}</span>
+                                            <span style={{
+                                                fontWeight: '700',
+                                                color: '#1e293b',
+                                                fontSize: '13.5px'
+                                            }}>{dish.name}</span>
                                         </td>
-                                        <td style={{ padding: '12px 8px', color: '#64748b', fontWeight: '500' }}>
-                                                <span style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>
+                                        <td style={{padding: '12px 8px', color: '#64748b', fontWeight: '500'}}>
+                                                <span style={{
+                                                    background: '#f1f5f9',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px',
+                                                    fontSize: '12px'
+                                                }}>
                                                     {dish.categoryName}
                                                 </span>
                                         </td>
-                                        <td style={{ padding: '12px 8px', fontWeight: '700', color: '#0052cc' }}>{dish.price.toLocaleString('vi-VN')}đ</td>
-                                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                                        <td style={{
+                                            padding: '12px 8px',
+                                            fontWeight: '700',
+                                            color: '#0052cc'
+                                        }}>{dish.price.toLocaleString('vi-VN')}đ
+                                        </td>
+                                        <td style={{padding: '12px 8px', textAlign: 'center'}}>
                                                 <span style={dishStatusBadgeStyle(dish.status === 'AVAILABLE')}>
                                                     {dish.status === 'AVAILABLE' ? 'Đang bán' : 'Tạm dừng'}
                                                 </span>
@@ -273,37 +356,43 @@ export default function AdminMenuDashboardPage() {
                     </div>
 
                     {/* HÀNG DƯỚI: Cần chú ý (Hiển thị toàn bộ món tạm dừng thực tế) */}
-                    <div style={{ ...cardStyle, flex: 0.8, display: 'flex', flexDirection: 'column', padding: '24px' }}>
-                        <h3 style={{ ...sectionTitleStyle, color: '#991b1b', marginBottom: '16px' }}>
+                    <div style={{...cardStyle, flex: 0.8, display: 'flex', flexDirection: 'column', padding: '24px'}}>
+                        <h3 style={{...sectionTitleStyle, color: '#991b1b', marginBottom: '16px'}}>
                             ⚠️ Cần chú ý (Món đang tạm dừng bán)
                         </h3>
-                        <div style={{ flex: 1, overflowY: 'auto', maxHeight: '200px', paddingRight: '4px' }}>
+                        <div style={{flex: 1, overflowY: 'auto', maxHeight: '200px', paddingRight: '4px'}}>
                             {/* Đổi từ latestDishes sang mảng toàn bộ món ẩn allPausedDishesList */}
                             {!data?.allPausedDishesList || data.allPausedDishesList.length === 0 ? (
-                                <div style={emptyWarningStyle}>🎉 Tuyệt vời! Hiện tại không có món ăn nào bị gián đoạn kinh doanh.</div>
+                                <div style={emptyWarningStyle}>🎉 Tuyệt vời! Hiện tại không có món ăn nào bị gián đoạn
+                                    kinh doanh.</div>
                             ) : (
                                 data.allPausedDishesList.map((dish) => (
                                     <div key={dish.id} style={warningItemStyle}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                            <div style={{ ...dishImageWrapperStyle, border: '1px solid #fcd5aa' }}>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                                            <div style={{...dishImageWrapperStyle, border: '1px solid #fcd5aa'}}>
                                                 {dish.imageUrl ? (
                                                     <img
                                                         // Sửa luôn logic nhận diện URL ảnh online tại đây giống trang Món Ăn
                                                         src={dish.imageUrl.startsWith('http') ? dish.imageUrl : `/image/${dish.imageUrl}`}
                                                         alt={dish.name}
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        style={{width: '100%', height: '100%', objectFit: 'cover'}}
                                                         onError={(e) => {
                                                             (e.target as HTMLImageElement).onerror = null;
                                                             (e.target as HTMLImageElement).src = 'https://placehold.co/36x36?text=🍲';
                                                         }}
                                                     />
                                                 ) : (
-                                                    <span style={{ fontSize: '18px' }}>🍲</span>
+                                                    <span style={{fontSize: '18px'}}>🍲</span>
                                                 )}
                                             </div>
                                             <div>
-                                                <strong style={{ fontSize: '14px', color: '#92400e', display: 'block' }}>{dish.name}</strong>
-                                                <small style={{ color: '#b45309', fontWeight: '500' }}>Thuộc nhóm: {dish.categoryName}</small>
+                                                <strong style={{
+                                                    fontSize: '14px',
+                                                    color: '#92400e',
+                                                    display: 'block'
+                                                }}>{dish.name}</strong>
+                                                <small style={{color: '#b45309', fontWeight: '500'}}>Thuộc
+                                                    nhóm: {dish.categoryName}</small>
                                             </div>
                                         </div>
                                         <span style={pausedLabelTagStyle}>TẠM NGƯNG</span>

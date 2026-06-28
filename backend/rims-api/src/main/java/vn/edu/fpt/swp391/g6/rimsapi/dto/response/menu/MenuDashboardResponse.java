@@ -2,12 +2,14 @@ package vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu;
 
 import lombok.Builder;
 import lombok.Data;
+
 import java.util.List;
-import java.util.Map;
+
 
 @Data
 @Builder
-public class MenuDashboardResponse {
+public class MenuDashboardResponse
+{
     // 4 thẻ chỉ số trên cùng
     private long totalDishes;
     private long totalCategories;
@@ -22,7 +24,8 @@ public class MenuDashboardResponse {
 
     @Data
     @Builder
-    public static class DishSummaryResponse {
+    public static class DishSummaryResponse
+    {
         private Integer id;
         private String name;
         private String categoryName;
@@ -33,7 +36,8 @@ public class MenuDashboardResponse {
 
     @Data
     @Builder
-    public static class CategoryStatResponse {
+    public static class CategoryStatResponse
+    {
         private String categoryName;
         private String status;
         private long dishCount;

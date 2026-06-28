@@ -8,10 +8,12 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InvoiceHistoryResponse {
+public class InvoiceHistoryResponse
+{
 
     private Long invoiceId;
 

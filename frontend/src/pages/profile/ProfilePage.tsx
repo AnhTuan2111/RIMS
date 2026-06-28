@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { useActor } from '../../context/ActorContext'
-import { RoleType } from '../../types/auth'
+import {useState} from 'react'
+import {useActor} from '../../context/ActorContext'
+import {RoleType} from '../../types/auth'
 import * as customerApi from '../../api/customer'
 import * as adminApi from '../../api/admin'
-import { getErrorMessage } from '../../utils/error'
+import {getErrorMessage} from '../../utils/error'
 
 const ROLE_LABELS: Record<string, string> = {
     ADMIN: 'Quản trị viên', CHEF: 'Đầu bếp',
@@ -11,7 +11,7 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 export default function ProfilePage() {
-    const { actor } = useActor()
+    const {actor} = useActor()
 
     // Load user from localStorage
     const stored = localStorage.getItem('currentUser')
@@ -43,7 +43,7 @@ export default function ProfilePage() {
         setUpdateLoading(true)
         setUpdateError(null)
         try {
-            const data = { fullName, email, phone }
+            const data = {fullName, email, phone}
             let updated
             if (actor === RoleType.CUSTOMER) {
                 updated = await customerApi.updateMyProfile(data)
@@ -79,8 +79,10 @@ export default function ProfilePage() {
         setPwLoading(true)
         setPwError(null)
         try {
-            await customerApi.changePassword({ currentPassword: currentPw, newPassword: newPw })
-            setCurrentPw(''); setNewPw(''); setConfirmPw('')
+            await customerApi.changePassword({currentPassword: currentPw, newPassword: newPw})
+            setCurrentPw('');
+            setNewPw('');
+            setConfirmPw('')
             setShowChangePw(false)
             setPwSuccess(true)
             setTimeout(() => setPwSuccess(false), 3000)
@@ -116,12 +118,12 @@ export default function ProfilePage() {
 
             {/* Profile Card */}
             <div style={cardStyle}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '28px' }}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '28px'}}>
                     <div style={avatarStyle}>
                         {savedUser.fullName.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                        <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 700 }}>{savedUser.fullName}</h3>
+                        <h3 style={{margin: 0, fontSize: '20px', fontWeight: 700}}>{savedUser.fullName}</h3>
                         <span style={{
                             background: '#e0e7ff', color: '#4338ca',
                             padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600
@@ -131,32 +133,39 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gap: '16px' }}>
-                    <ProfileField label="Tên đăng nhập" value={savedUser.username} readOnly />
+                <div style={{display: 'grid', gap: '16px'}}>
+                    <ProfileField label="Tên đăng nhập" value={savedUser.username} readOnly/>
 
                     {isEditing ? (
                         <>
-                            <EditField label="Họ tên *" value={fullName} onChange={setFullName} placeholder="Nguyễn Văn A" />
-                            <EditField label="Email" type="email" value={email} onChange={setEmail} placeholder="email@example.com" />
-                            <EditField label="Số điện thoại *" value={phone} onChange={setPhone} placeholder="0xxxxxxxxx" />
+                            <EditField label="Họ tên *" value={fullName} onChange={setFullName}
+                                       placeholder="Nguyễn Văn A"/>
+                            <EditField label="Email" type="email" value={email} onChange={setEmail}
+                                       placeholder="email@example.com"/>
+                            <EditField label="Số điện thoại *" value={phone} onChange={setPhone}
+                                       placeholder="0xxxxxxxxx"/>
                         </>
                     ) : (
                         <>
-                            <ProfileField label="Họ tên" value={savedUser.fullName} />
-                            <ProfileField label="Email" value={savedUser.email ?? '—'} />
-                            <ProfileField label="Số điện thoại" value={savedUser.phone} />
+                            <ProfileField label="Họ tên" value={savedUser.fullName}/>
+                            <ProfileField label="Email" value={savedUser.email ?? '—'}/>
+                            <ProfileField label="Số điện thoại" value={savedUser.phone}/>
                         </>
                     )}
                 </div>
 
-                {updateError && <div className="auth-error" style={{ marginTop: '12px' }}>{updateError}</div>}
+                {updateError && <div className="auth-error" style={{marginTop: '12px'}}>{updateError}</div>}
 
                 {isEditing && (
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '20px', justifyContent: 'flex-end' }}>
-                        <button className="secondary-button" onClick={() => { setIsEditing(false); setUpdateError(null) }}>
+                    <div style={{display: 'flex', gap: '8px', marginTop: '20px', justifyContent: 'flex-end'}}>
+                        <button className="secondary-button" onClick={() => {
+                            setIsEditing(false);
+                            setUpdateError(null)
+                        }}>
                             Hủy
                         </button>
-                        <button className="primary-button" disabled={updateLoading} onClick={() => void handleSaveProfile()}>
+                        <button className="primary-button" disabled={updateLoading}
+                                onClick={() => void handleSaveProfile()}>
                             {updateLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
                         </button>
                     </div>
@@ -165,30 +174,43 @@ export default function ProfilePage() {
 
             {/* Change Password (for customer or all) */}
             {isCustomer && (
-                <div style={{ ...cardStyle, marginTop: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showChangePw ? '20px' : 0 }}>
+                <div style={{...cardStyle, marginTop: '16px'}}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: showChangePw ? '20px' : 0
+                    }}>
                         <div>
-                            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Đổi mật khẩu</h3>
-                            <p style={{ margin: '4px 0 0', color: '#9ca3af', fontSize: '13px' }}>Cập nhật mật khẩu để bảo mật tài khoản</p>
+                            <h3 style={{margin: 0, fontSize: '16px', fontWeight: 600}}>Đổi mật khẩu</h3>
+                            <p style={{margin: '4px 0 0', color: '#9ca3af', fontSize: '13px'}}>Cập nhật mật khẩu để bảo
+                                mật tài khoản</p>
                         </div>
                         <button
                             className={showChangePw ? 'secondary-button' : 'primary-button'}
-                            onClick={() => { setShowChangePw(!showChangePw); setPwError(null) }}
+                            onClick={() => {
+                                setShowChangePw(!showChangePw);
+                                setPwError(null)
+                            }}
                         >
                             {showChangePw ? 'Hủy' : 'Đổi mật khẩu'}
                         </button>
                     </div>
 
                     {showChangePw && (
-                        <div style={{ display: 'grid', gap: '16px' }}>
-                            <EditField label="Mật khẩu hiện tại *" type="password" value={currentPw} onChange={setCurrentPw} placeholder="••••••" />
-                            <EditField label="Mật khẩu mới *" type="password" value={newPw} onChange={setNewPw} placeholder="Tối thiểu 6 ký tự" />
-                            <EditField label="Xác nhận mật khẩu mới *" type="password" value={confirmPw} onChange={setConfirmPw} placeholder="Nhập lại mật khẩu mới" />
+                        <div style={{display: 'grid', gap: '16px'}}>
+                            <EditField label="Mật khẩu hiện tại *" type="password" value={currentPw}
+                                       onChange={setCurrentPw} placeholder="••••••"/>
+                            <EditField label="Mật khẩu mới *" type="password" value={newPw} onChange={setNewPw}
+                                       placeholder="Tối thiểu 6 ký tự"/>
+                            <EditField label="Xác nhận mật khẩu mới *" type="password" value={confirmPw}
+                                       onChange={setConfirmPw} placeholder="Nhập lại mật khẩu mới"/>
 
                             {pwError && <div className="auth-error">{pwError}</div>}
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                <button className="primary-button" disabled={pwLoading} onClick={() => void handleChangePassword()}>
+                            <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                                <button className="primary-button" disabled={pwLoading}
+                                        onClick={() => void handleChangePassword()}>
                                     {pwLoading ? 'Đang xử lý...' : 'Xác nhận đổi mật khẩu'}
                                 </button>
                             </div>
@@ -200,27 +222,34 @@ export default function ProfilePage() {
     )
 }
 
-function ProfileField({ label, value, readOnly }: { label: string; value: string; readOnly?: boolean }) {
+function ProfileField({label, value, readOnly}: { label: string; value: string; readOnly?: boolean }) {
     return (
-        <div style={{ display: 'flex', padding: '12px 0', borderBottom: '1px solid #f3f4f6', gap: '16px' }}>
-            <span style={{ width: '160px', color: '#9ca3af', fontSize: '13px', flexShrink: 0 }}>{label}</span>
-            <span style={{ fontWeight: 500, fontSize: '14px', color: readOnly ? '#9ca3af' : '#111827' }}>{value}</span>
+        <div style={{display: 'flex', padding: '12px 0', borderBottom: '1px solid #f3f4f6', gap: '16px'}}>
+            <span style={{width: '160px', color: '#9ca3af', fontSize: '13px', flexShrink: 0}}>{label}</span>
+            <span style={{fontWeight: 500, fontSize: '14px', color: readOnly ? '#9ca3af' : '#111827'}}>{value}</span>
         </div>
     )
 }
 
-function EditField({ label, value, onChange, placeholder, type = 'text' }: {
+function EditField({label, value, onChange, placeholder, type = 'text'}: {
     label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string
 }) {
     return (
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+        <label style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px',
+            fontSize: '14px',
+            fontWeight: 500,
+            color: '#374151'
+        }}>
             {label}
             <input
                 type={type}
                 value={value}
                 onChange={e => onChange(e.target.value)}
                 placeholder={placeholder}
-                style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '14px' }}
+                style={{padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '14px'}}
             />
         </label>
     )

@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
-import { cashierApi } from '../../api/cashier';
-import type { TableDashboardResponse, OrderDetailResponse } from '../../types/cashier';
+import {useCallback, useEffect, useState} from 'react';
+import {cashierApi} from '../../api/cashier';
+import type {OrderDetailResponse, TableDashboardResponse} from '../../types/cashier';
 import OrderPanel from './OrderPanel';
 import PaymentModal from './PaymentModal';
 import PaymentResultManager from './PaymentResultManager';
@@ -68,7 +68,7 @@ export default function CashierPaymentsPage() {
     const handleDownloadPdf = async (invoiceId: number) => {
         try {
             const res = await cashierApi.downloadInvoicePdf(invoiceId);
-            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const blob = new Blob([res.data], {type: 'application/pdf'});
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -84,8 +84,8 @@ export default function CashierPaymentsPage() {
     };
 
     const gridLayoutLayout = selectedTable
-        ? { display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1.5rem' }
-        : { display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' };
+        ? {display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1.5rem'}
+        : {display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem'};
 
     if (isLoading) {
         return (
@@ -110,9 +110,10 @@ export default function CashierPaymentsPage() {
         <div className="dashboard-page" style={gridLayoutLayout}>
             <div className="page-card">
                 <h2>Sơ Đồ Quầy Thu Ngân</h2>
-                <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>Danh sách bàn ăn tại nhà hàng</p>
+                <p style={{color: '#64748b', marginBottom: '1.5rem'}}>Danh sách bàn ăn tại nhà hàng</p>
 
-                <div className="table-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '1rem' }}>
+                <div className="table-grid"
+                     style={{display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '1rem'}}>
                     {tables.map((table) => {
                         const isSelected = selectedTable?.tableId === table.tableId;
                         const isServing = table.status === 'SERVING';
@@ -130,11 +131,15 @@ export default function CashierPaymentsPage() {
                                     cursor: 'pointer', width: '100%', textAlign: 'left'
                                 }}
                             >
-                                <strong style={{ fontSize: '1.2rem' }}>{table.tableNumber}</strong>
-                                <span style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '8px' }}>
+                                <strong style={{fontSize: '1.2rem'}}>{table.tableNumber}</strong>
+                                <span style={{fontSize: '0.85rem', color: '#64748b', marginBottom: '8px'}}>
                                     ID Đơn: {isServing ? (table.orderId || 'Đang quét...') : 'null'}
                                 </span>
-                                <small style={{ color: isServing ? '#ea580c' : '#16a34a', marginTop: 'auto', fontWeight: 'bold' }}>
+                                <small style={{
+                                    color: isServing ? '#ea580c' : '#16a34a',
+                                    marginTop: 'auto',
+                                    fontWeight: 'bold'
+                                }}>
                                     {isServing ? '● Đang Phục Vụ' : '○ Bàn Trống'}
                                 </small>
                             </button>
@@ -148,7 +153,10 @@ export default function CashierPaymentsPage() {
                     selectedTable={selectedTable}
                     orderDetail={orderDetail}
                     loading={loadingDetails}
-                    onClose={() => { setSelectedTable(null); setOrderDetail(null); }}
+                    onClose={() => {
+                        setSelectedTable(null);
+                        setOrderDetail(null);
+                    }}
                     onCheckout={() => setShowPaymentModal(true)}
                 />
             )}

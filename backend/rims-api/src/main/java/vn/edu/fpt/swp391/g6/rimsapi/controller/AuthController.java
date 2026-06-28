@@ -16,42 +16,50 @@ import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AuthService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 
+
 @RestController
 @RequestMapping("/rims/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController
+{
 
     private final AuthService authService;
     private final UserService userService;
 
     @PostMapping("/login")
-    public AuthenticationResponse login(@Valid @RequestBody AuthenticationRequest loginRequest) {
+    public AuthenticationResponse login(@Valid @RequestBody AuthenticationRequest loginRequest)
+    {
         return authService.login(loginRequest);
     }
 
     @PostMapping("/refresh")
-    public AuthenticationResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+    public AuthenticationResponse refresh(@Valid @RequestBody RefreshTokenRequest request)
+    {
         return authService.refresh(request);
     }
 
     @GetMapping("/me")
-    public UserProfileResponse me(@AuthenticationPrincipal UserPrincipal principal) {
+    public UserProfileResponse me(@AuthenticationPrincipal UserPrincipal principal)
+    {
         return authService.getCurrentUser(principal);
     }
 
     @PostMapping("/logout")
-    public LogoutResponse logout() {
+    public LogoutResponse logout()
+    {
         return authService.logout();
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+    public ResponseEntity<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request)
+    {
         userService.sendForgotPasswordOtp(request);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestBody @Valid VerifyOtpRequest request) {
+    public ResponseEntity<Void> resetPassword(@RequestBody @Valid VerifyOtpRequest request)
+    {
         userService.verifyOtpAndResetPassword(request);
         return ResponseEntity.noContent().build();
     }

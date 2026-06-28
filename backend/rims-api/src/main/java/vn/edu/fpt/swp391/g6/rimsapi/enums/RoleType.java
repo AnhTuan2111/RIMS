@@ -6,6 +6,6 @@ public enum RoleType
     CHEF,
     WAITER,
     CASHIER,
-    CUSTOMER;
+    CUSTOMER
 
 }

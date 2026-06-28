@@ -1,13 +1,13 @@
-import {useState, useEffect, useCallback} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {waiterApi, type TableDetailResponse} from "../../api/waiter";
-import {WaiterHeader, useReservationTick, WaiterTableCard} from "../../components/waiter";
+import {type TableDetailResponse, waiterApi} from "../../api/waiter";
+import {useReservationTick, WaiterHeader, WaiterTableCard} from "../../components/waiter";
 import {
+    type EffectiveTableStatus,
     getActiveReservations,
     getEffectiveTableStatus,
     getNextReservationForTable,
     processAutoCancellations,
-    type EffectiveTableStatus,
 } from "./mockReservations";
 
 const STATUS_LABEL: Record<EffectiveTableStatus, string> = {

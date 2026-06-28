@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import {type ReactNode, useEffect, useState} from 'react'
 import {
     adminApi,
     type BestSellingDishItem,
@@ -98,7 +98,7 @@ function getPreviousWeekRange(week: WeekOption) {
         1,
         Math.round(
             (currentEndDate.getTime() - currentStartDate.getTime())
-                / 86_400_000,
+            / 86_400_000,
         ) + 1,
     )
     const previousEndDate = addDays(currentStartDate, -1)
@@ -154,14 +154,14 @@ function buildWeekOptions(year: number): WeekOption[] {
     while (
         weekStart.getFullYear() === year
         && (year < currentYear || weekStart <= today)
-    ) {
+        ) {
         const weekEnd = getSundayOfWeek(weekStart)
         const boundedEnd =
             year === currentYear && weekEnd > today
                 ? today
                 : weekEnd > endOfYear
-                  ? endOfYear
-                  : weekEnd
+                    ? endOfYear
+                    : weekEnd
 
         options.push({
             value: formatDateForApi(weekStart),
@@ -377,10 +377,10 @@ function CalendarIcon() {
             className="admin-revenue-calendar-icon"
             viewBox="0 0 24 24"
         >
-            <path d="M8 2v4" />
-            <path d="M16 2v4" />
-            <path d="M3 10h18" />
-            <path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+            <path d="M8 2v4"/>
+            <path d="M16 2v4"/>
+            <path d="M3 10h18"/>
+            <path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
         </svg>
     )
 }
@@ -391,10 +391,10 @@ function FileIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
-            <path d="M14 2v5h5" />
-            <path d="M9 13h6" />
-            <path d="M9 17h6" />
+            <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/>
+            <path d="M14 2v5h5"/>
+            <path d="M9 13h6"/>
+            <path d="M9 17h6"/>
         </svg>
     )
 }
@@ -405,11 +405,11 @@ function TrophyIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="M8 21h8" />
-            <path d="M12 17v4" />
-            <path d="M7 4h10v4a5 5 0 0 1-10 0z" />
-            <path d="M7 6H4a2 2 0 0 0 2 4h1" />
-            <path d="M17 6h3a2 2 0 0 1-2 4h-1" />
+            <path d="M8 21h8"/>
+            <path d="M12 17v4"/>
+            <path d="M7 4h10v4a5 5 0 0 1-10 0z"/>
+            <path d="M7 6H4a2 2 0 0 0 2 4h1"/>
+            <path d="M17 6h3a2 2 0 0 1-2 4h-1"/>
         </svg>
     )
 }
@@ -420,28 +420,28 @@ function TrendingIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="M3 17 9 11l4 4 7-8" />
-            <path d="M14 7h6v6" />
+            <path d="M3 17 9 11l4 4 7-8"/>
+            <path d="M14 7h6v6"/>
         </svg>
     )
 }
 
 function TrendStatusIcon({
-    tone,
-}: {
+                             tone,
+                         }: {
     tone: StatusTone
 }) {
     const isNegative = tone === 'negative'
     const path = isNegative
         ? 'M3 7l6 6 4-4 8 8'
         : tone === 'positive'
-          ? 'M3 17l6-6 4 4 8-8'
-          : 'M3 12h18'
+            ? 'M3 17l6-6 4 4 8-8'
+            : 'M3 12h18'
     const arrowPath = isNegative
         ? 'M15 17h6v-6'
         : tone === 'positive'
-          ? 'M15 7h6v6'
-          : ''
+            ? 'M15 7h6v6'
+            : ''
 
     return (
         <span className={`comparison-status-icon ${tone}`}>
@@ -449,8 +449,8 @@ function TrendStatusIcon({
                 aria-hidden="true"
                 viewBox="0 0 24 24"
             >
-                <path d={path} />
-                {arrowPath && <path d={arrowPath} />}
+                <path d={path}/>
+                {arrowPath && <path d={arrowPath}/>}
             </svg>
         </span>
     )
@@ -462,8 +462,8 @@ function MoneyIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="M12 2v20" />
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />
+            <path d="M12 2v20"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
     )
 }
@@ -474,11 +474,11 @@ function BowlIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="M4 11h16a7 7 0 0 1-14 0" />
-            <path d="M6 18h12" />
-            <path d="M8 7c0-1.5 2-1.5 2-3" />
-            <path d="M12 7c0-1.5 2-1.5 2-3" />
-            <path d="M16 7c0-1.5 2-1.5 2-3" />
+            <path d="M4 11h16a7 7 0 0 1-14 0"/>
+            <path d="M6 18h12"/>
+            <path d="M8 7c0-1.5 2-1.5 2-3"/>
+            <path d="M12 7c0-1.5 2-1.5 2-3"/>
+            <path d="M16 7c0-1.5 2-1.5 2-3"/>
         </svg>
     )
 }
@@ -489,20 +489,20 @@ function ChevronDownIcon() {
             aria-hidden="true"
             viewBox="0 0 24 24"
         >
-            <path d="m6 9 6 6 6-6" />
+            <path d="m6 9 6 6 6-6"/>
         </svg>
     )
 }
 
 function WeeklyOverviewKpiCard({
-    title,
-    value,
-    caption,
-    tone,
-    icon,
-    marker,
-    featured = false,
-}: {
+                                   title,
+                                   value,
+                                   caption,
+                                   tone,
+                                   icon,
+                                   marker,
+                                   featured = false,
+                               }: {
     title: string
     value: ReactNode
     caption?: ReactNode
@@ -539,8 +539,8 @@ function WeeklyOverviewKpiCard({
 }
 
 function WeeklyRevenueLineChart({
-    rows,
-}: {
+                                    rows,
+                                }: {
     rows: ReturnType<typeof buildWeeklyRevenueRows>
 }) {
     const width = 760
@@ -674,12 +674,12 @@ function WeeklyRevenueLineChart({
 }
 
 function WeeklyComparisonCard({
-    title,
-    value,
-    caption,
-    tone,
-    icon,
-}: {
+                                  title,
+                                  value,
+                                  caption,
+                                  tone,
+                                  icon,
+                              }: {
     title: string
     value: ReactNode
     caption?: ReactNode
@@ -699,14 +699,14 @@ function WeeklyComparisonCard({
 }
 
 function WeeklyRevenueOverviewDashboard({
-    selectedWeek,
-    weekOptions,
-    data,
-    isLoading,
-    error,
-    onWeekChange,
-    onReload,
-}: {
+                                            selectedWeek,
+                                            weekOptions,
+                                            data,
+                                            isLoading,
+                                            error,
+                                            onWeekChange,
+                                            onReload,
+                                        }: {
     selectedWeek: WeekOption
     weekOptions: WeekOption[]
     data: WeeklyRevenueOverviewData
@@ -724,8 +724,8 @@ function WeeklyRevenueOverviewDashboard({
         revenueDifference > 0
             ? 'Tăng'
             : isRevenueDown
-              ? 'Giảm'
-              : 'Không đổi'
+                ? 'Giảm'
+                : 'Không đổi'
     const differenceCaption =
         revenueDifference === 0
             ? 'Không đổi so với tuần trước'
@@ -773,7 +773,7 @@ function WeeklyRevenueOverviewDashboard({
                 </div>
 
                 <label className="weekly-overview-date-select">
-                    <CalendarIcon />
+                    <CalendarIcon/>
                     <select
                         aria-label="Chọn khoảng thời gian"
                         disabled={isLoading}
@@ -789,7 +789,7 @@ function WeeklyRevenueOverviewDashboard({
                             </option>
                         ))}
                     </select>
-                    <ChevronDownIcon />
+                    <ChevronDownIcon/>
                 </label>
             </header>
 
@@ -808,14 +808,14 @@ function WeeklyRevenueOverviewDashboard({
 
             <section className="weekly-overview-kpi-grid">
                 <WeeklyOverviewKpiCard
-                    icon={<MoneyIcon />}
+                    icon={<MoneyIcon/>}
                     marker="$"
                     title="Doanh thu tuần"
                     tone="orange"
                     value={formatRevenueCurrency(revenue)}
                 />
                 <WeeklyOverviewKpiCard
-                    icon={<FileIcon />}
+                    icon={<FileIcon/>}
                     title="Đơn đã thanh toán"
                     tone="green"
                     value={`${formatNumber(totalOrders)} đơn`}
@@ -833,7 +833,7 @@ function WeeklyRevenueOverviewDashboard({
                 />
                 <WeeklyOverviewKpiCard
                     caption={`${formatNumber(topDish?.totalQuantity ?? 0)} phần`}
-                    icon={<BowlIcon />}
+                    icon={<BowlIcon/>}
                     title="Món bán chạy nhất"
                     tone="orange"
                     value={topDish?.dishName ?? 'Chưa có dữ liệu'}
@@ -847,7 +847,7 @@ function WeeklyRevenueOverviewDashboard({
                         </>
                     }
                     featured
-                    icon={<TrophyIcon />}
+                    icon={<TrophyIcon/>}
                     title="Ca nhiều đơn nhất"
                     tone="orange"
                     value={featuredShift?.displayName ?? 'Chưa có dữ liệu'}
@@ -857,14 +857,14 @@ function WeeklyRevenueOverviewDashboard({
             <section className="weekly-overview-main-grid">
                 <article className="weekly-overview-panel weekly-revenue-chart-panel">
                     <h3>Doanh thu 7 ngày</h3>
-                    <WeeklyRevenueLineChart rows={chartRows} />
+                    <WeeklyRevenueLineChart rows={chartRows}/>
                 </article>
 
                 <article className="weekly-overview-panel weekly-comparison-panel">
                     <h3>So sánh doanh thu</h3>
                     <div className="weekly-comparison-card-grid">
                         <WeeklyComparisonCard
-                            icon={<TrendingIcon />}
+                            icon={<TrendingIcon/>}
                             title="Tuần trước"
                             tone="green"
                             value={formatRevenueCurrency(
@@ -872,7 +872,7 @@ function WeeklyRevenueOverviewDashboard({
                             )}
                         />
                         <WeeklyComparisonCard
-                            icon={<TrendingIcon />}
+                            icon={<TrendingIcon/>}
                             title="Tuần này"
                             tone="blue"
                             value={formatRevenueCurrency(revenue)}
@@ -928,7 +928,7 @@ function WeeklyRevenueOverviewDashboard({
                                                         8,
                                                         (item.totalQuantity
                                                             / maxQuantity)
-                                                            * 100,
+                                                        * 100,
                                                     )}%`,
                                                 }}
                                             />

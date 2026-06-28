@@ -15,18 +15,21 @@ import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAccessDeniedHandler;
 import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationEntryPoint;
 import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationFilter;
 
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig
+{
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
+    {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())

@@ -5,16 +5,20 @@ import org.springframework.stereotype.Service;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
+
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
-public class DashboardService {
+public class DashboardService
+{
 
     private final DishRepository dishRepository;
     private final CategoryRepository categoryRepository;
 
-    public MenuDashboardResponse getMenuDashboardData() {
+    public MenuDashboardResponse getMenuDashboardData()
+    {
         // 1. Lấy dữ liệu cho các thẻ chỉ số trên cùng
         long totalDishes = dishRepository.count();
         long totalCategories = categoryRepository.count();
@@ -36,7 +40,8 @@ public class DashboardService {
 
         // 3. Lấy dữ liệu thống kê danh mục
         var categoryStats = dishRepository.getCategoryStatistics().stream()
-                .map(result -> {
+                .map(result ->
+                {
                     // Ép kiểu phần tử thứ 2 từ Object sang Boolean (Giá trị của d.category.isAvailable)
                     Boolean isCategoryAvailable = (Boolean) result[1];
 

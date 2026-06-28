@@ -1,45 +1,13 @@
 import {Outlet, useNavigate} from 'react-router-dom'
 import {Sidebar} from '../components/common/Sidebar'
-import {ROLE_LABELS} from '../config/roleMenus'
-import {RoleType} from '../types/auth'
-import {useActor} from '../context/ActorContext'
-
-function getActorIcon(actor: RoleType) {
-    switch (actor) {
-        case RoleType.CHEF:
-            return '👨‍🍳'
-        case RoleType.WAITER:
-            return '🍽️'
-        case RoleType.CASHIER:
-            return '💳'
-        case RoleType.ADMIN:
-        default:
-            return '🛡️'
-    }
-}
-
-function getActorHomePath(actor: RoleType) {
-    switch (actor) {
-        case RoleType.CHEF:
-            return '/chef/dashboard'
-        case RoleType.WAITER:
-            return '/waiter/tables'
-        case RoleType.CASHIER:
-            return '/cashier/payments'
-        case RoleType.ADMIN:
-        default:
-            return '/dashboard'
-    }
-}
+import {logout} from '../api/auth'
 
 export default function DashboardLayout() {
-    const {actor, setActor} = useActor()
     const navigate = useNavigate()
 
-    function handleChangeActor(nextActor: RoleType) {
-        setActor(nextActor)
-        localStorage.setItem('selectedActor', nextActor)
-        navigate(getActorHomePath(nextActor))
+    function handleLogout() {
+        logout()
+        navigate('/login', {replace: true})
     }
 
     return (
@@ -63,34 +31,27 @@ export default function DashboardLayout() {
                     </div>
 
                     <div className="rims-topbar-actions">
-                        <div className="rims-current-role">
-                            <span className="rims-current-role-icon">
-                                {getActorIcon(actor)}
-                            </span>
-
-                            <div>
-                                <small>Vai trò hiện tại</small>
-                                <strong>{ROLE_LABELS[actor]}</strong>
-                            </div>
-                        </div>
-
-                        <label className="rims-actor-switcher">
-                            <span>Chuyển vai trò</span>
-
-                            <select
-                                value={actor}
-                                onChange={(event) =>
-                                    handleChangeActor(
-                                        event.target.value as RoleType,
-                                    )
-                                }
+                        <button
+                            id="btn-logout"
+                            onClick={handleLogout}
+                            className="rims-logout-btn"
+                        >
+                            <svg
+                                className="rims-logout-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
                             >
-                                <option value="ADMIN">Admin</option>
-                                <option value="CHEF">Chef</option>
-                                <option value="WAITER">Waiter</option>
-                                <option value="CASHIER">Cashier</option>
-                            </select>
-                        </label>
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16 17 21 12 16 7"/>
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            Đăng xuất
+                        </button>
                     </div>
                 </header>
 

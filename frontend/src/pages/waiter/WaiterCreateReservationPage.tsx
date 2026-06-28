@@ -1,14 +1,14 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
-import {WaiterHeader, WaiterToast, useReservationTick} from "../../components/waiter";
+import {useReservationTick, WaiterHeader, WaiterToast} from "../../components/waiter";
 import {
-    getActiveReservations,
     addReservation,
+    getActiveReservations,
+    getEffectiveTableStatus,
     hasTimeConflict,
     validateReservationForm,
-    getEffectiveTableStatus,
 } from "./mockReservations";
-import {waiterApi, type TableDetailResponse} from "../../api/waiter";
+import {type TableDetailResponse, waiterApi} from "../../api/waiter";
 
 function todayString() {
     const d = new Date();
@@ -194,7 +194,8 @@ export default function WaiterCreateReservationPage() {
                                                 <div className="waiter-res-info">
                                                     <h4>{r.customerName}</h4>
                                                     <p>{r.phone} · Bàn {tableNo}</p>
-                                                    {r.note && <p style={{fontSize: "0.85rem", color: "#64748b"}}>{r.note}</p>}
+                                                    {r.note &&
+                                                        <p style={{fontSize: "0.85rem", color: "#64748b"}}>{r.note}</p>}
                                                 </div>
                                             </div>
                                             <button
