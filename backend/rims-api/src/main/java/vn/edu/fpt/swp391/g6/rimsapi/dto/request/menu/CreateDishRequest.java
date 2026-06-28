@@ -14,6 +14,7 @@ public class CreateDishRequest
     @Length(max = 50, message = "Tên món ăn không được vượt quá 50 ký tự")
     private String name;
 
+    @Length(max = 100, message = "ko vượt quá 50 ký tự")
     private String description;
 
     @NotNull(message = "Giá không được để trống")
