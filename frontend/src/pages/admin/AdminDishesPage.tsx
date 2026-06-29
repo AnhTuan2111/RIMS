@@ -858,7 +858,7 @@ export default function AdminDishesPage() {
                                             padding: '3px 8px',
                                             borderRadius: '20px',
                                             fontWeight: '700'
-                                        }}>BÁN CHẠY</span>
+                                        }}></span>
                                         <strong style={{
                                             color: '#0f172a',
                                             fontSize: '16px',
