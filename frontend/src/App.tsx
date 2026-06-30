@@ -5,6 +5,9 @@ import {ActorProvider} from './context/ActorContext'
 import HomePage from './pages/home/HomePage'
 import LoginPage from './pages/login/LoginPage'
 import ForgotPasswordPage from './pages/login/ForgotPasswordPage'
+import RegisterPage from './pages/login/RegisterPage'
+
+
 
 import DashboardLayout from './pages/DashboardLayout'
 import {DashboardPage} from './pages/DashboardPage'
@@ -49,6 +52,7 @@ function App() {
                     {/* Auth */}
                     <Route path="/login" element={<LoginPage/>}/>
                     <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
+                    <Route path="/register" element={<RegisterPage />} />
 
                     <Route path="/payment-success" element={<PaymentSuccess/>}/>
                     <Route path="/payment-failed" element={<PaymentFailed/>}/>

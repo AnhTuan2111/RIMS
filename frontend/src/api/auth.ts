@@ -40,3 +40,15 @@ export async function forgotPassword(email: string): Promise<void> {
 export async function resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
     await apiClient.post('/auth/reset-password', { email, otp, newPassword })
 }
+
+export type RegisterRequest = {
+    username: string
+    email: string
+    phone: string
+    password: string
+    confirmPassword: string
+}
+
+export async function register(request: RegisterRequest): Promise<void> {
+    await apiClient.post('/auth/register', request)
+}
