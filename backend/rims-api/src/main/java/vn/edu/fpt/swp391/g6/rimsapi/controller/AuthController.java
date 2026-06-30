@@ -15,6 +15,9 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AuthService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
+import org.springframework.http.HttpStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateCustomerRequest;
 
 
 @RestController
@@ -62,5 +65,11 @@ public class AuthController
     {
         userService.verifyOtpAndResetPassword(request);
         return ResponseEntity.noContent().build();
+    }
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody CreateCustomerRequest request)
+    {
+        UserResponse response = userService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

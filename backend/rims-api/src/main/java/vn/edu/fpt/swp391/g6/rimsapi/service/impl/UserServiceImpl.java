@@ -12,11 +12,14 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.DuplicateResourceException;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.PasswordMismatchException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.EmailService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.OtpStore;
+
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -304,4 +307,42 @@ public class UserServiceImpl implements UserService
                 .createdAt(user.getCreatedAt())
                 .build();
     }
+
+    @Override
+    public UserResponse register(CreateCustomerRequest request)
+    {
+        if (!request.getPassword().equals(request.getConfirmPassword()))
+        {
+            throw new PasswordMismatchException("Mật khẩu xác nhận không khớp");
+        }
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent())
+        {
+            throw new DuplicateResourceException("Username đã tồn tại");
+        }
+
+        if (userRepository.existsByEmail(request.getEmail()))
+        {
+            throw new DuplicateResourceException("Email đã được sử dụng");
+        }
+
+        if (userRepository.existsByPhone(request.getPhone()))
+        {
+            throw new DuplicateResourceException("Số điện thoại đã được sử dụng");
+        }
+
+        User user = new User();
+        user.setRole(RoleType.CUSTOMER);
+        user.setUsername(request.getUsername());
+        user.setFullName(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setActive(true);
+
+        User saved = userRepository.save(user);
+
+        return convertToResponse(saved);
+    }
+
 }

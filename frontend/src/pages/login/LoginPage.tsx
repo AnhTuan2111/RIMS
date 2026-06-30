@@ -99,6 +99,12 @@ export default function LoginPage() {
                         {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                     </button>
                 </form>
+                <div style={{textAlign: 'center', marginTop: '16px', fontSize: '13px', color: '#9ca3af'}}>
+                    Chưa có tài khoản?{' '}
+                    <Link to="/register" style={{color: '#4f46e5', textDecoration: 'none', fontWeight: 600}}>
+                        Đăng ký ngay
+                    </Link>
+                </div>
 
                 <div className="login-demo">
                     <p>Tài khoản test:</p>
