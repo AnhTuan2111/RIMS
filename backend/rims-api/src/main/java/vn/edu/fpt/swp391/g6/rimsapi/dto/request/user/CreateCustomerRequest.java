@@ -20,6 +20,10 @@ public class CreateCustomerRequest {
     @Size(min = 3, max = 50, message = "Tên đăng nhập phải có từ 3-50 ký tự")
     private String username;
 
+    @NotBlank(message = "Họ tên không được để trống")
+    @Pattern(regexp = "^\\p{L}+(?: \\p{L}+)*$", message = "Họ tên không hợp lệ")
+    private String fullName;
+
     @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không đúng định dạng")
     @Pattern(
@@ -34,12 +38,4 @@ public class CreateCustomerRequest {
             message = "Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số"
     )
     private String phone;
-
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
-    private String password;
-
-    @NotBlank(message = "Xác nhận mật khẩu không được để trống")
-    @Size(min = 6, message = "Xác nhận mật khẩu phải có ít nhất 6 ký tự")
-    private String confirmPassword;
 }

@@ -41,14 +41,29 @@ export async function resetPassword(email: string, otp: string, newPassword: str
     await apiClient.post('/auth/reset-password', { email, otp, newPassword })
 }
 
-export type RegisterRequest = {
-    username: string
-    email: string
-    phone: string
-    password: string
-    confirmPassword: string
+// Định nghĩa interface cho Register request
+export interface RegisterRequest {
+    username: string;
+    fullName: string;
+    email: string;
+    phone: string;
 }
 
-export async function register(request: RegisterRequest): Promise<void> {
-    await apiClient.post('/auth/register', request)
+// Định nghĩa interface cho Register response
+export interface RegisterResponse {
+    id: number;
+    username: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    role: string;
+    isActive: boolean;
+    createdAt: string;
+}
+
+// Hàm register - SỬA: dùng apiClient và path đúng
+export async function register(data: RegisterRequest): Promise<RegisterResponse> {
+    // Vì baseURL đã là '/rims', nên path chỉ cần '/auth/register'
+    const response = await apiClient.post<RegisterResponse>('/auth/register', data);
+    return response.data;
 }
