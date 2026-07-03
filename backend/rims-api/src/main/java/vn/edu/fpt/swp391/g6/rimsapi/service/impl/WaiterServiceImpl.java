@@ -17,6 +17,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TableNotAvailableException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
@@ -285,14 +286,6 @@ public class WaiterServiceImpl implements WaiterService
         List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
         for (Order order : orders)
         {
-            BigDecimal totalBeforeVat = order.getTotalAmount() != null
-                    ? order.getTotalAmount()
-                    : order.getOrderItems().stream()
-                    .map(orderItem -> orderItem.getSubTotal() != null ? orderItem.getSubTotal() : BigDecimal.ZERO)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
-            BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
-
             orderDetailResponses.add(
                     OrderDetailResponse.builder().
                             orderId(order.getId())
@@ -312,9 +305,6 @@ public class WaiterServiceImpl implements WaiterService
                                         return response;
                                     }
                             ).toList())
-                            .totalAmountBeforeVat(totalBeforeVat)
-                            .vatAmount(vatAmount)
-                            .finalAmount(finalAmount)
                             .build()
             );
         }
@@ -329,16 +319,47 @@ public class WaiterServiceImpl implements WaiterService
 
         // tìm reservation tương ứng với số bàn và ngày, lúc này dữ liệu sẽ ra 1 list
         return reservationRepository.findByTableIdAndReservationTimeBetween(tableId, start, end)
-                .stream().map(reservation -> ReservationDetailResponse.builder()
-                        .reservationId(reservation.getId())
-                        .customerName(reservation.getCustomerName())
-                        .phone(reservation.getPhone())
-                        .note(reservation.getNote())
-                        .tableId(reservation.getTable().getId())
-                        .status(reservation.getStatus())
-                        .reservationTime(reservation.getReservationTime())
-                        .createdAt(reservation.getCreatedAt())
-                        .build()).toList();
+                .stream().map(this::toReservationResponse).toList();
     }
 
+    @Override
+    public ReservationDetailResponse viewReservationDetail(Long reservationId)
+    {
+        return reservationRepository.findById(reservationId)
+                .map(this::toReservationResponse)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find ReservationDetail for reservationId " + reservationId));
+    }
+
+    @Override
+    public ReservationDetailResponse getCurrentReservationByTable(int tableId, LocalDateTime now)
+    {
+        RestaurantTable table = restaurantTableRepository.findById(tableId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + tableId));
+
+        if (table.getStatus() != TableStatus.RESERVED)
+        {
+            throw new IllegalArgumentException("cannot get ReservationDetail for table " + tableId);
+        }
+
+        Reservation reservation = table.getReservations().stream().filter(r -> ReservationStatus.WAITING.equals(r.getStatus())).findFirst().orElse(null);
+
+        if (reservation == null)
+        {
+            throw new IllegalArgumentException("Cannot find Reservation");
+        }
+
+        return toReservationResponse(reservation);
+    }
+
+    private ReservationDetailResponse toReservationResponse(Reservation reservation)
+    {
+        return ReservationDetailResponse.builder()
+                .reservationId(reservation.getId())
+                .customerName(reservation.getCustomerName())
+                .phone(reservation.getPhone())
+                .note(reservation.getNote())
+                .tableId(reservation.getTable().getId())
+                .status(reservation.getStatus())
+                .reservationTime(reservation.getReservationTime())
+                .build();
+    }
 }

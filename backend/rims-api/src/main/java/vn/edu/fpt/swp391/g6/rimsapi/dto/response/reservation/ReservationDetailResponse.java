@@ -20,5 +20,4 @@ public class ReservationDetailResponse
     private Integer tableId;
     private ReservationStatus status;
     private LocalDateTime reservationTime;
-    private LocalDateTime createdAt;
 }
