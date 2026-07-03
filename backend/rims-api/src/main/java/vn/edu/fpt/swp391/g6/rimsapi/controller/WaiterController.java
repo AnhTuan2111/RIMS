@@ -12,10 +12,12 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.UpdateOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.ReservationDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -57,10 +59,17 @@ public class WaiterController
         return ResponseEntity.ok(waiterService.getMenu());
     }
 
-    @GetMapping("/detail/{orderId}")
-    public ResponseEntity<List<OrderDetailResponse>> getOrderDetailByTableId(@PathVariable int orderId)
+    @GetMapping("/detail/{tableId}")
+    public ResponseEntity<List<OrderDetailResponse>> getOrderDetailByTableId(@PathVariable int tableId)
     {
-        return ResponseEntity.ok(waiterService.getServingOrders(orderId));
+        return ResponseEntity.ok(waiterService.getServingOrders(tableId));
     }
+
+    @GetMapping("/reservation/{tableId}/{date}")
+    public ResponseEntity<List<ReservationDetailResponse>> getAllReservationsByTableAndDate(@PathVariable int tableId, @PathVariable LocalDate date)
+    {
+        return ResponseEntity.ok(waiterService.viewReservationsByTableAndTime(tableId, date));
+    }
+
 }
 
