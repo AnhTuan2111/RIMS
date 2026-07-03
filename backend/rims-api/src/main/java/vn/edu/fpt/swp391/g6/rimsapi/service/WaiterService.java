@@ -6,8 +6,11 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.UpdateOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.ReservationDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -21,5 +24,17 @@ public interface WaiterService
 
     List<MenuItemResponse> getMenu();
 
-    List<OrderDetailResponse> getServingOrders(int tableID);
+    List<OrderDetailResponse> getServingOrders(int tableId);
+
+    // tạo đơn đặt hàng
+    //String createReservation(CreateReservationRequest request);
+
+    // để waiter xem các đơn đặt tương ứng vói số bàn và ngày
+    List<ReservationDetailResponse> viewReservationsByTableAndTime(int tableId, LocalDate date);
+
+    // update reservation
+
+    // cancel reservation
+
+    // reload table status trước thời gian đặt bàn 30 phút
 }

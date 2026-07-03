@@ -12,19 +12,19 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.UpdateOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.ReservationDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TableNotAvailableException;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +34,7 @@ import java.util.List;
 public class WaiterServiceImpl implements WaiterService
 {
     private final RestaurantTableRepository restaurantTableRepository;
+    private final ReservationRepository reservationRepository;
     private final OrderRepository orderRepository;
     private final DishRepository dishRepository;
     private final UserRepository userRepository;
@@ -278,9 +279,9 @@ public class WaiterServiceImpl implements WaiterService
     }
 
     @Override
-    public List<OrderDetailResponse> getServingOrders(int tableID)
+    public List<OrderDetailResponse> getServingOrders(int tableId)
     {
-        List<Order> orders = orderRepository.findServingOrdersWithDetails(tableID);
+        List<Order> orders = orderRepository.findServingOrdersWithDetails(tableId);
         List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
         for (Order order : orders)
         {
@@ -319,4 +320,25 @@ public class WaiterServiceImpl implements WaiterService
         }
         return orderDetailResponses;
     }
+
+    @Override
+    public List<ReservationDetailResponse> viewReservationsByTableAndTime(int tableId, LocalDate date)
+    {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        // tìm reservation tương ứng với số bàn và ngày, lúc này dữ liệu sẽ ra 1 list
+        return reservationRepository.findByTableIdAndReservationTimeBetween(tableId, start, end)
+                .stream().map(reservation -> ReservationDetailResponse.builder()
+                        .reservationId(reservation.getId())
+                        .customerName(reservation.getCustomerName())
+                        .phone(reservation.getPhone())
+                        .note(reservation.getNote())
+                        .tableId(reservation.getTable().getId())
+                        .status(reservation.getStatus())
+                        .reservationTime(reservation.getReservationTime())
+                        .createdAt(reservation.getCreatedAt())
+                        .build()).toList();
+    }
+
 }
