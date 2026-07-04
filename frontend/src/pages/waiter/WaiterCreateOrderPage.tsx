@@ -120,7 +120,7 @@ export default function WaiterCreateOrderPage() {
                                     </button>
                                 </div>
                                 <input
-                                    placeholder="Ghi chú (ít cay, ...)"
+                                    placeholder="Ghi chú"
                                     value={d.note}
                                     onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
                                     className="waiter-note-input"

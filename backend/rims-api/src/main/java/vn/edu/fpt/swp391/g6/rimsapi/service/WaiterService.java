@@ -2,6 +2,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.service;
 
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.CreateOrderRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateOrderRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
@@ -24,16 +25,17 @@ public interface WaiterService
 
     List<MenuItemResponse> getMenu();
 
+    // view order detail
     List<OrderDetailResponse> getServingOrders(int tableId);
 
     // tạo đơn đặt hàng
-    //String createReservation(CreateReservationRequest request);
+    String createReservation(CreateReservationRequest request);
 
     // để waiter xem các đơn đặt tương ứng vói số bàn và ngày
     List<ReservationDetailResponse> viewReservationsByTableAndTime(int tableId, LocalDate date);
 
     // view reservation detail ứng với số bàn
-    ReservationDetailResponse getCurrentReservationByTable(int tableId, LocalDateTime now);
+    ReservationDetailResponse getCurrentReservationByTable(int tableId);
 
     // sử dụng để tự điền thông tin vào form Khi update reservation
     ReservationDetailResponse viewReservationDetail(Long reservationId);

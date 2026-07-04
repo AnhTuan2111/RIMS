@@ -18,6 +18,5 @@ public class UpdateOrderResponse
     private Long orderId;
     private String tableNumber;
     private String message;
-    private List<String> itemSummary;
     private BigDecimal totalAmount;
 }

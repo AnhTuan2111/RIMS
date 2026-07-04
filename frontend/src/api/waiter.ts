@@ -3,6 +3,7 @@ import {apiClient} from './client';
 // Enums
 export type TableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED';
 export type OrderItemStatus = 'PREPARING' | 'COMPLETED' | 'CANCELLED';
+export type ReservationStatus = 'QUEUED' | 'WAITING' | 'COMPLETED' | 'CANCELLED';
 
 // Responses
 export type TableDetailResponse = {
@@ -45,7 +46,6 @@ export type CreateOrderResponse = {
     orderId: number;
     tableNumber: string;
     message: string;
-    itemSummary: string;
     totalAmount: number;
 };
 
@@ -53,7 +53,6 @@ export type UpdateOrderResponse = {
     orderId: number;
     tableNumber: string;
     message: string;
-    itemSummary: string;
     totalAmount: number;
 };
 
