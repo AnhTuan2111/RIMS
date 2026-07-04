@@ -14,6 +14,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Payment;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
@@ -27,7 +28,6 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +75,9 @@ public class CashierServiceImpl implements CashierService
         Order order = orderRepository.findOrderWithDetailsById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng tương ứng"));
 
+        // 1. Lọc danh sách OrderItem chỉ lấy món đã COMPLETED
         List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
+                .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
                 .map(oi -> OrderItemResponse.builder()
                         .orderItemId(oi.getId())
                         .dishName(oi.getDish() != null ? oi.getDish().getName() : "Món ăn không xác định")
@@ -86,7 +88,12 @@ public class CashierServiceImpl implements CashierService
                         .build())
                 .toList();
 
-        BigDecimal totalBeforeVat = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+        // 2. Tính tổng tiền động dựa TRÊN CÁC MÓN COMPLETED
+        BigDecimal totalBeforeVat = itemResponses.stream()
+                .map(OrderItemResponse::getSubTotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
@@ -108,7 +115,6 @@ public class CashierServiceImpl implements CashierService
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        //Nếu đơn hàng đã bị khóa từ trước (do khách thao tác lại)
         if (order.getStatus() == OrderStatus.LOCKED)
         {
             return PaymentResponse.builder()
@@ -117,7 +123,6 @@ public class CashierServiceImpl implements CashierService
                     .build();
         }
 
-        // Nếu đơn hàng đã hoàn thành (COMPLETED) thì mới chặn lại
         if (order.getStatus() != OrderStatus.SERVING)
         {
             throw new RuntimeException("Đơn hàng này đã thanh toán xong hoặc không tồn tại!");
@@ -144,7 +149,8 @@ public class CashierServiceImpl implements CashierService
             throw new RuntimeException("Đơn hàng chưa được chốt (LOCKED) hoặc đã thanh toán xong!");
         }
 
-        BigDecimal totalBeforeVat = order.getTotalAmount();
+        // ĐÃ SỬA: Lấy tổng tiền thực tế của các món COMPLETED
+        BigDecimal totalBeforeVat = calculateActualTotal(order);
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
@@ -240,11 +246,12 @@ public class CashierServiceImpl implements CashierService
             throw new RuntimeException("Đơn hàng này đã thanh toán xong hoặc không hợp lệ!");
         }
 
-        BigDecimal totalBeforeVat = order.getTotalAmount();
+        // ĐÃ SỬA: Lấy tổng tiền thực tế của các món COMPLETED
+        BigDecimal totalBeforeVat = calculateActualTotal(order);
 
         if (totalBeforeVat == null || totalBeforeVat.compareTo(BigDecimal.ZERO) <= 0)
         {
-            throw new RuntimeException("Đơn hàng chưa có món ăn (Tổng tiền = 0đ)!");
+            throw new RuntimeException("Đơn hàng chưa có món ăn hoàn thành (Tổng tiền = 0đ)!");
         }
 
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
@@ -252,7 +259,6 @@ public class CashierServiceImpl implements CashierService
         long amountVND = finalAmount.setScale(0, RoundingMode.HALF_UP).longValue() * 100;
 
         String vnp_TxnRef = "RIMS_" + order.getId() + "_" + System.currentTimeMillis();
-
         String ipAddress = "127.0.0.1";
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -332,8 +338,8 @@ public class CashierServiceImpl implements CashierService
             throw new RuntimeException("Đơn hàng này đã được thanh toán rồi!");
         }
 
-        // Tính lại VAT vì trong DB chỉ lưu TotalBeforeVat
-        BigDecimal totalBeforeVat = order.getTotalAmount();
+        // ĐÃ SỬA: Tính lại VAT dựa trên tổng tiền thực tế của các món COMPLETED
+        BigDecimal totalBeforeVat = calculateActualTotal(order);
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
@@ -361,5 +367,15 @@ public class CashierServiceImpl implements CashierService
         }
 
         return invoice.getId();
+    }
+    
+    private BigDecimal calculateActualTotal(Order order) {
+        if (order.getOrderItems() == null) return BigDecimal.ZERO;
+
+        return order.getOrderItems().stream()
+                .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
+                .map(oi -> oi.getSubTotal())
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

@@ -1,5 +1,7 @@
 import {useCallback, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
+import SockJS from 'sockjs-client'; // THÊM IMPORT NÀY
+import Stomp from 'stompjs';        // THÊM IMPORT NÀY
 import {type TableDetailResponse, waiterApi} from "../../api/waiter";
 import {useReservationTick, WaiterHeader, WaiterTableCard} from "../../components/waiter";
 import {
@@ -27,9 +29,42 @@ export default function WaiterTableListPage() {
         waiterApi.getTables().then((res) => setTables(res.data)).catch(console.error);
     }, []);
 
+    // --- ĐÃ SỬA LẠI USEEFFECT Ở ĐÂY ---
     useEffect(() => {
+        // 1. Vẫn gọi loadTables lần đầu khi mở trang (code cũ)
         loadTables();
+
+        // 2. Bật ăng-ten lắng nghe Đầu bếp (Code mới)
+        const socket = new SockJS('http://localhost:8080/ws-rims');
+        const client = Stomp.over(socket);
+
+        client.connect({}, () => {
+            console.log("Waiter đã kết nối đường dây với Bếp!");
+
+            client.subscribe('/topic/waiter', (message) => {
+                if (message.body === 'DISH_READY') {
+                    // Khi nhận được tín hiệu món xong, tự động gọi lại hàm loadTables
+                    console.log("🔔 Có món đã nấu xong! Đang cập nhật lại bàn...");
+                    // Nếu ông muốn hiện pop-up thông báo cho Bồi bàn chạy đi lấy món thì mở comment dòng dưới:
+                    // alert("Có món đã nấu xong, vui lòng mang ra cho khách!");
+                    loadTables();
+                }
+            });
+        }, (error) => {
+            console.error("Lỗi mất kết nối với Bếp: ", error);
+        });
+
+        // 3. Tắt ăng-ten khi bồi bàn thoát màn hình này
+        return () => {
+            // Phải kiểm tra xem nó đã kết nối xong chưa rồi mới được rút phích cắm
+            if (client !== null && client.connected) {
+                client.disconnect(() => {
+                    console.log("Đã ngắt kết nối an toàn.");
+                });
+            }
+        };
     }, [loadTables]);
+    // -----------------------------------
 
     function handleTableClick(table: TableDetailResponse) {
         const status = getEffectiveTableStatus(table.status, table.tableId);

@@ -47,6 +47,7 @@ public class SecurityConfig
                                 "/rims/auth/forgot-password",
                                 "/rims/auth/reset-password"
                         ).permitAll()
+                        .requestMatchers("/ws-rims/**").permitAll()
                         .requestMatchers("/rims/admin/**").hasRole("ADMIN")
                         .requestMatchers("/rims/chef/**").hasRole("CHEF")
                         .requestMatchers("/rims/waiter/**").hasRole("WAITER")
