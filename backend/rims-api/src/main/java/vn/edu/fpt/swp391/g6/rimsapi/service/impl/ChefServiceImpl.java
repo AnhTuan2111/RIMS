@@ -12,6 +12,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderItemRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +25,7 @@ public class ChefServiceImpl implements ChefService
 
     private final OrderItemRepository orderItemRepository;
     private final DishRepository dishRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public List<KitchenOrderResponse> getKitchenOrders()
@@ -122,6 +124,7 @@ public class ChefServiceImpl implements ChefService
         item.setStatus(status);
 
         orderItemRepository.save(item);
+        messagingTemplate.convertAndSend("/topic/waiter", "DISH_READY");
     }
     @Override
     public List<DishListResponse> getDishList()

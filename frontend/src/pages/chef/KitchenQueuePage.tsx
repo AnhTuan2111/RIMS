@@ -1,4 +1,6 @@
 import {useEffect, useMemo, useState} from 'react'
+import SockJS from 'sockjs-client'
+import Stomp from 'stompjs'
 import {
     type DishDetailResponse,
     getDishDetail,
@@ -61,6 +63,7 @@ export default function KitchenQueuePage() {
     useEffect(() => {
         let isCancelled = false
 
+        // 1. Tải dữ liệu ban đầu
         getKitchenOrders()
             .then((data) => {
                 if (!isCancelled) {
@@ -70,7 +73,6 @@ export default function KitchenQueuePage() {
             })
             .catch((requestError) => {
                 console.error(requestError)
-
                 if (!isCancelled) {
                     setError(
                         'Không thể tải danh sách món cần chế biến. Hãy kiểm tra backend hoặc đăng nhập bằng tài khoản Chef.',
@@ -83,8 +85,27 @@ export default function KitchenQueuePage() {
                 }
             })
 
+        // 2. Thiết lập WebSocket để tự động làm mới
+        const socket = new SockJS('http://localhost:8080/ws-rims')
+        const client = Stomp.over(socket)
+
+        client.connect({}, () => {
+            client.subscribe('/topic/kitchen', (message) => {
+                if (message.body === 'REFRESH') {
+                    // Gọi lại hàm load để cập nhật danh sách món
+                    void loadKitchenOrders()
+                }
+            })
+        })
+
+        // 3. Dọn dẹp an toàn khi thoát trang (ĐÃ FIX LỖI)
         return () => {
-            isCancelled = true
+            isCancelled = true;
+            if (client !== null && client.connected) {
+                client.disconnect(() => {
+                    console.log("Bếp đã ngắt kết nối an toàn.");
+                });
+            }
         }
     }, [])
 
