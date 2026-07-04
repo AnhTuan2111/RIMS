@@ -71,5 +71,10 @@ public class WaiterController
         return ResponseEntity.ok(waiterService.viewReservationsByTableAndTime(tableId, date));
     }
 
+    @GetMapping("/reservation/detail/{tableId}")
+    public ResponseEntity<ReservationDetailResponse> getReservationByTable(@PathVariable int tableId)
+    {
+        return ResponseEntity.ok(waiterService.getCurrentReservationByTable(tableId));
+    }
 }
 

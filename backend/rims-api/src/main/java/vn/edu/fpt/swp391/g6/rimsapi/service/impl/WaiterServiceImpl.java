@@ -7,6 +7,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.CreateOrderRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.OrderItemRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateOrderItemRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateOrderRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
@@ -86,7 +87,6 @@ public class WaiterServiceImpl implements WaiterService
 
         // 4. Build OrderItems + accumulate total
         BigDecimal total = BigDecimal.ZERO;
-        List<String> itemSummary = new ArrayList<>();
 
         for (OrderItemRequest itemReq : request.getItems())
         {
@@ -106,7 +106,6 @@ public class WaiterServiceImpl implements WaiterService
             orderItem.setStatus(OrderItemStatus.PREPARING);
 
             order.addOrderItem(orderItem); // sets back-reference on OrderItem
-            itemSummary.add(itemReq.getQuantity() + " x " + dish.getName());
         }
 
         order.setTotalAmount(total);
@@ -123,7 +122,6 @@ public class WaiterServiceImpl implements WaiterService
                 .orderId(order.getId())
                 .tableNumber(table.getTableNumber())
                 .message("Tạo đơn thành công cho bàn " + table.getTableNumber())
-                .itemSummary(itemSummary)
                 .totalAmount(total)
                 .build();
     }
@@ -233,11 +231,9 @@ public class WaiterServiceImpl implements WaiterService
         }
 
         BigDecimal total = BigDecimal.ZERO;
-        List<String> itemSummary = new ArrayList<>();
         for (OrderItem item : order.getOrderItems())
         {
             total = total.add(item.getSubTotal());
-            itemSummary.add(item.getQuantity() + " x " + item.getDish().getName());
         }
         order.setTotalAmount(total);
 
@@ -247,7 +243,6 @@ public class WaiterServiceImpl implements WaiterService
                 .orderId(order.getId())
                 .tableNumber(order.getTable().getTableNumber())
                 .message("Cập nhật đơn hàng thành công cho bàn " + order.getTable().getTableNumber())
-                .itemSummary(itemSummary)
                 .totalAmount(total)
                 .build();
     }
@@ -310,6 +305,11 @@ public class WaiterServiceImpl implements WaiterService
         }
         return orderDetailResponses;
     }
+    @Override
+    public String createReservation(CreateReservationRequest request)
+    {
+        return "";
+    }
 
     @Override
     public List<ReservationDetailResponse> viewReservationsByTableAndTime(int tableId, LocalDate date)
@@ -331,7 +331,7 @@ public class WaiterServiceImpl implements WaiterService
     }
 
     @Override
-    public ReservationDetailResponse getCurrentReservationByTable(int tableId, LocalDateTime now)
+    public ReservationDetailResponse getCurrentReservationByTable(int tableId)
     {
         RestaurantTable table = restaurantTableRepository.findById(tableId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + tableId));
 
