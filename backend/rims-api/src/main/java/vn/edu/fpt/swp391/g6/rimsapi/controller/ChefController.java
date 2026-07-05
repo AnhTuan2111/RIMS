@@ -1,14 +1,19 @@
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CancelDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishStatusRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateMenuStatusRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.CompleteGroupedOrdersRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateChefInternalNoteRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.ChefDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.KitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CancelledOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.GroupedKitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
 
 import java.util.List;
@@ -65,10 +70,53 @@ public class ChefController
     {
         return chefService.getCompletedOrders();
     }
-    @PostMapping("/orders/{id}/cancel-request")
-    public String requestCancelDish(@PathVariable Long id, @RequestBody CancelDishRequest request)
+    @PutMapping("/orders/{id}/cancel")
+    public String cancelDish(
+            @PathVariable Long id,
+            @Valid
+            @RequestBody
+            CancelDishRequest request
+    ) {
+        chefService.requestCancel(
+                id,
+                request.getReason()
+        );
+
+        return "Dish cancelled successfully";
+    }
+    @PutMapping("/orders/{orderItemId}/internal-note")
+    public DishDetailResponse updateChefInternalNote(
+            @PathVariable Long orderItemId,
+            @Valid
+            @RequestBody
+            UpdateChefInternalNoteRequest request
+    ) {
+        return chefService.updateChefInternalNote(
+                orderItemId,
+                request.getNote()
+        );
+    }
+    @GetMapping("/orders/grouped")
+    public List<GroupedKitchenOrderResponse>
+    getGroupedKitchenOrders()
     {
-        chefService.requestCancel(id, request.getReason());
-        return "Cancel request sent successfully";
+        return chefService.getGroupedKitchenOrders();
+    }
+    @PutMapping("/orders/grouped/complete")
+    public String completeGroupedKitchenOrders(
+            @Valid
+            @RequestBody
+            CompleteGroupedOrdersRequest request
+    )
+    {
+        chefService.completeGroupedKitchenOrders(
+                request.getOrderItemIds()
+        );
+
+        return "Grouped kitchen orders completed successfully";
+    }
+    @GetMapping("/orders/cancelled")
+    public List<CancelledOrderResponse> getCancelledOrders() {
+        return chefService.getCancelledOrders();
     }
 }

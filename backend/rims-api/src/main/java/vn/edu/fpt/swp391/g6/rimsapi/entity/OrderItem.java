@@ -55,9 +55,25 @@ public class OrderItem
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(length = 500)
+    @Column(
+            name = "cancel_reason",
+            columnDefinition = "NVARCHAR(500)"
+    )
     private String cancelReason;
 
+
     private LocalDateTime cancelRequestedAt;
+    @Nationalized
+    @Column(
+            name = "chef_internal_note",
+            length = 500,
+            columnDefinition = "NVARCHAR(500)"
+    )
+    private String chefInternalNote;
+
+    @Column(name = "chef_internal_note_created_at")
+    private LocalDateTime chefInternalNoteCreatedAt;
+
+    @Column(name = "chef_internal_note_acknowledged_at")
+    private LocalDateTime chefInternalNoteAcknowledgedAt;
 }
