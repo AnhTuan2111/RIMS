@@ -4,6 +4,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.ChefDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.kitchen.KitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishListResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CancelledOrderResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.GroupedKitchenOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 
 import java.util.List;
@@ -29,4 +31,15 @@ public interface ChefService
     void requestCancel(Long orderItemId, String reason);
 
     List<KitchenOrderResponse> getCompletedOrders();
+    DishDetailResponse updateChefInternalNote(
+            Long orderItemId,
+            String note
+    );
+    List<GroupedKitchenOrderResponse> getGroupedKitchenOrders();
+
+    void completeGroupedKitchenOrders(
+            List<Long> orderItemIds
+    );
+    List<CancelledOrderResponse> getCancelledOrders();
+
 }

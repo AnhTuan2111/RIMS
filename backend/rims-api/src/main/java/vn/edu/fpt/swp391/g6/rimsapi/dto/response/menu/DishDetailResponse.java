@@ -31,4 +31,9 @@ public class DishDetailResponse
     // Trạng thái món
     private OrderItemStatus status;
     private LocalDateTime createdAt;
+    private String chefInternalNote;
+
+    private LocalDateTime chefInternalNoteCreatedAt;
+
+    private LocalDateTime chefInternalNoteAcknowledgedAt;
 }

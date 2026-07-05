@@ -1133,3 +1133,931 @@ s
         border-radius: 16px;
     }
 }
+/* BƯỚC 10 — CSS CHO GHI CHÚ NỘI BỘ CHEF */
+
+/* Khung ghi chú nội bộ */
+.chef-internal-note-box {
+    margin-top: 16px;
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    background: #eff6ff;
+}
+
+/* Phần tiêu đề và trạng thái */
+.chef-internal-note-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.chef-internal-note-heading h3 {
+    margin: 0 0 6px;
+    color: #1e3a8a;
+    font-size: 16px;
+}
+
+.chef-internal-note-heading p {
+    margin: 0;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Badge chờ xem / đã xem */
+.internal-note-status {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.internal-note-status.waiting {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.internal-note-status.acknowledged {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+/* Các nút ghi chú nhanh */
+.internal-note-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.internal-note-quick-actions button {
+    padding: 7px 10px;
+    border: 1px solid #93c5fd;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease;
+}
+
+.internal-note-quick-actions button:hover {
+    border-color: #3b82f6;
+    background: #dbeafe;
+}
+
+/* Ô nhập ghi chú */
+.chef-internal-note-box textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    resize: vertical;
+    border: 1px solid #93c5fd;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #0f172a;
+    font: inherit;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
+.chef-internal-note-box textarea:focus {
+    outline: 2px solid #60a5fa;
+    outline-offset: 1px;
+    border-color: #3b82f6;
+}
+
+/* Hàng đếm ký tự và nút gửi */
+.internal-note-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.internal-note-bottom-row > span {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.internal-note-save-button {
+    min-width: 145px;
+}
+
+/* Responsive */
+@media (max-width: 620px) {
+    .chef-internal-note-heading {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .internal-note-status {
+        width: fit-content;
+    }
+
+    .internal-note-bottom-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .internal-note-save-button {
+        width: 100%;
+    }
+}
+/* CSS cho trang Gom món để nấu */
+
+.grouped-kitchen-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.grouped-kitchen-card {
+    padding: 19px;
+    display: grid;
+    gap: 14px;
+    border: 1px solid var(--chef-danger, #e5eaf2);
+    border-left: 4px solid #2563eb;
+    border-radius: 17px;
+    background: #ffffff;
+    box-shadow: var(
+            --rims-shadow-sm,
+            0 8px 24px rgba(15, 23, 42, 0.055)
+    );
+}
+
+.grouped-kitchen-card.has-note {
+    border-left-color: #dc2626;
+}
+
+.grouped-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.grouped-card-head h3 {
+    margin: 6px 0 0;
+    color: #0f172a;
+    font-size: 1.2rem;
+    font-weight: 850;
+}
+
+.grouped-card-head p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.group-type {
+    display: inline-flex;
+    min-height: 25px;
+    padding: 0 9px;
+    align-items: center;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+}
+
+.group-type.batch {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.group-type.note {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.group-total {
+    min-width: 72px;
+    padding: 10px 12px;
+    border-radius: 13px;
+    background: #f8fafc;
+    text-align: center;
+}
+
+.group-total small,
+.group-total strong {
+    display: block;
+}
+
+.group-total small {
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 850;
+}
+
+.group-total strong {
+    margin-top: 4px;
+    color: #2563eb;
+    font-size: 1.45rem;
+}
+
+.waiting-badge {
+    width: fit-content;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 850;
+}
+
+.waiting-badge.normal {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.waiting-badge.warning {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.waiting-badge.danger {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.group-note {
+    padding: 11px 13px;
+    border: 1px solid #fecaca;
+    border-radius: 11px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.group-item-list {
+    display: grid;
+    gap: 7px;
+}
+
+.group-item-row {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid #e5eaf2;
+    border-radius: 11px;
+    background: #f8fafc;
+}
+
+.group-item-row.highlighted {
+    border-color: #60a5fa;
+    background: #eff6ff;
+}
+
+.group-item-row span,
+.group-item-row strong,
+.group-item-row small {
+    display: block;
+}
+
+.group-item-row small {
+    margin-top: 3px;
+    color: #7c8aa0;
+    font-size: 10px;
+}
+
+.group-item-row b {
+    color: #2563eb;
+}
+
+.group-card-footer {
+    padding-top: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid #e5eaf2;
+}
+
+.group-detail-link {
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+@media (max-width: 920px) {
+    .grouped-kitchen-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .grouped-card-head,
+    .group-card-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .group-total {
+        width: fit-content;
+    }
+
+    .group-card-footer .primary-button {
+        width: 100%;
+    }
+}
+/* =========================================================
+   CHEF DASHBOARD — MODERN DESIGN
+   ========================================================= */
+
+/* Khung Dashboard */
+.chef-page:has(.chef-dashboard-stat-grid) {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    animation: chef-dashboard-enter 280ms ease-out;
+}
+
+/* Card lớn bao quanh Dashboard */
+.chef-page > .page-card:has(.chef-dashboard-stat-grid) {
+    position: relative;
+    padding: 28px;
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 26px;
+
+    background:
+            radial-gradient(
+                    circle at 92% 5%,
+                    rgba(37, 99, 235, 0.13),
+                    transparent 22rem
+            ),
+            radial-gradient(
+                    circle at 8% 95%,
+                    rgba(124, 58, 237, 0.08),
+                    transparent 20rem
+            ),
+            linear-gradient(
+                    145deg,
+                    #ffffff 0%,
+                    #f8fbff 55%,
+                    #f8f7ff 100%
+            );
+
+    box-shadow:
+            0 1px 2px rgba(15, 23, 42, 0.03),
+            0 18px 48px rgba(15, 23, 42, 0.08);
+}
+
+/* Hình tròn trang trí */
+.chef-page > .page-card:has(.chef-dashboard-stat-grid)::before {
+    content: "";
+    position: absolute;
+    top: -85px;
+    right: -65px;
+
+    width: 220px;
+    height: 220px;
+
+    border: 34px solid rgba(37, 99, 235, 0.055);
+    border-radius: 999px;
+
+    pointer-events: none;
+}
+
+.chef-page > .page-card:has(.chef-dashboard-stat-grid)::after {
+    content: "";
+    position: absolute;
+    bottom: -110px;
+    left: -90px;
+
+    width: 220px;
+    height: 220px;
+
+    border-radius: 999px;
+    background: rgba(124, 58, 237, 0.04);
+
+    pointer-events: none;
+}
+
+/* Phần tiêu đề */
+.chef-page
+> .page-card:has(.chef-dashboard-stat-grid)
+> .page-header {
+    position: relative;
+    z-index: 1;
+
+    margin-bottom: 26px;
+    padding: 4px 2px 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    border-bottom: 1px solid rgba(203, 213, 225, 0.7);
+}
+
+.chef-page
+> .page-card:has(.chef-dashboard-stat-grid)
+> .page-header h2 {
+    margin: 0;
+
+    color: #0f172a;
+    font-size: clamp(1.7rem, 2.7vw, 2.3rem);
+    font-weight: 900;
+    letter-spacing: -0.055em;
+}
+
+.chef-page
+> .page-card:has(.chef-dashboard-stat-grid)
+> .page-header p {
+    max-width: 600px;
+    margin: 8px 0 0;
+
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Nút làm mới */
+.chef-page
+> .page-card:has(.chef-dashboard-stat-grid)
+.secondary-button {
+    min-height: 44px;
+    padding: 0 18px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 13px;
+
+    background: rgba(255, 255, 255, 0.85);
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    box-shadow:
+            0 2px 4px rgba(15, 23, 42, 0.035),
+            0 8px 20px rgba(15, 23, 42, 0.045);
+
+    transition:
+            transform 160ms ease,
+            border-color 160ms ease,
+            background 160ms ease,
+            box-shadow 160ms ease;
+}
+
+.chef-page
+> .page-card:has(.chef-dashboard-stat-grid)
+.secondary-button:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #2563eb;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+            0 4px 8px rgba(37, 99, 235, 0.08),
+            0 12px 28px rgba(37, 99, 235, 0.1);
+}
+
+/* Lưới thống kê */
+.chef-dashboard-stat-grid {
+    position: relative;
+    z-index: 1;
+
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+/* Card thống kê */
+.chef-dashboard-stat-grid .dashboard-stat-link {
+    position: relative;
+
+    min-height: 205px;
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 22px;
+
+    background: #ffffff;
+    color: #0f172a;
+    text-decoration: none;
+
+    box-shadow:
+            0 2px 4px rgba(15, 23, 42, 0.025),
+            0 12px 30px rgba(15, 23, 42, 0.055);
+
+    transition:
+            transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+            border-color 180ms ease,
+            box-shadow 180ms ease;
+}
+
+/* Thanh màu phía trên */
+.chef-dashboard-stat-grid .dashboard-stat-link::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 5px;
+
+    background: currentColor;
+}
+
+/* Hình tròn trang trí */
+.chef-dashboard-stat-grid .dashboard-stat-link::after {
+    content: "";
+    position: absolute;
+    top: -45px;
+    right: -35px;
+
+    width: 145px;
+    height: 145px;
+
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.075;
+
+    transition:
+            transform 220ms ease,
+            opacity 220ms ease;
+}
+
+/* Hover */
+.chef-dashboard-stat-grid .dashboard-stat-link:hover {
+    transform: translateY(-7px);
+
+    border-color: rgba(37, 99, 235, 0.22);
+
+    box-shadow:
+            0 8px 18px rgba(15, 23, 42, 0.07),
+            0 24px 50px rgba(15, 23, 42, 0.11);
+}
+
+.chef-dashboard-stat-grid
+.dashboard-stat-link:hover::after {
+    transform: scale(1.12);
+    opacity: 0.11;
+}
+
+.chef-dashboard-stat-grid
+.dashboard-stat-link:focus-visible {
+    outline: none;
+
+    box-shadow:
+            0 0 0 4px rgba(37, 99, 235, 0.14),
+            0 24px 50px rgba(15, 23, 42, 0.11);
+}
+
+/* Số lượng */
+.chef-dashboard-stat-grid .dashboard-stat-link strong {
+    position: relative;
+    z-index: 1;
+
+    display: block;
+
+    color: #0f172a;
+    font-size: clamp(2.6rem, 4.3vw, 3.5rem);
+    font-weight: 950;
+    letter-spacing: -0.085em;
+    line-height: 0.95;
+}
+
+/* Tên trạng thái */
+.chef-dashboard-stat-grid .dashboard-stat-link span {
+    position: relative;
+    z-index: 1;
+
+    margin-top: 15px;
+
+    color: #334155;
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: 0.025em;
+}
+
+/* Link bên dưới */
+.chef-dashboard-stat-grid .dashboard-stat-link small {
+    position: relative;
+    z-index: 1;
+
+    margin-top: 10px;
+
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+
+    transition:
+            color 160ms ease,
+            transform 160ms ease;
+}
+
+.chef-dashboard-stat-grid
+.dashboard-stat-link:hover small {
+    color: currentColor;
+    transform: translateX(3px);
+}
+
+/* Món đang chuẩn bị */
+.chef-dashboard-stat-grid
+.dashboard-stat-link:nth-child(1) {
+    color: #d97706;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #ffffff 0%,
+                    #fffbeb 100%
+            );
+}
+
+/* Món hoàn thành */
+.chef-dashboard-stat-grid
+.dashboard-stat-link:nth-child(2) {
+    color: #16a34a;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #ffffff 0%,
+                    #f0fdf4 100%
+            );
+}
+
+/* Món đã hủy */
+.chef-dashboard-stat-grid
+.dashboard-stat-link:nth-child(3) {
+    color: #dc2626;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #ffffff 0%,
+                    #fef2f2 100%
+            );
+}
+
+/* Món đang tạm hết */
+.chef-dashboard-stat-grid
+.dashboard-stat-link:nth-child(4) {
+    color: #7c3aed;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #ffffff 0%,
+                    #f5f3ff 100%
+            );
+}
+
+/* Animation khi mở Dashboard */
+@keyframes chef-dashboard-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tablet */
+@media (max-width: 1150px) {
+    .chef-dashboard-stat-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Mobile */
+@media (max-width: 650px) {
+    .chef-page > .page-card:has(.chef-dashboard-stat-grid) {
+        padding: 18px;
+        border-radius: 20px;
+    }
+
+    .chef-page
+    > .page-card:has(.chef-dashboard-stat-grid)
+    > .page-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .chef-page
+    > .page-card:has(.chef-dashboard-stat-grid)
+    .secondary-button {
+        width: 100%;
+    }
+
+    .chef-dashboard-stat-grid {
+        grid-template-columns: 1fr;
+        gap: 13px;
+    }
+
+    .chef-dashboard-stat-grid .dashboard-stat-link {
+        min-height: 165px;
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .chef-dashboard-stat-grid
+    .dashboard-stat-link strong {
+        font-size: 2.8rem;
+    }
+}
+.dish-name-cell {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.dish-name-cell strong {
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.4;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* =========================================================
+   NEW KITCHEN ORDER SOUND
+   ========================================================= */
+
+.sound-toggle-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    white-space: nowrap;
+}
+
+.sound-toggle-button.enabled {
+    border-color: #86efac;
+    background: #f0fdf4;
+    color: #15803d;
+
+    box-shadow:
+            0 0 0 3px rgba(34, 197, 94, 0.08);
+}
+
+.sound-toggle-button.enabled:hover {
+    border-color: #4ade80;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.sound-toggle-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.new-order-notification {
+    position: relative;
+
+    padding: 16px 18px;
+
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    overflow: hidden;
+
+    border: 1px solid #93c5fd;
+    border-radius: 16px;
+
+    background:
+            linear-gradient(
+                    135deg,
+                    #eff6ff,
+                    #ffffff
+            );
+
+    color: #1e3a8a;
+
+    box-shadow:
+            0 10px 28px rgba(37, 99, 235, 0.12);
+
+    animation:
+            new-order-notification-in
+            220ms ease-out;
+}
+
+.new-order-notification::before {
+    content: "";
+
+    position: absolute;
+    inset: 0 auto 0 0;
+
+    width: 5px;
+
+    background:
+            linear-gradient(
+                    180deg,
+                    #2563eb,
+                    #60a5fa
+            );
+}
+
+.new-order-notification-icon {
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    border-radius: 13px;
+
+    background: #dbeafe;
+
+    font-size: 22px;
+
+    animation:
+            new-order-bell-ring
+            700ms ease-in-out;
+}
+
+.new-order-notification strong {
+    display: block;
+
+    color: #1e3a8a;
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.new-order-notification p {
+    margin: 4px 0 0;
+
+    color: #475569;
+    font-size: 12px;
+}
+
+@keyframes new-order-notification-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes new-order-bell-ring {
+    0%,
+    100% {
+        transform: rotate(0);
+    }
+
+    20% {
+        transform: rotate(-14deg);
+    }
+
+    40% {
+        transform: rotate(14deg);
+    }
+
+    60% {
+        transform: rotate(-9deg);
+    }
+
+    80% {
+        transform: rotate(9deg);
+    }
+}
+
+@media (max-width: 720px) {
+    .sound-toggle-button {
+        width: 100%;
+    }
+
+    .new-order-notification {
+        align-items: flex-start;
+    }
+}
