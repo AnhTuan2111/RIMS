@@ -16,6 +16,14 @@ export interface AdminPaymentHistoryItem {
     paymentDate: string
 }
 
+export interface AdminPaymentHistoryPage {
+    items: AdminPaymentHistoryItem[]
+    page: number
+    pageSize: number
+    totalItems: number
+    totalPages: number
+}
+
 export interface AdminPaymentDetailItem {
     dishName: string
     quantity: number
@@ -154,9 +162,18 @@ export interface OrderShiftReportResponse {
 }
 
 export const adminApi = {
-    getPaymentHistory: () =>
-        apiClient.get<AdminPaymentHistoryItem[]>(
+    getPaymentHistory: (
+        page = 1,
+        pageSize = 10,
+    ) =>
+        apiClient.get<AdminPaymentHistoryPage>(
             '/admin/invoice/history',
+            {
+                params: {
+                    page,
+                    pageSize,
+                },
+            },
         ),
 
     getPaymentDetail: (invoiceId: number) =>
