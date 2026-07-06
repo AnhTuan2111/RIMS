@@ -2,7 +2,6 @@ import {useEffect, useMemo, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {type MenuItemResponse, type OrderItemRequest, waiterApi} from "../../api/waiter";
 import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
-import {fulfillReservationForTable} from "./mockReservations";
 
 export default function WaiterCreateOrderPage() {
     const navigate = useNavigate();
@@ -55,10 +54,9 @@ export default function WaiterCreateOrderPage() {
         setSubmitting(true);
         try {
             const res = await waiterApi.createOrder({tableId: tid, items});
-            fulfillReservationForTable(tid);
             setSuccessData({
                 message: res.data.message || "Tạo order thành công",
-                itemSummary: res.data.itemSummary || "",
+                itemSummary: "",
             });
         } catch {
             showToast("Lỗi khi tạo order", "error");

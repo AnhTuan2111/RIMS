@@ -41,8 +41,8 @@ public interface WaiterService
     ReservationDetailResponse viewReservationDetail(Long reservationId);
 
     // update reservation
+    String updateReservation(Long reservationId, CreateReservationRequest request);
 
     // cancel reservation
-
-    // reload table status trước thời gian đặt bàn 30 phút
+    String cancelReservation(Long reservationId);
 }

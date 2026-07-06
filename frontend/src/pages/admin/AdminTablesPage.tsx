@@ -1,9 +1,20 @@
-import {mockTables} from '../../data/mockData'
+import { useEffect, useState } from 'react'
+import { adminApi } from '../../api/admin'
+import type { TableDetailResponse } from '../../api/waiter'
 
 export default function AdminTablesPage() {
-    const totalTables = mockTables.length
-    const availableTables = mockTables.filter((table) => table.status === 'AVAILABLE').length
-    const occupiedTables = mockTables.filter((table) => table.status === 'OCCUPIED').length
+    const [tables, setTables] = useState<TableDetailResponse[]>([])
+
+    useEffect(() => {
+        adminApi.getTables()
+            .then(res => setTables(res.data))
+            .catch(console.error)
+    }, [])
+
+    const totalTables = tables.length
+    const availableTables = tables.filter((table) => table.status === 'AVAILABLE').length
+    const occupiedTables = tables.filter((table) => table.status === 'SERVING').length
+    const reservedTables = tables.filter((table) => table.status === 'RESERVED').length
 
     return (
         <div className="page-card">
@@ -31,14 +42,23 @@ export default function AdminTablesPage() {
                     <strong>{occupiedTables}</strong>
                     <span>Đang phục vụ</span>
                 </div>
+
+                <div className="stat-card">
+                    <strong>{reservedTables}</strong>
+                    <span>Đã đặt trước</span>
+                </div>
             </div>
 
             <div className="table-grid">
-                {mockTables.map((table) => (
-                    <div className="table-card" key={table.id}>
-                        <strong>{table.tableNumber}</strong>
+                {tables.map((table) => (
+                    <div className="table-card" key={table.tableId}>
+                        <strong>Bàn {table.tableNumber}</strong>
                         <span>{table.capacity} người</span>
-                        <small>{table.status === 'AVAILABLE' ? 'Bàn trống' : 'Đang phục vụ'}</small>
+                        <small>
+                            {table.status === 'AVAILABLE' && 'Bàn trống'}
+                            {table.status === 'SERVING' && 'Đang phục vụ'}
+                            {table.status === 'RESERVED' && 'Đã đặt trước'}
+                        </small>
                     </div>
                 ))}
             </div>

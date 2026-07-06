@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.CreateOrderRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.order.UpdateOrderRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.CreateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
@@ -75,6 +76,32 @@ public class WaiterController
     public ResponseEntity<ReservationDetailResponse> getReservationByTable(@PathVariable int tableId)
     {
         return ResponseEntity.ok(waiterService.getCurrentReservationByTable(tableId));
+    }
+
+    @PostMapping("/reservations")
+    public ResponseEntity<String> createReservation(@Valid @RequestBody CreateReservationRequest request)
+    {
+        return ResponseEntity.status(HttpStatus.CREATED).body(waiterService.createReservation(request));
+    }
+
+    @GetMapping("/reservations/{reservationId}")
+    public ResponseEntity<ReservationDetailResponse> getReservationDetail(@PathVariable Long reservationId)
+    {
+        return ResponseEntity.ok(waiterService.viewReservationDetail(reservationId));
+    }
+
+    @PutMapping("/reservations/{reservationId}")
+    public ResponseEntity<String> updateReservation(
+            @PathVariable Long reservationId,
+            @Valid @RequestBody CreateReservationRequest request)
+    {
+        return ResponseEntity.ok(waiterService.updateReservation(reservationId, request));
+    }
+
+    @PutMapping("/reservations/{reservationId}/cancel")
+    public ResponseEntity<String> cancelReservation(@PathVariable Long reservationId)
+    {
+        return ResponseEntity.ok(waiterService.cancelReservation(reservationId));
     }
 }
 

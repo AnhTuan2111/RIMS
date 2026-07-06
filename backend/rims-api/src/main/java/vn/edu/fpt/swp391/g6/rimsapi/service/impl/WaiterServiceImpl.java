@@ -404,4 +404,58 @@ public class WaiterServiceImpl implements WaiterService
                 .reservationTime(reservation.getReservationTime())
                 .build();
     }
+
+    @Override
+    @Transactional
+    public String updateReservation(Long reservationId, CreateReservationRequest request)
+    {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt bàn với ID: " + reservationId));
+
+        RestaurantTable table = restaurantTableRepository.findById(request.getTableId())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
+
+        if (request.getReservationTime().isBefore(LocalDateTime.now()))
+        {
+            throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
+        }
+
+        LocalDateTime start = request.getReservationTime().minusMinutes(150);
+        LocalDateTime end = request.getReservationTime().plusMinutes(150);
+
+        List<Reservation> existingReservations = reservationRepository.findByTableIdAndReservationTimeBetween(
+                request.getTableId(), start, end);
+
+        for (Reservation res : existingReservations)
+        {
+            if (!res.getId().equals(reservationId) && res.getStatus() != ReservationStatus.CANCELLED)
+            {
+                if (res.getReservationTime().isAfter(start) && res.getReservationTime().isBefore(end))
+                {
+                    throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
+                }
+            }
+        }
+
+        reservation.setCustomerName(request.getCustomerName());
+        reservation.setPhone(request.getPhone());
+        reservation.setNote(request.getNote());
+        reservation.setReservationTime(request.getReservationTime());
+        reservation.setTable(table);
+
+        reservationRepository.save(reservation);
+        return "Cập nhật đặt bàn thành công";
+    }
+
+    @Override
+    @Transactional
+    public String cancelReservation(Long reservationId)
+    {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt bàn với ID: " + reservationId));
+
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
+        return "Hủy đặt bàn thành công";
+    }
 }

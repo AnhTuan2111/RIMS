@@ -1,16 +1,7 @@
 import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {useReservationTick, WaiterHeader, WaiterToast} from "../../components/waiter";
-import {
-    cancelReservation,
-    getActiveReservations,
-    getEffectiveTableStatus,
-    getReservation,
-    hasTimeConflict,
-    updateReservation,
-    validateReservationForm,
-} from "./mockReservations";
-import {type TableDetailResponse, waiterApi} from "../../api/waiter";
+import {WaiterHeader, WaiterToast} from "../../components/waiter";
+import {type CreateReservationRequest, type TableDetailResponse, waiterApi} from "../../api/waiter";
 
 export default function WaiterEditReservationPage() {
     const navigate = useNavigate();
@@ -18,6 +9,7 @@ export default function WaiterEditReservationPage() {
     const [tables, setTables] = useState<TableDetailResponse[]>([]);
     const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
     const [resFormError, setResFormError] = useState("");
+    const [rightReservations, setRightReservations] = useState<any[]>([]);
     const [resForm, setResForm] = useState({
         customerName: "",
         phone: "",
@@ -26,74 +18,88 @@ export default function WaiterEditReservationPage() {
         tableId: 0,
         note: "",
     });
-    useReservationTick(30000);
 
     useEffect(() => {
         waiterApi.getTables().then((res) => setTables(res.data)).catch(console.error);
-        const existing = getReservation(resId || "");
-        if (existing && existing.status === "ACTIVE") {
-            setResForm({
-                customerName: existing.customerName,
-                phone: existing.phone,
-                date: existing.date,
-                time: existing.time,
-                tableId: existing.tableId,
-                note: existing.note,
-            });
-        } else {
-            navigate("/waiter/reservations");
+        if (resId) {
+            waiterApi.getReservationDetail(parseInt(resId))
+                .then((res) => {
+                    const data = res.data;
+                    if (data) {
+                        const date = data.reservationTime.split("T")[0];
+                        const time = data.reservationTime.split("T")[1]?.substring(0, 5) || "";
+                        setResForm({
+                            customerName: data.customerName,
+                            phone: data.phone,
+                            date,
+                            time,
+                            tableId: data.tableId,
+                            note: data.note || "",
+                        });
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error fetching reservation detail:", err);
+                    navigate("/waiter/tables");
+                });
         }
     }, [resId, navigate]);
+
+    useEffect(() => {
+        if (resForm.tableId && resForm.date) {
+            waiterApi.getReservationsByTableAndDate(resForm.tableId, resForm.date)
+                .then((res) => {
+                    setRightReservations(res.data || []);
+                })
+                .catch(console.error);
+        } else {
+            setRightReservations([]);
+        }
+    }, [resForm.tableId, resForm.date]);
 
     function showToast(msg: string, type = "success") {
         setToast({msg, type});
         setTimeout(() => setToast(null), 3000);
     }
 
-    function isTableSelectable(table: TableDetailResponse): boolean {
-        if (table.tableId === resForm.tableId) return true;
-        if (getEffectiveTableStatus(table.status, table.tableId) !== "AVAILABLE") return false;
-        if (!resForm.date || !resForm.time) return true;
-        return !hasTimeConflict(getActiveReservations(), table.tableId, resForm.date, resForm.time, resId || null);
-    }
-
-    function submitReservation() {
+    async function submitReservation() {
         const {customerName, phone, date, time, tableId, note} = resForm;
         if (!customerName.trim() || !phone.trim() || !date || !time || !tableId) {
             setResFormError("Vui lòng điền đầy đủ thông tin bắt buộc.");
             return;
         }
 
-        const list = getActiveReservations();
-        const validationError = validateReservationForm(list, tableId, date, time, resId || null);
-        if (validationError) {
-            setResFormError(validationError);
-            return;
-        }
-
-        updateReservation(resId!, {
-            tableId,
+        const reservationTime = `${date}T${time}:00`;
+        const payload: CreateReservationRequest = {
             customerName: customerName.trim(),
             phone: phone.trim(),
-            date,
-            time,
-            note,
-        });
-        showToast("Đã lưu thay đổi đặt bàn");
-        setResFormError("");
-        setTimeout(() => navigate("/waiter/reservations"), 800);
+            tableId,
+            reservationTime,
+            note: note.trim() || undefined,
+        };
+
+        try {
+            await waiterApi.updateReservation(parseInt(resId!), payload);
+            showToast("Đã lưu thay đổi đặt bàn");
+            setResFormError("");
+            setTimeout(() => navigate("/waiter/tables"), 800);
+        } catch (err: unknown) {
+            const msg =
+                (err as { response?: { data?: string } })?.response?.data ||
+                "Cập nhật đặt bàn thất bại.";
+            setResFormError(msg);
+        }
     }
 
-    function handleCancelReservation() {
-        cancelReservation(resId!);
-        showToast("Đã hủy đặt bàn");
-        setTimeout(() => navigate("/waiter/reservations"), 800);
+    async function handleCancelReservation() {
+        try {
+            await waiterApi.cancelReservation(parseInt(resId!));
+            showToast("Đã hủy đặt bàn");
+            setTimeout(() => navigate("/waiter/tables"), 800);
+        } catch {
+            showToast("Hủy đặt bàn thất bại.", "error");
+        }
     }
-
-    const availableForRes = tables.filter(isTableSelectable);
-    const rightReservations = getActiveReservations()
-        .filter((r) => r.tableId === resForm.tableId && r.date === resForm.date)
-        .sort((a, b) => a.time.localeCompare(b.time));
 
     return (
         <div className="waiter-container">
@@ -151,7 +157,7 @@ export default function WaiterEditReservationPage() {
                                     className="waiter-form-input"
                                 >
                                     <option value={0}>Chọn bàn</option>
-                                    {availableForRes.map((t) => (
+                                    {tables.map((t) => (
                                         <option key={t.tableId} value={t.tableId}>
                                             Bàn {t.tableNumber} ({t.capacity} chỗ)
                                         </option>
@@ -178,7 +184,7 @@ export default function WaiterEditReservationPage() {
                                 >
                                     Hủy đặt bàn
                                 </button>
-                                <button onClick={() => navigate("/waiter/reservations")} className="waiter-btn-outline">
+                                <button onClick={() => navigate("/waiter/tables")} className="waiter-btn-outline">
                                     Quay lại
                                 </button>
                             </div>
@@ -193,21 +199,24 @@ export default function WaiterEditReservationPage() {
                             {rightReservations.length === 0 ? (
                                 <p style={{color: "#94a3b8", fontWeight: 500}}>Không có lịch đặt nào.</p>
                             ) : (
-                                rightReservations.map((r) => (
-                                    <div
-                                        key={r.id}
-                                        className="waiter-res-card"
-                                        style={{borderColor: r.id === resId ? "#3b82f6" : undefined}}
-                                    >
-                                        <div>
-                                            <div className="waiter-res-time">{r.time}</div>
-                                            <div className="waiter-res-info">
-                                                <h4>{r.customerName}</h4>
-                                                <p>{r.phone}</p>
+                                rightReservations.map((r) => {
+                                    const timeStr = r.reservationTime ? r.reservationTime.split("T")[1]?.substring(0, 5) : "";
+                                    return (
+                                        <div
+                                            key={r.reservationId}
+                                            className="waiter-res-card"
+                                            style={{borderColor: r.reservationId === parseInt(resId || "0") ? "#3b82f6" : undefined}}
+                                        >
+                                            <div>
+                                                <div className="waiter-res-time">{timeStr}</div>
+                                                <div className="waiter-res-info">
+                                                    <h4>{r.customerName}</h4>
+                                                    <p>{r.phone}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
                     </div>

@@ -1,15 +1,42 @@
+import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {BackArrow, useReservationTick, WaiterHeader} from "../../components/waiter";
-import {getActiveReservationForTable, processAutoCancellations} from "./mockReservations";
+import {BackArrow, WaiterHeader} from "../../components/waiter";
+import {waiterApi} from "../../api/waiter";
 
 export default function WaiterReservationDetailPage() {
     const navigate = useNavigate();
     const {tableId} = useParams();
     const tid = parseInt(tableId || "0");
-    useReservationTick(30000);
+    const [reservation, setReservation] = useState<any | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    processAutoCancellations();
-    const reservation = getActiveReservationForTable(tid);
+    useEffect(() => {
+        if (tid) {
+            waiterApi.getCurrentReservationByTable(tid)
+                .then((res) => {
+                    setReservation(res.data || null);
+                })
+                .catch((err) => {
+                    console.error("Error fetching reservation detail:", err);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        } else {
+            setLoading(false);
+        }
+    }, [tid]);
+
+    if (loading) {
+        return (
+            <div className="waiter-container">
+                <WaiterHeader/>
+                <main className="waiter-main">
+                    <p style={{color: "#64748b"}}>Đang tải thông tin đặt bàn...</p>
+                </main>
+            </div>
+        );
+    }
 
     if (!reservation) {
         return (
@@ -37,6 +64,9 @@ export default function WaiterReservationDetailPage() {
         );
     }
 
+    const dateStr = reservation.reservationTime ? reservation.reservationTime.split("T")[0] : "";
+    const timeStr = reservation.reservationTime ? reservation.reservationTime.split("T")[1]?.substring(0, 5) : "";
+
     return (
         <div className="waiter-container">
             <WaiterHeader/>
@@ -56,11 +86,11 @@ export default function WaiterReservationDetailPage() {
                     <div className="waiter-card-body">
                         <div className="waiter-detail-row">
                             <span>Mã đặt bàn</span>
-                            <strong>{reservation.id}</strong>
+                            <strong>{reservation.reservationId}</strong>
                         </div>
                         <div className="waiter-detail-row">
                             <span>Thời gian</span>
-                            <strong>{reservation.date} — {reservation.time}</strong>
+                            <strong>{dateStr} — {timeStr}</strong>
                         </div>
                         <div className="waiter-detail-row">
                             <span>Khách hàng</span>

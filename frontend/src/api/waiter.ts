@@ -79,6 +79,14 @@ export type UpdateOrderRequest = {
     items: UpdateOrderItemRequest[];
 };
 
+export type CreateReservationRequest = {
+    customerName: string;
+    phone: string;
+    note?: string;
+    tableId: number;
+    reservationTime: string; // ISO LocalDateTime string e.g. "2026-07-07T18:00:00"
+};
+
 // API calls
 export const waiterApi = {
     getTables: () => apiClient.get<TableDetailResponse[]>('/waiter/tables'),
@@ -93,4 +101,22 @@ export const waiterApi = {
 
     getServingOrders: (tableId: number) =>
         apiClient.get<OrderDetailResponse[]>(`/waiter/detail/${tableId}`),
+
+    createReservation: (data: CreateReservationRequest) =>
+        apiClient.post<string>('/waiter/reservations', data),
+
+    getReservationsByTableAndDate: (tableId: number, date: string) =>
+        apiClient.get<any[]>(`/waiter/reservation/${tableId}/${date}`),
+
+    getCurrentReservationByTable: (tableId: number) =>
+        apiClient.get<any>(`/waiter/reservation/detail/${tableId}`),
+
+    getReservationDetail: (resId: number) =>
+        apiClient.get<any>(`/waiter/reservations/${resId}`),
+
+    updateReservation: (resId: number, data: CreateReservationRequest) =>
+        apiClient.put<string>(`/waiter/reservations/${resId}`, data),
+
+    cancelReservation: (resId: number) =>
+        apiClient.put<string>(`/waiter/reservations/${resId}/cancel`),
 };
