@@ -41,6 +41,7 @@ public class SecurityConfig
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/rims/cashier/payments/vnpay-callback").permitAll()
                         .requestMatchers(
+                                "/rims/auth/register",
                                 "/rims/auth/login",
                                 "/rims/auth/logout",
                                 "/rims/auth/refresh",

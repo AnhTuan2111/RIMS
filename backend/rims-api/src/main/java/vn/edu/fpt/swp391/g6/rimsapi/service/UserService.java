@@ -37,4 +37,6 @@ public interface UserService
     void sendForgotPasswordOtp(ForgotPasswordRequest request);
 
     void verifyOtpAndResetPassword(VerifyOtpRequest request);
+
+    UserResponse register(CreateCustomerRequest request);
 }
