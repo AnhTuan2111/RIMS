@@ -305,10 +305,45 @@ public class WaiterServiceImpl implements WaiterService
         }
         return orderDetailResponses;
     }
+
     @Override
     public String createReservation(CreateReservationRequest request)
     {
-        return "";
+        RestaurantTable table = restaurantTableRepository.findById(request.getTableId())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
+
+        if (request.getReservationTime().isBefore(LocalDateTime.now()))
+        {
+            throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
+        }
+
+        LocalDateTime start = request.getReservationTime().minusMinutes(150);
+        LocalDateTime end = request.getReservationTime().plusMinutes(150);
+
+        List<Reservation> existingReservations = reservationRepository.findByTableIdAndReservationTimeBetween(request.getTableId(), start, end);
+
+        for (Reservation res : existingReservations)
+        {
+            if (res.getStatus() != ReservationStatus.CANCELLED)
+            {
+                if (res.getReservationTime().isAfter(start) && res.getReservationTime().isBefore(end))
+                {
+                    throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
+                }
+            }
+        }
+
+        Reservation reservation = new Reservation();
+        reservation.setCustomerName(request.getCustomerName());
+        reservation.setPhone(request.getPhone());
+        reservation.setNote(request.getNote());
+        reservation.setReservationTime(request.getReservationTime());
+        reservation.setTable(table);
+        reservation.setStatus(ReservationStatus.QUEUED);
+
+        reservationRepository.save(reservation);
+
+        return "Tạo đơn đặt bàn thành công";
     }
 
     @Override
