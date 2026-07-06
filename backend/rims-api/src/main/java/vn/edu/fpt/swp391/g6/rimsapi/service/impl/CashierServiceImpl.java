@@ -14,13 +14,12 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Payment;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.*;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 
 import java.math.BigDecimal;
@@ -38,6 +37,7 @@ public class CashierServiceImpl implements CashierService
     private final RestaurantTableRepository tableRepository;
     private final InvoiceRepository invoiceRepository;
     private final VNPayConfig vnpayConfig;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -149,10 +149,35 @@ public class CashierServiceImpl implements CashierService
             throw new RuntimeException("Đơn hàng chưa được chốt (LOCKED) hoặc đã thanh toán xong!");
         }
 
-        // ĐÃ SỬA: Lấy tổng tiền thực tế của các món COMPLETED
         BigDecimal totalBeforeVat = calculateActualTotal(order);
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
+
+        if (request.getCustomerId() != null) {
+            User customer = userRepository.findById(request.getCustomerId()).orElse(null);
+            if (customer != null) {
+                // 1. Khách dùng điểm để trừ tiền hóa đơn (Tiêu điểm)
+                if (request.getPointsUsed() != null && request.getPointsUsed() > 0) {
+                    if (customer.getRewardPoints() < request.getPointsUsed()) {
+                        throw new RuntimeException("Khách hàng không đủ điểm!");
+                    }
+                    // Trừ điểm trong ví của khách
+                    customer.setRewardPoints(customer.getRewardPoints() - request.getPointsUsed());
+
+                    // Trừ tiền trong hóa đơn (1 điểm = 1 VNĐ)
+                    BigDecimal discount = new BigDecimal(request.getPointsUsed());
+                    finalAmount = finalAmount.subtract(discount);
+                    if (finalAmount.compareTo(BigDecimal.ZERO) < 0) finalAmount = BigDecimal.ZERO;
+                }
+
+                // 2. Khách được cộng điểm mới dựa trên số tiền THỰC TRẢ (Ví dụ: tích 5%)
+                int earnedPoints = finalAmount.multiply(new BigDecimal("0.05")).intValue();
+                customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
+
+                // Lưu cập nhật điểm vào Database
+                userRepository.save(customer);
+            }
+        }
 
         BigDecimal amountPaid = BigDecimal.valueOf(request.getAmountPaid());
 
@@ -193,7 +218,6 @@ public class CashierServiceImpl implements CashierService
                 .excessAmount(excessAmount)
                 .build();
     }
-
     @Override
     @Transactional
     public PaymentResponse unlockOrder(Long orderId)
@@ -377,5 +401,32 @@ public class CashierServiceImpl implements CashierService
                 .map(oi -> oi.getSubTotal())
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User searchCustomerByPhone(String phone) {
+        return userRepository.findByPhone(phone).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public User createCustomerFast(String fullName, String phone, String email) {
+        if (userRepository.existsByPhone(phone)) {
+            throw new RuntimeException("Số điện thoại này đã tồn tại!");
+        }
+        User user = new User();
+        user.setFullName(fullName);
+        user.setPhone(phone);
+        user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
+
+        // Sinh username và password rác để lấp vào Database
+        user.setUsername("CUST_" + System.currentTimeMillis());
+        user.setPasswordHash("DUMMY_HASH_" + java.util.UUID.randomUUID().toString());
+        user.setRole(RoleType.CUSTOMER);
+        user.setRewardPoints(0);
+        user.setActive(true);
+
+        return userRepository.save(user);
     }
 }
