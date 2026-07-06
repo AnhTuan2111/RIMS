@@ -21,14 +21,14 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
 {
     //Get total Revenue
     @Query("""
-            SELECT COALESCE(SUM(i.finalAmount),0)
+            SELECT COALESCE(SUM(i.restaurantRevenueAmount),0)
             FROM Invoice i
             """)
     BigDecimal getTotalRevenue();
 
     //Get revenue according period
     @Query("""
-            SELECT COALESCE(SUM(i.finalAmount),0)
+            SELECT COALESCE(SUM(i.restaurantRevenueAmount),0)
             FROM Invoice i
             WHERE i.invoiceDate BETWEEN :startDate AND :endDate
             """)
@@ -41,7 +41,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             value = """
                     SELECT
                         CAST(i.invoice_date AS date) AS revenueDate,
-                        COALESCE(SUM(i.final_amount), 0) AS revenue
+                        COALESCE(SUM(i.restaurant_revenue_amount), 0) AS revenue
                     FROM invoices i
                     WHERE i.invoice_date BETWEEN :startDate AND :endDate
                     GROUP BY CAST(i.invoice_date AS date)
@@ -109,4 +109,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
 
     @EntityGraph(attributePaths = {"order", "order.orderItems", "order.orderItems.dish", "order.table"})
     Optional<Invoice> findWithOrderAndItemsById(Long id);
+
+    List<Invoice> findByRestaurantRevenueAmountIsNull();
 }
