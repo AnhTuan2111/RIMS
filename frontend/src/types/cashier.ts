@@ -31,6 +31,9 @@ export interface OrderDetailResponse {
 export interface PaymentRequest {
     paymentMethod: PaymentMethodType;
     amountPaid: number;
+
+    customerId?: number | null;
+    pointsUsed?: number;
 }
 
 export interface PaymentResponse {

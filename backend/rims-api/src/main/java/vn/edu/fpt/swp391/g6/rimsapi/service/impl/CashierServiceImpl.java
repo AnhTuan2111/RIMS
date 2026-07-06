@@ -14,12 +14,12 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Payment;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.*;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 
 import java.math.BigDecimal;
@@ -27,7 +27,6 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +37,7 @@ public class CashierServiceImpl implements CashierService
     private final RestaurantTableRepository tableRepository;
     private final InvoiceRepository invoiceRepository;
     private final VNPayConfig vnpayConfig;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -75,7 +75,9 @@ public class CashierServiceImpl implements CashierService
         Order order = orderRepository.findOrderWithDetailsById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng tương ứng"));
 
+        // 1. Lọc danh sách OrderItem chỉ lấy món đã COMPLETED
         List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
+                .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
                 .map(oi -> OrderItemResponse.builder()
                         .orderItemId(oi.getId())
                         .dishName(oi.getDish() != null ? oi.getDish().getName() : "Món ăn không xác định")
@@ -86,7 +88,12 @@ public class CashierServiceImpl implements CashierService
                         .build())
                 .toList();
 
-        BigDecimal totalBeforeVat = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+        // 2. Tính tổng tiền động dựa TRÊN CÁC MÓN COMPLETED
+        BigDecimal totalBeforeVat = itemResponses.stream()
+                .map(OrderItemResponse::getSubTotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
@@ -108,7 +115,6 @@ public class CashierServiceImpl implements CashierService
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        //Nếu đơn hàng đã bị khóa từ trước (do khách thao tác lại)
         if (order.getStatus() == OrderStatus.LOCKED)
         {
             return PaymentResponse.builder()
@@ -117,7 +123,6 @@ public class CashierServiceImpl implements CashierService
                     .build();
         }
 
-        // Nếu đơn hàng đã hoàn thành (COMPLETED) thì mới chặn lại
         if (order.getStatus() != OrderStatus.SERVING)
         {
             throw new RuntimeException("Đơn hàng này đã thanh toán xong hoặc không tồn tại!");
@@ -144,9 +149,35 @@ public class CashierServiceImpl implements CashierService
             throw new RuntimeException("Đơn hàng chưa được chốt (LOCKED) hoặc đã thanh toán xong!");
         }
 
-        BigDecimal totalBeforeVat = order.getTotalAmount();
+        BigDecimal totalBeforeVat = calculateActualTotal(order);
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
+
+        if (request.getCustomerId() != null) {
+            User customer = userRepository.findById(request.getCustomerId()).orElse(null);
+            if (customer != null) {
+                // 1. Khách dùng điểm để trừ tiền hóa đơn (Tiêu điểm)
+                if (request.getPointsUsed() != null && request.getPointsUsed() > 0) {
+                    if (customer.getRewardPoints() < request.getPointsUsed()) {
+                        throw new RuntimeException("Khách hàng không đủ điểm!");
+                    }
+                    // Trừ điểm trong ví của khách
+                    customer.setRewardPoints(customer.getRewardPoints() - request.getPointsUsed());
+
+                    // Trừ tiền trong hóa đơn (1 điểm = 1 VNĐ)
+                    BigDecimal discount = new BigDecimal(request.getPointsUsed());
+                    finalAmount = finalAmount.subtract(discount);
+                    if (finalAmount.compareTo(BigDecimal.ZERO) < 0) finalAmount = BigDecimal.ZERO;
+                }
+
+                // 2. Khách được cộng điểm mới dựa trên số tiền THỰC TRẢ (Ví dụ: tích 5%)
+                int earnedPoints = finalAmount.multiply(new BigDecimal("0.05")).intValue();
+                customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
+
+                // Lưu cập nhật điểm vào Database
+                userRepository.save(customer);
+            }
+        }
 
         BigDecimal amountPaid = BigDecimal.valueOf(request.getAmountPaid());
 
@@ -159,7 +190,6 @@ public class CashierServiceImpl implements CashierService
         Invoice invoice = new Invoice();
         invoice.setOrder(order);
         invoice.setFinalAmount(finalAmount);
-        invoice.setRestaurantRevenueAmount(totalBeforeVat.setScale(0, RoundingMode.HALF_UP));
         invoice.setInvoiceDate(java.time.LocalDateTime.now());
 
         Payment payment = new Payment();
@@ -188,7 +218,6 @@ public class CashierServiceImpl implements CashierService
                 .excessAmount(excessAmount)
                 .build();
     }
-
     @Override
     @Transactional
     public PaymentResponse unlockOrder(Long orderId)
@@ -241,11 +270,12 @@ public class CashierServiceImpl implements CashierService
             throw new RuntimeException("Đơn hàng này đã thanh toán xong hoặc không hợp lệ!");
         }
 
-        BigDecimal totalBeforeVat = order.getTotalAmount();
+        // ĐÃ SỬA: Lấy tổng tiền thực tế của các món COMPLETED
+        BigDecimal totalBeforeVat = calculateActualTotal(order);
 
         if (totalBeforeVat == null || totalBeforeVat.compareTo(BigDecimal.ZERO) <= 0)
         {
-            throw new RuntimeException("Đơn hàng chưa có món ăn (Tổng tiền = 0đ)!");
+            throw new RuntimeException("Đơn hàng chưa có món ăn hoàn thành (Tổng tiền = 0đ)!");
         }
 
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
@@ -253,7 +283,6 @@ public class CashierServiceImpl implements CashierService
         long amountVND = finalAmount.setScale(0, RoundingMode.HALF_UP).longValue() * 100;
 
         String vnp_TxnRef = "RIMS_" + order.getId() + "_" + System.currentTimeMillis();
-
         String ipAddress = "127.0.0.1";
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -333,15 +362,14 @@ public class CashierServiceImpl implements CashierService
             throw new RuntimeException("Đơn hàng này đã được thanh toán rồi!");
         }
 
-        // Tính lại VAT vì trong DB chỉ lưu TotalBeforeVat
-        BigDecimal totalBeforeVat = order.getTotalAmount();
+        // ĐÃ SỬA: Tính lại VAT dựa trên tổng tiền thực tế của các món COMPLETED
+        BigDecimal totalBeforeVat = calculateActualTotal(order);
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
         Invoice invoice = new Invoice();
         invoice.setOrder(order);
         invoice.setFinalAmount(finalAmount);
-        invoice.setRestaurantRevenueAmount(totalBeforeVat.setScale(0, RoundingMode.HALF_UP));
         invoice.setInvoiceDate(java.time.LocalDateTime.now());
 
         Payment payment = new Payment();
@@ -363,5 +391,42 @@ public class CashierServiceImpl implements CashierService
         }
 
         return invoice.getId();
+    }
+    
+    private BigDecimal calculateActualTotal(Order order) {
+        if (order.getOrderItems() == null) return BigDecimal.ZERO;
+
+        return order.getOrderItems().stream()
+                .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
+                .map(oi -> oi.getSubTotal())
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User searchCustomerByPhone(String phone) {
+        return userRepository.findByPhone(phone).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public User createCustomerFast(String fullName, String phone, String email) {
+        if (userRepository.existsByPhone(phone)) {
+            throw new RuntimeException("Số điện thoại này đã tồn tại!");
+        }
+        User user = new User();
+        user.setFullName(fullName);
+        user.setPhone(phone);
+        user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
+
+        // Sinh username và password rác để lấp vào Database
+        user.setUsername("CUST_" + System.currentTimeMillis());
+        user.setPasswordHash("DUMMY_HASH_" + java.util.UUID.randomUUID().toString());
+        user.setRole(RoleType.CUSTOMER);
+        user.setRewardPoints(0);
+        user.setActive(true);
+
+        return userRepository.save(user);
     }
 }

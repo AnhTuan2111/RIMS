@@ -34,6 +34,12 @@ export const cashierApi = {
             responseType: 'blob'
         }),
 
+    searchCustomer: (phone: string) =>
+        apiClient.get(`/cashier/customers/search?phone=${phone}`),
+
+    createCustomerFast: (data: { fullName: string, phone: string, email: string }) =>
+        apiClient.post('/cashier/customers/create', data),
+
     unlockOrder: (orderId: number) =>
         apiClient.post<PaymentResponse>(`/cashier/orders/${orderId}/unlock`)
 };

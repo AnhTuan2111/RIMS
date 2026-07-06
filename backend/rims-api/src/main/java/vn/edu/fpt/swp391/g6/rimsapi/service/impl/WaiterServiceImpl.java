@@ -23,6 +23,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TableNotAvailableException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,6 +41,7 @@ public class WaiterServiceImpl implements WaiterService
     private final OrderRepository orderRepository;
     private final DishRepository dishRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public List<TableDetailResponse> getAllTables()
@@ -116,6 +118,10 @@ public class WaiterServiceImpl implements WaiterService
         // 6. Update table status
         table.setStatus(TableStatus.SERVING);
         restaurantTableRepository.save(table);
+
+        // BƯỚC MỚI: PHÁT LOA THÔNG BÁO CHO ĐẦU BẾP
+        // Gửi một tin nhắn đơn giản mang chữ "REFRESH" vào kênh của bếp
+        messagingTemplate.convertAndSend("/topic/kitchen", "REFRESH");
 
         // 7. Return response
         return CreateOrderResponse.builder()
@@ -236,8 +242,9 @@ public class WaiterServiceImpl implements WaiterService
             total = total.add(item.getSubTotal());
         }
         order.setTotalAmount(total);
-
         orderRepository.save(order);
+
+        messagingTemplate.convertAndSend("/topic/kitchen", "REFRESH");
 
         return UpdateOrderResponse.builder()
                 .orderId(order.getId())

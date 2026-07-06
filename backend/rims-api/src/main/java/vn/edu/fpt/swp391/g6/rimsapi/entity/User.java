@@ -51,6 +51,9 @@ public class User
 
     private boolean isActive = true;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private Integer rewardPoints = 0;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
