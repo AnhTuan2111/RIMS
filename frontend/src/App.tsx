@@ -40,6 +40,8 @@ import WaiterUpdateOrderPage from './pages/waiter/WaiterUpdateOrderPage'
 import WaiterReservationDetailPage from './pages/waiter/WaiterReservationDetailPage'
 import WaiterCreateReservationPage from './pages/waiter/WaiterCreateReservationPage'
 import WaiterEditReservationPage from './pages/waiter/WaiterEditReservationPage'
+import GroupedKitchenPage from "./pages/chef/GroupedKitchenPage.tsx";
+import CancelledOrdersPage from "./pages/chef/CancelledOrdersPage.tsx";
 
 function App() {
     return (
@@ -76,6 +78,14 @@ function App() {
                         <Route path="/chef/dashboard" element={<ChefDashboardPage/>}/>
                         <Route path="/chef/orders" element={<KitchenQueuePage/>}/>
                         <Route path="/chef/dishes" element={<DishListPage/>}/>
+                        <Route
+                            path="/chef/grouped-orders"
+                            element={<GroupedKitchenPage/>}
+                        />
+                        <Route
+                            path="/chef/cancelled-orders"
+                            element={<CancelledOrdersPage />}
+                        />
                         <Route path="/chef/completed-orders" element={<CompletedOrdersPage/>}/>
 
                         {/* WAITER */}

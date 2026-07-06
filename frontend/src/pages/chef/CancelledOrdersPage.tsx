@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-    getCompletedOrders,
-    type KitchenOrderItemResponse,
+    getCancelledOrders,
+    type CancelledOrderResponse,
 } from '../../api/chef'
 
 const ITEMS_PER_PAGE = 6
 
-type SortOrder = 'NEWEST' | 'OLDEST'
+type SortOrder = 'OLDEST' | 'NEWEST'
 
 function formatDateTime(value?: string) {
     if (!value) {
@@ -28,27 +28,36 @@ function formatDateTime(value?: string) {
     })
 }
 
-export default function CompletedOrdersPage() {
+export default function CancelledOrdersPage() {
     const [items, setItems] =
-        useState<KitchenOrderItemResponse[]>([])
+        useState<CancelledOrderResponse[]>([])
 
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] =
         useState<string | null>(null)
 
     const [searchText, setSearchText] = useState('')
+
     const [selectedTable, setSelectedTable] =
         useState('ALL')
+
     const [sortOrder, setSortOrder] =
         useState<SortOrder>('NEWEST')
+
     const [currentPage, setCurrentPage] = useState(1)
 
-    async function loadCompletedOrders() {
+    useEffect(() => {
+        loadCancelledOrders().catch((requestError) => {
+            console.error(requestError)
+        })
+    }, [])
+
+    async function loadCancelledOrders() {
         try {
             setIsLoading(true)
             setError(null)
 
-            const data = await getCompletedOrders()
+            const data = await getCancelledOrders()
 
             setItems(data)
             setCurrentPage(1)
@@ -56,18 +65,12 @@ export default function CompletedOrdersPage() {
             console.error(requestError)
 
             setError(
-                'Không thể tải danh sách món đã hoàn thành.',
+                'Không thể tải danh sách món đã hủy.',
             )
         } finally {
             setIsLoading(false)
         }
     }
-
-    useEffect(() => {
-        loadCompletedOrders().catch((requestError) => {
-            console.error(requestError)
-        })
-    }, [])
 
     function clearFilters() {
         setSearchText('')
@@ -76,18 +79,18 @@ export default function CompletedOrdersPage() {
         setCurrentPage(1)
     }
 
-    const tableNumbers = useMemo(() => {
+    const tableNumbers = useMemo<string[]>(() => {
         return Array.from(
             new Set(
-                items
-                    .map((item) => item.tableNumber)
-                    .filter(Boolean),
+                items.map((item) => item.tableNumber),
             ),
         ).sort((firstTable, secondTable) =>
             firstTable.localeCompare(
                 secondTable,
                 'vi',
-                { numeric: true },
+                {
+                    numeric: true,
+                },
             ),
         )
     }, [items])
@@ -98,18 +101,21 @@ export default function CompletedOrdersPage() {
 
         return [...items]
             .filter((item) => {
-                const dishName =
-                    item.dishName?.toLowerCase() ?? ''
-
-                const tableNumber =
-                    item.tableNumber?.toLowerCase() ?? ''
-
                 const matchesSearch =
                     keyword === ''
-                    || dishName.includes(keyword)
-                    || tableNumber.includes(keyword)
-                    || String(item.orderId).includes(keyword)
-                    || String(item.orderItemId).includes(keyword)
+                    || item.dishName
+                        .toLowerCase()
+                        .includes(keyword)
+                    || item.tableNumber
+                        .toLowerCase()
+                        .includes(keyword)
+                    || String(item.orderId)
+                        .includes(keyword)
+                    || String(item.orderItemId)
+                        .includes(keyword)
+                    || (item.cancelReason ?? '')
+                        .toLowerCase()
+                        .includes(keyword)
 
                 const matchesTable =
                     selectedTable === 'ALL'
@@ -118,13 +124,19 @@ export default function CompletedOrdersPage() {
                 return matchesSearch && matchesTable
             })
             .sort((firstItem, secondItem) => {
-                const firstTime = firstItem.createdAt
-                    ? new Date(firstItem.createdAt).getTime()
-                    : 0
+                const firstTime =
+                    firstItem.cancelledAt
+                        ? new Date(
+                            firstItem.cancelledAt,
+                        ).getTime()
+                        : 0
 
-                const secondTime = secondItem.createdAt
-                    ? new Date(secondItem.createdAt).getTime()
-                    : 0
+                const secondTime =
+                    secondItem.cancelledAt
+                        ? new Date(
+                            secondItem.cancelledAt,
+                        ).getTime()
+                        : 0
 
                 return sortOrder === 'OLDEST'
                     ? firstTime - secondTime
@@ -169,28 +181,24 @@ export default function CompletedOrdersPage() {
 
     if (isLoading) {
         return (
-            <section className="page-card">
-                <p>
-                    Đang tải danh sách món đã hoàn thành...
-                </p>
-            </section>
+            <div className="page-card">
+                Đang tải danh sách món đã hủy...
+            </div>
         )
     }
 
     if (error) {
         return (
-            <section className="page-card">
+            <div className="page-card">
                 <h2>Lỗi tải dữ liệu</h2>
 
-                <p className="modal-error">
-                    {error}
-                </p>
+                <p>{error}</p>
 
                 <button
                     type="button"
                     className="primary-button"
                     onClick={() => {
-                        loadCompletedOrders().catch(
+                        loadCancelledOrders().catch(
                             (requestError) => {
                                 console.error(requestError)
                             },
@@ -199,7 +207,7 @@ export default function CompletedOrdersPage() {
                 >
                     Thử lại
                 </button>
-            </section>
+            </div>
         )
     }
 
@@ -208,25 +216,25 @@ export default function CompletedOrdersPage() {
             <section className="page-card">
                 <div className="page-header">
                     <div>
-                        <h2>Món đã hoàn thành</h2>
+                        <h2>Món đã hủy</h2>
 
                         <p>
-                            Tìm theo tên món, bàn, mã đơn
-                            hoặc mã item.
+                            Tìm theo món, bàn, mã đơn hoặc
+                            lý do hủy.
                         </p>
                     </div>
 
                     <div className="chef-summary">
                         <div>
                             <strong>{items.length}</strong>
-                            <span>Đã hoàn thành</span>
+                            <span>Đã hủy</span>
                         </div>
 
                         <button
                             type="button"
                             className="secondary-button"
                             onClick={() => {
-                                loadCompletedOrders().catch(
+                                loadCancelledOrders().catch(
                                     (requestError) => {
                                         console.error(
                                             requestError,
@@ -246,7 +254,7 @@ export default function CompletedOrdersPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm tên món, bàn, mã đơn hoặc mã item..."
+                        placeholder="Tìm món, bàn, mã đơn hoặc lý do hủy..."
                         onChange={(event) => {
                             setSearchText(
                                 event.target.value,
@@ -291,11 +299,11 @@ export default function CompletedOrdersPage() {
                         }}
                     >
                         <option value="NEWEST">
-                            Mới nhất trước
+                            Hủy mới nhất trước
                         </option>
 
                         <option value="OLDEST">
-                            Cũ nhất trước
+                            Hủy cũ nhất trước
                         </option>
                     </select>
 
@@ -311,16 +319,11 @@ export default function CompletedOrdersPage() {
 
             {filteredItems.length === 0 ? (
                 <section className="page-card">
-                    <div className="empty-state">
-                        <h3>
-                            Không tìm thấy món phù hợp
-                        </h3>
+                    <h2>Không tìm thấy món phù hợp</h2>
 
-                        <p>
-                            Hãy thay đổi từ khóa hoặc
-                            xóa bộ lọc.
-                        </p>
-                    </div>
+                    <p>
+                        Hãy thay đổi từ khóa hoặc xóa bộ lọc.
+                    </p>
                 </section>
             ) : (
                 <>
@@ -336,7 +339,8 @@ export default function CompletedOrdersPage() {
                                             <span className="completed-order-id">
                                                 Order #{item.orderId}
                                                 {' · '}
-                                                Item #{item.orderItemId}
+                                                Item #
+                                                {item.orderItemId}
                                             </span>
 
                                             <h3>
@@ -344,8 +348,8 @@ export default function CompletedOrdersPage() {
                                             </h3>
                                         </div>
 
-                                        <span className="status-badge completed">
-                                            Hoàn thành
+                                        <span className="status-badge danger">
+                                            Đã hủy
                                         </span>
                                     </div>
 
@@ -370,13 +374,24 @@ export default function CompletedOrdersPage() {
 
                                         <div>
                                             <small>
-                                                THỜI GIAN TẠO
+                                                THỜI GIAN HỦY
                                             </small>
 
                                             <strong>
                                                 {formatDateTime(
-                                                    item.createdAt,
+                                                    item.cancelledAt,
                                                 )}
+                                            </strong>
+                                        </div>
+
+                                        <div>
+                                            <small>
+                                                LÝ DO HỦY
+                                            </small>
+
+                                            <strong>
+                                                {item.cancelReason
+                                                    || 'Không có lý do'}
                                             </strong>
                                         </div>
                                     </div>

@@ -16,6 +16,7 @@ public class ChefDashboardResponse
 
     // Số món đã hoàn thành
     private long completedCount;
+    private long cancelledCount;
 
     // Số món đang tạm hết
     private long unavailableDishCount;

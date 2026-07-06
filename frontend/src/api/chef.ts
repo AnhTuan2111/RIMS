@@ -1,10 +1,9 @@
-
 import { apiClient } from './client'
 
 export type OrderItemStatus =
     | 'PREPARING'
     | 'COMPLETED'
-    | 'CANCEL_REQUESTED'
+    | 'CANCELLED'
 
 export type KitchenOrderItemResponse = {
     orderItemId: number
@@ -25,6 +24,10 @@ export type DishDetailResponse = {
     note?: string
     status: OrderItemStatus
     createdAt?: string
+
+    chefInternalNote?: string
+    chefInternalNoteCreatedAt?: string
+    chefInternalNoteAcknowledgedAt?: string
 }
 
 export type DishListResponse = {
@@ -38,7 +41,37 @@ export type DishListResponse = {
 export type ChefDashboardResponse = {
     preparingCount: number
     completedCount: number
+    cancelledCount: number
     unavailableDishCount: number
+}
+
+export type CancelledOrderResponse = {
+    orderItemId: number
+    orderId: number
+    tableNumber: string
+    dishName: string
+    quantity: number
+    cancelReason?: string
+    cancelledAt?: string
+}
+
+export type GroupedKitchenItemResponse = {
+    orderItemId: number
+    orderId: number
+    tableNumber: string
+    quantity: number
+    createdAt?: string
+}
+
+export type GroupedKitchenOrderResponse = {
+    groupKey: string
+    dishId: number
+    dishName: string
+    note?: string
+    hasNote: boolean
+    totalQuantity: number
+    earliestCreatedAt?: string
+    items: GroupedKitchenItemResponse[]
 }
 
 /**
@@ -57,7 +90,7 @@ export async function getKitchenOrders(): Promise<
 }
 
 /**
- * Xem chi tiết một món trong hàng đợi bếp.
+ * Xem chi tiết một món.
  * GET /rims/chef/orders/{orderItemId}
  */
 export async function getDishDetail(
@@ -81,12 +114,12 @@ export async function updateOrderItemStatus(
 ): Promise<string> {
     const response = await apiClient.put<string>(
         `/chef/orders/${orderItemId}/status`,
-{
-    status,
-},
-)
+        {
+            status,
+        },
+    )
 
-return response.data
+    return response.data
 }
 
 /**
@@ -138,28 +171,95 @@ export async function getChefDashboard(): Promise<
 }
 
 /**
- * Gửi yêu cầu hủy món.
- * POST /rims/chef/orders/{orderItemId}/cancel-request
+ * Hủy món.
+ * PUT /rims/chef/orders/{orderItemId}/cancel
  */
-export async function requestCancelDish(
+export async function cancelDish(
     orderItemId: number,
     reason: string,
-): Promise<string> {
-    const response = await apiClient.post<string>(
-        `/chef/orders/${orderItemId}/cancel-request`,
+): Promise<void> {
+    await apiClient.put(
+        `/chef/orders/${orderItemId}/cancel`,
         {
             reason,
         },
     )
-
-    return response.data
 }
+
+/**
+ * Lấy danh sách món đã hoàn thành.
+ * GET /rims/chef/orders/completed
+ */
 export async function getCompletedOrders(): Promise<
     KitchenOrderItemResponse[]
 > {
     const response =
         await apiClient.get<KitchenOrderItemResponse[]>(
             '/chef/orders/completed',
+        )
+
+    return response.data
+}
+
+/**
+ * Lấy danh sách món đã hủy.
+ * GET /rims/chef/orders/cancelled
+ */
+export async function getCancelledOrders(): Promise<
+    CancelledOrderResponse[]
+> {
+    const response =
+        await apiClient.get<CancelledOrderResponse[]>(
+            '/chef/orders/cancelled',
+        )
+
+    return response.data
+}
+
+/**
+ * Lấy danh sách món đã gom.
+ * GET /rims/chef/orders/grouped
+ */
+export async function getGroupedKitchenOrders(): Promise<
+    GroupedKitchenOrderResponse[]
+> {
+    const response =
+        await apiClient.get<GroupedKitchenOrderResponse[]>(
+            '/chef/orders/grouped',
+        )
+
+    return response.data
+}
+
+/**
+ * Hoàn thành các món trong một nhóm.
+ * PUT /rims/chef/orders/grouped/complete
+ */
+export async function completeGroupedKitchenOrders(
+    orderItemIds: number[],
+): Promise<void> {
+    await apiClient.put(
+        '/chef/orders/grouped/complete',
+        {
+            orderItemIds,
+        },
+    )
+}
+
+/**
+ * Chef gửi, cập nhật hoặc xóa ghi chú nội bộ.
+ * PUT /rims/chef/orders/{orderItemId}/internal-note
+ */
+export async function updateChefInternalNote(
+    orderItemId: number,
+    note: string,
+): Promise<DishDetailResponse> {
+    const response =
+        await apiClient.put<DishDetailResponse>(
+            `/chef/orders/${orderItemId}/internal-note`,
+            {
+                note,
+            },
         )
 
     return response.data
