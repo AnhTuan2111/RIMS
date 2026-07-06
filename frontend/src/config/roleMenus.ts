@@ -28,6 +28,14 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
         { label: 'Tổng quan', path: '/chef/dashboard' },
         { label: 'Đơn cần chế biến', path: '/chef/orders' },
         { label: 'Danh sách món ăn', path: '/chef/dishes' },
+        {
+            label: 'Món đã hủy',
+            path: '/chef/cancelled-orders',
+        },
+        {
+            label: 'Gom món để nấu',
+            path: '/chef/grouped-orders',
+        },
         { label: 'Hồ sơ của tôi', path: '/profile' },
     ],
 
