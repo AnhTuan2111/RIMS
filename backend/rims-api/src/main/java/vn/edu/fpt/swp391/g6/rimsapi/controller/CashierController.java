@@ -10,12 +10,14 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.PaymentResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.VNPayResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -129,5 +131,28 @@ public class CashierController
     public ResponseEntity<PaymentResponse> unlockOrder(@PathVariable Long id)
     {
         return ResponseEntity.ok(cashierService.unlockOrder(id));
+    }
+
+    @GetMapping("/customers/search")
+    public ResponseEntity<?> searchCustomer(@RequestParam String phone) {
+        User customer = cashierService.searchCustomerByPhone(phone);
+        if (customer == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(Map.of(
+                "id", customer.getId(),
+                "fullName", customer.getFullName(),
+                "phone", customer.getPhone(),
+                "rewardPoints", customer.getRewardPoints()
+        ));
+    }
+
+    @PostMapping("/customers/create")
+    public ResponseEntity<?> createCustomer(@RequestBody Map<String, String> body) {
+        User newCustomer = cashierService.createCustomerFast(body.get("fullName"), body.get("phone"), body.get("email"));
+        return ResponseEntity.ok(Map.of(
+                "id", newCustomer.getId(),
+                "fullName", newCustomer.getFullName(),
+                "phone", newCustomer.getPhone(),
+                "rewardPoints", newCustomer.getRewardPoints()
+        ));
     }
 }

@@ -6,6 +6,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.PaymentResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.VNPayResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 
 import java.util.List;
 
@@ -28,4 +29,8 @@ public interface CashierService
     VNPayResponse createVNPayPaymentUrl(Long orderId);
 
     Long processVnPaySuccess(String vnpTxnRef);
+
+    User searchCustomerByPhone(String phone);
+
+    User createCustomerFast(String fullName, String phone, String email);
 }
