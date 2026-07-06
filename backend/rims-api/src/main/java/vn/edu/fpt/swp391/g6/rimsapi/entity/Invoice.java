@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +23,8 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class Invoice
 {
+    private static final BigDecimal VAT_INCLUSIVE_MULTIPLIER = new BigDecimal("1.10");
+    private static final int VND_SCALE = 0;
 
     @Id
     @Column(name = "invoice_id", nullable = false)
@@ -35,12 +38,39 @@ public class Invoice
     @Column(nullable = false)
     private BigDecimal finalAmount;
 
+    @Column(name = "restaurant_revenue_amount", precision = 38, scale = 2)
+    private BigDecimal restaurantRevenueAmount;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime invoiceDate;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payment> payments;
+
+    @PrePersist
+    @PreUpdate
+    private void fillRestaurantRevenueAmount()
+    {
+        if (restaurantRevenueAmount == null && finalAmount != null)
+        {
+            restaurantRevenueAmount = calculateRestaurantRevenueAmount(finalAmount);
+        }
+    }
+
+    public static BigDecimal calculateRestaurantRevenueAmount(BigDecimal finalAmount)
+    {
+        if (finalAmount == null)
+        {
+            return BigDecimal.ZERO.setScale(VND_SCALE, RoundingMode.HALF_UP);
+        }
+
+        return finalAmount.divide(
+                VAT_INCLUSIVE_MULTIPLIER,
+                VND_SCALE,
+                RoundingMode.HALF_UP
+        );
+    }
 
     // Thiết lập đơn hàng cho hóa đơn này và đồng bộ hóa liên kết ngược lại từ đơn hàng về hóa đơn
     public void setOrder(Order order)
