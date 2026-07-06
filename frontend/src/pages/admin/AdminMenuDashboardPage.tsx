@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { menuApi, categoryApi, dishApi } from '../../api/admin';
-import type { MenuDashboardData, CategoryStat, DishSummary } from '../../api/admin';
+import type { MenuDashboardData } from '../../api/admin';
 
 export default function AdminMenuDashboardPage() {
     const [data, setData] = useState<MenuDashboardData | null>(null);
@@ -30,7 +30,7 @@ export default function AdminMenuDashboardPage() {
                         );
                         return {
                             categoryName: c.name,
-                            status: c.isAvailable ? 'ACTIVE' : 'HIDDEN',
+                            status: (c.isAvailable ? 'ACTIVE' : 'HIDDEN') as 'ACTIVE' | 'HIDDEN',
                             dishCount: statMatch ? statMatch.dishCount : 0
                         };
                     });

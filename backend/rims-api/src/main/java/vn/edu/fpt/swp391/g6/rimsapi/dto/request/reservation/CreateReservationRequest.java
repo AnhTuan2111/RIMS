@@ -26,11 +26,11 @@ public class CreateReservationRequest
     @Size(max = 255)
     private String note;
 
-    @NotBlank
+    @NotNull
     @Min(1)
     @Max(12)
     private Integer tableId;
 
-    @NotBlank
+    @NotNull
     private LocalDateTime reservationTime;
 }

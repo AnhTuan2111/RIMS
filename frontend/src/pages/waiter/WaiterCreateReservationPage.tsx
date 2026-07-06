@@ -1,14 +1,7 @@
 import {useEffect, useState} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
-import {useReservationTick, WaiterHeader, WaiterToast} from "../../components/waiter";
-import {
-    addReservation,
-    getActiveReservations,
-    getEffectiveTableStatus,
-    hasTimeConflict,
-    validateReservationForm,
-} from "./mockReservations";
-import {type TableDetailResponse, waiterApi} from "../../api/waiter";
+import {WaiterHeader, WaiterToast} from "../../components/waiter";
+import {type CreateReservationRequest, type TableDetailResponse, waiterApi} from "../../api/waiter";
 
 function todayString() {
     const d = new Date();
@@ -22,6 +15,7 @@ export default function WaiterCreateReservationPage() {
     const [tables, setTables] = useState<TableDetailResponse[]>([]);
     const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
     const [resFormError, setResFormError] = useState("");
+    const [rightReservations, setRightReservations] = useState<any[]>([]);
     const [resForm, setResForm] = useState({
         customerName: "",
         phone: "",
@@ -30,7 +24,6 @@ export default function WaiterCreateReservationPage() {
         tableId: preselectedTable,
         note: "",
     });
-    useReservationTick(30000);
 
     useEffect(() => {
         waiterApi.getTables().then((res) => setTables(res.data)).catch(console.error);
@@ -42,60 +35,73 @@ export default function WaiterCreateReservationPage() {
         }
     }, [preselectedTable]);
 
+    useEffect(() => {
+        if (resForm.tableId && resForm.date) {
+            waiterApi.getReservationsByTableAndDate(resForm.tableId, resForm.date)
+                .then((res) => {
+                    setRightReservations(res.data || []);
+                })
+                .catch(console.error);
+        } else {
+            setRightReservations([]);
+        }
+    }, [resForm.tableId, resForm.date]);
+
     function showToast(msg: string, type = "success") {
         setToast({msg, type});
         setTimeout(() => setToast(null), 3000);
     }
 
-    function isTableSelectable(table: TableDetailResponse): boolean {
-        if (getEffectiveTableStatus(table.status, table.tableId) !== "AVAILABLE") {
-            if (table.tableId !== resForm.tableId) return false;
-        }
-        if (!resForm.date || !resForm.time) return table.status !== "SERVING";
-        return !hasTimeConflict(getActiveReservations(), table.tableId, resForm.date, resForm.time);
-    }
-
-    function submitReservation() {
+    async function submitReservation() {
         const {customerName, phone, date, time, tableId, note} = resForm;
         if (!customerName.trim() || !phone.trim() || !date || !time || !tableId) {
             setResFormError("Vui lòng điền đầy đủ thông tin bắt buộc.");
             return;
         }
 
-        const list = getActiveReservations();
-        const validationError = validateReservationForm(list, tableId, date, time);
-        if (validationError) {
-            setResFormError(validationError);
-            return;
-        }
-
         const table = tables.find((t) => t.tableId === tableId);
-        if (table && getEffectiveTableStatus(table.status, table.tableId) !== "AVAILABLE") {
-            setResFormError("Chỉ có thể chọn bàn đang Available.");
+        if (table && table.status === "SERVING") {
+            setResFormError("Không thể đặt bàn đang phục vụ.");
             return;
         }
 
-        addReservation({tableId, customerName: customerName.trim(), phone: phone.trim(), date, time, note});
-        showToast("Đã tạo đặt bàn");
-        setResFormError("");
-        setResForm({
-            customerName: "",
-            phone: "",
-            date: todayString(),
-            time: "18:00",
-            tableId: 0,
-            note: "",
-        });
+        // Build ISO LocalDateTime string: "2026-07-07T18:00:00"
+        const reservationTime = `${date}T${time}:00`;
+        const payload: CreateReservationRequest = {
+            customerName: customerName.trim(),
+            phone: phone.trim(),
+            tableId,
+            reservationTime,
+            note: note.trim() || undefined,
+        };
+
+        try {
+            await waiterApi.createReservation(payload);
+            showToast("Đã tạo đặt bàn");
+            setResFormError("");
+            setResForm({
+                customerName: "",
+                phone: "",
+                date: todayString(),
+                time: "18:00",
+                tableId: 0,
+                note: "",
+            });
+            // Refresh list
+            if (tableId && date) {
+                waiterApi.getReservationsByTableAndDate(tableId, date)
+                    .then((res) => setRightReservations(res.data || []))
+                    .catch(console.error);
+            }
+        } catch (err: unknown) {
+            const msg =
+                (err as { response?: { data?: string } })?.response?.data ||
+                "Đặt bàn thất bại. Vui lòng thử lại.";
+            setResFormError(msg);
+        }
     }
 
-    const availableForRes = tables.filter(isTableSelectable);
-    const rightReservations = getActiveReservations()
-        .filter((r) => {
-            if (resForm.tableId && r.tableId !== resForm.tableId) return false;
-            if (resForm.date && r.date !== resForm.date) return false;
-            return true;
-        })
-        .sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`));
+    const availableForRes = tables;
 
     return (
         <div className="waiter-container">
@@ -187,10 +193,12 @@ export default function WaiterCreateReservationPage() {
                             ) : (
                                 rightReservations.map((r) => {
                                     const tableNo = tables.find((t) => t.tableId === r.tableId)?.tableNumber ?? r.tableId;
+                                    const dateStr = r.reservationTime ? r.reservationTime.split("T")[0] : "";
+                                    const timeStr = r.reservationTime ? r.reservationTime.split("T")[1]?.substring(0, 5) : "";
                                     return (
-                                        <div key={r.id} className="waiter-res-card">
+                                        <div key={r.reservationId} className="waiter-res-card">
                                             <div>
-                                                <div className="waiter-res-time">{r.date} — {r.time}</div>
+                                                <div className="waiter-res-time">{dateStr} — {timeStr}</div>
                                                 <div className="waiter-res-info">
                                                     <h4>{r.customerName}</h4>
                                                     <p>{r.phone} · Bàn {tableNo}</p>
@@ -199,7 +207,7 @@ export default function WaiterCreateReservationPage() {
                                                 </div>
                                             </div>
                                             <button
-                                                onClick={() => navigate(`/waiter/reservations/${r.id}/edit`)}
+                                                onClick={() => navigate(`/waiter/reservations/${r.reservationId}/edit`)}
                                                 className="waiter-btn-outline"
                                                 style={{padding: "0.35rem 0.85rem"}}
                                             >

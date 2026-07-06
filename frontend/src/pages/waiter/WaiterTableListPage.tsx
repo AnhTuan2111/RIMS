@@ -1,18 +1,11 @@
 import {useCallback, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import SockJS from 'sockjs-client'; // THÊM IMPORT NÀY
-import Stomp from 'stompjs';        // THÊM IMPORT NÀY
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
 import {type TableDetailResponse, waiterApi} from "../../api/waiter";
-import {useReservationTick, WaiterHeader, WaiterTableCard} from "../../components/waiter";
-import {
-    type EffectiveTableStatus,
-    getActiveReservations,
-    getEffectiveTableStatus,
-    getNextReservationForTable,
-    processAutoCancellations,
-} from "./mockReservations";
+import {WaiterHeader, WaiterTableCard} from "../../components/waiter";
 
-const STATUS_LABEL: Record<EffectiveTableStatus, string> = {
+const STATUS_LABEL: Record<string, string> = {
     AVAILABLE: "available",
     SERVING: "serving",
     RESERVED: "reserved",
@@ -22,19 +15,15 @@ export default function WaiterTableListPage() {
     const navigate = useNavigate();
     const [tables, setTables] = useState<TableDetailResponse[]>([]);
     const [tableModal, setTableModal] = useState<TableDetailResponse | null>(null);
-    useReservationTick(30000);
+    const [resTimes, setResTimes] = useState<Record<number, string>>({});
 
     const loadTables = useCallback(() => {
-        processAutoCancellations();
         waiterApi.getTables().then((res) => setTables(res.data)).catch(console.error);
     }, []);
 
-    // --- ĐÃ SỬA LẠI USEEFFECT Ở ĐÂY ---
     useEffect(() => {
-        // 1. Vẫn gọi loadTables lần đầu khi mở trang (code cũ)
         loadTables();
 
-        // 2. Bật ăng-ten lắng nghe Đầu bếp (Code mới)
         const socket = new SockJS('http://localhost:8080/ws-rims');
         const client = Stomp.over(socket);
 
@@ -43,10 +32,7 @@ export default function WaiterTableListPage() {
 
             client.subscribe('/topic/waiter', (message) => {
                 if (message.body === 'DISH_READY') {
-                    // Khi nhận được tín hiệu món xong, tự động gọi lại hàm loadTables
                     console.log("🔔 Có món đã nấu xong! Đang cập nhật lại bàn...");
-                    // Nếu ông muốn hiện pop-up thông báo cho Bồi bàn chạy đi lấy món thì mở comment dòng dưới:
-                    // alert("Có món đã nấu xong, vui lòng mang ra cho khách!");
                     loadTables();
                 }
             });
@@ -54,9 +40,7 @@ export default function WaiterTableListPage() {
             console.error("Lỗi mất kết nối với Bếp: ", error);
         });
 
-        // 3. Tắt ăng-ten khi bồi bàn thoát màn hình này
         return () => {
-            // Phải kiểm tra xem nó đã kết nối xong chưa rồi mới được rút phích cắm
             if (client !== null && client.connected) {
                 client.disconnect(() => {
                     console.log("Đã ngắt kết nối an toàn.");
@@ -64,15 +48,28 @@ export default function WaiterTableListPage() {
             }
         };
     }, [loadTables]);
-    // -----------------------------------
+
+    useEffect(() => {
+        tables.forEach((t) => {
+            if (t.status === 'RESERVED' && !resTimes[t.tableId]) {
+                waiterApi.getCurrentReservationByTable(t.tableId)
+                    .then((res) => {
+                        if (res.data?.reservationTime) {
+                            const time = res.data.reservationTime.split('T')[1]?.substring(0, 5) || '';
+                            setResTimes(prev => ({ ...prev, [t.tableId]: time }));
+                        }
+                    })
+                    .catch(console.error);
+            }
+        });
+    }, [tables, resTimes]);
 
     function handleTableClick(table: TableDetailResponse) {
-        const status = getEffectiveTableStatus(table.status, table.tableId);
-        if (status === "AVAILABLE") {
+        if (table.status === "AVAILABLE") {
             setTableModal(table);
-        } else if (status === "SERVING") {
+        } else if (table.status === "SERVING") {
             navigate(`/waiter/tables/${table.tableId}/order/detail`);
-        } else {
+        } else if (table.status === "RESERVED") {
             navigate(`/waiter/tables/${table.tableId}/reservation`);
         }
     }
@@ -96,19 +93,14 @@ export default function WaiterTableListPage() {
                 </div>
                 <div className="waiter-table-grid">
                     {displayTables.map((table) => {
-                        const effective = getEffectiveTableStatus(table.status, table.tableId);
-                        const st = STATUS_LABEL[effective];
-                        const nextRes = effective === "RESERVED"
-                            ? getNextReservationForTable(table.tableId)
-                            : getActiveReservations()
-                                .filter((r) => r.tableId === table.tableId)
-                                .sort((a, b) => a.time.localeCompare(b.time))[0];
+                        const st = STATUS_LABEL[table.status] || "available";
+                        const nextResTime = resTimes[table.tableId];
                         return (
                             <WaiterTableCard
                                 key={table.tableId}
                                 table={table}
                                 statusLabel={st}
-                                nextReservationTime={nextRes?.time}
+                                nextReservationTime={nextResTime}
                                 onClick={handleTableClick}
                             />
                         );

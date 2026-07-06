@@ -1,5 +1,6 @@
 import {apiClient} from './client'
 import type {UserResponse} from '../types/auth'
+import type {TableDetailResponse} from './waiter'
 
 export type AdminPaymentMethod = 'CASH' | 'QRCODE'
 export type BestSellingPeriod = 'WEEK' | 'MONTH' | 'YEAR'
@@ -102,6 +103,7 @@ export interface UpdateAccountRequest {
     fullName: string
     email: string
     phone: string
+    role?: string
 }
 
 export interface SetAccountStatusRequest {
@@ -284,6 +286,9 @@ export const adminApi = {
                 },
             },
         ),
+
+    getTables: () =>
+        apiClient.get<TableDetailResponse[]>('/admin/tables'),
 }
 
 export async function setAccountStatus(id: number, active: boolean): Promise<void> {

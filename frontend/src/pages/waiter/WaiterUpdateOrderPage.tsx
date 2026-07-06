@@ -102,7 +102,7 @@ export default function WaiterUpdateOrderPage() {
             const res = await waiterApi.updateOrder(targetOrderId, {items: updateItems});
             setSuccessData({
                 message: res.data?.message || "Cập nhật order thành công!",
-                itemSummary: res.data?.itemSummary || "",
+                itemSummary: "",
             });
         } catch (err) {
             // Backend ErrorResponse: { message, details: Record<string,string> }

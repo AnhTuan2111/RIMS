@@ -602,37 +602,4 @@ function ModalActions({children}: { children: React.ReactNode }) {
 function ErrBox({msg}: { msg: string }) {
     return <div className="auth-error" style={{margin: '0 0 4px'}}>{msg}</div>
 }
-
-function ToggleSwitch({active, onToggle}: { active: boolean; onToggle: () => void }) {
-    return (
-        <button
-            onClick={onToggle}
-            title={active ? 'Nhấn để khóa tài khoản' : 'Nhấn để kích hoạt tài khoản'}
-            style={{
-                position: 'relative',
-                display: 'inline-flex',
-                alignItems: 'center',
-                width: 44,
-                height: 24,
-                borderRadius: 12,
-                border: 'none',
-                cursor: 'pointer',
-                background: active ? '#22c55e' : '#d1d5db',
-                transition: 'background 0.2s ease',
-                padding: 0,
-                flexShrink: 0,
-            }}
-        >
-            <span style={{
-                position: 'absolute',
-                left: active ? 22 : 2,
-                width: 20,
-                height: 20,
-                borderRadius: '50%',
-                background: '#fff',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
-                transition: 'left 0.2s ease',
-            }}/>
-        </button>
-    )
-}
+
