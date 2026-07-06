@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.ErrorResponse;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -89,21 +90,26 @@ public class GlobalExceptionHandler
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request)
-    {
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+
+        // Lấy tất cả lỗi validation
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) ->
-        {
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
 
+        // Lấy message đầu tiên để làm message chính
+        String firstErrorMessage = errors.values().stream().findFirst().orElse("Validation Failed");
+
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Validation Failed")
+                .message(firstErrorMessage)  // ← Lấy message từ annotation
                 .path(request.getRequestURI())
                 .details(errors)
                 .build();
@@ -121,6 +127,24 @@ public class GlobalExceptionHandler
                 .path(request.getRequestURI())
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public static class DuplicateResourceException extends RuntimeException
+    {
+        public DuplicateResourceException(String message)
+        {
+            super(message);
+        }
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public static class PasswordMismatchException extends RuntimeException
+    {
+        public PasswordMismatchException(String message)
+        {
+            super(message);
+        }
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
