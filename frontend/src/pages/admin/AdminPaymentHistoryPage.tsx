@@ -2,6 +2,8 @@ import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {adminApi, type AdminPaymentHistoryItem, type AdminPaymentMethod,} from '../../api/admin'
 
+const PAYMENT_HISTORY_PAGE_SIZE = 10
+
 function formatCurrency(value: number) {
     return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
 }
@@ -99,20 +101,37 @@ export default function AdminPaymentHistoryPage() {
     const [payments, setPayments] = useState<
         AdminPaymentHistoryItem[]
     >([])
+    const [page, setPage] = useState(1)
+    const [totalItems, setTotalItems] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        void loadPaymentHistory()
-    }, [])
+        void loadPaymentHistory(page)
+    }, [page])
 
-    async function loadPaymentHistory() {
+    async function loadPaymentHistory(targetPage: number) {
         try {
             setIsLoading(true)
             setError(null)
 
-            const {data} = await adminApi.getPaymentHistory()
-            setPayments(data)
+            const {data} = await adminApi.getPaymentHistory(
+                targetPage,
+                PAYMENT_HISTORY_PAGE_SIZE,
+            )
+
+            if (
+                data.totalPages > 0 &&
+                targetPage > data.totalPages
+            ) {
+                setPage(data.totalPages)
+                return
+            }
+
+            setPayments(data.items)
+            setTotalItems(data.totalItems)
+            setTotalPages(data.totalPages)
         } catch (error) {
             console.error(error)
             setError('Không thể tải lịch sử thanh toán.')
@@ -138,13 +157,23 @@ export default function AdminPaymentHistoryPage() {
                 <button
                     className="primary-button"
                     type="button"
-                    onClick={() => void loadPaymentHistory()}
+                    onClick={() => void loadPaymentHistory(page)}
                 >
                     Thử lại
                 </button>
             </section>
         )
     }
+
+    const firstVisibleItem =
+        totalItems === 0
+            ? 0
+            : (page - 1) * PAYMENT_HISTORY_PAGE_SIZE + 1
+    const lastVisibleItem = Math.min(
+        page * PAYMENT_HISTORY_PAGE_SIZE,
+        totalItems,
+    )
+    const safeTotalPages = Math.max(totalPages, 1)
 
     return (
         <div className="admin-payment-history-page">
@@ -161,7 +190,7 @@ export default function AdminPaymentHistoryPage() {
                 <div>
                     <h2>Lịch sử danh sách</h2>
                     <p>
-                        {payments.length} hóa đơn đã thanh toán được
+                        {totalItems} hóa đơn đã thanh toán được
                         ghi nhận
                     </p>
                 </div>
@@ -234,6 +263,54 @@ export default function AdminPaymentHistoryPage() {
                         ))
                     )}
                 </div>
+
+                {totalItems > 0 && (
+                    <div className="admin-payment-pagination">
+                        <div className="admin-payment-pagination-info">
+                            Hiển thị {firstVisibleItem}-
+                            {lastVisibleItem} trong tổng{' '}
+                            {totalItems} hóa đơn
+                        </div>
+
+                        <div className="admin-payment-pagination-controls">
+                            <button
+                                className="admin-payment-pagination-button"
+                                type="button"
+                                disabled={page === 1}
+                                onClick={() =>
+                                    setPage((currentPage) =>
+                                        Math.max(currentPage - 1, 1),
+                                    )
+                                }
+                            >
+                                Trước
+                            </button>
+
+                            <span className="admin-payment-pagination-page">
+                                Trang {page} / {safeTotalPages}
+                            </span>
+
+                            <button
+                                className="admin-payment-pagination-button"
+                                type="button"
+                                disabled={
+                                    totalPages === 0 ||
+                                    page >= totalPages
+                                }
+                                onClick={() =>
+                                    setPage((currentPage) =>
+                                        Math.min(
+                                            currentPage + 1,
+                                            safeTotalPages,
+                                        ),
+                                    )
+                                }
+                            >
+                                Sau
+                            </button>
+                        </div>
+                    </div>
+                )}
             </section>
         </div>
     )

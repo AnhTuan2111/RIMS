@@ -120,9 +120,22 @@ public class AdminController
     // =================== INVOICE ===================
 
     @GetMapping("/invoice/history")
-    public List<InvoiceHistoryResponse> getInvoiceHistory()
+    public InvoiceHistoryPageResponse getInvoiceHistory(
+            @RequestParam(
+                    defaultValue = "1"
+            )
+            int page,
+
+            @RequestParam(
+                    defaultValue = "10"
+            )
+            int pageSize
+    )
     {
-        return invoiceService.getInvoiceHistory();
+        return invoiceService.getInvoiceHistory(
+                page,
+                pageSize
+        );
     }
 
     @GetMapping("/invoice/{invoiceId}")
