@@ -1,6 +1,6 @@
 import {Link} from 'react-router-dom'
 import {ROLE_LABELS, roleMenus} from '../config/roleMenus'
-import AdminRevenueOverviewDashboard from '../components/admin/AdminRevenueOverviewDashboard'
+import AdminRevenueOverviewDashboard from './admin/AdminRevenueOverviewDashboard'
 import {useActor} from '../context/ActorContext'
 import {RoleType} from '../types/auth'
 

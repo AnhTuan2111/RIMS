@@ -159,6 +159,7 @@ public class CashierServiceImpl implements CashierService
         Invoice invoice = new Invoice();
         invoice.setOrder(order);
         invoice.setFinalAmount(finalAmount);
+        invoice.setRestaurantRevenueAmount(totalBeforeVat.setScale(0, RoundingMode.HALF_UP));
         invoice.setInvoiceDate(java.time.LocalDateTime.now());
 
         Payment payment = new Payment();
@@ -340,6 +341,7 @@ public class CashierServiceImpl implements CashierService
         Invoice invoice = new Invoice();
         invoice.setOrder(order);
         invoice.setFinalAmount(finalAmount);
+        invoice.setRestaurantRevenueAmount(totalBeforeVat.setScale(0, RoundingMode.HALF_UP));
         invoice.setInvoiceDate(java.time.LocalDateTime.now());
 
         Payment payment = new Payment();

@@ -289,3 +289,128 @@ export const adminApi = {
 export async function setAccountStatus(id: number, active: boolean): Promise<void> {
     await apiClient.patch(`/admin/user/${id}/status`, {active})
 }
+
+// ============================================
+// CATEGORY TYPES
+// ============================================
+export interface CategoryResponse {
+    id: number;
+    name: string;
+    description: string;
+    isAvailable: boolean;
+    createdAt: string;
+    updatedAt: string;
+    dishCount?: number;
+}
+
+export interface DishResponse {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    imageUrl: string;
+    isAvailable: boolean;
+    categoryName: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CategoryFormData {
+    name: string;
+    description: string;
+    isAvailable: boolean;
+}
+
+// ============================================
+// CATEGORY API
+// ============================================
+export const categoryApi = {
+    // Lấy tất cả danh mục
+    getAllCategories: () =>
+        apiClient.get<CategoryResponse[]>('/admin/category/all'),
+
+    // Lấy tất cả món ăn
+    getAllDishes: () =>
+        apiClient.get<DishResponse[]>('/admin/dish/all'),
+
+    // Tạo danh mục mới
+    createCategory: (data: { name: string; description: string }) =>
+        apiClient.post<CategoryResponse>('/admin/category/new', data),
+
+    // Cập nhật danh mục
+    updateCategory: (id: number, data: { name: string; description: string; isAvailable: boolean }) =>
+        apiClient.put<CategoryResponse>(`/admin/category/${id}`, data),
+
+    // Xóa danh mục (xóa mềm)
+    deleteCategory: (id: number) =>
+        apiClient.delete(`/admin/category/${id}`),
+}
+// Thêm interface DishFormData
+export interface DishFormData {
+    name: string;
+    categoryId: string;
+    price: number;
+    description: string;
+    imageUrl: string;
+    isAvailable: boolean;
+}
+
+// Thêm dishApi
+export const dishApi = {
+    getAllDishes: () =>
+        apiClient.get<DishResponse[]>('/admin/dish/all'),
+
+    getAllCategories: () =>
+        apiClient.get<CategoryResponse[]>('/admin/category/all'),
+
+    createDish: (data: {
+        name: string;
+        description: string;
+        price: number;
+        imageUrl: string;
+        categoryId: number;
+        isAvailable: boolean;
+    }) =>
+        apiClient.post<DishResponse>('/admin/dish/new', data),
+
+    updateDish: (id: number, data: {
+        name: string;
+        description: string;
+        price: number;
+        imageUrl: string;
+        categoryId: number;
+        isAvailable: boolean;
+    }) =>
+        apiClient.put<DishResponse>(`/admin/dish/update/${id}`, data),
+
+    deleteDish: (id: number) =>
+        apiClient.delete(`/admin/dish/delete/${id}`),
+}
+export const menuApi = {
+    getMenuDashboard: () =>
+        apiClient.get<MenuDashboardData>('/admin/menu'),
+}
+export interface DishSummary {
+    id: number;
+    name: string;
+    categoryName: string;
+    price: number;
+    imageUrl: string;
+    status: 'AVAILABLE' | 'PAUSED';
+}
+
+export interface CategoryStat {
+    categoryName: string;
+    status: 'ACTIVE' | 'HIDDEN';
+    dishCount: number;
+}
+
+export interface MenuDashboardData {
+    totalDishes: number;
+    totalCategories: number;
+    totalPausedDishes: number;
+    totalHiddenDishes: number;
+    latestDishes: DishSummary[];
+    categoryStats: CategoryStat[];
+    allPausedDishesList?: DishSummary[];
+}

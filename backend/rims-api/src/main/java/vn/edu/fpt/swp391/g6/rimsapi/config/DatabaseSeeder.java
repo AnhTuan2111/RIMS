@@ -10,6 +10,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.*;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -55,6 +56,7 @@ public class DatabaseSeeder implements CommandLineRunner
         seedCategoriesAndDishes();
         seedOrdersInvoicesAndPayments();
         seedReservations();
+        backfillInvoiceRestaurantRevenueAmount();
         System.out.println("Database seeder done!");
     }
 
@@ -436,9 +438,19 @@ public class DatabaseSeeder implements CommandLineRunner
 
     private Invoice buildInvoice(Order order, LocalDateTime invoiceDate)
     {
+        BigDecimal restaurantRevenueAmount =
+                order.getTotalAmount() == null
+                        ? BigDecimal.ZERO
+                        : order.getTotalAmount().setScale(0, RoundingMode.HALF_UP);
+
         Invoice invoice = new Invoice();
         invoice.setOrder(order);
-        invoice.setFinalAmount(order.getTotalAmount());
+        invoice.setFinalAmount(
+                restaurantRevenueAmount
+                        .multiply(new BigDecimal("1.10"))
+                        .setScale(0, RoundingMode.HALF_UP)
+        );
+        invoice.setRestaurantRevenueAmount(restaurantRevenueAmount);
         invoice.setInvoiceDate(invoiceDate);
         return invoice;
     }
@@ -452,6 +464,36 @@ public class DatabaseSeeder implements CommandLineRunner
         payment.setSuccess(true);
         payment.setPaymentDate(paymentDate);
         return payment;
+    }
+
+    private void backfillInvoiceRestaurantRevenueAmount()
+    {
+        List<Invoice> invoices =
+                invoiceRepository.findByRestaurantRevenueAmountIsNull();
+
+        if (invoices.isEmpty())
+        {
+            return;
+        }
+
+        invoices.forEach(invoice ->
+        {
+            BigDecimal restaurantRevenueAmount;
+
+            if (invoice.getOrder() != null && invoice.getOrder().getTotalAmount() != null)
+            {
+                restaurantRevenueAmount =
+                        invoice.getOrder().getTotalAmount().setScale(0, RoundingMode.HALF_UP);
+            } else
+            {
+                restaurantRevenueAmount =
+                        Invoice.calculateRestaurantRevenueAmount(invoice.getFinalAmount());
+            }
+
+            invoice.setRestaurantRevenueAmount(restaurantRevenueAmount);
+        });
+
+        invoiceRepository.saveAll(invoices);
     }
 
 
