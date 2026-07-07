@@ -11,7 +11,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.ReservationDetailRe
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 

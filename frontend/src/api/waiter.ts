@@ -11,6 +11,8 @@ export type TableDetailResponse = {
     tableNumber: string;
     capacity: number;
     status: TableStatus;
+    upcomingReservationTime?: string;
+    upcomingCustomerName?: string;
 };
 
 export type MenuItemResponse = {

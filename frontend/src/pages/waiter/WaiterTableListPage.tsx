@@ -112,9 +112,22 @@ export default function WaiterTableListPage() {
                 <div className="waiter-modal-overlay" onClick={() => setTableModal(null)}>
                     <div className="waiter-modal" onClick={(e) => e.stopPropagation()}>
                         <h3>Bàn {tableModal.tableNumber}</h3>
-                        <p>Bàn đang trống. Bạn muốn làm gì?</p>
+                        
+                        {tableModal.status === "AVAILABLE" && tableModal.upcomingReservationTime ? (
+                            <div className="waiter-warning-box">
+                                <p>
+                                    <strong>⚠️ Cảnh báo:</strong> Bàn này đã được đặt trước bởi <b>{tableModal.upcomingCustomerName || "Khách"}</b> vào lúc <b>{tableModal.upcomingReservationTime.split('T')[1].substring(0, 5)}</b>.
+                                </p>
+                                <p>Vui lòng xác nhận với khách walk-in rằng họ có thể hoàn thành bữa ăn trước thời gian này không. Nếu không, hãy chọn bàn khác.</p>
+                            </div>
+                        ) : (
+                            <p>Bàn đang trống. Bạn muốn làm gì?</p>
+                        )}
+                        
                         <div className="waiter-modal-actions">
-                            <button onClick={() => setTableModal(null)} className="waiter-btn-outline">Hủy</button>
+                            <button onClick={() => setTableModal(null)} className="waiter-btn-outline">
+                                {tableModal.upcomingReservationTime ? 'Chọn Bàn Khác' : 'Hủy'}
+                            </button>
                             <button
                                 onClick={() => navigate(`/waiter/reservations?tableId=${tableModal.tableId}`)}
                                 className="waiter-btn-outline"
