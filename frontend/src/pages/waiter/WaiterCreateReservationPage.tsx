@@ -94,9 +94,12 @@ export default function WaiterCreateReservationPage() {
                     .catch(console.error);
             }
         } catch (err: unknown) {
+            const responseData = (err as { response?: { data?: unknown } })?.response?.data;
             const msg =
-                (err as { response?: { data?: string } })?.response?.data ||
-                "Đặt bàn thất bại. Vui lòng thử lại.";
+                typeof responseData === "string"
+                    ? responseData
+                    : (responseData as { message?: string })?.message
+                    ?? "Đặt bàn thất bại. Vui lòng thử lại.";
             setResFormError(msg);
         }
     }

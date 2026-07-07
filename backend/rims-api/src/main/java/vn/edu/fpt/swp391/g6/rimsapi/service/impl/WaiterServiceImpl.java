@@ -28,8 +28,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 @Service
@@ -350,7 +352,9 @@ public class WaiterServiceImpl implements WaiterService
 
         reservationRepository.save(reservation);
 
-        return "Tạo đơn đặt bàn thành công";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH 'giờ' mm 'phút,' EEEE 'ngày' dd 'tháng' MM 'năm' yyyy", Locale.of("vi", "VN"));
+
+        return "Tạo đơn đặt bàn thành công cho bàn" + table.getTableNumber() + " vào " + request.getReservationTime().format(formatter);
     }
 
     @Override
@@ -375,19 +379,17 @@ public class WaiterServiceImpl implements WaiterService
     @Override
     public ReservationDetailResponse getCurrentReservationByTable(int tableId)
     {
-        RestaurantTable table = restaurantTableRepository.findById(tableId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + tableId));
+        RestaurantTable table = restaurantTableRepository.findById(tableId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + tableId));
 
         if (table.getStatus() != TableStatus.RESERVED)
         {
-            throw new IllegalArgumentException("cannot get ReservationDetail for table " + tableId);
+            throw new IllegalArgumentException("Bàn " + tableId + " không ở trạng thái RESERVED");
         }
 
-        Reservation reservation = table.getReservations().stream().filter(r -> ReservationStatus.WAITING.equals(r.getStatus())).findFirst().orElse(null);
-
-        if (reservation == null)
-        {
-            throw new IllegalArgumentException("Cannot find Reservation");
-        }
+        Reservation reservation = reservationRepository
+                .findFirstByTableIdAndStatus(tableId, ReservationStatus.WAITING)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đặt bàn WAITING cho bàn " + tableId));
 
         return toReservationResponse(reservation);
     }
