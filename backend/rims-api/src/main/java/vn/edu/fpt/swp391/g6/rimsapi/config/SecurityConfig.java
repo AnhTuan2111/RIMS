@@ -49,7 +49,7 @@ public class SecurityConfig
                                 "/rims/auth/reset-password"
                         ).permitAll()
                         .requestMatchers("/ws-rims/**").permitAll()
-                        .requestMatchers("/rims/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/rims/admin/**").permitAll()
                         .requestMatchers("/rims/chef/**").hasRole("CHEF")
                         .requestMatchers("/rims/waiter/**").hasRole("WAITER")
                         .requestMatchers("/rims/cashier/**").hasRole("CASHIER")

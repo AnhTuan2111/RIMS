@@ -70,6 +70,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setFullName(request.getFullName());
+        user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         userRepository.save(user);
@@ -101,7 +102,7 @@ public class UserServiceImpl implements UserService {
 
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setFullName(request.getUsername());
+        user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setRole(request.getRole());
