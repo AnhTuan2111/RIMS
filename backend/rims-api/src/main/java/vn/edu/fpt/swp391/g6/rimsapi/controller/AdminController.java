@@ -15,6 +15,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateCustomerRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateStaffRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.SetAccountStatusRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.PageResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
@@ -54,15 +55,23 @@ public class AdminController
     }
 
     @GetMapping("/user/staff")
-    public List<UserResponse> getStaffAccounts()
+    public PageResponse<UserResponse> getStaffAccounts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
     {
-        return userService.getStaffAccounts();
+        return userService.getStaffAccounts(keyword, active, page, size);
     }
 
     @GetMapping("/user/customer")
-    public List<UserResponse> getCustomerAccounts()
+    public PageResponse<UserResponse> getCustomerAccounts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
     {
-        return userService.getCustomerAccounts();
+        return userService.getCustomerAccounts(keyword, active, page, size);
     }
 
     @GetMapping("/user/{id}")

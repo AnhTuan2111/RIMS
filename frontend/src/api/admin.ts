@@ -130,15 +130,32 @@ export interface SetAccountStatusRequest {
     active: boolean
 }
 
+export interface PageResponse<T> {
+    content: T[]
+    page: number
+    size: number
+    totalElements: number
+    totalPages: number
+    first: boolean
+    last: boolean
+}
+
+export interface GetAccountsParams {
+    keyword?: string
+    active?: boolean
+    page?: number   // bắt đầu từ 0
+    size?: number
+}
+
 // Staff accounts
-export async function getStaffAccounts(): Promise<UserResponse[]> {
-    const res = await apiClient.get<UserResponse[]>('/admin/user/staff')
+export async function getStaffAccounts(params: GetAccountsParams = {}): Promise<PageResponse<UserResponse>> {
+    const res = await apiClient.get<PageResponse<UserResponse>>('/admin/user/staff', {params})
     return res.data
 }
 
 // Customer accounts
-export async function getCustomerAccounts(): Promise<UserResponse[]> {
-    const res = await apiClient.get<UserResponse[]>('/admin/user/customer')
+export async function getCustomerAccounts(params: GetAccountsParams = {}): Promise<PageResponse<UserResponse>> {
+    const res = await apiClient.get<PageResponse<UserResponse>>('/admin/user/customer', {params})
     return res.data
 }
 
