@@ -1,6 +1,10 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.UpdateProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.PageResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
@@ -15,6 +20,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.DuplicateResourceException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.PasswordMismatchException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.spec.UserSpecifications;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.EmailService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
@@ -27,12 +33,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private static final List<RoleType> STAFF_ROLES = List.of(
-            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER, RoleType.ADMIN
-    );
     private static final List<RoleType> ASSIGNABLE_STAFF_ROLES = List.of(
             RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER
     );
+
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -77,20 +83,29 @@ public class UserServiceImpl implements UserService {
         return toUserProfile(user);
     }
 
-    @Override
-    public List<UserResponse> getStaffAccounts() {
-        return userRepository.findByRoleIn(STAFF_ROLES).stream()
-                .map(this::convertToResponse)
-                .toList();
-    }
-
     // ===================== NEW =====================
 
     @Override
-    public List<UserResponse> getCustomerAccounts() {
-        return userRepository.findByRole(RoleType.CUSTOMER).stream()
-                .map(this::convertToResponse)
-                .toList();
+    public PageResponse<UserResponse> getStaffAccounts(String keyword, Boolean active, int page, int size) {
+        // Danh sách "nhân viên" hiển thị cho admin không bao gồm chính tài khoản ADMIN
+        var spec = UserSpecifications.filter(ASSIGNABLE_STAFF_ROLES, null, keyword, active);
+        Pageable pageable = buildPageable(page, size);
+        Page<User> result = userRepository.findAll(spec, pageable);
+        return PageResponse.from(result.map(this::convertToResponse));
+    }
+
+    @Override
+    public PageResponse<UserResponse> getCustomerAccounts(String keyword, Boolean active, int page, int size) {
+        var spec = UserSpecifications.filter(List.of(RoleType.CUSTOMER), null, keyword, active);
+        Pageable pageable = buildPageable(page, size);
+        Page<User> result = userRepository.findAll(spec, pageable);
+        return PageResponse.from(result.map(this::convertToResponse));
+    }
+
+    private Pageable buildPageable(int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = size <= 0 ? DEFAULT_PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE);
+        return PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
     @Override
