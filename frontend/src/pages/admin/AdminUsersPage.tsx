@@ -92,7 +92,7 @@ export default function AdminUsersPage() {
 
     const openEdit = (user: UserResponse) => {
         setSelectedUser(user)
-        setForm({...form, fullName: user.fullName, email: user.email ?? '', phone: user.phone, role: user.role})
+        setForm({...form, username: user.username, fullName: user.fullName, email: user.email ?? '', phone: user.phone, role: user.role})
         setFormError(null)
         setModal('edit')
     }
@@ -172,8 +172,8 @@ export default function AdminUsersPage() {
 
     const handleUpdate = async () => {
         if (!selectedUser) return
-        if (!form.fullName || !form.phone) {
-            setFormError('Họ tên và số điện thoại không được để trống')
+        if (!form.username || !form.fullName || !form.phone) {
+            setFormError('Tên đăng nhập, họ tên và số điện thoại không được để trống')
             return
         }
         setFormLoading(true);
@@ -181,6 +181,7 @@ export default function AdminUsersPage() {
         try {
             const isStaff = selectedUser.role !== 'CUSTOMER' && selectedUser.role !== 'ADMIN'
             await adminApi.updateAccount(selectedUser.id, {
+                username: form.username,
                 fullName: form.fullName,
                 email: form.email,
                 phone: form.phone,
@@ -384,9 +385,11 @@ export default function AdminUsersPage() {
                                 {STAFF_ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
                             </select>
                         </Field>
-                        <Field label="Mật khẩu *"><input type="password" value={form.password}
-                                                         onChange={e => setForm({...form, password: e.target.value})}
-                                                         placeholder="Tối thiểu 6 ký tự"/></Field>
+                        <Field label="Mật khẩu *">
+                            <PasswordInput value={form.password}
+                                           onChange={v => setForm({...form, password: v})}
+                                           placeholder="Tối thiểu 6 ký tự"/>
+                        </Field>
                     </FieldGroup>
                     {formError && <ErrBox msg={formError}/>}
                     <ModalActions>
@@ -416,9 +419,11 @@ export default function AdminUsersPage() {
                         <Field label="Số điện thoại *"><input value={form.phone}
                                                               onChange={e => setForm({...form, phone: e.target.value})}
                                                               placeholder="0xxxxxxxxx"/></Field>
-                        <Field label="Mật khẩu *"><input type="password" value={form.password}
-                                                         onChange={e => setForm({...form, password: e.target.value})}
-                                                         placeholder="Tối thiểu 6 ký tự"/></Field>
+                        <Field label="Mật khẩu *">
+                            <PasswordInput value={form.password}
+                                           onChange={v => setForm({...form, password: v})}
+                                           placeholder="Tối thiểu 6 ký tự"/>
+                        </Field>
                     </FieldGroup>
                     {formError && <ErrBox msg={formError}/>}
                     <ModalActions>
@@ -462,6 +467,7 @@ export default function AdminUsersPage() {
                         </div>
                     </div>
                     <DR label="Họ tên" value={selectedUser.fullName}/>
+                    <DR label="Tên đăng nhập" value={selectedUser.username}/>
                     <DR label="Email" value={selectedUser.email ?? '—'}/>
                     <DR label="Số điện thoại" value={selectedUser.phone}/>
                     <DR label="Vai trò" value={ROLE_LABELS[selectedUser.role] ?? selectedUser.role}/>
@@ -490,6 +496,9 @@ export default function AdminUsersPage() {
                         ID: <strong>#{selectedUser.id}</strong>
                     </div>
                     <FieldGroup>
+                        <Field label="Tên đăng nhập *"><input value={form.username}
+                                                              onChange={e => setForm({...form, username: e.target.value})}
+                                                              placeholder="username"/></Field>
                         <Field label="Họ tên *"><input value={form.fullName}
                                                        onChange={e => setForm({...form, fullName: e.target.value})}
                                                        placeholder="Nguyễn Văn A"/></Field>
@@ -611,4 +620,81 @@ function ModalActions({children}: { children: React.ReactNode }) {
 
 function ErrBox({msg}: { msg: string }) {
     return <div className="auth-error" style={{margin: '0 0 4px'}}>{msg}</div>
+}
+
+function PasswordInput({value, onChange, placeholder}: {
+    value: string
+    onChange: (v: string) => void
+    placeholder?: string
+}) {
+    const [visible, setVisible] = useState(false)
+    return (
+        <div style={{position: 'relative', display: 'flex', alignItems: 'center'}}>
+            <input
+                type={visible ? 'text' : 'password'}
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                placeholder={placeholder}
+                style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '9px 40px 9px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 8,
+                    fontSize: 14,
+                }}
+            />
+            <button
+                type="button"
+                onClick={() => setVisible(v => !v)}
+                aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                title={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                style={{
+                    position: 'absolute',
+                    right: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 28,
+                    height: 28,
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    color: '#9ca3af',
+                    transition: 'color 0.15s ease, background-color 0.15s ease',
+                }}
+                onMouseEnter={e => {
+                    e.currentTarget.style.color = '#4f46e5'
+                    e.currentTarget.style.backgroundColor = '#eef2ff'
+                }}
+                onMouseLeave={e => {
+                    e.currentTarget.style.color = '#9ca3af'
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+            >
+                {visible ? <EyeOffIcon/> : <EyeIcon/>}
+            </button>
+        </div>
+    )
+}
+
+function EyeIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>
+    )
+}
+
+function EyeOffIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.62 21.62 0 0 1 5.06-6.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.36M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+    )
 }

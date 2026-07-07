@@ -102,6 +102,7 @@ export interface CreateStaffRequest {
 }
 
 export interface UpdateAccountRequest {
+    username: string
     fullName: string
     email: string
     phone: string

@@ -121,6 +121,10 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateAccount(Integer id, UpdateAccountRequest request) {
         User user = findUserById(id);
 
+        if (!user.getUsername().equals(request.getUsername())
+                && userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên đăng nhập đã được sử dụng");
+        }
         if (!user.getPhone().equals(request.getPhone())
                 && userRepository.existsByPhone(request.getPhone())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Số điện thoại đã được sử dụng");
@@ -131,6 +135,7 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã được sử dụng");
         }
 
+        user.setUsername(request.getUsername());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
