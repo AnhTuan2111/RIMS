@@ -12,8 +12,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
-import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.DuplicateResourceException;
-import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.PasswordMismatchException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.EmailService;
@@ -28,11 +26,9 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private static final List<RoleType> STAFF_ROLES = List.of(
-            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER, RoleType.ADMIN
-    );
+            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER, RoleType.ADMIN);
     private static final List<RoleType> ASSIGNABLE_STAFF_ROLES = List.of(
-            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER
-    );
+            RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
