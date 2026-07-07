@@ -84,9 +84,12 @@ export default function WaiterEditReservationPage() {
             setResFormError("");
             setTimeout(() => navigate("/waiter/tables"), 800);
         } catch (err: unknown) {
+            const responseData = (err as { response?: { data?: unknown } })?.response?.data;
             const msg =
-                (err as { response?: { data?: string } })?.response?.data ||
-                "Cập nhật đặt bàn thất bại.";
+                typeof responseData === "string"
+                    ? responseData
+                    : (responseData as { message?: string })?.message
+                    ?? "Cập nhật đặt bàn thất bại.";
             setResFormError(msg);
         }
     }
