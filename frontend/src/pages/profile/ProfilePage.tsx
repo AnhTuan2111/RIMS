@@ -21,6 +21,7 @@ export default function ProfilePage() {
 
     const [isEditing, setIsEditing] = useState(false)
     const [fullName, setFullName] = useState(savedUser?.fullName ?? '')
+    const [username, setUsername] = useState(savedUser?.username ?? '')
     const [email, setEmail] = useState(savedUser?.email ?? '')
     const [phone, setPhone] = useState(savedUser?.phone ?? '')
     const [updateLoading, setUpdateLoading] = useState(false)
@@ -42,28 +43,50 @@ export default function ProfilePage() {
     const handleSaveProfile = async () => {
         setUpdateLoading(true)
         setUpdateError(null)
+
         try {
-            const data = {fullName, email, phone}
-            let updated
-            if (actor === RoleType.CUSTOMER) {
-                updated = await customerApi.updateMyProfile(data)
-            } else {
-                updated = await adminApi.updateAccount(savedUser.userId, data)
+
+            const data = {
+                fullName,
+                username,
+                email,
+                phone
             }
-            // Update localStorage
-            localStorage.setItem('currentUser', JSON.stringify({
+
+            // Dùng endpoint legacy PUT /admin/user/profile/update/{id} (giống GET /admin/user/profile/{id})
+            const updated = await adminApi.updateProfile(savedUser.userId, data)
+
+            const newUser = {
                 ...savedUser,
+                username: updated.username,
                 fullName: updated.fullName,
                 email: updated.email,
-                phone: updated.phone,
-            }))
+                phone: updated.phone
+            }
+
+            localStorage.setItem(
+                'currentUser',
+                JSON.stringify(newUser)
+            )
+
+            setUsername(updated.username)
+            setFullName(updated.fullName)
+            setEmail(updated.email)
+            setPhone(updated.phone)
+
             setIsEditing(false)
+
             setUpdateSuccess(true)
             setTimeout(() => setUpdateSuccess(false), 3000)
+
         } catch (err) {
+
             setUpdateError(getErrorMessage(err))
+
         } finally {
+
             setUpdateLoading(false)
+
         }
     }
 
@@ -116,7 +139,7 @@ export default function ProfilePage() {
                 <div style={successStyle}>✓ Đổi mật khẩu thành công!</div>
             )}
 
-            {/* Profile Card */}
+            {/* Profile Card - dùng chung cho mọi vai trò (customer + staff) */}
             <div style={cardStyle}>
                 <div style={{display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '28px'}}>
                     <div style={avatarStyle}>
@@ -134,12 +157,12 @@ export default function ProfilePage() {
                 </div>
 
                 <div style={{display: 'grid', gap: '16px'}}>
-                    <ProfileField label="Tên đăng nhập" value={savedUser.username} readOnly/>
-
                     {isEditing ? (
                         <>
                             <EditField label="Họ tên *" value={fullName} onChange={setFullName}
                                        placeholder="Nguyễn Văn A"/>
+                            <EditField label="Username *" value={username} onChange={setUsername}
+                                       placeholder="abc"/>
                             <EditField label="Email" type="email" value={email} onChange={setEmail}
                                        placeholder="email@example.com"/>
                             <EditField label="Số điện thoại *" value={phone} onChange={setPhone}
@@ -148,6 +171,7 @@ export default function ProfilePage() {
                     ) : (
                         <>
                             <ProfileField label="Họ tên" value={savedUser.fullName}/>
+                            <ProfileField label="Username" value={savedUser.username}/>
                             <ProfileField label="Email" value={savedUser.email ?? '—'}/>
                             <ProfileField label="Số điện thoại" value={savedUser.phone}/>
                         </>
@@ -160,6 +184,10 @@ export default function ProfilePage() {
                     <div style={{display: 'flex', gap: '8px', marginTop: '20px', justifyContent: 'flex-end'}}>
                         <button className="secondary-button" onClick={() => {
                             setIsEditing(false);
+                            setFullName(savedUser.fullName)
+                            setUsername(savedUser.username)
+                            setEmail(savedUser.email ?? '')
+                            setPhone(savedUser.phone)
                             setUpdateError(null)
                         }}>
                             Hủy

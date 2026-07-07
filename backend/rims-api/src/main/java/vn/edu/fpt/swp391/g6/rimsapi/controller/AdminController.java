@@ -112,7 +112,7 @@ public class AdminController
     @PutMapping("/user/profile/update/{id}")
     public UserProfileResponse updateProfile(
             @PathVariable Integer id,
-            @RequestBody UpdateProfileRequest request)
+            @RequestBody @Valid UpdateProfileRequest request)
     {
         return userService.updateProfile(id, request);
     }

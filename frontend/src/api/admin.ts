@@ -86,6 +86,7 @@ export interface HighestOrderShift {
 
 export interface CreateCustomerRequest {
     username: string
+    fullName: string
     email: string
     phone: string
     password: string
@@ -93,6 +94,7 @@ export interface CreateCustomerRequest {
 
 export interface CreateStaffRequest {
     username: string
+    fullName: string
     email: string
     phone: string
     role: string
@@ -104,6 +106,23 @@ export interface UpdateAccountRequest {
     email: string
     phone: string
     role?: string
+}
+
+// Dùng cho trang "Hồ sơ của tôi" (staff tự cập nhật thông tin của chính mình)
+export interface UpdateOwnProfileRequest {
+    fullName: string
+    username: string
+    email: string
+    phone: string
+}
+
+export interface UserProfileResponse {
+    userId: number
+    username: string
+    fullName: string
+    phone: string
+    email: string
+    role: string
 }
 
 export interface SetAccountStatusRequest {
@@ -139,6 +158,17 @@ export async function createStaff(data: CreateStaffRequest): Promise<UserRespons
 
 export async function updateAccount(id: number, data: UpdateAccountRequest): Promise<UserResponse> {
     const res = await apiClient.put<UserResponse>(`/admin/user/${id}`, data)
+    return res.data
+}
+
+// Legacy profile endpoints (dùng cho trang "Hồ sơ của tôi")
+export async function getProfile(id: number): Promise<UserProfileResponse> {
+    const res = await apiClient.get<UserProfileResponse>(`/admin/user/profile/${id}`)
+    return res.data
+}
+
+export async function updateProfile(id: number, data: UpdateOwnProfileRequest): Promise<UserProfileResponse> {
+    const res = await apiClient.put<UserProfileResponse>(`/admin/user/profile/update/${id}`, data)
     return res.data
 }
 

@@ -120,7 +120,7 @@ export default function AdminUsersPage() {
     }
 
     const handleCreateStaff = async () => {
-        if (!form.username || !form.email || !form.phone || !form.password) {
+        if (!form.username || !form.fullName || !form.email || !form.phone || !form.password) {
             setFormError('Vui lòng điền đầy đủ các trường bắt buộc')
             return
         }
@@ -129,6 +129,7 @@ export default function AdminUsersPage() {
         try {
             await adminApi.createStaff({
                 username: form.username,
+                fullName: form.fullName,
                 email: form.email,
                 phone: form.phone,
                 role: form.role,
@@ -145,7 +146,7 @@ export default function AdminUsersPage() {
     }
 
     const handleCreateCustomer = async () => {
-        if (!form.username || !form.email || !form.phone || !form.password) {
+        if (!form.username || !form.fullName || !form.email || !form.phone || !form.password) {
             setFormError('Vui lòng điền đầy đủ các trường bắt buộc')
             return
         }
@@ -154,6 +155,7 @@ export default function AdminUsersPage() {
         try {
             await adminApi.createCustomer({
                 username: form.username,
+                fullName: form.fullName,
                 email: form.email,
                 phone: form.phone,
                 password: form.password
@@ -363,6 +365,10 @@ export default function AdminUsersPage() {
             {modal === 'create-staff' && (
                 <Modal title="Thêm tài khoản nhân viên" onClose={() => setModal(null)}>
                     <FieldGroup>
+                        <Field label="Họ tên *"><input value={form.fullName} onChange={e => setForm({
+                            ...form,
+                            fullName: e.target.value
+                        })} placeholder="Nguyễn Văn A"/></Field>
                         <Field label="Tên đăng nhập *"><input value={form.username} onChange={e => setForm({
                             ...form,
                             username: e.target.value
@@ -396,6 +402,10 @@ export default function AdminUsersPage() {
             {modal === 'create-customer' && (
                 <Modal title="Thêm tài khoản khách hàng" onClose={() => setModal(null)}>
                     <FieldGroup>
+                        <Field label="Họ tên *"><input value={form.fullName} onChange={e => setForm({
+                            ...form,
+                            fullName: e.target.value
+                        })} placeholder="Nguyễn Văn A"/></Field>
                         <Field label="Tên đăng nhập *"><input value={form.username} onChange={e => setForm({
                             ...form,
                             username: e.target.value
@@ -602,4 +612,3 @@ function ModalActions({children}: { children: React.ReactNode }) {
 function ErrBox({msg}: { msg: string }) {
     return <div className="auth-error" style={{margin: '0 0 4px'}}>{msg}</div>
 }
-
