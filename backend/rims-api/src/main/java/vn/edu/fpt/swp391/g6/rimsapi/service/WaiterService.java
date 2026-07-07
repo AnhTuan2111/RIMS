@@ -20,6 +20,8 @@ public interface WaiterService
 
     CreateOrderResponse createOrder(CreateOrderRequest request, Integer waiterId);
 
+    CreateOrderResponse createOrderFromReservation(Long reservationId, CreateOrderRequest request, Integer waiterId);
+
     UpdateOrderResponse updateOrder(Long orderId, UpdateOrderRequest request, Integer waiterId);
 
     List<MenuItemResponse> getMenu();

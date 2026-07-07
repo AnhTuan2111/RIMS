@@ -98,6 +98,9 @@ export const waiterApi = {
     createOrder: (data: CreateOrderRequest) =>
         apiClient.post<CreateOrderResponse>('/waiter/orders', data),
 
+    createOrderFromReservation: (reservationId: number, data: CreateOrderRequest) =>
+        apiClient.post<CreateOrderResponse>(`/waiter/reservations/${reservationId}/orders`, data),
+
     updateOrder: (orderId: number, data: UpdateOrderRequest) =>
         apiClient.put<UpdateOrderResponse>(`/waiter/orders/${orderId}`, data),
 
