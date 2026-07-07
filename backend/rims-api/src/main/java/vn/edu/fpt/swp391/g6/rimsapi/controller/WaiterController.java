@@ -84,6 +84,16 @@ public class WaiterController
         return ResponseEntity.status(HttpStatus.CREATED).body(waiterService.createReservation(request));
     }
 
+    @PostMapping("/reservations/{reservationId}/orders")
+    public ResponseEntity<CreateOrderResponse> createOrderFromReservation(
+            @PathVariable Long reservationId,
+            @Valid @RequestBody CreateOrderRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal)
+    {
+        CreateOrderResponse response = waiterService.createOrderFromReservation(reservationId, request, userPrincipal.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @GetMapping("/reservations/{reservationId}")
     public ResponseEntity<ReservationDetailResponse> getReservationDetail(@PathVariable Long reservationId)
     {

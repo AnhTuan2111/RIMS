@@ -59,6 +59,12 @@ export default function WaiterCreateReservationPage() {
             return;
         }
 
+        const timeHour = parseInt(time.split(":")[0]);
+        if (timeHour < 8 || timeHour >= 22) {
+            setResFormError("Giờ đặt bàn phải nằm trong khoảng từ 08:00 đến 22:00.");
+            return;
+        }
+
         const table = tables.find((t) => t.tableId === tableId);
         if (table && table.status === "SERVING") {
             setResFormError("Không thể đặt bàn đang phục vụ.");
@@ -148,6 +154,8 @@ export default function WaiterCreateReservationPage() {
                                     <label>Giờ đặt</label>
                                     <input
                                         type="time"
+                                        min="08:00"
+                                        max="22:00"
                                         value={resForm.time}
                                         onChange={(e) => setResForm({...resForm, time: e.target.value})}
                                         className="waiter-form-input"
@@ -189,7 +197,10 @@ export default function WaiterCreateReservationPage() {
                         </div>
                     </div>
                     <div className="waiter-card">
-                        <div className="waiter-card-header">Danh sách đặt bàn</div>
+                        <div className="waiter-card-header">
+                            Lịch đặt cùng ngày
+                            (Bàn {tables.find((t) => t.tableId === resForm.tableId)?.tableNumber || "..."})
+                        </div>
                         <div className="waiter-card-body waiter-res-list">
                             {rightReservations.length === 0 ? (
                                 <p style={{color: "#94a3b8", fontWeight: 500}}>Không có lịch đặt nào.</p>

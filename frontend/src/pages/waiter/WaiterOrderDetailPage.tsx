@@ -62,42 +62,7 @@ export default function WaiterOrderDetailPage() {
                             </table>
                         </div>
                     </div>
-                    <div className="waiter-card">
-                        <div className="waiter-card-header">Hóa đơn tạm tính</div>
-                        <div className="waiter-card-body">
-                            {servingOrders.length > 0 && (
-                                <>
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        marginBottom: '0.75rem'
-                                    }}>
-                                        <span style={{color: '#64748b', fontWeight: 600}}>Tạm tính:</span>
-                                        <span
-                                            style={{fontWeight: 700}}>{fmtPrice(servingOrders[0].totalAmountBeforeVat)}</span>
-                                    </div>
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        marginBottom: '1.25rem',
-                                        borderBottom: '1px solid #e2e8f0',
-                                        paddingBottom: '1.25rem'
-                                    }}>
-                                        <span style={{color: '#64748b', fontWeight: 600}}>VAT (10%):</span>
-                                        <span style={{fontWeight: 700}}>{fmtPrice(servingOrders[0].vatAmount)}</span>
-                                    </div>
-                                    <div
-                                        style={{display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem'}}>
-                                        <span style={{color: '#0f172a', fontWeight: 800}}>Tổng cộng:</span>
-                                        <span style={{
-                                            fontWeight: 800,
-                                            color: '#dc2626'
-                                        }}>{fmtPrice(servingOrders[0].finalAmount)}</span>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
+
                 </div>
             </main>
         </div>

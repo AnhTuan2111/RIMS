@@ -158,6 +158,33 @@ public class WaiterServiceImpl implements WaiterService
 
     @Override
     @Transactional
+    public CreateOrderResponse createOrderFromReservation(Long reservationId, CreateOrderRequest request, Integer waiterId)
+    {
+        // lấy và validate Reservation
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đặt bàn với ID: " + reservationId));
+
+        if (reservation.getStatus() != ReservationStatus.WAITING)
+        {
+            throw new IllegalStateException("Chỉ có thể nhận bàn khi khách đến đúng khung giờ (Trạng thái WAITING). Vui lòng đợi đến khi bàn chuyển sang trạng thái RESERVED.");
+        }
+
+        if (reservation.getTable().getStatus() != TableStatus.RESERVED)
+        {
+            throw new IllegalStateException("Bàn hiện tại chưa được giữ (Reserved) cho đặt bàn này.");
+        }
+
+        //ghi đè Table ID để đảm bảo đồng nhất dữ liệu
+        request.setTableId(reservation.getTable().getId());
+
+        reservation.setStatus(ReservationStatus.COMPLETED); //hoàn tất Đặt bàn
+        reservationRepository.save(reservation);
+
+        return this.createOrder(request, waiterId); // gọi lại hàm tạo Order như bình thường
+    }
+
+    @Override
+    @Transactional
     public UpdateOrderResponse updateOrder(Long id, UpdateOrderRequest updateOrderRequest, Integer waiterId)
     {
         // nhận order id để validate (order đang serving và table đang serving)
