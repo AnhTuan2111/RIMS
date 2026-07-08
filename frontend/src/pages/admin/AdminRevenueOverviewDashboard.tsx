@@ -4,12 +4,9 @@ import {
     type BestSellingDishItem,
     type OrderShiftItem,
     type OrderShiftReportResponse,
-    type RevenueComparisonResponse,
     type RevenueReportResponse,
     type WeeklyRevenueChartResponse,
 } from '../../api/admin'
-
-type StatusTone = 'positive' | 'negative' | 'neutral'
 
 interface WeekOption {
     value: string
@@ -24,7 +21,6 @@ interface ShiftViewItem extends OrderShiftItem {
 
 interface WeeklyRevenueOverviewData {
     revenue: RevenueReportResponse | null
-    comparison: RevenueComparisonResponse | null
     dailyRevenue: WeeklyRevenueChartResponse | null
     bestSellers: BestSellingDishItem[]
     orderShiftReport: OrderShiftReportResponse | null
@@ -32,7 +28,6 @@ interface WeeklyRevenueOverviewData {
 
 const emptyWeeklyRevenueOverviewData: WeeklyRevenueOverviewData = {
     revenue: null,
-    comparison: null,
     dailyRevenue: null,
     bestSellers: [],
     orderShiftReport: null,
@@ -89,25 +84,6 @@ function parseApiDate(date: string) {
     const [year, month, day] = date.split('-').map(Number)
 
     return new Date(year, month - 1, day)
-}
-
-function getPreviousWeekRange(week: WeekOption) {
-    const currentStartDate = parseApiDate(week.fromDate)
-    const currentEndDate = parseApiDate(week.toDate)
-    const daysInRange = Math.max(
-        1,
-        Math.round(
-            (currentEndDate.getTime() - currentStartDate.getTime())
-            / 86_400_000,
-        ) + 1,
-    )
-    const previousEndDate = addDays(currentStartDate, -1)
-    const previousStartDate = addDays(previousEndDate, -(daysInRange - 1))
-
-    return {
-        previousStartDate: formatDateForApi(previousStartDate),
-        previousEndDate: formatDateForApi(previousEndDate),
-    }
 }
 
 function getWeekdayLabel(date: Date) {
@@ -220,50 +196,55 @@ function formatRevenueAxis(value: number) {
     return `${formatNumber(value)} đ`
 }
 
-function formatSignedRevenueCurrency(value?: number | null) {
-    const amount = value ?? 0
-    const sign = amount > 0 ? '+' : amount < 0 ? '-' : ''
-
-    return `${sign}${formatRevenueCurrency(Math.abs(amount))}`
-}
-
-function formatSignedPercentage(value?: number | null) {
-    const amount = value ?? 0
-    const sign = amount > 0 ? '+' : amount < 0 ? '-' : ''
-    const formattedAmount = new Intl.NumberFormat('vi-VN', {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2,
-    }).format(Math.abs(amount))
-
-    return `${sign}${formattedAmount}%`
-}
-
 function getDishInitial(dishName: string) {
     return dishName.trim().charAt(0).toUpperCase() || '?'
 }
 
-function getToneClass(value?: number | null): StatusTone {
-    if ((value ?? 0) > 0) {
-        return 'positive'
+function resolveDishImageSrc(imageUrl?: string | null) {
+    const value = imageUrl?.trim()
+
+    if (!value) {
+        return null
     }
 
-    if ((value ?? 0) < 0) {
-        return 'negative'
+    if (
+        value.startsWith('http')
+        || value.startsWith('//')
+        || value.startsWith('data:')
+        || value.startsWith('/')
+    ) {
+        return value
     }
 
-    return 'neutral'
+    return `/image/${value}`
 }
 
-function getGrowthStatus(growthRate?: number | null) {
-    if ((growthRate ?? 0) > 0) {
-        return 'Doanh thu tăng'
+function WeeklyBestSellerImage({
+                                   dishName,
+                                   imageUrl,
+                               }: {
+    dishName: string
+    imageUrl?: string | null
+}) {
+    const [hasError, setHasError] = useState(false)
+    const imageSrc = resolveDishImageSrc(imageUrl)
+
+    if (!imageSrc || hasError) {
+        return (
+            <span className="weekly-bestseller-avatar weekly-bestseller-avatar-fallback">
+                {getDishInitial(dishName)}
+            </span>
+        )
     }
 
-    if ((growthRate ?? 0) < 0) {
-        return 'Doanh thu giảm'
-    }
-
-    return 'Doanh thu không đổi'
+    return (
+        <img
+            alt={dishName}
+            className="weekly-bestseller-avatar"
+            src={imageSrc}
+            onError={() => setHasError(true)}
+        />
+    )
 }
 
 function getApiErrorMessage(error: unknown, fallback: string) {
@@ -414,45 +395,16 @@ function TrophyIcon() {
     )
 }
 
-function TrendingIcon() {
+function CrownIcon() {
     return (
         <svg
             aria-hidden="true"
+            className="bestseller-rank-crown"
             viewBox="0 0 24 24"
         >
-            <path d="M3 17 9 11l4 4 7-8"/>
-            <path d="M14 7h6v6"/>
+            <path d="m3 8 4 3 5-7 5 7 4-3-2 10H5z"/>
+            <path d="M5 18h14"/>
         </svg>
-    )
-}
-
-function TrendStatusIcon({
-                             tone,
-                         }: {
-    tone: StatusTone
-}) {
-    const isNegative = tone === 'negative'
-    const path = isNegative
-        ? 'M3 7l6 6 4-4 8 8'
-        : tone === 'positive'
-            ? 'M3 17l6-6 4 4 8-8'
-            : 'M3 12h18'
-    const arrowPath = isNegative
-        ? 'M15 17h6v-6'
-        : tone === 'positive'
-            ? 'M15 7h6v6'
-            : ''
-
-    return (
-        <span className={`comparison-status-icon ${tone}`}>
-            <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-            >
-                <path d={path}/>
-                {arrowPath && <path d={arrowPath}/>}
-            </svg>
-        </span>
     )
 }
 
@@ -544,11 +496,11 @@ function WeeklyRevenueLineChart({
     rows: ReturnType<typeof buildWeeklyRevenueRows>
 }) {
     const width = 760
-    const height = 250
+    const height = 160
     const left = 92
     const right = 28
-    const top = 14
-    const bottom = 208
+    const top = 10
+    const bottom = 126
     const plotWidth = width - left - right
     const plotHeight = bottom - top
     const maxRevenue = Math.max(
@@ -587,7 +539,7 @@ function WeeklyRevenueLineChart({
     return (
         <div className="weekly-overview-chart-shell">
             <svg
-                aria-label="Biểu đồ doanh thu 7 ngày"
+                aria-label="Biểu đồ doanh thu trong tuần"
                 className="weekly-overview-chart"
                 role="img"
                 viewBox={`0 0 ${width} ${height}`}
@@ -673,31 +625,6 @@ function WeeklyRevenueLineChart({
     )
 }
 
-function WeeklyComparisonCard({
-                                  title,
-                                  value,
-                                  caption,
-                                  tone,
-                                  icon,
-                              }: {
-    title: string
-    value: ReactNode
-    caption?: ReactNode
-    tone: 'green' | 'blue' | 'red'
-    icon: ReactNode
-}) {
-    return (
-        <article className={`weekly-comparison-card tone-${tone}`}>
-            <span>{title}</span>
-            <strong>{value}</strong>
-            {caption && <small>{caption}</small>}
-            <div className="weekly-comparison-card-icon">
-                {icon}
-            </div>
-        </article>
-    )
-}
-
 function WeeklyRevenueOverviewDashboard({
                                             selectedWeek,
                                             weekOptions,
@@ -715,23 +642,7 @@ function WeeklyRevenueOverviewDashboard({
     onWeekChange: (weekValue: string) => void
     onReload: () => void
 }) {
-    const revenue = data.revenue?.revenue ?? data.comparison?.currentRevenue ?? 0
-    const comparison = data.comparison
-    const revenueDifference = comparison?.difference ?? 0
-    const comparisonTone = getToneClass(revenueDifference)
-    const isRevenueDown = revenueDifference < 0
-    const differenceVerb =
-        revenueDifference > 0
-            ? 'Tăng'
-            : isRevenueDown
-                ? 'Giảm'
-                : 'Không đổi'
-    const differenceCaption =
-        revenueDifference === 0
-            ? 'Không đổi so với tuần trước'
-            : `${differenceVerb} ${formatRevenueCurrency(
-                Math.abs(revenueDifference),
-            )}`
+    const revenue = data.revenue?.revenue ?? 0
     const bestSellers = data.bestSellers.slice(0, 5)
     const topDish = bestSellers[0]
     const maxQuantity = Math.max(
@@ -821,17 +732,6 @@ function WeeklyRevenueOverviewDashboard({
                     value={`${formatNumber(totalOrders)} đơn`}
                 />
                 <WeeklyOverviewKpiCard
-                    caption={differenceCaption}
-                    icon={
-                        <TrendStatusIcon
-                            tone={isRevenueDown ? 'negative' : comparisonTone}
-                        />
-                    }
-                    title="So với tuần trước"
-                    tone={isRevenueDown ? 'red' : 'green'}
-                    value={formatSignedPercentage(comparison?.growthRate)}
-                />
-                <WeeklyOverviewKpiCard
                     caption={`${formatNumber(topDish?.totalQuantity ?? 0)} phần`}
                     icon={<BowlIcon/>}
                     title="Món bán chạy nhất"
@@ -856,46 +756,10 @@ function WeeklyRevenueOverviewDashboard({
 
             <section className="weekly-overview-main-grid">
                 <article className="weekly-overview-panel weekly-revenue-chart-panel">
-                    <h3>Doanh thu 7 ngày</h3>
+                    <h3>Biểu đồ doanh thu trong tuần</h3>
                     <WeeklyRevenueLineChart rows={chartRows}/>
                 </article>
 
-                <article className="weekly-overview-panel weekly-comparison-panel">
-                    <h3>So sánh doanh thu</h3>
-                    <div className="weekly-comparison-card-grid">
-                        <WeeklyComparisonCard
-                            icon={<TrendingIcon/>}
-                            title="Tuần trước"
-                            tone="green"
-                            value={formatRevenueCurrency(
-                                comparison?.previousRevenue,
-                            )}
-                        />
-                        <WeeklyComparisonCard
-                            icon={<TrendingIcon/>}
-                            title="Tuần này"
-                            tone="blue"
-                            value={formatRevenueCurrency(revenue)}
-                        />
-                        <WeeklyComparisonCard
-                            caption={getGrowthStatus(comparison?.growthRate)}
-                            icon={
-                                <TrendStatusIcon
-                                    tone={
-                                        isRevenueDown
-                                            ? 'negative'
-                                            : comparisonTone
-                                    }
-                                />
-                            }
-                            title="Chênh lệch"
-                            tone={isRevenueDown ? 'red' : 'green'}
-                            value={formatSignedRevenueCurrency(
-                                revenueDifference,
-                            )}
-                        />
-                    </div>
-                </article>
             </section>
 
             <section className="weekly-overview-bottom-grid">
@@ -908,37 +772,52 @@ function WeeklyRevenueOverviewDashboard({
                                 Chưa có dữ liệu món bán chạy trong tuần này.
                             </div>
                         ) : (
-                            bestSellers.map((item, index) => (
-                                <div
-                                    className="weekly-bestseller-row"
-                                    key={`${item.rank}-${item.dishName}`}
-                                >
-                                    <span className="weekly-bestseller-rank">
-                                        #{item.rank ?? index + 1}
-                                    </span>
-                                    <span className="weekly-bestseller-avatar">
-                                        {getDishInitial(item.dishName)}
-                                    </span>
-                                    <div className="weekly-bestseller-info">
-                                        <strong>{item.dishName}</strong>
-                                        <div className="weekly-bestseller-track">
-                                            <span
-                                                style={{
-                                                    width: `${Math.max(
-                                                        8,
-                                                        (item.totalQuantity
-                                                            / maxQuantity)
-                                                        * 100,
-                                                    )}%`,
-                                                }}
-                                            />
+                            bestSellers.map((item, index) => {
+                                const rank = item.rank ?? index + 1
+
+                                return (
+                                    <div
+                                        className={
+                                            rank === 1
+                                                ? 'weekly-bestseller-row is-top'
+                                                : 'weekly-bestseller-row'
+                                        }
+                                        key={`${rank}-${item.dishName}`}
+                                    >
+                                        <span
+                                            className={`weekly-bestseller-rank rank-${Math.min(
+                                                rank,
+                                                3,
+                                            )}`}
+                                        >
+                                            {rank === 1 && <CrownIcon/>}
+                                            <span>{rank}</span>
+                                        </span>
+                                        <WeeklyBestSellerImage
+                                            dishName={item.dishName}
+                                            imageUrl={item.imageUrl}
+                                        />
+                                        <div className="weekly-bestseller-info">
+                                            <strong>{item.dishName}</strong>
+                                            <div className="weekly-bestseller-track">
+                                                <span
+                                                    style={{
+                                                        width: `${Math.max(
+                                                            8,
+                                                            (item.totalQuantity
+                                                                / maxQuantity)
+                                                            * 100,
+                                                        )}%`,
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
+                                        <strong className="weekly-bestseller-count">
+                                            {formatNumber(item.totalQuantity)}
+                                        </strong>
                                     </div>
-                                    <strong className="weekly-bestseller-count">
-                                        {formatNumber(item.totalQuantity)}
-                                    </strong>
-                                </div>
-                            ))
+                                )
+                            })
                         )}
                     </div>
                 </article>
@@ -1007,26 +886,17 @@ export default function AdminRevenueOverviewDashboard() {
     async function loadWeeklyRevenueOverview(
         week: WeekOption = selectedWeek,
     ) {
-        const previousRange = getPreviousWeekRange(week)
-
         try {
             setIsOverviewLoading(true)
             setOverviewError(null)
 
             const [
                 revenue,
-                comparisonResult,
                 dailyRevenue,
                 bestSellingReport,
                 orderShiftReport,
             ] = await Promise.all([
                 adminApi.getCustomRevenue(
-                    week.fromDate,
-                    week.toDate,
-                ),
-                adminApi.compareRevenue(
-                    previousRange.previousStartDate,
-                    previousRange.previousEndDate,
                     week.fromDate,
                     week.toDate,
                 ),
@@ -1043,7 +913,6 @@ export default function AdminRevenueOverviewDashboard() {
 
             setOverviewData({
                 revenue: revenue.data,
-                comparison: comparisonResult.data,
                 dailyRevenue: dailyRevenue.data,
                 bestSellers: bestSellingReport.data.items ?? [],
                 orderShiftReport: orderShiftReport.data,
