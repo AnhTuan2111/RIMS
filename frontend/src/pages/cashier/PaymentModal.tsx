@@ -26,11 +26,11 @@ export default function PaymentModal({orderId, orderDetail, onClose, onSuccess}:
 
     // Tính toán tiền
     const originalFinalAmount = orderDetail.finalAmount;
-    const maxPointsAllowed = Math.floor(originalFinalAmount / 2);
+    const maxPointsAllowed = Math.floor(originalFinalAmount * 0.5 / 1000);
     const maxPointsCanUse = customer ? Math.min(customer.rewardPoints, maxPointsAllowed) : 0;
 
     const safePointsUsed = Math.min(pointsUsed, maxPointsCanUse);
-    const finalAmount = originalFinalAmount - safePointsUsed;
+    const finalAmount = originalFinalAmount - safePointsUsed * 1000;
     const changeReturned = amountReceived >= finalAmount ? amountReceived - finalAmount : 0;
 
     const handleSearchCustomer = async () => {

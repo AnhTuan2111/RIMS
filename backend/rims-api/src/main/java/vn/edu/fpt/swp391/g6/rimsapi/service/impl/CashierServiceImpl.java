@@ -156,25 +156,23 @@ public class CashierServiceImpl implements CashierService
         if (request.getCustomerId() != null) {
             User customer = userRepository.findById(request.getCustomerId()).orElse(null);
             if (customer != null) {
-                // 1. Khách dùng điểm để trừ tiền hóa đơn (Tiêu điểm)
                 if (request.getPointsUsed() != null && request.getPointsUsed() > 0) {
                     if (customer.getRewardPoints() < request.getPointsUsed()) {
                         throw new RuntimeException("Khách hàng không đủ điểm!");
                     }
-                    // Trừ điểm trong ví của khách
+                    BigDecimal discount = new BigDecimal(request.getPointsUsed()).multiply(new BigDecimal("1000"));
+                    BigDecimal maxDiscount = finalAmount.multiply(new BigDecimal("0.5"));
+                    if (discount.compareTo(maxDiscount) > 0) {
+                        throw new RuntimeException("Số điểm sử dụng vượt quá 50% hóa đơn cho phép!");
+                    }
                     customer.setRewardPoints(customer.getRewardPoints() - request.getPointsUsed());
-
-                    // Trừ tiền trong hóa đơn (1 điểm = 1 VNĐ)
-                    BigDecimal discount = new BigDecimal(request.getPointsUsed());
                     finalAmount = finalAmount.subtract(discount);
                     if (finalAmount.compareTo(BigDecimal.ZERO) < 0) finalAmount = BigDecimal.ZERO;
                 }
-
-                // 2. Khách được cộng điểm mới dựa trên số tiền THỰC TRẢ (Ví dụ: tích 5%)
-                int earnedPoints = finalAmount.multiply(new BigDecimal("0.05")).intValue();
+                int earnedPoints = finalAmount.multiply(new BigDecimal("0.01"))
+                        .divide(new BigDecimal("1000"), 0, java.math.RoundingMode.DOWN)
+                        .intValue();
                 customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
-
-                // Lưu cập nhật điểm vào Database
                 userRepository.save(customer);
             }
         }
@@ -406,7 +404,7 @@ public class CashierServiceImpl implements CashierService
     @Override
     @Transactional(readOnly = true)
     public User searchCustomerByPhone(String phone) {
-        return userRepository.findByPhone(phone).orElse(null);
+        return userRepository.findByPhoneAndRole(phone, RoleType.CUSTOMER).orElse(null);
     }
 
     @Override
