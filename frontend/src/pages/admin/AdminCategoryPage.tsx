@@ -77,10 +77,6 @@ export default function AdminCategoryPage() {
         e.preventDefault();
         if (isSubmitting) return;
 
-        if (formData.name.trim().length > 50) {
-            alert("Lỗi: Tên danh mục không được vượt quá 50 ký tự!");
-            return;
-        }
 
         try {
             setIsSubmitting(true);
@@ -335,9 +331,8 @@ export default function AdminCategoryPage() {
                                                 });
                                                 setView('EDIT');
                                             }}
-                                            disabled={!item.isAvailable}
-                                            className={`admin-category-action-btn admin-category-edit-btn ${!item.isAvailable ? 'disabled' : ''}`}
-                                            title={item.isAvailable ? "Chỉnh sửa" : "Không thể sửa danh mục đã ẩn"}
+                                            className="admin-category-action-btn admin-category-edit-btn"
+                                            title="Chỉnh sửa"
                                         >
                                             ✏️
                                         </button>
@@ -405,21 +400,19 @@ export default function AdminCategoryPage() {
                             <h3 className="admin-category-detail-title">CHI TIẾT DANH MỤC</h3>
                         </div>
                         <div className="admin-category-detail-header-right">
-                            {selectedCategory.isAvailable && (
-                                <button
-                                    onClick={() => {
-                                        setFormData({
-                                            name: selectedCategory.name,
-                                            description: selectedCategory.description,
-                                            isAvailable: selectedCategory.isAvailable
-                                        });
-                                        setView('EDIT');
-                                    }}
-                                    className="admin-category-btn-secondary"
-                                >
-                                    ✏️ Sửa danh mục
-                                </button>
-                            )}
+                            <button
+                                onClick={() => {
+                                    setFormData({
+                                        name: selectedCategory.name,
+                                        description: selectedCategory.description,
+                                        isAvailable: selectedCategory.isAvailable
+                                    });
+                                    setView('EDIT');
+                                }}
+                                className="admin-category-btn-secondary"
+                            >
+                                ✏️ Sửa danh mục
+                            </button>
                             <button
                                 onClick={() => setDeleteModal({ open: true, id: selectedCategory.id })}
                                 className="admin-category-btn-secondary admin-category-btn-danger"

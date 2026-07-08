@@ -12,6 +12,7 @@ public class UpdateCategoryRequest
     @NotBlank(message = "Tên danh mục không được để trống")
     @Length(max = 50, message = "Tên danh mục không được vượt quá 50 ký tự")
     private String name;
+    @Length(max = 100, message = "Tên mô tả không quá 100 ký tự")
     private String description;
 
     @NotNull(message = "Trạng thái không được để trống")

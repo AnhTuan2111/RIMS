@@ -125,19 +125,28 @@ public class CategoryServiceImpl implements CategoryService
             // Cập nhật trạng thái nếu có
             if (updateCategoryRequest.getIsAvailable() != null)
             {
-                category.setAvailable(updateCategoryRequest.getIsAvailable());
-            }
-            // Cập nhật trạng thái nếu có
-            if (updateCategoryRequest.getIsAvailable() != null)
-            {
-                category.setAvailable(updateCategoryRequest.getIsAvailable());
+                boolean newStatus = updateCategoryRequest.getIsAvailable();
+
+                // Nếu đang chuyển từ Hoạt động -> Ẩn thì phải kiểm tra còn món ăn không
+                if (category.isAvailable() && !newStatus)
+                {
+                    long dishCount = categoryRepository.countDishesByCategoryId(id);
+                    if (dishCount > 0)
+                    {
+                        throw new IllegalStateException(
+                                String.format("Không thể ẩn category vì đang có %d món ăn thuộc danh mục này!", dishCount)
+                        );
+                    }
+                }
+
+                category.setAvailable(newStatus);
             }
 
             Category updatedCategory = categoryRepository.save(category);
             log.info("Cập nhật category thành công: {}", updatedCategory.getName());
             return convertToDTO(updatedCategory);
 
-        } catch (EntityNotFoundException | IllegalArgumentException e)
+        } catch (EntityNotFoundException | IllegalArgumentException | IllegalStateException e)
         {
             log.warn("Lỗi khi cập nhật category ID {}: {}", id, e.getMessage());
             throw e;  // Ném lại để GlobalExceptionHandler bắt
