@@ -1,9 +1,12 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceHistoryPageResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceHistoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.InvoiceItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
@@ -21,12 +24,18 @@ public class InvoiceServiceImpl implements InvoiceService
     private final InvoiceRepository invoiceRepository;
 
     @Override
-    public List<InvoiceHistoryResponse> getInvoiceHistory()
+    public InvoiceHistoryPageResponse getInvoiceHistory(int page, int pageSize)
     {
+        int requestedPage = Math.max(page, 1);
+        int requestedPageSize = Math.min(Math.max(pageSize, 1), 50);
 
-        return invoiceRepository
-                .getInvoiceHistory()
-                .stream()
+        Page<InvoiceHistoryResponse> historyPage = invoiceRepository
+                .getInvoiceHistory(
+                        PageRequest.of(
+                                requestedPage - 1,
+                                requestedPageSize
+                        )
+                )
                 .map(row -> new InvoiceHistoryResponse(
                         row.getInvoiceId(),
                         row.getOrderId(),
@@ -34,8 +43,15 @@ public class InvoiceServiceImpl implements InvoiceService
                         row.getPaymentMethod(),
                         row.getAmount(),
                         row.getPaymentDate()
-                ))
-                .toList();
+                ));
+
+        return new InvoiceHistoryPageResponse(
+                historyPage.getContent(),
+                requestedPage,
+                requestedPageSize,
+                historyPage.getTotalElements(),
+                historyPage.getTotalPages()
+        );
     }
 
     @Override
