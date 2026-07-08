@@ -59,6 +59,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
     @Query("""
             SELECT
                 d.name as dishName,
+                d.imageUrl as imageUrl,
                 SUM(oi.quantity) as totalQuantity,
                 SUM(oi.subTotal) as totalRevenue
             FROM Invoice i
@@ -67,14 +68,19 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             JOIN oi.dish d
             WHERE
                 i.invoiceDate BETWEEN :startDate AND :endDate
+                AND (:categoryId IS NULL OR d.category.id = :categoryId)
             GROUP BY
-                d.name
+                d.id,
+                d.name,
+                d.imageUrl
             ORDER BY
-                SUM(oi.quantity) DESC
+                SUM(oi.quantity) DESC,
+                SUM(oi.subTotal) DESC
             """)
     List<BestSellingDishProjection> getBestSellingDishes(
             LocalDateTime startDate,
             LocalDateTime endDate,
+            Integer categoryId,
             Pageable pageable
     );
 

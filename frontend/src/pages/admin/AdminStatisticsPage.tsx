@@ -1,21 +1,21 @@
 import {useEffect, useState} from 'react'
 import {
     adminApi,
+    categoryApi,
     type BestSellingDishItem,
+    type CategoryResponse,
     type OrderShiftItem,
     type OrderShiftReportResponse,
-    type RevenueComparisonResponse,
     type RevenueReportResponse,
 } from '../../api/admin'
 
 type ReportKey =
     | 'revenue'
-    | 'comparison'
+    | 'categoryBestsellers'
     | 'bestsellers'
     | 'orderShifts'
 
 type RangePreset = 'TODAY' | 'LAST_7' | 'CUSTOM_WEEK'
-type StatusTone = 'positive' | 'negative' | 'neutral'
 
 interface RevenueDashboardData {
     totalRevenue: RevenueReportResponse | null
@@ -24,13 +24,6 @@ interface RevenueDashboardData {
     monthlyRevenue: RevenueReportResponse | null
     yearlyRevenue: RevenueReportResponse | null
     customRangeRevenue: RevenueReportResponse | null
-}
-
-interface RevenueComparisonRange {
-    previousStartDate: string
-    previousEndDate: string
-    currentStartDate: string
-    currentEndDate: string
 }
 
 interface WeekOption {
@@ -227,29 +220,34 @@ function formatNumber(value?: number | null) {
     return new Intl.NumberFormat('vi-VN').format(value ?? 0)
 }
 
+function getDishInitial(dishName: string) {
+    return dishName.trim().charAt(0).toUpperCase() || '?'
+}
+
+function resolveDishImageSrc(imageUrl?: string | null) {
+    const value = imageUrl?.trim()
+
+    if (!value) {
+        return null
+    }
+
+    if (
+        value.startsWith('http')
+        || value.startsWith('//')
+        || value.startsWith('data:')
+        || value.startsWith('/')
+    ) {
+        return value
+    }
+
+    return `/image/${value}`
+}
+
 function formatDecimal(value?: number | null) {
     return new Intl.NumberFormat('vi-VN', {
         maximumFractionDigits: 1,
         minimumFractionDigits: 0,
     }).format(value ?? 0)
-}
-
-function formatSignedRevenueCurrency(value?: number | null) {
-    const amount = value ?? 0
-    const sign = amount > 0 ? '+' : amount < 0 ? '-' : ''
-
-    return `${sign}${formatRevenueCurrency(Math.abs(amount))}`
-}
-
-function formatSignedPercentage(value?: number | null) {
-    const amount = value ?? 0
-    const sign = amount > 0 ? '+' : amount < 0 ? '-' : ''
-    const formattedAmount = new Intl.NumberFormat('vi-VN', {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2,
-    }).format(Math.abs(amount))
-
-    return `${sign}${formattedAmount}%`
 }
 
 function formatManualDateInput(value: string) {
@@ -296,78 +294,6 @@ function parseManualDateForApi(value: string) {
     return `${yearText}-${monthText}-${dayText}`
 }
 
-function getDefaultRevenueComparisonRange(): RevenueComparisonRange {
-    const currentEndDate = new Date()
-    const currentStartDate = addDays(currentEndDate, -6)
-    const previousEndDate = addDays(currentStartDate, -1)
-    const previousStartDate = addDays(previousEndDate, -6)
-
-    return {
-        previousStartDate: formatDisplayDate(
-            formatDateForApi(previousStartDate),
-        ),
-        previousEndDate: formatDisplayDate(
-            formatDateForApi(previousEndDate),
-        ),
-        currentStartDate: formatDisplayDate(
-            formatDateForApi(currentStartDate),
-        ),
-        currentEndDate: formatDisplayDate(formatDateForApi(currentEndDate)),
-    }
-}
-
-function getComparisonApiRange(range: RevenueComparisonRange) {
-    const previousStartDate = parseManualDateForApi(
-        range.previousStartDate,
-    )
-    const previousEndDate = parseManualDateForApi(range.previousEndDate)
-    const currentStartDate = parseManualDateForApi(range.currentStartDate)
-    const currentEndDate = parseManualDateForApi(range.currentEndDate)
-
-    if (
-        !previousStartDate
-        || !previousEndDate
-        || !currentStartDate
-        || !currentEndDate
-    ) {
-        return null
-    }
-
-    return {
-        previousStartDate,
-        previousEndDate,
-        currentStartDate,
-        currentEndDate,
-    }
-}
-
-function getComparisonValidationError(range: RevenueComparisonRange) {
-    if (
-        !range.previousStartDate.trim()
-        || !range.previousEndDate.trim()
-        || !range.currentStartDate.trim()
-        || !range.currentEndDate.trim()
-    ) {
-        return 'Vui lòng nhập đầy đủ ngày bắt đầu và ngày kết thúc.'
-    }
-
-    const apiRange = getComparisonApiRange(range)
-
-    if (!apiRange) {
-        return 'Vui lòng nhập ngày hợp lệ theo định dạng ngày/tháng/năm.'
-    }
-
-    if (apiRange.previousStartDate > apiRange.previousEndDate) {
-        return 'Khoảng thời gian trước không hợp lệ.'
-    }
-
-    if (apiRange.currentStartDate > apiRange.currentEndDate) {
-        return 'Khoảng thời gian hiện tại không hợp lệ.'
-    }
-
-    return null
-}
-
 function getApiErrorMessage(error: unknown, fallback: string) {
     if (typeof error !== 'object' || error === null) {
         return fallback
@@ -385,30 +311,6 @@ function getApiErrorMessage(error: unknown, fallback: string) {
     ).response
 
     return response?.data?.message ?? response?.data?.error ?? fallback
-}
-
-function getToneClass(value?: number | null): StatusTone {
-    if ((value ?? 0) > 0) {
-        return 'positive'
-    }
-
-    if ((value ?? 0) < 0) {
-        return 'negative'
-    }
-
-    return 'neutral'
-}
-
-function getGrowthStatus(growthRate?: number | null) {
-    if ((growthRate ?? 0) > 0) {
-        return 'Doanh thu tăng'
-    }
-
-    if ((growthRate ?? 0) < 0) {
-        return 'Doanh thu giảm'
-    }
-
-    return 'Doanh thu không đổi'
 }
 
 function getRangeLabelFromPreset(
@@ -555,6 +457,19 @@ function TrophyIcon() {
     )
 }
 
+function CrownIcon() {
+    return (
+        <svg
+            aria-hidden="true"
+            className="bestseller-rank-crown"
+            viewBox="0 0 24 24"
+        >
+            <path d="m3 8 4 3 5-7 5 7 4-3-2 10H5z"/>
+            <path d="M5 18h14"/>
+        </svg>
+    )
+}
+
 function TrendingIcon() {
     return (
         <svg
@@ -564,36 +479,6 @@ function TrendingIcon() {
             <path d="M3 17 9 11l4 4 7-8"/>
             <path d="M14 7h6v6"/>
         </svg>
-    )
-}
-
-function TrendStatusIcon({
-                             tone,
-                         }: {
-    tone: StatusTone
-}) {
-    const isNegative = tone === 'negative'
-    const path = isNegative
-        ? 'M3 7l6 6 4-4 8 8'
-        : tone === 'positive'
-            ? 'M3 17l6-6 4 4 8-8'
-            : 'M3 12h18'
-    const arrowPath = isNegative
-        ? 'M15 17h6v-6'
-        : tone === 'positive'
-            ? 'M15 7h6v6'
-            : ''
-
-    return (
-        <span className={`comparison-status-icon ${tone}`}>
-            <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-            >
-                <path d={path}/>
-                {arrowPath && <path d={arrowPath}/>}
-            </svg>
-        </span>
     )
 }
 
@@ -631,17 +516,17 @@ function StatisticsReportSelector({
 
             <button
                 className={
-                    activeReport === 'comparison'
+                    activeReport === 'categoryBestsellers'
                         ? 'rims-stat-card active'
                         : 'rims-stat-card'
                 }
                 type="button"
-                onClick={() => onSelectReport('comparison')}
+                onClick={() => onSelectReport('categoryBestsellers')}
             >
-                <StatIcon className="icon-comparison">SS</StatIcon>
+                <StatIcon className="icon-category-bestsellers">Cat</StatIcon>
                 <div className="rims-stat-card-body">
-                    <h3>So sánh tổng doanh thu</h3>
-                    <p>Đối chiếu hai khoảng thời gian</p>
+                    <h3>Top món theo category</h3>
+                    <p>Lọc món bán chạy theo danh mục</p>
                 </div>
                 <span className="rims-stat-card-action">›</span>
             </button>
@@ -982,186 +867,65 @@ function RevenueDashboard({
     )
 }
 
-function RevenueComparisonReport({
-                                     range,
-                                     comparison,
-                                     isLoading,
-                                     error,
-                                     onRangeChange,
-                                     onCompare,
-                                 }: {
-    range: RevenueComparisonRange
-    comparison: RevenueComparisonResponse | null
-    isLoading: boolean
-    error: string | null
-    onRangeChange: (
-        field: keyof RevenueComparisonRange,
-        value: string,
-    ) => void
-    onCompare: () => void
+function BestSellerDishImage({
+                                 dishName,
+                                 imageUrl,
+                             }: {
+    dishName: string
+    imageUrl?: string | null
 }) {
-    const revenueDifference = comparison?.difference ?? 0
-    const revenueGrowthRate = comparison?.growthRate ?? 0
-    const comparisonTone = getToneClass(revenueDifference)
+    const [hasError, setHasError] = useState(false)
+    const imageSrc = resolveDishImageSrc(imageUrl)
+
+    if (!imageSrc || hasError) {
+        return (
+            <span className="bestseller-item-avatar bestseller-item-avatar-fallback">
+                {getDishInitial(dishName)}
+            </span>
+        )
+    }
 
     return (
-        <section className="revenue-comparison-panel">
-            <header className="revenue-comparison-header">
-                <div>
-                    <h2>So sánh tổng doanh thu</h2>
-                    <p>
-                        Chọn hai khoảng thời gian để đối chiếu doanh thu,
-                        chênh lệch và tỷ lệ tăng trưởng.
-                    </p>
-                </div>
-            </header>
-
-            <form
-                className="admin-comparison-date-form"
-                onSubmit={(event) => {
-                    event.preventDefault()
-                    onCompare()
-                }}
-            >
-                <RevenueDateInput
-                    id="comparison-previous-start"
-                    label="Từ ngày kỳ trước"
-                    value={range.previousStartDate}
-                    onChange={(value) =>
-                        onRangeChange('previousStartDate', value)
-                    }
-                />
-                <RevenueDateInput
-                    id="comparison-previous-end"
-                    label="Đến ngày kỳ trước"
-                    value={range.previousEndDate}
-                    onChange={(value) =>
-                        onRangeChange('previousEndDate', value)
-                    }
-                />
-                <RevenueDateInput
-                    id="comparison-current-start"
-                    label="Từ ngày hiện tại"
-                    value={range.currentStartDate}
-                    onChange={(value) =>
-                        onRangeChange('currentStartDate', value)
-                    }
-                />
-                <RevenueDateInput
-                    id="comparison-current-end"
-                    label="Đến ngày hiện tại"
-                    value={range.currentEndDate}
-                    onChange={(value) =>
-                        onRangeChange('currentEndDate', value)
-                    }
-                />
-                <button
-                    className="revenue-comparison-submit"
-                    disabled={isLoading}
-                    type="submit"
-                >
-                    {isLoading ? 'Đang so sánh...' : 'So sánh doanh thu'}
-                </button>
-            </form>
-
-            {error && (
-                <p className="revenue-comparison-error">
-                    {error}
-                </p>
-            )}
-
-            <div className="revenue-comparison-results">
-                <article className="revenue-comparison-result-card previous-revenue">
-                    <span className="comparison-result-label">
-                        Doanh thu kỳ trước
-                    </span>
-                    <strong>
-                        {formatRevenueCurrency(comparison?.previousRevenue)}
-                    </strong>
-                    <p>
-                        Trong {formatNumber(comparison?.previousDays)} ngày
-                    </p>
-                    <small>
-                        Trung bình/ngày{' '}
-                        {formatRevenueCurrency(
-                            comparison?.previousAverageRevenue,
-                        )}
-                    </small>
-                </article>
-
-                <article className="revenue-comparison-result-card current-revenue">
-                    <span className="comparison-result-label">
-                        Doanh thu hiện tại
-                    </span>
-                    <strong>
-                        {formatRevenueCurrency(comparison?.currentRevenue)}
-                    </strong>
-                    <p>
-                        Trong {formatNumber(comparison?.currentDays)} ngày
-                    </p>
-                    <small>
-                        Trung bình/ngày{' '}
-                        {formatRevenueCurrency(
-                            comparison?.currentAverageRevenue,
-                        )}
-                    </small>
-                </article>
-
-                <article
-                    className={`revenue-comparison-result-card difference ${comparisonTone}`}
-                >
-                    <div className="comparison-status-heading">
-                        <TrendStatusIcon tone={comparisonTone}/>
-                        <span className="comparison-result-label">
-                            Revenue Difference
-                        </span>
-                    </div>
-                    <strong className={comparisonTone}>
-                        {formatSignedRevenueCurrency(revenueDifference)}
-                    </strong>
-                    <p>So với khoảng thời gian trước</p>
-                </article>
-
-                <article
-                    className={`revenue-comparison-result-card growth ${comparisonTone}`}
-                >
-                    <div className="comparison-status-heading">
-                        <TrendStatusIcon tone={comparisonTone}/>
-                        <span className="comparison-result-label">
-                            Growth Rate
-                        </span>
-                    </div>
-                    <strong className={comparisonTone}>
-                        {formatSignedPercentage(revenueGrowthRate)}
-                    </strong>
-                    <p>{getGrowthStatus(revenueGrowthRate)}</p>
-                </article>
-            </div>
-        </section>
+        <img
+            alt={dishName}
+            className="bestseller-item-avatar"
+            src={imageSrc}
+            onError={() => setHasError(true)}
+        />
     )
 }
 
 function BestSellersReport({
+                               title = 'Món bán chạy',
+                               subtitle = 'Báo cáo món ăn bán chạy theo khoảng thời gian.',
                                items,
                                preset,
                                selectedWeek,
                                selectedYear,
                                weekOptions,
                                yearOptions,
+                               categories,
+                               selectedCategoryId,
                                isLoading,
                                error,
+                               onCategoryChange,
                                onPresetChange,
                                onWeekChange,
                                onYearChange,
                            }: {
+    title?: string
+    subtitle?: string
     items: BestSellingDishItem[]
     preset: RangePreset
     selectedWeek: WeekOption
     selectedYear: number
     weekOptions: WeekOption[]
     yearOptions: number[]
+    categories?: CategoryResponse[]
+    selectedCategoryId?: string
     isLoading: boolean
     error: string | null
+    onCategoryChange?: (categoryId: string) => void
     onPresetChange: (preset: RangePreset) => void
     onWeekChange: (weekValue: string) => void
     onYearChange: (year: number) => void
@@ -1175,13 +939,41 @@ function BestSellersReport({
         <section className="order-shift-dashboard-panel admin-bestseller-dashboard-panel">
             <header className="order-shift-dashboard-header">
                 <div>
-                    <h2>Món bán chạy</h2>
+                    <h2>{title}</h2>
                     <p className="rims-report-subtitle">
-                        Báo cáo món ăn bán chạy theo khoảng thời gian.
+                        {subtitle}
                     </p>
                 </div>
 
                 <div className="order-shift-filter-area">
+                    {categories && selectedCategoryId && onCategoryChange && (
+                        <label className="admin-bestseller-category-filter">
+                            <span>Danh mục</span>
+                            <select
+                                disabled={isLoading || categories.length === 0}
+                                value={selectedCategoryId}
+                                onChange={(event) =>
+                                    onCategoryChange(event.target.value)
+                                }
+                            >
+                                {categories.length === 0 ? (
+                                    <option value="ALL">
+                                        Chưa có danh mục
+                                    </option>
+                                ) : (
+                                    categories.map((category) => (
+                                        <option
+                                            key={category.id}
+                                            value={String(category.id)}
+                                        >
+                                            {category.name}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                        </label>
+                    )}
+
                     <PresetButtonGroup
                         activePreset={preset}
                         isLoading={isLoading}
@@ -1212,50 +1004,65 @@ function BestSellersReport({
                         Chưa có dữ liệu món bán chạy trong khoảng này.
                     </div>
                 ) : (
-                    items.map((item) => (
-                        <article
-                            className="bestseller-item-card"
-                            key={`${item.rank}-${item.dishName}`}
-                        >
-                            <span className="item-rank-badge">
-                                #{item.rank}
-                            </span>
-                            <span className="bestseller-item-avatar bestseller-item-avatar-fallback">
-                                {item.dishName.charAt(0)}
-                            </span>
-                            <div className="item-info">
-                                <div className="item-title-row">
-                                    <strong>{item.dishName}</strong>
-                                    <span className="item-category-tag">
-                                        {formatRevenueCurrency(
-                                            item.totalRevenue,
-                                        )}
-                                    </span>
-                                </div>
+                    items.map((item, index) => {
+                        const rank = item.rank ?? index + 1
 
-                                <div className="item-visual-bar-container">
-                                    <div
-                                        className="item-bar-fill"
-                                        style={{
-                                            width: `${Math.max(
-                                                8,
-                                                (item.totalQuantity
-                                                    / maxQuantity)
-                                                * 100,
-                                            )}%`,
-                                        }}
-                                    />
-                                </div>
+                        return (
+                            <article
+                                className={
+                                    rank === 1
+                                        ? 'bestseller-item-card is-top'
+                                        : 'bestseller-item-card'
+                                }
+                                key={`${rank}-${item.dishName}`}
+                            >
+                                <span
+                                    className={`item-rank-badge rank-${Math.min(
+                                        rank,
+                                        3,
+                                    )}`}
+                                >
+                                    {rank === 1 && <CrownIcon/>}
+                                    <span>{rank}</span>
+                                </span>
+                                <BestSellerDishImage
+                                    dishName={item.dishName}
+                                    imageUrl={item.imageUrl}
+                                />
+                                <div className="item-info">
+                                    <div className="item-title-row">
+                                        <strong>{item.dishName}</strong>
+                                        <span className="item-category-tag">
+                                            {formatRevenueCurrency(
+                                                item.totalRevenue,
+                                            )}
+                                        </span>
+                                    </div>
 
-                                <div className="item-metric-row">
-                                    <span>Số lượng</span>
-                                    <strong>
-                                        {formatNumber(item.totalQuantity)}
-                                    </strong>
+                                    <div className="item-visual-bar-container">
+                                        <div
+                                            className="item-bar-fill"
+                                            style={{
+                                                width: `${Math.max(
+                                                    8,
+                                                    (item.totalQuantity
+                                                        / maxQuantity)
+                                                    * 100,
+                                                )}%`,
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="item-metric-row">
+                                        <span>Số lượng</span>
+                                        <strong>
+                                            {formatNumber(item.totalQuantity)}
+                                        </strong>
+                                    </div>
                                 </div>
-                            </div>
-                        </article>
-                    ))
+                            </article>
+                        )
+                    })
                 )}
             </section>
         </section>
@@ -1486,15 +1293,25 @@ export default function AdminStatisticsPage() {
     const [isRevenueLoading, setIsRevenueLoading] = useState(true)
     const [isCustomLoading, setIsCustomLoading] = useState(false)
 
-    const [comparisonRange, setComparisonRange] =
-        useState<RevenueComparisonRange>(
-            getDefaultRevenueComparisonRange,
+    const [categories, setCategories] = useState<CategoryResponse[]>([])
+    const [categoryBestSellingPreset, setCategoryBestSellingPreset] =
+        useState<RangePreset>('LAST_7')
+    const [categoryBestSellingYear, setCategoryBestSellingYear] =
+        useState(() => new Date().getFullYear())
+    const [
+        selectedCategoryBestSellingWeek,
+        setSelectedCategoryBestSellingWeek,
+    ] =
+        useState<WeekOption>(() =>
+            getDefaultWeek(new Date().getFullYear()),
         )
-    const [comparison, setComparison] =
-        useState<RevenueComparisonResponse | null>(null)
-    const [comparisonError, setComparisonError] =
+    const [selectedBestSellingCategoryId, setSelectedBestSellingCategoryId] =
+        useState('ALL')
+    const [categoryBestSellers, setCategoryBestSellers] =
+        useState<BestSellingDishItem[]>([])
+    const [categoryBestSellingError, setCategoryBestSellingError] =
         useState<string | null>(null)
-    const [isComparisonLoading, setIsComparisonLoading] =
+    const [isCategoryBestSellingLoading, setIsCategoryBestSellingLoading] =
         useState(false)
 
     const [bestSellingPreset, setBestSellingPreset] =
@@ -1525,12 +1342,15 @@ export default function AdminStatisticsPage() {
         useState<string | null>(null)
     const [isOrderShiftLoading, setIsOrderShiftLoading] = useState(false)
     const yearOptions = getYearOptions()
+    const categoryBestSellingWeekOptions = buildWeekOptions(
+        categoryBestSellingYear,
+    )
     const bestSellingWeekOptions = buildWeekOptions(bestSellingYear)
     const orderShiftWeekOptions = buildWeekOptions(orderShiftYear)
 
     useEffect(() => {
         void loadRevenueDashboard()
-        void loadRevenueComparison(comparisonRange)
+        void loadCategoryBestSellingCategories()
         void loadBestSellingReport(bestSellingPreset)
         void loadOrderShiftReport(orderShiftPreset)
     }, [])
@@ -1575,44 +1395,70 @@ export default function AdminStatisticsPage() {
         }
     }
 
-    async function loadRevenueComparison(
-        range: RevenueComparisonRange = comparisonRange,
-    ) {
-        const validationError = getComparisonValidationError(range)
-
-        if (validationError) {
-            setComparisonError(validationError)
-            return
-        }
-
-        const apiRange = getComparisonApiRange(range)
-
-        if (!apiRange) {
-            return
-        }
-
+    async function loadCategoryBestSellingCategories() {
         try {
-            setIsComparisonLoading(true)
-            setComparisonError(null)
+            const {data} = await categoryApi.getAllCategories()
+            const nextCategories = data ?? []
+            const defaultCategoryId =
+                nextCategories[0]?.id != null
+                    ? String(nextCategories[0].id)
+                    : 'ALL'
 
-            const {data} = await adminApi.compareRevenue(
-                apiRange.previousStartDate,
-                apiRange.previousEndDate,
-                apiRange.currentStartDate,
-                apiRange.currentEndDate,
+            setCategories(nextCategories)
+            setSelectedBestSellingCategoryId(defaultCategoryId)
+
+            await loadCategoryBestSellingReport(
+                categoryBestSellingPreset,
+                selectedCategoryBestSellingWeek,
+                defaultCategoryId,
             )
-
-            setComparison(data)
         } catch (error) {
             console.error(error)
-            setComparisonError(
+            setCategoryBestSellingError(
                 getApiErrorMessage(
                     error,
-                    'Không thể so sánh doanh thu với khoảng thời gian đã chọn.',
+                    'Không thể tải danh mục món ăn.',
+                ),
+            )
+        }
+    }
+
+    async function loadCategoryBestSellingReport(
+        preset: RangePreset,
+        selectedWeek: WeekOption = selectedCategoryBestSellingWeek,
+        categoryIdValue: string = selectedBestSellingCategoryId,
+    ) {
+        const range = getRangeFromPreset(preset, selectedWeek)
+        const parsedCategoryId =
+            categoryIdValue === 'ALL'
+                ? null
+                : Number(categoryIdValue)
+        const categoryId =
+            parsedCategoryId !== null && Number.isFinite(parsedCategoryId)
+                ? parsedCategoryId
+                : null
+
+        try {
+            setIsCategoryBestSellingLoading(true)
+            setCategoryBestSellingError(null)
+
+            const {data} = await adminApi.getBestSellingReportBetween(
+                range.fromDate,
+                range.toDate,
+                categoryId,
+            )
+
+            setCategoryBestSellers(data.items ?? [])
+        } catch (error) {
+            console.error(error)
+            setCategoryBestSellingError(
+                getApiErrorMessage(
+                    error,
+                    'Không thể tải top món bán chạy theo danh mục.',
                 ),
             )
         } finally {
-            setIsComparisonLoading(false)
+            setIsCategoryBestSellingLoading(false)
         }
     }
 
@@ -1674,18 +1520,53 @@ export default function AdminStatisticsPage() {
         }
     }
 
-    function handleComparisonRangeChange(
-        field: keyof RevenueComparisonRange,
-        value: string,
-    ) {
-        setComparisonRange((currentRange) => ({
-            ...currentRange,
-            [field]: value,
-        }))
+    function handleCategoryBestSellingPresetChange(preset: RangePreset) {
+        setCategoryBestSellingPreset(preset)
+        void loadCategoryBestSellingReport(
+            preset,
+            selectedCategoryBestSellingWeek,
+            selectedBestSellingCategoryId,
+        )
     }
 
-    function handleComparisonSubmit() {
-        void loadRevenueComparison(comparisonRange)
+    function handleCategoryBestSellingYearChange(year: number) {
+        const nextWeek = getDefaultWeek(year)
+
+        setCategoryBestSellingYear(year)
+        setSelectedCategoryBestSellingWeek(nextWeek)
+        setCategoryBestSellingPreset('CUSTOM_WEEK')
+        void loadCategoryBestSellingReport(
+            'CUSTOM_WEEK',
+            nextWeek,
+            selectedBestSellingCategoryId,
+        )
+    }
+
+    function handleCategoryBestSellingWeekChange(weekValue: string) {
+        const nextWeek = categoryBestSellingWeekOptions.find(
+            (week) => week.value === weekValue,
+        )
+
+        if (!nextWeek) {
+            return
+        }
+
+        setSelectedCategoryBestSellingWeek(nextWeek)
+        setCategoryBestSellingPreset('CUSTOM_WEEK')
+        void loadCategoryBestSellingReport(
+            'CUSTOM_WEEK',
+            nextWeek,
+            selectedBestSellingCategoryId,
+        )
+    }
+
+    function handleBestSellingCategoryChange(categoryId: string) {
+        setSelectedBestSellingCategoryId(categoryId)
+        void loadCategoryBestSellingReport(
+            categoryBestSellingPreset,
+            selectedCategoryBestSellingWeek,
+            categoryId,
+        )
     }
 
     function handleBestSellingPresetChange(preset: RangePreset) {
@@ -1816,14 +1697,24 @@ export default function AdminStatisticsPage() {
                 />
             )}
 
-            {activeReport === 'comparison' && (
-                <RevenueComparisonReport
-                    comparison={comparison}
-                    error={comparisonError}
-                    isLoading={isComparisonLoading}
-                    range={comparisonRange}
-                    onCompare={handleComparisonSubmit}
-                    onRangeChange={handleComparisonRangeChange}
+            {activeReport === 'categoryBestsellers' && (
+                <BestSellersReport
+                    categories={categories}
+                    error={categoryBestSellingError}
+                    isLoading={isCategoryBestSellingLoading}
+                    items={categoryBestSellers}
+                    preset={categoryBestSellingPreset}
+                    selectedCategoryId={selectedBestSellingCategoryId}
+                    selectedWeek={selectedCategoryBestSellingWeek}
+                    selectedYear={categoryBestSellingYear}
+                    subtitle="Lọc top món bán chạy theo từng danh mục, theo hôm nay, 7 ngày gần nhất hoặc tuần của một năm cụ thể."
+                    title="Top món bán chạy theo category"
+                    weekOptions={categoryBestSellingWeekOptions}
+                    yearOptions={yearOptions}
+                    onCategoryChange={handleBestSellingCategoryChange}
+                    onPresetChange={handleCategoryBestSellingPresetChange}
+                    onWeekChange={handleCategoryBestSellingWeekChange}
+                    onYearChange={handleCategoryBestSellingYearChange}
                 />
             )}
 

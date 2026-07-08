@@ -224,186 +224,13 @@ public class RevenueReportServiceImpl implements RevenueReportService
         );
     }
 
-
-    //compare revenue
-
-    @Override
-    public RevenueComparisonResponse compareRevenue(
-            LocalDate previousStartDate,
-            LocalDate previousEndDate,
-            LocalDate currentStartDate,
-            LocalDate currentEndDate
-    )
-    {
-
-        System.out.println("===== COMPARE =====");
-
-        System.out.println("Previous period");
-        System.out.println(previousStartDate + " -> " + previousEndDate);
-
-        System.out.println("Current period");
-        System.out.println(currentStartDate + " -> " + currentEndDate);
-
-        LocalDate today = LocalDate.now();
-
-        // Không cho phép ngày kết thúc ở tương lai
-        if (previousEndDate.isAfter(today))
-        {
-            previousEndDate = today;
-        }
-
-        if (currentEndDate.isAfter(today))
-        {
-            currentEndDate = today;
-        }
-
-        // Validate previous period
-        if (previousStartDate.isAfter(previousEndDate))
-        {
-            throw new RuntimeException(
-                    "Previous period start date must be before end date"
-            );
-        }
-
-        // Validate current period
-        if (currentStartDate.isAfter(currentEndDate))
-        {
-            throw new RuntimeException(
-                    "Current period start date must be before end date"
-            );
-        }
-
-        if (!previousEndDate.isBefore(currentStartDate))
-        {
-            throw new RuntimeException(
-                    "Previous period must be before current period"
-            );
-        }
-
-        long previousDays =
-                ChronoUnit.DAYS.between(
-                        previousStartDate,
-                        previousEndDate
-                ) + 1;
-
-        long currentDays =
-                ChronoUnit.DAYS.between(
-                        currentStartDate,
-                        currentEndDate
-                ) + 1;
-
-        long differenceDays =
-                Math.abs(previousDays - currentDays);
-
-        // Nếu khoảng hiện tại quá ngắn so với khoảng trước đó
-        if (differenceDays > 3)
-        {
-
-            if (currentDays < previousDays)
-            {
-
-                throw new RuntimeException(
-                        "The current period does not have enough data for comparison yet"
-                );
-            }
-
-            throw new RuntimeException(
-                    "The selected periods are too different in length to compare"
-            );
-        }
-
-        BigDecimal previousRevenue =
-                invoiceRepository.getRevenueBetween(
-                        previousStartDate.atStartOfDay(),
-                        previousEndDate.atTime(23, 59, 59)
-                );
-
-        BigDecimal currentRevenue =
-                invoiceRepository.getRevenueBetween(
-                        currentStartDate.atStartOfDay(),
-                        currentEndDate.atTime(23, 59, 59)
-                );
-
-        if (previousRevenue == null)
-        {
-            previousRevenue = BigDecimal.ZERO;
-        }
-
-        if (currentRevenue == null)
-        {
-            currentRevenue = BigDecimal.ZERO;
-        }
-
-        BigDecimal difference =
-                currentRevenue.subtract(previousRevenue);
-
-        BigDecimal growthRate =
-                BigDecimal.ZERO.setScale(
-                        2,
-                        RoundingMode.HALF_UP
-                );
-
-        if (previousRevenue.compareTo(BigDecimal.ZERO) > 0)
-        {
-
-            growthRate =
-                    difference
-                            .divide(
-                                    previousRevenue,
-                                    10,
-                                    RoundingMode.HALF_UP
-                            )
-                            .multiply(
-                                    BigDecimal.valueOf(100)
-                            )
-                            .setScale(
-                                    2,
-                                    RoundingMode.HALF_UP
-                            );
-        }
-
-        BigDecimal previousAverageRevenue =
-                previousRevenue.divide(
-                        BigDecimal.valueOf(previousDays),
-                        2,
-                        RoundingMode.HALF_UP
-                );
-
-        BigDecimal currentAverageRevenue =
-                currentRevenue.divide(
-                        BigDecimal.valueOf(currentDays),
-                        2,
-                        RoundingMode.HALF_UP
-                );
-
-        RevenueComparisonResponse response =
-                new RevenueComparisonResponse();
-
-        response.setPreviousRevenue(previousRevenue);
-        response.setCurrentRevenue(currentRevenue);
-
-        response.setDifference(difference);
-
-        response.setGrowthRate(growthRate);
-
-        response.setPreviousDays(previousDays);
-        response.setCurrentDays(currentDays);
-
-        response.setPreviousAverageRevenue(
-                previousAverageRevenue
-        );
-
-        response.setCurrentAverageRevenue(
-                currentAverageRevenue
-        );
-
-        return response;
-    }
-
     //Best selling
 
     @Override
-    public BestSellingReportResponse getBestSellingReport(String period)
+    public BestSellingReportResponse getBestSellingReport(
+            String period,
+            Integer categoryId
+    )
     {
 
         LocalDate today =
@@ -492,6 +319,7 @@ public class RevenueReportServiceImpl implements RevenueReportService
                 invoiceRepository.getBestSellingDishes(
                         start,
                         end,
+                        categoryId,
                         top10
                 );
 
@@ -507,6 +335,7 @@ public class RevenueReportServiceImpl implements RevenueReportService
                     new BestSellingDishItemResponse(
                             rank++,
                             row.getDishName(),
+                            row.getImageUrl(),
                             row.getTotalQuantity(),
                             row.getTotalRevenue()
                     )
@@ -524,7 +353,8 @@ public class RevenueReportServiceImpl implements RevenueReportService
     @Override
     public BestSellingReportResponse getBestSellingReport(
             LocalDate fromDate,
-            LocalDate toDate
+            LocalDate toDate,
+            Integer categoryId
     )
     {
 
@@ -557,6 +387,7 @@ public class RevenueReportServiceImpl implements RevenueReportService
                 invoiceRepository.getBestSellingDishes(
                         start,
                         end,
+                        categoryId,
                         top10
                 );
 
@@ -572,6 +403,7 @@ public class RevenueReportServiceImpl implements RevenueReportService
                     new BestSellingDishItemResponse(
                             rank++,
                             row.getDishName(),
+                            row.getImageUrl(),
                             row.getTotalQuantity(),
                             row.getTotalRevenue()
                     )

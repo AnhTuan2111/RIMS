@@ -205,40 +205,6 @@ public class AdminController
         return revenueReportService.getRevenueBetween(fromDate, toDate);
     }
 
-
-    @GetMapping("/revenue/compare")
-    public RevenueComparisonResponse compareRevenue(
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate previousStartDate,
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate previousEndDate,
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate currentStartDate,
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate currentEndDate
-    )
-    {
-
-        return revenueReportService.compareRevenue(
-                previousStartDate,
-                previousEndDate,
-                currentStartDate,
-                currentEndDate
-        );
-    }
-
     @GetMapping("/revenue/best-selling")
     public BestSellingReportResponse getBestSellingReport(
             @RequestParam(
@@ -260,14 +226,26 @@ public class AdminController
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE
             )
-            LocalDate toDate
+            LocalDate toDate,
+
+            @RequestParam(
+                    required = false
+            )
+            Integer categoryId
     )
     {
         if (fromDate != null && toDate != null)
         {
-            return revenueReportService.getBestSellingReport(fromDate, toDate);
+            return revenueReportService.getBestSellingReport(
+                    fromDate,
+                    toDate,
+                    categoryId
+            );
         }
-        return revenueReportService.getBestSellingReport(period);
+        return revenueReportService.getBestSellingReport(
+                period,
+                categoryId
+        );
     }
 
     @GetMapping("/revenue/order-shifts")
