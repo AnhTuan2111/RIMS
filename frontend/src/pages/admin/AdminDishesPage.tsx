@@ -89,6 +89,7 @@ export default function AdminDishesPage() {
             return;
         }
 
+
         try {
             setIsSubmitting(true);
             await dishApi.createDish({
@@ -130,7 +131,6 @@ export default function AdminDishesPage() {
             alert("Lỗi: Đường dẫn hình ảnh quá dài (tối đa 500 ký tự)!");
             return;
         }
-
         try {
             setIsSubmitting(true);
             await dishApi.updateDish(selectedDish.id, {
@@ -381,9 +381,8 @@ export default function AdminDishesPage() {
                                     </button>
                                     <button
                                         onClick={() => openFormWithDish(dish, 'EDIT')}
-                                        disabled={!dish.isAvailable || isParentCategoryHidden}
-                                        className={`admin-dish-action-btn admin-dish-edit-btn ${(!dish.isAvailable || isParentCategoryHidden) ? 'disabled' : ''}`}
-                                        title={!dish.isAvailable ? "Món ăn tạm dừng" : isParentCategoryHidden ? "Danh mục cha đã bị ẩn" : "Chỉnh sửa"}
+                                        className="admin-dish-action-btn admin-dish-edit-btn"
+                                        title="Chỉnh sửa"
                                     >
                                         ✏️
                                     </button>
@@ -602,20 +601,14 @@ export default function AdminDishesPage() {
                             </div>
 
                             <div className="admin-dish-view-actions">
-                                {selectedDish.isAvailable && (categories.find(c => c.name === selectedDish.categoryName)?.isAvailable !== false) ? (
-                                    <button
-                                        onClick={() => {
-                                            setActiveModal('EDIT');
-                                        }}
-                                        className="admin-dish-btn-primary"
-                                    >
-                                        📝 Chỉnh sửa
-                                    </button>
-                                ) : (
-                                    <div className="admin-dish-view-disabled">
-                                        🔒 Ngưng bán / Mục cha ẩn
-                                    </div>
-                                )}
+                                <button
+                                    onClick={() => {
+                                        setActiveModal('EDIT');
+                                    }}
+                                    className="admin-dish-btn-primary"
+                                >
+                                    📝 Chỉnh sửa
+                                </button>
                                 <button
                                     onClick={() => {
                                         setActiveModal('DELETE');

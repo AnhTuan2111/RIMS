@@ -14,7 +14,7 @@ public class UpdateDishRequest
     @NotBlank(message = "Tên món ăn không được để trống")
     @Length(max = 50, message = "Tên món ăn không được vượt quá 50 ký tự")
     private String name;
-
+    @Length(max = 150, message = "Tên mô tả không quá 150 ký tự")
     private String description;
 
     @NotNull(message = "Giá không được để trống")
