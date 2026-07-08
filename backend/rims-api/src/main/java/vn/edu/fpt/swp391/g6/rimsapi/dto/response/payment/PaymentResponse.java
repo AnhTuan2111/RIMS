@@ -17,4 +17,10 @@ public class PaymentResponse
     private Long invoiceId;
     private BigDecimal amountPaid;
     private BigDecimal excessAmount;
+
+    private BigDecimal finalAmount;      // Số tiền thực phải trả SAU KHI đã trừ điểm
+    private String customerName;         // Tên khách hàng (null nếu không gắn tài khoản)
+    private Integer pointsUsed;           // Số điểm đã dùng để giảm giá
+    private Integer pointsEarned;         // Số điểm tích lũy thêm được
+    private String paymentMethod;         // "CASH" hoặc "QRCODE"
 }

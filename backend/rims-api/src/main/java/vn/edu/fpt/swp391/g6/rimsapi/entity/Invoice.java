@@ -48,6 +48,16 @@ public class Invoice
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payment> payments;
 
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private User customer;
+
+    @Column(name = "points_used_on_invoice")
+    private Integer pointsUsedOnInvoice;
+
+    @Column(name = "points_earned_on_invoice")
+    private Integer pointsEarnedOnInvoice;
+
     @PrePersist
     @PreUpdate
     private void fillRestaurantRevenueAmount()

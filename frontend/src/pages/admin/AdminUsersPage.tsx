@@ -69,7 +69,9 @@ export default function AdminUsersPage() {
     }, [])
 
     useEffect(() => {
-        void loadData()
+        Promise.resolve().then(() => {
+            void loadData()
+        })
     }, [loadData])
 
     const resetForm = () => setForm({username: '', email: '', phone: '', password: '', role: 'CHEF', fullName: ''})
@@ -202,6 +204,13 @@ export default function AdminUsersPage() {
         return matchSearch && matchStatus
     })
 
+    // ĐÃ CHỈNH SỬA: Hàm cấu hình cột động theo Tab
+    const dynamicGridCols: React.CSSProperties = {
+        gridTemplateColumns: tab === 'customer'
+            ? '40px 1.5fr 1fr 1.5fr 1fr 1fr 1fr 1fr 1fr' // 9 cột cho khách (có thêm cột điểm)
+            : '40px 1.5fr 1fr 1.5fr 1fr 1fr 1fr 1fr'     // 8 cột cho nhân viên
+    }
+
     return (
         <div className="page-card">
             {/* ── Header ── */}
@@ -297,13 +306,15 @@ export default function AdminUsersPage() {
                 </div>
             ) : (
                 <div className="simple-table">
-                    <div className="simple-table-header" style={gridCols}>
+                    <div className="simple-table-header" style={dynamicGridCols}>
                         <span>#</span>
                         <span>Họ tên</span>
                         <span>Tài khoản</span>
                         <span>Email</span>
                         <span>SĐT</span>
                         <span>Vai trò</span>
+                        {/* ĐÃ CHỈNH SỬA: Thêm cột Điểm tích lũy */}
+                        {tab === 'customer' && <span>Điểm tích lũy</span>}
                         <span>Trạng thái</span>
                         <span>Thao tác</span>
                     </div>
@@ -315,7 +326,7 @@ export default function AdminUsersPage() {
                     ) : currentList.map((user, idx) => {
                         const rc = ROLE_COLORS[user.role] ?? {bg: '#f3f4f6', text: '#374151'}
                         return (
-                            <div className="simple-table-row" key={user.id} style={{...gridCols, alignItems: 'center'}}>
+                            <div className="simple-table-row" key={user.id} style={{...dynamicGridCols, alignItems: 'center'}}>
                                 <span style={{color: '#9ca3af', fontSize: 12}}>{idx + 1}</span>
                                 <span style={{fontWeight: 600}}>{user.fullName}</span>
                                 <span style={{color: '#6b7280', fontSize: 13}}>{user.username}</span>
@@ -333,6 +344,12 @@ export default function AdminUsersPage() {
                                         {ROLE_LABELS[user.role] ?? user.role}
                                     </span>
                                 </span>
+                                {/* ĐÃ CHỈNH SỬA: Hiển thị giá trị điểm tích lũy */}
+                                {tab === 'customer' && (
+                                    <span style={{fontWeight: 600, color: '#5b21b6'}}>
+                                        {(user.rewardPoints ?? 0).toLocaleString()} điểm
+                                    </span>
+                                )}
                                 <span>
                                     <button
                                         onClick={() => void handleStatusToggle(user)}
@@ -524,7 +541,7 @@ export default function AdminUsersPage() {
 
 // ── helpers ──────────────────────────────────────────────
 
-const gridCols: React.CSSProperties = {gridTemplateColumns: '40px 1.5fr 1fr 1.5fr 1fr 1fr 1fr 1fr'}
+// ĐÃ CHỈNH SỬA: Xóa cái const gridCols ở đây vì nó đã được chuyển lên trên thành dynamicGridCols
 
 const ghostBtn: React.CSSProperties = {background: 'none', border: 'none', cursor: 'pointer', fontSize: 16}
 
@@ -602,4 +619,3 @@ function ModalActions({children}: { children: React.ReactNode }) {
 function ErrBox({msg}: { msg: string }) {
     return <div className="auth-error" style={{margin: '0 0 4px'}}>{msg}</div>
 }
-
