@@ -1,3 +1,5 @@
+// src/config/roleMenus.ts
+
 import { RoleType } from '../types/auth'
 
 export type RoleMenuItem = {
@@ -28,14 +30,8 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
         { label: 'Tổng quan', path: '/chef/dashboard' },
         { label: 'Đơn cần chế biến', path: '/chef/orders' },
         { label: 'Danh sách món ăn', path: '/chef/dishes' },
-        {
-            label: 'Món đã hủy',
-            path: '/chef/cancelled-orders',
-        },
-        {
-            label: 'Gom món để nấu',
-            path: '/chef/grouped-orders',
-        },
+        { label: 'Món đã hủy', path: '/chef/cancelled-orders' },
+        { label: 'Gom món để nấu', path: '/chef/grouped-orders' },
         { label: 'Hồ sơ của tôi', path: '/profile' },
     ],
 
@@ -53,6 +49,7 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
     ],
 
     [RoleType.CUSTOMER]: [
+        { label: 'Đặt bàn', path: '/customer/reservations' },
         { label: 'Hồ sơ của tôi', path: '/profile' },
     ],
 }

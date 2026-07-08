@@ -10,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -46,6 +47,11 @@ public class Reservation
     @ManyToOne
     @JoinColumn(name = "table_id")
     private RestaurantTable table;
+
+    // 🔥 THÊM MỚI: Liên kết với User
+    @ManyToOne
+    @JoinColumn(name = "user_id")  // Thêm cột user_id trong bảng reservations
+    private User user;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
