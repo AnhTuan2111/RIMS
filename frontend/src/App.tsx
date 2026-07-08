@@ -43,6 +43,7 @@ import WaiterEditReservationPage from './pages/waiter/WaiterEditReservationPage'
 import GroupedKitchenPage from "./pages/chef/GroupedKitchenPage.tsx";
 import CancelledOrdersPage from "./pages/chef/CancelledOrdersPage.tsx";
 
+import CustomerReservations from './pages/customer/CustomerReservations'
 function App() {
     return (
         <BrowserRouter>
@@ -100,8 +101,10 @@ function App() {
                         {/* CASHIER */}
                         <Route path="/cashier/payments" element={<CashierPaymentsPage/>}/>
                         <Route path="/cashier/invoices" element={<CashierInvoicesPage/>}/>
-                    </Route>
 
+                    {/* Customer */}
+                    <Route path="/customer/reservations" element={<CustomerReservations />} />
+                </Route>
                     <Route path="*" element={<Navigate to="/" replace/>}/>
                 </Routes>
             </ActorProvider>
