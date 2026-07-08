@@ -1,45 +1,130 @@
+// src/main/java/vn/edu/fpt/swp391/g6/rimsapi/controller/CustomerController.java
+
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCancelReservationRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.ChangePasswordRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
+import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerReservationService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
-
+import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/rims/customer")
 @RequiredArgsConstructor
-public class CustomerController
-{
+@Slf4j
+public class CustomerController {
 
     private final UserService userService;
+    private final CustomerReservationService customerReservationService;
+    private final RestaurantTableRepository tableRepository;
 
+    // ========== Profile Management ==========
     @GetMapping("/profile")
-    public UserResponse getMyProfile(@AuthenticationPrincipal UserPrincipal principal)
-    {
+    public UserResponse getMyProfile(@AuthenticationPrincipal UserPrincipal principal) {
         return userService.getAccountDetail(principal.getId());
     }
 
     @PutMapping("/profile")
     public UserResponse updateMyProfile(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody @Valid UpdateAccountRequest request)
-    {
+            @RequestBody @Valid UpdateAccountRequest request) {
         return userService.updateAccount(principal.getId(), request);
     }
 
     @PostMapping("/change-password")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody @Valid ChangePasswordRequest request)
-    {
+            @RequestBody @Valid ChangePasswordRequest request) {
         userService.changePassword(principal, request);
         return ResponseEntity.noContent().build();
+    }
+
+    // ========== Table Management for Customer ==========
+    @GetMapping("/tables/available")
+    public ResponseEntity<List<RestaurantTableResponse>> getAvailableTables() {
+        try {
+            List<RestaurantTable> availableTables = tableRepository.findByStatus(TableStatus.AVAILABLE);
+            List<RestaurantTableResponse> response = availableTables.stream()
+                    .map(t -> RestaurantTableResponse.builder()
+                            .id(t.getId())
+                            .tableNumber(t.getTableNumber())
+                            .capacity(t.getCapacity())
+                            .status(t.getStatus().name())
+                            .build())
+                    .toList();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting available tables: ", e);
+            return ResponseEntity.ok(List.of());
+        }
+    }
+
+    // ========== Reservation Management for Customer ==========
+
+    /**
+     * Đặt bàn - Customer chỉ được đặt 1 bàn/ngày
+     * POST /rims/customer/reservations
+     */
+    @PostMapping("/reservations")
+    public ResponseEntity<CustomerReservationResponse> createReservation(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody @Valid CustomerCreateReservationRequest request) {
+
+        request.setUserId(principal.getId());
+        CustomerReservationResponse response = customerReservationService.createReservation(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Hủy đặt bàn - Hủy theo userId (tự động tìm đặt bàn hiện tại của user)
+     * DELETE /rims/customer/reservations/cancel
+     */
+    @DeleteMapping("/reservations/cancel")
+    public ResponseEntity<CustomerReservationResponse> cancelReservation(
+            @AuthenticationPrincipal UserPrincipal principal) {
+
+        CustomerReservationResponse response = customerReservationService.cancelCurrentReservation(principal.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Lấy đặt bàn hiện tại của customer
+     * GET /rims/customer/reservations/current
+     */
+    @GetMapping("/reservations/current")
+    public ResponseEntity<CustomerReservationResponse> getCurrentReservation(
+            @AuthenticationPrincipal UserPrincipal principal) {
+
+        CustomerReservationResponse response = customerReservationService.getCurrentReservationByUser(principal.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Kiểm tra đã đặt bàn trong ngày chưa
+     * GET /rims/customer/reservations/check?date=2026-07-08
+     */
+    @GetMapping("/reservations/check")
+    public ResponseEntity<Boolean> checkCustomerReservation(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam String date) {
+
+        boolean exists = customerReservationService.checkCustomerReservationByUser(principal.getId(), date);
+        return ResponseEntity.ok(exists);
     }
 }
