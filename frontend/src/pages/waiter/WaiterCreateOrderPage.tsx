@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import {type MenuItemResponse, type OrderItemRequest, waiterApi} from "../../api/waiter";
 import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
 
@@ -7,11 +7,15 @@ export default function WaiterCreateOrderPage() {
     const navigate = useNavigate();
     const {tableId} = useParams();
     const tid = parseInt(tableId || "0");
+    const [searchParams] = useSearchParams();
+    const reservationIdParam = searchParams.get("reservationId");
+    const reservationId = reservationIdParam ? parseInt(reservationIdParam) : null;
     const [menu, setMenu] = useState<MenuItemResponse[]>([]);
     const [orderDraft, setOrderDraft] = useState<Record<number, { qty: number; note: string }>>({});
     const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [activeCategory, setActiveCategory] = useState<string>("Tất cả");
 
     useEffect(() => {
         waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
@@ -53,13 +57,18 @@ export default function WaiterCreateOrderPage() {
 
         setSubmitting(true);
         try {
-            const res = await waiterApi.createOrder({tableId: tid, items});
+            const data = {tableId: tid, items};
+            const res = reservationId 
+                ? await waiterApi.createOrderFromReservation(reservationId, data)
+                : await waiterApi.createOrder(data);
+
             setSuccessData({
                 message: res.data.message || "Tạo order thành công",
                 itemSummary: "",
             });
-        } catch {
-            showToast("Lỗi khi tạo order", "error");
+        } catch (error: any) {
+            const msg = error.response?.data?.message || typeof error.response?.data === 'string' ? error.response?.data : "Lỗi khi tạo order";
+            showToast(msg, "error");
         } finally {
             setSubmitting(false);
             setShowConfirm(false);
@@ -90,8 +99,21 @@ export default function WaiterCreateOrderPage() {
                     <h2 className="waiter-title">Tạo Order - Bàn {tid}</h2>
                     <button onClick={openConfirm} className="waiter-action-btn">Tạo Order</button>
                 </div>
+                <div className="waiter-category-nav">
+                    {["Tất cả", ...Array.from(new Set(menu.map((d) => d.categoryName).filter(Boolean)))].map((cat) => (
+                        <button
+                            key={cat}
+                            className={`waiter-category-tab${activeCategory === cat ? " waiter-category-tab-active" : ""}`}
+                            onClick={() => setActiveCategory(cat)}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
                 <div className="waiter-menu-grid">
-                    {menu.map((dish) => {
+                    {menu
+                        .filter((dish) => activeCategory === "Tất cả" || dish.categoryName === activeCategory)
+                        .map((dish) => {
                         const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
                         return (
                             <div key={dish.dishId} className="waiter-menu-card">
