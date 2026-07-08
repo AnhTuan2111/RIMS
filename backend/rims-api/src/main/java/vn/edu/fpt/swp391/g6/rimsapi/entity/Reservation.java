@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = "reservations")
+@Table(name = "reservations", indexes = @Index(columnList = "reservation_time"))
 @Getter
 @Setter
 @AllArgsConstructor

@@ -11,7 +11,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.ReservationDetailRe
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -20,6 +19,8 @@ public interface WaiterService
     List<TableDetailResponse> getAllTables();
 
     CreateOrderResponse createOrder(CreateOrderRequest request, Integer waiterId);
+
+    CreateOrderResponse createOrderFromReservation(Long reservationId, CreateOrderRequest request, Integer waiterId);
 
     UpdateOrderResponse updateOrder(Long orderId, UpdateOrderRequest request, Integer waiterId);
 

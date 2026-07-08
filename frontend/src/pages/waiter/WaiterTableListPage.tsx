@@ -11,11 +11,17 @@ const STATUS_LABEL: Record<string, string> = {
     RESERVED: "reserved",
 };
 
+function todayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export default function WaiterTableListPage() {
     const navigate = useNavigate();
     const [tables, setTables] = useState<TableDetailResponse[]>([]);
     const [tableModal, setTableModal] = useState<TableDetailResponse | null>(null);
     const [resTimes, setResTimes] = useState<Record<number, string>>({});
+    const [modalReservations, setModalReservations] = useState<any[]>([]);
 
     const loadTables = useCallback(() => {
         waiterApi.getTables().then((res) => setTables(res.data)).catch(console.error);
@@ -67,6 +73,19 @@ export default function WaiterTableListPage() {
     function handleTableClick(table: TableDetailResponse) {
         if (table.status === "AVAILABLE") {
             setTableModal(table);
+            setModalReservations([]);
+            // Fetch all upcoming reservations for this table today
+            waiterApi.getReservationsByTableAndDate(table.tableId, todayString())
+                .then((res) => {
+                    // Filter only future reservations (QUEUED status)
+                    const upcoming = (res.data || []).filter((r: any) => {
+                        if (r.status !== 'QUEUED' && r.status !== 'WAITING') return false;
+                        if (!r.reservationTime) return false;
+                        return new Date(r.reservationTime) > new Date();
+                    });
+                    setModalReservations(upcoming);
+                })
+                .catch(console.error);
         } else if (table.status === "SERVING") {
             navigate(`/waiter/tables/${table.tableId}/order/detail`);
         } else if (table.status === "RESERVED") {
@@ -112,9 +131,43 @@ export default function WaiterTableListPage() {
                 <div className="waiter-modal-overlay" onClick={() => setTableModal(null)}>
                     <div className="waiter-modal" onClick={(e) => e.stopPropagation()}>
                         <h3>Bàn {tableModal.tableNumber}</h3>
-                        <p>Bàn đang trống. Bạn muốn làm gì?</p>
+
+                        {modalReservations.length > 0 ? (
+                            <div className="waiter-warning-box">
+                                <p>
+                                    <strong>⚠️ Bàn này đã có {modalReservations.length} lịch đặt trong hôm nay:</strong>
+                                </p>
+                                <ul style={{margin: "0.5rem 0 0.75rem 1.25rem", padding: 0}}>
+                                    {modalReservations.map((r: any) => {
+                                        const time = r.reservationTime?.split('T')[1]?.substring(0, 5) || '';
+                                        return (
+                                            <li key={r.reservationId} style={{marginBottom: "0.35rem"}}>
+                                                <strong>{time}</strong> — {r.customerName}
+                                                {r.phone && <span style={{color: "#78350f"}}> ({r.phone})</span>}
+                                                {r.note && <span style={{color: "#92400e", fontSize: "0.82rem"}}> · {r.note}</span>}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                                <p style={{margin: 0}}>
+                                    Vui lòng xác nhận với khách walk-in rằng họ có thể hoàn thành bữa ăn trước các khung giờ trên không. Nếu không, hãy <strong>chọn bàn khác</strong>.
+                                </p>
+                            </div>
+                        ) : tableModal.upcomingReservationTime ? (
+                            <div className="waiter-warning-box">
+                                <p>
+                                    <strong>⚠️ Cảnh báo:</strong> Bàn này đã được đặt trước bởi <b>{tableModal.upcomingCustomerName || "Khách"}</b> vào lúc <b>{tableModal.upcomingReservationTime.split('T')[1].substring(0, 5)}</b>.
+                                </p>
+                                <p>Vui lòng xác nhận với khách walk-in rằng họ có thể hoàn thành bữa ăn trước thời gian này không. Nếu không, hãy chọn bàn khác.</p>
+                            </div>
+                        ) : (
+                            <p>Bàn đang trống. Bạn muốn làm gì?</p>
+                        )}
+
                         <div className="waiter-modal-actions">
-                            <button onClick={() => setTableModal(null)} className="waiter-btn-outline">Hủy</button>
+                            <button onClick={() => setTableModal(null)} className="waiter-btn-outline">
+                                {(modalReservations.length > 0 || tableModal.upcomingReservationTime) ? 'Chọn Bàn Khác' : 'Hủy'}
+                            </button>
                             <button
                                 onClick={() => navigate(`/waiter/reservations?tableId=${tableModal.tableId}`)}
                                 className="waiter-btn-outline"
@@ -134,3 +187,4 @@ export default function WaiterTableListPage() {
         </div>
     );
 }
+

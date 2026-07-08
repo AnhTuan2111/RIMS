@@ -75,7 +75,7 @@ export default function WaiterReservationDetailPage() {
                     <BackArrow onClick={() => navigate("/waiter/tables")}/>
                     <h2 className="waiter-title">Chi tiết đặt bàn — Bàn {tid}</h2>
                     <button
-                        onClick={() => navigate(`/waiter/tables/${tid}/order/new`)}
+                        onClick={() => navigate(`/waiter/tables/${tid}/order/new?reservationId=${reservation.reservationId}`)}
                         className="waiter-action-btn"
                     >
                         Bắt đầu Order
