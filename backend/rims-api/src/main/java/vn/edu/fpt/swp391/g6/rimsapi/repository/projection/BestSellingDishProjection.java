@@ -8,6 +8,8 @@ public interface BestSellingDishProjection
 
     String getDishName();
 
+    String getImageUrl();
+
     Long getTotalQuantity();
 
     BigDecimal getTotalRevenue();
