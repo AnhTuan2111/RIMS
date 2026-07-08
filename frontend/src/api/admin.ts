@@ -16,6 +16,14 @@ export interface AdminPaymentHistoryItem {
     paymentDate: string
 }
 
+export interface AdminPaymentHistoryPage {
+    items: AdminPaymentHistoryItem[]
+    page: number
+    pageSize: number
+    totalItems: number
+    totalPages: number
+}
+
 export interface AdminPaymentDetailItem {
     dishName: string
     quantity: number
@@ -38,17 +46,6 @@ export interface RevenueReportResponse {
     period: string
 }
 
-export interface RevenueComparisonResponse {
-    previousRevenue: number
-    currentRevenue: number
-    difference: number
-    growthRate: number
-    previousDays: number
-    currentDays: number
-    previousAverageRevenue: number
-    currentAverageRevenue: number
-}
-
 export interface DailyRevenueItem {
     dayLabel: string
     date: string
@@ -64,6 +61,7 @@ export interface WeeklyRevenueChartResponse {
 export interface BestSellingDishItem {
     rank: number
     dishName: string
+    imageUrl?: string | null
     totalQuantity: number
     totalRevenue: number
 }
@@ -86,6 +84,7 @@ export interface HighestOrderShift {
 
 export interface CreateCustomerRequest {
     username: string
+    fullName: string
     email: string
     phone: string
     password: string
@@ -93,6 +92,7 @@ export interface CreateCustomerRequest {
 
 export interface CreateStaffRequest {
     username: string
+    fullName: string
     email: string
     phone: string
     role: string
@@ -100,25 +100,60 @@ export interface CreateStaffRequest {
 }
 
 export interface UpdateAccountRequest {
+    username: string
     fullName: string
     email: string
     phone: string
     role?: string
 }
 
+// Dùng cho trang "Hồ sơ của tôi" (staff tự cập nhật thông tin của chính mình)
+export interface UpdateOwnProfileRequest {
+    fullName: string
+    username: string
+    email: string
+    phone: string
+}
+
+export interface UserProfileResponse {
+    userId: number
+    username: string
+    fullName: string
+    phone: string
+    email: string
+    role: string
+}
+
 export interface SetAccountStatusRequest {
     active: boolean
 }
 
+export interface PageResponse<T> {
+    content: T[]
+    page: number
+    size: number
+    totalElements: number
+    totalPages: number
+    first: boolean
+    last: boolean
+}
+
+export interface GetAccountsParams {
+    keyword?: string
+    active?: boolean
+    page?: number   // bắt đầu từ 0
+    size?: number
+}
+
 // Staff accounts
-export async function getStaffAccounts(): Promise<UserResponse[]> {
-    const res = await apiClient.get<UserResponse[]>('/admin/user/staff')
+export async function getStaffAccounts(params: GetAccountsParams = {}): Promise<PageResponse<UserResponse>> {
+    const res = await apiClient.get<PageResponse<UserResponse>>('/admin/user/staff', {params})
     return res.data
 }
 
 // Customer accounts
-export async function getCustomerAccounts(): Promise<UserResponse[]> {
-    const res = await apiClient.get<UserResponse[]>('/admin/user/customer')
+export async function getCustomerAccounts(params: GetAccountsParams = {}): Promise<PageResponse<UserResponse>> {
+    const res = await apiClient.get<PageResponse<UserResponse>>('/admin/user/customer', {params})
     return res.data
 }
 
@@ -142,6 +177,17 @@ export async function updateAccount(id: number, data: UpdateAccountRequest): Pro
     return res.data
 }
 
+// Legacy profile endpoints (dùng cho trang "Hồ sơ của tôi")
+export async function getProfile(id: number): Promise<UserProfileResponse> {
+    const res = await apiClient.get<UserProfileResponse>(`/admin/user/profile/${id}`)
+    return res.data
+}
+
+export async function updateProfile(id: number, data: UpdateOwnProfileRequest): Promise<UserProfileResponse> {
+    const res = await apiClient.put<UserProfileResponse>(`/admin/user/profile/update/${id}`, data)
+    return res.data
+}
+
 export type OrderShiftItem = HighestOrderShift
 
 export interface OrderShiftReportResponse {
@@ -154,9 +200,18 @@ export interface OrderShiftReportResponse {
 }
 
 export const adminApi = {
-    getPaymentHistory: () =>
-        apiClient.get<AdminPaymentHistoryItem[]>(
+    getPaymentHistory: (
+        page = 1,
+        pageSize = 10,
+    ) =>
+        apiClient.get<AdminPaymentHistoryPage>(
             '/admin/invoice/history',
+            {
+                params: {
+                    page,
+                    pageSize,
+                },
+            },
         ),
 
     getPaymentDetail: (invoiceId: number) =>
@@ -217,32 +272,16 @@ export const adminApi = {
             },
         ),
 
-    compareRevenue: (
-        previousStartDate: string,
-        previousEndDate: string,
-        currentStartDate: string,
-        currentEndDate: string,
-    ) =>
-        apiClient.get<RevenueComparisonResponse>(
-            '/admin/revenue/compare',
-            {
-                params: {
-                    previousStartDate,
-                    previousEndDate,
-                    currentStartDate,
-                    currentEndDate,
-                },
-            },
-        ),
-
     getBestSellingReport: (
         period: BestSellingPeriod = 'WEEK',
+        categoryId?: number | null,
     ) =>
         apiClient.get<BestSellingReportResponse>(
             '/admin/revenue/best-selling',
             {
                 params: {
                     period,
+                    ...(categoryId ? {categoryId} : {}),
                 },
             },
         ),
@@ -250,6 +289,7 @@ export const adminApi = {
     getBestSellingReportBetween: (
         fromDate: string,
         toDate: string,
+        categoryId?: number | null,
     ) =>
         apiClient.get<BestSellingReportResponse>(
             '/admin/revenue/best-selling',
@@ -257,6 +297,7 @@ export const adminApi = {
                 params: {
                     fromDate,
                     toDate,
+                    ...(categoryId ? {categoryId} : {}),
                 },
             },
         ),

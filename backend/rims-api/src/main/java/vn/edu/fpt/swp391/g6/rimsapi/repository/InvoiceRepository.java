@@ -1,5 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -58,6 +59,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
     @Query("""
             SELECT
                 d.name as dishName,
+                d.imageUrl as imageUrl,
                 SUM(oi.quantity) as totalQuantity,
                 SUM(oi.subTotal) as totalRevenue
             FROM Invoice i
@@ -66,14 +68,19 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             JOIN oi.dish d
             WHERE
                 i.invoiceDate BETWEEN :startDate AND :endDate
+                AND (:categoryId IS NULL OR d.category.id = :categoryId)
             GROUP BY
-                d.name
+                d.id,
+                d.name,
+                d.imageUrl
             ORDER BY
-                SUM(oi.quantity) DESC
+                SUM(oi.quantity) DESC,
+                SUM(oi.subTotal) DESC
             """)
     List<BestSellingDishProjection> getBestSellingDishes(
             LocalDateTime startDate,
             LocalDateTime endDate,
+            Integer categoryId,
             Pageable pageable
     );
 
@@ -90,21 +97,28 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
 
 
     //Get invoice history for a specific table.
-    @Query("""
-            SELECT
-                i.id as invoiceId,
-                o.id as orderId,
-                t.tableNumber as tableNumber,
-                p.paymentMethod as paymentMethod,
-                i.finalAmount as amount,
-                i.invoiceDate as paymentDate
-            FROM Invoice i
-            JOIN i.order o
-            JOIN o.table t
-            JOIN i.payments p
-            ORDER BY i.invoiceDate DESC
-            """)
-    List<InvoiceHistoryProjection> getInvoiceHistory();
+    @Query(
+            value = """
+                    SELECT
+                        i.id as invoiceId,
+                        o.id as orderId,
+                        t.tableNumber as tableNumber,
+                        p.paymentMethod as paymentMethod,
+                        i.finalAmount as amount,
+                        i.invoiceDate as paymentDate
+                    FROM Invoice i
+                    JOIN i.order o
+                    JOIN o.table t
+                    JOIN i.payments p
+                    ORDER BY i.invoiceDate DESC
+                    """,
+            countQuery = """
+                    SELECT COUNT(i)
+                    FROM Invoice i
+                    JOIN i.payments p
+                    """
+    )
+    Page<InvoiceHistoryProjection> getInvoiceHistory(Pageable pageable);
 
 
     @EntityGraph(attributePaths = {"order", "order.orderItems", "order.orderItems.dish", "order.table"})

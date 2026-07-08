@@ -15,6 +15,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateCustomerRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateStaffRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.SetAccountStatusRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.PageResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
@@ -54,15 +55,23 @@ public class AdminController
     }
 
     @GetMapping("/user/staff")
-    public List<UserResponse> getStaffAccounts()
+    public PageResponse<UserResponse> getStaffAccounts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
     {
-        return userService.getStaffAccounts();
+        return userService.getStaffAccounts(keyword, active, page, size);
     }
 
     @GetMapping("/user/customer")
-    public List<UserResponse> getCustomerAccounts()
+    public PageResponse<UserResponse> getCustomerAccounts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean active,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
     {
-        return userService.getCustomerAccounts();
+        return userService.getCustomerAccounts(keyword, active, page, size);
     }
 
     @GetMapping("/user/{id}")
@@ -112,7 +121,7 @@ public class AdminController
     @PutMapping("/user/profile/update/{id}")
     public UserProfileResponse updateProfile(
             @PathVariable Integer id,
-            @RequestBody UpdateProfileRequest request)
+            @RequestBody @Valid UpdateProfileRequest request)
     {
         return userService.updateProfile(id, request);
     }
@@ -120,9 +129,22 @@ public class AdminController
     // =================== INVOICE ===================
 
     @GetMapping("/invoice/history")
-    public List<InvoiceHistoryResponse> getInvoiceHistory()
+    public InvoiceHistoryPageResponse getInvoiceHistory(
+            @RequestParam(
+                    defaultValue = "1"
+            )
+            int page,
+
+            @RequestParam(
+                    defaultValue = "10"
+            )
+            int pageSize
+    )
     {
-        return invoiceService.getInvoiceHistory();
+        return invoiceService.getInvoiceHistory(
+                page,
+                pageSize
+        );
     }
 
     @GetMapping("/invoice/{invoiceId}")
@@ -192,40 +214,6 @@ public class AdminController
         return revenueReportService.getRevenueBetween(fromDate, toDate);
     }
 
-
-    @GetMapping("/revenue/compare")
-    public RevenueComparisonResponse compareRevenue(
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate previousStartDate,
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate previousEndDate,
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate currentStartDate,
-
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate currentEndDate
-    )
-    {
-
-        return revenueReportService.compareRevenue(
-                previousStartDate,
-                previousEndDate,
-                currentStartDate,
-                currentEndDate
-        );
-    }
-
     @GetMapping("/revenue/best-selling")
     public BestSellingReportResponse getBestSellingReport(
             @RequestParam(
@@ -247,14 +235,26 @@ public class AdminController
             @DateTimeFormat(
                     iso = DateTimeFormat.ISO.DATE
             )
-            LocalDate toDate
+            LocalDate toDate,
+
+            @RequestParam(
+                    required = false
+            )
+            Integer categoryId
     )
     {
         if (fromDate != null && toDate != null)
         {
-            return revenueReportService.getBestSellingReport(fromDate, toDate);
+            return revenueReportService.getBestSellingReport(
+                    fromDate,
+                    toDate,
+                    categoryId
+            );
         }
-        return revenueReportService.getBestSellingReport(period);
+        return revenueReportService.getBestSellingReport(
+                period,
+                categoryId
+        );
     }
 
     @GetMapping("/revenue/order-shifts")

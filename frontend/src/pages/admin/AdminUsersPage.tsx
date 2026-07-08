@@ -27,8 +27,16 @@ type ModalType = 'create-staff' | 'create-customer' | 'edit' | 'detail' | null
 
 export default function AdminUsersPage() {
     const [tab, setTab] = useState<Tab>('staff')
-    const [staffList, setStaffList] = useState<UserResponse[]>([])
-    const [customerList, setCustomerList] = useState<UserResponse[]>([])
+
+    // dữ liệu của trang hiện tại (server trả về)
+    const [items, setItems] = useState<UserResponse[]>([])
+    const [totalElements, setTotalElements] = useState(0)
+    const [totalPages, setTotalPages] = useState(1)
+
+    // số lượng hiển thị trên tab (đếm riêng, không phụ thuộc tab đang xem)
+    const [staffCount, setStaffCount] = useState(0)
+    const [customerCount, setCustomerCount] = useState(0)
+
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [successMsg, setSuccessMsg] = useState<string | null>(null)
@@ -44,33 +52,74 @@ export default function AdminUsersPage() {
 
     // search & filter
     const [search, setSearch] = useState('')
+    const [debouncedSearch, setDebouncedSearch] = useState('')
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
+
+    // pagination — page tính từ 0 để khớp với API backend (Spring Data)
+    const [page, setPage] = useState(0)
+    const [pageSize, setPageSize] = useState(10)
 
     const showSuccess = (msg: string) => {
         setSuccessMsg(msg)
         setTimeout(() => setSuccessMsg(null), 3000)
     }
 
+    // debounce ô tìm kiếm 400ms để tránh gọi API liên tục khi gõ
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedSearch(search.trim()), 400)
+        return () => clearTimeout(t)
+    }, [search])
+
+    // reset về trang đầu mỗi khi đổi tab, từ khóa tìm kiếm hoặc bộ lọc trạng thái
+    useEffect(() => {
+        setPage(0)
+    }, [tab, debouncedSearch, filterStatus])
+
     const loadData = useCallback(async () => {
         setIsLoading(true)
         setError(null)
         try {
-            const [staff, customers] = await Promise.all([
-                adminApi.getStaffAccounts(),
-                adminApi.getCustomerAccounts(),
-            ])
-            setStaffList(staff)
-            setCustomerList(customers)
+            const params: adminApi.GetAccountsParams = {
+                keyword: debouncedSearch || undefined,
+                active: filterStatus === 'all' ? undefined : filterStatus === 'active',
+                page,
+                size: pageSize,
+            }
+            const res = tab === 'staff'
+                ? await adminApi.getStaffAccounts(params)
+                : await adminApi.getCustomerAccounts(params)
+
+            setItems(res.content)
+            setTotalElements(res.totalElements)
+            setTotalPages(res.totalPages)
+            if (tab === 'staff') setStaffCount(res.totalElements)
+            else setCustomerCount(res.totalElements)
         } catch (err) {
             setError(getErrorMessage(err))
         } finally {
             setIsLoading(false)
         }
-    }, [])
+    }, [tab, debouncedSearch, filterStatus, page, pageSize])
 
     useEffect(() => {
         void loadData()
     }, [loadData])
+
+    // lấy số lượng ban đầu cho cả 2 tab (để hiển thị đúng ngay cả khi chưa mở tab đó)
+    useEffect(() => {
+        (async () => {
+            try {
+                const [staffRes, customerRes] = await Promise.all([
+                    adminApi.getStaffAccounts({page: 0, size: 1}),
+                    adminApi.getCustomerAccounts({page: 0, size: 1}),
+                ])
+                setStaffCount(staffRes.totalElements)
+                setCustomerCount(customerRes.totalElements)
+            } catch {
+                // không quan trọng, chỉ ảnh hưởng số đếm hiển thị trên tab
+            }
+        })()
+    }, [])
 
     const resetForm = () => setForm({username: '', email: '', phone: '', password: '', role: 'CHEF', fullName: ''})
 
@@ -92,7 +141,7 @@ export default function AdminUsersPage() {
 
     const openEdit = (user: UserResponse) => {
         setSelectedUser(user)
-        setForm({...form, fullName: user.fullName, email: user.email ?? '', phone: user.phone, role: user.role})
+        setForm({...form, username: user.username, fullName: user.fullName, email: user.email ?? '', phone: user.phone, role: user.role})
         setFormError(null)
         setModal('edit')
     }
@@ -101,26 +150,20 @@ export default function AdminUsersPage() {
         const newStatus = !user.isActive
 
         // Optimistic update — đổi UI ngay, không cần chờ server
-        const patch = (list: UserResponse[]) =>
-            list.map(u => u.id === user.id ? {...u, isActive: newStatus} : u)
-        setStaffList(prev => patch(prev))
-        setCustomerList(prev => patch(prev))
+        setItems(prev => prev.map(u => u.id === user.id ? {...u, isActive: newStatus} : u))
 
         try {
             await adminApi.setAccountStatus(user.id, newStatus)
             showSuccess(`Đã ${newStatus ? 'kích hoạt' : 'khóa'} tài khoản ${user.username}`)
         } catch (err) {
             // Revert nếu server lỗi
-            const revert = (list: UserResponse[]) =>
-                list.map(u => u.id === user.id ? {...u, isActive: user.isActive} : u)
-            setStaffList(prev => revert(prev))
-            setCustomerList(prev => revert(prev))
+            setItems(prev => prev.map(u => u.id === user.id ? {...u, isActive: user.isActive} : u))
             setError(getErrorMessage(err))
         }
     }
 
     const handleCreateStaff = async () => {
-        if (!form.username || !form.email || !form.phone || !form.password) {
+        if (!form.username || !form.fullName || !form.email || !form.phone || !form.password) {
             setFormError('Vui lòng điền đầy đủ các trường bắt buộc')
             return
         }
@@ -129,6 +172,7 @@ export default function AdminUsersPage() {
         try {
             await adminApi.createStaff({
                 username: form.username,
+                fullName: form.fullName,
                 email: form.email,
                 phone: form.phone,
                 role: form.role,
@@ -145,7 +189,7 @@ export default function AdminUsersPage() {
     }
 
     const handleCreateCustomer = async () => {
-        if (!form.username || !form.email || !form.phone || !form.password) {
+        if (!form.username || !form.fullName || !form.email || !form.phone || !form.password) {
             setFormError('Vui lòng điền đầy đủ các trường bắt buộc')
             return
         }
@@ -154,6 +198,7 @@ export default function AdminUsersPage() {
         try {
             await adminApi.createCustomer({
                 username: form.username,
+                fullName: form.fullName,
                 email: form.email,
                 phone: form.phone,
                 password: form.password
@@ -170,8 +215,8 @@ export default function AdminUsersPage() {
 
     const handleUpdate = async () => {
         if (!selectedUser) return
-        if (!form.fullName || !form.phone) {
-            setFormError('Họ tên và số điện thoại không được để trống')
+        if (!form.username || !form.fullName || !form.phone) {
+            setFormError('Tên đăng nhập, họ tên và số điện thoại không được để trống')
             return
         }
         setFormLoading(true);
@@ -179,6 +224,7 @@ export default function AdminUsersPage() {
         try {
             const isStaff = selectedUser.role !== 'CUSTOMER' && selectedUser.role !== 'ADMIN'
             await adminApi.updateAccount(selectedUser.id, {
+                username: form.username,
                 fullName: form.fullName,
                 email: form.email,
                 phone: form.phone,
@@ -194,13 +240,8 @@ export default function AdminUsersPage() {
         }
     }
 
-    const raw = tab === 'staff' ? staffList.filter(user => user.role !== 'ADMIN') : customerList
-    const currentList = raw.filter(u => {
-        const q = search.toLowerCase()
-        const matchSearch = !q || u.fullName.toLowerCase().includes(q) || u.username.toLowerCase().includes(q) || (u.email ?? '').toLowerCase().includes(q) || u.phone.includes(q)
-        const matchStatus = filterStatus === 'all' || (filterStatus === 'active' && u.isActive) || (filterStatus === 'inactive' && !u.isActive)
-        return matchSearch && matchStatus
-    })
+    const startIdx = totalElements === 0 ? 0 : page * pageSize + 1
+    const endIdx = Math.min((page + 1) * pageSize, totalElements)
 
     return (
         <div className="page-card">
@@ -246,6 +287,7 @@ export default function AdminUsersPage() {
                         setTab(t);
                         setSearch('');
                         setFilterStatus('all')
+                        setPage(0)
                     }}
                             style={{
                                 padding: '10px 28px', background: 'none', border: 'none', cursor: 'pointer',
@@ -253,9 +295,7 @@ export default function AdminUsersPage() {
                                 color: tab === t ? '#4f46e5' : '#6b7280',
                                 fontWeight: tab === t ? 700 : 400, marginBottom: -2, fontSize: 14,
                             }}>
-                        {t === 'staff'
-                            ? `Nhân viên  (${staffList.filter(u => u.role !== RoleType.ADMIN).length})`
-                            : `Khách hàng  (${customerList.length})`}
+                        {t === 'staff' ? `Nhân viên  (${staffCount})` : `Khách hàng  (${customerCount})`}
                     </button>
                 ))}
             </div>
@@ -308,15 +348,15 @@ export default function AdminUsersPage() {
                         <span>Thao tác</span>
                     </div>
 
-                    {currentList.length === 0 ? (
+                    {items.length === 0 ? (
                         <div style={{textAlign: 'center', padding: 40, color: '#9ca3af'}}>
                             {search || filterStatus !== 'all' ? 'Không tìm thấy kết quả phù hợp.' : 'Chưa có tài khoản nào.'}
                         </div>
-                    ) : currentList.map((user, idx) => {
+                    ) : items.map((user, idx) => {
                         const rc = ROLE_COLORS[user.role] ?? {bg: '#f3f4f6', text: '#374151'}
                         return (
                             <div className="simple-table-row" key={user.id} style={{...gridCols, alignItems: 'center'}}>
-                                <span style={{color: '#9ca3af', fontSize: 12}}>{idx + 1}</span>
+                                <span style={{color: '#9ca3af', fontSize: 12}}>{page * pageSize + idx + 1}</span>
                                 <span style={{fontWeight: 600}}>{user.fullName}</span>
                                 <span style={{color: '#6b7280', fontSize: 13}}>{user.username}</span>
                                 <span style={{color: '#6b7280', fontSize: 12}}>{user.email ?? '—'}</span>
@@ -359,10 +399,31 @@ export default function AdminUsersPage() {
                 </div>
             )}
 
+            {/* ── Pagination ── */}
+            {!isLoading && totalElements > 0 && (
+                <Pagination
+                    page={page + 1}
+                    totalPages={totalPages}
+                    pageSize={pageSize}
+                    totalItems={totalElements}
+                    startIdx={startIdx}
+                    endIdx={endIdx}
+                    onPageChange={p => setPage(p - 1)}
+                    onPageSizeChange={size => {
+                        setPageSize(size)
+                        setPage(0)
+                    }}
+                />
+            )}
+
             {/* ── Modals ── */}
             {modal === 'create-staff' && (
                 <Modal title="Thêm tài khoản nhân viên" onClose={() => setModal(null)}>
                     <FieldGroup>
+                        <Field label="Họ tên *"><input value={form.fullName} onChange={e => setForm({
+                            ...form,
+                            fullName: e.target.value
+                        })} placeholder="Nguyễn Văn A"/></Field>
                         <Field label="Tên đăng nhập *"><input value={form.username} onChange={e => setForm({
                             ...form,
                             username: e.target.value
@@ -378,9 +439,11 @@ export default function AdminUsersPage() {
                                 {STAFF_ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
                             </select>
                         </Field>
-                        <Field label="Mật khẩu *"><input type="password" value={form.password}
-                                                         onChange={e => setForm({...form, password: e.target.value})}
-                                                         placeholder="Tối thiểu 6 ký tự"/></Field>
+                        <Field label="Mật khẩu *">
+                            <PasswordInput value={form.password}
+                                           onChange={v => setForm({...form, password: v})}
+                                           placeholder="Tối thiểu 6 ký tự"/>
+                        </Field>
                     </FieldGroup>
                     {formError && <ErrBox msg={formError}/>}
                     <ModalActions>
@@ -396,6 +459,10 @@ export default function AdminUsersPage() {
             {modal === 'create-customer' && (
                 <Modal title="Thêm tài khoản khách hàng" onClose={() => setModal(null)}>
                     <FieldGroup>
+                        <Field label="Họ tên *"><input value={form.fullName} onChange={e => setForm({
+                            ...form,
+                            fullName: e.target.value
+                        })} placeholder="Nguyễn Văn A"/></Field>
                         <Field label="Tên đăng nhập *"><input value={form.username} onChange={e => setForm({
                             ...form,
                             username: e.target.value
@@ -406,9 +473,11 @@ export default function AdminUsersPage() {
                         <Field label="Số điện thoại *"><input value={form.phone}
                                                               onChange={e => setForm({...form, phone: e.target.value})}
                                                               placeholder="0xxxxxxxxx"/></Field>
-                        <Field label="Mật khẩu *"><input type="password" value={form.password}
-                                                         onChange={e => setForm({...form, password: e.target.value})}
-                                                         placeholder="Tối thiểu 6 ký tự"/></Field>
+                        <Field label="Mật khẩu *">
+                            <PasswordInput value={form.password}
+                                           onChange={v => setForm({...form, password: v})}
+                                           placeholder="Tối thiểu 6 ký tự"/>
+                        </Field>
                     </FieldGroup>
                     {formError && <ErrBox msg={formError}/>}
                     <ModalActions>
@@ -452,6 +521,7 @@ export default function AdminUsersPage() {
                         </div>
                     </div>
                     <DR label="Họ tên" value={selectedUser.fullName}/>
+                    <DR label="Tên đăng nhập" value={selectedUser.username}/>
                     <DR label="Email" value={selectedUser.email ?? '—'}/>
                     <DR label="Số điện thoại" value={selectedUser.phone}/>
                     <DR label="Vai trò" value={ROLE_LABELS[selectedUser.role] ?? selectedUser.role}/>
@@ -480,6 +550,9 @@ export default function AdminUsersPage() {
                         ID: <strong>#{selectedUser.id}</strong>
                     </div>
                     <FieldGroup>
+                        <Field label="Tên đăng nhập *"><input value={form.username}
+                                                              onChange={e => setForm({...form, username: e.target.value})}
+                                                              placeholder="username"/></Field>
                         <Field label="Họ tên *"><input value={form.fullName}
                                                        onChange={e => setForm({...form, fullName: e.target.value})}
                                                        placeholder="Nguyễn Văn A"/></Field>
@@ -595,6 +668,116 @@ function DR({label, value, color}: { label: string; value: string; color?: strin
     )
 }
 
+function Pagination({page, totalPages, pageSize, totalItems, startIdx, endIdx, onPageChange, onPageSizeChange}: {
+    page: number
+    totalPages: number
+    pageSize: number
+    totalItems: number
+    startIdx: number
+    endIdx: number
+    onPageChange: (p: number) => void
+    onPageSizeChange: (size: number) => void
+}) {
+    // tính danh sách số trang hiển thị, dạng: 1 ... 4 5 [6] 7 8 ... 20
+    const getPageNumbers = (): (number | '...')[] => {
+        const delta = 1
+        const range: (number | '...')[] = []
+        const left = Math.max(2, page - delta)
+        const right = Math.min(totalPages - 1, page + delta)
+
+        range.push(1)
+        if (left > 2) range.push('...')
+        for (let i = left; i <= right; i++) range.push(i)
+        if (right < totalPages - 1) range.push('...')
+        if (totalPages > 1) range.push(totalPages)
+
+        return range
+    }
+
+    const pageBtnStyle = (active: boolean, disabled?: boolean): React.CSSProperties => ({
+        minWidth: 30,
+        height: 30,
+        padding: '0 6px',
+        borderRadius: 6,
+        border: '1px solid ' + (active ? '#4f46e5' : '#d1d5db'),
+        background: active ? '#4f46e5' : '#fff',
+        color: disabled ? '#d1d5db' : (active ? '#fff' : '#374151'),
+        fontWeight: active ? 700 : 500,
+        fontSize: 13,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.6 : 1,
+    })
+
+    return (
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 12,
+            marginTop: 16,
+            paddingTop: 16,
+            borderTop: '1px solid #f3f4f6',
+        }}>
+            <div style={{fontSize: 13, color: '#6b7280', display: 'flex', alignItems: 'center', gap: 10}}>
+                <span>
+                    Hiển thị <strong>{startIdx}</strong>–<strong>{endIdx}</strong> trong tổng số <strong>{totalItems}</strong>
+                </span>
+                <select
+                    value={pageSize}
+                    onChange={e => onPageSizeChange(Number(e.target.value))}
+                    style={{
+                        padding: '4px 8px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: 6,
+                        fontSize: 13,
+                        background: '#fff',
+                        cursor: 'pointer',
+                    }}
+                >
+                    {[5, 10, 20, 50].map(n => (
+                        <option key={n} value={n}>{n} / trang</option>
+                    ))}
+                </select>
+            </div>
+
+            <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
+                <button
+                    onClick={() => onPageChange(page - 1)}
+                    disabled={page <= 1}
+                    style={pageBtnStyle(false, page <= 1)}
+                    title="Trang trước"
+                >
+                    ‹
+                </button>
+
+                {getPageNumbers().map((p, i) =>
+                    p === '...'
+                        ? <span key={`dots-${i}`} style={{padding: '0 4px', color: '#9ca3af', fontSize: 13}}>…</span>
+                        : (
+                            <button
+                                key={p}
+                                onClick={() => onPageChange(p)}
+                                style={pageBtnStyle(p === page)}
+                            >
+                                {p}
+                            </button>
+                        )
+                )}
+
+                <button
+                    onClick={() => onPageChange(page + 1)}
+                    disabled={page >= totalPages}
+                    style={pageBtnStyle(false, page >= totalPages)}
+                    title="Trang sau"
+                >
+                    ›
+                </button>
+            </div>
+        </div>
+    )
+}
+
 function ModalActions({children}: { children: React.ReactNode }) {
     return <div style={{display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 22}}>{children}</div>
 }
@@ -602,4 +785,80 @@ function ModalActions({children}: { children: React.ReactNode }) {
 function ErrBox({msg}: { msg: string }) {
     return <div className="auth-error" style={{margin: '0 0 4px'}}>{msg}</div>
 }
-
+
+function PasswordInput({value, onChange, placeholder}: {
+    value: string
+    onChange: (v: string) => void
+    placeholder?: string
+}) {
+    const [visible, setVisible] = useState(false)
+    return (
+        <div style={{position: 'relative', display: 'flex', alignItems: 'center'}}>
+            <input
+                type={visible ? 'text' : 'password'}
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                placeholder={placeholder}
+                style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '9px 40px 9px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 8,
+                    fontSize: 14,
+                }}
+            />
+            <button
+                type="button"
+                onClick={() => setVisible(v => !v)}
+                aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                title={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                style={{
+                    position: 'absolute',
+                    right: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 28,
+                    height: 28,
+                    background: 'transparent',
+                    border: 'none',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    color: '#9ca3af',
+                    transition: 'color 0.15s ease, background-color 0.15s ease',
+                }}
+                onMouseEnter={e => {
+                    e.currentTarget.style.color = '#4f46e5'
+                    e.currentTarget.style.backgroundColor = '#eef2ff'
+                }}
+                onMouseLeave={e => {
+                    e.currentTarget.style.color = '#9ca3af'
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+            >
+                {visible ? <EyeOffIcon/> : <EyeIcon/>}
+            </button>
+        </div>
+    )
+}
+
+function EyeIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>
+    )
+}
+
+function EyeOffIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.62 21.62 0 0 1 5.06-6.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.36M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+    )
+}

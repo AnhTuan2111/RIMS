@@ -17,6 +17,8 @@ public class BestSellingDishItemResponse
 
     private String dishName;
 
+    private String imageUrl;
+
     private Long totalQuantity;
 
     private BigDecimal totalRevenue;

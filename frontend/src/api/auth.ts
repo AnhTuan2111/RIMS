@@ -28,6 +28,28 @@ export async function getCurrentUser(): Promise<UserProfile> {
     return res.data
 }
 
+export interface UpdateProfileRequest {
+    fullName: string
+    username: string
+    email: string
+    phone: string
+}
+
+export interface UpdateProfileResponse {
+    userId: number
+    username: string
+    fullName: string
+    phone: string
+    email: string
+    role: string
+}
+
+// Dùng chung cho mọi vai trò (customer, chef, waiter, cashier, admin...)
+export const updateProfile = async (data: UpdateProfileRequest): Promise<UpdateProfileResponse> => {
+    const response = await apiClient.put<UpdateProfileResponse>('/auth/profile', data)
+    return response.data
+}
+
 export function logout() {
     clearTokens()
     localStorage.removeItem('currentUser')
