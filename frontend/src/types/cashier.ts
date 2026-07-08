@@ -42,6 +42,11 @@ export interface PaymentResponse {
     invoiceId: number;
     amountPaid: number;
     excessAmount: number;
+    finalAmount: number;
+    customerName: string | null;
+    pointsUsed: number | null;
+    pointsEarned: number | null;
+    paymentMethod: string;
 }
 
 export interface VNPayResponse {

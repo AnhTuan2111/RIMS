@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {cashierApi} from '../../api/cashier';
-import type {OrderDetailResponse, TableDashboardResponse} from '../../types/cashier';
-import OrderPanel from './OrderPanel';
+import type {OrderDetailResponse, TableDashboardResponse, PaymentResponse} from '../../types/cashier';
+import OrderPanel, {type CustomerInfo} from './OrderPanel';
 import PaymentModal from './PaymentModal';
 import PaymentResultManager from './PaymentResultManager';
 
@@ -15,7 +15,12 @@ export default function CashierPaymentsPage() {
     const [error, setError] = useState<string | null>(null);
 
     const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
-    const [finalInvoiceId, setFinalInvoiceId] = useState<number | null>(null);
+    const [paymentResult, setPaymentResult] = useState<PaymentResponse | null>(null);
+
+    // ĐÃ THÊM: State khách hàng/điểm được "nâng" lên đây để dùng chung
+    // giữa OrderPanel (nơi tìm kiếm khách) và PaymentModal (nơi tính tiền/thanh toán)
+    const [customer, setCustomer] = useState<CustomerInfo | null>(null);
+    const [pointsUsed, setPointsUsed] = useState<number>(0);
 
     const loadTables = useCallback(async (isRefresh = false) => {
         try {
@@ -49,6 +54,10 @@ export default function CashierPaymentsPage() {
 
         setSelectedTable(table);
         setOrderDetail(null);
+        // ĐÃ THÊM: Reset khách hàng/điểm khi chuyển sang bàn khác
+        setCustomer(null);
+        setPointsUsed(0);
+
         const targetOrderId = table.orderId;
 
         if (targetOrderId) {
@@ -156,8 +165,14 @@ export default function CashierPaymentsPage() {
                     onClose={() => {
                         setSelectedTable(null);
                         setOrderDetail(null);
+                        setCustomer(null);
+                        setPointsUsed(0);
                     }}
                     onCheckout={() => setShowPaymentModal(true)}
+                    customer={customer}
+                    pointsUsed={pointsUsed}
+                    onCustomerChange={setCustomer}
+                    onPointsUsedChange={setPointsUsed}
                 />
             )}
 
@@ -165,27 +180,32 @@ export default function CashierPaymentsPage() {
                 <PaymentModal
                     orderId={orderDetail.orderId}
                     orderDetail={orderDetail}
+                    customer={customer}
+                    pointsUsed={pointsUsed}
                     onClose={() => setShowPaymentModal(false)}
-                    onSuccess={(invoiceId: number) => {
+                    onSuccess={(result: PaymentResponse) => {
                         setShowPaymentModal(false);
-                        setFinalInvoiceId(invoiceId);
+                        setPaymentResult(result);
                     }}
                 />
             )}
 
-            {finalInvoiceId && orderDetail && (
+            {paymentResult && orderDetail && (
                 <PaymentResultManager
-                    invoiceId={finalInvoiceId}
+                    paymentResult={paymentResult}
                     orderDetail={orderDetail}
                     onDownload={(id) => void handleDownloadPdf(id)}
                     onClose={() => {
-                        setFinalInvoiceId(null);
+                        setPaymentResult(null);
                         setSelectedTable(null);
                         setOrderDetail(null);
+                        setCustomer(null);
+                        setPointsUsed(0);
                         void loadTables(true);
                     }}
                 />
             )}
+
         </div>
     );
 }

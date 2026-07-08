@@ -26,9 +26,9 @@ public class UserResponse
 
     private String phone;
 
-    private RoleType role;
-
     private Integer rewardPoints;
+
+    private RoleType role;
 
     @JsonProperty("isActive")
     private boolean isActive;

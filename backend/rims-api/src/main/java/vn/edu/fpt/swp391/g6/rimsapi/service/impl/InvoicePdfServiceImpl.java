@@ -11,6 +11,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Payment;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
 
@@ -94,11 +95,17 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             table.addCell(createCell("Đ.GIÁ", fontBold, Element.ALIGN_RIGHT, false));
             table.addCell(createCell("T.TIỀN", fontBold, Element.ALIGN_RIGHT, false));
 
+            List<OrderItem> completedItems = order.getOrderItems().stream()
+                    .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
+                    .toList();
+
             int totalItems = 0;
-            for (OrderItem item : order.getOrderItems())
+            BigDecimal totalBeforeVat = BigDecimal.ZERO;
+            for (OrderItem item : completedItems)
             {
                 String dishName = (item.getDish() != null) ? item.getDish().getName() : "Món ẩn";
                 totalItems += item.getQuantity();
+                totalBeforeVat = totalBeforeVat.add(item.getSubTotal());
 
                 table.addCell(createCell(dishName, fontNormal, Element.ALIGN_LEFT, false));
                 table.addCell(createCell(String.valueOf(item.getQuantity()), fontNormal, Element.ALIGN_CENTER, false));
@@ -108,8 +115,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             document.add(table);
             document.add(lineSeparator);
 
-            // 5. Phần Tổng kết tài chính (Lấy từ Order và Payment)
-            BigDecimal totalBeforeVat = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+// 5. Phần Tổng kết tài chính — ĐÃ SỬA: tự tính từ các món COMPLETED, không dùng order.getTotalAmount() nữa
             BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
             BigDecimal finalAmount = invoice.getFinalAmount();
 
@@ -138,6 +144,21 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             // Dòng VAT
             totalTable.addCell(createCell("VAT (10%):", fontNormal, Element.ALIGN_LEFT, false));
             totalTable.addCell(createCell(String.format("%,.0f đ", vatAmount), fontNormal, Element.ALIGN_RIGHT, false));
+
+            if (invoice.getCustomer() != null) {
+                totalTable.addCell(createCell("Khách hàng:", fontNormal, Element.ALIGN_LEFT, false));
+                totalTable.addCell(createCell(invoice.getCustomer().getFullName(), fontNormal, Element.ALIGN_RIGHT, false));
+
+                if (invoice.getPointsUsedOnInvoice() != null && invoice.getPointsUsedOnInvoice() > 0) {
+                    totalTable.addCell(createCell("Điểm đã dùng:", fontNormal, Element.ALIGN_LEFT, false));
+                    totalTable.addCell(createCell("-" + String.format("%,.0f đ", (double)invoice.getPointsUsedOnInvoice() * 1000), fontNormal, Element.ALIGN_RIGHT, false));
+                }
+
+                if (invoice.getPointsEarnedOnInvoice() != null && invoice.getPointsEarnedOnInvoice() > 0) {
+                    totalTable.addCell(createCell("Điểm tích thêm:", fontItalic, Element.ALIGN_LEFT, false));
+                    totalTable.addCell(createCell("+" + invoice.getPointsEarnedOnInvoice() + " điểm", fontItalic, Element.ALIGN_RIGHT, false));
+                }
+            }
 
             // Dòng Thành tiền
             totalTable.addCell(createCell("THÀNH TIỀN:", fontHeader, Element.ALIGN_LEFT, false));

@@ -1,87 +1,26 @@
 import {useState} from 'react';
 import {cashierApi} from '../../api/cashier';
-import type {OrderDetailResponse, PaymentMethodType} from '../../types/cashier';
+import type {OrderDetailResponse, PaymentMethodType, PaymentResponse} from '../../types/cashier';
+import type {CustomerInfo} from './OrderPanel';
 
 interface PaymentModalProps {
     orderId: number;
     orderDetail: OrderDetailResponse;
+    customer: CustomerInfo | null;
+    pointsUsed: number;
     onClose: () => void;
-    onSuccess: (invoiceId: number) => void;
+    onSuccess: (result: PaymentResponse) => void;
 }
 
-export default function PaymentModal({orderId, orderDetail, onClose, onSuccess}: PaymentModalProps) {
+export default function PaymentModal({orderId, orderDetail, customer, pointsUsed, onClose, onSuccess}: PaymentModalProps) {
     const [method, setMethod] = useState<PaymentMethodType | null>(null);
     const [amountReceived, setAmountReceived] = useState<number>(0);
     const [processing, setProcessing] = useState<boolean>(false);
 
-    // --- State Tích Điểm ---
-    const [phoneSearch, setPhoneSearch] = useState('');
-    const [customer, setCustomer] = useState<{id: number, fullName: string, phone: string, rewardPoints: number} | null>(null);
-    const [isSearching, setIsSearching] = useState(false);
-    const [pointsUsed, setPointsUsed] = useState(0);
-
-    const [showCreate, setShowCreate] = useState(false);
-    const [newCusName, setNewCusName] = useState('');
-    const [newCusEmail, setNewCusEmail] = useState('');
-
-    // Tính toán tiền
+    // Tính toán tiền (customer/pointsUsed giờ đến từ props, đã được OrderPanel tính/giới hạn sẵn)
     const originalFinalAmount = orderDetail.finalAmount;
-    const maxPointsAllowed = Math.floor(originalFinalAmount * 0.5 / 1000);
-    const maxPointsCanUse = customer ? Math.min(customer.rewardPoints, maxPointsAllowed) : 0;
-
-    const safePointsUsed = Math.min(pointsUsed, maxPointsCanUse);
-    const finalAmount = originalFinalAmount - safePointsUsed * 1000;
+    const finalAmount = originalFinalAmount - pointsUsed * 1000;
     const changeReturned = amountReceived >= finalAmount ? amountReceived - finalAmount : 0;
-
-    const handleSearchCustomer = async () => {
-        if (!phoneSearch.trim()) return;
-        setIsSearching(true);
-        setShowCreate(false);
-        setCustomer(null);
-        setPointsUsed(0);
-        try {
-            const res = await cashierApi.searchCustomer(phoneSearch);
-            if (res?.data) {
-                setCustomer(res.data);
-            }
-        } catch (err) {
-            // Ép kiểu an toàn để lấy status 404 mà không dùng "any"
-            const error = err as { response?: { status?: number } };
-            if (error?.response?.status === 404) {
-                setShowCreate(true);
-            } else {
-                console.error(err);
-                alert("Lỗi tìm kiếm khách hàng!");
-            }
-        } finally {
-            setIsSearching(false);
-        }
-    };
-
-    const handleCreateCustomer = async () => {
-        if (!newCusName.trim()) {
-            alert("Vui lòng nhập tên khách hàng!");
-            return;
-        }
-        setProcessing(true);
-        try {
-            const res = await cashierApi.createCustomerFast({
-                fullName: newCusName,
-                phone: phoneSearch,
-                email: newCusEmail
-            });
-            if (res?.data) {
-                setCustomer(res.data);
-                setShowCreate(false);
-                alert("Đăng ký thành viên thành công!");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Lỗi tạo khách hàng (Có thể SĐT đã tồn tại)!");
-        } finally {
-            setProcessing(false);
-        }
-    };
 
     const handleCloseModal = async () => {
         try {
@@ -104,12 +43,12 @@ export default function PaymentModal({orderId, orderDetail, onClose, onSuccess}:
                 paymentMethod: 'CASH' as PaymentMethodType,
                 amountPaid: amountReceived,
                 customerId: customer?.id || null,
-                pointsUsed: safePointsUsed
+                pointsUsed: pointsUsed
             };
 
             const res = await cashierApi.completeCashPayment(orderId, reqData);
             if (res?.data?.success) {
-                onSuccess(res.data.invoiceId);
+                onSuccess(res.data);
             } else {
                 alert('Có lỗi xảy ra từ Server!');
             }
@@ -124,7 +63,7 @@ export default function PaymentModal({orderId, orderDetail, onClose, onSuccess}:
     const handleRedirectToVNPay = async () => {
         setProcessing(true);
         try {
-            const res = await cashierApi.getVNPayQrCode(orderId);
+            const res = await cashierApi.getVNPayQrCode(orderId, customer?.id, pointsUsed);
 
             if (res?.data?.success && res?.data?.paymentUrl) {
                 window.location.href = res.data.paymentUrl;
@@ -169,57 +108,18 @@ export default function PaymentModal({orderId, orderDetail, onClose, onSuccess}:
 
                 <div className="modal-body" style={{marginTop: '1.5rem'}}>
 
-                    {/* KHU VỰC TÍCH ĐIỂM (Được nhét ngay phía trên Cần thu) */}
-                    <div style={{background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '1.5rem'}}>
-                        <h4 style={{margin: '0 0 10px 0', color: '#334155'}}>🌟 Tích Điểm Thành Viên</h4>
-                        <div style={{display: 'flex', gap: '8px'}}>
-                            <input
-                                type="text" placeholder="Nhập SĐT khách hàng..."
-                                style={{flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1'}}
-                                value={phoneSearch} onChange={e => setPhoneSearch(e.target.value)}
-                            />
-                            <button type="button" onClick={() => void handleSearchCustomer()} disabled={isSearching}
-                                    style={{padding: '8px 16px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
-                                {isSearching ? '...' : 'Tìm'}
-                            </button>
+                    {/* ĐÃ THÊM: Hiện lại tóm tắt khách hàng đã chọn (chỉ đọc, không sửa được ở đây nữa) */}
+                    {customer && (
+                        <div style={{
+                            background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '8px',
+                            padding: '10px', marginBottom: '1rem', fontSize: '0.9rem'
+                        }}>
+                            👤 Khách: <strong>{customer.fullName}</strong>
+                            {pointsUsed > 0 && (
+                                <span style={{color: '#059669'}}> — Đã dùng {pointsUsed} điểm giảm giá</span>
+                            )}
                         </div>
-
-                        {showCreate && !customer && (
-                            <div style={{marginTop: '10px', padding: '10px', background: '#fff', border: '1px dashed #cbd5e1', borderRadius: '6px'}}>
-                                <p style={{margin: '0 0 8px 0', fontSize: '0.9rem', color: '#ef4444', fontWeight: 'bold'}}>Chưa có tài khoản! Đăng ký nhanh:</p>
-                                <input type="text" placeholder="Tên khách hàng (*)"
-                                       style={{width: '100%', boxSizing: 'border-box', padding: '6px', marginBottom: '6px', border: '1px solid #cbd5e1', borderRadius: '4px'}}
-                                       value={newCusName} onChange={e => setNewCusName(e.target.value)} />
-                                <input type="email" placeholder="Email (Không bắt buộc)"
-                                       style={{width: '100%', boxSizing: 'border-box', padding: '6px', marginBottom: '8px', border: '1px solid #cbd5e1', borderRadius: '4px'}}
-                                       value={newCusEmail} onChange={e => setNewCusEmail(e.target.value)} />
-                                <button type="button" onClick={() => void handleCreateCustomer()} disabled={processing}
-                                        style={{width: '100%', padding: '8px', background: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>
-                                    Tạo Tài Khoản
-                                </button>
-                            </div>
-                        )}
-
-                        {customer && (
-                            <div style={{marginTop: '10px', padding: '10px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '6px'}}>
-                                <p style={{margin: '0 0 5px 0'}}>👤 Khách: <strong>{customer.fullName}</strong></p>
-                                <p style={{margin: '0 0 10px 0'}}>💰 Điểm hiện có: <strong style={{color: '#059669'}}>{customer.rewardPoints.toLocaleString()}</strong></p>
-
-                                {customer.rewardPoints > 0 && (
-                                    <label style={{display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.9rem'}}>
-                                        Sử dụng điểm (Tối đa {maxPointsCanUse.toLocaleString()}):
-                                        <input
-                                            type="number" min="0" max={maxPointsCanUse}
-                                            style={{padding: '6px', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box'}}
-                                            value={pointsUsed || ''}
-                                            onChange={e => setPointsUsed(Number(e.target.value))}
-                                        />
-                                    </label>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                    {/* END KHU VỰC TÍCH ĐIỂM */}
+                    )}
 
                     <p style={{fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between'}}>
                         Cần thu: <strong style={{color: '#b91c1c'}}>{finalAmount.toLocaleString()} đ</strong>

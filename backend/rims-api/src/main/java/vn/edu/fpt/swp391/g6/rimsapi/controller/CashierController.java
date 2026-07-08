@@ -75,9 +75,13 @@ public class CashierController
 
     // API 6 sinh link Code VNPay dựa vào Order ID
     @GetMapping("/orders/{id}/vnpay-qr")
-    public ResponseEntity<VNPayResponse> getVNPayQrCode(@PathVariable Long id)
+    public ResponseEntity<VNPayResponse> getVNPayQrCode(
+            @PathVariable Long id,
+            @RequestParam(required = false) Integer customerId,
+            @RequestParam(required = false) Integer pointsUsed
+    )
     {
-        return ResponseEntity.ok(cashierService.createVNPayPaymentUrl(id));
+        return ResponseEntity.ok(cashierService.createVNPayPaymentUrl(id, customerId, pointsUsed));
     }
 
     //API 7 xuất file PDF

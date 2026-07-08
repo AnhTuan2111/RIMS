@@ -25,13 +25,13 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CashierServiceImpl implements CashierService
-{
+public class CashierServiceImpl implements CashierService {
 
     private final OrderRepository orderRepository;
     private final RestaurantTableRepository tableRepository;
@@ -139,13 +139,11 @@ public class CashierServiceImpl implements CashierService
 
     @Override
     @Transactional
-    public PaymentResponse completeCashPayment(Long orderId, PaymentRequest request)
-    {
+    public PaymentResponse completeCashPayment(Long orderId, PaymentRequest request) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        if (order.getStatus() != OrderStatus.LOCKED)
-        {
+        if (order.getStatus() != OrderStatus.LOCKED) {
             throw new RuntimeException("Đơn hàng chưa được chốt (LOCKED) hoặc đã thanh toán xong!");
         }
 
@@ -153,42 +151,24 @@ public class CashierServiceImpl implements CashierService
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
-        if (request.getCustomerId() != null) {
-            User customer = userRepository.findById(request.getCustomerId()).orElse(null);
-            if (customer != null) {
-                if (request.getPointsUsed() != null && request.getPointsUsed() > 0) {
-                    if (customer.getRewardPoints() < request.getPointsUsed()) {
-                        throw new RuntimeException("Khách hàng không đủ điểm!");
-                    }
-                    BigDecimal discount = new BigDecimal(request.getPointsUsed()).multiply(new BigDecimal("1000"));
-                    BigDecimal maxDiscount = finalAmount.multiply(new BigDecimal("0.5"));
-                    if (discount.compareTo(maxDiscount) > 0) {
-                        throw new RuntimeException("Số điểm sử dụng vượt quá 50% hóa đơn cho phép!");
-                    }
-                    customer.setRewardPoints(customer.getRewardPoints() - request.getPointsUsed());
-                    finalAmount = finalAmount.subtract(discount);
-                    if (finalAmount.compareTo(BigDecimal.ZERO) < 0) finalAmount = BigDecimal.ZERO;
-                }
-                int earnedPoints = finalAmount.multiply(new BigDecimal("0.01"))
-                        .divide(new BigDecimal("1000"), 0, java.math.RoundingMode.DOWN)
-                        .intValue();
-                customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
-                userRepository.save(customer);
-            }
-        }
+        // Tạo trước Invoice để lát nữa set dữ liệu
+        Invoice invoice = new Invoice();
+
+        // Áp dụng logic điểm dùng chung (trừ điểm giảm giá + cộng điểm tích lũy)
+        Integer customerId = request.getCustomerId();
+        Integer pointsUsed = request.getPointsUsed();
+        finalAmount = applyLoyaltyPoints(invoice, customerId, pointsUsed, finalAmount);
 
         BigDecimal amountPaid = BigDecimal.valueOf(request.getAmountPaid());
-
-        if (amountPaid.compareTo(finalAmount) < 0)
-        {
+        if (amountPaid.compareTo(finalAmount) < 0) {
             throw new RuntimeException("Khách đưa thiếu tiền!");
         }
         BigDecimal excessAmount = amountPaid.subtract(finalAmount);
 
-        Invoice invoice = new Invoice();
+        // Lưu Hóa đơn & Đóng order
         invoice.setOrder(order);
         invoice.setFinalAmount(finalAmount);
-        invoice.setInvoiceDate(java.time.LocalDateTime.now());
+        invoice.setInvoiceDate(LocalDateTime.now());
 
         Payment payment = new Payment();
         payment.setAmount(amountPaid);
@@ -197,12 +177,10 @@ public class CashierServiceImpl implements CashierService
         invoice.addPayment(payment);
 
         invoiceRepository.save(invoice);
-
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
-        if (order.getTable() != null)
-        {
+        if (order.getTable() != null) {
             RestaurantTable table = order.getTable();
             table.setStatus(TableStatus.AVAILABLE);
             tableRepository.save(table);
@@ -214,6 +192,11 @@ public class CashierServiceImpl implements CashierService
                 .invoiceId(invoice.getId())
                 .amountPaid(amountPaid)
                 .excessAmount(excessAmount)
+                .finalAmount(finalAmount)
+                .customerName(invoice.getCustomer() != null ? invoice.getCustomer().getFullName() : null)
+                .pointsUsed(invoice.getPointsUsedOnInvoice())
+                .pointsEarned(invoice.getPointsEarnedOnInvoice())
+                .paymentMethod("CASH")
                 .build();
     }
     @Override
@@ -226,6 +209,9 @@ public class CashierServiceImpl implements CashierService
         if (order.getStatus() == OrderStatus.LOCKED)
         {
             order.setStatus(OrderStatus.SERVING);
+            // Xóa dữ liệu điểm tạm vì hủy quá trình thanh toán
+            order.setPendingCustomerId(null);
+            order.setPendingPointsUsed(null);
             orderRepository.save(order);
 
             return PaymentResponse.builder()
@@ -252,13 +238,16 @@ public class CashierServiceImpl implements CashierService
         if (order != null && order.getStatus() == OrderStatus.LOCKED)
         {
             order.setStatus(OrderStatus.SERVING);
+            // Xóa dữ liệu điểm tạm vì thanh toán thất bại, không áp dụng nữa
+            order.setPendingCustomerId(null);
+            order.setPendingPointsUsed(null);
             orderRepository.save(order);
         }
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public VNPayResponse createVNPayPaymentUrl(Long orderId)
+    @Transactional
+    public VNPayResponse createVNPayPaymentUrl(Long orderId, Integer customerId, Integer pointsUsed)
     {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
@@ -278,6 +267,35 @@ public class CashierServiceImpl implements CashierService
 
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
+
+        // ĐÃ THÊM: Nếu khách chọn dùng điểm, trừ tạm vào số tiền phải trả qua VNPay
+        // (chưa trừ/cộng điểm thật vào tài khoản khách — việc đó chỉ làm khi callback thành công)
+        if (customerId != null)
+        {
+            User customer = userRepository.findById(customerId).orElse(null);
+            if (customer != null && pointsUsed != null && pointsUsed > 0)
+            {
+                if (customer.getRewardPoints() < pointsUsed)
+                {
+                    throw new RuntimeException("Khách hàng không đủ điểm!");
+                }
+                BigDecimal discount = new BigDecimal(pointsUsed).multiply(new BigDecimal("1000"));
+                BigDecimal maxDiscount = finalAmount.multiply(new BigDecimal("0.5"));
+                if (discount.compareTo(maxDiscount) > 0)
+                {
+                    throw new RuntimeException("Số điểm sử dụng vượt quá 50% hóa đơn cho phép!");
+                }
+                finalAmount = finalAmount.subtract(discount);
+                if (finalAmount.compareTo(BigDecimal.ZERO) < 0) finalAmount = BigDecimal.ZERO;
+            }
+        }
+
+        // ĐÃ THÊM: Lưu tạm customerId/pointsUsed vào Order để lấy lại lúc VNPay callback về
+        order.setPendingCustomerId(customerId);
+        order.setPendingPointsUsed(pointsUsed);
+        order.setStatus(OrderStatus.LOCKED);
+        orderRepository.save(order);
+
         long amountVND = finalAmount.setScale(0, RoundingMode.HALF_UP).longValue() * 100;
 
         String vnp_TxnRef = "RIMS_" + order.getId() + "_" + System.currentTimeMillis();
@@ -366,6 +384,17 @@ public class CashierServiceImpl implements CashierService
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
         Invoice invoice = new Invoice();
+
+        // ĐÃ THÊM: Lấy lại customerId/pointsUsed đã lưu tạm lúc tạo link VNPay,
+        // rồi áp dụng đúng logic trừ/cộng điểm y hệt luồng tiền mặt
+        Integer customerId = order.getPendingCustomerId();
+        Integer pointsUsed = order.getPendingPointsUsed();
+        finalAmount = applyLoyaltyPoints(invoice, customerId, pointsUsed, finalAmount);
+
+        // Dọn dẹp dữ liệu tạm sau khi đã dùng xong
+        order.setPendingCustomerId(null);
+        order.setPendingPointsUsed(null);
+
         invoice.setOrder(order);
         invoice.setFinalAmount(finalAmount);
         invoice.setInvoiceDate(java.time.LocalDateTime.now());
@@ -390,7 +419,46 @@ public class CashierServiceImpl implements CashierService
 
         return invoice.getId();
     }
-    
+
+
+    private BigDecimal applyLoyaltyPoints(Invoice invoice, Integer customerId, Integer pointsUsed, BigDecimal finalAmount)
+    {
+        if (customerId == null) return finalAmount;
+
+        User customer = userRepository.findById(customerId).orElse(null);
+        if (customer == null) return finalAmount;
+
+        invoice.setCustomer(customer);
+        int safePointsUsed = pointsUsed != null ? pointsUsed : 0;
+
+        if (safePointsUsed > 0)
+        {
+            if (customer.getRewardPoints() < safePointsUsed)
+            {
+                throw new RuntimeException("Khách hàng không đủ điểm!");
+            }
+            BigDecimal discount = new BigDecimal(safePointsUsed).multiply(new BigDecimal("1000"));
+            BigDecimal maxDiscount = finalAmount.multiply(new BigDecimal("0.5"));
+            if (discount.compareTo(maxDiscount) > 0)
+            {
+                throw new RuntimeException("Số điểm sử dụng vượt quá 50% hóa đơn cho phép!");
+            }
+            customer.setRewardPoints(customer.getRewardPoints() - safePointsUsed);
+            finalAmount = finalAmount.subtract(discount);
+            if (finalAmount.compareTo(BigDecimal.ZERO) < 0) finalAmount = BigDecimal.ZERO;
+            invoice.setPointsUsedOnInvoice(safePointsUsed);
+        }
+
+        int earnedPoints = finalAmount.multiply(new BigDecimal("0.01"))
+                .divide(new BigDecimal("1000"), 0, RoundingMode.DOWN)
+                .intValue();
+        customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
+        userRepository.save(customer);
+        invoice.setPointsEarnedOnInvoice(earnedPoints);
+
+        return finalAmount;
+    }
+
     private BigDecimal calculateActualTotal(Order order) {
         if (order.getOrderItems() == null) return BigDecimal.ZERO;
 
@@ -404,7 +472,11 @@ public class CashierServiceImpl implements CashierService
     @Override
     @Transactional(readOnly = true)
     public User searchCustomerByPhone(String phone) {
-        return userRepository.findByPhoneAndRole(phone, RoleType.CUSTOMER).orElse(null);
+        User user = userRepository.findByPhone(phone).orElse(null);
+        if (user != null && user.getRole() == RoleType.CUSTOMER) {
+            return user;
+        }
+        return null;
     }
 
     @Override

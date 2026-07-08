@@ -25,8 +25,10 @@ export const cashierApi = {
         apiClient.post<PaymentResponse>(`/cashier/orders/${orderId}/complete-cash`, request),
 
     // API 5: Lấy mã QR VNPay
-    getVNPayQrCode: (orderId: number) =>
-        apiClient.get<VNPayResponse>(`/cashier/orders/${orderId}/vnpay-qr`),
+    getVNPayQrCode: (orderId: number, customerId?: number | null, pointsUsed?: number) =>
+        apiClient.get<VNPayResponse>(`/cashier/orders/${orderId}/vnpay-qr`, {
+            params: { customerId: customerId ?? undefined, pointsUsed }
+        }),
 
     //API 6 : dowloand invoice pdf
     downloadInvoicePdf: (invoiceId: number) =>
