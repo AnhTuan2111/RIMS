@@ -28,20 +28,16 @@ public interface RevenueReportService
             LocalDate toDate
     );
 
-    // compare revenue between 2 periods.
-    RevenueComparisonResponse compareRevenue(
-            LocalDate previousStartDate,
-            LocalDate previousEndDate,
-            LocalDate currentStartDate,
-            LocalDate currentEndDate
-    );
-
     // best-selling
-    BestSellingReportResponse getBestSellingReport(String period);
+    BestSellingReportResponse getBestSellingReport(
+            String period,
+            Integer categoryId
+    );
 
     BestSellingReportResponse getBestSellingReport(
             LocalDate fromDate,
-            LocalDate toDate
+            LocalDate toDate,
+            Integer categoryId
     );
 
     OrderShiftReportResponse getOrderShiftReport(String period);

@@ -6119,6 +6119,11 @@ body {
     box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
 }
 
+.icon-category-bestsellers {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+}
+
 .icon-bestsellers {
     background: linear-gradient(135deg, #6366f1, #4f46e5);
     box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
@@ -7093,6 +7098,36 @@ body {
     gap: 1rem;
 }
 
+.admin-bestseller-category-filter {
+    min-width: 220px;
+    display: grid;
+    gap: 6px;
+}
+
+.admin-bestseller-category-filter span {
+    color: #475569;
+    font-size: 12px;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.admin-bestseller-category-filter select {
+    min-height: 42px;
+    padding: 0 36px 0 12px;
+    border: 1px solid #dbe3ea;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #0f172a;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.admin-bestseller-category-filter select:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 .bestseller-item-card {
     display: flex;
     align-items: center;
@@ -7118,12 +7153,12 @@ body {
 
 .bestseller-item-card:nth-child(1) .item-rank-badge {
     background: #fef3c7;
-    color: #d97706;
+    color: #c2410c;
 }
 
 .bestseller-item-card:nth-child(2) .item-rank-badge {
-    background: #f1f5f9;
-    color: #475569;
+    background: #fef3c7;
+    color: #c2410c;
 }
 
 .item-info {
@@ -7192,7 +7227,7 @@ body {
 .bestseller-item-card {
     min-width: 760px;
     display: grid;
-    grid-template-columns: 34px 38px minmax(0, 1fr);
+    grid-template-columns: 58px 46px minmax(0, 1fr);
     align-items: center;
     gap: 16px;
     padding: 8px 0;
@@ -7202,28 +7237,59 @@ body {
 }
 
 .item-rank-badge {
-    width: 34px;
-    height: auto;
-    border-radius: 0;
-    background: transparent;
-    color: #334155;
-    font-size: 15px;
-    font-weight: 500;
-    justify-content: flex-start;
+    width: 52px;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 1px solid #fdba74;
+    border-radius: 8px;
+    background: #fef3c7;
+    color: #c2410c;
+    font-size: 13px;
+    font-weight: 950;
+    line-height: 1;
+    justify-self: start;
 }
 
-.bestseller-item-card:nth-child(1) .item-rank-badge,
-.bestseller-item-card:nth-child(2) .item-rank-badge {
-    background: transparent;
-    color: #334155;
+.item-rank-badge.rank-1 {
+    border-color: #fdba74;
+    background: #fef3c7;
+    color: #c2410c;
+}
+
+.item-rank-badge.rank-2 {
+    border-color: #fdba74;
+    background: #fef3c7;
+    color: #c2410c;
+}
+
+.item-rank-badge.rank-3 {
+    border-color: #fdba74;
+    background: #fef3c7;
+    color: #c2410c;
+}
+
+.bestseller-rank-crown {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
 }
 
 .bestseller-item-avatar {
-    width: 38px;
-    height: 38px;
+    width: 46px;
+    height: 46px;
     border: 0;
-    border-radius: 999px;
+    border-radius: 8px;
     object-fit: cover;
+    background: #f8fafc;
+    box-shadow: inset 0 0 0 1px #e2e8f0;
 }
 
 .bestseller-item-avatar-fallback {
@@ -7550,8 +7616,8 @@ body {
 /* Weekly revenue overview dashboard */
 .weekly-overview-dashboard {
     display: grid;
-    gap: 22px;
-    padding: 28px;
+    gap: 16px;
+    padding: 22px;
     border: 1px solid #e5e7eb;
     border-radius: 14px;
     background: #f8fafc;
@@ -7661,17 +7727,17 @@ body {
 .weekly-overview-kpi-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
 }
 
 .weekly-overview-kpi-card {
     min-width: 0;
-    min-height: 152px;
+    min-height: 132px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 18px;
-    padding: 18px;
+    gap: 12px;
+    padding: 16px;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     background: #ffffff;
@@ -7805,12 +7871,12 @@ body {
 .weekly-overview-main-grid,
 .weekly-overview-bottom-grid {
     display: grid;
-    gap: 18px;
+    gap: 16px;
     align-items: stretch;
 }
 
 .weekly-overview-main-grid {
-    grid-template-columns: minmax(0, 1.5fr) minmax(360px, 0.9fr);
+    grid-template-columns: 1fr;
 }
 
 .weekly-overview-bottom-grid {
@@ -7819,7 +7885,7 @@ body {
 
 .weekly-overview-panel {
     min-width: 0;
-    padding: 18px;
+    padding: 16px;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     background: #ffffff;
@@ -7827,9 +7893,9 @@ body {
 }
 
 .weekly-overview-panel h3 {
-    margin: 0 0 12px;
+    margin: 0 0 10px;
     color: #0f2a33;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 950;
     line-height: 1.2;
 }
@@ -7979,29 +8045,62 @@ body {
 
 .weekly-bestseller-list {
     display: grid;
-    gap: 14px;
+    gap: 12px;
 }
 
 .weekly-bestseller-row {
     display: grid;
-    grid-template-columns: 44px 38px minmax(0, 1fr) minmax(42px, auto);
+    grid-template-columns: 56px 42px minmax(0, 1fr) minmax(42px, auto);
     align-items: center;
     gap: 12px;
 }
 
 .weekly-bestseller-rank {
-    color: #64748b;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 1px solid #fdba74;
+    border-radius: 8px;
+    background: #fef3c7;
+    color: #c2410c;
     font-size: 13px;
-    font-weight: 900;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.weekly-bestseller-rank.rank-1 {
+    border-color: #fdba74;
+    background: #fef3c7;
+    color: #c2410c;
+}
+
+.weekly-bestseller-rank.rank-2 {
+    border-color: #fdba74;
+    background: #fef3c7;
+    color: #c2410c;
+}
+
+.weekly-bestseller-rank.rank-3 {
+    border-color: #fdba74;
+    background: #fef3c7;
+    color: #c2410c;
 }
 
 .weekly-bestseller-avatar {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
+    display: block;
+    border-radius: 8px;
+    background: #f1f5f9;
+    object-fit: cover;
+    box-shadow: inset 0 0 0 1px #e2e8f0;
+}
+
+.weekly-bestseller-avatar-fallback {
     display: grid;
     place-items: center;
-    border-radius: 999px;
-    background: #f1f5f9;
     color: #475569;
     font-size: 14px;
     font-weight: 950;
@@ -8010,7 +8109,7 @@ body {
 .weekly-bestseller-info {
     min-width: 0;
     display: grid;
-    gap: 8px;
+    gap: 6px;
 }
 
 .weekly-bestseller-info strong {
@@ -8057,11 +8156,11 @@ body {
     display: grid;
     grid-template-columns: minmax(170px, 220px) minmax(0, 1fr);
     align-items: center;
-    gap: 24px;
+    gap: 20px;
 }
 
 .weekly-shift-donut {
-    width: 210px;
+    width: 186px;
     aspect-ratio: 1;
     display: grid;
     place-items: center;
@@ -8070,7 +8169,7 @@ body {
 }
 
 .weekly-shift-donut-hole {
-    width: 112px;
+    width: 100px;
     aspect-ratio: 1;
     display: grid;
     place-items: center;
@@ -8082,7 +8181,7 @@ body {
 
 .weekly-shift-donut-hole strong {
     color: #0f2a33;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 950;
     line-height: 1;
 }
@@ -8096,7 +8195,7 @@ body {
 
 .weekly-shift-legend {
     display: grid;
-    gap: 13px;
+    gap: 11px;
 }
 
 .weekly-shift-legend-item {
@@ -8186,12 +8285,12 @@ body {
     }
 
     .weekly-bestseller-row {
-        grid-template-columns: 38px 34px minmax(0, 1fr) minmax(36px, auto);
+        grid-template-columns: 52px 40px minmax(0, 1fr) minmax(36px, auto);
         gap: 10px;
     }
 
     .weekly-shift-donut {
-        width: min(210px, 100%);
+        width: min(186px, 100%);
     }
 }
 

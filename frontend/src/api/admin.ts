@@ -46,17 +46,6 @@ export interface RevenueReportResponse {
     period: string
 }
 
-export interface RevenueComparisonResponse {
-    previousRevenue: number
-    currentRevenue: number
-    difference: number
-    growthRate: number
-    previousDays: number
-    currentDays: number
-    previousAverageRevenue: number
-    currentAverageRevenue: number
-}
-
 export interface DailyRevenueItem {
     dayLabel: string
     date: string
@@ -72,6 +61,7 @@ export interface WeeklyRevenueChartResponse {
 export interface BestSellingDishItem {
     rank: number
     dishName: string
+    imageUrl?: string | null
     totalQuantity: number
     totalRevenue: number
 }
@@ -234,32 +224,16 @@ export const adminApi = {
             },
         ),
 
-    compareRevenue: (
-        previousStartDate: string,
-        previousEndDate: string,
-        currentStartDate: string,
-        currentEndDate: string,
-    ) =>
-        apiClient.get<RevenueComparisonResponse>(
-            '/admin/revenue/compare',
-            {
-                params: {
-                    previousStartDate,
-                    previousEndDate,
-                    currentStartDate,
-                    currentEndDate,
-                },
-            },
-        ),
-
     getBestSellingReport: (
         period: BestSellingPeriod = 'WEEK',
+        categoryId?: number | null,
     ) =>
         apiClient.get<BestSellingReportResponse>(
             '/admin/revenue/best-selling',
             {
                 params: {
                     period,
+                    ...(categoryId ? {categoryId} : {}),
                 },
             },
         ),
@@ -267,6 +241,7 @@ export const adminApi = {
     getBestSellingReportBetween: (
         fromDate: string,
         toDate: string,
+        categoryId?: number | null,
     ) =>
         apiClient.get<BestSellingReportResponse>(
             '/admin/revenue/best-selling',
@@ -274,6 +249,7 @@ export const adminApi = {
                 params: {
                     fromDate,
                     toDate,
+                    ...(categoryId ? {categoryId} : {}),
                 },
             },
         ),
