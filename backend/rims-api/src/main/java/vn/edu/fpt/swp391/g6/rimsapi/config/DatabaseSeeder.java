@@ -506,7 +506,7 @@ public class DatabaseSeeder implements CommandLineRunner
         RestaurantTable t04 = getTable(allTables, "T04");
         RestaurantTable t10 = getTable(allTables, "T10");
 
-        LocalDateTime arrivalTime = LocalDateTime.now().minusMinutes(15);
+        LocalDateTime arrivalTime = LocalDateTime.now().plusMinutes(15);
 
         reservationRepository.saveAll(List.of(
                 buildReservation(t04, "Nguyễn Thị Lan", "0912345678",

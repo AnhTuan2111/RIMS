@@ -15,6 +15,7 @@ export default function WaiterCreateOrderPage() {
     const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [activeCategory, setActiveCategory] = useState<string>("Tất cả");
 
     useEffect(() => {
         waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
@@ -98,8 +99,21 @@ export default function WaiterCreateOrderPage() {
                     <h2 className="waiter-title">Tạo Order - Bàn {tid}</h2>
                     <button onClick={openConfirm} className="waiter-action-btn">Tạo Order</button>
                 </div>
+                <div className="waiter-category-nav">
+                    {["Tất cả", ...Array.from(new Set(menu.map((d) => d.categoryName).filter(Boolean)))].map((cat) => (
+                        <button
+                            key={cat}
+                            className={`waiter-category-tab${activeCategory === cat ? " waiter-category-tab-active" : ""}`}
+                            onClick={() => setActiveCategory(cat)}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
                 <div className="waiter-menu-grid">
-                    {menu.map((dish) => {
+                    {menu
+                        .filter((dish) => activeCategory === "Tất cả" || dish.categoryName === activeCategory)
+                        .map((dish) => {
                         const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
                         return (
                             <div key={dish.dishId} className="waiter-menu-card">

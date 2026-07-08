@@ -232,43 +232,33 @@ public class WaiterServiceImpl implements WaiterService
                     throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " cannot have empty quantity or dish");
                 }
 
-                switch (existedItem.getStatus())
+                if (existedItem.getStatus().equals(OrderItemStatus.COMPLETED)) // chỉ có thể thêm số lượng chứ không bớt đi được. nếu thêm số lượng thì sẽ tạo order item mới với số lượng bằng phần dư khi trừ (để không bị trùng)
                 {
-                    case COMPLETED: // chỉ có thể thêm số lượng chứ không bớt đi được. nếu thêm số lượng thì sẽ tạo order item mới với số lượng bằng phần dư khi trừ (để không bị trùng)
+                    if (itemRequest.getQuantity() < existedItem.getQuantity())
                     {
-                        if (itemRequest.getQuantity() < existedItem.getQuantity())
-                        {
-                            throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " is COMPLETE, cannot reduce quantity");
-                        } else if (itemRequest.getQuantity() > existedItem.getQuantity())
-                        {
-                            // tạo order item mới đế không bị nhầm lẫn với order item khác
-                            OrderItem orderItem = new OrderItem();
-                            orderItem.setDish(existedItem.getDish());
-                            orderItem.setQuantity(itemRequest.getQuantity() - existedItem.getQuantity());
-                            orderItem.setUnitPrice(existedItem.getUnitPrice());
-                            orderItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())));
-                            orderItem.setNote(itemRequest.getNote());
-                            orderItem.setStatus(OrderItemStatus.PREPARING);
-                            order.addOrderItem(orderItem);
-                        }
-                        break;
+                        throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " is COMPLETE, cannot reduce quantity");
+                    } else if (itemRequest.getQuantity() > existedItem.getQuantity())
+                    {
+                        // tạo order item mới đế không bị nhầm lẫn với order item khác
+                        OrderItem orderItem = new OrderItem();
+                        orderItem.setDish(existedItem.getDish());
+                        orderItem.setQuantity(itemRequest.getQuantity() - existedItem.getQuantity());
+                        orderItem.setUnitPrice(existedItem.getUnitPrice());
+                        orderItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())));
+                        orderItem.setNote(itemRequest.getNote());
+                        orderItem.setStatus(OrderItemStatus.PREPARING);
+                        order.addOrderItem(orderItem);
                     }
-                    case PREPARING:
+                } else
+                {
+                    if (itemRequest.getQuantity() == 0)
                     {
-                        if (itemRequest.getQuantity() == 0)
-                        {
-                            order.removeOrderItem(existedItem);
-                        } else
-                        {
-                            existedItem.setQuantity(itemRequest.getQuantity());
-                            existedItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
-                            existedItem.setNote(itemRequest.getNote());
-                        }
-                        break;
-                    }
-                    case CANCELLED:
+                        order.removeOrderItem(existedItem);
+                    } else
                     {
-                        throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " is CANCELLED, cannot update");
+                        existedItem.setQuantity(itemRequest.getQuantity());
+                        existedItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
+                        existedItem.setNote(itemRequest.getNote());
                     }
                 }
             } else // món mới khi gửi đi sẽ có orderitem id là null
