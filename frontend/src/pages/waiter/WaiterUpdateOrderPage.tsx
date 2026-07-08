@@ -23,6 +23,7 @@ export default function WaiterUpdateOrderPage() {
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [successData, setSuccessData] = useState<{ message: string; itemSummary: string } | null>(null);
+    const [activeCategory, setActiveCategory] = useState<string>("Tất cả");
 
     useEffect(() => {
         Promise.all([waiterApi.getMenu(), waiterApi.getServingOrders(tid)])
@@ -58,14 +59,15 @@ export default function WaiterUpdateOrderPage() {
     function getMinQty(dishId: number): number {
         const cur = orderDraft[dishId];
         if (!cur) return 0;
-        if (cur.status === "CANCELLED" || cur.status === "COMPLETED") {
+        // Only COMPLETED items are pinned to their original qty
+        if (cur.status === "COMPLETED") {
             return cur.originalQty || 0;
         }
         return 0;
     }
 
-    function isItemLocked(dishId: number): boolean {
-        return orderDraft[dishId]?.status === "CANCELLED";
+    function isItemLocked(_dishId: number): boolean {
+        return false;
     }
 
     const updateItems = Object.entries(orderDraft)
@@ -131,7 +133,17 @@ export default function WaiterUpdateOrderPage() {
     function changeDraftQty(dishId: number, delta: number) {
         setOrderDraft((prev) => {
             const cur = prev[dishId] || {qty: 0, note: "", orderItemId: null};
-            if (cur.status === "CANCELLED") return prev;
+            if (cur.status === "CANCELLED") {
+                const qty = Math.max(0, cur.qty + delta);
+                // First time adding from 0 → clear old orderItemId, treat as new item
+                if (cur.qty === 0 && qty > 0) {
+                    return {
+                        ...prev,
+                        [dishId]: {qty, note: cur.note, orderItemId: null, status: undefined},
+                    };
+                }
+                return {...prev, [dishId]: {...cur, qty}};
+            }
             const min = getMinQty(dishId);
             const qty = Math.max(min, cur.qty + delta);
             return {...prev, [dishId]: {...cur, qty}};
@@ -139,7 +151,6 @@ export default function WaiterUpdateOrderPage() {
     }
 
     function setDraftNote(dishId: number, note: string) {
-        if (isItemLocked(dishId)) return;
         setOrderDraft((prev) => ({
             ...prev,
             [dishId]: {...(prev[dishId] || {qty: 0, orderItemId: null}), note},
@@ -155,8 +166,21 @@ export default function WaiterUpdateOrderPage() {
                     <h2 className="waiter-title">Cập nhật Order - Bàn {tid}</h2>
                     <button onClick={openConfirm} className="waiter-action-btn">Lưu Cập Nhật</button>
                 </div>
+                <div className="waiter-category-nav">
+                    {["Tất cả", ...Array.from(new Set(menu.map((d) => d.categoryName).filter(Boolean)))].map((cat) => (
+                        <button
+                            key={cat}
+                            className={`waiter-category-tab${activeCategory === cat ? " waiter-category-tab-active" : ""}`}
+                            onClick={() => setActiveCategory(cat)}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
                 <div className="waiter-menu-grid">
-                    {menu.map((dish) => {
+                    {menu
+                        .filter((dish) => activeCategory === "Tất cả" || dish.categoryName === activeCategory)
+                        .map((dish) => {
                         const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
                         const locked = isItemLocked(dish.dishId);
                         const minQty = getMinQty(dish.dishId);
@@ -202,14 +226,13 @@ export default function WaiterUpdateOrderPage() {
                                     value={d.note}
                                     onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
                                     className="waiter-note-input"
-                                    disabled={locked}
                                 />
                                 {d.status === "COMPLETED" && (
                                     <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng
                                         dưới {minQty}.</p>
                                 )}
-                                {locked && (
-                                    <p className="waiter-item-hint">Món đã hủy — không thể chỉnh sửa.</p>
+                                {d.status === "CANCELLED" && (
+                                    <p className="waiter-item-hint">Món đã hủy — nhấn + để thêm mới từ đầu (số lượng sẽ reset về 0).</p>
                                 )}
                             </div>
                         );

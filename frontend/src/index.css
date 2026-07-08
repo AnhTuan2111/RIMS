@@ -4458,6 +4458,45 @@ body {
     background: #fef08a;
 }
 
+/* Category Navbar */
+.waiter-category-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 0 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1.25rem;
+}
+
+.waiter-category-tab {
+    padding: 0.4rem 1.1rem;
+    border-radius: 999px;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.waiter-category-tab:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.waiter-category-tab-active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #ffffff;
+}
+
+.waiter-category-tab-active:hover {
+    background: #1e293b;
+    border-color: #1e293b;
+}
+
 /* Menu Grid */
 .waiter-menu-grid {
     display: grid;
