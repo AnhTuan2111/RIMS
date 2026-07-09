@@ -293,6 +293,7 @@ public class UserServiceImpl implements UserService {
                 .phone(user.getPhone())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .rewardPoints(user.getRewardPoints())
                 .build();
     }
 
@@ -305,6 +306,7 @@ public class UserServiceImpl implements UserService {
                 .phone(user.getPhone())
                 .role(user.getRole())
                 .isActive(user.isActive())
+                .rewardPoints(user.getRewardPoints())
                 .createdAt(user.getCreatedAt())
                 .build();
     }
