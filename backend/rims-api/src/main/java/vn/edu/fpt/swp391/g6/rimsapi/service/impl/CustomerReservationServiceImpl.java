@@ -20,10 +20,11 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerReservationService;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Service
@@ -35,6 +36,15 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
     private final RestaurantTableRepository tableRepository;
     private final UserRepository userRepository;
 
+    // Thời gian ăn mặc định + buffer dọn bàn — dùng để tính overlap (lỗi #3)
+    private static final int DEFAULT_DURATION_MINUTES = 90;
+    private static final int BUFFER_MINUTES = 20;
+    private static final int TOTAL_SLOT_MINUTES = DEFAULT_DURATION_MINUTES + BUFFER_MINUTES;
+
+    // Giới hạn đặt trước (lỗi #6)
+    private static final int MIN_ADVANCE_MINUTES = 30;
+    private static final int MAX_ADVANCE_DAYS = 30;
+
     @Override
     @Transactional
     public CustomerReservationResponse createReservation(CustomerCreateReservationRequest request) {
@@ -44,9 +54,19 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + request.getUserId()));
 
-        // 2. Kiểm tra ngày đặt không được ở quá khứ
-        if (request.getReservationTime().isBefore(LocalDateTime.now())) {
+        // 2. Kiểm tra giới hạn đặt trước tối thiểu/tối đa (lỗi #6)
+        // Check giá rẻ (không đụng DB) nên làm trước, fail sớm trước khi lock/query
+        LocalDateTime now = LocalDateTime.now();
+        long minutesUntilReservation = Duration.between(now, request.getReservationTime()).toMinutes();
+
+        if (minutesUntilReservation < 0) {
             throw new BusinessException("Không thể đặt bàn trong quá khứ");
+        }
+        if (minutesUntilReservation < MIN_ADVANCE_MINUTES) {
+            throw new BusinessException("Vui lòng đặt bàn trước ít nhất " + MIN_ADVANCE_MINUTES + " phút.");
+        }
+        if (minutesUntilReservation > (long) MAX_ADVANCE_DAYS * 24 * 60) {
+            throw new BusinessException("Chỉ được đặt bàn trước tối đa " + MAX_ADVANCE_DAYS + " ngày.");
         }
 
         // 3. Kiểm tra user đã đặt bàn trong ngày chưa
@@ -60,23 +80,31 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
             throw new BusinessException("Bạn đã đặt bàn trong ngày " + reservationDate + " rồi! Mỗi khách hàng chỉ được đặt 1 bàn/ngày.");
         }
 
-        // 4. Kiểm tra bàn tồn tại và còn trống
-        RestaurantTable table = tableRepository.findById(request.getTableId())
+        // 4. Lock bàn TRƯỚC khi check overlap (lỗi #1 — chống race condition)
+        // Request thứ 2 gọi findByIdForUpdate cho cùng tableId sẽ phải CHỜ tới khi
+        // transaction này commit/rollback, nên không thể có 2 request cùng "lọt qua" bước check bên dưới
+        RestaurantTable table = tableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
-        if (table.getStatus() != TableStatus.AVAILABLE) {
-            throw new BusinessException("Bàn " + table.getTableNumber() + " hiện không khả dụng. Vui lòng chọn bàn khác.");
-        }
+        // Bỏ check table.getStatus() != AVAILABLE ở đây (lỗi #2):
+        // table.status không còn dùng để chặn theo khung giờ nữa — xem giải thích ở bước 7.
+        // TableStatus thực tế chỉ có AVAILABLE/RESERVED/SERVING, không có giá trị "khoá vĩnh viễn"
+        // (MAINTENANCE) nào cả, nên không có gì để chặn ở bước này — overlap-check ở bước 5
+        // là điều kiện DUY NHẤT quyết định bàn có đặt được cho khung giờ này hay không.
 
-        // 5. Kiểm tra bàn có bị trùng thời gian không
-        LocalDateTime timeStart = request.getReservationTime().minusHours(1);
-        LocalDateTime timeEnd = request.getReservationTime().plusHours(1);
+        // 5. Kiểm tra overlap có tính buffer time, chỉ tính reservation còn "sống" (lỗi #3, #4)
+        LocalDateTime newStart = request.getReservationTime();
+        LocalDateTime newEnd = newStart.plusMinutes(DEFAULT_DURATION_MINUTES);
 
-        boolean tableReserved = reservationRepository.existsByTableIdAndReservationTimeBetween(
-                request.getTableId(), timeStart, timeEnd
-        );
+        List<Reservation> activeReservations = reservationRepository.findActiveReservationsByTableId(request.getTableId());
 
-        if (tableReserved) {
+        boolean hasConflict = activeReservations.stream().anyMatch(existing -> {
+            LocalDateTime existingEnd = existing.getReservationTime().plusMinutes(TOTAL_SLOT_MINUTES);
+            // Công thức overlap chuẩn: newStart < existingEnd AND newEnd > existingStart
+            return newStart.isBefore(existingEnd) && newEnd.isAfter(existing.getReservationTime());
+        });
+
+        if (hasConflict) {
             throw new BusinessException("Bàn " + table.getTableNumber() + " đã được đặt trong khoảng thời gian này. Vui lòng chọn bàn hoặc thời gian khác.");
         }
 
@@ -90,11 +118,14 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
         reservation.setTable(table);
         reservation.setUser(user);
 
-        // 7. Cập nhật trạng thái bàn thành RESERVED
-        table.setStatus(TableStatus.RESERVED);
-        tableRepository.save(table);
+        // 7. KHÔNG set table.status = RESERVED nữa (lỗi #2)
+        // Lý do: table.status là trạng thái vật lý của bàn tại MỌI thời điểm, còn 1 reservation
+        // chỉ chiếm bàn trong 1 khung giờ cụ thể. Nếu set RESERVED ở đây thì bàn bị khoá AVAILABLE
+        // cho toàn bộ tương lai, không đặt được cho khung giờ khác dù thực tế vẫn trống.
+        // Việc "bàn có trống hay không tại giờ X" giờ hoàn toàn dựa vào bước check overlap ở bước 5,
+        // không dựa vào table.status nữa. table.status chỉ dùng cho case bảo trì/khoá vĩnh viễn.
 
-        // 8. Lưu reservation
+        // 8. Lưu reservation — vẫn nằm trong cùng transaction với bước lock + check overlap ở trên
         Reservation savedReservation = reservationRepository.save(reservation);
         log.info("Customer {} đặt bàn thành công, ID: {}", request.getCustomerName(), savedReservation.getId());
 
@@ -103,27 +134,27 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
 
     @Override
     @Transactional
-    public CustomerReservationResponse cancelCurrentReservation(Integer userId) {
-        log.info("Customer ID: {} hủy đặt bàn hiện tại", userId);
+    public CustomerReservationResponse cancelReservation(Integer userId, Long reservationId) {
+        log.info("Customer ID: {} hủy đặt bàn ID: {}", userId, reservationId);
 
         // 1. Kiểm tra user tồn tại
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId);
         }
 
-        // 2. Tìm đặt bàn hiện tại của user
-        List<Reservation> currentReservations = reservationRepository.findCurrentReservationsByUser(userId);
+        // 2. Lấy ĐÚNG reservation user muốn hủy, đồng thời check ownership trong 1 query (lỗi #5)
+        // Không dùng findCurrentReservationsByUser(userId).get(0) nữa vì nếu user có nhiều
+        // active reservation (khác ngày), .get(0) có thể hủy nhầm cái user không định hủy
+        Reservation reservation = reservationRepository.findByIdAndUserId(reservationId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy đặt bàn ID " + reservationId + " thuộc về bạn."));
 
-        if (currentReservations.isEmpty()) {
-            throw new ResourceNotFoundException("Bạn không có đặt bàn nào đang hoạt động để hủy.");
-        }
-
-        // Lấy đặt bàn gần nhất
-        Reservation reservation = currentReservations.get(0);
-
-        // 3. Kiểm tra trạng thái - không cho hủy nếu đã COMPLETED
+        // 3. Kiểm tra trạng thái - không cho hủy nếu đã COMPLETED hoặc đã CANCELLED trước đó
         if (reservation.getStatus() == ReservationStatus.COMPLETED) {
             throw new BusinessException("Không thể hủy đặt bàn đã hoàn thành.");
+        }
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new BusinessException("Đặt bàn này đã được hủy trước đó.");
         }
 
         // 4. Kiểm tra đã quá giờ hủy chưa (chỉ áp dụng cho WAITING)
@@ -134,9 +165,10 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
             }
         }
 
-        // 5. Trả bàn về trạng thái AVAILABLE
         RestaurantTable table = reservation.getTable();
-        if (table.getStatus() == TableStatus.RESERVED) {
+
+        // 5. Trả bàn về AVAILABLE nếu nó đang bị đánh dấu RESERVED thủ công (trường hợp legacy)
+        if (table != null && table.getStatus() == TableStatus.RESERVED) {
             table.setStatus(TableStatus.AVAILABLE);
             tableRepository.save(table);
         }
@@ -147,25 +179,54 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
 
         log.info("Customer ID: {} hủy đặt bàn thành công, ID: {}", userId, cancelledReservation.getId());
 
+        // 7. Promote 1 reservation QUEUED khác đang chờ đúng bàn này lên WAITING (lỗi #7)
+        // Vì slot vừa được giải phóng, ai đang QUEUED lâu nhất cho bàn này được ưu tiên trước
+        if (table != null) {
+            promoteQueuedReservation(table.getId());
+        }
+
         return convertToCustomerResponse(cancelledReservation);
+    }
+
+    // Tìm reservation QUEUED cũ nhất cho 1 bàn và promote lên WAITING sau khi có slot trống (lỗi #7)
+    private void promoteQueuedReservation(Integer tableId) {
+        List<Reservation> queuedReservations = reservationRepository
+                .findByTableIdAndStatusOrderByCreatedAtAsc(tableId, ReservationStatus.QUEUED);
+
+        if (queuedReservations.isEmpty()) {
+            return;
+        }
+
+        Reservation nextInLine = queuedReservations.get(0);
+        nextInLine.setStatus(ReservationStatus.WAITING);
+        reservationRepository.save(nextInLine);
+
+        log.info("Promote reservation ID: {} từ QUEUED sang WAITING sau khi bàn {} được giải phóng",
+                nextInLine.getId(), tableId);
+
+        // TODO: gửi notification/email cho khách hàng của nextInLine báo đã có bàn
     }
 
     @Override
     public boolean checkCustomerReservationByUser(Integer userId, String date) {
+        log.info("Customer ID: {} kiểm tra đặt bàn ngày: {}", userId, date);
+
+        // Lỗi #8: không còn catch Exception rồi trả false cho mọi trường hợp nữa.
+        // Parse sai format, user không tồn tại, và "user tồn tại nhưng không có reservation"
+        // giờ là 3 nhánh khác nhau — lỗi hệ thống/input sai sẽ throw ra ngoài để GlobalExceptionHandler
+        // trả đúng mã lỗi (400/404), không bị nuốt thành "false" như thể đó là câu trả lời nghiệp vụ hợp lệ.
+        LocalDate reservationDate;
         try {
-            log.info("Customer ID: {} kiểm tra đặt bàn ngày: {}", userId, date);
-
-            LocalDate reservationDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-
-            if (!userRepository.existsById(userId)) {
-                return false;
-            }
-
-            return reservationRepository.existsActiveReservationByUserIdAndDate(userId, reservationDate);
-        } catch (Exception e) {
-            log.error("Error checking reservation: ", e);
-            return false;
+            reservationDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException e) {
+            throw new BusinessException("Định dạng ngày không hợp lệ, yêu cầu yyyy-MM-dd: " + date);
         }
+
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId);
+        }
+
+        return reservationRepository.existsActiveReservationByUserIdAndDate(userId, reservationDate);
     }
 
     @Override

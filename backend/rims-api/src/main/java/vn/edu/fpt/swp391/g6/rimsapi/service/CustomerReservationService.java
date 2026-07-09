@@ -13,9 +13,10 @@ public interface CustomerReservationService {
     CustomerReservationResponse createReservation(CustomerCreateReservationRequest request);
 
     /**
-     * Customer hủy đặt bàn hiện tại - Tìm theo userId
+     * Customer hủy đặt bàn - nhận cả userId (check ownership) và reservationId (đặt bàn cụ thể cần hủy)
+     * Không còn tự lấy "đặt bàn gần nhất" nữa vì có thể hủy nhầm nếu user có nhiều active reservation
      */
-    CustomerReservationResponse cancelCurrentReservation(Integer userId);
+    CustomerReservationResponse cancelReservation(Integer userId, Long reservationId);
 
     /**
      * Kiểm tra customer đã đặt bàn trong ngày chưa

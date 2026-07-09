@@ -65,8 +65,8 @@ export async function createReservation(data: CustomerCreateReservationRequest):
     return res.data
 }
 
-export async function cancelCurrentReservation(): Promise<CustomerReservationResponse> {
-    const res = await apiClient.delete<CustomerReservationResponse>('/customer/reservations/cancel')
+export async function cancelReservation(reservationId: number): Promise<CustomerReservationResponse> {
+    const res = await apiClient.delete<CustomerReservationResponse>(`/customer/reservations/${reservationId}/cancel`)
     return res.data
 }
 
