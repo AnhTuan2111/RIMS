@@ -8,6 +8,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.PaymentResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.VNPayResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.CashierInvoiceDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.PagedInvoiceResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
@@ -158,5 +160,24 @@ public class CashierController
                 "phone", newCustomer.getPhone(),
                 "rewardPoints", newCustomer.getRewardPoints()
         ));
+    }
+
+    @GetMapping("/invoices/today")
+    public ResponseEntity<PagedInvoiceResponse> getTodayInvoices(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String tableNumber,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String paymentMethod,
+            @RequestParam(required = false) String invoiceCode
+    )
+    {
+        return ResponseEntity.ok(cashierService.getTodayInvoices(tableNumber, keyword, paymentMethod, invoiceCode, page, size));
+    }
+
+    @GetMapping("/invoices/{invoiceId}")
+    public ResponseEntity<CashierInvoiceDetailResponse> getInvoiceDetail(@PathVariable Long invoiceId)
+    {
+        return ResponseEntity.ok(cashierService.getInvoiceDetailForCashier(invoiceId));
     }
 }

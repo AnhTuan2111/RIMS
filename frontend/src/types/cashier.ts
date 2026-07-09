@@ -54,3 +54,45 @@ export interface VNPayResponse {
     message: string;
     success: boolean;
 }
+
+export interface InvoiceSummary {
+    invoiceId: number;
+    tableNumber: string;
+    invoiceDate: string;
+    finalAmount: number;
+    customerName: string | null;
+    paymentMethod: string | null;
+    pointsUsed: number | null;
+    pointsEarned: number | null;
+}
+
+export interface PagedInvoiceResponse {
+    content: InvoiceSummary[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+}
+
+export interface InvoiceItemLine {
+    dishName: string;
+    quantity: number;
+    unitPrice: number;
+    subTotal: number;
+}
+
+export interface InvoiceDetail {
+    invoiceId: number;
+    tableNumber: string;
+    invoiceDate: string;
+    items: InvoiceItemLine[];
+    totalBeforeVat: number;
+    vatAmount: number;
+    finalAmount: number;
+    paymentMethod: string | null;
+    amountPaid: number;
+    excessAmount: number;
+    customerName: string | null;
+    pointsUsed: number | null;
+    pointsEarned: number | null;
+}
