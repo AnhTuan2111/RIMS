@@ -9,13 +9,14 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderItemResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.PaymentResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.VNPayResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.CashierInvoiceDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.CashierInvoiceItemResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.CashierInvoiceSummaryResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.PagedInvoiceResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Payment;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.*;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
@@ -25,6 +26,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -498,5 +501,116 @@ public class CashierServiceImpl implements CashierService {
         user.setActive(true);
 
         return userRepository.save(user);
+    }
+
+    // ĐÃ THÊM: dán 2 method này vào trong class CashierServiceImpl,
+// và thêm các import cần thiết ở đầu file (xem ghi chú bên dưới)
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedInvoiceResponse getTodayInvoices(String tableNumber, String keyword, String paymentMethod, String invoiceCode, int page, int size)
+    {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
+        List<Invoice> todayInvoices = invoiceRepository.findByInvoiceDateBetween(startOfDay, endOfDay);
+
+        List<Invoice> filtered = todayInvoices.stream()
+                .filter(inv -> tableNumber == null || tableNumber.isBlank()
+                        || (inv.getOrder().getTable() != null
+                        && inv.getOrder().getTable().getTableNumber().equalsIgnoreCase(tableNumber)))
+                .filter(inv -> paymentMethod == null || paymentMethod.isBlank()
+                        || (inv.getPayments() != null && !inv.getPayments().isEmpty()
+                        && inv.getPayments().get(0).getPaymentMethod().name().equalsIgnoreCase(paymentMethod)))
+                .filter(inv -> keyword == null || keyword.isBlank()
+                        || (inv.getCustomer() != null && (
+                        inv.getCustomer().getFullName().toLowerCase().contains(keyword.toLowerCase())
+                                || inv.getCustomer().getPhone().contains(keyword))))
+                .filter(inv -> invoiceCode == null || invoiceCode.isBlank()
+                        || String.valueOf(inv.getId()).contains(invoiceCode.replaceAll("[^0-9]", "")))
+                .sorted(Comparator.comparing(Invoice::getInvoiceDate).reversed())
+                .toList();
+
+        int totalElements = filtered.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        int fromIndex = Math.min(page * size, totalElements);
+        int toIndex = Math.min(fromIndex + size, totalElements);
+        List<Invoice> pageContent = filtered.subList(fromIndex, toIndex);
+
+        List<CashierInvoiceSummaryResponse> content = pageContent.stream()
+                .map(inv -> CashierInvoiceSummaryResponse.builder()
+                        .invoiceId(inv.getId())
+                        .tableNumber(inv.getOrder().getTable() != null ? inv.getOrder().getTable().getTableNumber() : "Mang về")
+                        .invoiceDate(inv.getInvoiceDate())
+                        .finalAmount(inv.getFinalAmount())
+                        .customerName(inv.getCustomer() != null ? inv.getCustomer().getFullName() : null)
+                        .paymentMethod(inv.getPayments() != null && !inv.getPayments().isEmpty()
+                                ? inv.getPayments().get(0).getPaymentMethod().name() : null)
+                        .pointsUsed(inv.getPointsUsedOnInvoice())
+                        .pointsEarned(inv.getPointsEarnedOnInvoice())
+                        .build())
+                .toList();
+
+        return PagedInvoiceResponse.builder()
+                .content(content)
+                .page(page)
+                .size(size)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CashierInvoiceDetailResponse getInvoiceDetailForCashier(Long invoiceId)
+    {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+
+        Order order = invoice.getOrder();
+
+        // Chỉ lấy món COMPLETED, khớp với logic PDF đã sửa trước đó
+        List<OrderItem> completedItems = order.getOrderItems().stream()
+                .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
+                .toList();
+
+        BigDecimal totalBeforeVat = completedItems.stream()
+                .map(OrderItem::getSubTotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
+
+        List<CashierInvoiceItemResponse> items = completedItems.stream()
+                .map(oi -> CashierInvoiceItemResponse.builder()
+                        .dishName(oi.getDish() != null ? oi.getDish().getName() : "Món ẩn")
+                        .quantity(oi.getQuantity())
+                        .unitPrice(oi.getUnitPrice())
+                        .subTotal(oi.getSubTotal())
+                        .build())
+                .toList();
+
+        Payment firstPayment = (invoice.getPayments() != null && !invoice.getPayments().isEmpty())
+                ? invoice.getPayments().get(0) : null;
+
+        BigDecimal amountPaid = (firstPayment != null && firstPayment.getAmount() != null)
+                ? firstPayment.getAmount() : invoice.getFinalAmount();
+        BigDecimal excessAmount = amountPaid.subtract(invoice.getFinalAmount());
+        if (excessAmount.compareTo(BigDecimal.ZERO) < 0) excessAmount = BigDecimal.ZERO;
+
+        return CashierInvoiceDetailResponse.builder()
+                .invoiceId(invoice.getId())
+                .tableNumber(order.getTable() != null ? order.getTable().getTableNumber() : "Mang về")
+                .invoiceDate(invoice.getInvoiceDate())
+                .items(items)
+                .totalBeforeVat(totalBeforeVat)
+                .vatAmount(vatAmount)
+                .finalAmount(invoice.getFinalAmount())
+                .paymentMethod(firstPayment != null ? firstPayment.getPaymentMethod().name() : null)
+                .amountPaid(amountPaid)
+                .excessAmount(excessAmount)
+                .customerName(invoice.getCustomer() != null ? invoice.getCustomer().getFullName() : null)
+                .pointsUsed(invoice.getPointsUsedOnInvoice())
+                .pointsEarned(invoice.getPointsEarnedOnInvoice())
+                .build();
     }
 }

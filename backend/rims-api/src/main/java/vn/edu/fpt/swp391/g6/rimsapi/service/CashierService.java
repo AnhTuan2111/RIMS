@@ -5,6 +5,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.PaymentResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.VNPayResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.CashierInvoiceDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.PagedInvoiceResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 
@@ -33,4 +35,8 @@ public interface CashierService
     User searchCustomerByPhone(String phone);
 
     User createCustomerFast(String fullName, String phone, String email);
+
+    PagedInvoiceResponse getTodayInvoices(String tableNumber, String keyword, String paymentMethod, String invoiceCode, int page, int size);
+
+    CashierInvoiceDetailResponse getInvoiceDetailForCashier(Long invoiceId);
 }
