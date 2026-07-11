@@ -113,5 +113,18 @@ public class WaiterController
     {
         return ResponseEntity.ok(waiterService.cancelReservation(reservationId));
     }
+    @PutMapping(
+            "/order-items/{orderItemId}/chef-note/acknowledge"
+    )
+    public ResponseEntity<Void> acknowledgeChefInternalNote(
+            @PathVariable Long orderItemId
+    )
+    {
+        waiterService.acknowledgeChefInternalNote(
+                orderItemId
+        );
+
+        return ResponseEntity.noContent().build();
+    }
 }
 

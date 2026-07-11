@@ -31,7 +31,18 @@ export type OrderItemResponse = {
     quantity: number;
     unitPrice: number; // BigDecimal -> number
     subTotal: number;
-    note: string;
+
+    // Ghi chú khách hoặc Waiter gửi xuống bếp
+    note?: string | null;
+
+    // Ghi chú Chef gửi lại cho Waiter
+    chefInternalNote?: string | null;
+
+    // Thời điểm Chef tạo ghi chú
+    chefInternalNoteCreatedAt?: string | null;
+
+    // Null nghĩa là Waiter chưa xác nhận đã xem
+    chefInternalNoteAcknowledgedAt?: string | null;
 };
 
 export type OrderDetailResponse = {
@@ -124,4 +135,9 @@ export const waiterApi = {
 
     cancelReservation: (resId: number) =>
         apiClient.put<string>(`/waiter/reservations/${resId}/cancel`),
+
+    acknowledgeChefInternalNote: (orderItemId: number) =>
+        apiClient.put<void>(
+            `/waiter/order-items/${orderItemId}/chef-note/acknowledge`,
+        ),
 };

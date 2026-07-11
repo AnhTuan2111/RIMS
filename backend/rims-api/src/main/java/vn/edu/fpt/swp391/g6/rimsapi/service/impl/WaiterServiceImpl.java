@@ -43,6 +43,7 @@ public class WaiterServiceImpl implements WaiterService
     private final DishRepository dishRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final OrderItemRepository orderItemRepository;
 
     @Override
     public List<TableDetailResponse> getAllTables()
@@ -346,7 +347,23 @@ public class WaiterServiceImpl implements WaiterService
                                         response.setQuantity(orderItem.getQuantity());
                                         response.setUnitPrice(orderItem.getUnitPrice());
                                         response.setSubTotal(orderItem.getSubTotal());
+
                                         response.setNote(orderItem.getNote());
+
+// Ghi chú Chef gửi cho Waiter
+                                        response.setChefInternalNote(
+                                                orderItem.getChefInternalNote()
+                                        );
+
+// Thời điểm Chef gửi note
+                                        response.setChefInternalNoteCreatedAt(
+                                                orderItem.getChefInternalNoteCreatedAt()
+                                        );
+
+// Thời điểm Waiter xác nhận đã xem
+                                        response.setChefInternalNoteAcknowledgedAt(
+                                                orderItem.getChefInternalNoteAcknowledgedAt()
+                                        );
                                         return response;
                                     }
                             ).toList())
@@ -567,5 +584,47 @@ public class WaiterServiceImpl implements WaiterService
             res.getTable().setStatus(TableStatus.AVAILABLE);
         }
     }
+    @Override
+    @Transactional
+    public void acknowledgeChefInternalNote(Long orderItemId)
+    {
+        OrderItem orderItem = orderItemRepository
+                .findById(orderItemId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "Không tìm thấy món với ID: "
+                                        + orderItemId
+                        )
+                );
 
+        String chefNote =
+                orderItem.getChefInternalNote();
+
+        if (
+                chefNote == null
+                        || chefNote.isBlank()
+        )
+        {
+            throw new IllegalStateException(
+                    "Món này không có ghi chú từ Chef"
+            );
+        }
+
+        /*
+         * Nếu Waiter đã xem rồi thì không cập nhật
+         * lại thời gian.
+         */
+        if (
+                orderItem
+                        .getChefInternalNoteAcknowledgedAt()
+                        == null
+        )
+        {
+            orderItem.setChefInternalNoteAcknowledgedAt(
+                    LocalDateTime.now()
+            );
+
+            orderItemRepository.save(orderItem);
+        }
+    }
 }

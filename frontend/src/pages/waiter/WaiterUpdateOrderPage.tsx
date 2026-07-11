@@ -10,6 +10,9 @@ type DraftItem = {
     note: string;
     orderItemId?: number | null;
     status?: OrderItemStatus;
+    chefInternalNote?: string | null;
+    chefInternalNoteCreatedAt?: string | null;
+    chefInternalNoteAcknowledgedAt?: string | null;
 };
 
 export default function WaiterUpdateOrderPage() {
@@ -24,6 +27,8 @@ export default function WaiterUpdateOrderPage() {
     const [submitting, setSubmitting] = useState(false);
     const [successData, setSuccessData] = useState<{ message: string; itemSummary: string } | null>(null);
     const [activeCategory, setActiveCategory] = useState<string>("Tất cả");
+    const [acknowledgingItemId, setAcknowledgingItemId] =
+        useState<number | null>(null);
 
     useEffect(() => {
         Promise.all([waiterApi.getMenu(), waiterApi.getServingOrders(tid)])
@@ -42,6 +47,11 @@ export default function WaiterUpdateOrderPage() {
                                 note: item.note || "",
                                 orderItemId: item.orderItemId,
                                 status: item.status,
+                                chefInternalNote: item.chefInternalNote,
+                                chefInternalNoteCreatedAt:
+                                item.chefInternalNoteCreatedAt,
+                                chefInternalNoteAcknowledgedAt:
+                                item.chefInternalNoteAcknowledgedAt,
                             };
                         }
                     });
@@ -64,10 +74,6 @@ export default function WaiterUpdateOrderPage() {
             return cur.originalQty || 0;
         }
         return 0;
-    }
-
-    function isItemLocked(_dishId: number): boolean {
-        return false;
     }
 
     const updateItems = Object.entries(orderDraft)
@@ -157,6 +163,59 @@ export default function WaiterUpdateOrderPage() {
         }));
     }
 
+
+    async function handleAcknowledgeChefNote(
+        dishId: number,
+        orderItemId: number,
+    ) {
+        try {
+            setAcknowledgingItemId(orderItemId);
+
+            await waiterApi.acknowledgeChefInternalNote(
+                orderItemId,
+            );
+
+            setOrderDraft((currentDraft) => ({
+                ...currentDraft,
+                [dishId]: {
+                    ...currentDraft[dishId],
+                    chefInternalNoteAcknowledgedAt:
+                        new Date().toISOString(),
+                },
+            }));
+
+            showToast("Đã xác nhận ghi chú từ bếp.");
+        } catch (error) {
+            console.error(error);
+            showToast(
+                "Không thể xác nhận ghi chú từ bếp.",
+                "error",
+            );
+        } finally {
+            setAcknowledgingItemId(null);
+        }
+    }
+
+    function formatChefNoteTime(value?: string | null) {
+        if (!value) {
+            return "";
+        }
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
+
+        return date.toLocaleString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        });
+    }
+
     return (
         <div className="waiter-container">
             <WaiterHeader/>
@@ -181,62 +240,154 @@ export default function WaiterUpdateOrderPage() {
                     {menu
                         .filter((dish) => activeCategory === "Tất cả" || dish.categoryName === activeCategory)
                         .map((dish) => {
-                        const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
-                        const locked = isItemLocked(dish.dishId);
-                        const minQty = getMinQty(dish.dishId);
-                        const hasExisting = Boolean(d.status);
-                        return (
-                            <div
-                                key={dish.dishId}
-                                className={`waiter-menu-card${locked ? " waiter-menu-card-locked" : ""}`}
-                            >
-                                <div className="waiter-menu-card-top">
-                                    {dish.imageUrl ? (
-                                        <img src={dish.imageUrl} alt={dish.name} className="waiter-menu-img"/>
-                                    ) : (
-                                        <span className="waiter-menu-emoji">🍽️</span>
-                                    )}
-                                    <div className="waiter-menu-info">
-                                        <h4>{dish.name}</h4>
-                                        <p>{fmtPrice(dish.price)}</p>
-                                        {hasExisting && d.status && (
-                                            <span className={`waiter-badge waiter-badge-${d.status.toLowerCase()}`}>
+                            const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
+                            const minQty = getMinQty(dish.dishId);
+                            const hasExisting = Boolean(d.status);
+                            return (
+                                <div
+                                    key={dish.dishId}
+                                    className="waiter-menu-card"
+                                >
+                                    <div className="waiter-menu-card-top">
+                                        {dish.imageUrl ? (
+                                            <img src={dish.imageUrl} alt={dish.name} className="waiter-menu-img"/>
+                                        ) : (
+                                            <span className="waiter-menu-emoji">🍽️</span>
+                                        )}
+                                        <div className="waiter-menu-info">
+                                            <h4>{dish.name}</h4>
+                                            <p>{fmtPrice(dish.price)}</p>
+                                            {hasExisting && d.status && (
+                                                <span className={`waiter-badge waiter-badge-${d.status.toLowerCase()}`}>
                                                 {d.status}
                                             </span>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
+                                    {d.chefInternalNote && (
+                                        <div
+                                            style={{
+                                                margin: "0.85rem 0",
+                                                padding: "0.85rem 0.95rem",
+                                                border: d.chefInternalNoteAcknowledgedAt
+                                                    ? "1px solid #cbd5e1"
+                                                    : "1px solid #f59e0b",
+                                                borderLeft: d.chefInternalNoteAcknowledgedAt
+                                                    ? "4px solid #94a3b8"
+                                                    : "4px solid #f59e0b",
+                                                borderRadius: "10px",
+                                                background: d.chefInternalNoteAcknowledgedAt
+                                                    ? "#f8fafc"
+                                                    : "#fffbeb",
+                                                color: d.chefInternalNoteAcknowledgedAt
+                                                    ? "#475569"
+                                                    : "#78350f",
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center",
+                                                    gap: "0.75rem",
+                                                    flexWrap: "wrap",
+                                                }}
+                                            >
+                                                <strong>🔔 Bếp nhắn</strong>
+
+                                                {d.chefInternalNoteCreatedAt && (
+                                                    <span
+                                                        style={{
+                                                            fontSize: "0.75rem",
+                                                            color: "#64748b",
+                                                        }}
+                                                    >
+                                                    {formatChefNoteTime(
+                                                        d.chefInternalNoteCreatedAt,
+                                                    )}
+                                                </span>
+                                                )}
+                                            </div>
+
+                                            <p
+                                                style={{
+                                                    margin: "0.45rem 0",
+                                                    whiteSpace: "pre-wrap",
+                                                    lineHeight: 1.45,
+                                                }}
+                                            >
+                                                {d.chefInternalNote}
+                                            </p>
+
+                                            {d.chefInternalNoteAcknowledgedAt ? (
+                                                <small
+                                                    style={{
+                                                        color: "#15803d",
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    ✓ Đã xem
+                                                </small>
+                                            ) : (
+                                                d.orderItemId && (
+                                                    <button
+                                                        type="button"
+                                                        className="waiter-btn-outline"
+                                                        disabled={
+                                                            acknowledgingItemId ===
+                                                            d.orderItemId
+                                                        }
+                                                        onClick={() =>
+                                                            void handleAcknowledgeChefNote(
+                                                                dish.dishId,
+                                                                d.orderItemId!,
+                                                            )
+                                                        }
+                                                        style={{
+                                                            marginTop: "0.25rem",
+                                                            padding: "0.4rem 0.75rem",
+                                                        }}
+                                                    >
+                                                        {acknowledgingItemId ===
+                                                        d.orderItemId
+                                                            ? "Đang xác nhận..."
+                                                            : "Đã xem"}
+                                                    </button>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className="waiter-qty-controls">
+                                        <button
+                                            onClick={() => changeDraftQty(dish.dishId, -1)}
+                                            disabled={d.qty <= minQty}
+                                            className="waiter-qty-btn"
+                                        >-
+                                        </button>
+                                        <span className="waiter-qty-val">{d.qty}</span>
+                                        <button
+                                            onClick={() => changeDraftQty(dish.dishId, 1)}
+                                            className="waiter-qty-btn"
+                                        >+
+                                        </button>
+                                    </div>
+                                    <input
+                                        placeholder="Ghi chú (ít cay, ...)"
+                                        value={d.note}
+                                        onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
+                                        className="waiter-note-input"
+                                    />
+                                    {d.status === "COMPLETED" && (
+                                        <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng
+                                            dưới {minQty}.</p>
+                                    )}
+                                    {d.status === "CANCELLED" && (
+                                        <p className="waiter-item-hint">Món đã hủy — nhấn + để thêm mới từ đầu (số lượng sẽ reset về 0).</p>
+                                    )}
                                 </div>
-                                <div className="waiter-qty-controls">
-                                    <button
-                                        onClick={() => changeDraftQty(dish.dishId, -1)}
-                                        disabled={locked || d.qty <= minQty}
-                                        className="waiter-qty-btn"
-                                    >-
-                                    </button>
-                                    <span className="waiter-qty-val">{d.qty}</span>
-                                    <button
-                                        onClick={() => changeDraftQty(dish.dishId, 1)}
-                                        disabled={locked}
-                                        className="waiter-qty-btn"
-                                    >+
-                                    </button>
-                                </div>
-                                <input
-                                    placeholder="Ghi chú (ít cay, ...)"
-                                    value={d.note}
-                                    onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
-                                    className="waiter-note-input"
-                                />
-                                {d.status === "COMPLETED" && (
-                                    <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng
-                                        dưới {minQty}.</p>
-                                )}
-                                {d.status === "CANCELLED" && (
-                                    <p className="waiter-item-hint">Món đã hủy — nhấn + để thêm mới từ đầu (số lượng sẽ reset về 0).</p>
-                                )}
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
                 </div>
             </main>
 

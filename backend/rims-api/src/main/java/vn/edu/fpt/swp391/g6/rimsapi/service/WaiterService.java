@@ -46,4 +46,5 @@ public interface WaiterService
 
     // cancel reservation
     String cancelReservation(Long reservationId);
+    void acknowledgeChefInternalNote(Long orderItemId);
 }
