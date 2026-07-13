@@ -284,7 +284,7 @@ export default function AdminCategoryPage() {
                             <tbody>
                             {currentItems.map((item) => (
                                 <tr key={item.id} className="admin-category-table-row">
-                                    <td className="admin-category-cell-id">CAT-{String(item.id).padStart(3, '0')}</td>
+                                    <td className="admin-category-cell-id">{String(item.id).padStart(2, '0')}</td>
                                     <td className="admin-category-cell-name">
                                         <div className="admin-category-info">
                                             <div className="admin-category-icon">📁</div>
@@ -478,7 +478,6 @@ export default function AdminCategoryPage() {
                                         <th className="admin-category-dish-col-price">GIÁ (VND)</th>
                                         <th className="admin-category-dish-col-status">TRẠNG THÁI</th>
                                         <th className="admin-category-dish-col-date">NGÀY TẠO</th>
-                                        <th className="admin-category-dish-col-actions">THAO TÁC</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -512,15 +511,6 @@ export default function AdminCategoryPage() {
                                             </td>
                                             <td className="admin-category-dish-cell-date">
                                                 {dish.createdAt ? new Date(dish.createdAt).toLocaleDateString('vi-VN') : '---'}
-                                            </td>
-                                            <td className="admin-category-dish-cell-actions">
-                                                <button className="admin-category-small-action-btn" title="Xem chi tiết">👁️</button>
-                                                <button
-                                                    className={`admin-category-small-action-btn ${!dish.isAvailable ? 'disabled' : ''}`}
-                                                    title="Chỉnh sửa"
-                                                >
-                                                    ✏️
-                                                </button>
                                             </td>
                                         </tr>
                                     ))}
