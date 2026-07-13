@@ -53,14 +53,14 @@ const shiftCatalog = [
         displayName: 'Ca chiều',
         startTime: '14:00',
         endTime: '16:59',
-        color: '#f97316',
+        color: '#86efac',
     },
     {
         shiftName: 'EVENING',
         displayName: 'Ca tối',
         startTime: '17:00',
         endTime: '22:00',
-        color: '#ea580c',
+        color: '#f97316',
     },
 ]
 
