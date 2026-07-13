@@ -38,4 +38,6 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
             "FROM Dish d " +
             "GROUP BY d.category.id, d.category.name, d.category.isAvailable")
     List<Object[]> getCategoryStatistics();
+    @Query("SELECT COUNT(oi) FROM OrderItem oi WHERE oi.dish.id = :dishId")
+    long countOrderItemsByDishId(@Param("dishId") Integer dishId);
 }

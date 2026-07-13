@@ -183,7 +183,7 @@ export default function AdminDishesPage() {
     // --- Filter Logic ---
     const filteredDishes = dishes.filter(dish => {
         const matchesKeyword = dish.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-            `#sku-${String(dish.id).padStart(5, '0')}`.includes(searchKeyword.toLowerCase());
+            `#ID-${String(dish.id).padStart(2, '0')}`.includes(searchKeyword.toLowerCase());
         const matchesCategory = selectedCategory === 'ALL' || dish.categoryName === selectedCategory;
         const matchesStatus = selectedStatus === 'ALL' ||
             (selectedStatus === 'AVAILABLE' && dish.isAvailable) ||
@@ -276,7 +276,7 @@ export default function AdminDishesPage() {
                     <div className="admin-dish-filter-container">
                         <input
                             type="text"
-                            placeholder="Tìm theo tên món ăn hoặc mã SKU..."
+                            placeholder="Tìm theo tên món ăn hoặc mã ID..."
                             value={searchKeyword}
                             onChange={(e) => setSearchKeyword(e.target.value)}
                             className="admin-dish-search-input"
@@ -353,7 +353,7 @@ export default function AdminDishesPage() {
                                 </td>
                                 <td className="admin-dish-cell-name">
                                     <div className="admin-dish-name">{dish.name}</div>
-                                    <small className="admin-dish-sku">SKU-{String(dish.id).padStart(5, '0')}</small>
+                                    <small className="admin-dish-sku">ID-{String(dish.id).padStart(2, '0')}</small>
                                 </td>
                                 <td className="admin-dish-cell-category">
                                         <span className={`admin-dish-category-badge ${isParentCategoryHidden ? 'hidden' : ''}`}>
@@ -528,7 +528,7 @@ export default function AdminDishesPage() {
                                     {formData.imageUrl ?
                                         <img src={formData.imageUrl} alt="Preview"/> :
                                         <div className="admin-dish-image-placeholder">
-                                            <span>🖼️</span>
+                                            <span>🖼️    </span>
                                             <small>Chưa có hình ảnh</small>
                                         </div>
                                     }
@@ -583,8 +583,8 @@ export default function AdminDishesPage() {
                                 />
                             </div>
                             <div className="admin-dish-view-sku">
-                                <span className="admin-dish-view-sku-label">MÃ SKU:</span>
-                                <strong>#SKU-{String(selectedDish.id).padStart(5, '0')}</strong>
+                                <span className="admin-dish-view-sku-label">MÃ ID:</span>
+                                <strong>{String(selectedDish.id).padStart(2, '0')}</strong>
                             </div>
                         </div>
 
@@ -736,15 +736,21 @@ export default function AdminDishesPage() {
                             <div>
                                 <div className="admin-dish-preview-header">XEM TRƯỚC HIỂN THỊ CHUẨN</div>
                                 <div className="admin-dish-preview-body">
+                                    {/* Thay thế phần này */}
                                     <div className="admin-dish-preview-image">
                                         <img
-                                            src={formData.imageUrl || 'https://placehold.co/300x200?text=No+Image'}
+                                            src={formData.imageUrl ?
+                                                (formData.imageUrl.startsWith('http') ? formData.imageUrl : `/image/${formData.imageUrl}`)
+                                                : 'https://placehold.co/300x200?text=No+Image'
+                                            }
                                             alt="Preview"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = 'https://placehold.co/300x200?text=No+Image'
+                                            }}
                                         />
                                     </div>
                                     <div className="admin-dish-preview-info">
                                         <span className="admin-dish-preview-status"></span>
-                                        <strong className="admin-dish-preview-price">{formData.price.toLocaleString()}đ</strong>
                                     </div>
                                 </div>
                             </div>

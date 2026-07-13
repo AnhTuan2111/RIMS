@@ -220,25 +220,37 @@ public class DishServiceImpl implements DishService
     {
         try
         {
+            // 1. Kiểm tra món ăn có tồn tại trong hệ thống không
             Dish dish = dishRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy món ăn với ID: " + id));
 
-            // Soft delete: chỉ set isAvailable = false
-            dish.setAvailable(false);
-            dishRepository.save(dish);
-            log.info("Xóa mềm món ăn thành công: {}", dish.getName());
+            // 2. Kiểm tra xem món ăn đã từng phát sinh trong bất kỳ đơn hàng nào chưa (kể cả đơn đã hủy)
+            long orderCount = dishRepository.countOrderItemsByDishId(id);
+
+            if (orderCount == 0)
+            {
+                // TRƯỜNG HỢP 1: Món mới tạo, chưa từng nằm trong order_items -> Cho phép xóa hẳn khỏi DB
+                dishRepository.delete(dish);
+                log.info("Xóa cứng món ăn thành công (chưa từng phát sinh đơn hàng): {}", dish.getName());
+            }
+            else
+            {
+                // TRƯỜNG HỢP 2: Món đã từng được đặt -> Xóa mềm bằng cách ẩn khỏi thực đơn để giữ lịch sử
+                dish.setAvailable(false);
+                dishRepository.save(dish);
+                log.info("Xóa mềm món ăn thành công (giữ lại lịch sử order_items): {}", dish.getName());
+            }
 
         } catch (EntityNotFoundException e)
         {
             log.warn("Không tìm thấy dish với ID: {}", id);
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
+            throw e;  // Ném lại để GlobalExceptionHandler xử lý
         } catch (Exception e)
         {
             log.error("Lỗi khi xóa dish ID {}: {}", id, e.getMessage());
-            throw new RuntimeException("Không thể xóa món ăn: " + e.getMessage());
+            throw new RuntimeException("Không thể thực hiện xóa món ăn: " + e.getMessage());
         }
     }
-
     private DishResponse convertToDTO(Dish dish)
     {
         DishResponse dto = new DishResponse();

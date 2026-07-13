@@ -163,26 +163,25 @@ public class CategoryServiceImpl implements CategoryService
         try
         {
             Category category = categoryRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy category với ID: " + id));
+                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
-            // Kiểm tra xem category có đang chứa dishes không
-            long dishCount = categoryRepository.countDishesByCategoryId(id);
+            // Kiểm tra xem category có đang chứa dishes không[cite: 2]
+            long dishCount = categoryRepository.countDishesByCategoryId(id); // Giả định hàm này đã viết trong repo[cite: 2]
             if (dishCount > 0)
             {
                 throw new IllegalStateException(
-                        String.format("Không thể xóa category vì đang có %d món ăn thuộc danh mục này!", dishCount)
+                        String.format("Không thể xóa danh mục này vì đang có %d món ăn thuộc danh mục!", dishCount)
                 );
             }
 
-            // Soft delete: chỉ set isAvailable = false
-            category.setAvailable(false);
-            categoryRepository.save(category);
-            log.info("Xóa mềm category thành công: {}", category.getName());
+            // HỢP LỆ: Danh mục trống -> Cho phép xóa hẳn khỏi hệ thống
+            categoryRepository.delete(category);
+            log.info("Xóa cứng danh mục thành công: {}", category.getName());
 
         } catch (EntityNotFoundException | IllegalStateException e)
         {
             log.warn("Lỗi khi xóa category ID {}: {}", id, e.getMessage());
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
+            throw e;
         } catch (Exception e)
         {
             log.error("Lỗi khi xóa category ID {}: {}", id, e.getMessage());
