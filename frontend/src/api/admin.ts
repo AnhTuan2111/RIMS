@@ -122,6 +122,7 @@ export interface UserProfileResponse {
     phone: string
     email: string
     role: string
+    rewardPoints?: number
 }
 
 export interface SetAccountStatusRequest {

@@ -20,7 +20,7 @@ const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
     CUSTOMER: {bg: '#ede9fe', text: '#5b21b6'},
 }
 
-const STAFF_ROLES = [RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER, RoleType.ADMIN]
+const STAFF_ROLES = [RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER]
 
 type Tab = 'staff' | 'customer'
 type ModalType = 'create-staff' | 'create-customer' | 'edit' | 'detail' | null
@@ -525,6 +525,13 @@ export default function AdminUsersPage() {
                     <DR label="Email" value={selectedUser.email ?? '—'}/>
                     <DR label="Số điện thoại" value={selectedUser.phone}/>
                     <DR label="Vai trò" value={ROLE_LABELS[selectedUser.role] ?? selectedUser.role}/>
+                    {selectedUser.role === 'CUSTOMER' && (
+                        <DR
+                            label="Điểm tích lũy"
+                            value={`${selectedUser.rewardPoints ?? 0} điểm`}
+                            color="#065f46"
+                        />
+                    )}
                     <DR label="Trạng thái" value={selectedUser.isActive ? '✓ Đang hoạt động' : '✕ Đã khóa'}
                         color={selectedUser.isActive ? '#065f46' : '#991b1b'}/>
                     <DR label="Ngày tạo"
