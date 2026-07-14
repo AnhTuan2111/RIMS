@@ -14,10 +14,11 @@ public class CustomerCreateReservationRequest {
 
     @NotBlank(message = "Tên khách hàng không được để trống")
     @Size(max = 50, message = "Tên không được vượt quá 50 ký tự")
+    @Pattern(regexp = "^\\p{L}+(?: \\p{L}+)*$")
     private String customerName;
 
     @NotBlank(message = "Số điện thoại không được để trống")
-    @Pattern(regexp = "^[0-9]{10}$", message = "Số điện thoại phải là 10 chữ số")
+    @Pattern(regexp = "^0[0-9]{9}$")
     private String phone;
 
     @NotNull(message = "Thời gian đặt bàn không được để trống")

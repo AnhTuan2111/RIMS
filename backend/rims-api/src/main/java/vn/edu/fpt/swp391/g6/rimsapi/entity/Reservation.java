@@ -48,9 +48,8 @@ public class Reservation
     @JoinColumn(name = "table_id")
     private RestaurantTable table;
 
-    // 🔥 THÊM MỚI: Liên kết với User
     @ManyToOne
-    @JoinColumn(name = "user_id")  // Thêm cột user_id trong bảng reservations
+    @JoinColumn(name = "user_id")
     private User user;
 
     @CreatedDate

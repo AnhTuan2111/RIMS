@@ -25,6 +25,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+
 
 @Service
 @RequiredArgsConstructor
@@ -38,73 +40,51 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
     @Override
     @Transactional
     public CustomerReservationResponse createReservation(CustomerCreateReservationRequest request) {
-        log.info("Customer {} đặt bàn vào ngày: {}", request.getCustomerName(), request.getReservationTime());
 
-        // 1. Kiểm tra userId có tồn tại
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + request.getUserId()));
-
-        // 2. Kiểm tra ngày đặt không được ở quá khứ
-        if (request.getReservationTime().isBefore(LocalDateTime.now())) {
-            throw new BusinessException("Không thể đặt bàn trong quá khứ");
+        if (userRepository.findById(request.getUserId()).isEmpty()) {
+            throw new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + request.getUserId());
         }
 
-        // 3. Kiểm tra user đã đặt bàn trong ngày chưa
-        LocalDate reservationDate = request.getReservationTime().toLocalDate();
-
-        boolean userHasReservation = reservationRepository.existsActiveReservationByUserIdAndDate(
-                request.getUserId(), reservationDate
-        );
-
-        if (userHasReservation) {
-            throw new BusinessException("Bạn đã đặt bàn trong ngày " + reservationDate + " rồi! Mỗi khách hàng chỉ được đặt 1 bàn/ngày.");
-        }
-
-        // 4. Kiểm tra bàn tồn tại và còn trống
         RestaurantTable table = tableRepository.findById(request.getTableId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bàn với ID: " + request.getTableId()));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
-        if (table.getStatus() != TableStatus.AVAILABLE) {
-            throw new BusinessException("Bàn " + table.getTableNumber() + " hiện không khả dụng. Vui lòng chọn bàn khác.");
+        if (request.getReservationTime().isBefore(LocalDateTime.now()))
+        {
+            throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
         }
 
-        // 5. Kiểm tra bàn có bị trùng thời gian không
-        LocalDateTime timeStart = request.getReservationTime().minusHours(1);
-        LocalDateTime timeEnd = request.getReservationTime().plusHours(1);
+        LocalDateTime start = request.getReservationTime().minusMinutes(150);
+        LocalDateTime end = request.getReservationTime().plusMinutes(150);
 
-        boolean tableReserved = reservationRepository.existsByTableIdAndReservationTimeBetween(
-                request.getTableId(), timeStart, timeEnd
-        );
+        List<Reservation> existingReservations = reservationRepository.findByTableIdAndReservationTimeBetween(request.getTableId(), start, end);
 
-        if (tableReserved) {
-            throw new BusinessException("Bàn " + table.getTableNumber() + " đã được đặt trong khoảng thời gian này. Vui lòng chọn bàn hoặc thời gian khác.");
+        for (Reservation res : existingReservations)
+        {
+            if (res.getStatus() != ReservationStatus.CANCELLED)
+            {
+                if (res.getReservationTime().isAfter(start) && res.getReservationTime().isBefore(end))
+                {
+                    throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
+                }
+            }
         }
 
-        // 6. Tạo reservation mới
         Reservation reservation = new Reservation();
         reservation.setCustomerName(request.getCustomerName());
         reservation.setPhone(request.getPhone());
-        reservation.setReservationTime(request.getReservationTime());
         reservation.setNote(request.getNote());
-        reservation.setStatus(ReservationStatus.QUEUED);
+        reservation.setReservationTime(request.getReservationTime());
         reservation.setTable(table);
-        reservation.setUser(user);
+        reservation.setStatus(ReservationStatus.QUEUED);
 
-        // 7. Cập nhật trạng thái bàn thành RESERVED
-        table.setStatus(TableStatus.RESERVED);
-        tableRepository.save(table);
+        reservationRepository.save(reservation);
 
-        // 8. Lưu reservation
-        Reservation savedReservation = reservationRepository.save(reservation);
-        log.info("Customer {} đặt bàn thành công, ID: {}", request.getCustomerName(), savedReservation.getId());
-
-        return convertToCustomerResponse(savedReservation);
+        return convertToCustomerResponse(reservation);
     }
 
     @Override
     @Transactional
     public CustomerReservationResponse cancelCurrentReservation(Integer userId) {
-        log.info("Customer ID: {} hủy đặt bàn hiện tại", userId);
 
         // 1. Kiểm tra user tồn tại
         if (!userRepository.existsById(userId)) {
@@ -126,15 +106,7 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
             throw new BusinessException("Không thể hủy đặt bàn đã hoàn thành.");
         }
 
-        // 4. Kiểm tra đã quá giờ hủy chưa (chỉ áp dụng cho WAITING)
-        if (reservation.getStatus() == ReservationStatus.WAITING) {
-            LocalDateTime cancelDeadline = reservation.getReservationTime().plusMinutes(15);
-            if (LocalDateTime.now().isAfter(cancelDeadline)) {
-                throw new BusinessException("Đã quá thời gian cho phép hủy đặt bàn.");
-            }
-        }
 
-        // 5. Trả bàn về trạng thái AVAILABLE
         RestaurantTable table = reservation.getTable();
         if (table.getStatus() == TableStatus.RESERVED) {
             table.setStatus(TableStatus.AVAILABLE);
@@ -145,25 +117,20 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
         reservation.setStatus(ReservationStatus.CANCELLED);
         Reservation cancelledReservation = reservationRepository.save(reservation);
 
-        log.info("Customer ID: {} hủy đặt bàn thành công, ID: {}", userId, cancelledReservation.getId());
-
         return convertToCustomerResponse(cancelledReservation);
     }
 
     @Override
     public boolean checkCustomerReservationByUser(Integer userId, String date) {
         try {
-            log.info("Customer ID: {} kiểm tra đặt bàn ngày: {}", userId, date);
 
             LocalDate reservationDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-
             if (!userRepository.existsById(userId)) {
                 return false;
             }
 
             return reservationRepository.existsActiveReservationByUserIdAndDate(userId, reservationDate);
         } catch (Exception e) {
-            log.error("Error checking reservation: ", e);
             return false;
         }
     }
