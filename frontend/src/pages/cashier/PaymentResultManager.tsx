@@ -1,22 +1,30 @@
 import {useState} from 'react';
-import type {OrderDetailResponse} from '../../types/cashier';
+import type {OrderDetailResponse, PaymentResponse} from '../../types/cashier';
 
 interface Props {
-    invoiceId: number;
+    paymentResult: PaymentResponse;
     orderDetail: OrderDetailResponse;
     onClose: () => void;
     onDownload: (id: number) => void;
 }
 
-export default function PaymentResultManager({invoiceId, orderDetail, onClose, onDownload}: Props) {
+export default function PaymentResultManager({paymentResult, orderDetail, onClose, onDownload}: Props) {
     const [step, setStep] = useState<'SUCCESS' | 'BILL'>('SUCCESS');
 
     const itemsList = orderDetail.orderItems || [];
 
-    // Lấy đúng 3 trường tiền tệ từ Java DTO
+    // Tiền gốc lấy từ Order
     const beforeVat = orderDetail.totalAmountBeforeVat || 0;
     const vatAmount = orderDetail.vatAmount || 0;
-    const finalAmount = orderDetail.finalAmount || 0;
+
+    // Các thông tin chuẩn đã được Backend xử lý lấy từ paymentResult
+    const invoiceId = paymentResult.invoiceId;
+    const finalAmount = paymentResult.finalAmount;
+    const customerName = paymentResult.customerName;
+    const pointsUsed = paymentResult.pointsUsed || 0;
+    const pointsEarned = paymentResult.pointsEarned || 0;
+
+    const paymentMethodLabel = paymentResult.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản/QR';
 
     if (step === 'SUCCESS') {
         return (
@@ -32,6 +40,12 @@ export default function PaymentResultManager({invoiceId, orderDetail, onClose, o
                 <div style={{fontSize: '8rem', marginBottom: '1rem'}}>✔</div>
                 <h1 style={{fontSize: '4rem', fontWeight: 'bold'}}>THANH TOÁN THÀNH CÔNG</h1>
                 <p style={{fontSize: '1.5rem', opacity: 0.9}}>Mã hóa đơn: INV-{invoiceId}</p>
+                {customerName && (
+                    <div style={{marginTop: '1rem', padding: '10px 20px', background: 'rgba(255,255,255,0.2)', borderRadius: '8px'}}>
+                        <p style={{margin: '0 0 5px 0', fontSize: '1.2rem'}}>Khách hàng: <strong>{customerName}</strong></p>
+                        <p style={{margin: 0, fontSize: '1.1rem'}}>🎉 Tích lũy thêm: <strong>+{pointsEarned} điểm</strong></p>
+                    </div>
+                )}
                 <p style={{marginTop: '3rem', fontSize: '1.1rem', fontStyle: 'italic'}}>— Chạm vào màn hình để xem hóa
                     đơn —</p>
             </div>
@@ -87,7 +101,7 @@ export default function PaymentResultManager({invoiceId, orderDetail, onClose, o
                     </div>
                 </div>
 
-                {/* KHU VỰC HIỂN THỊ TIỀN VAT VÀ PHƯƠNG THỨC THANH TOÁN */}
+                {/* KHU VỰC HIỂN THỊ TIỀN, ĐIỂM V VÀ PHƯƠNG THỨC THANH TOÁN */}
                 <div style={{
                     background: '#f8fafc',
                     padding: '1rem',
@@ -95,50 +109,50 @@ export default function PaymentResultManager({invoiceId, orderDetail, onClose, o
                     marginBottom: '2rem',
                     border: '1px solid #e2e8f0'
                 }}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        fontSize: '0.95rem',
-                        color: '#475569',
-                        marginBottom: '6px'
-                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#475569', marginBottom: '6px' }}>
                         <span>Tạm tính:</span>
                         <span>{beforeVat.toLocaleString()} đ</span>
                     </div>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        fontSize: '0.95rem',
-                        color: '#475569',
-                        marginBottom: '12px',
-                        paddingBottom: '12px',
-                        borderBottom: '1px dashed #cbd5e1'
-                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#475569', marginBottom: '12px' }}>
                         <span>Thuế VAT (10%):</span>
                         <span>{vatAmount.toLocaleString()} đ</span>
                     </div>
 
+                    {/* HIỂN THỊ KHÁCH HÀNG & ĐIỂM (NẾU CÓ) */}
+                    {customerName && (
+                        <div style={{ padding: '12px 0', borderTop: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', marginBottom: '12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#475569', marginBottom: '6px' }}>
+                                <span>Khách hàng:</span>
+                                <strong>{customerName}</strong>
+                            </div>
+                            {pointsUsed > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#16a34a', marginBottom: '6px' }}>
+                                    <span>Điểm đã dùng:</span>
+                                    <span>- {(pointsUsed * 1000).toLocaleString()} đ</span>
+                                </div>
+                            )}
+                            {pointsEarned > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#ea580c', fontWeight: 'bold' }}>
+                                    <span>Điểm tích lũy thêm:</span>
+                                    <span>+{pointsEarned} điểm</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        fontSize: '1.2rem',
-                        fontWeight: 'bold',
-                        color: '#b91c1c',
-                        marginBottom: '12px'
+                        display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem',
+                        fontWeight: 'bold', color: '#b91c1c', marginBottom: '12px',
+                        paddingTop: customerName ? '0' : '12px',
+                        borderTop: customerName ? 'none' : '1px dashed #cbd5e1'
                     }}>
                         <span>TỔNG THANH TOÁN:</span>
                         <span>{finalAmount.toLocaleString()} đ</span>
                     </div>
 
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        fontSize: '0.9rem',
-                        color: '#16a34a',
-                        fontWeight: 'bold'
-                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#16a34a', fontWeight: 'bold' }}>
                         <span>Phương thức thanh toán:</span>
-                        <span>Tiền mặt</span>
+                        <span>{paymentMethodLabel}</span>
                     </div>
                 </div>
 
@@ -147,13 +161,8 @@ export default function PaymentResultManager({invoiceId, orderDetail, onClose, o
                         type="button"
                         onClick={() => void onDownload(invoiceId)}
                         style={{
-                            padding: '1rem',
-                            background: '#2563eb',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer'
+                            padding: '1rem', background: '#2563eb', color: 'white',
+                            border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
                         }}
                     >
                         📥 Tải PDF
@@ -162,13 +171,8 @@ export default function PaymentResultManager({invoiceId, orderDetail, onClose, o
                         type="button"
                         onClick={onClose}
                         style={{
-                            padding: '1rem',
-                            background: '#64748b',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer'
+                            padding: '1rem', background: '#64748b', color: 'white',
+                            border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
                         }}
                     >
                         Đóng & Tiếp tục
