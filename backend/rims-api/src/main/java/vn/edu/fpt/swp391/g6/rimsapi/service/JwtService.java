@@ -20,4 +20,10 @@ public interface JwtService
     String extractUsername(JWTClaimsSet claims);
 
     String extractRole(JWTClaimsSet claims);
+
+    String extractJti(String token);
+
+    String extractJti(JWTClaimsSet claims);
+
+    java.time.LocalDateTime extractExpiry(String token);
 }

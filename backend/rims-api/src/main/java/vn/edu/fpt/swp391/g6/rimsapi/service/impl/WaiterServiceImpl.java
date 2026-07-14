@@ -25,6 +25,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TableNotAvailableException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -44,6 +45,7 @@ public class WaiterServiceImpl implements WaiterService
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final OrderItemRepository orderItemRepository;
+    private final ReservationConflictValidator conflictValidator;
 
     @Override
     public List<TableDetailResponse> getAllTables()
@@ -194,7 +196,7 @@ public class WaiterServiceImpl implements WaiterService
         // các món đã trong trạng thái COMPLETE thì chỉ có thêm số lượng chứ không giảm đi được, tức là số lượng lúc sau phải luôn >= số lượng ban đầu, nếu không thì lỗi
         // còn các món mà trong trạng thái PREPARING thì thêm bớt tùy ý
 
-        Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("order Id " + id + " not found"));
+        Order order = orderRepository.findOrderWithDetailsById(id).orElseThrow(() -> new IllegalArgumentException("order Id " + id + " not found"));
 
         if (!userRepository.existsById(waiterId))
         {
@@ -283,7 +285,9 @@ public class WaiterServiceImpl implements WaiterService
         BigDecimal total = BigDecimal.ZERO;
         for (OrderItem item : order.getOrderItems())
         {
-            total = total.add(item.getSubTotal());
+            if (item.getStatus() != OrderItemStatus.CANCELLED) {
+                total = total.add(item.getSubTotal());
+            }
         }
         order.setTotalAmount(total);
         orderRepository.save(order);
@@ -378,20 +382,13 @@ public class WaiterServiceImpl implements WaiterService
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
         }
 
-        LocalDateTime start = request.getReservationTime().minusMinutes(150);
-        LocalDateTime end = request.getReservationTime().plusMinutes(150);
+        LocalDateTime start = request.getReservationTime().minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+        LocalDateTime end = request.getReservationTime().plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
 
         List<Reservation> existingReservations = reservationRepository.findByTableIdAndReservationTimeBetween(request.getTableId(), start, end);
 
-        for (Reservation res : existingReservations)
-        {
-            if (res.getStatus() != ReservationStatus.CANCELLED)
-            {
-                if (res.getReservationTime().isAfter(start) && res.getReservationTime().isBefore(end))
-                {
-                    throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
-                }
-            }
+        if (conflictValidator.hasConflict(existingReservations, request.getReservationTime(), null)) {
+            throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
         }
 
         Reservation reservation = new Reservation();
@@ -474,21 +471,14 @@ public class WaiterServiceImpl implements WaiterService
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
         }
 
-        LocalDateTime start = request.getReservationTime().minusMinutes(150);
-        LocalDateTime end = request.getReservationTime().plusMinutes(150);
+        LocalDateTime start = request.getReservationTime().minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+        LocalDateTime end = request.getReservationTime().plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
 
         List<Reservation> existingReservations = reservationRepository.findByTableIdAndReservationTimeBetween(
                 request.getTableId(), start, end);
 
-        for (Reservation res : existingReservations)
-        {
-            if (!res.getId().equals(reservationId) && res.getStatus() != ReservationStatus.CANCELLED)
-            {
-                if (res.getReservationTime().isAfter(start) && res.getReservationTime().isBefore(end))
-                {
-                    throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
-                }
-            }
+        if (conflictValidator.hasConflict(existingReservations, request.getReservationTime(), reservationId)) {
+            throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
         }
 
         reservation.setCustomerName(request.getCustomerName());
@@ -526,7 +516,8 @@ public class WaiterServiceImpl implements WaiterService
 
         for (Reservation res : reservations)
         {
-            RestaurantTable currentTable = res.getTable();
+            RestaurantTable currentTable = restaurantTableRepository.findByIdForUpdate(res.getTable().getId()).orElse(null);
+            if (currentTable == null) continue;
 
             if (currentTable.getStatus() == TableStatus.AVAILABLE)
             {

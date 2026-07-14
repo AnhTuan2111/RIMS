@@ -2,21 +2,27 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.AuthenticationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.RefreshTokenRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.auth.AuthenticationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.auth.LogoutResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.RevokedToken;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.InvalidTokenException;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.RevokedTokenRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AuthService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
+
+import java.time.LocalDateTime;
 
 
 @Service
@@ -28,6 +34,7 @@ public class AuthServiceImpl implements AuthService
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RevokedTokenRepository revokedTokenRepository;
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest loginRequest)
@@ -80,8 +87,15 @@ public class AuthServiceImpl implements AuthService
     }
 
     @Override
-    public LogoutResponse logout()
+    public LogoutResponse logout(UserPrincipal principal, String rawAccessToken)
     {
+        String jti = jwtService.extractJti(rawAccessToken);
+        java.time.LocalDateTime exp = jwtService.extractExpiry(rawAccessToken);
+        if (jti != null && exp != null)
+        {
+            revokedTokenRepository.save(new RevokedToken(jti, LocalDateTime.now(), exp));
+        }
+
         return LogoutResponse.builder()
                 .message("Logged out successfully")
                 .build();
@@ -121,5 +135,12 @@ public class AuthServiceImpl implements AuthService
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();
+    }
+
+    @Scheduled(fixedRate = 3600000) // 1 hour
+    @Transactional
+    public void cleanupRevokedTokens()
+    {
+        revokedTokenRepository.deleteAllByExpiresAtBefore(LocalDateTime.now());
     }
 }

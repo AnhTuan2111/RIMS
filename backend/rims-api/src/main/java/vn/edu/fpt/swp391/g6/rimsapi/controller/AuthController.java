@@ -48,9 +48,13 @@ public class AuthController
     }
 
     @PostMapping("/logout")
-    public LogoutResponse logout()
+    public LogoutResponse logout(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("Authorization") String authHeader
+    )
     {
-        return authService.logout();
+        String token = authHeader.substring(7);
+        return authService.logout(principal, token);
     }
 
     @PostMapping("/forgot-password")

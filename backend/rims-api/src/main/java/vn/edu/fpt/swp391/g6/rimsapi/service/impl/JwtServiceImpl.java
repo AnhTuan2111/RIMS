@@ -12,8 +12,11 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
 
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 
 @Service
@@ -40,6 +43,7 @@ public class JwtServiceImpl implements JwtService
                     .claim(CLAIM_USERNAME, username)
                     .claim(CLAIM_ROLE, role)
                     .claim(CLAIM_TYPE, TOKEN_TYPE_ACCESS)
+                    .jwtID(UUID.randomUUID().toString())
                     .issuer(ISSUER)
                     .issueTime(new Date())
                     .expirationTime(Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)))
@@ -60,6 +64,7 @@ public class JwtServiceImpl implements JwtService
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                     .subject(String.valueOf(id))
                     .claim(CLAIM_TYPE, TOKEN_TYPE_REFRESH)
+                    .jwtID(UUID.randomUUID().toString())
                     .issuer(ISSUER)
                     .issueTime(new Date())
                     .expirationTime(Date.from(Instant.now().plus(7, ChronoUnit.DAYS)))
@@ -151,5 +156,25 @@ public class JwtServiceImpl implements JwtService
         JWSObject jwsObject = new JWSObject(header, new Payload(claimsSet.toJSONObject()));
         jwsObject.sign(new MACSigner(signerKey.getBytes()));
         return jwsObject.serialize();
+    }
+
+    @Override
+    public String extractJti(String token)
+    {
+        return parseAndValidate(token).getJWTID();
+    }
+
+    @Override
+    public String extractJti(JWTClaimsSet claims)
+    {
+        return claims.getJWTID();
+    }
+
+    @Override
+    public LocalDateTime extractExpiry(String token)
+    {
+        Date exp = parseAndValidate(token).getExpirationTime();
+        if (exp == null) return null;
+        return exp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 }

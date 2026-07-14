@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.RevokedTokenRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter
 {
     private final JwtService jwtService;
+    private final RevokedTokenRepository revokedTokenRepository;
 
     @Override
     protected void doFilterInternal(
@@ -40,6 +42,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
             try
             {
                 JWTClaimsSet claims = jwtService.parseAndValidate(token);
+
+                String jti = jwtService.extractJti(claims);
+                if (jti != null && revokedTokenRepository.existsByJti(jti)) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token has been revoked");
+                    return;
+                }
 
                 if (jwtService.isAccessToken(claims)
                         && SecurityContextHolder.getContext().getAuthentication() == null)
