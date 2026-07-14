@@ -16,7 +16,13 @@ export default function ProfilePage() {
     // Load user from localStorage
     const stored = localStorage.getItem('currentUser')
     const savedUser = stored ? JSON.parse(stored) as {
-        userId: number; username: string; fullName: string; phone: string; email: string | null; role: string
+        userId: number
+        username: string
+        fullName: string
+        phone: string
+        email: string | null
+        role: string
+        rewardPoints?: number
     } : null
 
     const [isEditing, setIsEditing] = useState(false)
@@ -174,9 +180,16 @@ export default function ProfilePage() {
                             <ProfileField label="Username" value={savedUser.username}/>
                             <ProfileField label="Email" value={savedUser.email ?? '—'}/>
                             <ProfileField label="Số điện thoại" value={savedUser.phone}/>
+                            {isCustomer && (
+                                <ProfileField
+                                    label="Điểm tích lũy"
+                                    value={`${savedUser.rewardPoints ?? 0} điểm`}
+                                />
+                            )}
                         </>
                     )}
                 </div>
+
 
                 {updateError && <div className="auth-error" style={{marginTop: '12px'}}>{updateError}</div>}
 

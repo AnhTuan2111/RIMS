@@ -62,4 +62,5 @@ export interface UserResponse {
     role: RoleType
     isActive: boolean
     createdAt: string
+    rewardPoints?: number
 }

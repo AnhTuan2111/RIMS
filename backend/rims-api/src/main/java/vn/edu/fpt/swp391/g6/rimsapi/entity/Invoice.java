@@ -49,7 +49,6 @@ public class Invoice
     private List<Payment> payments;
 
     @PrePersist
-    @PreUpdate
     private void fillRestaurantRevenueAmount()
     {
         if (restaurantRevenueAmount == null && finalAmount != null)
@@ -82,7 +81,7 @@ public class Invoice
         }
     }
 
-    // Thêm thanh toán vào hóa đơn và tự động thiết lập liên kết ngược lại ở phía Payment
+    // Thêm thanh toán vào hóa đơn và tự động thiết lập liên kết ngược lại ở phía P     ayment
     public void addPayment(Payment payment)
     {
         if (this.payments == null)
