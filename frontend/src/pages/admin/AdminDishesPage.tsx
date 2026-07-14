@@ -757,7 +757,6 @@ export default function AdminDishesPage() {
 
                             <div className="admin-dish-danger-zone">
                                 <h5>🚨 KHU VỰC NGUY HIỂM</h5>
-                                <p>Thực hiện xóa sẽ gỡ bỏ hoàn toàn dữ liệu món ăn này khỏi hệ thống cơ sở dữ liệu.</p>
                                 <button
                                     type="button"
                                     onClick={() => {
