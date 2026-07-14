@@ -77,10 +77,6 @@ export default function AdminCategoryPage() {
         e.preventDefault();
         if (isSubmitting) return;
 
-        if (formData.name.trim().length > 50) {
-            alert("Lỗi: Tên danh mục không được vượt quá 50 ký tự!");
-            return;
-        }
 
         try {
             setIsSubmitting(true);
@@ -288,7 +284,7 @@ export default function AdminCategoryPage() {
                             <tbody>
                             {currentItems.map((item) => (
                                 <tr key={item.id} className="admin-category-table-row">
-                                    <td className="admin-category-cell-id">CAT-{String(item.id).padStart(3, '0')}</td>
+                                    <td className="admin-category-cell-id">{String(item.id).padStart(2, '0')}</td>
                                     <td className="admin-category-cell-name">
                                         <div className="admin-category-info">
                                             <div className="admin-category-icon">📁</div>
@@ -335,9 +331,8 @@ export default function AdminCategoryPage() {
                                                 });
                                                 setView('EDIT');
                                             }}
-                                            disabled={!item.isAvailable}
-                                            className={`admin-category-action-btn admin-category-edit-btn ${!item.isAvailable ? 'disabled' : ''}`}
-                                            title={item.isAvailable ? "Chỉnh sửa" : "Không thể sửa danh mục đã ẩn"}
+                                            className="admin-category-action-btn admin-category-edit-btn"
+                                            title="Chỉnh sửa"
                                         >
                                             ✏️
                                         </button>
@@ -405,21 +400,19 @@ export default function AdminCategoryPage() {
                             <h3 className="admin-category-detail-title">CHI TIẾT DANH MỤC</h3>
                         </div>
                         <div className="admin-category-detail-header-right">
-                            {selectedCategory.isAvailable && (
-                                <button
-                                    onClick={() => {
-                                        setFormData({
-                                            name: selectedCategory.name,
-                                            description: selectedCategory.description,
-                                            isAvailable: selectedCategory.isAvailable
-                                        });
-                                        setView('EDIT');
-                                    }}
-                                    className="admin-category-btn-secondary"
-                                >
-                                    ✏️ Sửa danh mục
-                                </button>
-                            )}
+                            <button
+                                onClick={() => {
+                                    setFormData({
+                                        name: selectedCategory.name,
+                                        description: selectedCategory.description,
+                                        isAvailable: selectedCategory.isAvailable
+                                    });
+                                    setView('EDIT');
+                                }}
+                                className="admin-category-btn-secondary"
+                            >
+                                ✏️ Sửa danh mục
+                            </button>
                             <button
                                 onClick={() => setDeleteModal({ open: true, id: selectedCategory.id })}
                                 className="admin-category-btn-secondary admin-category-btn-danger"
@@ -485,7 +478,6 @@ export default function AdminCategoryPage() {
                                         <th className="admin-category-dish-col-price">GIÁ (VND)</th>
                                         <th className="admin-category-dish-col-status">TRẠNG THÁI</th>
                                         <th className="admin-category-dish-col-date">NGÀY TẠO</th>
-                                        <th className="admin-category-dish-col-actions">THAO TÁC</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -519,15 +511,6 @@ export default function AdminCategoryPage() {
                                             </td>
                                             <td className="admin-category-dish-cell-date">
                                                 {dish.createdAt ? new Date(dish.createdAt).toLocaleDateString('vi-VN') : '---'}
-                                            </td>
-                                            <td className="admin-category-dish-cell-actions">
-                                                <button className="admin-category-small-action-btn" title="Xem chi tiết">👁️</button>
-                                                <button
-                                                    className={`admin-category-small-action-btn ${!dish.isAvailable ? 'disabled' : ''}`}
-                                                    title="Chỉnh sửa"
-                                                >
-                                                    ✏️
-                                                </button>
                                             </td>
                                         </tr>
                                     ))}
