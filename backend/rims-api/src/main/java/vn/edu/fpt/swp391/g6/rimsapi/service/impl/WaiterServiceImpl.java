@@ -584,6 +584,7 @@ public class WaiterServiceImpl implements WaiterService
             res.getTable().setStatus(TableStatus.AVAILABLE);
         }
     }
+
     @Override
     @Transactional
     public void acknowledgeChefInternalNote(Long orderItemId)
