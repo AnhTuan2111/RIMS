@@ -34,6 +34,4 @@ public class UserResponse
     private boolean isActive;
 
     private LocalDateTime createdAt;
-
-    private Integer rewardPoints;
 }

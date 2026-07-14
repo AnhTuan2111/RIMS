@@ -350,20 +350,14 @@ public class WaiterServiceImpl implements WaiterService
 
                                         response.setNote(orderItem.getNote());
 
-// Ghi chú Chef gửi cho Waiter
-                                        response.setChefInternalNote(
-                                                orderItem.getChefInternalNote()
-                                        );
+                                        // Ghi chú Chef gửi cho Waiter
+                                        response.setChefInternalNote(orderItem.getChefInternalNote());
 
-// Thời điểm Chef gửi note
-                                        response.setChefInternalNoteCreatedAt(
-                                                orderItem.getChefInternalNoteCreatedAt()
-                                        );
+                                        // Thời điểm Chef gửi note
+                                        response.setChefInternalNoteCreatedAt(orderItem.getChefInternalNoteCreatedAt());
 
-// Thời điểm Waiter xác nhận đã xem
-                                        response.setChefInternalNoteAcknowledgedAt(
-                                                orderItem.getChefInternalNoteAcknowledgedAt()
-                                        );
+                                        // Thời điểm Waiter xác nhận đã xem
+                                        response.setChefInternalNoteAcknowledgedAt(orderItem.getChefInternalNoteAcknowledgedAt());
                                         return response;
                                     }
                             ).toList())
