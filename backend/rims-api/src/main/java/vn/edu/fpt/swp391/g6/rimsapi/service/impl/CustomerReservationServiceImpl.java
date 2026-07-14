@@ -84,40 +84,25 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
 
     @Override
     @Transactional
-    public CustomerReservationResponse cancelCurrentReservation(Integer userId) {
+    public CustomerReservationResponse cancelReservation(Integer userId, Long reservationId) {
 
-        // 1. Kiểm tra user tồn tại
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId);
         }
 
-        // 2. Tìm đặt bàn hiện tại của user
         List<Reservation> currentReservations = reservationRepository.findCurrentReservationsByUser(userId);
 
         if (currentReservations.isEmpty()) {
             throw new ResourceNotFoundException("Bạn không có đặt bàn nào đang hoạt động để hủy.");
         }
 
-        // Lấy đặt bàn gần nhất
-        Reservation reservation = currentReservations.get(0);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt bàn với ID: " + reservationId));
 
-        // 3. Kiểm tra trạng thái - không cho hủy nếu đã COMPLETED
-        if (reservation.getStatus() == ReservationStatus.COMPLETED) {
-            throw new BusinessException("Không thể hủy đặt bàn đã hoàn thành.");
-        }
-
-
-        RestaurantTable table = reservation.getTable();
-        if (table.getStatus() == TableStatus.RESERVED) {
-            table.setStatus(TableStatus.AVAILABLE);
-            tableRepository.save(table);
-        }
-
-        // 6. Cập nhật trạng thái reservation thành CANCELLED
         reservation.setStatus(ReservationStatus.CANCELLED);
-        Reservation cancelledReservation = reservationRepository.save(reservation);
+        reservationRepository.save(reservation);
 
-        return convertToCustomerResponse(cancelledReservation);
+        return convertToCustomerResponse(reservation);
     }
 
     @Override
