@@ -1,5 +1,3 @@
-// src/main/java/vn/edu/fpt/swp391/g6/rimsapi/controller/CustomerController.java
-
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import jakarta.validation.Valid;
@@ -9,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCancelReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.ChangePasswordRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
@@ -22,6 +19,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerReservationService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
+
 import java.util.List;
 
 @RestController
@@ -92,14 +90,24 @@ public class CustomerController {
     }
 
     /**
-     * Hủy đặt bàn - Hủy theo userId (tự động tìm đặt bàn hiện tại của user)
-     * DELETE /rims/customer/reservations/cancel
+     * Hủy đặt bàn - Nhận reservationId từ path variable
+     * DELETE /rims/customer/reservations/{reservationId}/cancel
+     *
+     * Không dùng @RequestBody cho DELETE nữa: nhiều client (axios .delete(), một số
+     * proxy/gateway) không gửi body kèm request DELETE theo mặc định, dẫn tới lỗi
+     * "Required request body is missing" dù backend code không sai gì. Path variable
+     * không có khái niệm "quên gửi" — nếu thiếu, Spring trả 404 (không khớp route)
+     * thay vì 400 mơ hồ như cũ.
      */
-    @DeleteMapping("/reservations/cancel")
+    @DeleteMapping("/reservations/{reservationId}/cancel")
     public ResponseEntity<CustomerReservationResponse> cancelReservation(
-            @AuthenticationPrincipal UserPrincipal principal) {
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long reservationId) {
 
-        CustomerReservationResponse response = customerReservationService.cancelCurrentReservation(principal.getId());
+        CustomerReservationResponse response = customerReservationService.cancelReservation(
+                principal.getId(),
+                reservationId
+        );
         return ResponseEntity.ok(response);
     }
 
