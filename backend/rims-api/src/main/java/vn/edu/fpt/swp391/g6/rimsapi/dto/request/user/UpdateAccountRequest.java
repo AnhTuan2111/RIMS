@@ -35,8 +35,6 @@ public class UpdateAccountRequest
             regexp = "^0[0-9]{9}$",
             message = "Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số"
     )
-    @NotBlank
-    @Pattern(regexp = "^0[0-9]{9}$")
     private String phone;
 
     private RoleType role;

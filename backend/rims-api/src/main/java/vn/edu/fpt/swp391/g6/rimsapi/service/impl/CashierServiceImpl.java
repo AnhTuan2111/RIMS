@@ -17,10 +17,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.*;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 
 import java.math.BigDecimal;
@@ -41,6 +38,7 @@ public class CashierServiceImpl implements CashierService {
     private final InvoiceRepository invoiceRepository;
     private final VNPayConfig vnpayConfig;
     private final UserRepository userRepository;
+    private final ReservationRepository reservationRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -143,7 +141,7 @@ public class CashierServiceImpl implements CashierService {
     @Override
     @Transactional
     public PaymentResponse completeCashPayment(Long orderId, PaymentRequest request) {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findOrderWithDetailsById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
         if (order.getStatus() != OrderStatus.LOCKED) {
@@ -185,7 +183,13 @@ public class CashierServiceImpl implements CashierService {
 
         if (order.getTable() != null) {
             RestaurantTable table = order.getTable();
-            table.setStatus(TableStatus.AVAILABLE);
+            boolean hasUpcomingReservation = reservationRepository
+                    .findFirstByTableAndStatusInAndReservationTimeAfterOrderByReservationTimeAsc(
+                            table,
+                            List.of(ReservationStatus.WAITING, ReservationStatus.QUEUED),
+                            LocalDateTime.now()
+                    ).isPresent();
+            table.setStatus(hasUpcomingReservation ? TableStatus.RESERVED : TableStatus.AVAILABLE);
             tableRepository.save(table);
         }
 
@@ -252,7 +256,7 @@ public class CashierServiceImpl implements CashierService {
     @Transactional
     public VNPayResponse createVNPayPaymentUrl(Long orderId, Integer customerId, Integer pointsUsed)
     {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findOrderWithDetailsById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
         if (order.getStatus() != OrderStatus.SERVING && order.getStatus() != OrderStatus.LOCKED)
@@ -373,7 +377,7 @@ public class CashierServiceImpl implements CashierService {
         String[] parts = vnpTxnRef.split("_");
         Long orderId = Long.parseLong(parts[1]);
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findOrderWithDetailsById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng từ VNPay"));
 
         if (order.getStatus() == OrderStatus.COMPLETED)
@@ -416,7 +420,13 @@ public class CashierServiceImpl implements CashierService {
         if (order.getTable() != null)
         {
             RestaurantTable table = order.getTable();
-            table.setStatus(TableStatus.AVAILABLE);
+            boolean hasUpcomingReservation = reservationRepository
+                    .findFirstByTableAndStatusInAndReservationTimeAfterOrderByReservationTimeAsc(
+                            table,
+                            List.of(ReservationStatus.WAITING, ReservationStatus.QUEUED),
+                            LocalDateTime.now()
+                    ).isPresent();
+            table.setStatus(hasUpcomingReservation ? TableStatus.RESERVED : TableStatus.AVAILABLE);
             tableRepository.save(table);
         }
 

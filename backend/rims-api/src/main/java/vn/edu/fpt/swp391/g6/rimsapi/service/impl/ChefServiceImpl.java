@@ -26,6 +26,9 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderItemRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
+import java.math.BigDecimal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -36,6 +39,7 @@ public class ChefServiceImpl implements ChefService {
     private final OrderItemRepository orderItemRepository;
     private final DishRepository dishRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final OrderRepository orderRepository;
 
     @Override
     public List<KitchenOrderResponse> getKitchenOrders() {
@@ -287,6 +291,7 @@ public class ChefServiceImpl implements ChefService {
         );
 
         orderItemRepository.save(selectedItem);
+        recalculateOrderTotal(selectedItem.getOrder());
     }
 
     @Override
@@ -605,7 +610,23 @@ public class ChefServiceImpl implements ChefService {
             orderItemRepository.saveAll(
                     preparingItemsOfDish
             );
+            Set<Order> affectedOrders = preparingItemsOfDish.stream()
+                    .map(OrderItem::getOrder)
+                    .collect(Collectors.toSet());
+            for (Order order : affectedOrders) {
+                recalculateOrderTotal(order);
+            }
         }
+    }
+
+    private void recalculateOrderTotal(Order order) {
+        BigDecimal total = order.getOrderItems().stream()
+                .filter(item -> item.getStatus() != OrderItemStatus.CANCELLED)
+                .map(OrderItem::getSubTotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        order.setTotalAmount(total);
+        orderRepository.save(order);
     }
 
     private OrderItem findOrderItem(

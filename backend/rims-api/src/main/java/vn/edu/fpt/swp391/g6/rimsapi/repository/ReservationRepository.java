@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Reservation;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 
 import java.time.LocalDate;
@@ -22,6 +23,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>
             LocalDateTime end);
 
     Optional<Reservation> findFirstByTableIdAndStatus(int tableId, ReservationStatus status);
+
+    Optional<Reservation> findFirstByTableAndStatusInAndReservationTimeAfterOrderByReservationTimeAsc(
+            RestaurantTable table,
+            List<ReservationStatus> statuses,
+            LocalDateTime after
+    );
 
 
     // Lấy các reservation QUEUED sắp tới trong vòng 30 phút (để chuyển sang WAITING)

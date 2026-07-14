@@ -233,7 +233,7 @@ public class UserServiceImpl implements UserService {
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setPasswordHash(passwordEncoder.encode(DEFAULT_PASSWORD));
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setActive(true);
 
         User saved = userRepository.save(user);

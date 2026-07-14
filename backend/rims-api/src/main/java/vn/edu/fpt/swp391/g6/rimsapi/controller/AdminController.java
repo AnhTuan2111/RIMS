@@ -24,8 +24,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.service.TableService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -44,7 +43,7 @@ public class AdminController
     private final CategoryService categoryService;
     private final RevenueReportService revenueReportService;
     private final DashboardService dashboardService;
-    private final RestaurantTableRepository restaurantTableRepository;
+    private final TableService tableService;
 
     // =================== USER / ACCOUNT ===================
 
@@ -397,17 +396,6 @@ public class AdminController
     @GetMapping("/tables")
     public ResponseEntity<List<TableDetailResponse>> getAllTables()
     {
-        List<RestaurantTable> tables = restaurantTableRepository.findAll();
-        List<TableDetailResponse> responses = new ArrayList<>();
-        for (RestaurantTable t : tables)
-        {
-            responses.add(TableDetailResponse.builder()
-                    .tableId(t.getId())
-                    .tableNumber(t.getTableNumber())
-                    .capacity(t.getCapacity())
-                    .status(t.getStatus())
-                    .build());
-        }
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(tableService.getAllTables());
     }
 }
