@@ -53,6 +53,12 @@ public class Order
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "pending_customer_id")
+    private Integer pendingCustomerId;
+
+    @Column(name = "pending_points_used")
+    private Integer pendingPointsUsed;
+
     // Thêm món vào đơn hàng và tự động thiết lập liên kết ngược lại ở phía OrderItem
     public void addOrderItem(OrderItem orderItem)
     {

@@ -125,4 +125,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
     Optional<Invoice> findWithOrderAndItemsById(Long id);
 
     List<Invoice> findByRestaurantRevenueAmountIsNull();
+
+    List<Invoice> findByInvoiceDateBetween(LocalDateTime start, LocalDateTime end);
 }

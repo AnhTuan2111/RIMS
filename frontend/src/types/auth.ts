@@ -59,6 +59,7 @@ export interface UserResponse {
     fullName: string
     email: string | null
     phone: string
+    rewardPoints: number
     role: RoleType
     isActive: boolean
     createdAt: string

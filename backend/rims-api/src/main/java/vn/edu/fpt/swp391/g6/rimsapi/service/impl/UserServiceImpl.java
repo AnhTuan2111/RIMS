@@ -304,6 +304,7 @@ public class UserServiceImpl implements UserService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
+                .rewardPoints(user.getRewardPoints())
                 .role(user.getRole())
                 .isActive(user.isActive())
                 .rewardPoints(user.getRewardPoints())
