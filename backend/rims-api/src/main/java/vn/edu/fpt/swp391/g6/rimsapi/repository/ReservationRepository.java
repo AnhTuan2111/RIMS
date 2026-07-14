@@ -40,8 +40,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>
     // Kiểm tra số điện thoại đã đặt bàn trong ngày chưa
     boolean existsByPhoneAndReservationTimeBetween(String phone, LocalDateTime start, LocalDateTime end);
 
-    // Kiểm tra bàn đã được đặt trong khoảng thời gian chưa
-    boolean existsByTableIdAndReservationTimeBetween(Integer tableId, LocalDateTime start, LocalDateTime end);
+    // Lấy các reservation còn "sống" (chưa CANCELLED/COMPLETED) của 1 bàn để service tự tính overlap
+    // Tính existingEnd = reservationTime + duration + buffer ở tầng Java để không phụ thuộc cú pháp
+    // DATE_ADD/DATEADD riêng của từng loại DB (MySQL vs SQL Server khác nhau)
+    @Query("SELECT r FROM Reservation r WHERE r.table.id = :tableId AND r.status NOT IN ('CANCELLED', 'COMPLETED')")
+    List<Reservation> findActiveReservationsByTableId(@Param("tableId") Integer tableId);
+
+    // Tìm reservation QUEUED cho 1 bàn cụ thể, sắp theo thời gian tạo (ai đặt trước được ưu tiên)
+    List<Reservation> findByTableIdAndStatusOrderByCreatedAtAsc(Integer tableId, ReservationStatus status);
 
     // Tìm reservation theo phone và ngày
     Optional<Reservation> findByPhoneAndReservationTimeBetween(String phone, LocalDateTime start, LocalDateTime end);

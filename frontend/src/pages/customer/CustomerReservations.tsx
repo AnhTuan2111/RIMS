@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
     createReservation,
-    cancelCurrentReservation,
+    cancelReservation,  // ✅ Đổi tên import
     getCurrentReservation,
     checkReservationByDate,
     getAvailableTables,
@@ -134,7 +134,11 @@ export default function CustomerReservations() {
         setCancelLoading(true)
 
         try {
-            const result = await cancelCurrentReservation()
+            // ✅ Lấy reservationId từ currentReservation và gọi cancelReservation
+            if (!currentReservation) {
+                throw new Error('Không có đặt bàn để hủy')
+            }
+            const result = await cancelReservation(currentReservation.id)
             setCancelSuccess(result)
             setCurrentReservation(null)
             await loadAvailableTables()
@@ -159,10 +163,10 @@ export default function CustomerReservations() {
         })
     }
 
+    // ✅ Sửa statusLabels để match với enum backend (không có CONFIRMED)
     const statusLabels: Record<string, string> = {
         QUEUED: 'Đang chờ',
         WAITING: 'Chờ xác nhận',
-        CONFIRMED: 'Đã xác nhận',
         COMPLETED: 'Đã hoàn thành',
         CANCELLED: 'Đã hủy',
     }
