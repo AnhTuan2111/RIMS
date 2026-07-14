@@ -470,8 +470,7 @@ public class RevenueReportServiceImpl implements RevenueReportService
 
         if (toDate.isAfter(today))
         {
-            toDate =
-                    today;
+            toDate = today;
         }
 
         if (fromDate.isAfter(toDate))
@@ -517,7 +516,7 @@ public class RevenueReportServiceImpl implements RevenueReportService
             {
                 orderCountByShift.compute(
                         shift,
-                        (key, value) -> value == null ? 1L : value + 1
+                        (key, value) -> value + 1L
                 );
             }
         }
