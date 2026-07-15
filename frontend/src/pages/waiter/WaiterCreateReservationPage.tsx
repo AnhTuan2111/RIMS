@@ -65,12 +65,6 @@ export default function WaiterCreateReservationPage() {
             return;
         }
 
-        const table = tables.find((t) => t.tableId === tableId);
-        if (table && table.status === "SERVING") {
-            setResFormError("Không thể đặt bàn đang phục vụ.");
-            return;
-        }
-
         // Build ISO LocalDateTime string: "2026-07-07T18:00:00"
         const reservationTime = `${date}T${time}:00`;
         const payload: CreateReservationRequest = {

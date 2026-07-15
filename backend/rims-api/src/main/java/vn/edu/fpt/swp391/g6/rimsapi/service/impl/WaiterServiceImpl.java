@@ -387,7 +387,16 @@ public class WaiterServiceImpl implements WaiterService
 
         List<Reservation> existingReservations = reservationRepository.findByTableIdAndReservationTimeBetween(request.getTableId(), start, end);
 
-        if (conflictValidator.hasConflict(existingReservations, request.getReservationTime(), null)) {
+        LocalDateTime servingOrderCreatedAt = null;
+        if (table.getStatus() == TableStatus.SERVING)
+        {
+            servingOrderCreatedAt = orderRepository.findServingOrdersWithDetails(table.getId())
+                    .stream().findFirst()
+                    .map(Order::getCreatedAt)
+                    .orElse(null);
+        }
+
+        if (conflictValidator.hasConflict(existingReservations, request.getReservationTime(), null, servingOrderCreatedAt)) {
             throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
         }
 
@@ -477,7 +486,16 @@ public class WaiterServiceImpl implements WaiterService
         List<Reservation> existingReservations = reservationRepository.findByTableIdAndReservationTimeBetween(
                 request.getTableId(), start, end);
 
-        if (conflictValidator.hasConflict(existingReservations, request.getReservationTime(), reservationId)) {
+        LocalDateTime servingOrderCreatedAt = null;
+        if (table.getStatus() == TableStatus.SERVING)
+        {
+            servingOrderCreatedAt = orderRepository.findServingOrdersWithDetails(table.getId())
+                    .stream().findFirst()
+                    .map(Order::getCreatedAt)
+                    .orElse(null);
+        }
+
+        if (conflictValidator.hasConflict(existingReservations, request.getReservationTime(), reservationId, servingOrderCreatedAt)) {
             throw new IllegalArgumentException("Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
         }
 
