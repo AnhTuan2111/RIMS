@@ -8,6 +8,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.VNPayResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.CashierInvoiceDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.PagedInvoiceResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 
 import java.util.List;
@@ -39,4 +40,10 @@ public interface CashierService
     PagedInvoiceResponse getTodayInvoices(String tableNumber, String keyword, String paymentMethod, String invoiceCode, int page, int size);
 
     CashierInvoiceDetailResponse getInvoiceDetailForCashier(Long invoiceId);
+
+    /**
+     * Lấy Invoice kèm đầy đủ thông tin Order, OrderItems và Table để xuất PDF.
+     * Sử dụng EntityGraph eager-fetch để tránh N+1 query.
+     */
+    Invoice getInvoiceWithDetails(Long invoiceId);
 }

@@ -10,7 +10,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 
 import java.time.LocalDateTime;
 

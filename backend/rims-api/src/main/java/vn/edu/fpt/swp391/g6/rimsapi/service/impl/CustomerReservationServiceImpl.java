@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Reservation;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
@@ -152,5 +154,18 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
         }
 
         return builder.build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RestaurantTableResponse> getAvailableTables() {
+        return tableRepository.findByStatus(TableStatus.AVAILABLE).stream()
+                .map(t -> RestaurantTableResponse.builder()
+                        .id(t.getId())
+                        .tableNumber(t.getTableNumber())
+                        .capacity(t.getCapacity())
+                        .status(t.getStatus().name())
+                        .build())
+                .toList();
     }
 }

@@ -20,14 +20,12 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.*;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.service.TableService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -44,7 +42,7 @@ public class AdminController
     private final RevenueReportService revenueReportService;
     private final DashboardService dashboardService;
     private final TableService tableService;
-
+    
     // =================== USER / ACCOUNT ===================
 
     @GetMapping("/user/all")
@@ -129,27 +127,18 @@ public class AdminController
 
     @GetMapping("/invoice/history")
     public InvoiceHistoryPageResponse getInvoiceHistory(
-            @RequestParam(
-                    defaultValue = "1"
-            )
-            int page,
+            @RequestParam(defaultValue = "1") int page,
 
-            @RequestParam(
-                    defaultValue = "10"
-            )
-            int pageSize
-    )
+            @RequestParam(defaultValue = "10") int pageSize)
     {
         return invoiceService.getInvoiceHistory(
                 page,
-                pageSize
-        );
+                pageSize);
     }
 
     @GetMapping("/invoice/{invoiceId}")
     public InvoiceDetailResponse getInvoiceDetail(
-            @PathVariable Long invoiceId
-    )
+            @PathVariable Long invoiceId)
     {
         return invoiceService.getInvoiceDetail(invoiceId);
     }
@@ -176,21 +165,13 @@ public class AdminController
 
     @GetMapping("/revenue/daily")
     public WeeklyRevenueChartResponse getDailyRevenue(
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
 
-            @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE)
-            LocalDate toDate
-    )
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate)
     {
         return revenueReportService.getDailyRevenue(
                 fromDate,
-                toDate
-        );
+                toDate);
     }
 
     @GetMapping("/revenue/monthly")
@@ -215,78 +196,40 @@ public class AdminController
 
     @GetMapping("/revenue/best-selling")
     public BestSellingReportResponse getBestSellingReport(
-            @RequestParam(
-                    defaultValue = "WEEK"
-            )
-            String period,
+            @RequestParam(defaultValue = "WEEK") String period,
 
-            @RequestParam(
-                    required = false
-            )
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
-            LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
 
-            @RequestParam(
-                    required = false
-            )
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
-            LocalDate toDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
 
-            @RequestParam(
-                    required = false
-            )
-            Integer categoryId
-    )
+            @RequestParam(required = false) Integer categoryId)
     {
         if (fromDate != null && toDate != null)
         {
             return revenueReportService.getBestSellingReport(
                     fromDate,
                     toDate,
-                    categoryId
-            );
+                    categoryId);
         }
         return revenueReportService.getBestSellingReport(
                 period,
-                categoryId
-        );
+                categoryId);
     }
 
     @GetMapping("/revenue/order-shifts")
     public OrderShiftReportResponse getOrderShiftReport(
-            @RequestParam(
-                    defaultValue = "WEEK"
-            )
-            String period,
+            @RequestParam(defaultValue = "WEEK") String period,
 
-            @RequestParam(
-                    required = false
-            )
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
-            LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
 
-            @RequestParam(
-                    required = false
-            )
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
-            LocalDate toDate
-    )
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate)
     {
         if (fromDate != null && toDate != null)
         {
             return revenueReportService
                     .getOrderShiftReport(
                             fromDate,
-                            toDate
-                    );
+                            toDate);
         }
 
         return revenueReportService
@@ -386,6 +329,7 @@ public class AdminController
         dishService.deleteDish(id);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/menu")
     public ResponseEntity<MenuDashboardResponse> getMenuDashboard()
     {

@@ -2,7 +2,6 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
@@ -14,7 +13,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
 
@@ -30,7 +28,6 @@ public class CashierController
 
     private final CashierService cashierService;
     private final InvoicePdfService invoicePdfService;
-    private final InvoiceRepository invoiceRepository;
 
     // API 1 xem danh sách 12 bàn
     @GetMapping("/tables")
@@ -88,11 +85,9 @@ public class CashierController
 
     //API 7 xuất file PDF
     @GetMapping("/invoices/{invoiceId}/pdf")
-    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId)
     {
-        Invoice invoice = invoiceRepository.findWithOrderAndItemsById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+        Invoice invoice = cashierService.getInvoiceWithDetails(invoiceId);
 
         byte[] pdfBytes = invoicePdfService.generateInvoicePdf(invoice);
 

@@ -11,14 +11,11 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReserv
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.ChangePasswordRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerReservationService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
 
 import java.util.List;
 
@@ -30,7 +27,6 @@ public class CustomerController {
 
     private final UserService userService;
     private final CustomerReservationService customerReservationService;
-    private final RestaurantTableRepository tableRepository;
 
     // ========== Profile Management ==========
     @GetMapping("/profile")
@@ -57,15 +53,7 @@ public class CustomerController {
     @GetMapping("/tables/available")
     public ResponseEntity<List<RestaurantTableResponse>> getAvailableTables() {
         try {
-            List<RestaurantTable> availableTables = tableRepository.findByStatus(TableStatus.AVAILABLE);
-            List<RestaurantTableResponse> response = availableTables.stream()
-                    .map(t -> RestaurantTableResponse.builder()
-                            .id(t.getId())
-                            .tableNumber(t.getTableNumber())
-                            .capacity(t.getCapacity())
-                            .status(t.getStatus().name())
-                            .build())
-                    .toList();
+            List<RestaurantTableResponse> response = customerReservationService.getAvailableTables();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error getting available tables: ", e);
