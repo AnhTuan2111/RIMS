@@ -11,7 +11,7 @@ public enum OrderShift
             "MORNING",
             "Ca sáng",
             LocalTime.of(8, 0),
-            LocalTime.of(11, 59),
+            LocalTime.of(10, 59),
             "08:00",
             "10:59"
     ),

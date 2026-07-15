@@ -486,8 +486,9 @@ public class DatabaseSeeder implements CommandLineRunner
                         invoice.getOrder().getTotalAmount().setScale(0, RoundingMode.HALF_UP);
             } else
             {
-                restaurantRevenueAmount =
-                        Invoice.calculateRestaurantRevenueAmount(invoice.getFinalAmount());
+                // Tự chia trực tiếp inline để làm dữ liệu mẫu (thay vì gọi hàm đã xóa bên Invoice)
+                restaurantRevenueAmount = invoice.getFinalAmount()
+                        .divide(new BigDecimal("1.10"), 0, RoundingMode.HALF_UP);
             }
 
             invoice.setRestaurantRevenueAmount(restaurantRevenueAmount);
