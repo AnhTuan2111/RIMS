@@ -623,4 +623,11 @@ public class CashierServiceImpl implements CashierService {
                 .pointsEarned(invoice.getPointsEarnedOnInvoice())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Invoice getInvoiceWithDetails(Long invoiceId) {
+        return invoiceRepository.findWithOrderAndItemsById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + invoiceId));
+    }
 }

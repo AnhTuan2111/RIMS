@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 
 
 @Data

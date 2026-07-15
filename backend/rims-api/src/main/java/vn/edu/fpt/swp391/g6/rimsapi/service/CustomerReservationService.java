@@ -4,6 +4,9 @@ package vn.edu.fpt.swp391.g6.rimsapi.service;
 
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
+
+import java.util.List;
 
 public interface CustomerReservationService {
 
@@ -27,4 +30,9 @@ public interface CustomerReservationService {
      * Lấy đặt bàn hiện tại của customer
      */
     CustomerReservationResponse getCurrentReservationByUser(Integer userId);
+
+    /**
+     * Lấy danh sách bàn còn trống để customer chọn khi đặt bàn
+     */
+    List<RestaurantTableResponse> getAvailableTables();
 }

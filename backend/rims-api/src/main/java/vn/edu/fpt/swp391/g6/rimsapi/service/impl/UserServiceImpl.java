@@ -17,8 +17,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
-import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.DuplicateResourceException;
-import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.PasswordMismatchException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.spec.UserSpecifications;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
