@@ -21,9 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Invoice
-{
-    private static final BigDecimal VAT_INCLUSIVE_MULTIPLIER = new BigDecimal("1.10");
+public class Invoice {
     private static final int VND_SCALE = 0;
 
     @Id
@@ -58,27 +56,11 @@ public class Invoice
     @Column(name = "points_earned_on_invoice")
     private Integer pointsEarnedOnInvoice;
 
-    @PrePersist
-    private void fillRestaurantRevenueAmount()
-    {
-        if (restaurantRevenueAmount == null && finalAmount != null)
-        {
-            restaurantRevenueAmount = calculateRestaurantRevenueAmount(finalAmount);
+    // Hàm mới: Tính doanh thu thực tế bằng cách trừ thẳng tiền VAT
+    public void calculateAndSetRevenue(BigDecimal vatAmount) {
+        if (this.finalAmount != null && vatAmount != null) {
+            this.restaurantRevenueAmount = this.finalAmount.subtract(vatAmount);
         }
-    }
-
-    public static BigDecimal calculateRestaurantRevenueAmount(BigDecimal finalAmount)
-    {
-        if (finalAmount == null)
-        {
-            return BigDecimal.ZERO.setScale(VND_SCALE, RoundingMode.HALF_UP);
-        }
-
-        return finalAmount.divide(
-                VAT_INCLUSIVE_MULTIPLIER,
-                VND_SCALE,
-                RoundingMode.HALF_UP
-        );
     }
 
     // Thiết lập đơn hàng cho hóa đơn này và đồng bộ hóa liên kết ngược lại từ đơn hàng về hóa đơn
@@ -91,7 +73,7 @@ public class Invoice
         }
     }
 
-    // Thêm thanh toán vào hóa đơn và tự động thiết lập liên kết ngược lại ở phía P     ayment
+    // Thêm thanh toán vào hóa đơn và tự động thiết lập liên kết ngược lại ở phía Payment
     public void addPayment(Payment payment)
     {
         if (this.payments == null)
