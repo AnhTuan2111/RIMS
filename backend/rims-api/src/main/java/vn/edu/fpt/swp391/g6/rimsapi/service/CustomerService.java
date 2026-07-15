@@ -8,7 +8,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResp
 
 import java.util.List;
 
-public interface CustomerReservationService {
+public interface CustomerService
+{
 
     /**
      * Customer đặt bàn - 1 user chỉ đặt 1 bàn

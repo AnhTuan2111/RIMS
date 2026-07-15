@@ -23,7 +23,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.service.*;
+import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,13 +37,7 @@ public class AdminController
 {
 
     private final UserService userService;
-    private final DishService dishService;
-    private final InvoiceService invoiceService;
-    private final CategoryService categoryService;
-    private final RevenueReportService revenueReportService;
-    private final DashboardService dashboardService;
-    private final TableService tableService;
-    
+    private final AdminService adminService;
     // =================== USER / ACCOUNT ===================
 
     @GetMapping("/user/all")
@@ -131,7 +126,7 @@ public class AdminController
 
             @RequestParam(defaultValue = "10") int pageSize)
     {
-        return invoiceService.getInvoiceHistory(
+        return adminService.getInvoiceHistory(
                 page,
                 pageSize);
     }
@@ -140,7 +135,7 @@ public class AdminController
     public InvoiceDetailResponse getInvoiceDetail(
             @PathVariable Long invoiceId)
     {
-        return invoiceService.getInvoiceDetail(invoiceId);
+        return adminService.getInvoiceDetail(invoiceId);
     }
 
     // =================== REVENUE ===================
@@ -148,19 +143,19 @@ public class AdminController
     @GetMapping("/revenue/total")
     public RevenueReportResponse getTotalRevenue()
     {
-        return revenueReportService.getTotalRevenue();
+        return adminService.getTotalRevenue();
     }
 
     @GetMapping("/revenue/today")
     public RevenueReportResponse getTodayRevenue()
     {
-        return revenueReportService.getTodayRevenue();
+        return adminService.getTodayRevenue();
     }
 
     @GetMapping("/revenue/weekly")
     public RevenueReportResponse getWeeklyRevenue()
     {
-        return revenueReportService.getWeeklyRevenue();
+        return adminService.getWeeklyRevenue();
     }
 
     @GetMapping("/revenue/daily")
@@ -169,7 +164,7 @@ public class AdminController
 
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate)
     {
-        return revenueReportService.getDailyRevenue(
+        return adminService.getDailyRevenue(
                 fromDate,
                 toDate);
     }
@@ -177,13 +172,13 @@ public class AdminController
     @GetMapping("/revenue/monthly")
     public RevenueReportResponse getMonthlyRevenue()
     {
-        return revenueReportService.getMonthlyRevenue();
+        return adminService.getMonthlyRevenue();
     }
 
     @GetMapping("/revenue/yearly")
     public RevenueReportResponse getYearlyRevenue()
     {
-        return revenueReportService.getYearlyRevenue();
+        return adminService.getYearlyRevenue();
     }
 
     @GetMapping("/revenue/custom")
@@ -191,7 +186,7 @@ public class AdminController
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate)
     {
-        return revenueReportService.getRevenueBetween(fromDate, toDate);
+        return adminService.getRevenueBetween(fromDate, toDate);
     }
 
     @GetMapping("/revenue/best-selling")
@@ -206,12 +201,12 @@ public class AdminController
     {
         if (fromDate != null && toDate != null)
         {
-            return revenueReportService.getBestSellingReport(
+            return adminService.getBestSellingReport(
                     fromDate,
                     toDate,
                     categoryId);
         }
-        return revenueReportService.getBestSellingReport(
+        return adminService.getBestSellingReport(
                 period,
                 categoryId);
     }
@@ -226,39 +221,39 @@ public class AdminController
     {
         if (fromDate != null && toDate != null)
         {
-            return revenueReportService
+            return adminService
                     .getOrderShiftReport(
                             fromDate,
                             toDate);
         }
 
-        return revenueReportService
+        return adminService
                 .getOrderShiftReport(period);
     }
 
     @GetMapping("/category/all")
     public ResponseEntity<List<CategoryResponse>> getAllCategories()
     {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+        return ResponseEntity.ok(adminService.getAllCategories());
     }
 
     @GetMapping("/category/available")
     public ResponseEntity<List<CategoryResponse>> getAvailableCategories()
     {
-        return ResponseEntity.ok(categoryService.getAvailableCategories());
+        return ResponseEntity.ok(adminService.getAvailableCategories());
     }
 
     @GetMapping("/category/{id}")
     public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Integer id)
     {
-        return ResponseEntity.ok(categoryService.getCategoryById(id));
+        return ResponseEntity.ok(adminService.getCategoryById(id));
     }
 
     @PostMapping("/category/new")
     public ResponseEntity<CategoryResponse> createCategory(
             @RequestBody @Valid CreateCategoryRequest createCategoryRequest)
     {
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(createCategoryRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createCategory(createCategoryRequest));
     }
 
     @PutMapping("/category/{id}")
@@ -266,13 +261,13 @@ public class AdminController
             @PathVariable Integer id,
             @RequestBody @Valid UpdateCategoryRequest updateCategoryRequest)
     {
-        return ResponseEntity.ok(categoryService.updateCategory(id, updateCategoryRequest));
+        return ResponseEntity.ok(adminService.updateCategory(id, updateCategoryRequest));
     }
 
     @DeleteMapping("/category/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Integer id)
     {
-        categoryService.deleteCategory(id);
+        adminService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -281,38 +276,38 @@ public class AdminController
     @GetMapping("/dish/all")
     public ResponseEntity<List<DishResponse>> getAllDishes()
     {
-        return ResponseEntity.ok(dishService.getAllDishes());
+        return ResponseEntity.ok(adminService.getAllDishes());
     }
 
     @GetMapping("/dish/category/{categoryId}")
     public ResponseEntity<List<DishResponse>> getDishesByCategory(@PathVariable Integer categoryId)
     {
-        return ResponseEntity.ok(dishService.getDishesByCategory(categoryId));
+        return ResponseEntity.ok(adminService.getDishesByCategory(categoryId));
     }
 
     @GetMapping("/dish/available")
     public ResponseEntity<List<DishResponse>> getAvailableDishes()
     {
-        return ResponseEntity.ok(dishService.getAvailableDishes());
+        return ResponseEntity.ok(adminService.getAvailableDishes());
     }
 
     @GetMapping("/dish/search")
     public ResponseEntity<List<DishResponse>> searchDishes(@RequestParam(required = false) String keyword)
     {
-        return ResponseEntity.ok(dishService.searchDishes(keyword));
+        return ResponseEntity.ok(adminService.searchDishes(keyword));
     }
 
     @GetMapping("/dish/{id}")
     public ResponseEntity<DishResponse> getDishById(@PathVariable Integer id)
     {
-        return ResponseEntity.ok(dishService.getDishById(id));
+        return ResponseEntity.ok(adminService.getDishById(id));
     }
 
     @PostMapping("/dish/new")
     public ResponseEntity<DishResponse> createDish(
             @RequestBody @Valid CreateDishRequest createDishRequest)
     {
-        return ResponseEntity.status(HttpStatus.CREATED).body(dishService.createDish(createDishRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createDish(createDishRequest));
     }
 
     @PutMapping("/dish/update/{id}")
@@ -320,26 +315,26 @@ public class AdminController
             @PathVariable Integer id,
             @RequestBody @Valid UpdateDishRequest updateDishRequest)
     {
-        return ResponseEntity.ok(dishService.updateDish(id, updateDishRequest));
+        return ResponseEntity.ok(adminService.updateDish(id, updateDishRequest));
     }
 
     @DeleteMapping("/dish/delete/{id}")
     public ResponseEntity<Void> deleteDish(@PathVariable Integer id)
     {
-        dishService.deleteDish(id);
+        adminService.deleteDish(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/menu")
     public ResponseEntity<MenuDashboardResponse> getMenuDashboard()
     {
-        MenuDashboardResponse data = dashboardService.getMenuDashboardData();
+        MenuDashboardResponse data = adminService.getMenuDashboardData();
         return ResponseEntity.ok(data);
     }
 
     @GetMapping("/tables")
     public ResponseEntity<List<TableDetailResponse>> getAllTables()
     {
-        return ResponseEntity.ok(tableService.getAllTables());
+        return ResponseEntity.ok(adminService.getAllTables());
     }
 }

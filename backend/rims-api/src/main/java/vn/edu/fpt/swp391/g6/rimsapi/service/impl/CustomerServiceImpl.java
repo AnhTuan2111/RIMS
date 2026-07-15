@@ -9,15 +9,17 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReserv
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Reservation;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.ResourceNotFoundException;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.ReservationRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerReservationService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
 
 import java.time.LocalDate;
@@ -28,11 +30,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CustomerReservationServiceImpl implements CustomerReservationService {
+public class CustomerServiceImpl implements CustomerService
+{
 
     private final ReservationRepository reservationRepository;
     private final RestaurantTableRepository tableRepository;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
     private final ReservationConflictValidator conflictValidator;
 
     @Override
@@ -56,7 +60,16 @@ public class CustomerReservationServiceImpl implements CustomerReservationServic
         List<Reservation> existingReservations = reservationRepository
                 .findByTableIdAndReservationTimeBetween(request.getTableId(), start, end);
 
-        if (conflictValidator.hasConflict(existingReservations, request.getReservationTime(), null)) {
+        LocalDateTime servingOrderCreatedAt = null;
+        if (table.getStatus() == TableStatus.SERVING)
+        {
+            servingOrderCreatedAt = orderRepository.findServingOrdersWithDetails(table.getId())
+                    .stream().findFirst()
+                    .map(Order::getCreatedAt)
+                    .orElse(null);
+        }
+
+        if (conflictValidator.hasConflict(existingReservations, request.getReservationTime(), null, servingOrderCreatedAt)) {
             throw new IllegalArgumentException(
                     "Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
         }

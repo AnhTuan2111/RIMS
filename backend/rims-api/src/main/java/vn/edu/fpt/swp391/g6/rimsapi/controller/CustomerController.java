@@ -14,7 +14,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservation
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
-import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerReservationService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.List;
 public class CustomerController {
 
     private final UserService userService;
-    private final CustomerReservationService customerReservationService;
+    private final CustomerService customerService;
 
     // ========== Profile Management ==========
     @GetMapping("/profile")
@@ -53,7 +53,7 @@ public class CustomerController {
     @GetMapping("/tables/available")
     public ResponseEntity<List<RestaurantTableResponse>> getAvailableTables() {
         try {
-            List<RestaurantTableResponse> response = customerReservationService.getAvailableTables();
+            List<RestaurantTableResponse> response = customerService.getAvailableTables();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error getting available tables: ", e);
@@ -73,7 +73,7 @@ public class CustomerController {
             @RequestBody @Valid CustomerCreateReservationRequest request) {
 
         request.setUserId(principal.getId());
-        CustomerReservationResponse response = customerReservationService.createReservation(request);
+        CustomerReservationResponse response = customerService.createReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -92,7 +92,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long reservationId) {
 
-        CustomerReservationResponse response = customerReservationService.cancelReservation(
+        CustomerReservationResponse response = customerService.cancelReservation(
                 principal.getId(),
                 reservationId
         );
@@ -107,7 +107,7 @@ public class CustomerController {
     public ResponseEntity<CustomerReservationResponse> getCurrentReservation(
             @AuthenticationPrincipal UserPrincipal principal) {
 
-        CustomerReservationResponse response = customerReservationService.getCurrentReservationByUser(principal.getId());
+        CustomerReservationResponse response = customerService.getCurrentReservationByUser(principal.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -120,7 +120,7 @@ public class CustomerController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam String date) {
 
-        boolean exists = customerReservationService.checkCustomerReservationByUser(principal.getId(), date);
+        boolean exists = customerService.checkCustomerReservationByUser(principal.getId(), date);
         return ResponseEntity.ok(exists);
     }
 }
