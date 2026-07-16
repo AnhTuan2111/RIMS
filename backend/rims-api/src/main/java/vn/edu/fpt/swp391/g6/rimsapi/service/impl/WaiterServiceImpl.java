@@ -23,6 +23,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TableNotAvailableException;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
@@ -146,9 +148,7 @@ public class WaiterServiceImpl implements WaiterService
         table.setStatus(TableStatus.SERVING);
         restaurantTableRepository.save(table);
 
-        // BƯỚC MỚI: PHÁT LOA THÔNG BÁO CHO ĐẦU BẾP
-        // Gửi một tin nhắn đơn giản mang chữ "REFRESH" vào kênh của bếp
-        messagingTemplate.convertAndSend("/topic/kitchen", "REFRESH");
+        broadcastAfterCommit("/topic/kitchen", "REFRESH");
 
         // 7. Return response
         return CreateOrderResponse.builder()
@@ -292,7 +292,7 @@ public class WaiterServiceImpl implements WaiterService
         order.setTotalAmount(total);
         orderRepository.save(order);
 
-        messagingTemplate.convertAndSend("/topic/kitchen", "REFRESH");
+        broadcastAfterCommit("/topic/kitchen", "REFRESH");
 
         return UpdateOrderResponse.builder()
                 .orderId(order.getId())
@@ -312,6 +312,26 @@ public class WaiterServiceImpl implements WaiterService
             }
         }
         return null;
+    }
+
+    private void broadcastAfterCommit(String topic, Object payload)
+    {
+        if (TransactionSynchronizationManager.isSynchronizationActive())
+        {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization()
+            {
+                @Override
+                public void afterCommit()
+                {
+                    messagingTemplate.convertAndSend(topic, payload);
+                }
+            });
+        }
+        else
+        {
+            // Trường hợp hiếm: method được gọi ngoài transaction, vẫn gửi ngay để không mất tín hiệu
+            messagingTemplate.convertAndSend(topic, payload);
+        }
     }
 
     @Override
