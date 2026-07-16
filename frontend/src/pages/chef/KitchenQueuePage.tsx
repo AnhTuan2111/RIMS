@@ -1,3 +1,5 @@
+import SockJS from 'sockjs-client'
+import Stomp from 'stompjs'
 import {
     useCallback,
     useEffect,
@@ -298,18 +300,15 @@ export default function KitchenQueuePage() {
     )
 
     useEffect(() => {
-        fetchKitchenOrders(true, false).catch(
-            (requestError) => {
+        queueMicrotask(() => {
+            fetchKitchenOrders(true, false).catch((requestError) => {
                 console.error(requestError)
-            },
-        )
+            })
+        })
 
         const intervalId = window.setInterval(
             () => {
-                fetchKitchenOrders(
-                    false,
-                    false,
-                ).catch((requestError) => {
+                fetchKitchenOrders(false, false).catch((requestError) => {
                     console.error(requestError)
                 })
             },
@@ -319,25 +318,42 @@ export default function KitchenQueuePage() {
         return () => {
             window.clearInterval(intervalId)
 
-            if (
-                newOrderMessageTimerRef.current
-                !== null
-            ) {
-                window.clearTimeout(
-                    newOrderMessageTimerRef.current,
-                )
+            if (newOrderMessageTimerRef.current !== null) {
+                window.clearTimeout(newOrderMessageTimerRef.current)
             }
 
-            document.title =
-                originalDocumentTitleRef.current
+            document.title = originalDocumentTitleRef.current
 
-            audioContextRef.current
-                ?.close()
-                .catch((requestError) => {
-                    console.error(requestError)
-                })
+            audioContextRef.current?.close().catch((requestError) => {
+                console.error(requestError)
+            })
 
             audioContextRef.current = null
+        }
+    }, [fetchKitchenOrders])
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws-rims')
+        const client = Stomp.over(socket)
+
+        client.connect({}, () => {
+            console.log('Bếp đã kết nối WebSocket!')
+
+            client.subscribe('/topic/kitchen', () => {
+                fetchKitchenOrders(false, false).catch((requestError) => {
+                    console.error(requestError)
+                })
+            })
+        }, (error) => {
+            console.error('Lỗi kết nối WebSocket bếp: ', error)
+        })
+
+        return () => {
+            if (client !== null && client.connected) {
+                client.disconnect(() => {
+                    console.log('Đã ngắt kết nối WebSocket bếp.')
+                })
+            }
         }
     }, [fetchKitchenOrders])
 
