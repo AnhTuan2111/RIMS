@@ -43,6 +43,9 @@ public class Dish
     @Column(nullable = false)
     private boolean isAvailable = true;
 
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden = false;
+
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

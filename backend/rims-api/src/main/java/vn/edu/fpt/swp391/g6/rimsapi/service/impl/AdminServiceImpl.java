@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
@@ -49,6 +50,7 @@ public class AdminServiceImpl implements AdminService
     private final CategoryRepository categoryRepository; // line ~260
     private final InvoiceRepository invoiceRepository; // line ~470 (invoice) / line ~540 (revenue report)
     private final RestaurantTableRepository restaurantTableRepository; // line ~455 (table) / line ~410 (menu)
+    private final SimpMessagingTemplate messagingTemplate;
 
     // DISH SERVICE
 
@@ -159,6 +161,7 @@ public class AdminServiceImpl implements AdminService
             dish.setPrice(createDishRequest.getPrice());
             dish.setImageUrl(createDishRequest.getImageUrl());
             dish.setAvailable(createDishRequest.getIsAvailable() != null ? createDishRequest.getIsAvailable() : true);
+            dish.setHidden(createDishRequest.getIsHidden() != null ? createDishRequest.getIsHidden() : false);
             dish.setCategory(category);
 
             Dish savedDish = dishRepository.save(dish);
@@ -206,6 +209,14 @@ public class AdminServiceImpl implements AdminService
                 dish.setAvailable(updateDishRequest.getIsAvailable());
             }
 
+            boolean hiddenChanged = false;
+            if (updateDishRequest.getIsHidden() != null
+                    && !updateDishRequest.getIsHidden().equals(dish.isHidden()))
+            {
+                dish.setHidden(updateDishRequest.getIsHidden());
+                hiddenChanged = true;
+            }
+
             // Cập nhật category nếu có thay đổi
             if (updateDishRequest.getCategoryId() != null)
             {
@@ -215,6 +226,12 @@ public class AdminServiceImpl implements AdminService
             }
 
             Dish updatedDish = dishRepository.save(dish);
+
+            if (hiddenChanged)
+            {
+                broadcastMenuVisibilityChanged(updatedDish);
+            }
+
             return convertToResponse(updatedDish);
 
         } catch (EntityNotFoundException | IllegalArgumentException e)
@@ -240,16 +257,17 @@ public class AdminServiceImpl implements AdminService
 
             if (orderCount == 0)
             {
-                // TRƯỜNG HỢP 1: Món mới tạo, chưa từng nằm trong order_items -> Cho phép xóa hẳn khỏi DB
+                // Món mới tạo, chưa từng nằm trong order_items -> Cho phép xóa hẳn khỏi DB
                 dishRepository.delete(dish);
             } else
             {
-                // TRƯỜNG HỢP 2: Món đã từng được đặt -> Xóa mềm bằng cách ẩn khỏi thực đơn để giữ lịch sử
-                dish.setAvailable(false);
-                dishRepository.save(dish);
+                // Món đã từng được đặt -> Không cho xóa, bắt dùng "Tạm dừng" thay thế
+                throw new IllegalStateException(
+                        "Món ăn đã phát sinh đơn hàng, không thể xóa. Vui lòng dùng chức năng \"Tạm dừng\" để ẩn món khỏi menu."
+                );
             }
 
-        } catch (EntityNotFoundException e)
+        } catch (EntityNotFoundException | IllegalStateException e)
         {
             throw e;  // Ném lại để GlobalExceptionHandler xử lý
         } catch (Exception e)
@@ -840,6 +858,7 @@ public class AdminServiceImpl implements AdminService
         response.setDescription(dish.getDescription());
         response.setPrice(dish.getPrice());
         response.setIsAvailable(dish.isAvailable());
+        response.setIsHidden(dish.isHidden());
         response.setImageUrl(dish.getImageUrl());
         response.setCreatedAt(dish.getCreatedAt());
         response.setUpdatedAt(dish.getUpdatedAt());
@@ -936,6 +955,15 @@ public class AdminServiceImpl implements AdminService
             case SATURDAY -> "T7";
             case SUNDAY -> "CN";
         };
+    }
+    private void broadcastMenuVisibilityChanged(Dish dish)
+    {
+        String payload = String.format(
+                "{\"type\":\"MENU_VISIBILITY_CHANGED\",\"dishId\":%d,\"hidden\":%b}",
+                dish.getId(), dish.isHidden()
+        );
+        messagingTemplate.convertAndSend("/topic/waiter", payload);
+        messagingTemplate.convertAndSend("/topic/kitchen", payload);
     }
 
 }

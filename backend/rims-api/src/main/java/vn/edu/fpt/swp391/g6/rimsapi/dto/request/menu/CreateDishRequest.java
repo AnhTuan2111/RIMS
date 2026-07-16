@@ -25,6 +25,7 @@ public class CreateDishRequest
     private String imageUrl;
 
     private Boolean isAvailable = true;
+    private Boolean isHidden = false;
 
     @NotNull(message = "Vui lòng chọn danh mục món ăn")
     private Integer categoryId;
