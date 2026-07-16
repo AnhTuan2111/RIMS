@@ -26,6 +26,8 @@ public class UpdateDishRequest
     @NotNull(message = "Trạng thái không được để trống")
     private Boolean isAvailable;  // Có thể update trạng thái
 
+    private Boolean isHidden;
+
     @NotNull(message = "Vui lòng chọn danh mục món ăn")
     private Integer categoryId;  // Có thể chuyển danh mục
 }

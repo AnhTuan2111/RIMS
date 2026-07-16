@@ -334,10 +334,9 @@ public class WaiterServiceImpl implements WaiterService
         }
     }
 
-    @Override
     public List<MenuItemResponse> getMenu()
     {
-        return dishRepository.findByIsAvailableTrue().stream()
+        return dishRepository.findByIsAvailableTrueAndIsHiddenFalse().stream()
                 .map(dish -> MenuItemResponse.builder()
                         .dishId(dish.getId())
                         .name(dish.getName())

@@ -13,6 +13,7 @@ public class DishResponse
     private String description;
     private Integer price;
     private Boolean isAvailable;
+    private Boolean isHidden;
     private String imageUrl;
     private String categoryName;
     private Integer categoryId;
