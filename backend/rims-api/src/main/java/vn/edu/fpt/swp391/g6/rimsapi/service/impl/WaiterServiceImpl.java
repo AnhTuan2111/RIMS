@@ -334,9 +334,10 @@ public class WaiterServiceImpl implements WaiterService
         }
     }
 
+    @Override
     public List<MenuItemResponse> getMenu()
     {
-        return dishRepository.findByIsAvailableTrueAndIsHiddenFalse().stream()
+        return dishRepository.findByIsHiddenFalse().stream()
                 .map(dish -> MenuItemResponse.builder()
                         .dishId(dish.getId())
                         .name(dish.getName())
@@ -344,6 +345,7 @@ public class WaiterServiceImpl implements WaiterService
                         .price(dish.getPrice())
                         .imageUrl(dish.getImageUrl())
                         .categoryName(dish.getCategory().getName())
+                        .available(dish.isAvailable())
                         .build())
                 .toList();
     }

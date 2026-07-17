@@ -142,7 +142,7 @@ public class ChefServiceImpl implements ChefService {
 
     @Override
     public List<DishListResponse> getDishList() {
-        return dishRepository.findAll()
+        return dishRepository.findByIsHiddenFalse()
                 .stream()
                 .map(dish -> {
                     DishListResponse response =

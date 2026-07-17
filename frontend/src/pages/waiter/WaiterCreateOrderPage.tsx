@@ -114,40 +114,53 @@ export default function WaiterCreateOrderPage() {
                     {menu
                         .filter((dish) => activeCategory === "Tất cả" || dish.categoryName === activeCategory)
                         .map((dish) => {
-                        const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
-                        return (
-                            <div key={dish.dishId} className="waiter-menu-card">
-                                <div className="waiter-menu-card-top">
-                                    {dish.imageUrl ? (
-                                        <img src={dish.imageUrl} alt={dish.name} className="waiter-menu-img"/>
-                                    ) : (
-                                        <span className="waiter-menu-emoji">🍽️</span>
-                                    )}
-                                    <div className="waiter-menu-info">
-                                        <h4>{dish.name}</h4>
-                                        <p>{fmtPrice(dish.price)}</p>
+                            const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
+                            const isUnavailable = dish.available === false;
+                            return (
+                                <div
+                                    key={dish.dishId}
+                                    className="waiter-menu-card"
+                                    style={isUnavailable ? {opacity: 0.5} : undefined}
+                                >
+                                    <div className="waiter-menu-card-top">
+                                        {dish.imageUrl ? (
+                                            <img src={dish.imageUrl} alt={dish.name} className="waiter-menu-img"/>
+                                        ) : (
+                                            <span className="waiter-menu-emoji">🍽️</span>
+                                        )}
+                                        <div className="waiter-menu-info">
+                                            <h4>{dish.name}</h4>
+                                            <p>{fmtPrice(dish.price)}</p>
+                                            {isUnavailable && (
+                                                <span className="waiter-badge waiter-badge-cancelled">Tạm hết</span>
+                                            )}
+                                        </div>
                                     </div>
+                                    <div className="waiter-qty-controls">
+                                        <button
+                                            onClick={() => changeDraftQty(dish.dishId, -1)}
+                                            disabled={d.qty <= 0}
+                                            className="waiter-qty-btn"
+                                        >-
+                                        </button>
+                                        <span className="waiter-qty-val">{d.qty}</span>
+                                        <button
+                                            onClick={() => changeDraftQty(dish.dishId, 1)}
+                                            disabled={isUnavailable}
+                                            className="waiter-qty-btn"
+                                        >+
+                                        </button>
+                                    </div>
+                                    <input
+                                        placeholder="Ghi chú"
+                                        value={d.note}
+                                        onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
+                                        className="waiter-note-input"
+                                        disabled={isUnavailable}
+                                    />
                                 </div>
-                                <div className="waiter-qty-controls">
-                                    <button
-                                        onClick={() => changeDraftQty(dish.dishId, -1)}
-                                        disabled={d.qty <= 0}
-                                        className="waiter-qty-btn"
-                                    >-
-                                    </button>
-                                    <span className="waiter-qty-val">{d.qty}</span>
-                                    <button onClick={() => changeDraftQty(dish.dishId, 1)} className="waiter-qty-btn">+
-                                    </button>
-                                </div>
-                                <input
-                                    placeholder="Ghi chú"
-                                    value={d.note}
-                                    onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
-                                    className="waiter-note-input"
-                                />
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
                 </div>
             </main>
 

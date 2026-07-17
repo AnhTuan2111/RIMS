@@ -243,10 +243,12 @@ export default function WaiterUpdateOrderPage() {
                             const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
                             const minQty = getMinQty(dish.dishId);
                             const hasExisting = Boolean(d.status);
+                            const isUnavailable = dish.available === false;
                             return (
                                 <div
                                     key={dish.dishId}
                                     className="waiter-menu-card"
+                                    style={isUnavailable ? {opacity: 0.5} : undefined}
                                 >
                                     <div className="waiter-menu-card-top">
                                         {dish.imageUrl ? (
@@ -261,6 +263,9 @@ export default function WaiterUpdateOrderPage() {
                                                 <span className={`waiter-badge waiter-badge-${d.status.toLowerCase()}`}>
                                                 {d.status}
                                             </span>
+                                            )}
+                                            {isUnavailable && (
+                                                <span className="waiter-badge waiter-badge-cancelled">Tạm hết</span>
                                             )}
                                         </div>
                                     </div>
@@ -368,6 +373,7 @@ export default function WaiterUpdateOrderPage() {
                                         <span className="waiter-qty-val">{d.qty}</span>
                                         <button
                                             onClick={() => changeDraftQty(dish.dishId, 1)}
+                                            disabled={isUnavailable}
                                             className="waiter-qty-btn"
                                         >+
                                         </button>

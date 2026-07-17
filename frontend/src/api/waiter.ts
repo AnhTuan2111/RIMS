@@ -22,6 +22,7 @@ export type MenuItemResponse = {
     price: number;
     imageUrl: string;
     categoryName: string;
+    available: boolean;
 };
 
 export type OrderItemResponse = {
