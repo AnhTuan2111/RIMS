@@ -22,7 +22,6 @@ import java.util.List;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Invoice {
-    private static final int VND_SCALE = 0;
 
     @Id
     @Column(name = "invoice_id", nullable = false)

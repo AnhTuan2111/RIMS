@@ -36,11 +36,9 @@ export default function WaiterTableListPage() {
         client.connect({}, () => {
             console.log("Waiter đã kết nối đường dây với Bếp!");
 
-            client.subscribe('/topic/waiter', (message) => {
-                if (message.body === 'DISH_READY') {
-                    console.log("🔔 Có món đã nấu xong! Đang cập nhật lại bàn...");
-                    loadTables();
-                }
+            client.subscribe('/topic/waiter', () => {
+                console.log("🔔 Có cập nhật! Đang làm mới lại bàn...");
+                loadTables();
             });
         }, (error) => {
             console.error("Lỗi mất kết nối với Bếp: ", error);

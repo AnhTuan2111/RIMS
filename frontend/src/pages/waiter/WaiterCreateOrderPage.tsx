@@ -1,5 +1,7 @@
 import {useEffect, useMemo, useState} from "react";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
 import {type MenuItemResponse, type OrderItemRequest, waiterApi} from "../../api/waiter";
 import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
 
@@ -19,6 +21,21 @@ export default function WaiterCreateOrderPage() {
 
     useEffect(() => {
         waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
+
+        const socket = new SockJS('http://localhost:8080/ws-rims');
+        const client = Stomp.over(socket);
+
+        client.connect({}, () => {
+            client.subscribe('/topic/waiter', () => {
+                waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
+            });
+        });
+
+        return () => {
+            if (client.connected) {
+                client.disconnect(() => {});
+            }
+        };
     }, []);
 
     function showToast(msg: string, type = "success") {

@@ -1,5 +1,7 @@
 import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
 import {type MenuItemResponse, type OrderDetailResponse, type OrderItemStatus, waiterApi,} from "../../api/waiter";
 import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
 import type {AxiosError} from "axios";
@@ -35,6 +37,23 @@ export default function WaiterUpdateOrderPage() {
             .then(([menuRes, orderRes]) => {
                 setMenu(menuRes.data);
                 setServingOrders(orderRes.data);
+
+                useEffect(() => {
+                    const socket = new SockJS('http://localhost:8080/ws-rims');
+                    const client = Stomp.over(socket);
+
+                    client.connect({}, () => {
+                        client.subscribe('/topic/waiter', () => {
+                            waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
+                        });
+                    });
+
+                    return () => {
+                        if (client.connected) {
+                            client.disconnect(() => {});
+                        }
+                    };
+                }, []);
 
                 const draft: Record<number, DraftItem> = {};
                 orderRes.data.forEach((o) => {
