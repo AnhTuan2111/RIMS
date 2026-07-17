@@ -648,8 +648,8 @@ public class WaiterServiceImpl implements WaiterService
             orderItem.setChefInternalNoteAcknowledgedAt(
                     LocalDateTime.now()
             );
-
             orderItemRepository.save(orderItem);
+            broadcastAfterCommit("/topic/chef-note", "NOTE_ACKNOWLEDGED");
         }
     }
 }
