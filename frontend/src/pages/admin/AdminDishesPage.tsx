@@ -33,7 +33,8 @@ export default function AdminDishesPage() {
         price: 0,
         description: '',
         imageUrl: '',
-        isAvailable: true
+        isAvailable: true,
+        isHidden: false
     });
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -98,7 +99,8 @@ export default function AdminDishesPage() {
                 price: formData.price,
                 imageUrl: formData.imageUrl,
                 categoryId: catIdParsed,
-                isAvailable: formData.isAvailable
+                isAvailable: formData.isAvailable,
+                isHidden: formData.isHidden
             });
             setActiveModal('NONE');
             loadAllData();
@@ -139,7 +141,8 @@ export default function AdminDishesPage() {
                 price: formData.price,
                 imageUrl: formData.imageUrl,
                 categoryId: catIdParsed,
-                isAvailable: formData.isAvailable
+                isAvailable: selectedDish.isAvailable,
+                isHidden: formData.isHidden
             });
             setActiveModal('NONE');
             loadAllData();
@@ -175,7 +178,8 @@ export default function AdminDishesPage() {
             price: dish.price,
             description: dish.description || '',
             imageUrl: dish.imageUrl || '',
-            isAvailable: dish.isAvailable
+            isAvailable: dish.isAvailable,
+            isHidden: dish.isHidden
         });
         setActiveModal(modalType);
     };
@@ -186,8 +190,8 @@ export default function AdminDishesPage() {
             `#ID-${String(dish.id).padStart(2, '0')}`.includes(searchKeyword.toLowerCase());
         const matchesCategory = selectedCategory === 'ALL' || dish.categoryName === selectedCategory;
         const matchesStatus = selectedStatus === 'ALL' ||
-            (selectedStatus === 'AVAILABLE' && dish.isAvailable) ||
-            (selectedStatus === 'PAUSED' && !dish.isAvailable);
+            (selectedStatus === 'AVAILABLE' && !dish.isHidden) ||
+            (selectedStatus === 'PAUSED' && dish.isHidden);
 
         return matchesKeyword && matchesCategory && matchesStatus;
     });
@@ -260,7 +264,8 @@ export default function AdminDishesPage() {
                             price: 0,
                             description: '',
                             imageUrl: '',
-                            isAvailable: true
+                            isAvailable: true,
+                            isHidden: false
                         });
                         setActiveModal('CREATE');
                     }}
@@ -364,8 +369,8 @@ export default function AdminDishesPage() {
                                     {dish.price.toLocaleString('vi-VN')}đ
                                 </td>
                                 <td className="admin-dish-cell-status">
-                                        <span className={`admin-dish-status-badge ${dish.isAvailable ? 'available' : 'paused'}`}>
-                                            {dish.isAvailable ? '● Đang bán' : '● Tạm dừng'}
+                                        <span className={`admin-dish-status-badge ${!dish.isHidden ? 'available' : 'paused'}`}>
+                                            {!dish.isHidden ? '● Đang bán' : '● Tạm dừng'}
                                         </span>
                                 </td>
                                 <td className="admin-dish-cell-date">
@@ -572,8 +577,8 @@ export default function AdminDishesPage() {
                         <div className="admin-dish-view-left">
                             <div className="admin-dish-view-header">
                                 <button onClick={() => setActiveModal('NONE')} className="admin-dish-back-btn">&larr;</button>
-                                <span className={`admin-dish-view-status ${selectedDish.isAvailable ? 'available' : 'paused'}`}>
-                                    {selectedDish.isAvailable ? '● Đang bán' : '● Tạm ngưng'}
+                                <span className={`admin-dish-view-status ${!selectedDish.isHidden ? 'available' : 'paused'}`}>
+                                    {!selectedDish.isHidden ? '● Đang bán' : '● Tạm ngưng'}
                                 </span>
                             </div>
                             <div className="admin-dish-view-image">
@@ -678,16 +683,16 @@ export default function AdminDishesPage() {
                                                 <input
                                                     type="radio"
                                                     name="availability"
-                                                    checked={formData.isAvailable === true}
-                                                    onChange={() => setFormData({...formData, isAvailable: true})}
+                                                    checked={formData.isHidden === false}
+                                                    onChange={() => setFormData({...formData, isHidden: false})}
                                                 /> 🟢 Có sẵn
                                             </label>
                                             <label className="admin-dish-radio-label">
                                                 <input
                                                     type="radio"
                                                     name="availability"
-                                                    checked={formData.isAvailable === false}
-                                                    onChange={() => setFormData({...formData, isAvailable: false})}
+                                                    checked={formData.isHidden === true}
+                                                    onChange={() => setFormData({...formData, isHidden: true})}
                                                 /> 🔴 Tạm dừng
                                             </label>
                                         </div>

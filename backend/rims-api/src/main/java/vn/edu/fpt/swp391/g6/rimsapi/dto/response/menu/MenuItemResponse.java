@@ -16,4 +16,5 @@ public class MenuItemResponse
     private int price;
     private String imageUrl;
     private String categoryName;
+    private boolean available;
 }
