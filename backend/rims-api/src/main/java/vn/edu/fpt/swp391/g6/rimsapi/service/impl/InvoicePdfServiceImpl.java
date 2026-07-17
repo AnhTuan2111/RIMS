@@ -103,7 +103,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             BigDecimal totalBeforeVat = BigDecimal.ZERO;
             for (OrderItem item : completedItems)
             {
-                String dishName = (item.getDish() != null) ? item.getDish().getName() : "Món ẩn";
+                String dishName = item.getDishNameSnapshot();
                 totalItems += item.getQuantity();
                 totalBeforeVat = totalBeforeVat.add(item.getSubTotal());
 

@@ -130,6 +130,7 @@ public class WaiterServiceImpl implements WaiterService
 
             OrderItem orderItem = new OrderItem();
             orderItem.setDish(dish);
+            orderItem.setDishNameSnapshot(dish.getName());
             orderItem.setQuantity(itemReq.getQuantity());
             orderItem.setUnitPrice(unitPrice);
             orderItem.setSubTotal(subTotal);
@@ -245,6 +246,7 @@ public class WaiterServiceImpl implements WaiterService
                         // tạo order item mới đế không bị nhầm lẫn với order item khác
                         OrderItem orderItem = new OrderItem();
                         orderItem.setDish(existedItem.getDish());
+                        orderItem.setDishNameSnapshot(existedItem.getDishNameSnapshot());
                         orderItem.setQuantity(itemRequest.getQuantity() - existedItem.getQuantity());
                         orderItem.setUnitPrice(existedItem.getUnitPrice());
                         orderItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())));
@@ -271,6 +273,7 @@ public class WaiterServiceImpl implements WaiterService
 
                 OrderItem orderItem = new OrderItem();
                 orderItem.setDish(dish);
+                orderItem.setDishNameSnapshot(dish.getName());
                 orderItem.setQuantity(itemRequest.getQuantity());
                 BigDecimal unitPrice = BigDecimal.valueOf(dish.getPrice());
                 orderItem.setUnitPrice(unitPrice);
@@ -367,7 +370,7 @@ public class WaiterServiceImpl implements WaiterService
                                     {
                                         OrderItemResponse response = new OrderItemResponse();
                                         response.setOrderItemId(orderItem.getId());
-                                        response.setDishName(orderItem.getDish().getName());
+                                        response.setDishName(orderItem.getDishNameSnapshot());
                                         response.setStatus(orderItem.getStatus());
                                         response.setQuantity(orderItem.getQuantity());
                                         response.setUnitPrice(orderItem.getUnitPrice());

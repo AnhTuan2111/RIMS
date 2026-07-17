@@ -81,7 +81,7 @@ public class CashierServiceImpl implements CashierService {
                 .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
                 .map(oi -> OrderItemResponse.builder()
                         .orderItemId(oi.getId())
-                        .dishName(oi.getDish() != null ? oi.getDish().getName() : "Món ăn không xác định")
+                        .dishName(oi.getDishNameSnapshot())
                         .quantity(oi.getQuantity())
                         .unitPrice(oi.getUnitPrice())
                         .subTotal(oi.getSubTotal())
@@ -596,7 +596,7 @@ public class CashierServiceImpl implements CashierService {
 
         List<CashierInvoiceItemResponse> items = completedItems.stream()
                 .map(oi -> CashierInvoiceItemResponse.builder()
-                        .dishName(oi.getDish() != null ? oi.getDish().getName() : "Món ẩn")
+                        .dishName(oi.getDishNameSnapshot())
                         .quantity(oi.getQuantity())
                         .unitPrice(oi.getUnitPrice())
                         .subTotal(oi.getSubTotal())
