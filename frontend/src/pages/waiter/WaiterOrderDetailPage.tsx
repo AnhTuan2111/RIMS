@@ -4,6 +4,8 @@ import {
     useEffect,
     useState,
 } from "react";
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
 import {
     useNavigate,
     useParams,
@@ -80,6 +82,25 @@ export default function WaiterOrderDetailPage() {
 
     useEffect(() => {
         void loadServingOrders();
+    }, [loadServingOrders]);
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws-rims');
+        const client = Stomp.over(socket);
+
+        client.connect({}, () => {
+            client.subscribe('/topic/waiter', () => {
+                void loadServingOrders();
+            });
+        }, (error) => {
+            console.error('Lỗi kết nối WebSocket Waiter: ', error);
+        });
+
+        return () => {
+            if (client.connected) {
+                client.disconnect(() => {});
+            }
+        };
     }, [loadServingOrders]);
 
     async function handleAcknowledgeChefNote(
