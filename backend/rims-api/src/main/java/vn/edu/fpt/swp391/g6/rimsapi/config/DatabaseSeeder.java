@@ -415,6 +415,7 @@ public class DatabaseSeeder implements CommandLineRunner
         OrderItem item = new OrderItem();
         item.setOrder(order);
         item.setDish(dish);
+        item.setDishNameSnapshot(dish.getName());
         item.setQuantity(qty);
         item.setUnitPrice(BigDecimal.valueOf(dish.getPrice()));
         item.setSubTotal(BigDecimal.valueOf((long) dish.getPrice() * qty));

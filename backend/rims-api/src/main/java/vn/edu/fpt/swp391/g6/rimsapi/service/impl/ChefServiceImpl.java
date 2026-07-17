@@ -78,13 +78,12 @@ public class ChefServiceImpl implements ChefService {
         );
 
         response.setDishName(
-                item.getDish().getName()
+                item.getDishNameSnapshot()
         );
 
         response.setDescription(
                 item.getDish().getDescription()
         );
-
         response.setQuantity(
                 item.getQuantity()
         );
@@ -337,7 +336,7 @@ public class ChefServiceImpl implements ChefService {
                     );
 
                     response.setDishName(
-                            item.getDish().getName()
+                            item.getDishNameSnapshot()
                     );
 
                     response.setQuantity(
@@ -670,7 +669,7 @@ public class ChefServiceImpl implements ChefService {
         );
 
         response.setDishName(
-                item.getDish().getName()
+                item.getDishNameSnapshot()
         );
 
         response.setQuantity(
@@ -704,7 +703,7 @@ public class ChefServiceImpl implements ChefService {
         );
 
         group.setDishName(
-                item.getDish().getName()
+                item.getDishNameSnapshot()
         );
 
         group.setHasNote(

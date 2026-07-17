@@ -47,6 +47,10 @@ public class OrderItem
     private BigDecimal subTotal;
 
     @Nationalized
+    @Column(name = "dish_name_snapshot", nullable = false, length = 255)
+    private String dishNameSnapshot;
+
+    @Nationalized
     private String note;
 
     @Column(nullable = false)
