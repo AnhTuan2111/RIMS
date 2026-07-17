@@ -576,6 +576,7 @@ public class ChefServiceImpl implements ChefService {
         }
 
         orderItemRepository.saveAll(items);
+        broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     private void cancelAllPreparingItemsOfDish(
