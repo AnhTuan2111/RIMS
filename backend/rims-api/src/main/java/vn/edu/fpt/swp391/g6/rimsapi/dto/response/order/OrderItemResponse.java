@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class OrderItemResponse
 {
     private Long orderItemId;
+    private Integer dishId;
     private String dishName;
     private OrderItemStatus status;
     private Integer quantity;

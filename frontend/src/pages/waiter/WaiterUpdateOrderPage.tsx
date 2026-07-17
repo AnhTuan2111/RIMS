@@ -38,27 +38,10 @@ export default function WaiterUpdateOrderPage() {
                 setMenu(menuRes.data);
                 setServingOrders(orderRes.data);
 
-                useEffect(() => {
-                    const socket = new SockJS('http://localhost:8080/ws-rims');
-                    const client = Stomp.over(socket);
-
-                    client.connect({}, () => {
-                        client.subscribe('/topic/waiter', () => {
-                            waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
-                        });
-                    });
-
-                    return () => {
-                        if (client.connected) {
-                            client.disconnect(() => {});
-                        }
-                    };
-                }, []);
-
                 const draft: Record<number, DraftItem> = {};
                 orderRes.data.forEach((o) => {
                     o.orderItems.forEach((item) => {
-                        const dish = menuRes.data.find((m) => m.name === item.dishName);
+                        const dish = menuRes.data.find((m) => m.dishId === item.dishId);
                         if (dish) {
                             draft[dish.dishId] = {
                                 qty: item.quantity,
@@ -79,6 +62,25 @@ export default function WaiterUpdateOrderPage() {
             })
             .catch(console.error);
     }, [tid]);
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws-rims');
+        const client = Stomp.over(socket);
+
+        client.connect({}, () => {
+            client.subscribe('/topic/waiter', () => {
+                waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
+            });
+        }, (error) => {
+            console.error('Lỗi kết nối WebSocket cập nhật order: ', error);
+        });
+
+        return () => {
+            if (client.connected) {
+                client.disconnect(() => {});
+            }
+        };
+    }, []);
 
     function showToast(msg: string, type = "success") {
         setToast({msg, type});
