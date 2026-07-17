@@ -399,6 +399,7 @@ public class ChefServiceImpl implements ChefService {
         }
 
         orderItemRepository.save(item);
+        broadcastAfterCommit("/topic/waiter", "DISH_READY");
 
         return getDishDetail(orderItemId);
     }

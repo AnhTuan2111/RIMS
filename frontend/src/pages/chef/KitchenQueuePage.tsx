@@ -116,6 +116,7 @@ export default function KitchenQueuePage() {
 
     const newOrderMessageTimerRef =
         useRef<number | null>(null)
+    const selectedDishIdRef = useRef<number | null>(null)
 
     const originalDocumentTitleRef =
         useRef(document.title)
@@ -333,6 +334,10 @@ export default function KitchenQueuePage() {
     }, [fetchKitchenOrders])
 
     useEffect(() => {
+        selectedDishIdRef.current = selectedDish?.orderItemId ?? null
+    }, [selectedDish])
+
+    useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws-rims')
         const client = Stomp.over(socket)
 
@@ -343,6 +348,23 @@ export default function KitchenQueuePage() {
                 fetchKitchenOrders(false, false).catch((requestError) => {
                     console.error(requestError)
                 })
+            })
+
+            client.subscribe('/topic/chef-note', () => {
+                const openDishId = selectedDishIdRef.current
+
+                if (openDishId === null) {
+                    return
+                }
+
+                getDishDetail(openDishId)
+                    .then((data) => {
+                        setSelectedDish(data)
+                        setChefInternalNote(data.chefInternalNote ?? '')
+                    })
+                    .catch((requestError) => {
+                        console.error(requestError)
+                    })
             })
         }, (error) => {
             console.error('Lỗi kết nối WebSocket bếp: ', error)
