@@ -382,7 +382,7 @@ public class WaiterServiceImpl implements WaiterService
     @Override
     public String createReservation(CreateReservationRequest request)
     {
-        RestaurantTable table = restaurantTableRepository.findById(request.getTableId())
+        RestaurantTable table = restaurantTableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
         if (request.getReservationTime().isBefore(LocalDateTime.now()))
@@ -480,7 +480,7 @@ public class WaiterServiceImpl implements WaiterService
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt bàn với ID: " + reservationId));
 
-        RestaurantTable table = restaurantTableRepository.findById(request.getTableId())
+        RestaurantTable table = restaurantTableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
         if (request.getReservationTime().isBefore(LocalDateTime.now()))
