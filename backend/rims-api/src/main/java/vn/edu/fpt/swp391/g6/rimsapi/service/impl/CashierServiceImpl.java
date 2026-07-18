@@ -19,6 +19,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.*;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -39,6 +40,7 @@ public class CashierServiceImpl implements CashierService {
     private final VNPayConfig vnpayConfig;
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
+    private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
     @Transactional(readOnly = true)
@@ -193,6 +195,7 @@ public class CashierServiceImpl implements CashierService {
                     ).isPresent();
             table.setStatus(hasUpcomingReservation ? TableStatus.RESERVED : TableStatus.AVAILABLE);
             tableRepository.save(table);
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         }
 
         return PaymentResponse.builder()
@@ -432,6 +435,7 @@ public class CashierServiceImpl implements CashierService {
                     ).isPresent();
             table.setStatus(hasUpcomingReservation ? TableStatus.RESERVED : TableStatus.AVAILABLE);
             tableRepository.save(table);
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         }
 
         return invoice.getId();

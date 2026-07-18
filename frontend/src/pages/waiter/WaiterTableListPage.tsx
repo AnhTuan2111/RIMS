@@ -40,11 +40,23 @@ export default function WaiterTableListPage() {
                 console.log("🔔 Có cập nhật! Đang làm mới lại bàn...");
                 loadTables();
             });
+
+            // MỚI: lắng nghe thay đổi trạng thái bàn (thanh toán, tự động reserved/hủy)
+            client.subscribe('/topic/tables', () => {
+                console.log("🔔 Trạng thái bàn thay đổi! Đang làm mới lại...");
+                loadTables();
+            });
         }, (error) => {
             console.error("Lỗi mất kết nối với Bếp: ", error);
         });
 
+        // MỚI: polling fallback 10s, phòng khi WS mất kết nối (chưa có reconnect)
+        const pollInterval = setInterval(() => {
+            loadTables();
+        }, 10000);
+
         return () => {
+            clearInterval(pollInterval); // MỚI
             if (client !== null && client.connected) {
                 client.disconnect(() => {
                     console.log("Đã ngắt kết nối an toàn.");
