@@ -30,7 +30,7 @@ public interface CustomerService
     /**
      * Lấy đặt bàn hiện tại của customer
      */
-    CustomerReservationResponse getCurrentReservationByUser(Integer userId);
+    List<CustomerReservationResponse> getCurrentReservationByUser(Integer userId);
 
     /**
      * Lấy danh sách bàn còn trống để customer chọn khi đặt bàn
