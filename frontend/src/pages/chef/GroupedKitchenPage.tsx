@@ -7,7 +7,7 @@ import {
     useState,
 } from 'react'
 import { Link } from 'react-router-dom'
-
+import { getAccessToken } from '../../utils/tokenStorage'
 import {
     completeGroupedKitchenOrders,
     getGroupedKitchenOrders,
@@ -127,7 +127,7 @@ export default function GroupedKitchenPage() {
         const socket = new SockJS('http://localhost:8080/ws-rims')
         const client = Stomp.over(socket)
 
-        client.connect({}, () => {
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
             console.log('Gom món đã kết nối WebSocket!')
 
             client.subscribe('/topic/kitchen', () => {

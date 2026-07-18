@@ -16,6 +16,7 @@ import {
     type DishDetailResponse,
     type KitchenOrderItemResponse,
 } from '../../api/chef'
+import { getAccessToken } from '../../utils/tokenStorage'
 
 const ITEMS_PER_PAGE = 6
 const ORDER_POLL_INTERVAL_MS = 10_000
@@ -341,7 +342,7 @@ export default function KitchenQueuePage() {
         const socket = new SockJS('http://localhost:8080/ws-rims')
         const client = Stomp.over(socket)
 
-        client.connect({}, () => {
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
             console.log('Bếp đã kết nối WebSocket!')
 
             client.subscribe('/topic/kitchen', () => {

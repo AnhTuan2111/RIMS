@@ -2,6 +2,7 @@ import {useCallback, useEffect, useState} from 'react';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import {cashierApi} from '../../api/cashier';
+import { getAccessToken } from '../../utils/tokenStorage';
 import type {OrderDetailResponse, TableDashboardResponse, PaymentResponse} from '../../types/cashier';
 import OrderPanel, {type CustomerInfo} from './OrderPanel';
 import PaymentModal from './PaymentModal';
@@ -51,7 +52,7 @@ export default function CashierPaymentsPage() {
         const socket = new SockJS('http://localhost:8080/ws-rims');
         const client = Stomp.over(socket);
 
-        client.connect({}, () => {
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
             console.log("Cashier đã kết nối WebSocket!");
             client.subscribe('/topic/tables', () => {
                 console.log("🔔 Trạng thái bàn thay đổi! Đang làm mới lại...");

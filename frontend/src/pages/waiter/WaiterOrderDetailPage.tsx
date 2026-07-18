@@ -10,6 +10,7 @@ import {
     useNavigate,
     useParams,
 } from "react-router-dom";
+import { getAccessToken } from "../../utils/tokenStorage";
 import {
     type OrderDetailResponse,
     waiterApi,
@@ -88,7 +89,7 @@ export default function WaiterOrderDetailPage() {
         const socket = new SockJS('http://localhost:8080/ws-rims');
         const client = Stomp.over(socket);
 
-        client.connect({}, () => {
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
             client.subscribe('/topic/waiter', () => {
                 void loadServingOrders();
             });
