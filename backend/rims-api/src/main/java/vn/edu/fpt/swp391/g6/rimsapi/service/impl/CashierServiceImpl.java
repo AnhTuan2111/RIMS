@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import vn.edu.fpt.swp391.g6.rimsapi.config.VNPayConfig;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
@@ -42,6 +43,7 @@ public class CashierServiceImpl implements CashierService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final WebSocketBroadcaster webSocketBroadcaster;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -472,9 +474,11 @@ public class CashierServiceImpl implements CashierService {
         user.setPhone(phone);
         user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
 
-        // Sinh username và password rác để lấp vào Database
-        user.setUsername("CUST_" + System.currentTimeMillis());
-        user.setPasswordHash("DUMMY_HASH_" + java.util.UUID.randomUUID().toString());
+        // Dùng luôn SĐT làm username (đã đảm bảo duy nhất qua check existsByPhone ở trên),
+        // mật khẩu mặc định "123456" được mã hóa bằng đúng PasswordEncoder (BCrypt) dùng chung
+        // với toàn hệ thống, để khách có thể đăng nhập thật bằng SĐT + mật khẩu này về sau.
+        user.setUsername(phone);
+        user.setPasswordHash(passwordEncoder.encode("123456"));
         user.setRole(RoleType.CUSTOMER);
         user.setRewardPoints(0);
         user.setActive(true);
