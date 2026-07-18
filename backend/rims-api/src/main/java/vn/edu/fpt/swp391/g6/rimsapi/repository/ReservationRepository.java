@@ -81,7 +81,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>
     Optional<Reservation> findByIdAndUserId(@Param("reservationId") Long reservationId, @Param("userId") Integer userId);
 
     // Tìm reservation hiện tại của user (chưa COMPLETED hoặc CANCELLED)
-    @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId AND r.status NOT IN ('COMPLETED', 'CANCELLED') ORDER BY r.reservationTime DESC")
+    @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId AND r.status NOT IN ('COMPLETED', 'CANCELLED') ORDER BY r.reservationTime ASC")
     List<Reservation> findCurrentReservationsByUser(@Param("userId") Integer userId);
 
     // Kiểm tra user đã đặt bàn trong ngày và chưa COMPLETED/CANCELLED

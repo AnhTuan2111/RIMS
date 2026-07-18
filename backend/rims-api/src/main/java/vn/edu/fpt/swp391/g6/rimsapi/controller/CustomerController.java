@@ -104,10 +104,10 @@ public class CustomerController {
      * GET /rims/customer/reservations/current
      */
     @GetMapping("/reservations/current")
-    public ResponseEntity<CustomerReservationResponse> getCurrentReservation(
+    public ResponseEntity<List<CustomerReservationResponse>> getCurrentReservation(
             @AuthenticationPrincipal UserPrincipal principal) {
 
-        CustomerReservationResponse response = customerService.getCurrentReservationByUser(principal.getId());
+        List<CustomerReservationResponse> response = customerService.getCurrentReservationByUser(principal.getId());
         return ResponseEntity.ok(response);
     }
 

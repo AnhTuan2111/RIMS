@@ -75,8 +75,8 @@ export async function checkReservationByDate(date: string): Promise<boolean> {
     return res.data
 }
 
-export async function getCurrentReservation(): Promise<CustomerReservationResponse> {
-    const res = await apiClient.get<CustomerReservationResponse>('/customer/reservations/current')
+export async function getCurrentReservation(): Promise<CustomerReservationResponse[]> {
+    const res = await apiClient.get<CustomerReservationResponse[]>('/customer/reservations/current')
     return res.data
 }
 

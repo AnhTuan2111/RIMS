@@ -49,12 +49,19 @@ public class CustomerServiceImpl implements CustomerService
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Không tìm thấy người dùng với ID: " + request.getUserId()));
 
-        RestaurantTable table = tableRepository.findById(request.getTableId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
-
         if (request.getReservationTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
         }
+
+        // Chặn 1 khách có nhiều hơn 1 đặt bàn đang hoạt động trong cùng 1 ngày
+        LocalDate reservationDate = request.getReservationTime().toLocalDate();
+        if (reservationRepository.existsActiveReservationByUserIdAndDate(user.getId(), reservationDate)) {
+            throw new IllegalArgumentException(
+                    "Bạn đã có một đặt bàn đang hoạt động trong ngày này, vui lòng hủy đặt bàn cũ trước khi đặt bàn mới.");
+        }
+
+        RestaurantTable table = tableRepository.findById(request.getTableId())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
         LocalDateTime start = request.getReservationTime().minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
         LocalDateTime end = request.getReservationTime().plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
@@ -154,7 +161,7 @@ public class CustomerServiceImpl implements CustomerService
     }
 
     @Override
-    public CustomerReservationResponse getCurrentReservationByUser(Integer userId) {
+    public List<CustomerReservationResponse> getCurrentReservationByUser(Integer userId) {
         log.info("Customer ID: {} lấy đặt bàn hiện tại", userId);
 
         if (!userRepository.existsById(userId)) {
@@ -163,12 +170,9 @@ public class CustomerServiceImpl implements CustomerService
 
         List<Reservation> currentReservations = reservationRepository.findCurrentReservationsByUser(userId);
 
-        if (currentReservations.isEmpty()) {
-            throw new ResourceNotFoundException("Bạn không có đặt bàn nào đang hoạt động.");
-        }
-
-        Reservation currentReservation = currentReservations.get(0);
-        return convertToCustomerResponse(currentReservation);
+        return currentReservations.stream()
+                .map(this::convertToCustomerResponse)
+                .toList();
     }
 
     // Phương thức chuyển đổi Entity sang Response

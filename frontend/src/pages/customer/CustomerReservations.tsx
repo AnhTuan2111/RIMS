@@ -3,9 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
     createReservation,
-    cancelReservation,  // ✅ Đổi tên import
+    cancelReservation,
     getCurrentReservation,
-    checkReservationByDate,
     getAvailableTables,
 } from '../../api/customer'
 import type {
@@ -35,13 +34,6 @@ export default function CustomerReservations() {
     const [loadingTables, setLoadingTables] = useState(true)
     const [tableError, setTableError] = useState<string | null>(null)
 
-    // ===== Cancel State =====
-    const [cancelLoading, setCancelLoading] = useState(false)
-    const [cancelError, setCancelError] = useState('')
-    const [cancelSuccess, setCancelSuccess] = useState<CustomerReservationResponse | null>(null)
-    const [currentReservation, setCurrentReservation] = useState<CustomerReservationResponse | null>(null)
-    const [loadingCurrent, setLoadingCurrent] = useState(false)
-
     // ===== Load available tables =====
     const loadAvailableTables = useCallback(async () => {
         setLoadingTables(true)
@@ -61,45 +53,33 @@ export default function CustomerReservations() {
         }
     }, [])
 
-    // ===== Load current reservation =====
-    const loadCurrentReservation = useCallback(async () => {
+// ===== Cancel State =====
+    const [cancelingId, setCancelingId] = useState<number | null>(null)
+    const [cancelError, setCancelError] = useState('')
+    const [cancelSuccess, setCancelSuccess] = useState<CustomerReservationResponse | null>(null)
+    const [currentReservations, setCurrentReservations] = useState<CustomerReservationResponse[]>([])
+    const [loadingCurrent, setLoadingCurrent] = useState(false)
+
+// ===== Load current reservations =====
+    const loadCurrentReservations = useCallback(async () => {
         setLoadingCurrent(true)
         try {
             const res = await getCurrentReservation()
-            setCurrentReservation(res)
+            setCurrentReservations(res || [])
         } catch (err: any) {
-            if (err?.response?.status === 404) {
-                setCurrentReservation(null)
-            } else {
-                console.error('Failed to load current reservation:', err)
-                setCurrentReservation(null)
-            }
+            console.error('Failed to load current reservations:', err)
+            setCurrentReservations([])
         } finally {
             setLoadingCurrent(false)
         }
     }, [])
 
-    // ===== Check if has reservation today =====
-    const checkTodayReservation = useCallback(async () => {
-        try {
-            const hasRes = await checkReservationByDate(todayStr)
-            if (hasRes) {
-                await loadCurrentReservation()
-            } else {
-                setCurrentReservation(null)
-            }
-        } catch (err) {
-            console.error('Check reservation error:', err)
-            setCurrentReservation(null)
-        }
-    }, [loadCurrentReservation])
-
     useEffect(() => {
         loadAvailableTables()
-        checkTodayReservation()
-    }, [loadAvailableTables, checkTodayReservation])
+        loadCurrentReservations()
+    }, [loadAvailableTables, loadCurrentReservations])
 
-    // ===== Book =====
+// ===== Book =====
     const handleBookSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setBookError('')
@@ -117,7 +97,7 @@ export default function CustomerReservations() {
                 reservationTime: `${todayStr}T18:00:00`,
             }))
             await loadAvailableTables()
-            await checkTodayReservation()
+            await loadCurrentReservations()
             setActiveTab('cancel')
         } catch (err: any) {
             setBookError(err?.response?.data?.message || err?.message || 'Đặt bàn thất bại')
@@ -126,27 +106,21 @@ export default function CustomerReservations() {
         }
     }
 
-    // ===== Cancel =====
-    const handleCancelSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+// ===== Cancel (giờ theo từng reservation riêng) =====
+    const handleCancel = async (reservationId: number) => {
         setCancelError('')
         setCancelSuccess(null)
-        setCancelLoading(true)
+        setCancelingId(reservationId)
 
         try {
-            // ✅ Lấy reservationId từ currentReservation và gọi cancelReservation
-            if (!currentReservation) {
-                throw new Error('Không có đặt bàn để hủy')
-            }
-            const result = await cancelReservation(currentReservation.id)
+            const result = await cancelReservation(reservationId)
             setCancelSuccess(result)
-            setCurrentReservation(null)
             await loadAvailableTables()
-            await checkTodayReservation()
+            await loadCurrentReservations()
         } catch (err: any) {
             setCancelError(err?.response?.data?.message || err?.message || 'Hủy đặt bàn thất bại')
         } finally {
-            setCancelLoading(false)
+            setCancelingId(null)
         }
     }
 
@@ -196,7 +170,7 @@ export default function CustomerReservations() {
                         setActiveTab('cancel')
                         setCancelSuccess(null)
                         setCancelError('')
-                        loadCurrentReservation()
+                        loadCurrentReservations()
                     }}
                 >
                     Hủy đặt bàn
@@ -380,28 +354,40 @@ export default function CustomerReservations() {
                 <div className="customer-reservation-card">
                     <h2>❌ Hủy đặt bàn</h2>
                     <p className="customer-reservation-sub">
-                        Hủy đặt bàn hiện tại của bạn
+                        Danh sách đặt bàn đang hoạt động của bạn
                     </p>
 
                     {loadingCurrent ? (
                         <div className="customer-loading">Đang tải thông tin...</div>
-                    ) : currentReservation ? (
-                        <div className="customer-current-reservation">
-                            <div className="customer-current-info">
-                                <span className="customer-current-label">Đặt bàn hiện tại:</span>
-                                <span>
-                                    Bàn <strong>{currentReservation.tableNumber}</strong> -{' '}
-                                    {formatDateTime(currentReservation.reservationTime)}
+                    ) : currentReservations.length > 0 ? (
+                        <div className="customer-current-reservation-list">
+                            {currentReservations.map(r => (
+                                <div key={r.id} className="customer-current-reservation">
+                                    <div className="customer-current-info">
+                                        <span className="customer-current-label">Đặt bàn:</span>
+                                        <span>
+                                Bàn <strong>{r.tableNumber}</strong> -{' '}
+                                            {formatDateTime(r.reservationTime)}
+                            </span>
+                                        <span className={`customer-status-badge-${r.status.toLowerCase()}`}>
+                                {statusLabels[r.status]}
+                            </span>
+                                        {r.note && (
+                                            <span className="customer-current-note">
+                                    Ghi chú: {r.note}
                                 </span>
-                                <span className={`customer-status-badge-${currentReservation.status.toLowerCase()}`}>
-                                    {statusLabels[currentReservation.status]}
-                                </span>
-                                {currentReservation.note && (
-                                    <span className="customer-current-note">
-                                        Ghi chú: {currentReservation.note}
-                                    </span>
-                                )}
-                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="customer-btn-danger"
+                                        onClick={() => handleCancel(r.id)}
+                                        disabled={cancelingId === r.id}
+                                    >
+                                        {cancelingId === r.id ? 'Đang xử lý...' : '🗑️ Hủy đặt bàn'}
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         <div className="customer-empty-state">
@@ -414,10 +400,10 @@ export default function CustomerReservations() {
                         <div className="customer-success-box">
                             <strong>✅ Hủy đặt bàn thành công!</strong>
                             <div className="customer-success-detail">
-                                <span>
-                                    Đã hủy bàn <strong>{cancelSuccess.tableNumber}</strong> -{' '}
-                                    {formatDateTime(cancelSuccess.reservationTime)}
-                                </span>
+                    <span>
+                        Đã hủy bàn <strong>{cancelSuccess.tableNumber}</strong> -{' '}
+                        {formatDateTime(cancelSuccess.reservationTime)}
+                    </span>
                             </div>
                         </div>
                     )}
@@ -431,19 +417,11 @@ export default function CustomerReservations() {
                     <div className="customer-form-actions">
                         <button
                             type="button"
-                            className="customer-btn-danger"
-                            onClick={handleCancelSubmit}
-                            disabled={cancelLoading || !currentReservation}
-                        >
-                            {cancelLoading ? 'Đang xử lý...' : '🗑️ Hủy đặt bàn'}
-                        </button>
-                        <button
-                            type="button"
                             className="customer-btn-secondary"
                             onClick={() => {
                                 setCancelError('')
                                 setCancelSuccess(null)
-                                loadCurrentReservation()
+                                loadCurrentReservations()
                             }}
                         >
                             Làm mới
