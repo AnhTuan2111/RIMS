@@ -61,7 +61,7 @@ public class CustomerServiceImpl implements CustomerService
                     "Bạn đã có một đặt bàn đang hoạt động trong ngày này, vui lòng hủy đặt bàn cũ trước khi đặt bàn mới.");
         }
 
-        RestaurantTable table = tableRepository.findById(request.getTableId())
+        RestaurantTable table = tableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
         LocalDateTime start = request.getReservationTime().minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);

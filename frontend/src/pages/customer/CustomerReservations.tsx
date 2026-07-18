@@ -246,7 +246,7 @@ export default function CustomerReservations() {
 
     const statusLabels: Record<string, string> = {
         QUEUED: 'Đang chờ',
-        WAITING: 'Chờ xác nhận',
+        WAITING: 'Đã giữ bàn',
         COMPLETED: 'Đã hoàn thành',
         CANCELLED: 'Đã hủy',
     }
