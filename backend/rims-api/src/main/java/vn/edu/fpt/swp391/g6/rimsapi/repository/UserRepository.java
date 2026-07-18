@@ -31,8 +31,6 @@ public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecifi
 
     Integer id(Integer id);
 
-    Optional<User> findByPhoneAndRole(String phone, RoleType role);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findByIdForUpdate(@Param("id") Integer id);

@@ -104,10 +104,8 @@ public class CashierController
             @RequestParam java.util.Map<String, String> vnpayParams,
             jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException
     {
-
         try
         {
-
             String vnp_ResponseCode = vnpayParams.get("vnp_ResponseCode");
             String vnp_TxnRef = vnpayParams.get("vnp_TxnRef");
 
@@ -124,6 +122,9 @@ public class CashierController
         } catch (Exception e)
         {
             e.printStackTrace();
+            // MỚI: luôn redirect về trang failed thay vì để trình duyệt treo trắng,
+            // kể cả khi processVnPaySuccess/processVnPayFailed tự throw (VD: callback gọi lại lần 2)
+            response.sendRedirect("http://localhost:5173/payment-failed");
         }
     }
 

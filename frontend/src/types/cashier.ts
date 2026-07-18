@@ -19,7 +19,7 @@ export interface OrderItemResponse {
 
 export interface OrderDetailResponse {
     orderId: number;
-    tableName: string;
+    tableNumber: string;
     createdAt: string;
     orderItems: OrderItemResponse[];
 

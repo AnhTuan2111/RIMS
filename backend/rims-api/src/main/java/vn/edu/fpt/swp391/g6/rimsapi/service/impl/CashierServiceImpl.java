@@ -50,7 +50,7 @@ public class CashierServiceImpl implements CashierService {
     public List<TableDashboardResponse> getTablesDashboard()
     {
         List<RestaurantTable> tables = tableRepository.findAll();
-        List<Order> activeOrders = orderRepository.findByStatus(OrderStatus.SERVING);
+        List<Order> activeOrders = orderRepository.findByStatusIn(List.of(OrderStatus.SERVING, OrderStatus.LOCKED)); // ĐỔI: gộp cả LOCKED
 
         Map<Integer, Long> tableOrderMap = activeOrders.stream()
                 .filter(o -> o.getTable() != null)
@@ -167,6 +167,7 @@ public class CashierServiceImpl implements CashierService {
         }
 
         order.setStatus(OrderStatus.LOCKED);
+        order.setLockedAt(LocalDateTime.now());
         orderRepository.save(order);
 
         return PaymentResponse.builder()
@@ -178,7 +179,7 @@ public class CashierServiceImpl implements CashierService {
     @Override
     @Transactional
     public PaymentResponse completeCashPayment(Long orderId, PaymentRequest request) {
-        Order order = orderRepository.findOrderWithDetailsById(orderId)
+        Order order = orderRepository.findOrderForUpdateWithItems(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
         if (order.getStatus() != OrderStatus.LOCKED) {
@@ -189,25 +190,29 @@ public class CashierServiceImpl implements CashierService {
         BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
         BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
 
-        // Tạo trước Invoice để lát nữa set dữ liệu
-        Invoice invoice = new Invoice();
-
-        // Áp dụng logic điểm dùng chung (trừ điểm giảm giá + cộng điểm tích lũy)
+        // MỚI: tính trước số tiền phải trả SAU khi trừ điểm dự kiến (chưa apply thật) để validate sớm
         Integer customerId = request.getCustomerId();
         Integer pointsUsed = request.getPointsUsed();
-        finalAmount = applyLoyaltyPoints(invoice, customerId, pointsUsed, finalAmount);
+        BigDecimal previewDiscount = BigDecimal.ZERO;
+        if (customerId != null && pointsUsed != null && pointsUsed > 0) {
+            previewDiscount = new BigDecimal(pointsUsed).multiply(new BigDecimal("1000"));
+        }
+        BigDecimal previewFinalAmount = finalAmount.subtract(previewDiscount);
+        if (previewFinalAmount.compareTo(BigDecimal.ZERO) < 0) previewFinalAmount = BigDecimal.ZERO;
 
         BigDecimal amountPaid = BigDecimal.valueOf(request.getAmountPaid());
-        if (amountPaid.compareTo(finalAmount) < 0) {
+        if (amountPaid.compareTo(previewFinalAmount) < 0) {
             throw new RuntimeException("Khách đưa thiếu tiền!");
         }
+
+        Invoice invoice = new Invoice();
+        finalAmount = applyLoyaltyPoints(invoice, customerId, pointsUsed, finalAmount);
+
         BigDecimal excessAmount = amountPaid.subtract(finalAmount);
 
-        // Lưu Hóa đơn & Đóng order
         invoice.setOrder(order);
         invoice.setFinalAmount(finalAmount);
         invoice.setInvoiceDate(LocalDateTime.now());
-
         invoice.calculateAndSetRevenue(vatAmount);
 
         Payment payment = new Payment();
@@ -217,6 +222,7 @@ public class CashierServiceImpl implements CashierService {
         invoice.addPayment(payment);
 
         invoiceRepository.save(invoice);
+        order.setLockedAt(null);
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
@@ -235,6 +241,7 @@ public class CashierServiceImpl implements CashierService {
                 .paymentMethod("CASH")
                 .build();
     }
+
     @Override
     @Transactional
     public PaymentResponse unlockOrder(Long orderId)
@@ -245,9 +252,9 @@ public class CashierServiceImpl implements CashierService {
         if (order.getStatus() == OrderStatus.LOCKED)
         {
             order.setStatus(OrderStatus.SERVING);
-            // Xóa dữ liệu điểm tạm vì hủy quá trình thanh toán
             order.setPendingCustomerId(null);
             order.setPendingPointsUsed(null);
+            order.setLockedAt(null);
             orderRepository.save(order);
 
             return PaymentResponse.builder()
@@ -274,9 +281,9 @@ public class CashierServiceImpl implements CashierService {
         if (order != null && order.getStatus() == OrderStatus.LOCKED)
         {
             order.setStatus(OrderStatus.SERVING);
-            // Xóa dữ liệu điểm tạm vì thanh toán thất bại, không áp dụng nữa
             order.setPendingCustomerId(null);
             order.setPendingPointsUsed(null);
+            order.setLockedAt(null);
             orderRepository.save(order);
         }
     }
@@ -330,6 +337,7 @@ public class CashierServiceImpl implements CashierService {
         order.setPendingCustomerId(customerId);
         order.setPendingPointsUsed(pointsUsed);
         order.setStatus(OrderStatus.LOCKED);
+        order.setLockedAt(LocalDateTime.now());
         orderRepository.save(order);
 
         long amountVND = finalAmount.setScale(0, RoundingMode.HALF_UP).longValue() * 100;
@@ -406,7 +414,7 @@ public class CashierServiceImpl implements CashierService {
         String[] parts = vnpTxnRef.split("_");
         Long orderId = Long.parseLong(parts[1]);
 
-        Order order = orderRepository.findOrderWithDetailsById(orderId)
+        Order order = orderRepository.findOrderForUpdateWithItems(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng từ VNPay"));
 
         if (order.getStatus() == OrderStatus.COMPLETED)
@@ -445,6 +453,7 @@ public class CashierServiceImpl implements CashierService {
 
         invoiceRepository.save(invoice);
 
+        order.setLockedAt(null);
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
@@ -618,6 +627,25 @@ public class CashierServiceImpl implements CashierService {
         if (!staleOrders.isEmpty())
         {
             orderRepository.deleteAll(staleOrders); // cascade xóa OrderItem con luôn (đã xác nhận cascade=ALL, orphanRemoval=true)
+        }
+    }
+
+    @Scheduled(fixedRate = 300000) // 5 phút/lần — đủ nhanh để không kẹt bàn lâu, không quá tải DB
+    @Transactional
+    public void autoUnlockStaleOrders()
+    {
+        LocalDateTime deadline = LocalDateTime.now().minusMinutes(15); // ngưỡng "kẹt": LOCKED quá 15 phút không ai xử lý tiếp
+
+        List<Order> staleLockedOrders = orderRepository
+                .findByStatusAndLockedAtBefore(OrderStatus.LOCKED, deadline);
+
+        for (Order order : staleLockedOrders)
+        {
+            order.setStatus(OrderStatus.SERVING);
+            order.setPendingCustomerId(null);
+            order.setPendingPointsUsed(null);
+            order.setLockedAt(null);
+            orderRepository.save(order);
         }
     }
 
