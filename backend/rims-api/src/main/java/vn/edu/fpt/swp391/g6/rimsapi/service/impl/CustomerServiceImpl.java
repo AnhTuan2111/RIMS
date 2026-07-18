@@ -21,6 +21,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
+import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,6 +39,7 @@ public class CustomerServiceImpl implements CustomerService
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ReservationConflictValidator conflictValidator;
+    private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
     @Transactional
@@ -109,8 +111,29 @@ public class CustomerServiceImpl implements CustomerService
             throw new AccessDeniedException("Bạn không có quyền hủy đặt bàn này");
         }
 
+        if (reservation.getStatus() == ReservationStatus.CANCELLED
+                || reservation.getStatus() == ReservationStatus.COMPLETED) {
+            throw new IllegalArgumentException("Đặt bàn này đã "
+                    + (reservation.getStatus() == ReservationStatus.COMPLETED ? "hoàn tất" : "bị hủy")
+                    + " trước đó, không thể hủy lại.");
+        }
+
+        boolean tableReleased = false;
+        if (reservation.getStatus() == ReservationStatus.WAITING) {
+            RestaurantTable currentTable = tableRepository.findByIdForUpdate(reservation.getTable().getId()).orElse(null);
+            if (currentTable != null && currentTable.getStatus() == TableStatus.RESERVED) {
+                currentTable.setStatus(TableStatus.AVAILABLE);
+                tableRepository.save(currentTable);
+                tableReleased = true;
+            }
+        }
+
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
+
+        if (tableReleased) {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
+        }
 
         return convertToCustomerResponse(reservation);
     }

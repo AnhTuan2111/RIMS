@@ -524,8 +524,34 @@ public class WaiterServiceImpl implements WaiterService
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt bàn với ID: " + reservationId));
 
+        if (reservation.getStatus() == ReservationStatus.CANCELLED
+                || reservation.getStatus() == ReservationStatus.COMPLETED)
+        {
+            throw new IllegalArgumentException("Đặt bàn này đã "
+                    + (reservation.getStatus() == ReservationStatus.COMPLETED ? "hoàn tất" : "bị hủy")
+                    + " trước đó, không thể hủy lại.");
+        }
+
+        boolean tableReleased = false;
+        if (reservation.getStatus() == ReservationStatus.WAITING)
+        {
+            RestaurantTable currentTable = restaurantTableRepository.findByIdForUpdate(reservation.getTable().getId()).orElse(null);
+            if (currentTable != null && currentTable.getStatus() == TableStatus.RESERVED)
+            {
+                currentTable.setStatus(TableStatus.AVAILABLE);
+                restaurantTableRepository.save(currentTable);
+                tableReleased = true;
+            }
+        }
+
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
+
+        if (tableReleased)
+        {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
+        }
+
         return "Hủy đặt bàn thành công";
     }
 

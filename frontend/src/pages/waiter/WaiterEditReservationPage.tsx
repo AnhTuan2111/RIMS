@@ -95,6 +95,9 @@ export default function WaiterEditReservationPage() {
     }
 
     async function handleCancelReservation() {
+        const confirmed = window.confirm("Xác nhận hủy đặt bàn này? Hành động không thể hoàn tác.");
+        if (!confirmed) return;
+
         try {
             await waiterApi.cancelReservation(parseInt(resId!));
             showToast("Đã hủy đặt bàn");
