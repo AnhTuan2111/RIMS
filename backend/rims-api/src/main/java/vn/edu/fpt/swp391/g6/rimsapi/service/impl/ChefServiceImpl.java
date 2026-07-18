@@ -33,6 +33,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +43,7 @@ public class ChefServiceImpl implements ChefService {
     private final DishRepository dishRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final OrderRepository orderRepository;
+    private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
     public List<KitchenOrderResponse> getKitchenOrders() {
@@ -138,7 +140,7 @@ public class ChefServiceImpl implements ChefService {
         item.setStatus(status);
 
         orderItemRepository.save(item);
-        broadcastAfterCommit("/topic/waiter", "DISH_READY");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     @Override
@@ -209,7 +211,7 @@ public class ChefServiceImpl implements ChefService {
 
         dishRepository.save(dish);
 
-        broadcastAfterCommit("/topic/waiter", "DISH_READY");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     @Override
@@ -296,7 +298,7 @@ public class ChefServiceImpl implements ChefService {
         orderItemRepository.save(selectedItem);
         recalculateOrderTotal(selectedItem.getOrder());
 
-        broadcastAfterCommit("/topic/waiter", "DISH_READY");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     @Override
@@ -398,7 +400,7 @@ public class ChefServiceImpl implements ChefService {
         }
 
         orderItemRepository.save(item);
-        broadcastAfterCommit("/topic/waiter", "DISH_READY");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
 
         return getDishDetail(orderItemId);
     }
@@ -576,7 +578,7 @@ public class ChefServiceImpl implements ChefService {
         }
 
         orderItemRepository.saveAll(items);
-        broadcastAfterCommit("/topic/waiter", "DISH_READY");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     private void cancelAllPreparingItemsOfDish(
@@ -749,22 +751,4 @@ public class ChefServiceImpl implements ChefService {
                 : note.trim();
     }
 
-    private void broadcastAfterCommit(String topic, Object payload)
-    {
-        if (TransactionSynchronizationManager.isSynchronizationActive())
-        {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization()
-            {
-                @Override
-                public void afterCommit()
-                {
-                    messagingTemplate.convertAndSend(topic, payload);
-                }
-            });
-        }
-        else
-        {
-            messagingTemplate.convertAndSend(topic, payload);
-        }
-    }
 }

@@ -27,6 +27,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
 
 import java.math.BigDecimal;
@@ -48,6 +49,7 @@ public class WaiterServiceImpl implements WaiterService
     private final SimpMessagingTemplate messagingTemplate;
     private final OrderItemRepository orderItemRepository;
     private final ReservationConflictValidator conflictValidator;
+    private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
     public List<TableDetailResponse> getAllTables()
@@ -149,7 +151,8 @@ public class WaiterServiceImpl implements WaiterService
         table.setStatus(TableStatus.SERVING);
         restaurantTableRepository.save(table);
 
-        broadcastAfterCommit("/topic/kitchen", "REFRESH");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/kitchen", "REFRESH");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
 
         // 7. Return response
         return CreateOrderResponse.builder()
@@ -295,7 +298,7 @@ public class WaiterServiceImpl implements WaiterService
         order.setTotalAmount(total);
         orderRepository.save(order);
 
-        broadcastAfterCommit("/topic/kitchen", "REFRESH");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/kitchen", "REFRESH");
 
         return UpdateOrderResponse.builder()
                 .orderId(order.getId())
@@ -315,26 +318,6 @@ public class WaiterServiceImpl implements WaiterService
             }
         }
         return null;
-    }
-
-    private void broadcastAfterCommit(String topic, Object payload)
-    {
-        if (TransactionSynchronizationManager.isSynchronizationActive())
-        {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization()
-            {
-                @Override
-                public void afterCommit()
-                {
-                    messagingTemplate.convertAndSend(topic, payload);
-                }
-            });
-        }
-        else
-        {
-            // Trường hợp hiếm: method được gọi ngoài transaction, vẫn gửi ngay để không mất tín hiệu
-            messagingTemplate.convertAndSend(topic, payload);
-        }
     }
 
     @Override
@@ -552,10 +535,10 @@ public class WaiterServiceImpl implements WaiterService
     {
         LocalDateTime now = LocalDateTime.now();
 
-        // Chỉ lấy QUEUED có reservationTime trong khoảng (now, now+30m]
-        // -> DB tự lọc, không kéo những đơn đặt xa tương lai về bộ nhớ
         List<Reservation> reservations = reservationRepository
                 .findByStatusAndReservationTimeBetween(ReservationStatus.QUEUED, now, now.plusMinutes(30));
+
+        boolean changed = false;
 
         for (Reservation res : reservations)
         {
@@ -564,34 +547,36 @@ public class WaiterServiceImpl implements WaiterService
 
             if (currentTable.getStatus() == TableStatus.AVAILABLE)
             {
-                // Trường hợp bình thường: bàn đang trống, chuyển sang RESERVED
                 res.setStatus(ReservationStatus.WAITING);
                 currentTable.setStatus(TableStatus.RESERVED);
+                changed = true;
             } else if (currentTable.getStatus() == TableStatus.SERVING)
             {
-                // Bàn đang phục vụ -> tìm bàn thay thế có capacity >= bàn gốc
                 int requiredCapacity = currentTable.getCapacity() != null ? currentTable.getCapacity() : 0;
 
                 List<RestaurantTable> alternatives = restaurantTableRepository
                         .findByStatusAndCapacityGreaterThanEqual(TableStatus.AVAILABLE, requiredCapacity);
 
-                // Loại bỏ chính bàn đang xét (phòng trường hợp status chưa sync)
                 alternatives.removeIf(t -> t.getId() == currentTable.getId());
 
                 if (!alternatives.isEmpty())
                 {
-                    // Chọn bàn có capacity nhỏ nhất phù hợp (tránh lãng phí bàn lớn)
                     RestaurantTable newTable = alternatives.stream().min(Comparator.comparingInt(t -> t.getCapacity() != null ? t.getCapacity() : 0)).get();
 
                     res.setTable(newTable);
                     res.setStatus(ReservationStatus.WAITING);
                     newTable.setStatus(TableStatus.RESERVED);
+                    changed = true; // MỚI
                 } else
                 {
-                    // Không có bàn thay thế -> hủy reservation
                     res.setStatus(ReservationStatus.CANCELLED);
                 }
             }
+        }
+
+        if (changed) // MỚI
+        {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         }
     }
 
@@ -601,15 +586,21 @@ public class WaiterServiceImpl implements WaiterService
     {
         LocalDateTime now = LocalDateTime.now();
 
-        // Chỉ lấy WAITING có reservationTime < (now - 15phút)
-        // -> DB tự lọc, bỏ qua những đơn chưa hết hạn
         List<Reservation> expiredReservations = reservationRepository
                 .findByStatusAndReservationTimeBefore(ReservationStatus.WAITING, now.minusMinutes(15));
+
+        boolean changed = false; // MỚI
 
         for (Reservation res : expiredReservations)
         {
             res.setStatus(ReservationStatus.CANCELLED);
             res.getTable().setStatus(TableStatus.AVAILABLE);
+            changed = true; // MỚI
+        }
+
+        if (changed) // MỚI
+        {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         }
     }
 
@@ -653,7 +644,7 @@ public class WaiterServiceImpl implements WaiterService
                     LocalDateTime.now()
             );
             orderItemRepository.save(orderItem);
-            broadcastAfterCommit("/topic/chef-note", "NOTE_ACKNOWLEDGED");
+            webSocketBroadcaster.broadcastAfterCommit("/topic/chef-note", "NOTE_ACKNOWLEDGED");
         }
     }
 }
