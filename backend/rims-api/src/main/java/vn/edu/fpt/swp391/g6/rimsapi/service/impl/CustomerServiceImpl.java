@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.TimeRangeResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Reservation;
@@ -199,7 +200,7 @@ public class CustomerServiceImpl implements CustomerService
     @Override
     @Transactional(readOnly = true)
     public List<RestaurantTableResponse> getAvailableTables() {
-        return tableRepository.findByStatus(TableStatus.AVAILABLE).stream()
+        return tableRepository.findAll().stream()
                 .map(t -> RestaurantTableResponse.builder()
                         .id(t.getId())
                         .tableNumber(t.getTableNumber())
@@ -207,5 +208,48 @@ public class CustomerServiceImpl implements CustomerService
                         .status(t.getStatus().name())
                         .build())
                 .toList();
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<TimeRangeResponse> getBlockedTimeRanges(int tableId, LocalDate date) {
+
+        RestaurantTable table = tableRepository.findById(tableId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + tableId));
+
+        LocalDateTime dayStart = date.atStartOfDay();
+        LocalDateTime dayEnd = dayStart.plusDays(1);
+
+        List<Reservation> activeReservations = reservationRepository.findActiveReservationsByTableId(tableId);
+
+        List<TimeRangeResponse> blockedRanges = new java.util.ArrayList<>();
+
+        for (Reservation res : activeReservations) {
+            LocalDateTime resTime = res.getReservationTime();
+            LocalDateTime start = resTime.minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+            LocalDateTime end = resTime.plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+
+            // chỉ giữ lại khung có giao với ngày đang xét (tránh trả về noise của ngày khác)
+            if (end.isAfter(dayStart) && start.isBefore(dayEnd)) {
+                blockedRanges.add(TimeRangeResponse.builder().start(start).end(end).build());
+            }
+        }
+
+        if (table.getStatus() == TableStatus.SERVING) {
+            LocalDateTime servingOrderCreatedAt = orderRepository.findServingOrdersWithDetails(table.getId())
+                    .stream().findFirst()
+                    .map(Order::getCreatedAt)
+                    .orElse(null);
+
+            if (servingOrderCreatedAt != null) {
+                LocalDateTime start = servingOrderCreatedAt;
+                LocalDateTime end = servingOrderCreatedAt.plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+
+                if (end.isAfter(dayStart) && start.isBefore(dayEnd)) {
+                    blockedRanges.add(TimeRangeResponse.builder().start(start).end(end).build());
+                }
+            }
+        }
+
+        return blockedRanges;
     }
 }
