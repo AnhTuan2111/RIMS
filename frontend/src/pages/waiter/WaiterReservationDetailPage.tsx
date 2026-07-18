@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {BackArrow, WaiterHeader} from "../../components/waiter";
+import {BackArrow, WaiterHeader, WaiterToast} from "../../components/waiter";
 import {waiterApi} from "../../api/waiter";
 
 export default function WaiterReservationDetailPage() {
@@ -9,6 +9,8 @@ export default function WaiterReservationDetailPage() {
     const tid = parseInt(tableId || "0");
     const [reservation, setReservation] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
+    const [cancelling, setCancelling] = useState(false);
+    const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
 
     useEffect(() => {
         if (tid) {
@@ -26,6 +28,36 @@ export default function WaiterReservationDetailPage() {
             setLoading(false);
         }
     }, [tid]);
+
+    function showToast(msg: string, type = "success") {
+        setToast({msg, type});
+        setTimeout(() => setToast(null), 3000);
+    }
+
+    async function handleCancelReservation() {
+        if (!reservation) return;
+        const confirmed = window.confirm(
+            `Xác nhận hủy đặt bàn của khách "${reservation.customerName}"? Bàn sẽ được giải phóng ngay.`
+        );
+        if (!confirmed) return;
+
+        setCancelling(true);
+        try {
+            await waiterApi.cancelReservation(reservation.reservationId);
+            showToast("Đã hủy đặt bàn");
+            setTimeout(() => navigate("/waiter/tables"), 800);
+        } catch (err: unknown) {
+            const responseData = (err as { response?: { data?: unknown } })?.response?.data;
+            const msg =
+                typeof responseData === "string"
+                    ? responseData
+                    : (responseData as { message?: string })?.message
+                    ?? "Hủy đặt bàn thất bại. Vui lòng thử lại.";
+            showToast(msg, "error");
+        } finally {
+            setCancelling(false);
+        }
+    }
 
     if (loading) {
         return (
@@ -74,12 +106,22 @@ export default function WaiterReservationDetailPage() {
                 <div className="waiter-sub-header">
                     <BackArrow onClick={() => navigate("/waiter/tables")}/>
                     <h2 className="waiter-title">Chi tiết đặt bàn — Bàn {tid}</h2>
-                    <button
-                        onClick={() => navigate(`/waiter/tables/${tid}/order/new?reservationId=${reservation.reservationId}`)}
-                        className="waiter-action-btn"
-                    >
-                        Bắt đầu Order
-                    </button>
+                    <div style={{display: "flex", gap: "0.75rem"}}>
+                        <button
+                            onClick={handleCancelReservation}
+                            disabled={cancelling}
+                            className="waiter-btn-outline"
+                            style={{color: "#ef4444", borderColor: "#fca5a5"}}
+                        >
+                            {cancelling ? "Đang hủy..." : "Hủy đặt bàn"}
+                        </button>
+                        <button
+                            onClick={() => navigate(`/waiter/tables/${tid}/order/new?reservationId=${reservation.reservationId}`)}
+                            className="waiter-action-btn"
+                        >
+                            Bắt đầu Order
+                        </button>
+                    </div>
                 </div>
                 <div className="waiter-card" style={{maxWidth: "600px"}}>
                     <div className="waiter-card-header">Thông tin đặt bàn</div>
@@ -109,6 +151,7 @@ export default function WaiterReservationDetailPage() {
                     </div>
                 </div>
             </main>
+            <WaiterToast toast={toast}/>
         </div>
     );
 }
