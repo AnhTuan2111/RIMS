@@ -29,7 +29,7 @@ export interface CustomerReservationResponse {
     phone: string
     reservationTime: string
     note: string | null
-    status: 'QUEUED' | 'WAITING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
+    status: 'QUEUED' | 'WAITING' | 'COMPLETED' | 'CANCELLED'
     tableNumber: string
     capacity: number
     tableStatus: string
@@ -41,7 +41,24 @@ export interface RestaurantTable {
     id: number
     tableNumber: string
     capacity: number
-    status: 'AVAILABLE' | 'RESERVED' | 'OCCUPIED'
+    status: 'AVAILABLE' | 'SERVING' | 'RESERVED'
+}
+export interface TimeRangeResponse {
+    start: string   // ISO LocalDateTime string
+    end: string
+}
+
+// ===== Tables API =====
+export async function getAvailableTables(): Promise<RestaurantTable[]> {
+    const res = await apiClient.get<RestaurantTable[]>('/customer/tables/available')
+    return res.data
+}
+
+export async function getBlockedTimeRanges(tableId: number, date: string): Promise<TimeRangeResponse[]> {
+    const res = await apiClient.get<TimeRangeResponse[]>(`/customer/tables/${tableId}/blocked-slots`, {
+        params: { date },
+    })
+    return res.data
 }
 
 // ===== Profile APIs =====
@@ -77,11 +94,5 @@ export async function checkReservationByDate(date: string): Promise<boolean> {
 
 export async function getCurrentReservation(): Promise<CustomerReservationResponse[]> {
     const res = await apiClient.get<CustomerReservationResponse[]>('/customer/reservations/current')
-    return res.data
-}
-
-// ===== Tables API =====
-export async function getAvailableTables(): Promise<RestaurantTable[]> {
-    const res = await apiClient.get<RestaurantTable[]>('/customer/tables/available')
     return res.data
 }
