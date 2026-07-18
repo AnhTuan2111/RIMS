@@ -31,8 +31,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import java.math.BigDecimal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import java.time.LocalDate;
 import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 @Service
@@ -314,45 +313,21 @@ public class ChefServiceImpl implements ChefService {
 
     @Override
     public List<CancelledOrderResponse> getCancelledOrders() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay(); // MỚI
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1); // MỚI
+
         return orderItemRepository
-                .findByStatusOrderByCreatedAtAsc(
-                        OrderItemStatus.CANCELLED
-                )
+                .findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(OrderItemStatus.CANCELLED, startOfDay, endOfDay) // ĐỔI
                 .stream()
                 .map(item -> {
-                    CancelledOrderResponse response =
-                            new CancelledOrderResponse();
-
-                    response.setOrderItemId(
-                            item.getId()
-                    );
-
-                    response.setOrderId(
-                            item.getOrder().getId()
-                    );
-
-                    response.setTableNumber(
-                            item.getOrder()
-                                    .getTable()
-                                    .getTableNumber()
-                    );
-
-                    response.setDishName(
-                            item.getDishNameSnapshot()
-                    );
-
-                    response.setQuantity(
-                            item.getQuantity()
-                    );
-
-                    response.setCancelReason(
-                            item.getCancelReason()
-                    );
-
-                    response.setCancelledAt(
-                            item.getCancelRequestedAt()
-                    );
-
+                    CancelledOrderResponse response = new CancelledOrderResponse();
+                    response.setOrderItemId(item.getId());
+                    response.setOrderId(item.getOrder().getId());
+                    response.setTableNumber(item.getOrder().getTable().getTableNumber());
+                    response.setDishName(item.getDishNameSnapshot());
+                    response.setQuantity(item.getQuantity());
+                    response.setCancelReason(item.getCancelReason());
+                    response.setCancelledAt(item.getCancelRequestedAt());
                     return response;
                 })
                 .toList();

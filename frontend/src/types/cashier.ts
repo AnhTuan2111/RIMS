@@ -47,6 +47,7 @@ export interface PaymentResponse {
     pointsUsed: number | null;
     pointsEarned: number | null;
     paymentMethod: string;
+    autoClosedNoPayment?: boolean
 }
 
 export interface VNPayResponse {
