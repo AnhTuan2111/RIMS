@@ -93,7 +93,7 @@ public class CustomerServiceImpl implements CustomerService
         reservation.setUser(user);
 
         reservationRepository.save(reservation);
-
+        webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         return convertToCustomerResponse(reservation);
     }
 
