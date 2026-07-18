@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom'
 import SockJS from 'sockjs-client'
 import Stomp from 'stompjs'
+import { getAccessToken } from '../../utils/tokenStorage'
 import {
     getChefDishes,
     updateMenuStatus,
@@ -99,7 +100,7 @@ export default function DishListPage() {
         const socket = new SockJS('http://localhost:8080/ws-rims')
         const client = Stomp.over(socket)
 
-        client.connect({}, () => {
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
             console.log('Danh sách món đã kết nối WebSocket!')
 
             client.subscribe('/topic/kitchen', () => {

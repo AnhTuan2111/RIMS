@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
+import { getAccessToken } from "../../utils/tokenStorage";
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import {type TableDetailResponse, waiterApi} from "../../api/waiter";
@@ -33,7 +34,7 @@ export default function WaiterTableListPage() {
         const socket = new SockJS('http://localhost:8080/ws-rims');
         const client = Stomp.over(socket);
 
-        client.connect({}, () => {
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
             console.log("Waiter đã kết nối đường dây với Bếp!");
 
             client.subscribe('/topic/waiter', () => {
