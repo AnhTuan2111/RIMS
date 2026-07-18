@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>
 {
 
     List<Order> findByStatus(OrderStatus status);
+
+    List<Order> findByStatusAndInvoiceIsNullAndCreatedAtBefore(OrderStatus status, LocalDateTime cutoff);
 
     @Query("""
             SELECT o FROM Order o

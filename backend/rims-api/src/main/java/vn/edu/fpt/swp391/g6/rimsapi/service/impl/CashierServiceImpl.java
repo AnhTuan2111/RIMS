@@ -2,6 +2,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.swp391.g6.rimsapi.config.VNPayConfig;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
@@ -115,7 +116,7 @@ public class CashierServiceImpl implements CashierService {
     @Transactional
     public PaymentResponse processPayment(Long orderId, PaymentRequest request)
     {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findOrderWithDetailsById(orderId) // ĐỔI: cần load kèm orderItems
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
         if (order.getStatus() == OrderStatus.LOCKED)
@@ -129,6 +130,38 @@ public class CashierServiceImpl implements CashierService {
         if (order.getStatus() != OrderStatus.SERVING)
         {
             throw new RuntimeException("Đơn hàng này đã thanh toán xong hoặc không tồn tại!");
+        }
+
+        List<OrderItem> items = order.getOrderItems() != null ? order.getOrderItems() : List.of();
+
+        // MỚI: chặn nếu còn món chưa xử lý xong
+        boolean hasPreparingItem = items.stream()
+                .anyMatch(item -> item.getStatus() == OrderItemStatus.PREPARING);
+
+        if (hasPreparingItem)
+        {
+            String preparingNames = items.stream()
+                    .filter(item -> item.getStatus() == OrderItemStatus.PREPARING)
+                    .map(item -> item.getDishNameSnapshot() + " x" + item.getQuantity())
+                    .collect(Collectors.joining(", "));
+            throw new IllegalArgumentException("Không thể thanh toán, còn món chưa hoàn thành: " + preparingNames); // ĐỔI: RuntimeException -> IllegalArgumentException để trả đúng mã 400
+        }
+
+        // MỚI: nếu không còn PREPARING nhưng cũng không có món nào COMPLETED -> toàn bộ đã bị hủy
+        boolean hasCompletedItem = items.stream()
+                .anyMatch(item -> item.getStatus() == OrderItemStatus.COMPLETED);
+
+        if (!hasCompletedItem)
+        {
+            order.setStatus(OrderStatus.COMPLETED); // dùng lại giá trị enum có sẵn, không tạo Invoice
+            orderRepository.save(order);
+            releaseTableAfterOrderClose(order);
+
+            return PaymentResponse.builder()
+                    .message("Bàn không có món nào được hoàn thành, đơn đã được đóng và giải phóng bàn.")
+                    .success(true)
+                    .autoClosedNoPayment(true)
+                    .build();
         }
 
         order.setStatus(OrderStatus.LOCKED);
@@ -185,18 +218,7 @@ public class CashierServiceImpl implements CashierService {
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
-        if (order.getTable() != null) {
-            RestaurantTable table = order.getTable();
-            boolean hasUpcomingReservation = reservationRepository
-                    .findFirstByTableAndStatusInAndReservationTimeAfterOrderByReservationTimeAsc(
-                            table,
-                            List.of(ReservationStatus.WAITING, ReservationStatus.QUEUED),
-                            LocalDateTime.now()
-                    ).isPresent();
-            table.setStatus(hasUpcomingReservation ? TableStatus.RESERVED : TableStatus.AVAILABLE);
-            tableRepository.save(table);
-            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
-        }
+        releaseTableAfterOrderClose(order);
 
         return PaymentResponse.builder()
                 .message("Thanh toán tiền mặt thành công")
@@ -424,70 +446,9 @@ public class CashierServiceImpl implements CashierService {
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
-        if (order.getTable() != null)
-        {
-            RestaurantTable table = order.getTable();
-            boolean hasUpcomingReservation = reservationRepository
-                    .findFirstByTableAndStatusInAndReservationTimeAfterOrderByReservationTimeAsc(
-                            table,
-                            List.of(ReservationStatus.WAITING, ReservationStatus.QUEUED),
-                            LocalDateTime.now()
-                    ).isPresent();
-            table.setStatus(hasUpcomingReservation ? TableStatus.RESERVED : TableStatus.AVAILABLE);
-            tableRepository.save(table);
-            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
-        }
+        releaseTableAfterOrderClose(order);
 
         return invoice.getId();
-    }
-
-
-    private BigDecimal applyLoyaltyPoints(Invoice invoice, Integer customerId, Integer pointsUsed, BigDecimal finalAmount)
-    {
-        if (customerId == null) return finalAmount;
-
-        User customer = userRepository.findById(customerId).orElse(null);
-        if (customer == null) return finalAmount;
-
-        invoice.setCustomer(customer);
-        int safePointsUsed = pointsUsed != null ? pointsUsed : 0;
-
-        if (safePointsUsed > 0)
-        {
-            if (customer.getRewardPoints() < safePointsUsed)
-            {
-                throw new RuntimeException("Khách hàng không đủ điểm!");
-            }
-            BigDecimal discount = new BigDecimal(safePointsUsed).multiply(new BigDecimal("1000"));
-            BigDecimal maxDiscount = finalAmount.multiply(new BigDecimal("0.5"));
-            if (discount.compareTo(maxDiscount) > 0)
-            {
-                throw new RuntimeException("Số điểm sử dụng vượt quá 50% hóa đơn cho phép!");
-            }
-            customer.setRewardPoints(customer.getRewardPoints() - safePointsUsed);
-            finalAmount = finalAmount.subtract(discount);
-            if (finalAmount.compareTo(BigDecimal.ZERO) < 0) finalAmount = BigDecimal.ZERO;
-            invoice.setPointsUsedOnInvoice(safePointsUsed);
-        }
-
-        int earnedPoints = finalAmount.multiply(new BigDecimal("0.01"))
-                .divide(new BigDecimal("1000"), 0, RoundingMode.DOWN)
-                .intValue();
-        customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
-        userRepository.save(customer);
-        invoice.setPointsEarnedOnInvoice(earnedPoints);
-
-        return finalAmount;
-    }
-
-    private BigDecimal calculateActualTotal(Order order) {
-        if (order.getOrderItems() == null) return BigDecimal.ZERO;
-
-        return order.getOrderItems().stream()
-                .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
-                .map(oi -> oi.getSubTotal())
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
@@ -521,8 +482,6 @@ public class CashierServiceImpl implements CashierService {
         return userRepository.save(user);
     }
 
-    // ĐÃ THÊM: dán 2 method này vào trong class CashierServiceImpl,
-// và thêm các import cần thiết ở đầu file (xem ghi chú bên dưới)
 
     @Override
     @Transactional(readOnly = true)
@@ -637,5 +596,84 @@ public class CashierServiceImpl implements CashierService {
     public Invoice getInvoiceWithDetails(Long invoiceId) {
         return invoiceRepository.findWithOrderAndItemsById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + invoiceId));
+    }
+
+    @Scheduled(fixedRate = 3600000) // 1 giờ/lần — không cấp thiết như 2 job kia
+    @Transactional
+    public void cleanupStaleCancelledOrders()
+    {
+        LocalDateTime cutoff = LocalDate.now().atStartOfDay(); // đầu ngày hôm nay — xóa mọi Order "toàn hủy" từ hôm qua trở về trước
+
+        List<Order> staleOrders = orderRepository
+                .findByStatusAndInvoiceIsNullAndCreatedAtBefore(OrderStatus.COMPLETED, cutoff);
+
+        if (!staleOrders.isEmpty())
+        {
+            orderRepository.deleteAll(staleOrders); // cascade xóa OrderItem con luôn (đã xác nhận cascade=ALL, orphanRemoval=true)
+        }
+    }
+
+    private BigDecimal calculateActualTotal(Order order) {
+        if (order.getOrderItems() == null) return BigDecimal.ZERO;
+
+        return order.getOrderItems().stream()
+                .filter(oi -> oi.getStatus() == OrderItemStatus.COMPLETED)
+                .map(oi -> oi.getSubTotal())
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal applyLoyaltyPoints(Invoice invoice, Integer customerId, Integer pointsUsed, BigDecimal finalAmount)
+    {
+        if (customerId == null) return finalAmount;
+
+        User customer = userRepository.findById(customerId).orElse(null);
+        if (customer == null) return finalAmount;
+
+        invoice.setCustomer(customer);
+        int safePointsUsed = pointsUsed != null ? pointsUsed : 0;
+
+        if (safePointsUsed > 0)
+        {
+            if (customer.getRewardPoints() < safePointsUsed)
+            {
+                throw new RuntimeException("Khách hàng không đủ điểm!");
+            }
+            BigDecimal discount = new BigDecimal(safePointsUsed).multiply(new BigDecimal("1000"));
+            BigDecimal maxDiscount = finalAmount.multiply(new BigDecimal("0.5"));
+            if (discount.compareTo(maxDiscount) > 0)
+            {
+                throw new RuntimeException("Số điểm sử dụng vượt quá 50% hóa đơn cho phép!");
+            }
+            customer.setRewardPoints(customer.getRewardPoints() - safePointsUsed);
+            finalAmount = finalAmount.subtract(discount);
+            if (finalAmount.compareTo(BigDecimal.ZERO) < 0) finalAmount = BigDecimal.ZERO;
+            invoice.setPointsUsedOnInvoice(safePointsUsed);
+        }
+
+        int earnedPoints = finalAmount.multiply(new BigDecimal("0.01"))
+                .divide(new BigDecimal("1000"), 0, RoundingMode.DOWN)
+                .intValue();
+        customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
+        userRepository.save(customer);
+        invoice.setPointsEarnedOnInvoice(earnedPoints);
+
+        return finalAmount;
+    }
+
+    private void releaseTableAfterOrderClose(Order order)
+    {
+        if (order.getTable() == null) return;
+
+        RestaurantTable table = order.getTable();
+        boolean hasUpcomingReservation = reservationRepository
+                .findFirstByTableAndStatusInAndReservationTimeAfterOrderByReservationTimeAsc(
+                        table,
+                        List.of(ReservationStatus.WAITING, ReservationStatus.QUEUED),
+                        LocalDateTime.now()
+                ).isPresent();
+        table.setStatus(hasUpcomingReservation ? TableStatus.RESERVED : TableStatus.AVAILABLE);
+        tableRepository.save(table);
+        webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
     }
 }

@@ -108,19 +108,23 @@ export default function OrderPanel({
     const handleCheckoutClick = async () => {
         setIsLocking(true);
         try {
-            // Gọi API khóa đơn hàng
             const res = await cashierApi.processPaymentLock(orderDetail!.orderId, {
                 paymentMethod: 'CASH',
                 amountPaid: 0
             });
             if (res.data.success) {
-                onCheckout(); // Bật PaymentModal lên
+                if (res.data.autoClosedNoPayment) { // MỚI
+                    alert(res.data.message);
+                    onClose(); // đóng panel, KHÔNG mở PaymentModal vì không có gì để thanh toán
+                } else {
+                    onCheckout(); // Bật PaymentModal lên như cũ
+                }
             } else {
                 alert(res.data.message);
             }
         } catch (err) {
-            console.error(err);
-            alert('Không thể khóa đơn hàng để thanh toán!');
+            const error = err as { response?: { data?: { message?: string } } };
+            alert(error?.response?.data?.message || 'Không thể khóa đơn hàng để thanh toán!'); // ĐỔI: hiện đúng message lỗi backend (VD: liệt kê món PREPARING) thay vì message chung chung
         } finally {
             setIsLocking(false);
         }
