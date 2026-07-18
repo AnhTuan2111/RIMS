@@ -46,7 +46,7 @@ public class CustomerServiceImpl implements CustomerService
     @Transactional
     public CustomerReservationResponse createReservation(CustomerCreateReservationRequest request) {
 
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findByIdForUpdate(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Không tìm thấy người dùng với ID: " + request.getUserId()));
 

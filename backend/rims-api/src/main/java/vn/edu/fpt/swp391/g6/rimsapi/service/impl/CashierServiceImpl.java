@@ -474,16 +474,20 @@ public class CashierServiceImpl implements CashierService {
         user.setPhone(phone);
         user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
 
-        // Dùng luôn SĐT làm username (đã đảm bảo duy nhất qua check existsByPhone ở trên),
-        // mật khẩu mặc định "123456" được mã hóa bằng đúng PasswordEncoder (BCrypt) dùng chung
-        // với toàn hệ thống, để khách có thể đăng nhập thật bằng SĐT + mật khẩu này về sau.
         user.setUsername(phone);
         user.setPasswordHash(passwordEncoder.encode("123456"));
         user.setRole(RoleType.CUSTOMER);
         user.setRewardPoints(0);
         user.setActive(true);
 
-        return userRepository.save(user);
+        try {
+            return userRepository.save(user);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Bắt trường hợp race condition: 2 request cùng tạo 1 SĐT gần như đồng thời,
+            // request đầu đã pass check existsByPhone nhưng request thứ 2 mới thực sự save trước.
+            // DB tự chặn nhờ unique constraint trên cột phone — chuyển thành message thân thiện.
+            throw new RuntimeException("Số điện thoại này đã tồn tại!");
+        }
     }
 
 
