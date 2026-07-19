@@ -1,5 +1,6 @@
 import {
-    useRef,
+    useCallback,
+    useEffect,
     useState,
     type CSSProperties,
 } from 'react'
@@ -12,13 +13,12 @@ import {
     type OrderDetailResponse,
     waiterApi,
 } from '@/shared/api/waiter'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     BackArrow,
     fmtPrice,
     WaiterHeader,
 } from './components'
-import {usePolling} from '@/shared/hooks/usePolling'
+import {useWaiterSocket} from '@/realtime'
 
 function isRequestCanceled(error: unknown) {
     if (typeof error !== 'object' || error === null) {
@@ -54,92 +54,79 @@ export default function WaiterOrderDetailPage() {
     const [error, setError] =
         useState<string | null>(null)
 
-    const hasLoadedInitialOrdersRef =
-        useRef(false)
 
-    async function loadServingOrders(
-        signal?: AbortSignal,
-        showFullLoading = true,
-    ) {
-        if (!tableIdNumber) {
-            setServingOrders([])
-            setError('Không xác định được bàn.')
-            setIsLoading(false)
-            return
-        }
 
-        try {
-            if (showFullLoading) {
-                setIsLoading(true)
-            }
-
-            setError(null)
-
-            const response =
-                await waiterApi.getServingOrders(
-                    tableIdNumber,
-                    signal,
-                )
-
-            if (signal?.aborted) {
-                return
-            }
-
-            setServingOrders(response.data)
-        } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
-                return
-            }
-
-            console.error(
-                '[WAITER_ORDER_DETAIL_FETCH_ERROR]',
-                requestError,
-            )
-
-            setError(
-                'Không thể tải chi tiết order của bàn.',
-            )
-        } finally {
-            if (
-                showFullLoading
-                && !signal?.aborted
-            ) {
+    const loadServingOrders = useCallback(
+        async (
+            signal?: AbortSignal,
+            showFullLoading = true,
+        ) => {
+            if (!tableIdNumber) {
+                setServingOrders([])
+                setError('Không xác định được bàn.')
                 setIsLoading(false)
+                return
             }
-        }
-    }
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialOrdersRef.current
+            try {
+                if (showFullLoading) {
+                    setIsLoading(true)
+                }
 
-            await loadServingOrders(
-                signal,
-                isInitialLoad,
-            )
+                setError(null)
 
-            hasLoadedInitialOrdersRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .waiter
-                .orderDetailIntervalMs,
+                const response =
+                    await waiterApi.getServingOrders(
+                        tableIdNumber,
+                        signal,
+                    )
 
-            runImmediately: true,
-            pauseWhenHidden: true,
+                if (signal?.aborted) {
+                    return
+                }
 
-            onError: (requestError) => {
+                setServingOrders(response.data)
+            } catch (requestError: unknown) {
+                if (
+                    signal?.aborted
+                    || isRequestCanceled(requestError)
+                ) {
+                    return
+                }
+
                 console.error(
-                    '[WAITER_ORDER_DETAIL_POLL_ERROR]',
+                    '[WAITER_ORDER_DETAIL_FETCH_ERROR]',
                     requestError,
                 )
-            },
+
+                setError(
+                    'Không thể tải chi tiết order của bàn.',
+                )
+            } finally {
+                if (
+                    showFullLoading
+                    && !signal?.aborted
+                ) {
+                    setIsLoading(false)
+                }
+            }
         },
+        [tableIdNumber],
+    )
+
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadServingOrders()
+        }, 0)
+
+        return () => window.clearTimeout(timer)
+    }, [loadServingOrders])
+
+    // WebSocket: refresh when backend broadcasts waiter or table updates
+    useWaiterSocket(
+        () => void loadServingOrders(undefined, false),
+        () => void loadServingOrders(undefined, false),
     )
 
     const orderItems =

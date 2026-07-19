@@ -1,7 +1,7 @@
-﻿import {
+import {
     useCallback,
+    useEffect,
     useMemo,
-    useRef,
     useState,
 } from 'react'
 import {
@@ -14,7 +14,6 @@ import {
     updateMenuStatus,
     type DishListResponse,
 } from '@/shared/api/chef'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     EmptyState,
     ErrorState,
@@ -24,7 +23,7 @@ import {
     PageCard,
     PageHeader,
 } from '@/shared/components/ui'
-import {usePolling} from '@/shared/hooks/usePolling'
+import {useKitchenSocket} from '@/realtime'
 
 const ITEMS_PER_PAGE = 8
 
@@ -80,7 +79,7 @@ export default function DishListPage() {
     const [updatingDishId, setUpdatingDishId] =
         useState<number | null>(null)
 
-    const hasLoadedInitialDishesRef = useRef(false)
+
 
 
     const loadDishes = useCallback(
@@ -124,36 +123,17 @@ export default function DishListPage() {
         [],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialDishesRef.current
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadDishes(true, false)
+        }, 0)
 
-            await loadDishes(
-                isInitialLoad,
-                false,
-                signal,
-            )
+        return () => window.clearTimeout(timer)
+    }, [loadDishes])
 
-            hasLoadedInitialDishesRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .chef
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[CHEF_DISH_LIST_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+    // WebSocket: refresh when backend broadcasts a kitchen update
+    useKitchenSocket(() => void loadDishes(false, false))
 
 
     async function handleToggleDish(

@@ -1,4 +1,6 @@
-﻿import {
+import {
+    useCallback,
+    useEffect,
     useMemo,
     useRef,
     useState,
@@ -16,7 +18,6 @@ import {
     type UpdateOrderItemRequest,
     waiterApi,
 } from '@/shared/api/waiter'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     BackArrow,
     ConfirmModal,
@@ -24,7 +25,7 @@ import {
     WaiterHeader,
     WaiterToast,
 } from './components'
-import {usePolling} from '@/shared/hooks/usePolling'
+import {useWaiterSocket} from '@/realtime'
 
 type DraftItem = {
     qty: number
@@ -225,8 +226,7 @@ export default function WaiterUpdateOrderPage() {
     const [pageError, setPageError] =
         useState<string | null>(null)
 
-    const hasLoadedInitialDataRef =
-        useRef(false)
+
 
     const hasUserEditedDraftRef =
         useRef(false)
@@ -246,111 +246,103 @@ export default function WaiterUpdateOrderPage() {
         )
     }
 
-    async function loadOrderData(
-        signal?: AbortSignal,
-        showFullLoading = true,
-    ) {
-        if (!tableIdNumber) {
-            setPageError('Mã bàn không hợp lệ.')
-            setIsLoading(false)
-            return
-        }
-
-        try {
-            if (showFullLoading) {
-                setIsLoading(true)
-            }
-
-            setPageError(null)
-
-            const [
-                menuResponse,
-                orderResponse,
-            ] =
-                await Promise.all([
-                    waiterApi.getMenu(signal),
-                    waiterApi.getServingOrders(
-                        tableIdNumber,
-                        signal,
-                    ),
-                ])
-
-            if (signal?.aborted) {
-                return
-            }
-
-            const nextMenu = menuResponse.data
-            const nextOrders = orderResponse.data ?? []
-
-            setMenu(nextMenu)
-            setServingOrders(nextOrders)
-
-            if (
-                !hasUserEditedDraftRef.current
-                && !showConfirm
-                && !submitting
-            ) {
-                setOrderDraft(
-                    buildDraftFromOrders(
-                        nextMenu,
-                        nextOrders,
-                    ),
-                )
-            }
-        } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
-                return
-            }
-
-            console.error(
-                '[WAITER_UPDATE_ORDER_LOAD_ERROR]',
-                requestError,
-            )
-
-            setPageError(
-                'Không thể tải dữ liệu cập nhật order.',
-            )
-        } finally {
-            if (
-                showFullLoading
-                && !signal?.aborted
-            ) {
+    const loadOrderData = useCallback(
+        async (
+            signal?: AbortSignal,
+            showFullLoading = true,
+        ) => {
+            if (!tableIdNumber) {
+                setPageError('Mã bàn không hợp lệ.')
                 setIsLoading(false)
+                return
             }
-        }
-    }
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialDataRef.current
+            try {
+                if (showFullLoading) {
+                    setIsLoading(true)
+                }
 
-            await loadOrderData(
-                signal,
-                isInitialLoad,
-            )
+                setPageError(null)
 
-            hasLoadedInitialDataRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .waiter
-                .orderDetailIntervalMs,
+                const [
+                    menuResponse,
+                    orderResponse,
+                ] =
+                    await Promise.all([
+                        waiterApi.getMenu(signal),
+                        waiterApi.getServingOrders(
+                            tableIdNumber,
+                            signal,
+                        ),
+                    ])
 
-            runImmediately: true,
-            pauseWhenHidden: true,
+                if (signal?.aborted) {
+                    return
+                }
 
-            onError: (requestError) => {
+                const nextMenu = menuResponse.data
+                const nextOrders = orderResponse.data ?? []
+
+                setMenu(nextMenu)
+                setServingOrders(nextOrders)
+
+                if (
+                    !hasUserEditedDraftRef.current
+                    && !showConfirm
+                    && !submitting
+                ) {
+                    setOrderDraft(
+                        buildDraftFromOrders(
+                            nextMenu,
+                            nextOrders,
+                        ),
+                    )
+                }
+            } catch (requestError: unknown) {
+                if (
+                    signal?.aborted
+                    || isRequestCanceled(requestError)
+                ) {
+                    return
+                }
+
                 console.error(
-                    '[WAITER_UPDATE_ORDER_POLL_ERROR]',
+                    '[WAITER_UPDATE_ORDER_LOAD_ERROR]',
                     requestError,
                 )
-            },
+
+                setPageError(
+                    'Không thể tải dữ liệu cập nhật order.',
+                )
+            } finally {
+                if (
+                    showFullLoading
+                    && !signal?.aborted
+                ) {
+                    setIsLoading(false)
+                }
+            }
         },
+        [
+            showConfirm,
+            submitting,
+            tableIdNumber,
+        ],
+    )
+
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadOrderData()
+        }, 0)
+
+        return () => window.clearTimeout(timer)
+    }, [loadOrderData])
+
+    // WebSocket: refresh when backend broadcasts waiter or table updates
+    useWaiterSocket(
+        () => void loadOrderData(undefined, false),
+        () => void loadOrderData(undefined, false),
     )
 
     function getMinQty(dishId: number) {

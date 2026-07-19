@@ -1,7 +1,7 @@
-﻿import {
+import {
     useCallback,
+    useEffect,
     useMemo,
-    useRef,
     useState,
 } from 'react'
 
@@ -9,7 +9,7 @@ import {
     getCompletedOrders,
     type KitchenOrderItemResponse,
 } from '@/shared/api/chef'
-import {DEFAULT_POLL_INTERVAL_MS} from '@/app/config/realtime'
+import {useKitchenSocket} from '@/realtime'
 import {
     EmptyState,
     ErrorState,
@@ -19,7 +19,7 @@ import {
     PageCard,
     PageHeader,
 } from '@/shared/components/ui'
-import {usePolling} from '@/shared/hooks/usePolling'
+
 
 const ITEMS_PER_PAGE = 6
 
@@ -64,8 +64,7 @@ export default function CompletedOrdersPage() {
 
     const [currentPage, setCurrentPage] = useState(1)
 
-    const hasLoadedInitialCompletedOrdersRef =
-        useRef(false)
+
 
     const loadCompletedOrders = useCallback(
         async (
@@ -109,32 +108,17 @@ export default function CompletedOrdersPage() {
         [],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialCompletedOrdersRef.current
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadCompletedOrders(true, false)
+        }, 0)
 
-            await loadCompletedOrders(
-                isInitialLoad,
-                false,
-                signal,
-            )
+        return () => window.clearTimeout(timer)
+    }, [loadCompletedOrders])
 
-            hasLoadedInitialCompletedOrdersRef.current = true
-        },
-        {
-            intervalMs: DEFAULT_POLL_INTERVAL_MS,
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[CHEF_COMPLETED_ORDERS_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+    // WebSocket: refresh when backend broadcasts a kitchen update
+    useKitchenSocket(() => void loadCompletedOrders(false, false))
 
     function clearFilters() {
         setSearchText('')

@@ -1,7 +1,8 @@
-﻿
+
 import {
+    useCallback,
+    useEffect,
     useMemo,
-    useRef,
     useState,
 } from 'react'
 import {
@@ -16,7 +17,6 @@ import {
     type OrderItemRequest,
     waiterApi,
 } from '@/shared/api/waiter'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     BackArrow,
     ConfirmModal,
@@ -24,7 +24,7 @@ import {
     WaiterHeader,
     WaiterToast,
 } from './components'
-import {usePolling} from '@/shared/hooks/usePolling'
+import {useWaiterSocket} from '@/realtime'
 
 type DraftItem = {
     qty: number
@@ -130,8 +130,7 @@ export default function WaiterCreateOrderPage() {
     const [menuError, setMenuError] =
         useState<string | null>(null)
 
-    const hasLoadedInitialMenuRef =
-        useRef(false)
+
 
     function showToast(
         msg: string,
@@ -148,79 +147,67 @@ export default function WaiterCreateOrderPage() {
         )
     }
 
-    async function loadMenu(
-        signal?: AbortSignal,
-        showFullLoading = true,
-    ) {
-        try {
-            if (showFullLoading) {
-                setIsLoadingMenu(true)
-            }
+    const loadMenu = useCallback(
+        async (
+            signal?: AbortSignal,
+            showFullLoading = true,
+        ) => {
+            try {
+                if (showFullLoading) {
+                    setIsLoadingMenu(true)
+                }
 
-            setMenuError(null)
+                setMenuError(null)
 
-            const response =
-                await waiterApi.getMenu(signal)
+                const response =
+                    await waiterApi.getMenu(signal)
 
-            if (signal?.aborted) {
-                return
-            }
+                if (signal?.aborted) {
+                    return
+                }
 
-            setMenu(response.data)
-        } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
-                return
-            }
+                setMenu(response.data)
+            } catch (requestError: unknown) {
+                if (
+                    signal?.aborted
+                    || isRequestCanceled(requestError)
+                ) {
+                    return
+                }
 
-            console.error(
-                '[WAITER_CREATE_ORDER_MENU_ERROR]',
-                requestError,
-            )
-
-            setMenuError(
-                'Không thể tải danh sách món.',
-            )
-        } finally {
-            if (
-                showFullLoading
-                && !signal?.aborted
-            ) {
-                setIsLoadingMenu(false)
-            }
-        }
-    }
-
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialMenuRef.current
-
-            await loadMenu(
-                signal,
-                isInitialLoad,
-            )
-
-            hasLoadedInitialMenuRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .waiter
-                .tablesIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
                 console.error(
-                    '[WAITER_CREATE_ORDER_MENU_POLL_ERROR]',
+                    '[WAITER_CREATE_ORDER_MENU_ERROR]',
                     requestError,
                 )
-            },
+
+                setMenuError(
+                    'Không thể tải danh sách món.',
+                )
+            } finally {
+                if (
+                    showFullLoading
+                    && !signal?.aborted
+                ) {
+                    setIsLoadingMenu(false)
+                }
+            }
         },
+        [],
+    )
+
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadMenu()
+        }, 0)
+
+        return () => window.clearTimeout(timer)
+    }, [loadMenu])
+
+    // WebSocket: refresh menu when backend broadcasts a waiter update
+    useWaiterSocket(
+        () => void loadMenu(undefined, false),
+        () => void loadMenu(undefined, false),
     )
 
     const categories =

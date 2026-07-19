@@ -1,4 +1,4 @@
-﻿import {
+import {
     useState,
     type CSSProperties,
 } from 'react'
@@ -273,15 +273,22 @@ export default function ProfilePage() {
                 phone,
             }
 
-            const updated =
-                await adminApi.updateProfile(
+            let updated
+            if (isCustomer) {
+                updated = await customerApi.updateMyProfile({
+                    fullName,
+                    email,
+                    phone,
+                })
+            } else {
+                updated = await adminApi.updateProfile(
                     userId,
                     data,
                 )
-
+            }
             const nextUser: StoredUser = {
                 ...currentUser,
-                userId: updated.userId,
+                userId: (updated as unknown as Record<string, unknown>).userId as number ?? (updated as unknown as Record<string, unknown>).id as number ?? currentUser.userId,
                 username: updated.username,
                 fullName: updated.fullName,
                 email: updated.email,

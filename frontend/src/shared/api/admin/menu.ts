@@ -27,9 +27,7 @@ export const categoryApi = {
     getAllCategories: (signal?: AbortSignal) =>
         apiClient.get<CategoryResponse[]>('/admin/category/all', {signal}),
 
-    /** Returns all dishes */
-    getAllDishes: (signal?: AbortSignal) =>
-        apiClient.get<DishResponse[]>('/admin/dish/all', {signal}),
+
 
     /** Creates a new category */
     createCategory: (data: Pick<CategoryFormData, 'name' | 'description'>) =>
@@ -52,9 +50,7 @@ export const dishApi = {
     getAllDishes: (signal?: AbortSignal) =>
         apiClient.get<DishResponse[]>('/admin/dish/all', {signal}),
 
-    /** Returns all categories (used by dish forms) */
-    getAllCategories: (signal?: AbortSignal) =>
-        apiClient.get<CategoryResponse[]>('/admin/category/all', {signal}),
+
 
     /** Creates a new dish */
     createDish: (data: {

@@ -4,7 +4,7 @@
     useState,
     type FormEvent,
 } from 'react';
-import { dishApi } from '@/shared/api/admin';
+import { categoryApi, dishApi } from '@/shared/api/admin';
 import type { DishResponse, CategoryResponse, DishFormData } from '@/shared/api/admin';
 import { REALTIME_CONFIG } from '@/app/config/realtime';
 import { usePolling } from '@/shared/hooks/usePolling';
@@ -105,7 +105,7 @@ export default function AdminDishesPage() {
 
                 const [dishRes, catRes] = await Promise.all([
                     dishApi.getAllDishes(signal),
-                    dishApi.getAllCategories(signal),
+                    categoryApi.getAllCategories(signal),
                 ]);
 
                 setDishes(dishRes.data);

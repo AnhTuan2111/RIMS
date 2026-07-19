@@ -30,9 +30,6 @@ export interface LoginResponse {
     rewardPoints?: number
 }
 
-export interface RefreshTokenRequest {
-    refreshToken: string
-}
 
 export interface UserProfile {
     userId: number
@@ -45,9 +42,6 @@ export interface UserProfile {
     rewardPoints?: number
 }
 
-export interface LogoutResponse {
-    message: string
-}
 
 export interface AuthUser {
     userId: number

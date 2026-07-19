@@ -1,5 +1,6 @@
-﻿import {
+import {
     useCallback,
+    useEffect,
     useRef,
     useState,
     type CSSProperties,
@@ -11,18 +12,25 @@ import {
     type TableDetailResponse,
     waiterApi,
 } from '@/shared/api/waiter'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     WaiterHeader,
     WaiterTableCard,
 } from './components'
-import {usePolling} from '@/shared/hooks/usePolling'
+import {useWaiterSocket} from '@/realtime'
 
 const STATUS_LABEL: Record<string, string> = {
     AVAILABLE: 'available',
     SERVING: 'serving',
     RESERVED: 'reserved',
 }
+
+const NOTIFIABLE_ITEM_STATUSES = new Set([
+    'CANCELLED',
+    'COMPLETED',
+])
+
+type ServingOrderStatusSnapshot =
+    Record<number, Record<string, string>>
 
 function todayString() {
     const date = new Date()
@@ -86,6 +94,9 @@ function isUpcomingReservation(
 export default function WaiterTableListPage() {
     const navigate = useNavigate()
 
+    const previousServingStatusesRef =
+        useRef<ServingOrderStatusSnapshot | null>(null)
+
     const [tables, setTables] =
         useState<TableDetailResponse[]>([])
 
@@ -107,8 +118,10 @@ export default function WaiterTableListPage() {
     const [isModalLoading, setIsModalLoading] =
         useState(false)
 
-    const hasLoadedInitialTablesRef =
-        useRef(false)
+    const [tableStatusNotifications, setTableStatusNotifications] =
+        useState<Record<number, boolean>>({})
+
+
 
     const loadReservationTimesForReservedTables =
         useCallback(
@@ -184,6 +197,159 @@ export default function WaiterTableListPage() {
             [],
         )
 
+    const loadServingOrderStatuses =
+        useCallback(
+            async (
+                nextTables: TableDetailResponse[],
+                signal?: AbortSignal,
+            ) => {
+                const servingTables =
+                    nextTables.filter(
+                        (table) => table.status === 'SERVING',
+                    )
+
+                const servingTableIds =
+                    new Set(
+                        servingTables.map(
+                            (table) => table.tableId,
+                        ),
+                    )
+
+                if (servingTables.length === 0) {
+                    previousServingStatusesRef.current = {}
+                    setTableStatusNotifications({})
+                    return
+                }
+
+                const statusEntries =
+                    await Promise.all(
+                        servingTables.map(async (table) => {
+                            try {
+                                const response =
+                                    await waiterApi.getServingOrders(
+                                        table.tableId,
+                                        signal,
+                                    )
+
+                                if (signal?.aborted) {
+                                    return null
+                                }
+
+                                const itemStatuses:
+                                    Record<string, string> = {}
+
+                                response.data.forEach((order) => {
+                                    order.orderItems.forEach((
+                                        item,
+                                        itemIndex,
+                                    ) => {
+                                        const itemKey =
+                                            item.orderItemId
+                                            ? String(item.orderItemId)
+                                            : `${order.orderId}:${item.dishName}:${itemIndex}`
+
+                                        if (item.status) {
+                                            itemStatuses[itemKey] =
+                                                item.status
+                                        }
+                                    })
+                                })
+
+                                return [
+                                    table.tableId,
+                                    itemStatuses,
+                                ] as const
+                            } catch (requestError: unknown) {
+                                if (
+                                    signal?.aborted
+                                    || isRequestCanceled(requestError)
+                                ) {
+                                    return null
+                                }
+
+                                console.error(
+                                    '[WAITER_TABLE_SERVING_STATUS_ERROR]',
+                                    requestError,
+                                )
+
+                                return null
+                            }
+                        }),
+                    )
+
+                if (signal?.aborted) {
+                    return
+                }
+
+                const nextSnapshot =
+                    Object.fromEntries(
+                        statusEntries.filter(
+                            Boolean,
+                        ) as Array<
+                            readonly [number, Record<string, string>]
+                        >,
+                    )
+
+                const previousSnapshot =
+                    previousServingStatusesRef.current
+
+                previousServingStatusesRef.current =
+                    nextSnapshot
+
+                if (!previousSnapshot) {
+                    return
+                }
+
+                const changedTableIds =
+                    Object.entries(nextSnapshot)
+                        .filter(([tableId, itemStatuses]) => {
+                            const previousItemStatuses =
+                                previousSnapshot[Number(tableId)] ?? {}
+
+                            return Object.entries(itemStatuses)
+                                .some(([itemKey, status]) => {
+                                    const previousStatus =
+                                        previousItemStatuses[itemKey]
+
+                                    return (
+                                        previousStatus
+                                        && previousStatus !== status
+                                        && NOTIFIABLE_ITEM_STATUSES
+                                            .has(status)
+                                    )
+                                })
+                        })
+                        .map(([tableId]) => Number(tableId))
+
+                setTableStatusNotifications((current) => {
+                    const nextNotifications:
+                        Record<number, boolean> = {}
+
+                    Object.entries(current).forEach((
+                        [tableId, hasNotification],
+                    ) => {
+                        const numericTableId =
+                            Number(tableId)
+
+                        if (
+                            hasNotification
+                            && servingTableIds.has(numericTableId)
+                        ) {
+                            nextNotifications[numericTableId] =
+                                true
+                        }
+                    })
+
+                    changedTableIds.forEach((tableId) => {
+                        nextNotifications[tableId] = true
+                    })
+
+                    return nextNotifications
+                })
+            },
+            [],
+        )
+
     const loadTables =
         useCallback(
             async (
@@ -206,10 +372,16 @@ export default function WaiterTableListPage() {
 
                     setTables(response.data)
 
-                    await loadReservationTimesForReservedTables(
-                        response.data,
-                        signal,
-                    )
+                    await Promise.all([
+                        loadReservationTimesForReservedTables(
+                            response.data,
+                            signal,
+                        ),
+                        loadServingOrderStatuses(
+                            response.data,
+                            signal,
+                        ),
+                    ])
                 } catch (requestError: unknown) {
                     if (
                         signal?.aborted
@@ -235,37 +407,25 @@ export default function WaiterTableListPage() {
                     }
                 }
             },
-            [loadReservationTimesForReservedTables],
+            [
+                loadReservationTimesForReservedTables,
+                loadServingOrderStatuses,
+            ],
         )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialTablesRef.current
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadTables()
+        }, 0)
 
-            await loadTables(
-                signal,
-                isInitialLoad,
-            )
+        return () => window.clearTimeout(timer)
+    }, [loadTables])
 
-            hasLoadedInitialTablesRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .waiter
-                .tablesIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[WAITER_TABLE_LIST_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
+    // WebSocket: refresh when backend broadcasts waiter or table updates
+    useWaiterSocket(
+        () => void loadTables(undefined, false),
+        () => void loadTables(undefined, false),
     )
 
     async function handleTableClick(
@@ -308,6 +468,20 @@ export default function WaiterTableListPage() {
         }
 
         if (table.status === 'SERVING') {
+            setTableStatusNotifications((current) => {
+                if (!current[table.tableId]) {
+                    return current
+                }
+
+                const nextNotifications = {
+                    ...current,
+                }
+
+                delete nextNotifications[table.tableId]
+
+                return nextNotifications
+            })
+
             navigate(
                 `/waiter/tables/${table.tableId}/order/detail`,
             )
@@ -388,6 +562,13 @@ export default function WaiterTableListPage() {
                                     statusLabel={statusLabel}
                                     nextReservationTime={
                                         nextReservationTime
+                                    }
+                                    hasStatusNotification={
+                                        Boolean(
+                                            tableStatusNotifications[
+                                                table.tableId
+                                            ],
+                                        )
                                     }
                                     onClick={handleTableClick}
                                 />

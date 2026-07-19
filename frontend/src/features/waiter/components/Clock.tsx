@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 
 export function Clock() {
-    const [nowMs, setNowMs] = useState(Date.now());
+    const [nowMs, setNowMs] = useState(() => Date.now());
     useEffect(() => {
         const t = setInterval(() => setNowMs(Date.now()), 60000);
         return () => clearInterval(t);

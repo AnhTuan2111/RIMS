@@ -1,7 +1,7 @@
-﻿import {
+import {
     type CSSProperties,
     useCallback,
-    useRef,
+    useEffect,
     useState,
 } from 'react'
 
@@ -16,6 +16,7 @@ import {
     PageHeader,
 } from '@/shared/components/ui'
 import {usePolling} from '@/shared/hooks/usePolling'
+import {useCashierSocket} from '@/realtime'
 import type {
     OrderDetailResponse,
     PaymentResponse,
@@ -84,7 +85,7 @@ export default function CashierPaymentsPage() {
     const [pointsUsed, setPointsUsed] =
         useState<number>(0)
 
-    const hasLoadedInitialTablesRef = useRef(false)
+
 
     const loadTables = useCallback(
         async (
@@ -209,40 +210,17 @@ export default function CashierPaymentsPage() {
         [],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialTablesRef.current
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadTables()
+        }, 0)
 
-            await loadTables(
-                signal,
-                isInitialLoad,
-                isInitialLoad,
-            )
+        return () => window.clearTimeout(timer)
+    }, [loadTables])
 
-            hasLoadedInitialTablesRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .cashier
-                .tablesIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                if (isRequestCanceled(requestError)) {
-                    return
-                }
-
-                console.error(
-                    '[CASHIER_TABLES_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+    // WebSocket: refresh table dashboard when backend broadcasts /topic/tables
+    useCashierSocket(() => void loadTables(undefined, false, false))
 
     usePolling(
         async (signal) => {
