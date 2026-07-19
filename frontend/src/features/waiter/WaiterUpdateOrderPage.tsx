@@ -33,6 +33,7 @@ type DraftItem = {
     note: string
     orderItemId?: number | null
     status?: OrderItemStatus
+    cancelReason?: string | null
     chefInternalNote?: string | null
     chefInternalNoteCreatedAt?: string | null
     chefInternalNoteAcknowledgedAt?: string | null
@@ -149,6 +150,7 @@ function buildDraftFromOrders(
                 note: item.note ?? '',
                 orderItemId: item.orderItemId,
                 status: item.status,
+                cancelReason: item.cancelReason,
                 chefInternalNote: item.chefInternalNote,
                 chefInternalNoteCreatedAt:
                 item.chefInternalNoteCreatedAt,
@@ -885,10 +887,19 @@ export default function WaiterUpdateOrderPage() {
                                     )}
 
                                     {draft.status === 'CANCELLED' && (
-                                        <p className="waiter-item-hint">
-                                            Món đã hủy — nhấn + để thêm mới
-                                            từ đầu.
-                                        </p>
+                                        <>
+                                            <p className="waiter-item-hint">
+                                                Món đã hủy — nhấn + để thêm mới
+                                                từ đầu.
+                                            </p>
+
+                                            {draft.cancelReason && (
+                                                <p style={cancelReasonStyle}>
+                                                    Lý do hủy:{' '}
+                                                    {draft.cancelReason}
+                                                </p>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             )
@@ -1004,6 +1015,14 @@ const seenTextStyle: CSSProperties = {
 const ackButtonStyle: CSSProperties = {
     marginTop: '0.25rem',
     padding: '0.4rem 0.75rem',
+}
+
+const cancelReasonStyle: CSSProperties = {
+    margin: '0.25rem 0 0',
+    color: '#dc2626',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    lineHeight: 1.4,
 }
 
 const successSummaryStyle: CSSProperties = {

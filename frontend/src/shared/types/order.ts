@@ -20,6 +20,7 @@ export interface OrderItemResponse {
     unitPrice: number
     subTotal: number
     note?: string | null
+    cancelReason?: string | null
     chefInternalNote?: string | null
     chefInternalNoteCreatedAt?: string | null
     chefInternalNoteAcknowledgedAt?: string | null
