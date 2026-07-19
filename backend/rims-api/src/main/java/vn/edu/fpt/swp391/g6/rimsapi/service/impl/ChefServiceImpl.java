@@ -30,7 +30,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import java.math.BigDecimal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.time.LocalDate;
 import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
@@ -40,7 +39,6 @@ public class ChefServiceImpl implements ChefService {
 
     private final OrderItemRepository orderItemRepository;
     private final DishRepository dishRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final OrderRepository orderRepository;
     private final WebSocketBroadcaster webSocketBroadcaster;
 
