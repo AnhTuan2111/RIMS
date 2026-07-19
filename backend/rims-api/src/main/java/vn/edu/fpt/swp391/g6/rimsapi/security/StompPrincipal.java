@@ -15,7 +15,4 @@ public class StompPrincipal implements Principal {
         return String.valueOf(userPrincipal.getId());
     }
 
-    public UserPrincipal getUserPrincipal() {
-        return userPrincipal;
-    }
 }

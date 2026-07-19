@@ -17,12 +17,6 @@ public interface RestaurantTableRepository extends JpaRepository<RestaurantTable
     // Tìm các bàn trống có sức chứa >= minCapacity, dùng để chuyển reservation sang bàn mới
     List<RestaurantTable> findByStatusAndCapacityGreaterThanEqual(TableStatus status, int minCapacity);
 
-    // Tìm bàn theo trạng thái
-    List<RestaurantTable> findByStatus(TableStatus status);
-
-    // Tìm bàn theo số bàn
-    RestaurantTable findByTableNumber(String tableNumber);
-
     // Lock bàn để tránh 2 request cùng đặt 1 bàn tại cùng thời điểm (race condition)
     // Request thứ 2 sẽ phải CHỜ cho tới khi transaction của request thứ 1 commit/rollback
     @Lock(LockModeType.PESSIMISTIC_WRITE)
