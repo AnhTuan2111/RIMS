@@ -25,8 +25,10 @@ import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -359,8 +361,8 @@ public class CashierServiceImpl implements CashierService {
 
         vnp_Params.put("vnp_ReturnUrl", "http://localhost:8080/rims/cashier/payments/vnpay-callback");
 
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         vnp_Params.put("vnp_CreateDate", now.format(formatter));
 
         Map<String, String> sortedParams = new TreeMap<>(vnp_Params);
@@ -380,11 +382,11 @@ public class CashierServiceImpl implements CashierService {
                 {
                     hashData.append(fieldName);
                     hashData.append('=');
-                    hashData.append(java.net.URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
 
-                    query.append(java.net.URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
                     query.append('=');
-                    query.append(java.net.URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
 
                     if (itr.hasNext())
                     {
