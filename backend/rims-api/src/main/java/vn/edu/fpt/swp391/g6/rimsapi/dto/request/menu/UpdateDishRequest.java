@@ -11,23 +11,24 @@ import org.hibernate.validator.constraints.Length;
 public class UpdateDishRequest
 {
 
-    @NotBlank(message = "Tên món ăn không được để trống")
-    @Length(max = 50, message = "Tên món ăn không được vượt quá 50 ký tự")
+    @NotBlank()
+    @Length(max = 50)
     private String name;
-    @Length(max = 150, message = "Tên mô tả không quá 150 ký tự")
+
+    @Length(max = 100)
     private String description;
 
-    @NotNull(message = "Giá không được để trống")
-    @Positive(message = "Giá phải lớn hơn 0")
+    @NotNull()
+    @Positive()
     private Integer price;
 
     private String imageUrl;
 
-    @NotNull(message = "Trạng thái không được để trống")
-    private Boolean isAvailable;  // Có thể update trạng thái
+    @NotNull()
+    private Boolean isAvailable;
 
     private Boolean isHidden;
 
-    @NotNull(message = "Vui lòng chọn danh mục món ăn")
-    private Integer categoryId;  // Có thể chuyển danh mục
+    @NotNull()
+    private Integer categoryId;
 }

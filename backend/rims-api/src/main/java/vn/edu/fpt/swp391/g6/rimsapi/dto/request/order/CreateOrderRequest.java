@@ -18,10 +18,10 @@ import java.util.List;
 public class CreateOrderRequest
 {
 
-    @NotNull(message = "Table ID cannot be null")
+    @NotNull()
     private Integer tableId;
 
-    @NotEmpty(message = "Order must have at least one item")
+    @NotEmpty()
     @Valid
     private List<OrderItemRequest> items;
 }

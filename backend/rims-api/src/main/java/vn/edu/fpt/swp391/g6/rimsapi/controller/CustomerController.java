@@ -2,7 +2,6 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,7 +24,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/rims/customer")
 @RequiredArgsConstructor
-@Slf4j
 public class CustomerController {
 
     private final UserService userService;
@@ -59,7 +57,6 @@ public class CustomerController {
             List<RestaurantTableResponse> response = customerService.getAvailableTables();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Error getting available tables: ", e);
             return ResponseEntity.ok(List.of());
         }
     }

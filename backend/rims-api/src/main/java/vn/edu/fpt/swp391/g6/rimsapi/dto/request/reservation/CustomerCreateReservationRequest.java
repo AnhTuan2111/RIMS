@@ -12,22 +12,22 @@ import java.time.LocalDateTime;
 @Data
 public class CustomerCreateReservationRequest {
 
-    @NotBlank(message = "Tên khách hàng không được để trống")
-    @Size(max = 50, message = "Tên không được vượt quá 50 ký tự")
-    @Pattern(regexp = "^\\p{L}+(?: \\p{L}+)*$")
+    @NotBlank()
+    @Size(max = 50)
+    @Pattern(regexp = "^\\p{L}+( \\p{L}+)*$")
     private String customerName;
 
-    @NotBlank(message = "Số điện thoại không được để trống")
+    @NotBlank()
     @Pattern(regexp = "^0[0-9]{9}$")
     private String phone;
 
-    @NotNull(message = "Thời gian đặt bàn không được để trống")
+    @NotNull()
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reservationTime;
 
     private String note;
 
-    @NotNull(message = "Vui lòng chọn bàn")
+    @NotNull()
     private Integer tableId;
 
     // Sẽ được set từ principal trong controller

@@ -9,7 +9,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class Invoice {
     @Column(nullable = false)
     private BigDecimal finalAmount;
 
-    @Column(name = "restaurant_revenue_amount", precision = 38, scale = 2)
+    @Column(precision = 38, scale = 2)
     private BigDecimal restaurantRevenueAmount;
 
     @CreatedDate
@@ -49,10 +48,8 @@ public class Invoice {
     @JoinColumn(name = "customer_id")
     private User customer;
 
-    @Column(name = "points_used_on_invoice")
     private Integer pointsUsedOnInvoice;
 
-    @Column(name = "points_earned_on_invoice")
     private Integer pointsEarnedOnInvoice;
 
     // Hàm mới: Tính doanh thu thực tế bằng cách trừ thẳng tiền VAT
