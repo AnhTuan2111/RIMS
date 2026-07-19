@@ -1,12 +1,52 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { categoryApi } from '../../api/admin';
 import type { CategoryResponse, DishResponse, CategoryFormData } from '../../api/admin';
+import { REALTIME_CONFIG } from '../../app/config/realtime';
+import { usePolling } from '../../hooks/usePolling';
+import {
+    EmptyState,
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback';
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui';
 
 type ViewMode = 'LIST' | 'CREATE' | 'EDIT' | 'DETAIL';
 type FilterStatus = 'ALL' | 'ACTIVE' | 'HIDDEN';
 
 // --- Pagination Config ---
 const ITEMS_PER_PAGE = 5;
+
+
+type ErrorResponseShape = {
+    response?: {
+        data?: {
+            message?: unknown;
+        };
+    };
+};
+
+function getRequestErrorMessage(
+    error: unknown,
+    fallbackMessage: string,
+) {
+    const errorResponse =
+        error as ErrorResponseShape;
+
+    const message =
+        errorResponse.response?.data?.message;
+
+    if (
+        typeof message === 'string'
+        && message.trim().length > 0
+    ) {
+        return message;
+    }
+
+    return fallbackMessage;
+}
 
 export default function AdminCategoryPage() {
     // --- States ---
@@ -32,45 +72,85 @@ export default function AdminCategoryPage() {
     const [deleteModal, setDeleteModal] = useState({ open: false, id: null as number | null });
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+    const hasLoadedInitialCategoriesRef = useRef(false);
+
     // --- Load Data ---
-    const loadCategories = async () => {
-        try {
-            setLoading(true);
-            const [categoriesData, dishesData] = await Promise.all([
-                categoryApi.getAllCategories(),
-                categoryApi.getAllDishes()
-            ]);
+    const loadCategories = useCallback(
+        async (
+            showFullLoading = true,
+            resetPage = true,
+            signal?: AbortSignal,
+        ) => {
+            try {
+                if (showFullLoading) {
+                    setLoading(true);
+                }
 
-            const processedDishes = dishesData.data.map((dish) => ({
-                ...dish,
-                imageUrl: dish.imageUrl
-            }));
+                const [categoriesData, dishesData] = await Promise.all([
+                    categoryApi.getAllCategories(signal),
+                    categoryApi.getAllDishes(signal)
+                ]);
 
-            setDishes(processedDishes);
+                const processedDishes = dishesData.data.map((dish) => ({
+                    ...dish,
+                    imageUrl: dish.imageUrl
+                }));
 
-            const formattedData = categoriesData.data.map((cat) => ({
-                ...cat,
-                dishCount: processedDishes.filter((d) => d.categoryName === cat.name).length
-            })).sort((a, b) => a.id - b.id);
+                setDishes(processedDishes);
 
-            setCategories(formattedData);
-            setError(null);
-            setCurrentPage(1);
-        } catch (err: any) {
-            console.error("Lỗi khi tải dữ liệu:", err);
-            setError("Không thể tải danh sách danh mục từ máy chủ.");
-        } finally {
-            setLoading(false);
-        }
-    };
+                const formattedData = categoriesData.data.map((cat) => ({
+                    ...cat,
+                    dishCount: processedDishes.filter((d) => d.categoryName === cat.name).length
+                })).sort((a, b) => a.id - b.id);
 
-    useEffect(() => {
-        loadCategories();
-    }, []);
+                setCategories(formattedData);
+                setError(null);
 
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [filterStatus, searchTerm]);
+                if (resetPage) {
+                    setCurrentPage(1);
+                }
+            } catch (err: unknown) {
+                console.error("Lỗi khi tải dữ liệu:", err);
+                setError("Không thể tải danh sách danh mục từ máy chủ.");
+            } finally {
+                if (showFullLoading) {
+                    setLoading(false);
+                }
+            }
+        },
+        [],
+    );
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialCategoriesRef.current;
+
+            await loadCategories(
+                isInitialLoad,
+                isInitialLoad,
+                signal,
+            );
+
+            hasLoadedInitialCategoriesRef.current = true;
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .admin
+                .dashboardIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[ADMIN_CATEGORY_POLL_ERROR]',
+                    requestError,
+                );
+            },
+        },
+    );
 
     // --- CRUD Handlers ---
     const handleSave = async (e: React.FormEvent) => {
@@ -97,10 +177,13 @@ export default function AdminCategoryPage() {
             }
 
             setView('LIST');
-            loadCategories();
-        } catch (err: any) {
+            await loadCategories(true, true);
+        } catch (err: unknown) {
             console.error("Lỗi API xử lý danh mục:", err);
-            const errMsg = err.response?.data?.message || "Đã xảy ra lỗi trong quá trình xử lý.";
+            const errMsg = getRequestErrorMessage(
+                err,
+                "Đã xảy ra lỗi trong quá trình xử lý.",
+            );
             alert(errMsg);
         } finally {
             setIsSubmitting(false);
@@ -113,10 +196,13 @@ export default function AdminCategoryPage() {
             await categoryApi.deleteCategory(deleteModal.id);
             alert("Xóa danh mục thành công! 🎉");
             setDeleteModal({ open: false, id: null });
-            loadCategories();
-        } catch (err: any) {
+            await loadCategories(true, true);
+        } catch (err: unknown) {
             console.error("Lỗi khi xóa danh mục:", err);
-            const errMsg = err.response?.data?.message || "Không thể thực hiện xóa danh mục!";
+            const errMsg = getRequestErrorMessage(
+                err,
+                "Không thể thực hiện xóa danh mục!",
+            );
             alert(errMsg);
             setDeleteModal({ open: false, id: null });
         }
@@ -133,7 +219,7 @@ export default function AdminCategoryPage() {
 
     // --- Pagination Logic ---
     const totalItems = filteredCategories.length;
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     const currentItems = filteredCategories.slice(startIndex, endIndex);
@@ -184,28 +270,51 @@ export default function AdminCategoryPage() {
         ? dishes.filter(d => d.categoryName === selectedCategory.name)
         : [];
 
-    if (loading) return <div className="admin-category-status">🔄 Đang tải dữ liệu danh mục thực đơn...</div>;
-    if (error) return <div className="admin-category-status admin-category-status-error">❌ {error}</div>;
+    if (loading) {
+        return (
+            <LoadingState
+                title="Đang tải dữ liệu danh mục thực đơn..."
+                description="Hệ thống đang lấy danh sách danh mục và món ăn liên quan."
+            />
+        );
+    }
+
+    if (error) {
+        return (
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    loadCategories(true, true).catch((requestError) => {
+                        console.error(requestError);
+                    });
+                }}
+            />
+        );
+    }
 
     return (
         <div className="admin-category-page">
             {view === 'LIST' && (
                 <div>
                     {/* Header */}
-                    <div className="admin-category-header">
-                        <div>
-                            <h2 className="admin-category-page-title">📁 QUẢN LÝ DANH MỤC</h2>
-                        </div>
-                        <button
-                            onClick={() => {
-                                setFormData({ name: '', description: '', isAvailable: true });
-                                setView('CREATE');
-                            }}
-                            className="admin-category-btn-primary"
-                        >
-                            <span>+</span> Thêm Danh Mục
-                        </button>
-                    </div>
+                    <PageCard className="admin-category-header-card">
+                        <PageHeader
+                            title="📁 QUẢN LÝ DANH MỤC"
+                            description="Quản lý nhóm món ăn, trạng thái hiển thị và số món thuộc từng danh mục."
+                            actions={
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setFormData({ name: '', description: '', isAvailable: true });
+                                        setView('CREATE');
+                                    }}
+                                    className="admin-category-btn-primary"
+                                >
+                                    <span>+</span> Thêm Danh Mục
+                                </button>
+                            }
+                        />
+                    </PageCard>
 
                     {/* Stats & Filters */}
                     <div className="admin-category-top-grid">
@@ -215,19 +324,28 @@ export default function AdminCategoryPage() {
                                     <span className="admin-category-filter-label">TRẠNG THÁI</span>
                                     <div className="admin-category-filter-group">
                                         <button
-                                            onClick={() => setFilterStatus('ALL')}
+                                            onClick={() => {
+                                                setFilterStatus('ALL');
+                                                setCurrentPage(1);
+                                            }}
                                             className={`admin-category-filter-btn ${filterStatus === 'ALL' ? 'active' : ''}`}
                                         >
                                             Tất cả
                                         </button>
                                         <button
-                                            onClick={() => setFilterStatus('ACTIVE')}
+                                            onClick={() => {
+                                                setFilterStatus('ACTIVE');
+                                                setCurrentPage(1);
+                                            }}
                                             className={`admin-category-filter-btn ${filterStatus === 'ACTIVE' ? 'active' : ''}`}
                                         >
                                             Hoạt động
                                         </button>
                                         <button
-                                            onClick={() => setFilterStatus('HIDDEN')}
+                                            onClick={() => {
+                                                setFilterStatus('HIDDEN');
+                                                setCurrentPage(1);
+                                            }}
                                             className={`admin-category-filter-btn ${filterStatus === 'HIDDEN' ? 'active' : ''}`}
                                         >
                                             Đã ẩn
@@ -240,7 +358,10 @@ export default function AdminCategoryPage() {
                                         type="text"
                                         placeholder="Tìm tên danh mục, mã ID..."
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value);
+                                            setCurrentPage(1);
+                                        }}
                                         className="admin-category-search-input"
                                     />
                                 </div>
@@ -349,7 +470,23 @@ export default function AdminCategoryPage() {
                             </tbody>
                         </table>
                         {filteredCategories.length === 0 && (
-                            <div className="admin-category-empty-state">Không tìm thấy danh mục nào phù hợp với bộ lọc tìm kiếm.</div>
+                            <EmptyState
+                                title="Không tìm thấy danh mục phù hợp"
+                                description="Hãy thay đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái."
+                                action={
+                                    <button
+                                        type="button"
+                                        className="admin-category-btn-secondary"
+                                        onClick={() => {
+                                            setSearchTerm('');
+                                            setFilterStatus('ALL');
+                                            setCurrentPage(1);
+                                        }}
+                                    >
+                                        Xóa bộ lọc
+                                    </button>
+                                }
+                            />
                         )}
 
                         {/* Pagination */}
@@ -518,10 +655,10 @@ export default function AdminCategoryPage() {
                                 </table>
                             </div>
                         ) : (
-                            <div className="admin-category-empty-dish-state">
-                                <span className="admin-category-empty-icon">🍽️</span>
-                                <p className="admin-category-empty-text">Chưa có món ăn nào trong danh mục này</p>
-                            </div>
+                            <EmptyState
+                                title="Chưa có món ăn nào trong danh mục này"
+                                description="Danh mục hiện chưa liên kết với món ăn nào."
+                            />
                         )}
                     </div>
                 </div>

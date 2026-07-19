@@ -1,17 +1,30 @@
 import {
-    useEffect,
+    useCallback,
     useMemo,
+    useRef,
     useState,
 } from 'react'
 import {
     Link,
     useSearchParams,
 } from 'react-router-dom'
+
 import {
     getChefDishes,
     updateMenuStatus,
     type DishListResponse,
 } from '../../api/chef'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {
+    EmptyState,
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback'
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui'
+import {usePolling} from '../../hooks/usePolling'
 
 const ITEMS_PER_PAGE = 8
 
@@ -36,10 +49,18 @@ function formatCurrency(value: number) {
 export default function DishListPage() {
     const [searchParams] = useSearchParams()
 
+    const routeStatus = searchParams.get('status')
+
+    const initialStatus: StatusFilter =
+        routeStatus === 'unavailable'
+            ? 'UNAVAILABLE'
+            : 'ALL'
+
     const [dishes, setDishes] =
         useState<DishListResponse[]>([])
 
     const [isLoading, setIsLoading] = useState(true)
+
     const [error, setError] =
         useState<string | null>(null)
 
@@ -49,7 +70,7 @@ export default function DishListPage() {
         useState('ALL')
 
     const [selectedStatus, setSelectedStatus] =
-        useState<StatusFilter>('ALL')
+        useState<StatusFilter>(initialStatus)
 
     const [sortOrder, setSortOrder] =
         useState<SortOrder>('NAME_ASC')
@@ -59,43 +80,81 @@ export default function DishListPage() {
     const [updatingDishId, setUpdatingDishId] =
         useState<number | null>(null)
 
-    const routeStatus = searchParams.get('status')
+    const hasLoadedInitialDishesRef = useRef(false)
 
-    async function loadDishes() {
-        try {
-            setIsLoading(true)
-            setError(null)
 
-            const data = await getChefDishes()
+    const loadDishes = useCallback(
+        async (
+            showFullLoading: boolean,
+            resetPage: boolean,
+            signal?: AbortSignal,
+        ) => {
+            try {
+                if (showFullLoading) {
+                    setIsLoading(true)
+                }
 
-            setDishes(data)
-            setCurrentPage(1)
-        } catch (requestError) {
-            console.error(requestError)
+                const data = await getChefDishes(signal)
 
-            setError(
-                'Không thể tải danh sách món ăn.',
+                setDishes(data)
+                setError(null)
+
+                if (resetPage) {
+                    setCurrentPage(1)
+                }
+            } catch (requestError) {
+                if (signal?.aborted) {
+                    return
+                }
+
+                console.error(
+                    '[CHEF_DISH_LIST_FETCH_ERROR]',
+                    requestError,
+                )
+
+                setError(
+                    'Không thể tải danh sách món ăn.',
+                )
+            } finally {
+                if (showFullLoading) {
+                    setIsLoading(false)
+                }
+            }
+        },
+        [],
+    )
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialDishesRef.current
+
+            await loadDishes(
+                isInitialLoad,
+                false,
+                signal,
             )
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
-    useEffect(() => {
-        loadDishes().catch((requestError) => {
-            console.error(requestError)
-        })
-    }, [])
+            hasLoadedInitialDishesRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .chef
+                .dashboardIntervalMs,
 
-    useEffect(() => {
-        if (routeStatus === 'unavailable') {
-            setSelectedStatus('UNAVAILABLE')
-        } else {
-            setSelectedStatus('ALL')
-        }
+            runImmediately: true,
+            pauseWhenHidden: true,
 
-        setCurrentPage(1)
-    }, [routeStatus])
+            onError: (requestError) => {
+                console.error(
+                    '[CHEF_DISH_LIST_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
 
     async function handleToggleDish(
         dish: DishListResponse,
@@ -294,89 +353,78 @@ export default function DishListPage() {
 
     if (isLoading) {
         return (
-            <section className="page-card">
-                <p>Đang tải danh sách món ăn...</p>
-            </section>
+            <LoadingState
+                title="Đang tải danh sách món ăn..."
+                description="Hệ thống đang lấy dữ liệu thực đơn mới nhất."
+            />
         )
     }
 
     if (error) {
         return (
-            <section className="page-card">
-                <h2>Lỗi tải dữ liệu</h2>
-
-                <p className="modal-error">
-                    {error}
-                </p>
-
-                <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => {
-                        loadDishes().catch(
-                            (requestError) => {
-                                console.error(requestError)
-                            },
-                        )
-                    }}
-                >
-                    Thử lại
-                </button>
-            </section>
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    loadDishes(
+                        true,
+                        true,
+                    ).catch((requestError) => {
+                        console.error(requestError)
+                    })
+                }}
+            />
         )
     }
 
     return (
         <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
-                    <div>
-                        <h2>
-                            {showUnavailableOnly
-                                ? 'Món đang tạm hết'
-                                : 'Quản lý món ăn'}
-                        </h2>
+            <PageCard>
+                <PageHeader
+                    title={
+                        showUnavailableOnly
+                            ? 'Món đang tạm hết'
+                            : 'Quản lý món ăn'
+                    }
+                    description="Tìm kiếm, lọc và thay đổi trạng thái phục vụ của thực đơn."
+                    actions={
+                        <div className="chef-summary">
+                            <div>
+                                <strong>
+                                    {availableCount}
+                                </strong>
 
-                        <p>
-                            Tìm kiếm, lọc và thay đổi
-                            trạng thái phục vụ của thực đơn.
-                        </p>
-                    </div>
+                                <span>Đang bán</span>
+                            </div>
 
-                    <div className="chef-summary">
-                        <div>
-                            <strong>
-                                {availableCount}
-                            </strong>
+                            <div>
+                                <strong>
+                                    {unavailableCount}
+                                </strong>
 
-                            <span>Đang bán</span>
+                                <span>Tạm hết</span>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={() => {
+                                    loadDishes(
+                                        true,
+                                        true,
+                                    ).catch(
+                                        (requestError) => {
+                                            console.error(
+                                                requestError,
+                                            )
+                                        },
+                                    )
+                                }}
+                            >
+                                Làm mới
+                            </button>
                         </div>
-
-                        <div>
-                            <strong>
-                                {unavailableCount}
-                            </strong>
-
-                            <span>Tạm hết</span>
-                        </div>
-
-                        <button
-                            type="button"
-                            className="secondary-button"
-                            onClick={() => {
-                                loadDishes().catch(
-                                    (requestError) => {
-                                        console.error(
-                                            requestError,
-                                        )
-                                    },
-                                )
-                            }}
-                        >
-                            Làm mới
-                        </button>
-                    </div>
-                </div>
+                    }
+                />
 
                 {routeStatus === 'unavailable' && (
                     <Link
@@ -386,9 +434,9 @@ export default function DishListPage() {
                         ← Xem tất cả món
                     </Link>
                 )}
-            </section>
+            </PageCard>
 
-            <section className="page-card">
+            <PageCard>
                 <div className="chef-filter-bar">
                     <input
                         type="search"
@@ -483,24 +531,25 @@ export default function DishListPage() {
                         Xóa bộ lọc
                     </button>
                 </div>
-            </section>
+            </PageCard>
 
             {filteredDishes.length === 0 ? (
-                <section className="page-card">
-                    <div className="empty-state">
-                        <h3>
-                            Không tìm thấy món phù hợp
-                        </h3>
-
-                        <p>
-                            Hãy thay đổi điều kiện lọc
-                            hoặc xóa bộ lọc.
-                        </p>
-                    </div>
-                </section>
+                <EmptyState
+                    title="Không tìm thấy món phù hợp"
+                    description="Hãy thay đổi điều kiện lọc hoặc xóa bộ lọc."
+                    action={
+                        <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={clearFilters}
+                        >
+                            Xóa bộ lọc
+                        </button>
+                    }
+                />
             ) : (
                 <>
-                    <section className="page-card">
+                    <PageCard>
                         <div className="simple-table chef-dish-table">
                             <div className="simple-table-header">
                                 <span>Tên món</span>
@@ -517,9 +566,9 @@ export default function DishListPage() {
                                         key={dishItem.dishId}
                                     >
                                         <span className="dish-name-cell">
-
-
-                                            <strong>{dishItem.dishName}</strong>
+                                            <strong>
+                                                {dishItem.dishName}
+                                            </strong>
                                         </span>
 
                                         <span>
@@ -593,7 +642,7 @@ export default function DishListPage() {
                                 ),
                             )}
                         </div>
-                    </section>
+                    </PageCard>
 
                     <div className="chef-pagination">
                         <div className="pagination-result-info">

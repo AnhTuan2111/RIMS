@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useRef, useState} from 'react'
 import {
     adminApi,
     categoryApi,
@@ -8,6 +8,8 @@ import {
     type OrderShiftReportResponse,
     type RevenueReportResponse,
 } from '../../api/admin'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {usePolling} from '../../hooks/usePolling'
 
 type ReportKey =
     | 'revenue'
@@ -1348,16 +1350,84 @@ export default function AdminStatisticsPage() {
     const bestSellingWeekOptions = buildWeekOptions(bestSellingYear)
     const orderShiftWeekOptions = buildWeekOptions(orderShiftYear)
 
-    useEffect(() => {
-        void loadRevenueDashboard()
-        void loadCategoryBestSellingCategories()
-        void loadBestSellingReport(bestSellingPreset)
-        void loadOrderShiftReport(orderShiftPreset)
-    }, [])
+    const hasLoadedInitialStatisticsRef = useRef(false)
 
-    async function loadRevenueDashboard() {
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialStatisticsRef.current
+
+            if (isInitialLoad) {
+                await Promise.all([
+                    loadRevenueDashboard(true, signal),
+                    loadCategoryBestSellingCategories(true, signal),
+                    loadBestSellingReport(
+                        bestSellingPreset,
+                        selectedBestSellingWeek,
+                        true,
+                        signal,
+                    ),
+                    loadOrderShiftReport(
+                        orderShiftPreset,
+                        selectedOrderShiftWeek,
+                        true,
+                        signal,
+                    ),
+                ])
+
+                hasLoadedInitialStatisticsRef.current = true
+                return
+            }
+
+            await Promise.all([
+                loadRevenueDashboard(false, signal),
+                loadCategoryBestSellingReport(
+                    categoryBestSellingPreset,
+                    selectedCategoryBestSellingWeek,
+                    selectedBestSellingCategoryId,
+                    false,
+                    signal,
+                ),
+                loadBestSellingReport(
+                    bestSellingPreset,
+                    selectedBestSellingWeek,
+                    false,
+                    signal,
+                ),
+                loadOrderShiftReport(
+                    orderShiftPreset,
+                    selectedOrderShiftWeek,
+                    false,
+                    signal,
+                ),
+            ])
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .admin
+                .dashboardIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[ADMIN_STATISTICS_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
+    async function loadRevenueDashboard(
+        showFullLoading = true,
+        signal?: AbortSignal,
+    ) {
         try {
-            setIsRevenueLoading(true)
+            if (showFullLoading) {
+                setIsRevenueLoading(true)
+            }
             setRevenueError(null)
 
             const [
@@ -1367,11 +1437,11 @@ export default function AdminStatisticsPage() {
                 monthlyRevenue,
                 yearlyRevenue,
             ] = await Promise.all([
-                adminApi.getTotalRevenue(),
-                adminApi.getTodayRevenue(),
-                adminApi.getWeeklyRevenue(),
-                adminApi.getMonthlyRevenue(),
-                adminApi.getYearlyRevenue(),
+                adminApi.getTotalRevenue(signal),
+                adminApi.getTodayRevenue(signal),
+                adminApi.getWeeklyRevenue(signal),
+                adminApi.getMonthlyRevenue(signal),
+                adminApi.getYearlyRevenue(signal),
             ])
 
             setRevenueData((currentData) => ({
@@ -1383,6 +1453,10 @@ export default function AdminStatisticsPage() {
                 yearlyRevenue: yearlyRevenue.data,
             }))
         } catch (error) {
+            if (signal?.aborted) {
+                return
+            }
+
             console.error(error)
             setRevenueError(
                 getApiErrorMessage(
@@ -1391,13 +1465,18 @@ export default function AdminStatisticsPage() {
                 ),
             )
         } finally {
-            setIsRevenueLoading(false)
+            if (showFullLoading && !signal?.aborted) {
+                setIsRevenueLoading(false)
+            }
         }
     }
 
-    async function loadCategoryBestSellingCategories() {
+    async function loadCategoryBestSellingCategories(
+        showFullLoading = true,
+        signal?: AbortSignal,
+    ) {
         try {
-            const {data} = await categoryApi.getAllCategories()
+            const {data} = await categoryApi.getAllCategories(signal)
             const nextCategories = data ?? []
             const defaultCategoryId =
                 nextCategories[0]?.id != null
@@ -1411,8 +1490,14 @@ export default function AdminStatisticsPage() {
                 categoryBestSellingPreset,
                 selectedCategoryBestSellingWeek,
                 defaultCategoryId,
+                showFullLoading,
+                signal,
             )
         } catch (error) {
+            if (signal?.aborted) {
+                return
+            }
+
             console.error(error)
             setCategoryBestSellingError(
                 getApiErrorMessage(
@@ -1427,6 +1512,8 @@ export default function AdminStatisticsPage() {
         preset: RangePreset,
         selectedWeek: WeekOption = selectedCategoryBestSellingWeek,
         categoryIdValue: string = selectedBestSellingCategoryId,
+        showFullLoading = true,
+        signal?: AbortSignal,
     ) {
         const range = getRangeFromPreset(preset, selectedWeek)
         const parsedCategoryId =
@@ -1439,17 +1526,24 @@ export default function AdminStatisticsPage() {
                 : null
 
         try {
-            setIsCategoryBestSellingLoading(true)
+            if (showFullLoading) {
+                setIsCategoryBestSellingLoading(true)
+            }
             setCategoryBestSellingError(null)
 
             const {data} = await adminApi.getBestSellingReportBetween(
                 range.fromDate,
                 range.toDate,
                 categoryId,
+                signal,
             )
 
             setCategoryBestSellers(data.items ?? [])
         } catch (error) {
+            if (signal?.aborted) {
+                return
+            }
+
             console.error(error)
             setCategoryBestSellingError(
                 getApiErrorMessage(
@@ -1458,27 +1552,39 @@ export default function AdminStatisticsPage() {
                 ),
             )
         } finally {
-            setIsCategoryBestSellingLoading(false)
+            if (showFullLoading && !signal?.aborted) {
+                setIsCategoryBestSellingLoading(false)
+            }
         }
     }
 
     async function loadBestSellingReport(
         preset: RangePreset,
         selectedWeek: WeekOption = selectedBestSellingWeek,
+        showFullLoading = true,
+        signal?: AbortSignal,
     ) {
         const range = getRangeFromPreset(preset, selectedWeek)
 
         try {
-            setIsBestSellingLoading(true)
+            if (showFullLoading) {
+                setIsBestSellingLoading(true)
+            }
             setBestSellingError(null)
 
             const {data} = await adminApi.getBestSellingReportBetween(
                 range.fromDate,
                 range.toDate,
+                undefined,
+                signal,
             )
 
             setBestSellers(data.items ?? [])
         } catch (error) {
+            if (signal?.aborted) {
+                return
+            }
+
             console.error(error)
             setBestSellingError(
                 getApiErrorMessage(
@@ -1487,27 +1593,38 @@ export default function AdminStatisticsPage() {
                 ),
             )
         } finally {
-            setIsBestSellingLoading(false)
+            if (showFullLoading && !signal?.aborted) {
+                setIsBestSellingLoading(false)
+            }
         }
     }
 
     async function loadOrderShiftReport(
         preset: RangePreset,
         selectedWeek: WeekOption = selectedOrderShiftWeek,
+        showFullLoading = true,
+        signal?: AbortSignal,
     ) {
         const range = getRangeFromPreset(preset, selectedWeek)
 
         try {
-            setIsOrderShiftLoading(true)
+            if (showFullLoading) {
+                setIsOrderShiftLoading(true)
+            }
             setOrderShiftError(null)
 
             const {data} = await adminApi.getOrderShiftReportBetween(
                 range.fromDate,
                 range.toDate,
+                signal,
             )
 
             setOrderShiftReport(data)
         } catch (error) {
+            if (signal?.aborted) {
+                return
+            }
+
             console.error(error)
             setOrderShiftError(
                 getApiErrorMessage(
@@ -1516,7 +1633,9 @@ export default function AdminStatisticsPage() {
                 ),
             )
         } finally {
-            setIsOrderShiftLoading(false)
+            if (showFullLoading && !signal?.aborted) {
+                setIsOrderShiftLoading(false)
+            }
         }
     }
 

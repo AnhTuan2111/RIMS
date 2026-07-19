@@ -1,184 +1,480 @@
-import {useState} from 'react';
-import type {OrderDetailResponse, PaymentResponse} from '../../types/cashier';
+import {
+    useState,
+    type CSSProperties,
+} from 'react'
+
+import type {
+    OrderDetailResponse,
+    PaymentResponse,
+} from '../../types/cashier'
 
 interface Props {
-    paymentResult: PaymentResponse;
-    orderDetail: OrderDetailResponse;
-    onClose: () => void;
-    onDownload: (id: number) => void;
+    paymentResult: PaymentResponse
+    orderDetail: OrderDetailResponse
+    onClose: () => void
+    onDownload: (id: number) => void
 }
 
-export default function PaymentResultManager({paymentResult, orderDetail, onClose, onDownload}: Props) {
-    const [step, setStep] = useState<'SUCCESS' | 'BILL'>('SUCCESS');
+type ResultStep = 'SUCCESS' | 'BILL'
 
-    const itemsList = orderDetail.orderItems || [];
+function formatCurrency(value: number) {
+    return `${value.toLocaleString()} đ`
+}
 
-    // Tiền gốc lấy từ Order
-    const beforeVat = orderDetail.totalAmountBeforeVat || 0;
-    const vatAmount = orderDetail.vatAmount || 0;
+function getPaymentMethodLabel(method: string | null | undefined) {
+    if (method === 'CASH') {
+        return 'Tiền mặt'
+    }
 
-    // Các thông tin chuẩn đã được Backend xử lý lấy từ paymentResult
-    const invoiceId = paymentResult.invoiceId;
-    const finalAmount = paymentResult.finalAmount;
-    const customerName = paymentResult.customerName;
-    const pointsUsed = paymentResult.pointsUsed || 0;
-    const pointsEarned = paymentResult.pointsEarned || 0;
+    if (method === 'QRCODE') {
+        return 'Chuyển khoản/QR'
+    }
 
-    const paymentMethodLabel = paymentResult.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản/QR';
+    return '—'
+}
+
+export default function PaymentResultManager({
+                                                 paymentResult,
+                                                 orderDetail,
+                                                 onClose,
+                                                 onDownload,
+                                             }: Props) {
+    const [step, setStep] =
+        useState<ResultStep>('SUCCESS')
+
+    const itemsList =
+        orderDetail.orderItems ?? []
+
+    const beforeVat =
+        orderDetail.totalAmountBeforeVat ?? 0
+
+    const vatAmount =
+        orderDetail.vatAmount ?? 0
+
+    const invoiceId =
+        paymentResult.invoiceId
+
+    const finalAmount =
+        paymentResult.finalAmount
+
+    const customerName =
+        paymentResult.customerName
+
+    const pointsUsed =
+        paymentResult.pointsUsed ?? 0
+
+    const pointsEarned =
+        paymentResult.pointsEarned ?? 0
+
+    const paymentMethodLabel =
+        getPaymentMethodLabel(
+            paymentResult.paymentMethod,
+        )
 
     if (step === 'SUCCESS') {
         return (
             <div
-                style={{
-                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                    background: '#16a34a', zIndex: 9999, display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    color: 'white', cursor: 'pointer', textAlign: 'center', animation: 'fadeIn 0.3s'
-                }}
+                style={successScreenStyle}
                 onClick={() => setStep('BILL')}
             >
-                <div style={{fontSize: '8rem', marginBottom: '1rem'}}>✔</div>
-                <h1 style={{fontSize: '4rem', fontWeight: 'bold'}}>THANH TOÁN THÀNH CÔNG</h1>
-                <p style={{fontSize: '1.5rem', opacity: 0.9}}>Mã hóa đơn: INV-{invoiceId}</p>
+                <div style={successIconStyle}>
+                    ✔
+                </div>
+
+                <h1 style={successTitleStyle}>
+                    THANH TOÁN THÀNH CÔNG
+                </h1>
+
+                <p style={successInvoiceStyle}>
+                    Mã hóa đơn: INV-{invoiceId}
+                </p>
+
                 {customerName && (
-                    <div style={{marginTop: '1rem', padding: '10px 20px', background: 'rgba(255,255,255,0.2)', borderRadius: '8px'}}>
-                        <p style={{margin: '0 0 5px 0', fontSize: '1.2rem'}}>Khách hàng: <strong>{customerName}</strong></p>
-                        <p style={{margin: 0, fontSize: '1.1rem'}}>🎉 Tích lũy thêm: <strong>+{pointsEarned} điểm</strong></p>
+                    <div style={successCustomerBoxStyle}>
+                        <p style={successCustomerNameStyle}>
+                            Khách hàng:{' '}
+                            <strong>{customerName}</strong>
+                        </p>
+
+                        <p style={successPointsStyle}>
+                            🎉 Tích lũy thêm:{' '}
+                            <strong>
+                                +{pointsEarned} điểm
+                            </strong>
+                        </p>
                     </div>
                 )}
-                <p style={{marginTop: '3rem', fontSize: '1.1rem', fontStyle: 'italic'}}>— Chạm vào màn hình để xem hóa
-                    đơn —</p>
+
+                <p style={successHintStyle}>
+                    — Chạm vào màn hình để xem hóa đơn —
+                </p>
             </div>
-        );
+        )
     }
 
     return (
-        <div style={{
-            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            background: '#f8fafc', zIndex: 9999, display: 'flex',
-            alignItems: 'center', justifyContent: 'center', padding: '20px'
-        }}>
-            <div className="page-card"
-                 style={{width: '100%', maxWidth: '500px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'}}>
-                <h2 style={{
-                    textAlign: 'center',
-                    color: '#1e293b',
-                    borderBottom: '2px dashed #e2e8f0',
-                    paddingBottom: '1rem'
-                }}>
+        <div style={billOverlayStyle}>
+            <div
+                className="page-card"
+                style={billCardStyle}
+            >
+                <h2 style={billTitleStyle}>
                     HÓA ĐƠN THANH TOÁN
-                    <div style={{fontSize: '1rem', color: '#64748b', marginTop: '4px', fontWeight: 'normal'}}>
+
+                    <div style={billCodeStyle}>
                         Mã: INV-{invoiceId}
                     </div>
                 </h2>
 
-                <div style={{margin: '1.5rem 0'}}>
+                <div style={tableWrapperStyle}>
                     <div className="simple-table">
-                        <div className="simple-table-header" style={{
-                            gridTemplateColumns: '2fr 1fr 1fr',
-                            display: 'grid',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid #cbd5e1',
-                            paddingBottom: '8px'
-                        }}>
-                            <span>Món ăn</span><span style={{textAlign: 'center'}}>SL</span><span
-                            style={{textAlign: 'right'}}>Thành tiền</span>
+                        <div
+                            className="simple-table-header"
+                            style={tableHeaderStyle}
+                        >
+                            <span>Món ăn</span>
+                            <span style={centerTextStyle}>
+                                SL
+                            </span>
+                            <span style={rightTextStyle}>
+                                Thành tiền
+                            </span>
                         </div>
-                        <div style={{maxHeight: '250px', overflowY: 'auto', paddingTop: '8px'}}>
-                            {itemsList.map((item, idx) => (
-                                <div key={idx} style={{
-                                    gridTemplateColumns: '2fr 1fr 1fr',
-                                    display: 'grid',
-                                    padding: '10px 0',
-                                    borderBottom: '1px dashed #f1f5f9'
-                                }}>
-                                    <span>{item.dishName}</span>
-                                    <span style={{textAlign: 'center'}}>{item.quantity}</span>
-                                    <span style={{textAlign: 'right'}}>{item.subTotal.toLocaleString()} đ</span>
-                                </div>
-                            ))}
+
+                        <div style={itemsListStyle}>
+                            {itemsList.length === 0 ? (
+                                <p style={emptyItemsStyle}>
+                                    Không có món ăn trong hóa đơn.
+                                </p>
+                            ) : (
+                                itemsList.map((item, index) => (
+                                    <div
+                                        key={`${item.dishName}-${index}`}
+                                        style={tableRowStyle}
+                                    >
+                                        <span>
+                                            {item.dishName}
+                                        </span>
+
+                                        <span style={centerTextStyle}>
+                                            {item.quantity}
+                                        </span>
+
+                                        <span style={rightTextStyle}>
+                                            {formatCurrency(item.subTotal)}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>
 
-                {/* KHU VỰC HIỂN THỊ TIỀN, ĐIỂM V VÀ PHƯƠNG THỨC THANH TOÁN */}
-                <div style={{
-                    background: '#f8fafc',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                    marginBottom: '2rem',
-                    border: '1px solid #e2e8f0'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#475569', marginBottom: '6px' }}>
-                        <span>Tạm tính:</span>
-                        <span>{beforeVat.toLocaleString()} đ</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#475569', marginBottom: '12px' }}>
-                        <span>Thuế VAT (10%):</span>
-                        <span>{vatAmount.toLocaleString()} đ</span>
-                    </div>
+                <div style={summaryBoxStyle}>
+                    <SummaryRow
+                        label="Tạm tính:"
+                        value={formatCurrency(beforeVat)}
+                    />
 
-                    {/* HIỂN THỊ KHÁCH HÀNG & ĐIỂM (NẾU CÓ) */}
+                    <SummaryRow
+                        label="Thuế VAT (10%):"
+                        value={formatCurrency(vatAmount)}
+                        marginBottom={customerName ? 12 : 0}
+                    />
+
                     {customerName && (
-                        <div style={{ padding: '12px 0', borderTop: '1px dashed #cbd5e1', borderBottom: '1px dashed #cbd5e1', marginBottom: '12px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#475569', marginBottom: '6px' }}>
-                                <span>Khách hàng:</span>
-                                <strong>{customerName}</strong>
-                            </div>
+                        <div style={customerBlockStyle}>
+                            <SummaryRow
+                                label="Khách hàng:"
+                                value={customerName}
+                                strongValue
+                            />
+
                             {pointsUsed > 0 && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#16a34a', marginBottom: '6px' }}>
-                                    <span>Điểm đã dùng:</span>
-                                    <span>- {(pointsUsed * 1000).toLocaleString()} đ</span>
-                                </div>
+                                <SummaryRow
+                                    label="Điểm đã dùng:"
+                                    value={`- ${formatCurrency(pointsUsed * 1000)}`}
+                                    color="#16a34a"
+                                />
                             )}
+
                             {pointsEarned > 0 && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#ea580c', fontWeight: 'bold' }}>
-                                    <span>Điểm tích lũy thêm:</span>
-                                    <span>+{pointsEarned} điểm</span>
-                                </div>
+                                <SummaryRow
+                                    label="Điểm tích lũy thêm:"
+                                    value={`+${pointsEarned} điểm`}
+                                    color="#ea580c"
+                                    bold
+                                />
                             )}
                         </div>
                     )}
 
-                    <div style={{
-                        display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem',
-                        fontWeight: 'bold', color: '#b91c1c', marginBottom: '12px',
-                        paddingTop: customerName ? '0' : '12px',
-                        borderTop: customerName ? 'none' : '1px dashed #cbd5e1'
-                    }}>
+                    <div
+                        style={{
+                            ...totalRowStyle,
+                            paddingTop: customerName ? 0 : 12,
+                            borderTop:
+                                customerName
+                                    ? 'none'
+                                    : '1px dashed #cbd5e1',
+                        }}
+                    >
                         <span>TỔNG THANH TOÁN:</span>
-                        <span>{finalAmount.toLocaleString()} đ</span>
+                        <span>
+                            {formatCurrency(finalAmount)}
+                        </span>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#16a34a', fontWeight: 'bold' }}>
+                    <div style={paymentMethodRowStyle}>
                         <span>Phương thức thanh toán:</span>
                         <span>{paymentMethodLabel}</span>
                     </div>
                 </div>
 
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
+                <div style={actionGridStyle}>
                     <button
                         type="button"
-                        onClick={() => void onDownload(invoiceId)}
-                        style={{
-                            padding: '1rem', background: '#2563eb', color: 'white',
-                            border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
-                        }}
+                        style={downloadButtonStyle}
+                        onClick={() =>
+                            void onDownload(invoiceId)
+                        }
                     >
                         📥 Tải PDF
                     </button>
+
                     <button
                         type="button"
+                        style={closeButtonStyle}
                         onClick={onClose}
-                        style={{
-                            padding: '1rem', background: '#64748b', color: 'white',
-                            border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
-                        }}
                     >
                         Đóng & Tiếp tục
                     </button>
                 </div>
             </div>
         </div>
-    );
+    )
+}
+
+function SummaryRow({
+                        label,
+                        value,
+                        color = '#475569',
+                        bold = false,
+                        strongValue = false,
+                        marginBottom = 6,
+                    }: {
+    label: string
+    value: string
+    color?: string
+    bold?: boolean
+    strongValue?: boolean
+    marginBottom?: number
+}) {
+    return (
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: '0.95rem',
+                color,
+                marginBottom,
+                fontWeight: bold ? 'bold' : 'normal',
+            }}
+        >
+            <span>{label}</span>
+
+            {strongValue ? (
+                <strong>{value}</strong>
+            ) : (
+                <span>{value}</span>
+            )}
+        </div>
+    )
+}
+
+const successScreenStyle: CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    background: '#16a34a',
+    zIndex: 9999,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    cursor: 'pointer',
+    textAlign: 'center',
+    animation: 'fadeIn 0.3s',
+}
+
+const successIconStyle: CSSProperties = {
+    fontSize: '8rem',
+    marginBottom: '1rem',
+}
+
+const successTitleStyle: CSSProperties = {
+    fontSize: '4rem',
+    fontWeight: 'bold',
+}
+
+const successInvoiceStyle: CSSProperties = {
+    fontSize: '1.5rem',
+    opacity: 0.9,
+}
+
+const successCustomerBoxStyle: CSSProperties = {
+    marginTop: '1rem',
+    padding: '10px 20px',
+    background: 'rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+}
+
+const successCustomerNameStyle: CSSProperties = {
+    margin: '0 0 5px 0',
+    fontSize: '1.2rem',
+}
+
+const successPointsStyle: CSSProperties = {
+    margin: 0,
+    fontSize: '1.1rem',
+}
+
+const successHintStyle: CSSProperties = {
+    marginTop: '3rem',
+    fontSize: '1.1rem',
+    fontStyle: 'italic',
+}
+
+const billOverlayStyle: CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    background: '#f8fafc',
+    zIndex: 9999,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px',
+}
+
+const billCardStyle: CSSProperties = {
+    width: '100%',
+    maxWidth: '500px',
+    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+}
+
+const billTitleStyle: CSSProperties = {
+    textAlign: 'center',
+    color: '#1e293b',
+    borderBottom: '2px dashed #e2e8f0',
+    paddingBottom: '1rem',
+}
+
+const billCodeStyle: CSSProperties = {
+    fontSize: '1rem',
+    color: '#64748b',
+    marginTop: '4px',
+    fontWeight: 'normal',
+}
+
+const tableWrapperStyle: CSSProperties = {
+    margin: '1.5rem 0',
+}
+
+const tableHeaderStyle: CSSProperties = {
+    gridTemplateColumns: '2fr 1fr 1fr',
+    display: 'grid',
+    fontWeight: 'bold',
+    borderBottom: '1px solid #cbd5e1',
+    paddingBottom: '8px',
+}
+
+const itemsListStyle: CSSProperties = {
+    maxHeight: '250px',
+    overflowY: 'auto',
+    paddingTop: '8px',
+}
+
+const tableRowStyle: CSSProperties = {
+    gridTemplateColumns: '2fr 1fr 1fr',
+    display: 'grid',
+    padding: '10px 0',
+    borderBottom: '1px dashed #f1f5f9',
+}
+
+const centerTextStyle: CSSProperties = {
+    textAlign: 'center',
+}
+
+const rightTextStyle: CSSProperties = {
+    textAlign: 'right',
+}
+
+const emptyItemsStyle: CSSProperties = {
+    textAlign: 'center',
+    color: '#94a3b8',
+    margin: '1rem 0',
+}
+
+const summaryBoxStyle: CSSProperties = {
+    background: '#f8fafc',
+    padding: '1rem',
+    borderRadius: '8px',
+    marginBottom: '2rem',
+    border: '1px solid #e2e8f0',
+}
+
+const customerBlockStyle: CSSProperties = {
+    padding: '12px 0',
+    borderTop: '1px dashed #cbd5e1',
+    borderBottom: '1px dashed #cbd5e1',
+    marginBottom: '12px',
+}
+
+const totalRowStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#b91c1c',
+    marginBottom: '12px',
+}
+
+const paymentMethodRowStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '0.9rem',
+    color: '#16a34a',
+    fontWeight: 'bold',
+}
+
+const actionGridStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '1rem',
+}
+
+const downloadButtonStyle: CSSProperties = {
+    padding: '1rem',
+    background: '#2563eb',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+}
+
+const closeButtonStyle: CSSProperties = {
+    padding: '1rem',
+    background: '#64748b',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
 }

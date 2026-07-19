@@ -1,6 +1,26 @@
-import {useEffect, useState} from 'react'
+import {
+    useCallback,
+    useRef,
+    useState,
+} from 'react'
 import {useNavigate} from 'react-router-dom'
-import {adminApi, type AdminPaymentHistoryItem, type AdminPaymentMethod,} from '../../api/admin'
+
+import {
+    adminApi,
+    type AdminPaymentHistoryItem,
+    type AdminPaymentMethod,
+} from '../../api/admin'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {
+    EmptyState,
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback'
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui'
+import {usePolling} from '../../hooks/usePolling'
 
 const PAYMENT_HISTORY_PAGE_SIZE = 10
 
@@ -98,70 +118,147 @@ function PaymentMethodBadge({
 export default function AdminPaymentHistoryPage() {
     const navigate = useNavigate()
 
-    const [payments, setPayments] = useState<
-        AdminPaymentHistoryItem[]
-    >([])
+    const [payments, setPayments] =
+        useState<AdminPaymentHistoryItem[]>([])
+
     const [page, setPage] = useState(1)
     const [totalItems, setTotalItems] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        void loadPaymentHistory(page)
-    }, [page])
+    const hasLoadedInitialPaymentsRef = useRef(false)
 
-    async function loadPaymentHistory(targetPage: number) {
-        try {
-            setIsLoading(true)
-            setError(null)
+    const loadPaymentHistory = useCallback(
+        async (
+            targetPage: number,
+            showFullLoading = true,
+            signal?: AbortSignal,
+        ) => {
+            try {
+                if (showFullLoading) {
+                    setIsLoading(true)
+                }
 
-            const {data} = await adminApi.getPaymentHistory(
-                targetPage,
-                PAYMENT_HISTORY_PAGE_SIZE,
+                const {data} = await adminApi.getPaymentHistory(
+                    targetPage,
+                    PAYMENT_HISTORY_PAGE_SIZE,
+                    signal,
+                )
+
+                if (
+                    data.totalPages > 0
+                    && targetPage > data.totalPages
+                ) {
+                    setPage(data.totalPages)
+
+                    const retryResponse =
+                        await adminApi.getPaymentHistory(
+                            data.totalPages,
+                            PAYMENT_HISTORY_PAGE_SIZE,
+                            signal,
+                        )
+
+                    setPayments(retryResponse.data.items)
+                    setTotalItems(retryResponse.data.totalItems)
+                    setTotalPages(retryResponse.data.totalPages)
+                    setError(null)
+                    return
+                }
+
+                setPayments(data.items)
+                setTotalItems(data.totalItems)
+                setTotalPages(data.totalPages)
+                setError(null)
+            } catch (requestError: unknown) {
+                console.error(
+                    '[ADMIN_PAYMENT_HISTORY_FETCH_ERROR]',
+                    requestError,
+                )
+
+                setError(
+                    'Không thể tải lịch sử thanh toán.',
+                )
+            } finally {
+                if (showFullLoading) {
+                    setIsLoading(false)
+                }
+            }
+        },
+        [],
+    )
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialPaymentsRef.current
+
+            await loadPaymentHistory(
+                page,
+                isInitialLoad,
+                signal,
             )
 
-            if (
-                data.totalPages > 0 &&
-                targetPage > data.totalPages
-            ) {
-                setPage(data.totalPages)
-                return
-            }
+            hasLoadedInitialPaymentsRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .admin
+                .dashboardIntervalMs,
 
-            setPayments(data.items)
-            setTotalItems(data.totalItems)
-            setTotalPages(data.totalPages)
-        } catch (error) {
-            console.error(error)
-            setError('Không thể tải lịch sử thanh toán.')
-        } finally {
-            setIsLoading(false)
-        }
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[ADMIN_PAYMENT_HISTORY_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
+    function handlePageChange(nextPage: number) {
+        const safeTotalPages = Math.max(totalPages, 1)
+
+        const safeNextPage = Math.min(
+            Math.max(nextPage, 1),
+            safeTotalPages,
+        )
+
+        setPage(safeNextPage)
+
+        loadPaymentHistory(
+            safeNextPage,
+            true,
+        ).catch((requestError) => {
+            console.error(requestError)
+        })
     }
 
     if (isLoading) {
         return (
-            <section className="admin-payment-state page-card">
-                Đang tải lịch sử thanh toán...
-            </section>
+            <LoadingState
+                title="Đang tải lịch sử thanh toán..."
+                description="Hệ thống đang lấy danh sách hóa đơn đã thanh toán."
+            />
         )
     }
 
     if (error) {
         return (
-            <section className="admin-payment-state page-card">
-                <h2>Không thể tải dữ liệu</h2>
-                <p>{error}</p>
-
-                <button
-                    className="primary-button"
-                    type="button"
-                    onClick={() => void loadPaymentHistory(page)}
-                >
-                    Thử lại
-                </button>
-            </section>
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    loadPaymentHistory(
+                        page,
+                        true,
+                    ).catch((requestError) => {
+                        console.error(requestError)
+                    })
+                }}
+            />
         )
     }
 
@@ -169,32 +266,32 @@ export default function AdminPaymentHistoryPage() {
         totalItems === 0
             ? 0
             : (page - 1) * PAYMENT_HISTORY_PAGE_SIZE + 1
+
     const lastVisibleItem = Math.min(
         page * PAYMENT_HISTORY_PAGE_SIZE,
         totalItems,
     )
+
     const safeTotalPages = Math.max(totalPages, 1)
 
     return (
         <div className="admin-payment-history-page">
-            <section className="admin-payment-header">
-                <button
-                    aria-label="Quay lại"
-                    className="admin-payment-back-button"
-                    type="button"
-                    onClick={() => navigate(-1)}
-                >
-                    ‹
-                </button>
-
-                <div>
-                    <h2>Lịch sử danh sách</h2>
-                    <p>
-                        {totalItems} hóa đơn đã thanh toán được
-                        ghi nhận
-                    </p>
-                </div>
-            </section>
+            <PageCard className="admin-payment-header-card">
+                <PageHeader
+                    title="Lịch sử danh sách"
+                    description={`${totalItems} hóa đơn đã thanh toán được ghi nhận`}
+                    actions={
+                        <button
+                            aria-label="Quay lại"
+                            className="admin-payment-back-button"
+                            type="button"
+                            onClick={() => navigate(-1)}
+                        >
+                            ‹
+                        </button>
+                    }
+                />
+            </PageCard>
 
             <section className="admin-payment-table-card">
                 <div className="admin-payment-table">
@@ -209,9 +306,10 @@ export default function AdminPaymentHistoryPage() {
                     </div>
 
                     {payments.length === 0 ? (
-                        <div className="admin-payment-empty-row">
-                            Chưa có hóa đơn đã thanh toán.
-                        </div>
+                        <EmptyState
+                            title="Chưa có hóa đơn đã thanh toán"
+                            description="Hiện hệ thống chưa ghi nhận hóa đơn thanh toán nào."
+                        />
                     ) : (
                         payments.map((payment) => (
                             <button
@@ -278,9 +376,7 @@ export default function AdminPaymentHistoryPage() {
                                 type="button"
                                 disabled={page === 1}
                                 onClick={() =>
-                                    setPage((currentPage) =>
-                                        Math.max(currentPage - 1, 1),
-                                    )
+                                    handlePageChange(page - 1)
                                 }
                             >
                                 Trước
@@ -294,16 +390,11 @@ export default function AdminPaymentHistoryPage() {
                                 className="admin-payment-pagination-button"
                                 type="button"
                                 disabled={
-                                    totalPages === 0 ||
-                                    page >= totalPages
+                                    totalPages === 0
+                                    || page >= totalPages
                                 }
                                 onClick={() =>
-                                    setPage((currentPage) =>
-                                        Math.min(
-                                            currentPage + 1,
-                                            safeTotalPages,
-                                        ),
-                                    )
+                                    handlePageChange(page + 1)
                                 }
                             >
                                 Sau

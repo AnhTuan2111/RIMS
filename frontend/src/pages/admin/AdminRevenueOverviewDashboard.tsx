@@ -1,4 +1,4 @@
-import {type ReactNode, useEffect, useState} from 'react'
+import {type ReactNode, useRef, useState} from 'react'
 import {
     adminApi,
     type BestSellingDishItem,
@@ -7,6 +7,8 @@ import {
     type RevenueReportResponse,
     type WeeklyRevenueChartResponse,
 } from '../../api/admin'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {usePolling} from '../../hooks/usePolling'
 
 interface WeekOption {
     value: string
@@ -879,15 +881,18 @@ export default function AdminRevenueOverviewDashboard() {
     const [isOverviewLoading, setIsOverviewLoading] = useState(false)
     const weekOptions = buildWeekOptions(new Date().getFullYear())
 
-    useEffect(() => {
-        void loadWeeklyRevenueOverview(selectedWeek)
-    }, [])
+    const hasLoadedInitialOverviewRef = useRef(false)
 
     async function loadWeeklyRevenueOverview(
         week: WeekOption = selectedWeek,
+        showFullLoading = true,
+        signal?: AbortSignal,
     ) {
         try {
-            setIsOverviewLoading(true)
+            if (showFullLoading) {
+                setIsOverviewLoading(true)
+            }
+
             setOverviewError(null)
 
             const [
@@ -899,15 +904,23 @@ export default function AdminRevenueOverviewDashboard() {
                 adminApi.getCustomRevenue(
                     week.fromDate,
                     week.toDate,
+                    signal,
                 ),
-                adminApi.getDailyRevenue(week.fromDate, week.toDate),
+                adminApi.getDailyRevenue(
+                    week.fromDate,
+                    week.toDate,
+                    signal,
+                ),
                 adminApi.getBestSellingReportBetween(
                     week.fromDate,
                     week.toDate,
+                    undefined,
+                    signal,
                 ),
                 adminApi.getOrderShiftReportBetween(
                     week.fromDate,
                     week.toDate,
+                    signal,
                 ),
             ])
 
@@ -918,6 +931,10 @@ export default function AdminRevenueOverviewDashboard() {
                 orderShiftReport: orderShiftReport.data,
             })
         } catch (error) {
+            if (signal?.aborted) {
+                return
+            }
+
             console.error(error)
             setOverviewError(
                 getApiErrorMessage(
@@ -926,9 +943,42 @@ export default function AdminRevenueOverviewDashboard() {
                 ),
             )
         } finally {
-            setIsOverviewLoading(false)
+            if (showFullLoading && !signal?.aborted) {
+                setIsOverviewLoading(false)
+            }
         }
     }
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialOverviewRef.current
+
+            await loadWeeklyRevenueOverview(
+                selectedWeek,
+                isInitialLoad,
+                signal,
+            )
+
+            if (!signal.aborted) {
+                hasLoadedInitialOverviewRef.current = true
+            }
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .admin
+                .dashboardIntervalMs,
+            runImmediately: true,
+            pauseWhenHidden: true,
+            onError: (requestError) => {
+                console.error(
+                    '[ADMIN_REVENUE_OVERVIEW_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
 
     function handleWeekChange(weekValue: string) {
         const nextWeek = weekOptions.find(
@@ -940,7 +990,7 @@ export default function AdminRevenueOverviewDashboard() {
         }
 
         setSelectedWeek(nextWeek)
-        void loadWeeklyRevenueOverview(nextWeek)
+        void loadWeeklyRevenueOverview(nextWeek, true)
     }
 
     return (
@@ -950,7 +1000,7 @@ export default function AdminRevenueOverviewDashboard() {
             isLoading={isOverviewLoading}
             selectedWeek={selectedWeek}
             weekOptions={weekOptions}
-            onReload={() => void loadWeeklyRevenueOverview(selectedWeek)}
+            onReload={() => void loadWeeklyRevenueOverview(selectedWeek, true)}
             onWeekChange={handleWeekChange}
         />
     )

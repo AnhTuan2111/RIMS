@@ -1,179 +1,623 @@
-import {useEffect, useState} from "react";
-import {useNavigate, useParams} from "react-router-dom";
-import {type MenuItemResponse, type OrderDetailResponse, type OrderItemStatus, waiterApi,} from "../../api/waiter";
-import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
-import type {AxiosError} from "axios";
+import {
+    useMemo,
+    useRef,
+    useState,
+    type CSSProperties,
+} from 'react'
+import {
+    useNavigate,
+    useParams,
+} from 'react-router-dom'
+
+import {
+    type MenuItemResponse,
+    type OrderDetailResponse,
+    type OrderItemStatus,
+    type UpdateOrderItemRequest,
+    waiterApi,
+} from '../../api/waiter'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {
+    BackArrow,
+    ConfirmModal,
+    fmtPrice,
+    WaiterHeader,
+    WaiterToast,
+} from '../../components/waiter'
+import {usePolling} from '../../hooks/usePolling'
 
 type DraftItem = {
-    qty: number;
-    originalQty?: number;
-    note: string;
-    orderItemId?: number | null;
-    status?: OrderItemStatus;
-    chefInternalNote?: string | null;
-    chefInternalNoteCreatedAt?: string | null;
-    chefInternalNoteAcknowledgedAt?: string | null;
-};
+    qty: number
+    originalQty?: number
+    note: string
+    orderItemId?: number | null
+    status?: OrderItemStatus
+    chefInternalNote?: string | null
+    chefInternalNoteCreatedAt?: string | null
+    chefInternalNoteAcknowledgedAt?: string | null
+}
+
+type ToastState = {
+    msg: string
+    type: string
+} | null
+
+type UpdateItemWithName = UpdateOrderItemRequest & {
+    name: string
+}
+
+function isRequestCanceled(error: unknown) {
+    if (typeof error !== 'object' || error === null) {
+        return false
+    }
+
+    const requestError = error as {
+        name?: string
+        code?: string
+        message?: string
+    }
+
+    return (
+        requestError.name === 'CanceledError'
+        || requestError.code === 'ERR_CANCELED'
+        || requestError.message === 'canceled'
+    )
+}
+
+function getRequestErrorMessage(
+    error: unknown,
+    fallback: string,
+) {
+    if (typeof error !== 'object' || error === null) {
+        return fallback
+    }
+
+    const requestError = error as {
+        response?: {
+            data?: string | {
+                message?: string
+                details?: Record<string, string>
+            }
+        }
+        message?: string
+    }
+
+    const responseData = requestError.response?.data
+
+    if (typeof responseData === 'string') {
+        return responseData
+    }
+
+    if (
+        responseData?.details
+        && Object.keys(responseData.details).length > 0
+    ) {
+        return Object.entries(responseData.details)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join('; ')
+    }
+
+    if (responseData?.message) {
+        return responseData.message
+    }
+
+    return requestError.message || fallback
+}
+
+function formatChefNoteTime(value?: string | null) {
+    if (!value) {
+        return ''
+    }
+
+    const date = new Date(value)
+
+    if (Number.isNaN(date.getTime())) {
+        return value
+    }
+
+    return date.toLocaleString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    })
+}
+
+function buildDraftFromOrders(
+    menu: MenuItemResponse[],
+    orders: OrderDetailResponse[],
+) {
+    const draft: Record<number, DraftItem> = {}
+
+    orders.forEach((order) => {
+        order.orderItems.forEach((item) => {
+            const dish =
+                menu.find(
+                    (menuItem) =>
+                        menuItem.name === item.dishName,
+                )
+
+            if (!dish) {
+                return
+            }
+
+            draft[dish.dishId] = {
+                qty: item.quantity,
+                originalQty: item.quantity,
+                note: item.note ?? '',
+                orderItemId: item.orderItemId,
+                status: item.status,
+                chefInternalNote: item.chefInternalNote,
+                chefInternalNoteCreatedAt:
+                item.chefInternalNoteCreatedAt,
+                chefInternalNoteAcknowledgedAt:
+                item.chefInternalNoteAcknowledgedAt,
+            }
+        })
+    })
+
+    return draft
+}
+
+function getChefNoteBoxStyle(
+    acknowledged: boolean,
+): CSSProperties {
+    return {
+        margin: '0.85rem 0',
+        padding: '0.85rem 0.95rem',
+        border: acknowledged
+            ? '1px solid #cbd5e1'
+            : '1px solid #f59e0b',
+        borderLeft: acknowledged
+            ? '4px solid #94a3b8'
+            : '4px solid #f59e0b',
+        borderRadius: '10px',
+        background: acknowledged
+            ? '#f8fafc'
+            : '#fffbeb',
+        color: acknowledged
+            ? '#475569'
+            : '#78350f',
+    }
+}
 
 export default function WaiterUpdateOrderPage() {
-    const navigate = useNavigate();
-    const {tableId} = useParams();
-    const tid = parseInt(tableId || "0");
-    const [menu, setMenu] = useState<MenuItemResponse[]>([]);
-    const [servingOrders, setServingOrders] = useState<OrderDetailResponse[]>([]);
-    const [orderDraft, setOrderDraft] = useState<Record<number, DraftItem>>({});
-    const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
-    const [showConfirm, setShowConfirm] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [successData, setSuccessData] = useState<{ message: string; itemSummary: string } | null>(null);
-    const [activeCategory, setActiveCategory] = useState<string>("Tất cả");
+    const navigate = useNavigate()
+    const {tableId} = useParams()
+
+    const tableIdNumber =
+        Number.parseInt(tableId ?? '0', 10)
+
+    const [menu, setMenu] =
+        useState<MenuItemResponse[]>([])
+
+    const [servingOrders, setServingOrders] =
+        useState<OrderDetailResponse[]>([])
+
+    const [orderDraft, setOrderDraft] =
+        useState<Record<number, DraftItem>>({})
+
+    const [toast, setToast] =
+        useState<ToastState>(null)
+
+    const [showConfirm, setShowConfirm] =
+        useState(false)
+
+    const [submitting, setSubmitting] =
+        useState(false)
+
+    const [successData, setSuccessData] =
+        useState<{
+            message: string
+            itemSummary: string
+        } | null>(null)
+
+    const [activeCategory, setActiveCategory] =
+        useState('Tất cả')
+
     const [acknowledgingItemId, setAcknowledgingItemId] =
-        useState<number | null>(null);
+        useState<number | null>(null)
 
-    useEffect(() => {
-        Promise.all([waiterApi.getMenu(), waiterApi.getServingOrders(tid)])
-            .then(([menuRes, orderRes]) => {
-                setMenu(menuRes.data);
-                setServingOrders(orderRes.data);
+    const [isLoading, setIsLoading] =
+        useState(true)
 
-                const draft: Record<number, DraftItem> = {};
-                orderRes.data.forEach((o) => {
-                    o.orderItems.forEach((item) => {
-                        const dish = menuRes.data.find((m) => m.name === item.dishName);
-                        if (dish) {
-                            draft[dish.dishId] = {
-                                qty: item.quantity,
-                                originalQty: item.quantity,
-                                note: item.note || "",
-                                orderItemId: item.orderItemId,
-                                status: item.status,
-                                chefInternalNote: item.chefInternalNote,
-                                chefInternalNoteCreatedAt:
-                                item.chefInternalNoteCreatedAt,
-                                chefInternalNoteAcknowledgedAt:
-                                item.chefInternalNoteAcknowledgedAt,
-                            };
-                        }
-                    });
-                });
-                setOrderDraft(draft);
-            })
-            .catch(console.error);
-    }, [tid]);
+    const [pageError, setPageError] =
+        useState<string | null>(null)
 
-    function showToast(msg: string, type = "success") {
-        setToast({msg, type});
-        setTimeout(() => setToast(null), 3000);
-    }
+    const hasLoadedInitialDataRef =
+        useRef(false)
 
-    function getMinQty(dishId: number): number {
-        const cur = orderDraft[dishId];
-        if (!cur) return 0;
-        // Only COMPLETED items are pinned to their original qty
-        if (cur.status === "COMPLETED") {
-            return cur.originalQty || 0;
-        }
-        return 0;
-    }
+    const hasUserEditedDraftRef =
+        useRef(false)
 
-    const updateItems = Object.entries(orderDraft)
-        .filter(([, v]) => {
-            if (!v.orderItemId) return v.qty > 0;
-            return true;
+    function showToast(
+        msg: string,
+        type = 'success',
+    ) {
+        setToast({
+            msg,
+            type,
         })
-        .filter(([, v]) => v.qty > 0 || (v.orderItemId && v.status === "PREPARING"))
-        .map(([dishId, v]) => ({
-            orderItemId: v.orderItemId ?? null,
-            dishId: parseInt(dishId),
-            quantity: v.qty,
-            note: v.note || "",
-            // for display in confirm modal
-            name: menu.find(m => m.dishId === parseInt(dishId))?.name || "Món"
-        }));
+
+        window.setTimeout(
+            () => setToast(null),
+            3000,
+        )
+    }
+
+    async function loadOrderData(
+        signal?: AbortSignal,
+        showFullLoading = true,
+    ) {
+        if (!tableIdNumber) {
+            setPageError('Mã bàn không hợp lệ.')
+            setIsLoading(false)
+            return
+        }
+
+        try {
+            if (showFullLoading) {
+                setIsLoading(true)
+            }
+
+            setPageError(null)
+
+            const [
+                menuResponse,
+                orderResponse,
+            ] =
+                await Promise.all([
+                    waiterApi.getMenu(signal),
+                    waiterApi.getServingOrders(
+                        tableIdNumber,
+                        signal,
+                    ),
+                ])
+
+            if (signal?.aborted) {
+                return
+            }
+
+            const nextMenu = menuResponse.data
+            const nextOrders = orderResponse.data ?? []
+
+            setMenu(nextMenu)
+            setServingOrders(nextOrders)
+
+            if (
+                !hasUserEditedDraftRef.current
+                && !showConfirm
+                && !submitting
+            ) {
+                setOrderDraft(
+                    buildDraftFromOrders(
+                        nextMenu,
+                        nextOrders,
+                    ),
+                )
+            }
+        } catch (requestError: unknown) {
+            if (
+                signal?.aborted
+                || isRequestCanceled(requestError)
+            ) {
+                return
+            }
+
+            console.error(
+                '[WAITER_UPDATE_ORDER_LOAD_ERROR]',
+                requestError,
+            )
+
+            setPageError(
+                'Không thể tải dữ liệu cập nhật order.',
+            )
+        } finally {
+            if (
+                showFullLoading
+                && !signal?.aborted
+            ) {
+                setIsLoading(false)
+            }
+        }
+    }
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialDataRef.current
+
+            await loadOrderData(
+                signal,
+                isInitialLoad,
+            )
+
+            hasLoadedInitialDataRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .waiter
+                .orderDetailIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[WAITER_UPDATE_ORDER_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
+    function getMinQty(dishId: number) {
+        const current = orderDraft[dishId]
+
+        if (!current) {
+            return 0
+        }
+
+        if (current.status === 'COMPLETED') {
+            return current.originalQty ?? 0
+        }
+
+        return 0
+    }
+
+    const categories =
+        useMemo(
+            () => [
+                'Tất cả',
+                ...Array.from(
+                    new Set(
+                        menu
+                            .map((dish) => dish.categoryName)
+                            .filter(Boolean),
+                    ),
+                ),
+            ],
+            [menu],
+        )
+
+    const visibleMenu =
+        useMemo(
+            () =>
+                menu.filter(
+                    (dish) =>
+                        activeCategory === 'Tất cả'
+                        || dish.categoryName === activeCategory,
+                ),
+            [
+                menu,
+                activeCategory,
+            ],
+        )
+
+    const updateItems =
+        useMemo<UpdateItemWithName[]>(
+            () =>
+                Object.entries(orderDraft)
+                    .filter(([, value]) => {
+                        if (!value.orderItemId) {
+                            return value.qty > 0
+                        }
+
+                        return true
+                    })
+                    .filter(([, value]) =>
+                            value.qty > 0
+                            || (
+                                value.orderItemId
+                                && value.status === 'PREPARING'
+                            ),
+                    )
+                    .map(([dishId, value]) => {
+                        const numericDishId =
+                            Number.parseInt(dishId, 10)
+
+                        return {
+                            orderItemId:
+                                value.orderItemId ?? null,
+
+                            dishId: numericDishId,
+                            quantity: value.qty,
+                            note: value.note || '',
+                            name:
+                                menu.find(
+                                    (dish) =>
+                                        dish.dishId
+                                        === numericDishId,
+                                )?.name
+                                ?? 'Món',
+                        }
+                    }),
+            [
+                orderDraft,
+                menu,
+            ],
+        )
 
     function openConfirm() {
-        if (!servingOrders.length) return;
-        if (updateItems.length === 0) {
-            showToast("Không có món nào để cập nhật.", "error");
-            return;
+        if (!servingOrders.length) {
+            showToast(
+                'Không có order đang phục vụ để cập nhật.',
+                'error',
+            )
+            return
         }
-        setShowConfirm(true);
+
+        if (updateItems.length === 0) {
+            showToast(
+                'Không có món nào để cập nhật.',
+                'error',
+            )
+            return
+        }
+
+        setShowConfirm(true)
     }
 
     async function submitUpdateOrder() {
-        if (!servingOrders.length) return;
-        const targetOrderId = servingOrders[0].orderId;
+        if (!servingOrders.length) {
+            return
+        }
 
-        setSubmitting(true);
+        const targetOrderId =
+            servingOrders[0].orderId
+
+        const items: UpdateOrderItemRequest[] =
+            updateItems.map((item) => ({
+                orderItemId: item.orderItemId,
+                dishId: item.dishId,
+                quantity: item.quantity,
+                note: item.note,
+            }))
+
+        setSubmitting(true)
 
         try {
-            const res = await waiterApi.updateOrder(targetOrderId, {items: updateItems});
+            const response =
+                await waiterApi.updateOrder(
+                    targetOrderId,
+                    {
+                        items,
+                    },
+                )
+
+            hasUserEditedDraftRef.current = false
+
             setSuccessData({
-                message: res.data?.message || "Cập nhật order thành công!",
-                itemSummary: "",
-            });
-        } catch (err) {
-            // Backend ErrorResponse: { message, details: Record<string,string> }
-            const axiosErr = err as AxiosError<{ message?: string; details?: Record<string, string> }>;
-            let reason = "Lỗi không xác định";
-            if (axiosErr.response?.data) {
-                const data = axiosErr.response.data;
-                if (data.details && Object.keys(data.details).length > 0) {
-                    // Validation errors: format "field: message"
-                    reason = Object.entries(data.details)
-                        .map(([k, v]) => `${k}: ${v}`)
-                        .join("; ");
-                } else if (data.message) {
-                    reason = data.message;
-                }
-            } else if (axiosErr.message) {
-                reason = axiosErr.message;
+                message:
+                    response.data?.message
+                    || 'Cập nhật order thành công!',
+                itemSummary: '',
+            })
+        } catch (requestError: unknown) {
+            if (isRequestCanceled(requestError)) {
+                return
             }
-            showToast(`Cập nhật thất bại: ${reason}`, "error");
+
+            console.error(
+                '[WAITER_UPDATE_ORDER_SUBMIT_ERROR]',
+                requestError,
+            )
+
+            showToast(
+                `Cập nhật thất bại: ${
+                    getRequestErrorMessage(
+                        requestError,
+                        'Lỗi không xác định',
+                    )
+                }`,
+                'error',
+            )
         } finally {
-            setSubmitting(false);
-            setShowConfirm(false);
+            setSubmitting(false)
+            setShowConfirm(false)
         }
     }
 
-    function changeDraftQty(dishId: number, delta: number) {
-        setOrderDraft((prev) => {
-            const cur = prev[dishId] || {qty: 0, note: "", orderItemId: null};
-            if (cur.status === "CANCELLED") {
-                const qty = Math.max(0, cur.qty + delta);
-                // First time adding from 0 → clear old orderItemId, treat as new item
-                if (cur.qty === 0 && qty > 0) {
-                    return {
-                        ...prev,
-                        [dishId]: {qty, note: cur.note, orderItemId: null, status: undefined},
-                    };
+    function changeDraftQty(
+        dishId: number,
+        delta: number,
+    ) {
+        hasUserEditedDraftRef.current = true
+
+        setOrderDraft((previous) => {
+            const current =
+                previous[dishId] ?? {
+                    qty: 0,
+                    note: '',
+                    orderItemId: null,
                 }
-                return {...prev, [dishId]: {...cur, qty}};
+
+            if (current.status === 'CANCELLED') {
+                const qty =
+                    Math.max(
+                        0,
+                        current.qty + delta,
+                    )
+
+                if (
+                    current.qty === 0
+                    && qty > 0
+                ) {
+                    return {
+                        ...previous,
+                        [dishId]: {
+                            qty,
+                            note: current.note,
+                            orderItemId: null,
+                            status: undefined,
+                        },
+                    }
+                }
+
+                return {
+                    ...previous,
+                    [dishId]: {
+                        ...current,
+                        qty,
+                    },
+                }
             }
-            const min = getMinQty(dishId);
-            const qty = Math.max(min, cur.qty + delta);
-            return {...prev, [dishId]: {...cur, qty}};
-        });
+
+            const minQty =
+                getMinQty(dishId)
+
+            const qty =
+                Math.max(
+                    minQty,
+                    current.qty + delta,
+                )
+
+            return {
+                ...previous,
+                [dishId]: {
+                    ...current,
+                    qty,
+                },
+            }
+        })
     }
 
-    function setDraftNote(dishId: number, note: string) {
-        setOrderDraft((prev) => ({
-            ...prev,
-            [dishId]: {...(prev[dishId] || {qty: 0, orderItemId: null}), note},
-        }));
-    }
+    function setDraftNote(
+        dishId: number,
+        note: string,
+    ) {
+        hasUserEditedDraftRef.current = true
 
+        setOrderDraft((previous) => {
+            const current =
+                previous[dishId] ?? {
+                    qty: 0,
+                    note: '',
+                    orderItemId: null,
+                }
+
+            return {
+                ...previous,
+                [dishId]: {
+                    ...current,
+                    note,
+                },
+            }
+        })
+    }
 
     async function handleAcknowledgeChefNote(
         dishId: number,
         orderItemId: number,
     ) {
         try {
-            setAcknowledgingItemId(orderItemId);
+            setAcknowledgingItemId(orderItemId)
 
             await waiterApi.acknowledgeChefInternalNote(
                 orderItemId,
-            );
+            )
 
             setOrderDraft((currentDraft) => ({
                 ...currentDraft,
@@ -182,67 +626,133 @@ export default function WaiterUpdateOrderPage() {
                     chefInternalNoteAcknowledgedAt:
                         new Date().toISOString(),
                 },
-            }));
+            }))
 
-            showToast("Đã xác nhận ghi chú từ bếp.");
-        } catch (error) {
-            console.error(error);
+            showToast('Đã xác nhận ghi chú từ bếp.')
+        } catch (requestError: unknown) {
+            if (isRequestCanceled(requestError)) {
+                return
+            }
+
+            console.error(
+                '[WAITER_UPDATE_ORDER_ACK_NOTE_ERROR]',
+                requestError,
+            )
+
             showToast(
-                "Không thể xác nhận ghi chú từ bếp.",
-                "error",
-            );
+                getRequestErrorMessage(
+                    requestError,
+                    'Không thể xác nhận ghi chú từ bếp.',
+                ),
+                'error',
+            )
         } finally {
-            setAcknowledgingItemId(null);
+            setAcknowledgingItemId(null)
         }
-    }
-
-    function formatChefNoteTime(value?: string | null) {
-        if (!value) {
-            return "";
-        }
-
-        const date = new Date(value);
-
-        if (Number.isNaN(date.getTime())) {
-            return value;
-        }
-
-        return date.toLocaleString("vi-VN", {
-            hour: "2-digit",
-            minute: "2-digit",
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-        });
     }
 
     return (
         <div className="waiter-container">
-            <WaiterHeader/>
+            <WaiterHeader />
+
             <main className="waiter-main">
                 <div className="waiter-sub-header">
-                    <BackArrow onClick={() => navigate(`/waiter/tables/${tid}/order/detail`)}/>
-                    <h2 className="waiter-title">Cập nhật Order - Bàn {tid}</h2>
-                    <button onClick={openConfirm} className="waiter-action-btn">Lưu Cập Nhật</button>
+                    <BackArrow
+                        onClick={() =>
+                            navigate(
+                                `/waiter/tables/${tableIdNumber}/order/detail`,
+                            )
+                        }
+                    />
+
+                    <h2 className="waiter-title">
+                        Cập nhật Order - Bàn {tableIdNumber || '—'}
+                    </h2>
+
+                    <button
+                        type="button"
+                        className="waiter-action-btn"
+                        disabled={
+                            isLoading
+                            || submitting
+                            || !tableIdNumber
+                        }
+                        onClick={openConfirm}
+                    >
+                        Lưu Cập Nhật
+                    </button>
                 </div>
+
                 <div className="waiter-category-nav">
-                    {["Tất cả", ...Array.from(new Set(menu.map((d) => d.categoryName).filter(Boolean)))].map((cat) => (
+                    {categories.map((category) => (
                         <button
-                            key={cat}
-                            className={`waiter-category-tab${activeCategory === cat ? " waiter-category-tab-active" : ""}`}
-                            onClick={() => setActiveCategory(cat)}
+                            key={category}
+                            type="button"
+                            className={`waiter-category-tab${
+                                activeCategory === category
+                                    ? ' waiter-category-tab-active'
+                                    : ''
+                            }`}
+                            onClick={() =>
+                                setActiveCategory(category)
+                            }
                         >
-                            {cat}
+                            {category}
                         </button>
                     ))}
                 </div>
-                <div className="waiter-menu-grid">
-                    {menu
-                        .filter((dish) => activeCategory === "Tất cả" || dish.categoryName === activeCategory)
-                        .map((dish) => {
-                            const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
-                            const minQty = getMinQty(dish.dishId);
-                            const hasExisting = Boolean(d.status);
+
+                {pageError && (
+                    <div
+                        className="waiter-form-error"
+                        style={errorBoxStyle}
+                    >
+                        {pageError}
+
+                        <button
+                            type="button"
+                            className="waiter-btn-outline"
+                            style={retryButtonStyle}
+                            onClick={() =>
+                                void loadOrderData(
+                                    undefined,
+                                    true,
+                                )
+                            }
+                        >
+                            Thử lại
+                        </button>
+                    </div>
+                )}
+
+                {isLoading ? (
+                    <div style={stateBoxStyle}>
+                        Đang tải dữ liệu cập nhật order...
+                    </div>
+                ) : visibleMenu.length === 0 ? (
+                    <div style={stateBoxStyle}>
+                        Không có món nào trong danh mục này.
+                    </div>
+                ) : (
+                    <div className="waiter-menu-grid">
+                        {visibleMenu.map((dish) => {
+                            const draft =
+                                orderDraft[dish.dishId] ?? {
+                                    qty: 0,
+                                    note: '',
+                                }
+
+                            const minQty =
+                                getMinQty(dish.dishId)
+
+                            const hasExisting =
+                                Boolean(draft.status)
+
+                            const noteAcknowledged =
+                                Boolean(
+                                    draft.chefInternalNoteAcknowledgedAt,
+                                )
+
                             return (
                                 <div
                                     key={dish.dishId}
@@ -250,108 +760,80 @@ export default function WaiterUpdateOrderPage() {
                                 >
                                     <div className="waiter-menu-card-top">
                                         {dish.imageUrl ? (
-                                            <img src={dish.imageUrl} alt={dish.name} className="waiter-menu-img"/>
+                                            <img
+                                                src={dish.imageUrl}
+                                                alt={dish.name}
+                                                className="waiter-menu-img"
+                                            />
                                         ) : (
-                                            <span className="waiter-menu-emoji">🍽️</span>
+                                            <span className="waiter-menu-emoji">
+                                                🍽️
+                                            </span>
                                         )}
+
                                         <div className="waiter-menu-info">
                                             <h4>{dish.name}</h4>
                                             <p>{fmtPrice(dish.price)}</p>
-                                            {hasExisting && d.status && (
-                                                <span className={`waiter-badge waiter-badge-${d.status.toLowerCase()}`}>
-                                                {d.status}
-                                            </span>
+
+                                            {hasExisting && draft.status && (
+                                                <span
+                                                    className={`waiter-badge waiter-badge-${draft.status.toLowerCase()}`}
+                                                >
+                                                    {draft.status}
+                                                </span>
                                             )}
                                         </div>
                                     </div>
-                                    {d.chefInternalNote && (
-                                        <div
-                                            style={{
-                                                margin: "0.85rem 0",
-                                                padding: "0.85rem 0.95rem",
-                                                border: d.chefInternalNoteAcknowledgedAt
-                                                    ? "1px solid #cbd5e1"
-                                                    : "1px solid #f59e0b",
-                                                borderLeft: d.chefInternalNoteAcknowledgedAt
-                                                    ? "4px solid #94a3b8"
-                                                    : "4px solid #f59e0b",
-                                                borderRadius: "10px",
-                                                background: d.chefInternalNoteAcknowledgedAt
-                                                    ? "#f8fafc"
-                                                    : "#fffbeb",
-                                                color: d.chefInternalNoteAcknowledgedAt
-                                                    ? "#475569"
-                                                    : "#78350f",
-                                            }}
-                                        >
-                                            <div
-                                                style={{
-                                                    display: "flex",
-                                                    justifyContent: "space-between",
-                                                    alignItems: "center",
-                                                    gap: "0.75rem",
-                                                    flexWrap: "wrap",
-                                                }}
-                                            >
-                                                <strong>🔔 Bếp nhắn</strong>
 
-                                                {d.chefInternalNoteCreatedAt && (
-                                                    <span
-                                                        style={{
-                                                            fontSize: "0.75rem",
-                                                            color: "#64748b",
-                                                        }}
-                                                    >
-                                                    {formatChefNoteTime(
-                                                        d.chefInternalNoteCreatedAt,
-                                                    )}
-                                                </span>
+                                    {draft.chefInternalNote && (
+                                        <div
+                                            style={getChefNoteBoxStyle(
+                                                noteAcknowledged,
+                                            )}
+                                        >
+                                            <div style={chefNoteHeaderStyle}>
+                                                <strong>
+                                                    🔔 Bếp nhắn
+                                                </strong>
+
+                                                {draft.chefInternalNoteCreatedAt && (
+                                                    <span style={chefNoteTimeStyle}>
+                                                        {formatChefNoteTime(
+                                                            draft.chefInternalNoteCreatedAt,
+                                                        )}
+                                                    </span>
                                                 )}
                                             </div>
 
-                                            <p
-                                                style={{
-                                                    margin: "0.45rem 0",
-                                                    whiteSpace: "pre-wrap",
-                                                    lineHeight: 1.45,
-                                                }}
-                                            >
-                                                {d.chefInternalNote}
+                                            <p style={chefNoteContentStyle}>
+                                                {draft.chefInternalNote}
                                             </p>
 
-                                            {d.chefInternalNoteAcknowledgedAt ? (
-                                                <small
-                                                    style={{
-                                                        color: "#15803d",
-                                                        fontWeight: 700,
-                                                    }}
-                                                >
+                                            {noteAcknowledged ? (
+                                                <small style={seenTextStyle}>
                                                     ✓ Đã xem
                                                 </small>
                                             ) : (
-                                                d.orderItemId && (
+                                                draft.orderItemId && (
                                                     <button
                                                         type="button"
                                                         className="waiter-btn-outline"
+                                                        style={ackButtonStyle}
                                                         disabled={
-                                                            acknowledgingItemId ===
-                                                            d.orderItemId
+                                                            acknowledgingItemId
+                                                            === draft.orderItemId
                                                         }
                                                         onClick={() =>
                                                             void handleAcknowledgeChefNote(
                                                                 dish.dishId,
-                                                                d.orderItemId!,
+                                                                draft.orderItemId!,
                                                             )
                                                         }
-                                                        style={{
-                                                            marginTop: "0.25rem",
-                                                            padding: "0.4rem 0.75rem",
-                                                        }}
                                                     >
-                                                        {acknowledgingItemId ===
-                                                        d.orderItemId
-                                                            ? "Đang xác nhận..."
-                                                            : "Đã xem"}
+                                                        {acknowledgingItemId
+                                                        === draft.orderItemId
+                                                            ? 'Đang xác nhận...'
+                                                            : 'Đã xem'}
                                                     </button>
                                                 )
                                             )}
@@ -360,51 +842,105 @@ export default function WaiterUpdateOrderPage() {
 
                                     <div className="waiter-qty-controls">
                                         <button
-                                            onClick={() => changeDraftQty(dish.dishId, -1)}
-                                            disabled={d.qty <= minQty}
+                                            type="button"
                                             className="waiter-qty-btn"
-                                        >-
+                                            disabled={draft.qty <= minQty}
+                                            onClick={() =>
+                                                changeDraftQty(
+                                                    dish.dishId,
+                                                    -1,
+                                                )
+                                            }
+                                        >
+                                            -
                                         </button>
-                                        <span className="waiter-qty-val">{d.qty}</span>
+
+                                        <span className="waiter-qty-val">
+                                            {draft.qty}
+                                        </span>
+
                                         <button
-                                            onClick={() => changeDraftQty(dish.dishId, 1)}
+                                            type="button"
                                             className="waiter-qty-btn"
-                                        >+
+                                            onClick={() =>
+                                                changeDraftQty(
+                                                    dish.dishId,
+                                                    1,
+                                                )
+                                            }
+                                        >
+                                            +
                                         </button>
                                     </div>
+
                                     <input
                                         placeholder="Ghi chú (ít cay, ...)"
-                                        value={d.note}
-                                        onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
+                                        value={draft.note}
                                         className="waiter-note-input"
+                                        onChange={(event) =>
+                                            setDraftNote(
+                                                dish.dishId,
+                                                event.target.value,
+                                            )
+                                        }
                                     />
-                                    {d.status === "COMPLETED" && (
-                                        <p className="waiter-item-hint">Món đã hoàn thành — không thể giảm số lượng
-                                            dưới {minQty}.</p>
+
+                                    {draft.status === 'COMPLETED' && (
+                                        <p className="waiter-item-hint">
+                                            Món đã hoàn thành — không thể giảm
+                                            số lượng dưới {minQty}.
+                                        </p>
                                     )}
-                                    {d.status === "CANCELLED" && (
-                                        <p className="waiter-item-hint">Món đã hủy — nhấn + để thêm mới từ đầu (số lượng sẽ reset về 0).</p>
+
+                                    {draft.status === 'CANCELLED' && (
+                                        <p className="waiter-item-hint">
+                                            Món đã hủy — nhấn + để thêm mới
+                                            từ đầu.
+                                        </p>
                                     )}
                                 </div>
-                            );
+                            )
                         })}
-                </div>
+                    </div>
+                )}
             </main>
 
             {showConfirm && (
                 <ConfirmModal
                     title="Xác nhận cập nhật Order"
-                    message={`Bàn ${tid} — Bạn đang gửi yêu cầu cập nhật các món sau:`}
-                    confirmLabel={submitting ? "Đang gửi..." : "Xác nhận"}
-                    onCancel={() => !submitting && setShowConfirm(false)}
-                    onConfirm={() => !submitting && submitUpdateOrder()}
+                    message={`Bàn ${tableIdNumber} — Bạn đang gửi yêu cầu cập nhật các món sau:`}
+                    confirmLabel={
+                        submitting
+                            ? 'Đang gửi...'
+                            : 'Xác nhận'
+                    }
+                    onCancel={() => {
+                        if (!submitting) {
+                            setShowConfirm(false)
+                        }
+                    }}
+                    onConfirm={() => {
+                        if (!submitting) {
+                            void submitUpdateOrder()
+                        }
+                    }}
                 >
                     <ul className="waiter-confirm-list">
                         {updateItems.map((item) => (
                             <li key={item.dishId}>
-                                <span>{item.name} × {item.quantity}</span>
-                                {item.note && <small>Ghi chú: {item.note}</small>}
-                                {!item.quantity && <small> (Hủy món)</small>}
+                                <span>
+                                    {item.name} × {item.quantity}
+                                </span>
+
+                                {item.note && (
+                                    <small>
+                                        Ghi chú: {item.note}
+                                    </small>
+                                )}
+
+                                {!item.quantity && (
+                                    <small> (Hủy món)</small>
+                                )}
                             </li>
                         ))}
                     </ul>
@@ -417,16 +953,69 @@ export default function WaiterUpdateOrderPage() {
                     message={successData.message}
                     confirmLabel="Đóng"
                     cancelLabel=""
-                    onConfirm={() => navigate("/waiter/tables")}
-                    onCancel={() => navigate("/waiter/tables")}
+                    onConfirm={() =>
+                        navigate('/waiter/tables')
+                    }
+                    onCancel={() =>
+                        navigate('/waiter/tables')
+                    }
                 >
-                    <div style={{marginTop: "1rem", whiteSpace: "pre-wrap", color: "#475569"}}>
+                    <div style={successSummaryStyle}>
                         {successData.itemSummary}
                     </div>
                 </ConfirmModal>
             )}
 
-            <WaiterToast toast={toast}/>
+            <WaiterToast toast={toast} />
         </div>
-    );
+    )
+}
+
+const stateBoxStyle: CSSProperties = {
+    padding: '2rem',
+    textAlign: 'center',
+    color: '#64748b',
+}
+
+const errorBoxStyle: CSSProperties = {
+    marginBottom: '1rem',
+}
+
+const retryButtonStyle: CSSProperties = {
+    marginLeft: '0.75rem',
+}
+
+const chefNoteHeaderStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '0.75rem',
+    flexWrap: 'wrap',
+}
+
+const chefNoteTimeStyle: CSSProperties = {
+    fontSize: '0.75rem',
+    color: '#64748b',
+}
+
+const chefNoteContentStyle: CSSProperties = {
+    margin: '0.45rem 0',
+    whiteSpace: 'pre-wrap',
+    lineHeight: 1.45,
+}
+
+const seenTextStyle: CSSProperties = {
+    color: '#15803d',
+    fontWeight: 700,
+}
+
+const ackButtonStyle: CSSProperties = {
+    marginTop: '0.25rem',
+    padding: '0.4rem 0.75rem',
+}
+
+const successSummaryStyle: CSSProperties = {
+    marginTop: '1rem',
+    whiteSpace: 'pre-wrap',
+    color: '#475569',
 }

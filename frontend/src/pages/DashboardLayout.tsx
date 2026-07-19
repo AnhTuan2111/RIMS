@@ -1,62 +1,112 @@
-import {Outlet, useNavigate} from 'react-router-dom'
+import {
+    Outlet,
+    useNavigate,
+} from 'react-router-dom'
+
 import {Sidebar} from '../components/common/Sidebar'
-import {logout} from '../api/auth'
+import {ROLE_LABELS} from '../config/roleMenus'
+import {useActor} from '../context/ActorContext'
+import {RoleType} from '../types/auth'
+
+const actorOptions: RoleType[] = [
+    RoleType.ADMIN,
+    RoleType.CHEF,
+    RoleType.WAITER,
+    RoleType.CASHIER,
+    RoleType.CUSTOMER,
+]
+
+function getDefaultPathByActor(actor: RoleType) {
+    switch (actor) {
+        case RoleType.ADMIN:
+            return '/dashboard'
+
+        case RoleType.CHEF:
+            return '/chef/dashboard'
+
+        case RoleType.WAITER:
+            return '/waiter/tables'
+
+        case RoleType.CASHIER:
+            return '/cashier/payments'
+
+        case RoleType.CUSTOMER:
+            return '/customer/reservations'
+
+        default:
+            return '/dashboard'
+    }
+}
 
 export default function DashboardLayout() {
-    const navigate = useNavigate()
+    const {actor, setActor} =
+        useActor()
 
-    function handleLogout() {
-        logout()
-        navigate('/login', {replace: true})
+    const navigate =
+        useNavigate()
+
+    function handleChangeActor(nextActor: RoleType) {
+        setActor(nextActor)
+
+        navigate(
+            getDefaultPathByActor(nextActor),
+            {
+                replace: true,
+            },
+        )
     }
 
     return (
-        <div className="app-layout">
-            <Sidebar/>
+        <div className="app-layout d-flex min-vh-100 bg-light">
+            <Sidebar />
 
-            <div className="app-main">
-                <header className="rims-topbar">
-                    <div className="rims-topbar-heading">
-                        <span className="rims-topbar-eyebrow">
-                            <span className="rims-topbar-live-dot"/>
-                            RIMS CONTROL CENTER
-                        </span>
+            <div className="app-main flex-grow-1 min-vw-0 d-flex flex-column">
+                <header className="app-topbar navbar navbar-expand-lg bg-white border-bottom shadow-sm px-3 px-lg-4 py-3 sticky-top">
+                    <div className="container-fluid px-0 gap-3">
+                        <div className="d-flex flex-column">
+                            <h1 className="h4 fw-bold mb-1 text-dark">
+                                Restaurant Management System
+                            </h1>
 
-                        <h1>Restaurant Management System</h1>
+                            <p className="mb-0 text-secondary small">
+                                Giao diện quản lý dùng chung cho tất cả vai trò.
+                            </p>
+                        </div>
 
-                        <p>
-                            Theo dõi và điều phối hoạt động nhà hàng theo thời
-                            gian thực.
-                        </p>
-                    </div>
+                        <div className="topbar-actions ms-lg-auto d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
+                            <span className="badge text-bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                                Đang xem: {ROLE_LABELS[actor]}
+                            </span>
 
-                    <div className="rims-topbar-actions">
-                        <button
-                            id="btn-logout"
-                            onClick={handleLogout}
-                            className="rims-logout-btn"
-                        >
-                            <svg
-                                className="rims-logout-icon"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                aria-hidden="true"
+                            <label className="visually-hidden" htmlFor="actor-select">
+                                Chọn vai trò
+                            </label>
+
+                            <select
+                                id="actor-select"
+                                className="form-select form-select-sm w-auto"
+                                value={actor}
+                                onChange={(event) =>
+                                    handleChangeActor(
+                                        event.target.value as RoleType,
+                                    )
+                                }
                             >
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                                <polyline points="16 17 21 12 16 7"/>
-                                <line x1="21" y1="12" x2="9" y2="12"/>
-                            </svg>
-                            Đăng xuất
-                        </button>
+                                {actorOptions.map((option) => (
+                                    <option
+                                        key={option}
+                                        value={option}
+                                    >
+                                        {ROLE_LABELS[option]}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </header>
 
-                <main className="app-content rims-app-content">
-                    <Outlet/>
+                <main className="app-content rims-app-content flex-grow-1 p-3 p-lg-4">
+                    <Outlet />
                 </main>
             </div>
         </div>

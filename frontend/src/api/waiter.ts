@@ -1,143 +1,236 @@
-import {apiClient} from './client';
+import {apiClient} from './client'
 
 // Enums
-export type TableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED';
-export type OrderItemStatus = 'PREPARING' | 'COMPLETED' | 'CANCELLED';
-export type ReservationStatus = 'QUEUED' | 'WAITING' | 'COMPLETED' | 'CANCELLED';
+export type TableStatus =
+    | 'AVAILABLE'
+    | 'SERVING'
+    | 'RESERVED'
+
+export type OrderItemStatus =
+    | 'PREPARING'
+    | 'COMPLETED'
+    | 'CANCELLED'
+
+export type ReservationStatus =
+    | 'QUEUED'
+    | 'WAITING'
+    | 'COMPLETED'
+    | 'CANCELLED'
 
 // Responses
 export type TableDetailResponse = {
-    tableId: number;
-    tableNumber: string;
-    capacity: number;
-    status: TableStatus;
-    upcomingReservationTime?: string;
-    upcomingCustomerName?: string;
-};
+    tableId: number
+    tableNumber: string
+    capacity: number
+    status: TableStatus
+    upcomingReservationTime?: string
+    upcomingCustomerName?: string
+}
 
 export type MenuItemResponse = {
-    dishId: number;
-    name: string;
-    description: string;
-    price: number;
-    imageUrl: string;
-    categoryName: string;
-};
+    dishId: number
+    name: string
+    description: string
+    price: number
+    imageUrl: string
+    categoryName: string
+}
 
 export type OrderItemResponse = {
-    orderItemId: number; // In Java this is Long, using number in TS
-    dishName: string;
-    status: OrderItemStatus;
-    quantity: number;
-    unitPrice: number; // BigDecimal -> number
-    subTotal: number;
-
-    // Ghi chú khách hoặc Waiter gửi xuống bếp
-    note?: string | null;
-
-    // Ghi chú Chef gửi lại cho Waiter
-    chefInternalNote?: string | null;
-
-    // Thời điểm Chef tạo ghi chú
-    chefInternalNoteCreatedAt?: string | null;
-
-    // Null nghĩa là Waiter chưa xác nhận đã xem
-    chefInternalNoteAcknowledgedAt?: string | null;
-};
+    orderItemId: number
+    dishName: string
+    status: OrderItemStatus
+    quantity: number
+    unitPrice: number
+    subTotal: number
+    note?: string | null
+    chefInternalNote?: string | null
+    chefInternalNoteCreatedAt?: string | null
+    chefInternalNoteAcknowledgedAt?: string | null
+}
 
 export type OrderDetailResponse = {
-    orderId: number;
-    tableNumber: string;
-    createdAt: string; // LocalDateTime string
-    orderItems: OrderItemResponse[];
-    totalAmountBeforeVat: number;
-    vatAmount: number;
-    finalAmount: number;
-};
+    orderId: number
+    tableNumber: string
+    createdAt: string
+    orderItems: OrderItemResponse[]
+    totalAmountBeforeVat: number
+    vatAmount: number
+    finalAmount: number
+}
 
 export type CreateOrderResponse = {
-    orderId: number;
-    tableNumber: string;
-    message: string;
-    totalAmount: number;
-};
+    orderId: number
+    tableNumber: string
+    message: string
+    totalAmount: number
+}
 
 export type UpdateOrderResponse = {
-    orderId: number;
-    tableNumber: string;
-    message: string;
-    totalAmount: number;
-};
+    orderId: number
+    tableNumber: string
+    message: string
+    totalAmount: number
+}
 
 // Requests
 export type OrderItemRequest = {
-    dishId: number;
-    quantity: number;
-    note?: string;
-};
+    dishId: number
+    quantity: number
+    note?: string
+}
 
 export type CreateOrderRequest = {
-    tableId: number;
-    items: OrderItemRequest[];
-};
+    tableId: number
+    items: OrderItemRequest[]
+}
 
 export type UpdateOrderItemRequest = {
-    orderItemId?: number | null; // null/undefined if new item
-    dishId: number;
-    quantity: number;
-    note?: string;
-};
+    orderItemId?: number | null
+    dishId: number
+    quantity: number
+    note?: string
+}
 
 export type UpdateOrderRequest = {
-    items: UpdateOrderItemRequest[];
-};
+    items: UpdateOrderItemRequest[]
+}
 
 export type CreateReservationRequest = {
-    customerName: string;
-    phone: string;
-    note?: string;
-    tableId: number;
-    reservationTime: string; // ISO LocalDateTime string e.g. "2026-07-07T18:00:00"
-};
+    customerName: string
+    phone: string
+    note?: string
+    tableId: number
+    reservationTime: string
+}
+
+export type ReservationResponse = {
+    id?: number
+    reservationId?: number
+    customerName: string
+    phone: string
+    note?: string | null
+    tableId: number
+    tableNumber?: string
+    reservationTime: string
+    status?: ReservationStatus
+}
 
 // API calls
 export const waiterApi = {
-    getTables: () => apiClient.get<TableDetailResponse[]>('/waiter/tables'),
+    getTables: (signal?: AbortSignal) =>
+        apiClient.get<TableDetailResponse[]>(
+            '/waiter/tables',
+            {
+                signal,
+            },
+        ),
 
-    getMenu: () => apiClient.get<MenuItemResponse[]>('/waiter/menu'),
+    getMenu: (signal?: AbortSignal) =>
+        apiClient.get<MenuItemResponse[]>(
+            '/waiter/menu',
+            {
+                signal,
+            },
+        ),
 
     createOrder: (data: CreateOrderRequest) =>
-        apiClient.post<CreateOrderResponse>('/waiter/orders', data),
+        apiClient.post<CreateOrderResponse>(
+            '/waiter/orders',
+            data,
+        ),
 
-    createOrderFromReservation: (reservationId: number, data: CreateOrderRequest) =>
-        apiClient.post<CreateOrderResponse>(`/waiter/reservations/${reservationId}/orders`, data),
+    createOrderFromReservation: (
+        reservationId: number,
+        data: CreateOrderRequest,
+    ) =>
+        apiClient.post<CreateOrderResponse>(
+            `/waiter/reservations/${reservationId}/orders`,
+            data,
+        ),
 
-    updateOrder: (orderId: number, data: UpdateOrderRequest) =>
-        apiClient.put<UpdateOrderResponse>(`/waiter/orders/${orderId}`, data),
+    updateOrder: (
+        orderId: number,
+        data: UpdateOrderRequest,
+    ) =>
+        apiClient.put<UpdateOrderResponse>(
+            `/waiter/orders/${orderId}`,
+            data,
+        ),
 
-    getServingOrders: (tableId: number) =>
-        apiClient.get<OrderDetailResponse[]>(`/waiter/detail/${tableId}`),
+    getServingOrders: (
+        tableId: number,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<OrderDetailResponse[]>(
+            `/waiter/detail/${tableId}`,
+            {
+                signal,
+            },
+        ),
 
-    createReservation: (data: CreateReservationRequest) =>
-        apiClient.post<string>('/waiter/reservations', data),
+    createReservation: (
+        data: CreateReservationRequest,
+    ) =>
+        apiClient.post<string>(
+            '/waiter/reservations',
+            data,
+        ),
 
-    getReservationsByTableAndDate: (tableId: number, date: string) =>
-        apiClient.get<any[]>(`/waiter/reservation/${tableId}/${date}`),
+    getReservationsByTableAndDate: (
+        tableId: number,
+        date: string,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<ReservationResponse[]>(
+            `/waiter/reservation/${tableId}/${date}`,
+            {
+                signal,
+            },
+        ),
 
-    getCurrentReservationByTable: (tableId: number) =>
-        apiClient.get<any>(`/waiter/reservation/detail/${tableId}`),
+    getCurrentReservationByTable: (
+        tableId: number,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<ReservationResponse | null>(
+            `/waiter/reservation/detail/${tableId}`,
+            {
+                signal,
+            },
+        ),
 
-    getReservationDetail: (resId: number) =>
-        apiClient.get<any>(`/waiter/reservations/${resId}`),
+    getReservationDetail: (
+        reservationId: number,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<ReservationResponse>(
+            `/waiter/reservations/${reservationId}`,
+            {
+                signal,
+            },
+        ),
 
-    updateReservation: (resId: number, data: CreateReservationRequest) =>
-        apiClient.put<string>(`/waiter/reservations/${resId}`, data),
+    updateReservation: (
+        reservationId: number,
+        data: CreateReservationRequest,
+    ) =>
+        apiClient.put<string>(
+            `/waiter/reservations/${reservationId}`,
+            data,
+        ),
 
-    cancelReservation: (resId: number) =>
-        apiClient.put<string>(`/waiter/reservations/${resId}/cancel`),
+    cancelReservation: (
+        reservationId: number,
+    ) =>
+        apiClient.put<string>(
+            `/waiter/reservations/${reservationId}/cancel`,
+        ),
 
-    acknowledgeChefInternalNote: (orderItemId: number) =>
+    acknowledgeChefInternalNote: (
+        orderItemId: number,
+    ) =>
         apiClient.put<void>(
             `/waiter/order-items/${orderItemId}/chef-note/acknowledge`,
         ),
-};
+}

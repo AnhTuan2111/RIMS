@@ -1,145 +1,240 @@
-import {Fragment} from 'react'
-import {NavLink, useNavigate} from 'react-router-dom'
-import {ROLE_LABELS, roleMenus} from '../../config/roleMenus'
-import {useActor} from '../../context/ActorContext'
+import {
+    Fragment,
+    useCallback,
+    useMemo,
+    type ReactNode,
+} from 'react'
+import {
+    NavLink,
+    useNavigate,
+} from 'react-router-dom'
+
+import {
+    ROLE_LABELS,
+    roleMenus,
+} from '../../config/roleMenus'
 import {logout} from '../../api/auth'
+import {useActor} from '../../context/ActorContext'
+import {RoleType} from '../../types/auth'
 
+type CurrentUserPreview = {
+    fullName?: string | null
+    username?: string | null
+}
 
-const adminQuickLinks = [
+type AdminQuickLink = {
+    label: string
+    path: string
+    variant: 'primary' | 'success'
+    icon: ReactNode
+}
+
+const roleAccent: Record<RoleType, string> = {
+    [RoleType.ADMIN]: 'Quản trị hệ thống',
+    [RoleType.CHEF]: 'Bếp vận hành',
+    [RoleType.WAITER]: 'Phục vụ tại bàn',
+    [RoleType.CASHIER]: 'Thu ngân',
+    [RoleType.CUSTOMER]: 'Khách hàng',
+}
+
+const roleIcon: Record<RoleType, string> = {
+    [RoleType.ADMIN]: '♛',
+    [RoleType.CHEF]: '♨',
+    [RoleType.WAITER]: '☕',
+    [RoleType.CASHIER]: '₫',
+    [RoleType.CUSTOMER]: '♡',
+}
+
+const adminQuickLinks: AdminQuickLink[] = [
     {
         label: 'Thống kê',
         path: '/admin/statistics',
         variant: 'primary',
-        icon: <StatisticsQuickIcon/>,
+        icon: '↗',
     },
     {
         label: 'Lịch sử hóa đơn',
         path: '/admin/invoices',
-        variant: 'secondary',
-        icon: <InvoiceStackIcon/>,
+        variant: 'success',
+        icon: '▧',
     },
 ]
 
-function StatisticsQuickIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            className="rims-quick-svg"
-            focusable="false"
-            viewBox="0 0 24 24"
-        >
-            <path d="M4.5 18.5h14"/>
-            <path d="M6.5 18.5v-6"/>
-            <path d="M10.5 18.5v-9"/>
-            <path d="M14.5 18.5v-4"/>
-            <circle cx="16.5" cy="7.5" r="3"/>
-            <path d="m19 10 2.2 2.2"/>
-        </svg>
-    )
+function readCurrentUser(): CurrentUserPreview | null {
+    if (
+        typeof window === 'undefined'
+        || typeof window.localStorage === 'undefined'
+    ) {
+        return null
+    }
+
+    try {
+        const stored =
+            localStorage.getItem('currentUser')
+
+        if (!stored) {
+            return null
+        }
+
+        return JSON.parse(stored) as CurrentUserPreview
+    } catch {
+        localStorage.removeItem('currentUser')
+        return null
+    }
 }
 
-function InvoiceStackIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            className="rims-quick-svg"
-            focusable="false"
-            viewBox="0 0 24 24"
-        >
-            <path d="M7 5h10a2 2 0 0 1 2 2v11H7z"/>
-            <path d="M5 8h10a2 2 0 0 1 2 2v9H5z"/>
-            <path d="M8.5 12h5.5"/>
-            <path d="M8.5 15h4"/>
-        </svg>
-    )
-}
+function getMenuIcon(path: string): ReactNode {
+    if (path.includes('dashboard')) {
+        return '▦'
+    }
 
-function getMenuIcon(path: string) {
-    if (path.includes('dashboard')) return '▦'
-    if (path.includes('completed')) return '✓'
-    if (path.includes('orders')) return '⌁'
-    if (path.includes('dishes')) return '◉'
-    if (path.includes('tables')) return '▤'
-    if (path.includes('reservations')) return '◷'
-    if (path.includes('payments')) return '₫'
-    if (path.includes('invoices')) return '▧'
-    if (path.includes('users')) return '♙'
-    if (path.includes('profile'))
-        return (
-            <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <circle
-                    cx="12"
-                    cy="12"
-                    r="9"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                />
-                <circle
-                    cx="12"
-                    cy="9"
-                    r="3"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                />
-                <path
-                    d="M7.5 17C8.8 14.8 15.2 14.8 16.5 17"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                />
-            </svg>
-        )
+    if (path.includes('completed')) {
+        return '✓'
+    }
+
+    if (path.includes('cancelled')) {
+        return '×'
+    }
+
+    if (path.includes('grouped')) {
+        return '☷'
+    }
+
+    if (path.includes('orders')) {
+        return '⌁'
+    }
+
+    if (path.includes('dishes')) {
+        return '◉'
+    }
+
+    if (path.includes('menu')) {
+        return '☰'
+    }
+
+    if (path.includes('categories')) {
+        return '◫'
+    }
+
+    if (path.includes('tables')) {
+        return '▤'
+    }
+
+    if (path.includes('reservations')) {
+        return '◷'
+    }
+
+    if (path.includes('payments')) {
+        return '₫'
+    }
+
+    if (path.includes('invoices')) {
+        return '▧'
+    }
+
+    if (path.includes('users')) {
+        return '♙'
+    }
+
+    if (path.includes('profile')) {
+        return '◎'
+    }
+
     return '•'
 }
 
+function getUserDisplayName(
+    currentUser: CurrentUserPreview | null,
+) {
+    return currentUser?.fullName
+        ?? currentUser?.username
+        ?? 'Người dùng'
+}
+
 export function Sidebar() {
-    const {actor} = useActor()
-    const navigate = useNavigate()
-    const menus = roleMenus[actor] ?? []
+    const {actor} =
+        useActor()
 
-    const stored = localStorage.getItem('currentUser')
-    const currentUser = stored ? JSON.parse(stored) as { fullName: string; username: string } : null
+    const navigate =
+        useNavigate()
 
-    const handleLogout = () => {
-        logout()
-        navigate('/login', {replace: true})
-    }
+    const menus =
+        roleMenus[actor] ?? []
+
+    const currentUser =
+        useMemo(
+            () => readCurrentUser(),
+            [],
+        )
+
+    const handleLogout =
+        useCallback(
+            () => {
+                logout()
+
+                navigate(
+                    '/login',
+                    {
+                        replace: true,
+                    },
+                )
+            },
+            [
+                navigate,
+            ],
+        )
 
     return (
-        <aside className="app-sidebar rims-sidebar">
+        <aside className="app-sidebar rims-sidebar d-flex flex-column">
             <div className="rims-sidebar-brand">
-                <div className="rims-sidebar-logo">R</div>
-                <div>
-                    <h2>RIMS</h2>
-                    <p>Restaurant Operations</p>
+                <div className="rims-sidebar-logo">
+                    R
+                </div>
+
+                <div className="min-w-0">
+                    <h2 className="mb-0">
+                        RIMS
+                    </h2>
+
+                    <p className="mb-0">
+                        Restaurant Operations
+                    </p>
                 </div>
             </div>
 
             <div className="rims-sidebar-role">
-                <div className="rims-role-icon">✦</div>
-                <div>
-                    <small>Không gian làm việc</small>
-                    <strong>{ROLE_LABELS[actor]}</strong>
+                <div className="rims-role-icon">
+                    {roleIcon[actor]}
+                </div>
+
+                <div className="min-w-0">
+                    <small>
+                        {roleAccent[actor]}
+                    </small>
+
+                    <strong>
+                        {ROLE_LABELS[actor]}
+                    </strong>
                 </div>
             </div>
 
-            <nav className="rims-sidebar-nav">
-                <p className="rims-sidebar-title">CHỨC NĂNG</p>
+            <nav className="rims-sidebar-nav flex-grow-1">
+                <p className="rims-sidebar-title">
+                    Chức năng
+                </p>
 
                 {menus.map((item) => (
                     <Fragment key={item.path}>
                         <NavLink
                             to={item.path}
                             className={({isActive}) =>
-                                isActive
-                                    ? 'rims-sidebar-link active'
-                                    : 'rims-sidebar-link'
+                                [
+                                    'rims-sidebar-link',
+                                    'nav-link',
+                                    isActive ? 'active' : '',
+                                ]
+                                    .filter(Boolean)
+                                    .join(' ')
                             }
                         >
                             <span className="rims-menu-icon">
@@ -178,10 +273,6 @@ export function Sidebar() {
                                         <span className="rims-sidebar-quick-label">
                                             {quickLink.label}
                                         </span>
-
-                                        <span className="rims-sidebar-quick-arrow">
-                                            ›
-                                        </span>
                                     </NavLink>
                                 ))}
                             </div>
@@ -190,31 +281,30 @@ export function Sidebar() {
                 ))}
             </nav>
 
-            <div className="rims-sidebar-status">
-                <span className="rims-online-dot"/>
-                <div>
-                    <strong>{currentUser?.fullName ?? currentUser?.username ?? 'Người dùng'}</strong>
-                    <small>Hệ thống hoạt động</small>
-                </div>
-            </div>
+            <div className="rims-sidebar-footer">
+                <div className="rims-sidebar-status">
+                    <span className="rims-online-dot" />
 
-            <button
-                onClick={handleLogout}
-                style={{
-                    margin: '8px 16px 16px',
-                    padding: '10px',
-                    background: '#fee2e2',
-                    color: '#991b1b',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    width: 'calc(100% - 32px)',
-                }}
-            >
-                🚪 Đăng xuất
-            </button>
+                    <div className="min-w-0">
+                        <strong>
+                            {getUserDisplayName(currentUser)}
+                        </strong>
+
+                        <small>
+                            Hệ thống hoạt động
+                        </small>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    className="btn rims-logout-button w-100"
+                    onClick={handleLogout}
+                >
+                    <span>🚪</span>
+                    Đăng xuất
+                </button>
+            </div>
         </aside>
     )
 }

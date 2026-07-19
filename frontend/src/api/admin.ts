@@ -147,45 +147,113 @@ export interface GetAccountsParams {
 }
 
 // Staff accounts
-export async function getStaffAccounts(params: GetAccountsParams = {}): Promise<PageResponse<UserResponse>> {
-    const res = await apiClient.get<PageResponse<UserResponse>>('/admin/user/staff', {params})
+export async function getStaffAccounts(
+    params: GetAccountsParams = {},
+    signal?: AbortSignal,
+): Promise<PageResponse<UserResponse>> {
+    const res =
+        await apiClient.get<PageResponse<UserResponse>>(
+            '/admin/user/staff',
+            {
+                params,
+                signal,
+            },
+        )
+
     return res.data
 }
 
 // Customer accounts
-export async function getCustomerAccounts(params: GetAccountsParams = {}): Promise<PageResponse<UserResponse>> {
-    const res = await apiClient.get<PageResponse<UserResponse>>('/admin/user/customer', {params})
+export async function getCustomerAccounts(
+    params: GetAccountsParams = {},
+    signal?: AbortSignal,
+): Promise<PageResponse<UserResponse>> {
+    const res =
+        await apiClient.get<PageResponse<UserResponse>>(
+            '/admin/user/customer',
+            {
+                params,
+                signal,
+            },
+        )
+
     return res.data
 }
 
-export async function getAccountDetail(id: number): Promise<UserResponse> {
-    const res = await apiClient.get<UserResponse>(`/admin/user/${id}`)
+export async function getAccountDetail(
+    id: number,
+    signal?: AbortSignal,
+): Promise<UserResponse> {
+    const res =
+        await apiClient.get<UserResponse>(
+            `/admin/user/${id}`,
+            {
+                signal,
+            },
+        )
+
     return res.data
 }
 
-export async function createCustomer(data: CreateCustomerRequest): Promise<UserResponse> {
-    const res = await apiClient.post<UserResponse>('/admin/user/customer/new', data)
+export async function createCustomer(
+    data: CreateCustomerRequest,
+): Promise<UserResponse> {
+    const res = await apiClient.post<UserResponse>(
+        '/admin/user/customer/new',
+        data,
+    )
+
     return res.data
 }
 
-export async function createStaff(data: CreateStaffRequest): Promise<UserResponse> {
-    const res = await apiClient.post<UserResponse>('/admin/user/staff/new', data)
+export async function createStaff(
+    data: CreateStaffRequest,
+): Promise<UserResponse> {
+    const res = await apiClient.post<UserResponse>(
+        '/admin/user/staff/new',
+        data,
+    )
+
     return res.data
 }
 
-export async function updateAccount(id: number, data: UpdateAccountRequest): Promise<UserResponse> {
-    const res = await apiClient.put<UserResponse>(`/admin/user/${id}`, data)
+export async function updateAccount(
+    id: number,
+    data: UpdateAccountRequest,
+): Promise<UserResponse> {
+    const res = await apiClient.put<UserResponse>(
+        `/admin/user/${id}`,
+        data,
+    )
+
     return res.data
 }
 
 // Legacy profile endpoints (dùng cho trang "Hồ sơ của tôi")
-export async function getProfile(id: number): Promise<UserProfileResponse> {
-    const res = await apiClient.get<UserProfileResponse>(`/admin/user/profile/${id}`)
+export async function getProfile(
+    id: number,
+    signal?: AbortSignal,
+): Promise<UserProfileResponse> {
+    const res =
+        await apiClient.get<UserProfileResponse>(
+            `/admin/user/profile/${id}`,
+            {
+                signal,
+            },
+        )
+
     return res.data
 }
 
-export async function updateProfile(id: number, data: UpdateOwnProfileRequest): Promise<UserProfileResponse> {
-    const res = await apiClient.put<UserProfileResponse>(`/admin/user/profile/update/${id}`, data)
+export async function updateProfile(
+    id: number,
+    data: UpdateOwnProfileRequest,
+): Promise<UserProfileResponse> {
+    const res = await apiClient.put<UserProfileResponse>(
+        `/admin/user/profile/update/${id}`,
+        data,
+    )
+
     return res.data
 }
 
@@ -204,6 +272,7 @@ export const adminApi = {
     getPaymentHistory: (
         page = 1,
         pageSize = 10,
+        signal?: AbortSignal,
     ) =>
         apiClient.get<AdminPaymentHistoryPage>(
             '/admin/invoice/history',
@@ -212,32 +281,55 @@ export const adminApi = {
                     page,
                     pageSize,
                 },
+                signal,
             },
         ),
 
-    getPaymentDetail: (invoiceId: number) =>
+    getPaymentDetail: (
+        invoiceId: number,
+        signal?: AbortSignal,
+    ) =>
         apiClient.get<AdminPaymentDetail>(
             `/admin/invoice/${invoiceId}`,
+            {
+                signal,
+            },
         ),
 
-    getTotalRevenue: () =>
+    getTotalRevenue: (
+        signal?: AbortSignal,
+    ) =>
         apiClient.get<RevenueReportResponse>(
             '/admin/revenue/total',
+            {
+                signal,
+            },
         ),
 
-    getTodayRevenue: () =>
+    getTodayRevenue: (
+        signal?: AbortSignal,
+    ) =>
         apiClient.get<RevenueReportResponse>(
             '/admin/revenue/today',
+            {
+                signal,
+            },
         ),
 
-    getWeeklyRevenue: () =>
+    getWeeklyRevenue: (
+        signal?: AbortSignal,
+    ) =>
         apiClient.get<RevenueReportResponse>(
             '/admin/revenue/weekly',
+            {
+                signal,
+            },
         ),
 
     getDailyRevenue: (
         fromDate: string,
         toDate: string,
+        signal?: AbortSignal,
     ) =>
         apiClient.get<WeeklyRevenueChartResponse>(
             '/admin/revenue/daily',
@@ -246,22 +338,34 @@ export const adminApi = {
                     fromDate,
                     toDate,
                 },
+                signal,
             },
         ),
 
-    getMonthlyRevenue: () =>
+    getMonthlyRevenue: (
+        signal?: AbortSignal,
+    ) =>
         apiClient.get<RevenueReportResponse>(
             '/admin/revenue/monthly',
+            {
+                signal,
+            },
         ),
 
-    getYearlyRevenue: () =>
+    getYearlyRevenue: (
+        signal?: AbortSignal,
+    ) =>
         apiClient.get<RevenueReportResponse>(
             '/admin/revenue/yearly',
+            {
+                signal,
+            },
         ),
 
     getCustomRevenue: (
         fromDate: string,
         toDate: string,
+        signal?: AbortSignal,
     ) =>
         apiClient.get<RevenueReportResponse>(
             '/admin/revenue/custom',
@@ -270,12 +374,14 @@ export const adminApi = {
                     fromDate,
                     toDate,
                 },
+                signal,
             },
         ),
 
     getBestSellingReport: (
         period: BestSellingPeriod = 'WEEK',
         categoryId?: number | null,
+        signal?: AbortSignal,
     ) =>
         apiClient.get<BestSellingReportResponse>(
             '/admin/revenue/best-selling',
@@ -284,6 +390,7 @@ export const adminApi = {
                     period,
                     ...(categoryId ? {categoryId} : {}),
                 },
+                signal,
             },
         ),
 
@@ -291,6 +398,7 @@ export const adminApi = {
         fromDate: string,
         toDate: string,
         categoryId?: number | null,
+        signal?: AbortSignal,
     ) =>
         apiClient.get<BestSellingReportResponse>(
             '/admin/revenue/best-selling',
@@ -300,11 +408,13 @@ export const adminApi = {
                     toDate,
                     ...(categoryId ? {categoryId} : {}),
                 },
+                signal,
             },
         ),
 
     getOrderShiftReport: (
         period: OrderShiftPeriod = 'WEEK',
+        signal?: AbortSignal,
     ) =>
         apiClient.get<OrderShiftReportResponse>(
             '/admin/revenue/order-shifts',
@@ -312,12 +422,14 @@ export const adminApi = {
                 params: {
                     period,
                 },
+                signal,
             },
         ),
 
     getOrderShiftReportBetween: (
         fromDate: string,
         toDate: string,
+        signal?: AbortSignal,
     ) =>
         apiClient.get<OrderShiftReportResponse>(
             '/admin/revenue/order-shifts',
@@ -326,11 +438,19 @@ export const adminApi = {
                     fromDate,
                     toDate,
                 },
+                signal,
             },
         ),
 
-    getTables: () =>
-        apiClient.get<TableDetailResponse[]>('/admin/tables'),
+    getTables: (
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<TableDetailResponse[]>(
+            '/admin/tables',
+            {
+                signal,
+            },
+        ),
 }
 
 export async function setAccountStatus(id: number, active: boolean): Promise<void> {
@@ -373,25 +493,50 @@ export interface CategoryFormData {
 // ============================================
 export const categoryApi = {
     // Lấy tất cả danh mục
-    getAllCategories: () =>
-        apiClient.get<CategoryResponse[]>('/admin/category/all'),
+    getAllCategories: (
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<CategoryResponse[]>(
+            '/admin/category/all',
+            {
+                signal,
+            },
+        ),
 
     // Lấy tất cả món ăn
-    getAllDishes: () =>
-        apiClient.get<DishResponse[]>('/admin/dish/all'),
+    getAllDishes: (
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<DishResponse[]>(
+            '/admin/dish/all',
+            {
+                signal,
+            },
+        ),
 
     // Tạo danh mục mới
     createCategory: (data: { name: string; description: string }) =>
         apiClient.post<CategoryResponse>('/admin/category/new', data),
 
     // Cập nhật danh mục
-    updateCategory: (id: number, data: { name: string; description: string; isAvailable: boolean }) =>
-        apiClient.put<CategoryResponse>(`/admin/category/${id}`, data),
+    updateCategory: (
+        id: number,
+        data: {
+            name: string;
+            description: string;
+            isAvailable: boolean;
+        },
+    ) =>
+        apiClient.put<CategoryResponse>(
+            `/admin/category/${id}`,
+            data,
+        ),
 
     // Xóa danh mục (xóa mềm)
     deleteCategory: (id: number) =>
         apiClient.delete(`/admin/category/${id}`),
 }
+
 // Thêm interface DishFormData
 export interface DishFormData {
     name: string;
@@ -404,11 +549,25 @@ export interface DishFormData {
 
 // Thêm dishApi
 export const dishApi = {
-    getAllDishes: () =>
-        apiClient.get<DishResponse[]>('/admin/dish/all'),
+    getAllDishes: (
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<DishResponse[]>(
+            '/admin/dish/all',
+            {
+                signal,
+            },
+        ),
 
-    getAllCategories: () =>
-        apiClient.get<CategoryResponse[]>('/admin/category/all'),
+    getAllCategories: (
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<CategoryResponse[]>(
+            '/admin/category/all',
+            {
+                signal,
+            },
+        ),
 
     createDish: (data: {
         name: string;
@@ -420,23 +579,38 @@ export const dishApi = {
     }) =>
         apiClient.post<DishResponse>('/admin/dish/new', data),
 
-    updateDish: (id: number, data: {
-        name: string;
-        description: string;
-        price: number;
-        imageUrl: string;
-        categoryId: number;
-        isAvailable: boolean;
-    }) =>
-        apiClient.put<DishResponse>(`/admin/dish/update/${id}`, data),
+    updateDish: (
+        id: number,
+        data: {
+            name: string;
+            description: string;
+            price: number;
+            imageUrl: string;
+            categoryId: number;
+            isAvailable: boolean;
+        },
+    ) =>
+        apiClient.put<DishResponse>(
+            `/admin/dish/update/${id}`,
+            data,
+        ),
 
     deleteDish: (id: number) =>
         apiClient.delete(`/admin/dish/delete/${id}`),
 }
+
 export const menuApi = {
-    getMenuDashboard: () =>
-        apiClient.get<MenuDashboardData>('/admin/menu'),
+    getMenuDashboard: (
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<MenuDashboardData>(
+            '/admin/menu',
+            {
+                signal,
+            },
+        ),
 }
+
 export interface DishSummary {
     id: number;
     name: string;

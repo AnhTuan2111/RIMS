@@ -1,52 +1,124 @@
-import {useState} from 'react'
-import {Link, useNavigate} from 'react-router-dom'
+import {
+    useState,
+    type CSSProperties,
+    type FormEvent,
+} from 'react'
+import {
+    Link,
+    useNavigate,
+} from 'react-router-dom'
+
 import {login} from '../../api/auth'
 import {useActor} from '../../context/ActorContext'
 import {RoleType} from '../../types/auth'
+import {getErrorMessage} from '../../utils/error'
+
+function isRequestCanceled(error: unknown) {
+    if (typeof error !== 'object' || error === null) {
+        return false
+    }
+
+    const requestError = error as {
+        name?: string
+        code?: string
+        message?: string
+    }
+
+    return (
+        requestError.name === 'CanceledError'
+        || requestError.code === 'ERR_CANCELED'
+        || requestError.message === 'canceled'
+    )
+}
+
+function getRedirectPath(role: RoleType) {
+    switch (role) {
+        case RoleType.ADMIN:
+            return '/dashboard'
+
+        case RoleType.CHEF:
+            return '/chef/orders'
+
+        case RoleType.WAITER:
+            return '/waiter/tables'
+
+        case RoleType.CASHIER:
+            return '/cashier/payments'
+
+        case RoleType.CUSTOMER:
+            return '/profile'
+
+        default:
+            return '/dashboard'
+    }
+}
 
 export default function LoginPage() {
     const navigate = useNavigate()
     const {setActor} = useActor()
 
-    const [username, setUsername] = useState('')
-    const [rawPassword, setRawPassword] = useState('')
-    const [error, setError] = useState<string | null>(null)
-    const [isLoading, setIsLoading] = useState(false)
+    const [username, setUsername] =
+        useState('')
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const [rawPassword, setRawPassword] =
+        useState('')
+
+    const [error, setError] =
+        useState<string | null>(null)
+
+    const [isLoading, setIsLoading] =
+        useState(false)
+
+    async function handleSubmit(
+        event: FormEvent<HTMLFormElement>,
+    ) {
         event.preventDefault()
 
+        setIsLoading(true)
+        setError(null)
+
         try {
-            setIsLoading(true)
-            setError(null)
+            const user =
+                await login({
+                    username,
+                    rawPassword,
+                })
 
-            const user = await login({username, rawPassword})
-            const role = user.role as RoleType
+            const role =
+                user.role as RoleType
+
             setActor(role)
-            localStorage.setItem('selectedActor', role)
 
-            switch (role) {
-                case RoleType.ADMIN:
-                    navigate('/dashboard', {replace: true})
-                    return
-                case RoleType.CHEF:
-                    navigate('/chef/orders', {replace: true})
-                    return
-                case RoleType.WAITER:
-                    navigate('/waiter/tables', {replace: true})
-                    return
-                case RoleType.CASHIER:
-                    navigate('/cashier/payments', {replace: true})
-                    return
-                case RoleType.CUSTOMER:
-                    navigate('/profile', {replace: true})
-                    return
-                default:
-                    navigate('/dashboard', {replace: true})
-                    return
+            localStorage.setItem(
+                'selectedActor',
+                role,
+            )
+
+            localStorage.setItem(
+                'currentUser',
+                JSON.stringify(user),
+            )
+
+            navigate(
+                getRedirectPath(role),
+                {
+                    replace: true,
+                },
+            )
+        } catch (requestError: unknown) {
+            if (isRequestCanceled(requestError)) {
+                return
             }
-        } catch {
-            setError('Đăng nhập thất bại. Vui lòng kiểm tra tài khoản hoặc mật khẩu.')
+
+            console.error(
+                '[LOGIN_ERROR]',
+                requestError,
+            )
+
+            setError(
+                getErrorMessage(requestError)
+                || 'Đăng nhập thất bại. Vui lòng kiểm tra tài khoản hoặc mật khẩu.',
+            )
         } finally {
             setIsLoading(false)
         }
@@ -55,53 +127,85 @@ export default function LoginPage() {
     return (
         <main className="login-page">
             <section className="login-card">
-                <Link className="login-back-link" to="/">
+                <Link
+                    className="login-back-link"
+                    to="/"
+                >
                     ← Quay lại trang chủ
                 </Link>
 
                 <div className="login-header">
                     <h1>Đăng nhập RIMS</h1>
-                    <p>Nhập tài khoản để truy cập hệ thống quản lý nhà hàng.</p>
+
+                    <p>
+                        Nhập tài khoản để truy cập hệ thống quản lý
+                        nhà hàng.
+                    </p>
                 </div>
 
-                {error && <div className="auth-error">{error}</div>}
+                {error && (
+                    <div className="auth-error">
+                        {error}
+                    </div>
+                )}
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={(event) => void handleSubmit(event)}>
                     <label className="auth-field">
                         Username
+
                         <input
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
                             placeholder="Nhập tên đăng nhập"
                             required
+                            autoComplete="username"
+                            onChange={(event) =>
+                                setUsername(event.target.value)
+                            }
                         />
                     </label>
 
                     <label className="auth-field">
                         Password
+
                         <input
                             type="password"
                             value={rawPassword}
-                            onChange={(e) => setRawPassword(e.target.value)}
                             placeholder="Nhập mật khẩu"
                             required
+                            autoComplete="current-password"
+                            onChange={(event) =>
+                                setRawPassword(event.target.value)
+                            }
                         />
                     </label>
 
-                    <div style={{textAlign: 'right', marginBottom: '8px'}}>
-                        <Link to="/forgot-password"
-                              style={{fontSize: '13px', color: '#4f46e5', textDecoration: 'none'}}>
+                    <div style={forgotPasswordRowStyle}>
+                        <Link
+                            to="/forgot-password"
+                            style={forgotPasswordLinkStyle}
+                        >
                             Quên mật khẩu?
                         </Link>
                     </div>
 
-                    <button className="auth-submit" disabled={isLoading}>
-                        {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                    <button
+                        type="submit"
+                        className="auth-submit"
+                        disabled={isLoading}
+                    >
+                        {isLoading
+                            ? 'Đang đăng nhập...'
+                            : 'Đăng nhập'}
                     </button>
                 </form>
-                <div style={{textAlign: 'center', marginTop: '16px', fontSize: '13px', color: '#9ca3af'}}>
+
+                <div style={registerTextStyle}>
                     Chưa có tài khoản?{' '}
-                    <Link to="/register" style={{color: '#4f46e5', textDecoration: 'none', fontWeight: 600}}>
+
+                    <Link
+                        to="/register"
+                        style={registerLinkStyle}
+                    >
                         Đăng ký ngay
                     </Link>
                 </div>
@@ -117,4 +221,28 @@ export default function LoginPage() {
             </section>
         </main>
     )
+}
+
+const forgotPasswordRowStyle: CSSProperties = {
+    textAlign: 'right',
+    marginBottom: '8px',
+}
+
+const forgotPasswordLinkStyle: CSSProperties = {
+    fontSize: '13px',
+    color: '#4f46e5',
+    textDecoration: 'none',
+}
+
+const registerTextStyle: CSSProperties = {
+    textAlign: 'center',
+    marginTop: '16px',
+    fontSize: '13px',
+    color: '#9ca3af',
+}
+
+const registerLinkStyle: CSSProperties = {
+    color: '#4f46e5',
+    textDecoration: 'none',
+    fontWeight: 600,
 }

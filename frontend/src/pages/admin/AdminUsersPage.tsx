@@ -1,8 +1,24 @@
-import {useCallback, useEffect, useState} from 'react'
+import {
+    useCallback,
+    useRef,
+    useState,
+    type CSSProperties,
+    type ReactNode,
+} from 'react'
 import * as adminApi from '../../api/admin'
 import type {UserResponse} from '../../types/auth'
 import {RoleType} from '../../types/auth'
 import {getErrorMessage} from '../../utils/error'
+import {
+    EmptyState,
+    LoadingState,
+} from '../../components/feedback'
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {usePolling} from '../../hooks/usePolling'
 
 const ROLE_LABELS: Record<string, string> = {
     ADMIN: 'Quản trị viên',
@@ -24,6 +40,25 @@ const STAFF_ROLES = [RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER]
 
 type Tab = 'staff' | 'customer'
 type ModalType = 'create-staff' | 'create-customer' | 'edit' | 'detail' | null
+
+
+function isRequestCanceled(error: unknown) {
+    if (typeof error !== 'object' || error === null) {
+        return false
+    }
+
+    const requestError = error as {
+        name?: string
+        code?: string
+        message?: string
+    }
+
+    return (
+        requestError.name === 'CanceledError'
+        || requestError.code === 'ERR_CANCELED'
+        || requestError.message === 'canceled'
+    )
+}
 
 export default function AdminUsersPage() {
     const [tab, setTab] = useState<Tab>('staff')
@@ -52,7 +87,6 @@ export default function AdminUsersPage() {
 
     // search & filter
     const [search, setSearch] = useState('')
-    const [debouncedSearch, setDebouncedSearch] = useState('')
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
 
     // pagination — page tính từ 0 để khớp với API backend (Spring Data)
@@ -64,62 +98,134 @@ export default function AdminUsersPage() {
         setTimeout(() => setSuccessMsg(null), 3000)
     }
 
-    // debounce ô tìm kiếm 400ms để tránh gọi API liên tục khi gõ
-    useEffect(() => {
-        const t = setTimeout(() => setDebouncedSearch(search.trim()), 400)
-        return () => clearTimeout(t)
-    }, [search])
+    const hasLoadedInitialUsersRef = useRef(false)
 
-    // reset về trang đầu mỗi khi đổi tab, từ khóa tìm kiếm hoặc bộ lọc trạng thái
-    useEffect(() => {
-        setPage(0)
-    }, [tab, debouncedSearch, filterStatus])
-
-    const loadData = useCallback(async () => {
-        setIsLoading(true)
-        setError(null)
-        try {
-            const params: adminApi.GetAccountsParams = {
-                keyword: debouncedSearch || undefined,
-                active: filterStatus === 'all' ? undefined : filterStatus === 'active',
-                page,
-                size: pageSize,
+    const loadData = useCallback(
+        async (
+            showFullLoading = true,
+            signal?: AbortSignal,
+        ) => {
+            if (showFullLoading) {
+                setIsLoading(true)
             }
-            const res = tab === 'staff'
-                ? await adminApi.getStaffAccounts(params)
-                : await adminApi.getCustomerAccounts(params)
 
-            setItems(res.content)
-            setTotalElements(res.totalElements)
-            setTotalPages(res.totalPages)
-            if (tab === 'staff') setStaffCount(res.totalElements)
-            else setCustomerCount(res.totalElements)
-        } catch (err) {
-            setError(getErrorMessage(err))
-        } finally {
-            setIsLoading(false)
-        }
-    }, [tab, debouncedSearch, filterStatus, page, pageSize])
+            setError(null)
 
-    useEffect(() => {
-        void loadData()
-    }, [loadData])
+            try {
+                const params: adminApi.GetAccountsParams = {
+                    keyword: search.trim() || undefined,
+                    active:
+                        filterStatus === 'all'
+                            ? undefined
+                            : filterStatus === 'active',
+                    page,
+                    size: pageSize,
+                }
 
-    // lấy số lượng ban đầu cho cả 2 tab (để hiển thị đúng ngay cả khi chưa mở tab đó)
-    useEffect(() => {
-        (async () => {
+                const res =
+                    tab === 'staff'
+                        ? await adminApi.getStaffAccounts(params, signal)
+                        : await adminApi.getCustomerAccounts(params, signal)
+
+                setItems(res.content)
+                setTotalElements(res.totalElements)
+                setTotalPages(Math.max(res.totalPages, 1))
+
+                if (tab === 'staff') {
+                    setStaffCount(res.totalElements)
+                } else {
+                    setCustomerCount(res.totalElements)
+                }
+            } catch (err: unknown) {
+                if (isRequestCanceled(err)) {
+                    return
+                }
+
+                setError(getErrorMessage(err))
+            } finally {
+                if (showFullLoading) {
+                    setIsLoading(false)
+                }
+            }
+        },
+        [
+            tab,
+            search,
+            filterStatus,
+            page,
+            pageSize,
+        ],
+    )
+
+    const loadCounts = useCallback(
+        async (signal?: AbortSignal) => {
             try {
                 const [staffRes, customerRes] = await Promise.all([
-                    adminApi.getStaffAccounts({page: 0, size: 1}),
-                    adminApi.getCustomerAccounts({page: 0, size: 1}),
+                    adminApi.getStaffAccounts(
+                        {
+                            page: 0,
+                            size: 1,
+                        },
+                        signal,
+                    ),
+                    adminApi.getCustomerAccounts(
+                        {
+                            page: 0,
+                            size: 1,
+                        },
+                        signal,
+                    ),
                 ])
+
                 setStaffCount(staffRes.totalElements)
                 setCustomerCount(customerRes.totalElements)
-            } catch {
-                // không quan trọng, chỉ ảnh hưởng số đếm hiển thị trên tab
+            } catch (err: unknown) {
+                if (isRequestCanceled(err)) {
+                    return
+                }
+
+                console.error('[ADMIN_USERS_COUNT_FETCH_ERROR]', err)
             }
-        })()
-    }, [])
+        },
+        [],
+    )
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialUsersRef.current
+
+            await Promise.all([
+                loadData(
+                    isInitialLoad,
+                    signal,
+                ),
+                loadCounts(signal),
+            ])
+
+            hasLoadedInitialUsersRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .admin
+                .dashboardIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
+
+                console.error(
+                    '[ADMIN_USERS_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
 
     const resetForm = () => setForm({username: '', email: '', phone: '', password: '', role: 'CHEF', fullName: ''})
 
@@ -134,7 +240,7 @@ export default function AdminUsersPage() {
             const detail = await adminApi.getAccountDetail(user.id)
             setSelectedUser(detail)
             setModal('detail')
-        } catch (err) {
+        } catch (err: unknown) {
             setError(getErrorMessage(err))
         }
     }
@@ -155,7 +261,7 @@ export default function AdminUsersPage() {
         try {
             await adminApi.setAccountStatus(user.id, newStatus)
             showSuccess(`Đã ${newStatus ? 'kích hoạt' : 'khóa'} tài khoản ${user.username}`)
-        } catch (err) {
+        } catch (err: unknown) {
             // Revert nếu server lỗi
             setItems(prev => prev.map(u => u.id === user.id ? {...u, isActive: user.isActive} : u))
             setError(getErrorMessage(err))
@@ -181,7 +287,7 @@ export default function AdminUsersPage() {
             setModal(null)
             showSuccess('Tạo tài khoản nhân viên thành công!')
             void loadData()
-        } catch (err) {
+        } catch (err: unknown) {
             setFormError(getErrorMessage(err))
         } finally {
             setFormLoading(false)
@@ -206,7 +312,7 @@ export default function AdminUsersPage() {
             setModal(null)
             showSuccess('Tạo tài khoản khách hàng thành công!')
             void loadData()
-        } catch (err) {
+        } catch (err: unknown) {
             setFormError(getErrorMessage(err))
         } finally {
             setFormLoading(false)
@@ -233,7 +339,7 @@ export default function AdminUsersPage() {
             setModal(null)
             showSuccess('Cập nhật tài khoản thành công!')
             void loadData()
-        } catch (err) {
+        } catch (err: unknown) {
             setFormError(getErrorMessage(err))
         } finally {
             setFormLoading(false)
@@ -244,20 +350,21 @@ export default function AdminUsersPage() {
     const endIdx = Math.min((page + 1) * pageSize, totalElements)
 
     return (
-        <div className="page-card">
+        <PageCard>
             {/* ── Header ── */}
-            <div className="page-header">
-                <div>
-                    <h2>Quản lý tài khoản</h2>
-                    <p>Xem, thêm, sửa và quản lý trạng thái tài khoản nhân viên và khách hàng.</p>
-                </div>
-                <button
-                    className="primary-button"
-                    onClick={() => openCreate(tab)}
-                >
-                    + Thêm {tab === 'staff' ? 'nhân viên' : 'khách hàng'}
-                </button>
-            </div>
+            <PageHeader
+                title="Quản lý tài khoản"
+                description="Xem, thêm, sửa và quản lý trạng thái tài khoản nhân viên và khách hàng."
+                actions={
+                    <button
+                        type="button"
+                        className="primary-button"
+                        onClick={() => openCreate(tab)}
+                    >
+                        + Thêm {tab === 'staff' ? 'nhân viên' : 'khách hàng'}
+                    </button>
+                }
+            />
 
             {/* ── Alerts ── */}
             {error && (
@@ -304,7 +411,10 @@ export default function AdminUsersPage() {
             <div style={{display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap'}}>
                 <input
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
+                    onChange={e => {
+                        setSearch(e.target.value)
+                        setPage(0)
+                    }}
                     placeholder="Tìm theo tên, tài khoản, email, SĐT..."
                     style={{
                         flex: 1,
@@ -316,7 +426,10 @@ export default function AdminUsersPage() {
                     }}
                 />
                 {(['all', 'active', 'inactive'] as const).map(s => (
-                    <button key={s} onClick={() => setFilterStatus(s)}
+                    <button key={s} onClick={() => {
+                        setFilterStatus(s)
+                        setPage(0)
+                    }}
                             style={{
                                 padding: '8px 14px', borderRadius: 8, border: '1px solid',
                                 borderColor: filterStatus === s ? '#4f46e5' : '#d1d5db',
@@ -331,10 +444,10 @@ export default function AdminUsersPage() {
 
             {/* ── Table ── */}
             {isLoading ? (
-                <div style={{textAlign: 'center', padding: 48, color: '#9ca3af'}}>
-                    <div style={{fontSize: 28, marginBottom: 8}}>⟳</div>
-                    Đang tải dữ liệu...
-                </div>
+                <LoadingState
+                    title="Đang tải danh sách tài khoản..."
+                    description="Hệ thống đang lấy dữ liệu tài khoản mới nhất."
+                />
             ) : (
                 <div className="simple-table">
                     <div className="simple-table-header" style={gridCols}>
@@ -349,9 +462,27 @@ export default function AdminUsersPage() {
                     </div>
 
                     {items.length === 0 ? (
-                        <div style={{textAlign: 'center', padding: 40, color: '#9ca3af'}}>
-                            {search || filterStatus !== 'all' ? 'Không tìm thấy kết quả phù hợp.' : 'Chưa có tài khoản nào.'}
-                        </div>
+                        <EmptyState
+                            title={
+                                search || filterStatus !== 'all'
+                                    ? 'Không tìm thấy tài khoản phù hợp'
+                                    : 'Chưa có tài khoản nào'
+                            }
+                            description={
+                                search || filterStatus !== 'all'
+                                    ? 'Hãy đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái.'
+                                    : 'Tạo tài khoản mới để bắt đầu quản lý người dùng.'
+                            }
+                            action={
+                                <button
+                                    type="button"
+                                    className="primary-button"
+                                    onClick={() => openCreate(tab)}
+                                >
+                                    + Thêm {tab === 'staff' ? 'nhân viên' : 'khách hàng'}
+                                </button>
+                            }
+                        />
                     ) : items.map((user, idx) => {
                         const rc = ROLE_COLORS[user.role] ?? {bg: '#f3f4f6', text: '#374151'}
                         return (
@@ -598,17 +729,17 @@ export default function AdminUsersPage() {
                     </ModalActions>
                 </Modal>
             )}
-        </div>
+        </PageCard>
     )
 }
 
 // ── helpers ──────────────────────────────────────────────
 
-const gridCols: React.CSSProperties = {gridTemplateColumns: '40px 1.5fr 1fr 1.5fr 1fr 1fr 1fr 1fr'}
+const gridCols: CSSProperties = {gridTemplateColumns: '40px 1.5fr 1fr 1.5fr 1fr 1fr 1fr 1fr'}
 
-const ghostBtn: React.CSSProperties = {background: 'none', border: 'none', cursor: 'pointer', fontSize: 16}
+const ghostBtn: CSSProperties = {background: 'none', border: 'none', cursor: 'pointer', fontSize: 16}
 
-function btn(bg: string, color: string): React.CSSProperties {
+function btn(bg: string, color: string): CSSProperties {
     return {
         background: bg,
         color,
@@ -621,7 +752,7 @@ function btn(bg: string, color: string): React.CSSProperties {
     }
 }
 
-function Modal({title, onClose, children}: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({title, onClose, children}: { title: string; onClose: () => void; children: ReactNode }) {
     return (
         <div style={{
             position: 'fixed',
@@ -652,11 +783,11 @@ function Modal({title, onClose, children}: { title: string; onClose: () => void;
     )
 }
 
-function FieldGroup({children}: { children: React.ReactNode }) {
+function FieldGroup({children}: { children: ReactNode }) {
     return <div style={{display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 16}}>{children}</div>
 }
 
-function Field({label, children}: { label: string; children: React.ReactNode }) {
+function Field({label, children}: { label: string; children: ReactNode }) {
     return (
         <label
             style={{display: 'flex', flexDirection: 'column', gap: 6, fontSize: 14, fontWeight: 500, color: '#374151'}}>
@@ -701,7 +832,7 @@ function Pagination({page, totalPages, pageSize, totalItems, startIdx, endIdx, o
         return range
     }
 
-    const pageBtnStyle = (active: boolean, disabled?: boolean): React.CSSProperties => ({
+    const pageBtnStyle = (active: boolean, disabled?: boolean): CSSProperties => ({
         minWidth: 30,
         height: 30,
         padding: '0 6px',
@@ -785,7 +916,7 @@ function Pagination({page, totalPages, pageSize, totalItems, startIdx, endIdx, o
     )
 }
 
-function ModalActions({children}: { children: React.ReactNode }) {
+function ModalActions({children}: { children: ReactNode }) {
     return <div style={{display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 22}}>{children}</div>
 }
 

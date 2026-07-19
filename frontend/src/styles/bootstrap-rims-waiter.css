@@ -1,0 +1,677 @@
+/* RIMS Waiter Pages
+   Copy to: src/styles/bootstrap-rims-waiter.css
+*/
+
+/* =========================
+   WAITER DASHBOARD
+========================= */
+
+.waiter-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+}
+
+.waiter-header {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+}
+
+.waiter-clock {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.waiter-main {
+    flex: 1;
+    overflow: auto;
+    padding: 1.5rem;
+    background: #ffffff;
+}
+
+.waiter-legend {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 600;
+}
+
+.waiter-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.waiter-legend-dot {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 0.25rem;
+}
+
+.waiter-dot-available {
+    background: #4ade80;
+}
+
+.waiter-dot-serving {
+    background: #60a5fa;
+}
+
+.waiter-dot-reserved {
+    background: #f87171;
+}
+
+.waiter-table-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    max-width: 960px;
+}
+
+.waiter-table-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    text-align: left;
+    transition: all 0.2s;
+    cursor: pointer;
+    width: 100%;
+    background: transparent;
+    padding: 0;
+}
+
+.waiter-table-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.waiter-table-header {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.waiter-table-body {
+    padding: 1.5rem 1rem;
+    text-align: center;
+}
+
+.waiter-table-status {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    text-transform: capitalize;
+    margin: 0;
+}
+
+.waiter-table-res-time {
+    font-size: 0.8rem;
+    color: #475569;
+    margin: 0.35rem 0 0 0;
+    font-weight: 500;
+}
+
+/* Status variants */
+.waiter-table-available .waiter-table-header {
+    background: #bbf7d0;
+    border-bottom: 1px solid #86efac;
+}
+
+.waiter-table-available .waiter-table-body {
+    background: #f0fdf4;
+}
+
+.waiter-table-card.has-warning {
+    border-color: #f59e0b;
+}
+
+.waiter-table-card.has-warning .waiter-table-header {
+    background: #fef3c7;
+    border-bottom: 1px solid #fcd34d;
+    color: #92400e;
+}
+
+.waiter-table-card.has-warning .waiter-table-body {
+    background: #fffbeb;
+}
+
+.waiter-table-warning-badge {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    background: #f59e0b;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+}
+
+.waiter-warning-box {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    color: #92400e;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.waiter-warning-box p {
+    margin: 0 0 0.5rem 0;
+}
+
+.waiter-warning-box p:last-child {
+    margin: 0;
+}
+
+.waiter-table-serving .waiter-table-header {
+    background: #bfdbfe;
+    border-bottom: 1px solid #93c5fd;
+}
+
+.waiter-table-serving .waiter-table-body {
+    background: #eff6ff;
+}
+
+.waiter-table-reserved .waiter-table-header {
+    background: #fecaca;
+    border-bottom: 1px solid #fca5a5;
+}
+
+.waiter-table-reserved .waiter-table-body {
+    background: #fef2f2;
+}
+
+/* Sub screen headers */
+.waiter-sub-header {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0 0 1rem 0;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.waiter-back-btn {
+    color: #8b5cf6;
+    transition: color 0.2s;
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.waiter-back-btn:hover {
+    color: #6d28d9;
+}
+
+.waiter-back-btn svg {
+    width: 2.2rem;
+    height: 2.2rem;
+}
+
+.waiter-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.waiter-action-btn {
+    border: 1px solid #eab308;
+    background: #fef9c3;
+    border-radius: 0.35rem;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    transition: background-color 0.2s;
+}
+
+.waiter-action-btn:hover {
+    background: #fef08a;
+}
+
+/* Category Navbar */
+.waiter-category-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 0 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1.25rem;
+}
+
+.waiter-category-tab {
+    padding: 0.4rem 1.1rem;
+    border-radius: 999px;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.waiter-category-tab:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.waiter-category-tab-active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #ffffff;
+}
+
+.waiter-category-tab-active:hover {
+    background: #1e293b;
+    border-color: #1e293b;
+}
+
+/* Menu Grid */
+.waiter-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.waiter-menu-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+}
+
+.waiter-menu-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.waiter-menu-emoji {
+    font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    background: #e2e8f0;
+    border-radius: 0.35rem;
+}
+
+.waiter-menu-img {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 0.35rem;
+    object-fit: cover;
+}
+
+.waiter-menu-info h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.25rem 0;
+}
+
+.waiter-menu-info p {
+    font-size: 0.9rem;
+    color: #dc2626;
+    font-weight: 700;
+    margin: 0;
+}
+
+.waiter-qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.75rem;
+}
+
+.waiter-qty-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+
+.waiter-qty-btn:hover {
+    background: #f1f5f9;
+}
+
+.waiter-qty-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.waiter-qty-val {
+    font-weight: 700;
+    font-size: 1rem;
+    width: 1.25rem;
+    text-align: center;
+}
+
+.waiter-note-input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.35rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+
+.waiter-note-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Modal */
+.waiter-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    backdrop-filter: blur(2px);
+}
+
+.waiter-modal {
+    background: #ffffff;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    width: 26rem;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.waiter-modal h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 0.75rem 0;
+}
+
+.waiter-modal p {
+    font-size: 0.95rem;
+    color: #475569;
+    margin: 0 0 1.75rem 0;
+}
+
+.waiter-modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.waiter-btn-outline {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.35rem;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+}
+
+.waiter-btn-outline:hover {
+    background: #f1f5f9;
+}
+
+.waiter-btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.35rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+}
+
+.waiter-btn-primary:hover {
+    background: #1d4ed8;
+}
+
+/* Detail screens */
+.waiter-detail-layout {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr;
+    gap: 1.5rem;
+}
+
+.waiter-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.waiter-card-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.25rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #0f172a;
+}
+
+.waiter-card-body {
+    padding: 1.25rem;
+}
+
+.waiter-table-custom {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+.waiter-table-custom th, .waiter-table-custom td {
+    padding: 0.85rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.waiter-table-custom th {
+    background: #f8fafc;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.waiter-table-custom td {
+    font-size: 0.95rem;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.waiter-badge {
+    padding: 0.35rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* Reservation */
+.waiter-res-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1.75rem;
+}
+
+.waiter-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.waiter-form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.35rem;
+}
+
+.waiter-form-input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.35rem;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.waiter-form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.waiter-form-error {
+    color: #ef4444;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+}
+
+.waiter-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    padding: 1.1rem 1.5rem;
+    border-radius: 0.35rem;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.waiter-res-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.35rem;
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    background: #f8fafc;
+}
+
+.waiter-res-time {
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #0f172a;
+}
+
+.waiter-res-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.waiter-res-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.waiter-res-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+.waiter-confirm-list {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.waiter-confirm-list li {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 600;
+    color: #334155;
+}
+
+.waiter-confirm-list small {
+    font-weight: 500;
+    color: #64748b;
+    margin-top: 0.2rem;
+}
+
+.waiter-menu-card-locked {
+    opacity: 0.65;
+}
+
+.waiter-item-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.waiter-detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.waiter-detail-row span {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.waiter-detail-row strong {
+    color: #0f172a;
+    text-align: right;
+}
+

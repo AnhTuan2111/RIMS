@@ -1,182 +1,544 @@
-import {useCallback, useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
-import {type TableDetailResponse, waiterApi} from "../../api/waiter";
-import {WaiterHeader, WaiterTableCard} from "../../components/waiter";
+import {
+    useCallback,
+    useRef,
+    useState,
+    type CSSProperties,
+} from 'react'
+import {useNavigate} from 'react-router-dom'
+
+import {
+    type ReservationResponse,
+    type TableDetailResponse,
+    waiterApi,
+} from '../../api/waiter'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {
+    WaiterHeader,
+    WaiterTableCard,
+} from '../../components/waiter'
+import {usePolling} from '../../hooks/usePolling'
 
 const STATUS_LABEL: Record<string, string> = {
-    AVAILABLE: "available",
-    SERVING: "serving",
-    RESERVED: "reserved",
-};
+    AVAILABLE: 'available',
+    SERVING: 'serving',
+    RESERVED: 'reserved',
+}
 
 function todayString() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const date = new Date()
+
+    return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, '0'),
+        String(date.getDate()).padStart(2, '0'),
+    ].join('-')
+}
+
+function isRequestCanceled(error: unknown) {
+    if (typeof error !== 'object' || error === null) {
+        return false
+    }
+
+    const requestError = error as {
+        name?: string
+        code?: string
+        message?: string
+    }
+
+    return (
+        requestError.name === 'CanceledError'
+        || requestError.code === 'ERR_CANCELED'
+        || requestError.message === 'canceled'
+    )
+}
+
+function getReservationId(
+    reservation: ReservationResponse,
+) {
+    return reservation.reservationId ?? reservation.id
+}
+
+function getReservationTime(value?: string | null) {
+    if (!value) {
+        return ''
+    }
+
+    return value.split('T')[1]?.substring(0, 5) ?? ''
+}
+
+function isUpcomingReservation(
+    reservation: ReservationResponse,
+) {
+    if (
+        reservation.status !== 'QUEUED'
+        && reservation.status !== 'WAITING'
+    ) {
+        return false
+    }
+
+    if (!reservation.reservationTime) {
+        return false
+    }
+
+    return new Date(reservation.reservationTime) > new Date()
 }
 
 export default function WaiterTableListPage() {
-    const navigate = useNavigate();
-    const [tables, setTables] = useState<TableDetailResponse[]>([]);
-    const [tableModal, setTableModal] = useState<TableDetailResponse | null>(null);
-    const [resTimes, setResTimes] = useState<Record<number, string>>({});
-    const [modalReservations, setModalReservations] = useState<any[]>([]);
+    const navigate = useNavigate()
 
-    const loadTables = useCallback(() => {
-        waiterApi.getTables().then((res) => setTables(res.data)).catch(console.error);
-    }, []);
+    const [tables, setTables] =
+        useState<TableDetailResponse[]>([])
 
-    useEffect(() => {
-        loadTables();
+    const [tableModal, setTableModal] =
+        useState<TableDetailResponse | null>(null)
 
-        const socket = new SockJS('http://localhost:8080/ws-rims');
-        const client = Stomp.over(socket);
+    const [resTimes, setResTimes] =
+        useState<Record<number, string>>({})
 
-        client.connect({}, () => {
-            console.log("Waiter đã kết nối đường dây với Bếp!");
+    const [modalReservations, setModalReservations] =
+        useState<ReservationResponse[]>([])
 
-            client.subscribe('/topic/waiter', (message) => {
-                if (message.body === 'DISH_READY') {
-                    console.log("🔔 Có món đã nấu xong! Đang cập nhật lại bàn...");
-                    loadTables();
+    const [isLoading, setIsLoading] =
+        useState(true)
+
+    const [error, setError] =
+        useState<string | null>(null)
+
+    const [isModalLoading, setIsModalLoading] =
+        useState(false)
+
+    const hasLoadedInitialTablesRef =
+        useRef(false)
+
+    const loadReservationTimesForReservedTables =
+        useCallback(
+            async (
+                nextTables: TableDetailResponse[],
+                signal?: AbortSignal,
+            ) => {
+                const reservedTables =
+                    nextTables.filter(
+                        (table) => table.status === 'RESERVED',
+                    )
+
+                if (reservedTables.length === 0) {
+                    setResTimes({})
+                    return
                 }
-            });
-        }, (error) => {
-            console.error("Lỗi mất kết nối với Bếp: ", error);
-        });
 
-        return () => {
-            if (client !== null && client.connected) {
-                client.disconnect(() => {
-                    console.log("Đã ngắt kết nối an toàn.");
-                });
+                const timeEntries =
+                    await Promise.all(
+                        reservedTables.map(async (table) => {
+                            try {
+                                const response =
+                                    await waiterApi.getCurrentReservationByTable(
+                                        table.tableId,
+                                        signal,
+                                    )
+
+                                if (signal?.aborted) {
+                                    return null
+                                }
+
+                                const reservationTime =
+                                    response.data?.reservationTime
+
+                                if (!reservationTime) {
+                                    return null
+                                }
+
+                                return [
+                                    table.tableId,
+                                    getReservationTime(reservationTime),
+                                ] as const
+                            } catch (requestError: unknown) {
+                                if (
+                                    signal?.aborted
+                                    || isRequestCanceled(requestError)
+                                ) {
+                                    return null
+                                }
+
+                                console.error(
+                                    '[WAITER_TABLE_RESERVED_TIME_ERROR]',
+                                    requestError,
+                                )
+
+                                return null
+                            }
+                        }),
+                    )
+
+                if (signal?.aborted) {
+                    return
+                }
+
+                setResTimes(
+                    Object.fromEntries(
+                        timeEntries.filter(
+                            Boolean,
+                        ) as Array<readonly [number, string]>,
+                    ),
+                )
+            },
+            [],
+        )
+
+    const loadTables =
+        useCallback(
+            async (
+                signal?: AbortSignal,
+                showFullLoading = true,
+            ) => {
+                try {
+                    if (showFullLoading) {
+                        setIsLoading(true)
+                    }
+
+                    setError(null)
+
+                    const response =
+                        await waiterApi.getTables(signal)
+
+                    if (signal?.aborted) {
+                        return
+                    }
+
+                    setTables(response.data)
+
+                    await loadReservationTimesForReservedTables(
+                        response.data,
+                        signal,
+                    )
+                } catch (requestError: unknown) {
+                    if (
+                        signal?.aborted
+                        || isRequestCanceled(requestError)
+                    ) {
+                        return
+                    }
+
+                    console.error(
+                        '[WAITER_TABLE_LIST_FETCH_ERROR]',
+                        requestError,
+                    )
+
+                    setError(
+                        'Không thể tải danh sách bàn.',
+                    )
+                } finally {
+                    if (
+                        showFullLoading
+                        && !signal?.aborted
+                    ) {
+                        setIsLoading(false)
+                    }
+                }
+            },
+            [loadReservationTimesForReservedTables],
+        )
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialTablesRef.current
+
+            await loadTables(
+                signal,
+                isInitialLoad,
+            )
+
+            hasLoadedInitialTablesRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .waiter
+                .tablesIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[WAITER_TABLE_LIST_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
+    async function handleTableClick(
+        table: TableDetailResponse,
+    ) {
+        if (table.status === 'AVAILABLE') {
+            setTableModal(table)
+            setModalReservations([])
+            setIsModalLoading(true)
+
+            try {
+                const response =
+                    await waiterApi.getReservationsByTableAndDate(
+                        table.tableId,
+                        todayString(),
+                    )
+
+                const upcoming =
+                    (response.data ?? []).filter(
+                        isUpcomingReservation,
+                    )
+
+                setModalReservations(upcoming)
+            } catch (requestError: unknown) {
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
+
+                console.error(
+                    '[WAITER_TABLE_MODAL_RESERVATIONS_ERROR]',
+                    requestError,
+                )
+
+                setModalReservations([])
+            } finally {
+                setIsModalLoading(false)
             }
-        };
-    }, [loadTables]);
 
-    useEffect(() => {
-        tables.forEach((t) => {
-            if (t.status === 'RESERVED' && !resTimes[t.tableId]) {
-                waiterApi.getCurrentReservationByTable(t.tableId)
-                    .then((res) => {
-                        if (res.data?.reservationTime) {
-                            const time = res.data.reservationTime.split('T')[1]?.substring(0, 5) || '';
-                            setResTimes(prev => ({ ...prev, [t.tableId]: time }));
-                        }
-                    })
-                    .catch(console.error);
-            }
-        });
-    }, [tables, resTimes]);
+            return
+        }
 
-    function handleTableClick(table: TableDetailResponse) {
-        if (table.status === "AVAILABLE") {
-            setTableModal(table);
-            setModalReservations([]);
-            // Fetch all upcoming reservations for this table today
-            waiterApi.getReservationsByTableAndDate(table.tableId, todayString())
-                .then((res) => {
-                    // Filter only future reservations (QUEUED status)
-                    const upcoming = (res.data || []).filter((r: any) => {
-                        if (r.status !== 'QUEUED' && r.status !== 'WAITING') return false;
-                        if (!r.reservationTime) return false;
-                        return new Date(r.reservationTime) > new Date();
-                    });
-                    setModalReservations(upcoming);
-                })
-                .catch(console.error);
-        } else if (table.status === "SERVING") {
-            navigate(`/waiter/tables/${table.tableId}/order/detail`);
-        } else if (table.status === "RESERVED") {
-            navigate(`/waiter/tables/${table.tableId}/reservation`);
+        if (table.status === 'SERVING') {
+            navigate(
+                `/waiter/tables/${table.tableId}/order/detail`,
+            )
+            return
+        }
+
+        if (table.status === 'RESERVED') {
+            navigate(
+                `/waiter/tables/${table.tableId}/reservation`,
+            )
         }
     }
 
-    const displayTables = tables.slice(0, 12);
+    const displayTables =
+        tables.slice(0, 12)
 
     return (
         <div className="waiter-container">
-            <WaiterHeader/>
+            <WaiterHeader />
+
             <main className="waiter-main">
                 <div className="waiter-legend">
                     <span className="waiter-legend-item">
-                        <span className="waiter-legend-dot waiter-dot-available"/> Available
+                        <span className="waiter-legend-dot waiter-dot-available" />
+                        Available
                     </span>
+
                     <span className="waiter-legend-item">
-                        <span className="waiter-legend-dot waiter-dot-serving"/> Serving
+                        <span className="waiter-legend-dot waiter-dot-serving" />
+                        Serving
                     </span>
+
                     <span className="waiter-legend-item">
-                        <span className="waiter-legend-dot waiter-dot-reserved"/> Reserved
+                        <span className="waiter-legend-dot waiter-dot-reserved" />
+                        Reserved
                     </span>
                 </div>
-                <div className="waiter-table-grid">
-                    {displayTables.map((table) => {
-                        const st = STATUS_LABEL[table.status] || "available";
-                        const nextResTime = resTimes[table.tableId];
-                        return (
-                            <WaiterTableCard
-                                key={table.tableId}
-                                table={table}
-                                statusLabel={st}
-                                nextReservationTime={nextResTime}
-                                onClick={handleTableClick}
-                            />
-                        );
-                    })}
-                </div>
+
+                {isLoading ? (
+                    <div style={stateBoxStyle}>
+                        Đang tải danh sách bàn...
+                    </div>
+                ) : error ? (
+                    <div style={errorBoxStyle}>
+                        <p>{error}</p>
+
+                        <button
+                            type="button"
+                            className="waiter-action-btn"
+                            onClick={() =>
+                                void loadTables(
+                                    undefined,
+                                    true,
+                                )
+                            }
+                        >
+                            Thử lại
+                        </button>
+                    </div>
+                ) : displayTables.length === 0 ? (
+                    <div style={stateBoxStyle}>
+                        Chưa có bàn nào.
+                    </div>
+                ) : (
+                    <div className="waiter-table-grid">
+                        {displayTables.map((table) => {
+                            const statusLabel =
+                                STATUS_LABEL[table.status]
+                                ?? 'available'
+
+                            const nextReservationTime =
+                                resTimes[table.tableId]
+
+                            return (
+                                <WaiterTableCard
+                                    key={table.tableId}
+                                    table={table}
+                                    statusLabel={statusLabel}
+                                    nextReservationTime={
+                                        nextReservationTime
+                                    }
+                                    onClick={handleTableClick}
+                                />
+                            )
+                        })}
+                    </div>
+                )}
             </main>
 
             {tableModal && (
-                <div className="waiter-modal-overlay" onClick={() => setTableModal(null)}>
-                    <div className="waiter-modal" onClick={(e) => e.stopPropagation()}>
-                        <h3>Bàn {tableModal.tableNumber}</h3>
+                <div
+                    className="waiter-modal-overlay"
+                    onClick={() => setTableModal(null)}
+                >
+                    <div
+                        className="waiter-modal"
+                        onClick={(event) =>
+                            event.stopPropagation()
+                        }
+                    >
+                        <h3>
+                            Bàn {tableModal.tableNumber}
+                        </h3>
 
-                        {modalReservations.length > 0 ? (
+                        {isModalLoading ? (
+                            <p>Đang kiểm tra lịch đặt...</p>
+                        ) : modalReservations.length > 0 ? (
                             <div className="waiter-warning-box">
                                 <p>
-                                    <strong>⚠️ Bàn này đã có {modalReservations.length} lịch đặt trong hôm nay:</strong>
+                                    <strong>
+                                        ⚠️ Bàn này đã có{' '}
+                                        {modalReservations.length}{' '}
+                                        lịch đặt trong hôm nay:
+                                    </strong>
                                 </p>
-                                <ul style={{margin: "0.5rem 0 0.75rem 1.25rem", padding: 0}}>
-                                    {modalReservations.map((r: any) => {
-                                        const time = r.reservationTime?.split('T')[1]?.substring(0, 5) || '';
+
+                                <ul style={reservationListStyle}>
+                                    {modalReservations.map((reservation) => {
+                                        const reservationTime =
+                                            getReservationTime(
+                                                reservation.reservationTime,
+                                            )
+
                                         return (
-                                            <li key={r.reservationId} style={{marginBottom: "0.35rem"}}>
-                                                <strong>{time}</strong> — {r.customerName}
-                                                {r.phone && <span style={{color: "#78350f"}}> ({r.phone})</span>}
-                                                {r.note && <span style={{color: "#92400e", fontSize: "0.82rem"}}> · {r.note}</span>}
+                                            <li
+                                                key={
+                                                    getReservationId(
+                                                        reservation,
+                                                    )
+                                                    ?? `${reservation.phone}-${reservation.reservationTime}`
+                                                }
+                                                style={reservationItemStyle}
+                                            >
+                                                <strong>
+                                                    {reservationTime}
+                                                </strong>
+                                                {' — '}
+                                                {reservation.customerName}
+
+                                                {reservation.phone && (
+                                                    <span style={phoneStyle}>
+                                                        {' '}
+                                                        ({reservation.phone})
+                                                    </span>
+                                                )}
+
+                                                {reservation.note && (
+                                                    <span style={noteStyle}>
+                                                        {' '}
+                                                        · {reservation.note}
+                                                    </span>
+                                                )}
                                             </li>
-                                        );
+                                        )
                                     })}
                                 </ul>
+
                                 <p style={{margin: 0}}>
-                                    Vui lòng xác nhận với khách walk-in rằng họ có thể hoàn thành bữa ăn trước các khung giờ trên không. Nếu không, hãy <strong>chọn bàn khác</strong>.
+                                    Vui lòng xác nhận với khách walk-in
+                                    rằng họ có thể hoàn thành bữa ăn trước
+                                    các khung giờ trên không. Nếu không,
+                                    hãy <strong>chọn bàn khác</strong>.
                                 </p>
                             </div>
                         ) : tableModal.upcomingReservationTime ? (
                             <div className="waiter-warning-box">
                                 <p>
-                                    <strong>⚠️ Cảnh báo:</strong> Bàn này đã được đặt trước bởi <b>{tableModal.upcomingCustomerName || "Khách"}</b> vào lúc <b>{tableModal.upcomingReservationTime.split('T')[1].substring(0, 5)}</b>.
+                                    <strong>⚠️ Cảnh báo:</strong>
+                                    {' '}
+                                    Bàn này đã được đặt trước bởi{' '}
+                                    <b>
+                                        {tableModal.upcomingCustomerName
+                                            || 'Khách'}
+                                    </b>
+                                    {' '}
+                                    vào lúc{' '}
+                                    <b>
+                                        {getReservationTime(
+                                            tableModal.upcomingReservationTime,
+                                        )}
+                                    </b>
+                                    .
                                 </p>
-                                <p>Vui lòng xác nhận với khách walk-in rằng họ có thể hoàn thành bữa ăn trước thời gian này không. Nếu không, hãy chọn bàn khác.</p>
+
+                                <p>
+                                    Vui lòng xác nhận với khách walk-in
+                                    rằng họ có thể hoàn thành bữa ăn trước
+                                    thời gian này không. Nếu không, hãy
+                                    chọn bàn khác.
+                                </p>
                             </div>
                         ) : (
-                            <p>Bàn đang trống. Bạn muốn làm gì?</p>
+                            <p>
+                                Bàn đang trống. Bạn muốn làm gì?
+                            </p>
                         )}
 
                         <div className="waiter-modal-actions">
-                            <button onClick={() => setTableModal(null)} className="waiter-btn-outline">
-                                {(modalReservations.length > 0 || tableModal.upcomingReservationTime) ? 'Chọn Bàn Khác' : 'Hủy'}
-                            </button>
                             <button
-                                onClick={() => navigate(`/waiter/reservations?tableId=${tableModal.tableId}`)}
+                                type="button"
                                 className="waiter-btn-outline"
+                                onClick={() =>
+                                    setTableModal(null)
+                                }
+                            >
+                                {modalReservations.length > 0
+                                || tableModal.upcomingReservationTime
+                                    ? 'Chọn Bàn Khác'
+                                    : 'Hủy'}
+                            </button>
+
+                            <button
+                                type="button"
+                                className="waiter-btn-outline"
+                                onClick={() =>
+                                    navigate(
+                                        `/waiter/reservations?tableId=${tableModal.tableId}`,
+                                    )
+                                }
                             >
                                 Tạo Đặt Bàn
                             </button>
+
                             <button
-                                onClick={() => navigate(`/waiter/tables/${tableModal.tableId}/order/new`)}
+                                type="button"
                                 className="waiter-btn-primary"
+                                onClick={() =>
+                                    navigate(
+                                        `/waiter/tables/${tableModal.tableId}/order/new`,
+                                    )
+                                }
                             >
                                 Tạo Order
                             </button>
@@ -185,6 +547,35 @@ export default function WaiterTableListPage() {
                 </div>
             )}
         </div>
-    );
+    )
 }
 
+const stateBoxStyle: CSSProperties = {
+    padding: '2rem',
+    textAlign: 'center',
+    color: '#64748b',
+}
+
+const errorBoxStyle: CSSProperties = {
+    padding: '2rem',
+    textAlign: 'center',
+    color: '#dc2626',
+}
+
+const reservationListStyle: CSSProperties = {
+    margin: '0.5rem 0 0.75rem 1.25rem',
+    padding: 0,
+}
+
+const reservationItemStyle: CSSProperties = {
+    marginBottom: '0.35rem',
+}
+
+const phoneStyle: CSSProperties = {
+    color: '#78350f',
+}
+
+const noteStyle: CSSProperties = {
+    color: '#92400e',
+    fontSize: '0.82rem',
+}
