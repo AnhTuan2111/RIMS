@@ -43,8 +43,13 @@ export default function OrderPanel({
     const maxPointsAllowed = Math.floor(totalAmount * 0.5 / 1000);
     const maxPointsCanUse = customer ? Math.min(customer.rewardPoints, maxPointsAllowed) : 0;
 
+    const isValidPhone = (value: string) => /^0[0-9]{9}$/.test(value);
     const handleSearchCustomer = async () => {
         if (!phoneSearch.trim()) return;
+        if (!isValidPhone(phoneSearch.trim())) {
+            alert("Số điện thoại phải bắt đầu bằng 0 và đủ 10 chữ số!");
+            return;
+        }
         setIsSearching(true);
         setShowCreate(false);
         onCustomerChange(null);
@@ -108,19 +113,23 @@ export default function OrderPanel({
     const handleCheckoutClick = async () => {
         setIsLocking(true);
         try {
-            // Gọi API khóa đơn hàng
             const res = await cashierApi.processPaymentLock(orderDetail!.orderId, {
                 paymentMethod: 'CASH',
                 amountPaid: 0
             });
             if (res.data.success) {
-                onCheckout(); // Bật PaymentModal lên
+                if (res.data.autoClosedNoPayment) { // MỚI
+                    alert(res.data.message);
+                    onClose(); // đóng panel, KHÔNG mở PaymentModal vì không có gì để thanh toán
+                } else {
+                    onCheckout(); // Bật PaymentModal lên như cũ
+                }
             } else {
                 alert(res.data.message);
             }
         } catch (err) {
-            console.error(err);
-            alert('Không thể khóa đơn hàng để thanh toán!');
+            const error = err as { response?: { data?: { message?: string } } };
+            alert(error?.response?.data?.message || 'Không thể khóa đơn hàng để thanh toán!'); // ĐỔI: hiện đúng message lỗi backend (VD: liệt kê món PREPARING) thay vì message chung chung
         } finally {
             setIsLocking(false);
         }
@@ -182,7 +191,7 @@ export default function OrderPanel({
                         <input
                             type="text" placeholder="Nhập SĐT khách hàng..."
                             style={{flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1'}}
-                            value={phoneSearch} onChange={e => setPhoneSearch(e.target.value)}
+                            value={phoneSearch} onChange={e => setPhoneSearch(e.target.value.replace(/\D/g, '').slice(0, 10))}
                             disabled={!!customer}
                         />
                         {customer ? (
@@ -199,7 +208,8 @@ export default function OrderPanel({
                                 Bỏ chọn
                             </button>
                         ) : (
-                            <button type="button" onClick={() => void handleSearchCustomer()} disabled={isSearching}
+                            <button type="button" onClick={() => void handleSearchCustomer()}
+                                    disabled={isSearching || !isValidPhone(phoneSearch.trim())}
                                     style={{
                                         padding: '8px 16px', background: '#3b82f6', color: '#fff',
                                         border: 'none', borderRadius: '4px', cursor: 'pointer'

@@ -22,10 +22,12 @@ export type MenuItemResponse = {
     price: number;
     imageUrl: string;
     categoryName: string;
+    available: boolean;
 };
 
 export type OrderItemResponse = {
     orderItemId: number; // In Java this is Long, using number in TS
+    dishId: number;
     dishName: string;
     status: OrderItemStatus;
     quantity: number;

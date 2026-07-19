@@ -3,19 +3,56 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
     createReservation,
-    cancelReservation,  // ✅ Đổi tên import
+    cancelReservation,
     getCurrentReservation,
     checkReservationByDate,
     getAvailableTables,
+    getBlockedTimeRanges,
 } from '../../api/customer'
 import type {
     CustomerReservationResponse,
     RestaurantTable,
     CustomerCreateReservationRequest,
+    TimeRangeResponse,
 } from '../../api/customer'
 
 const today = new Date()
 const todayStr = today.toISOString().split('T')[0]
+
+const TABLE_STATUS_LABELS: Record<string, string> = {
+    AVAILABLE: 'Còn trống',
+    SERVING: 'Đang phục vụ',
+    RESERVED: 'Đã có khách đặt',
+}
+
+function formatRangeTime(iso: string) {
+    const d = new Date(iso)
+    return d.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+    })
+}
+
+function findBlockingRange(reservationTimeIso: string, ranges: TimeRangeResponse[]): TimeRangeResponse | null {
+    const t = new Date(reservationTimeIso).getTime()
+    for (const r of ranges) {
+        const s = new Date(r.start).getTime()
+        const e = new Date(r.end).getTime()
+        if (t >= s && t <= e) return r
+    }
+    return null
+}
+
+function extractErrorMessage(err: unknown, fallback: string): string {
+    const responseData = (err as { response?: { data?: unknown } })?.response?.data
+    if (typeof responseData === 'string') return responseData
+    const msg = (responseData as { message?: string })?.message
+    if (msg) return msg
+    if (err instanceof Error) return err.message
+    return fallback
+}
 
 export default function CustomerReservations() {
     const [activeTab, setActiveTab] = useState<'book' | 'cancel'>('book')
@@ -35,6 +72,10 @@ export default function CustomerReservations() {
     const [loadingTables, setLoadingTables] = useState(true)
     const [tableError, setTableError] = useState<string | null>(null)
 
+    // ===== Blocked time ranges (mới cho việc 4) =====
+    const [blockedRanges, setBlockedRanges] = useState<TimeRangeResponse[]>([])
+    const [loadingBlocked, setLoadingBlocked] = useState(false)
+
     // ===== Cancel State =====
     const [cancelLoading, setCancelLoading] = useState(false)
     const [cancelError, setCancelError] = useState('')
@@ -42,7 +83,9 @@ export default function CustomerReservations() {
     const [currentReservation, setCurrentReservation] = useState<CustomerReservationResponse | null>(null)
     const [loadingCurrent, setLoadingCurrent] = useState(false)
 
-    // ===== Load available tables =====
+    const bookDate = bookForm.reservationTime.split('T')[0]
+
+    // ===== Load available tables (giờ trả về TẤT CẢ bàn) =====
     const loadAvailableTables = useCallback(async () => {
         setLoadingTables(true)
         setTableError(null)
@@ -52,28 +95,50 @@ export default function CustomerReservations() {
             if (tables && tables.length > 0 && bookForm.tableId === 0) {
                 setBookForm(prev => ({ ...prev, tableId: tables[0].id }))
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Failed to load tables:', err)
-            setTableError(err?.response?.data?.message || err?.message || 'Không thể tải danh sách bàn')
+            setTableError(extractErrorMessage(err, 'Không thể tải danh sách bàn'))
             setAvailableTables([])
         } finally {
             setLoadingTables(false)
         }
     }, [])
 
-    // ===== Load current reservation =====
+    // ===== Load blocked ranges cho bàn + ngày đang chọn =====
+    const loadBlockedRanges = useCallback(async (tableId: number, date: string) => {
+        if (!tableId || !date) {
+            setBlockedRanges([])
+            return
+        }
+        setLoadingBlocked(true)
+        try {
+            const ranges = await getBlockedTimeRanges(tableId, date)
+            setBlockedRanges(ranges || [])
+        } catch (err) {
+            console.error('Failed to load blocked ranges:', err)
+            setBlockedRanges([])
+        } finally {
+            setLoadingBlocked(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (bookForm.tableId && bookDate) {
+            queueMicrotask(() => {
+                loadBlockedRanges(bookForm.tableId, bookDate)
+            })
+        }
+    }, [bookForm.tableId, bookDate, loadBlockedRanges])
+
+    // ===== Load current reservation (đã sửa: API trả về mảng, lấy phần tử đầu) =====
     const loadCurrentReservation = useCallback(async () => {
         setLoadingCurrent(true)
         try {
             const res = await getCurrentReservation()
-            setCurrentReservation(res)
+            setCurrentReservation(res && res.length > 0 ? res[0] : null)
         } catch (err: any) {
-            if (err?.response?.status === 404) {
-                setCurrentReservation(null)
-            } else {
-                console.error('Failed to load current reservation:', err)
-                setCurrentReservation(null)
-            }
+            console.error('Failed to load current reservation:', err)
+            setCurrentReservation(null)
         } finally {
             setLoadingCurrent(false)
         }
@@ -95,8 +160,10 @@ export default function CustomerReservations() {
     }, [loadCurrentReservation])
 
     useEffect(() => {
-        loadAvailableTables()
-        checkTodayReservation()
+        queueMicrotask(() => {
+            loadAvailableTables()
+            checkTodayReservation()
+        })
     }, [loadAvailableTables, checkTodayReservation])
 
     // ===== Book =====
@@ -104,8 +171,23 @@ export default function CustomerReservations() {
         e.preventDefault()
         setBookError('')
         setBookSuccess(null)
-        setBookLoading(true)
 
+        const timeStr = bookForm.reservationTime.split('T')[1]?.slice(0, 5) || ''
+        const timeHour = parseInt(timeStr.split(':')[0], 10)
+        if (isNaN(timeHour) || timeHour < 8 || timeHour >= 22) {
+            setBookError('Giờ đặt bàn phải nằm trong khoảng từ 08:00 đến 22:00.')
+            return
+        }
+
+        const blocking = findBlockingRange(bookForm.reservationTime, blockedRanges)
+        if (blocking) {
+            setBookError(
+                `Bàn này đã kín trong khung ${formatRangeTime(blocking.start)} — ${formatRangeTime(blocking.end)}, vui lòng chọn giờ khác.`
+            )
+            return
+        }
+
+        setBookLoading(true)
         try {
             const result = await createReservation(bookForm)
             setBookSuccess(result)
@@ -119,8 +201,8 @@ export default function CustomerReservations() {
             await loadAvailableTables()
             await checkTodayReservation()
             setActiveTab('cancel')
-        } catch (err: any) {
-            setBookError(err?.response?.data?.message || err?.message || 'Đặt bàn thất bại')
+        } catch (err: unknown) {
+            setBookError(extractErrorMessage(err, 'Đặt bàn thất bại'))
         } finally {
             setBookLoading(false)
         }
@@ -134,7 +216,6 @@ export default function CustomerReservations() {
         setCancelLoading(true)
 
         try {
-            // ✅ Lấy reservationId từ currentReservation và gọi cancelReservation
             if (!currentReservation) {
                 throw new Error('Không có đặt bàn để hủy')
             }
@@ -143,8 +224,8 @@ export default function CustomerReservations() {
             setCurrentReservation(null)
             await loadAvailableTables()
             await checkTodayReservation()
-        } catch (err: any) {
-            setCancelError(err?.response?.data?.message || err?.message || 'Hủy đặt bàn thất bại')
+        } catch (err: unknown) {
+            setCancelError(extractErrorMessage(err, 'Hủy đặt bàn thất bại'))
         } finally {
             setCancelLoading(false)
         }
@@ -163,10 +244,9 @@ export default function CustomerReservations() {
         })
     }
 
-    // ✅ Sửa statusLabels để match với enum backend (không có CONFIRMED)
     const statusLabels: Record<string, string> = {
         QUEUED: 'Đang chờ',
-        WAITING: 'Chờ xác nhận',
+        WAITING: 'Đã giữ bàn',
         COMPLETED: 'Đã hoàn thành',
         CANCELLED: 'Đã hủy',
     }
@@ -263,7 +343,7 @@ export default function CustomerReservations() {
                                 <label>Ngày đặt <span className="required">*</span></label>
                                 <input
                                     type="date"
-                                    value={bookForm.reservationTime.split('T')[0]}
+                                    value={bookDate}
                                     onChange={e => {
                                         const time = bookForm.reservationTime.split('T')[1] || '18:00:00'
                                         setBookForm(prev => ({
@@ -277,26 +357,44 @@ export default function CustomerReservations() {
                             </div>
                             <div className="customer-form-group">
                                 <label>Giờ đặt <span className="required">*</span></label>
-                                <select
-                                    value={bookForm.reservationTime.split('T')[1]?.slice(0, 5) || '18:00'}
-                                    onChange={e => {
-                                        const date = bookForm.reservationTime.split('T')[0] || todayStr
-                                        setBookForm(prev => ({
-                                            ...prev,
-                                            reservationTime: `${date}T${e.target.value}:00`
-                                        }))
-                                    }}
-                                    required
-                                >
-                                    {Array.from({ length: 14 }, (_, i) => i + 10).map(h => {
-                                        const hour = String(h).padStart(2, '0')
-                                        return (
-                                            <option key={h} value={`${hour}:00`}>
-                                                {hour}:00
-                                            </option>
-                                        )
-                                    })}
-                                </select>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <select
+                                        value={bookForm.reservationTime.split('T')[1]?.slice(0, 2) || '18'}
+                                        onChange={e => {
+                                            const date = bookForm.reservationTime.split('T')[0] || todayStr
+                                            const minute = bookForm.reservationTime.split('T')[1]?.slice(3, 5) || '00'
+                                            setBookForm(prev => ({
+                                                ...prev,
+                                                reservationTime: `${date}T${e.target.value}:${minute}:00`
+                                            }))
+                                        }}
+                                        required
+                                        style={{ flex: 1 }}
+                                    >
+                                        {Array.from({ length: 14 }, (_, i) => i + 8).map(h => {
+                                            const hh = String(h).padStart(2, '0')
+                                            return <option key={hh} value={hh}>{hh} giờ</option>
+                                        })}
+                                    </select>
+                                    <select
+                                        value={bookForm.reservationTime.split('T')[1]?.slice(3, 5) || '00'}
+                                        onChange={e => {
+                                            const date = bookForm.reservationTime.split('T')[0] || todayStr
+                                            const hour = bookForm.reservationTime.split('T')[1]?.slice(0, 2) || '18'
+                                            setBookForm(prev => ({
+                                                ...prev,
+                                                reservationTime: `${date}T${hour}:${e.target.value}:00`
+                                            }))
+                                        }}
+                                        required
+                                        style={{ flex: 1 }}
+                                    >
+                                        {Array.from({ length: 12 }, (_, i) => i * 5).map(m => {
+                                            const mm = String(m).padStart(2, '0')
+                                            return <option key={mm} value={mm}>{mm} phút</option>
+                                        })}
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -314,11 +412,11 @@ export default function CustomerReservations() {
                                     ) : tableError ? (
                                         <option value={0}>Lỗi tải bàn</option>
                                     ) : availableTables.length === 0 ? (
-                                        <option value={0}>Không có bàn trống</option>
+                                        <option value={0}>Không có bàn</option>
                                     ) : (
                                         availableTables.map(table => (
                                             <option key={table.id} value={table.id}>
-                                                Bàn {table.tableNumber} - {table.capacity} chỗ
+                                                Bàn {table.tableNumber} - {table.capacity} chỗ ({TABLE_STATUS_LABELS[table.status] || table.status})
                                             </option>
                                         ))
                                     )}
@@ -328,11 +426,22 @@ export default function CustomerReservations() {
                                         ⚠️ {tableError}
                                     </span>
                                 )}
-                                {!loadingTables && !tableError && availableTables.length === 0 && (
-                                    <span className="customer-warning-text">
-                                        ⚠️ Hiện không có bàn trống
-                                    </span>
-                                )}
+
+                                {/* Hiển thị khung giờ bị chặn của bàn + ngày đang chọn */}
+                                {loadingBlocked ? (
+                                    <span className="customer-warning-text">Đang kiểm tra khung giờ trống...</span>
+                                ) : blockedRanges.length > 0 ? (
+                                    <div className="customer-warning-text">
+                                        ⚠️ Bàn này đã kín trong các khung giờ sau:
+                                        <ul style={{ margin: '0.25rem 0 0 1rem', padding: 0 }}>
+                                            {blockedRanges.map((r, idx) => (
+                                                <li key={idx}>
+                                                    {formatRangeTime(r.start)} — {formatRangeTime(r.end)}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ) : null}
                             </div>
                             <div className="customer-form-group">
                                 <label>Ghi chú</label>

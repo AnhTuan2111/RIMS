@@ -18,6 +18,8 @@ public class RevokedToken
 {
     @Id
     private String jti;
+
     private LocalDateTime revokedAt;
+
     private LocalDateTime expiresAt;
 }

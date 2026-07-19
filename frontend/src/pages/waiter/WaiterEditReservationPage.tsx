@@ -95,6 +95,9 @@ export default function WaiterEditReservationPage() {
     }
 
     async function handleCancelReservation() {
+        const confirmed = window.confirm("Xác nhận hủy đặt bàn này? Hành động không thể hoàn tác.");
+        if (!confirmed) return;
+
         try {
             await waiterApi.cancelReservation(parseInt(resId!));
             showToast("Đã hủy đặt bàn");
@@ -144,12 +147,28 @@ export default function WaiterEditReservationPage() {
                                 </div>
                                 <div className="waiter-form-group" style={{flex: 1}}>
                                     <label>Giờ đặt</label>
-                                    <input
-                                        type="time"
-                                        value={resForm.time}
-                                        onChange={(e) => setResForm({...resForm, time: e.target.value})}
-                                        className="waiter-form-input"
-                                    />
+                                    <div style={{display: "flex", gap: "0.5rem"}}>
+                                        <select
+                                            value={resForm.time.split(':')[0] || '18'}
+                                            onChange={(e) => setResForm({...resForm, time: `${e.target.value}:${resForm.time.split(':')[1] || '00'}`})}
+                                            className="waiter-form-input"
+                                        >
+                                            {Array.from({length: 14}, (_, i) => i + 8).map(h => {
+                                                const hh = String(h).padStart(2, '0')
+                                                return <option key={hh} value={hh}>{hh} giờ</option>
+                                            })}
+                                        </select>
+                                        <select
+                                            value={resForm.time.split(':')[1] || '00'}
+                                            onChange={(e) => setResForm({...resForm, time: `${resForm.time.split(':')[0] || '18'}:${e.target.value}`})}
+                                            className="waiter-form-input"
+                                        >
+                                            {Array.from({length: 12}, (_, i) => i * 5).map(m => {
+                                                const mm = String(m).padStart(2, '0')
+                                                return <option key={mm} value={mm}>{mm} phút</option>
+                                            })}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div className="waiter-form-group">

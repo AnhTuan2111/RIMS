@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.TimeRangeResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Reservation;
@@ -21,6 +22,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
+import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,21 +40,29 @@ public class CustomerServiceImpl implements CustomerService
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ReservationConflictValidator conflictValidator;
+    private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
     @Transactional
     public CustomerReservationResponse createReservation(CustomerCreateReservationRequest request) {
 
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findByIdForUpdate(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Không tìm thấy người dùng với ID: " + request.getUserId()));
-
-        RestaurantTable table = tableRepository.findById(request.getTableId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
         if (request.getReservationTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
         }
+
+        // Chặn 1 khách có nhiều hơn 1 đặt bàn đang hoạt động trong cùng 1 ngày
+        LocalDate reservationDate = request.getReservationTime().toLocalDate();
+        if (reservationRepository.existsActiveReservationByUserIdAndDate(user.getId(), reservationDate)) {
+            throw new IllegalArgumentException(
+                    "Bạn đã có một đặt bàn đang hoạt động trong ngày này, vui lòng hủy đặt bàn cũ trước khi đặt bàn mới.");
+        }
+
+        RestaurantTable table = tableRepository.findByIdForUpdate(request.getTableId())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
         LocalDateTime start = request.getReservationTime().minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
         LocalDateTime end = request.getReservationTime().plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
@@ -84,7 +94,7 @@ public class CustomerServiceImpl implements CustomerService
         reservation.setUser(user);
 
         reservationRepository.save(reservation);
-
+        webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         return convertToCustomerResponse(reservation);
     }
 
@@ -109,8 +119,29 @@ public class CustomerServiceImpl implements CustomerService
             throw new AccessDeniedException("Bạn không có quyền hủy đặt bàn này");
         }
 
+        if (reservation.getStatus() == ReservationStatus.CANCELLED
+                || reservation.getStatus() == ReservationStatus.COMPLETED) {
+            throw new IllegalArgumentException("Đặt bàn này đã "
+                    + (reservation.getStatus() == ReservationStatus.COMPLETED ? "hoàn tất" : "bị hủy")
+                    + " trước đó, không thể hủy lại.");
+        }
+
+        boolean tableReleased = false;
+        if (reservation.getStatus() == ReservationStatus.WAITING) {
+            RestaurantTable currentTable = tableRepository.findByIdForUpdate(reservation.getTable().getId()).orElse(null);
+            if (currentTable != null && currentTable.getStatus() == TableStatus.RESERVED) {
+                currentTable.setStatus(TableStatus.AVAILABLE);
+                tableRepository.save(currentTable);
+                tableReleased = true;
+            }
+        }
+
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
+
+        if (tableReleased) {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
+        }
 
         return convertToCustomerResponse(reservation);
     }
@@ -131,7 +162,7 @@ public class CustomerServiceImpl implements CustomerService
     }
 
     @Override
-    public CustomerReservationResponse getCurrentReservationByUser(Integer userId) {
+    public List<CustomerReservationResponse> getCurrentReservationByUser(Integer userId) {
         log.info("Customer ID: {} lấy đặt bàn hiện tại", userId);
 
         if (!userRepository.existsById(userId)) {
@@ -140,12 +171,9 @@ public class CustomerServiceImpl implements CustomerService
 
         List<Reservation> currentReservations = reservationRepository.findCurrentReservationsByUser(userId);
 
-        if (currentReservations.isEmpty()) {
-            throw new ResourceNotFoundException("Bạn không có đặt bàn nào đang hoạt động.");
-        }
-
-        Reservation currentReservation = currentReservations.get(0);
-        return convertToCustomerResponse(currentReservation);
+        return currentReservations.stream()
+                .map(this::convertToCustomerResponse)
+                .toList();
     }
 
     // Phương thức chuyển đổi Entity sang Response
@@ -172,7 +200,7 @@ public class CustomerServiceImpl implements CustomerService
     @Override
     @Transactional(readOnly = true)
     public List<RestaurantTableResponse> getAvailableTables() {
-        return tableRepository.findByStatus(TableStatus.AVAILABLE).stream()
+        return tableRepository.findAll().stream()
                 .map(t -> RestaurantTableResponse.builder()
                         .id(t.getId())
                         .tableNumber(t.getTableNumber())
@@ -180,5 +208,48 @@ public class CustomerServiceImpl implements CustomerService
                         .status(t.getStatus().name())
                         .build())
                 .toList();
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<TimeRangeResponse> getBlockedTimeRanges(int tableId, LocalDate date) {
+
+        RestaurantTable table = tableRepository.findById(tableId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + tableId));
+
+        LocalDateTime dayStart = date.atStartOfDay();
+        LocalDateTime dayEnd = dayStart.plusDays(1);
+
+        List<Reservation> activeReservations = reservationRepository.findActiveReservationsByTableId(tableId);
+
+        List<TimeRangeResponse> blockedRanges = new java.util.ArrayList<>();
+
+        for (Reservation res : activeReservations) {
+            LocalDateTime resTime = res.getReservationTime();
+            LocalDateTime start = resTime.minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+            LocalDateTime end = resTime.plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+
+            // chỉ giữ lại khung có giao với ngày đang xét (tránh trả về noise của ngày khác)
+            if (end.isAfter(dayStart) && start.isBefore(dayEnd)) {
+                blockedRanges.add(TimeRangeResponse.builder().start(start).end(end).build());
+            }
+        }
+
+        if (table.getStatus() == TableStatus.SERVING) {
+            LocalDateTime servingOrderCreatedAt = orderRepository.findServingOrdersWithDetails(table.getId())
+                    .stream().findFirst()
+                    .map(Order::getCreatedAt)
+                    .orElse(null);
+
+            if (servingOrderCreatedAt != null) {
+                LocalDateTime start = servingOrderCreatedAt;
+                LocalDateTime end = servingOrderCreatedAt.plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+
+                if (end.isAfter(dayStart) && start.isBefore(dayEnd)) {
+                    blockedRanges.add(TimeRangeResponse.builder().start(start).end(end).build());
+                }
+            }
+        }
+
+        return blockedRanges;
     }
 }

@@ -1,5 +1,8 @@
 import {useCallback, useEffect, useState} from 'react';
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
 import {cashierApi} from '../../api/cashier';
+import { getAccessToken } from '../../utils/tokenStorage';
 import type {OrderDetailResponse, TableDashboardResponse, PaymentResponse} from '../../types/cashier';
 import OrderPanel, {type CustomerInfo} from './OrderPanel';
 import PaymentModal from './PaymentModal';
@@ -43,6 +46,35 @@ export default function CashierPaymentsPage() {
             await loadTables(false);
         };
         void fetchData();
+    }, [loadTables]);
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws-rims');
+        const client = Stomp.over(socket);
+
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
+            console.log("Cashier đã kết nối WebSocket!");
+            client.subscribe('/topic/tables', () => {
+                console.log("🔔 Trạng thái bàn thay đổi! Đang làm mới lại...");
+                void loadTables(false);
+            });
+        }, (error) => {
+            console.error("Lỗi kết nối WebSocket: ", error);
+        });
+
+        // Polling fallback 10s, phòng khi WS mất kết nối
+        const pollInterval = setInterval(() => {
+            void loadTables(false);
+        }, 10000);
+
+        return () => {
+            clearInterval(pollInterval);
+            if (client !== null && client.connected) {
+                client.disconnect(() => {
+                    console.log("Đã ngắt kết nối an toàn.");
+                });
+            }
+        };
     }, [loadTables]);
 
     const handleSelectTable = async (table: TableDashboardResponse) => {

@@ -23,4 +23,5 @@ public class PaymentResponse
     private Integer pointsUsed;           // Số điểm đã dùng để giảm giá
     private Integer pointsEarned;         // Số điểm tích lũy thêm được
     private String paymentMethod;         // "CASH" hoặc "QRCODE"
+    private boolean autoClosedNoPayment; // true khi đơn tự đóng do toàn bộ món đã bị hủy, không có gì để thanh toán
 }

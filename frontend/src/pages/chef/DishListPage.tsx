@@ -7,6 +7,9 @@ import {
     Link,
     useSearchParams,
 } from 'react-router-dom'
+import SockJS from 'sockjs-client'
+import Stomp from 'stompjs'
+import { getAccessToken } from '../../utils/tokenStorage'
 import {
     getChefDishes,
     updateMenuStatus,
@@ -85,6 +88,37 @@ export default function DishListPage() {
         loadDishes().catch((requestError) => {
             console.error(requestError)
         })
+    }, [])
+
+    useEffect(() => {
+        loadDishes().catch((requestError) => {
+            console.error(requestError)
+        })
+    }, [])
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws-rims')
+        const client = Stomp.over(socket)
+
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
+            console.log('Danh sách món đã kết nối WebSocket!')
+
+            client.subscribe('/topic/kitchen', () => {
+                loadDishes().catch((requestError) => {
+                    console.error(requestError)
+                })
+            })
+        }, (error) => {
+            console.error('Lỗi kết nối WebSocket danh sách món: ', error)
+        })
+
+        return () => {
+            if (client !== null && client.connected) {
+                client.disconnect(() => {
+                    console.log('Đã ngắt kết nối WebSocket danh sách món.')
+                })
+            }
+        }
     }, [])
 
     useEffect(() => {

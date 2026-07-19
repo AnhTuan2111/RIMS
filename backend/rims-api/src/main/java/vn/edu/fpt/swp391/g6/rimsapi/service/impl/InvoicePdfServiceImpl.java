@@ -61,7 +61,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             receiptTitle.setSpacingAfter(5);
             document.add(receiptTitle);
 
-            // 3. Thông tin meta (Số HĐ, Ngày, Bàn, Thu ngân)
+            // Thông tin meta (Số HĐ, Ngày, Bàn, Thu ngân)
             Order order = invoice.getOrder();
             String tableName = (order.getTable() != null) ? order.getTable().getTableNumber() : "Mang về";
             String cashierName = (order.getCreatedBy() != null && order.getCreatedBy().getFullName() != null)
@@ -84,7 +84,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             lineSeparator.setAlignment(Element.ALIGN_CENTER);
             document.add(lineSeparator);
 
-            //Bảng danh sách món ăn (4 cột: Tên, SL, Đ.Giá, T.Tiền)
+            // Bảng danh sách món ăn (4 cột: Tên, SL, Đ.Giá, T.Tiền)
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
             table.setWidths(new float[]{40, 12, 23, 25});
@@ -103,7 +103,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             BigDecimal totalBeforeVat = BigDecimal.ZERO;
             for (OrderItem item : completedItems)
             {
-                String dishName = (item.getDish() != null) ? item.getDish().getName() : "Món ẩn";
+                String dishName = item.getDishNameSnapshot();
                 totalItems += item.getQuantity();
                 totalBeforeVat = totalBeforeVat.add(item.getSubTotal());
 
@@ -115,7 +115,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             document.add(table);
             document.add(lineSeparator);
 
-// 5. Phần Tổng kết tài chính — ĐÃ SỬA: tự tính từ các món COMPLETED, không dùng order.getTotalAmount() nữa
+            //Phần Tổng kết tài chính — ĐÃ SỬA: tự tính từ các món COMPLETED, không dùng order.getTotalAmount() nữa
             BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
             BigDecimal finalAmount = invoice.getFinalAmount();
 

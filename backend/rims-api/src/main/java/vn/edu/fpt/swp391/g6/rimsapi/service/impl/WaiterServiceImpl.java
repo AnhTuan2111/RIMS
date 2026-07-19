@@ -1,7 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +24,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TableNotAvailableException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
 
 import java.math.BigDecimal;
@@ -43,9 +43,9 @@ public class WaiterServiceImpl implements WaiterService
     private final OrderRepository orderRepository;
     private final DishRepository dishRepository;
     private final UserRepository userRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final OrderItemRepository orderItemRepository;
     private final ReservationConflictValidator conflictValidator;
+    private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
     public List<TableDetailResponse> getAllTables()
@@ -128,6 +128,7 @@ public class WaiterServiceImpl implements WaiterService
 
             OrderItem orderItem = new OrderItem();
             orderItem.setDish(dish);
+            orderItem.setDishNameSnapshot(dish.getName());
             orderItem.setQuantity(itemReq.getQuantity());
             orderItem.setUnitPrice(unitPrice);
             orderItem.setSubTotal(subTotal);
@@ -146,9 +147,8 @@ public class WaiterServiceImpl implements WaiterService
         table.setStatus(TableStatus.SERVING);
         restaurantTableRepository.save(table);
 
-        // BƯỚC MỚI: PHÁT LOA THÔNG BÁO CHO ĐẦU BẾP
-        // Gửi một tin nhắn đơn giản mang chữ "REFRESH" vào kênh của bếp
-        messagingTemplate.convertAndSend("/topic/kitchen", "REFRESH");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/kitchen", "REFRESH");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
 
         // 7. Return response
         return CreateOrderResponse.builder()
@@ -245,6 +245,7 @@ public class WaiterServiceImpl implements WaiterService
                         // tạo order item mới đế không bị nhầm lẫn với order item khác
                         OrderItem orderItem = new OrderItem();
                         orderItem.setDish(existedItem.getDish());
+                        orderItem.setDishNameSnapshot(existedItem.getDishNameSnapshot());
                         orderItem.setQuantity(itemRequest.getQuantity() - existedItem.getQuantity());
                         orderItem.setUnitPrice(existedItem.getUnitPrice());
                         orderItem.setSubTotal(existedItem.getUnitPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())));
@@ -271,6 +272,7 @@ public class WaiterServiceImpl implements WaiterService
 
                 OrderItem orderItem = new OrderItem();
                 orderItem.setDish(dish);
+                orderItem.setDishNameSnapshot(dish.getName());
                 orderItem.setQuantity(itemRequest.getQuantity());
                 BigDecimal unitPrice = BigDecimal.valueOf(dish.getPrice());
                 orderItem.setUnitPrice(unitPrice);
@@ -292,7 +294,7 @@ public class WaiterServiceImpl implements WaiterService
         order.setTotalAmount(total);
         orderRepository.save(order);
 
-        messagingTemplate.convertAndSend("/topic/kitchen", "REFRESH");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/kitchen", "REFRESH");
 
         return UpdateOrderResponse.builder()
                 .orderId(order.getId())
@@ -317,7 +319,7 @@ public class WaiterServiceImpl implements WaiterService
     @Override
     public List<MenuItemResponse> getMenu()
     {
-        return dishRepository.findByIsAvailableTrue().stream()
+        return dishRepository.findByIsHiddenFalse().stream()
                 .map(dish -> MenuItemResponse.builder()
                         .dishId(dish.getId())
                         .name(dish.getName())
@@ -325,6 +327,7 @@ public class WaiterServiceImpl implements WaiterService
                         .price(dish.getPrice())
                         .imageUrl(dish.getImageUrl())
                         .categoryName(dish.getCategory().getName())
+                        .available(dish.isAvailable())
                         .build())
                 .toList();
     }
@@ -346,12 +349,13 @@ public class WaiterServiceImpl implements WaiterService
                                     {
                                         OrderItemResponse response = new OrderItemResponse();
                                         response.setOrderItemId(orderItem.getId());
-                                        response.setDishName(orderItem.getDish().getName());
+                                        response.setDishId(orderItem.getDish().getId());
+                                        response.setDishName(orderItem.getDishNameSnapshot());
                                         response.setStatus(orderItem.getStatus());
                                         response.setQuantity(orderItem.getQuantity());
                                         response.setUnitPrice(orderItem.getUnitPrice());
                                         response.setSubTotal(orderItem.getSubTotal());
-
+                                        response.setCancelReason(orderItem.getCancelReason());
                                         response.setNote(orderItem.getNote());
 
                                         // Ghi chú Chef gửi cho Waiter
@@ -374,7 +378,7 @@ public class WaiterServiceImpl implements WaiterService
     @Override
     public String createReservation(CreateReservationRequest request)
     {
-        RestaurantTable table = restaurantTableRepository.findById(request.getTableId())
+        RestaurantTable table = restaurantTableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
         if (request.getReservationTime().isBefore(LocalDateTime.now()))
@@ -472,7 +476,7 @@ public class WaiterServiceImpl implements WaiterService
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt bàn với ID: " + reservationId));
 
-        RestaurantTable table = restaurantTableRepository.findById(request.getTableId())
+        RestaurantTable table = restaurantTableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
         if (request.getReservationTime().isBefore(LocalDateTime.now()))
@@ -516,8 +520,34 @@ public class WaiterServiceImpl implements WaiterService
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn đặt bàn với ID: " + reservationId));
 
+        if (reservation.getStatus() == ReservationStatus.CANCELLED
+                || reservation.getStatus() == ReservationStatus.COMPLETED)
+        {
+            throw new IllegalArgumentException("Đặt bàn này đã "
+                    + (reservation.getStatus() == ReservationStatus.COMPLETED ? "hoàn tất" : "bị hủy")
+                    + " trước đó, không thể hủy lại.");
+        }
+
+        boolean tableReleased = false;
+        if (reservation.getStatus() == ReservationStatus.WAITING)
+        {
+            RestaurantTable currentTable = restaurantTableRepository.findByIdForUpdate(reservation.getTable().getId()).orElse(null);
+            if (currentTable != null && currentTable.getStatus() == TableStatus.RESERVED)
+            {
+                currentTable.setStatus(TableStatus.AVAILABLE);
+                restaurantTableRepository.save(currentTable);
+                tableReleased = true;
+            }
+        }
+
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
+
+        if (tableReleased)
+        {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
+        }
+
         return "Hủy đặt bàn thành công";
     }
 
@@ -527,10 +557,10 @@ public class WaiterServiceImpl implements WaiterService
     {
         LocalDateTime now = LocalDateTime.now();
 
-        // Chỉ lấy QUEUED có reservationTime trong khoảng (now, now+30m]
-        // -> DB tự lọc, không kéo những đơn đặt xa tương lai về bộ nhớ
         List<Reservation> reservations = reservationRepository
                 .findByStatusAndReservationTimeBetween(ReservationStatus.QUEUED, now, now.plusMinutes(30));
+
+        boolean changed = false;
 
         for (Reservation res : reservations)
         {
@@ -539,34 +569,36 @@ public class WaiterServiceImpl implements WaiterService
 
             if (currentTable.getStatus() == TableStatus.AVAILABLE)
             {
-                // Trường hợp bình thường: bàn đang trống, chuyển sang RESERVED
                 res.setStatus(ReservationStatus.WAITING);
                 currentTable.setStatus(TableStatus.RESERVED);
+                changed = true;
             } else if (currentTable.getStatus() == TableStatus.SERVING)
             {
-                // Bàn đang phục vụ -> tìm bàn thay thế có capacity >= bàn gốc
                 int requiredCapacity = currentTable.getCapacity() != null ? currentTable.getCapacity() : 0;
 
                 List<RestaurantTable> alternatives = restaurantTableRepository
                         .findByStatusAndCapacityGreaterThanEqual(TableStatus.AVAILABLE, requiredCapacity);
 
-                // Loại bỏ chính bàn đang xét (phòng trường hợp status chưa sync)
-                alternatives.removeIf(t -> t.getId() == currentTable.getId());
+                alternatives.removeIf(t -> Objects.equals(t.getId(), currentTable.getId()));
 
                 if (!alternatives.isEmpty())
                 {
-                    // Chọn bàn có capacity nhỏ nhất phù hợp (tránh lãng phí bàn lớn)
                     RestaurantTable newTable = alternatives.stream().min(Comparator.comparingInt(t -> t.getCapacity() != null ? t.getCapacity() : 0)).get();
 
                     res.setTable(newTable);
                     res.setStatus(ReservationStatus.WAITING);
                     newTable.setStatus(TableStatus.RESERVED);
+                    changed = true;
                 } else
                 {
-                    // Không có bàn thay thế -> hủy reservation
                     res.setStatus(ReservationStatus.CANCELLED);
                 }
             }
+        }
+
+        if (changed)
+        {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         }
     }
 
@@ -576,15 +608,21 @@ public class WaiterServiceImpl implements WaiterService
     {
         LocalDateTime now = LocalDateTime.now();
 
-        // Chỉ lấy WAITING có reservationTime < (now - 15phút)
-        // -> DB tự lọc, bỏ qua những đơn chưa hết hạn
         List<Reservation> expiredReservations = reservationRepository
                 .findByStatusAndReservationTimeBefore(ReservationStatus.WAITING, now.minusMinutes(15));
+
+        boolean changed = false;
 
         for (Reservation res : expiredReservations)
         {
             res.setStatus(ReservationStatus.CANCELLED);
             res.getTable().setStatus(TableStatus.AVAILABLE);
+            changed = true;
+        }
+
+        if (changed)
+        {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         }
     }
 
@@ -592,43 +630,15 @@ public class WaiterServiceImpl implements WaiterService
     @Transactional
     public void acknowledgeChefInternalNote(Long orderItemId)
     {
-        OrderItem orderItem = orderItemRepository
-                .findById(orderItemId)
-                .orElseThrow(
-                        () -> new IllegalArgumentException(
-                                "Không tìm thấy món với ID: "
-                                        + orderItemId
-                        )
-                );
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy món với ID: " + orderItemId));
 
-        String chefNote =
-                orderItem.getChefInternalNote();
-
-        if (
-                chefNote == null
-                        || chefNote.isBlank()
-        )
+        //Nếu Waiter đã xem rồi thì không cập nhật lại thời gian.
+        if (orderItem.getChefInternalNoteAcknowledgedAt() == null)
         {
-            throw new IllegalStateException(
-                    "Món này không có ghi chú từ Chef"
-            );
-        }
-
-        /*
-         * Nếu Waiter đã xem rồi thì không cập nhật
-         * lại thời gian.
-         */
-        if (
-                orderItem
-                        .getChefInternalNoteAcknowledgedAt()
-                        == null
-        )
-        {
-            orderItem.setChefInternalNoteAcknowledgedAt(
-                    LocalDateTime.now()
-            );
-
+            orderItem.setChefInternalNoteAcknowledgedAt(LocalDateTime.now());
             orderItemRepository.save(orderItem);
+            webSocketBroadcaster.broadcastAfterCommit("/topic/chef-note", "NOTE_ACKNOWLEDGED");
         }
     }
 }

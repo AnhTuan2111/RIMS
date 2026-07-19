@@ -32,6 +32,7 @@ public class Dish
     private String name;
 
     @Nationalized
+    @Column(length = 100)
     private String description;
 
     @Column(nullable = false)
@@ -42,6 +43,9 @@ public class Dish
 
     @Column(nullable = false)
     private boolean isAvailable = true;
+
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden = false;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)

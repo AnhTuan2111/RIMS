@@ -1,6 +1,10 @@
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
@@ -91,23 +95,21 @@ public class CashierController
 
         byte[] pdfBytes = invoicePdfService.generateInvoicePdf(invoice);
 
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("inline", "invoice-" + invoiceId + ".pdf");
 
-        return new ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 
     // API 8: Đón kết quả Callback từ VNPay trả về
     @GetMapping("/payments/vnpay-callback")
     public void vnpayCallback(
             @RequestParam java.util.Map<String, String> vnpayParams,
-            jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException
+            HttpServletResponse response) throws java.io.IOException
     {
-
         try
         {
-
             String vnp_ResponseCode = vnpayParams.get("vnp_ResponseCode");
             String vnp_TxnRef = vnpayParams.get("vnp_TxnRef");
 
@@ -124,6 +126,9 @@ public class CashierController
         } catch (Exception e)
         {
             e.printStackTrace();
+            // MỚI: luôn redirect về trang failed thay vì để trình duyệt treo trắng,
+            // kể cả khi processVnPaySuccess/processVnPayFailed tự throw (VD: callback gọi lại lần 2)
+            response.sendRedirect("http://localhost:5173/payment-failed");
         }
     }
 

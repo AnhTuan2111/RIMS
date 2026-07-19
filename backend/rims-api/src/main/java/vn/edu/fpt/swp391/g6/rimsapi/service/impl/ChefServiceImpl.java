@@ -30,7 +30,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import java.math.BigDecimal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.ChefService;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import java.time.LocalDate;
+import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +39,8 @@ public class ChefServiceImpl implements ChefService {
 
     private final OrderItemRepository orderItemRepository;
     private final DishRepository dishRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final OrderRepository orderRepository;
+    private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
     public List<KitchenOrderResponse> getKitchenOrders() {
@@ -76,13 +77,12 @@ public class ChefServiceImpl implements ChefService {
         );
 
         response.setDishName(
-                item.getDish().getName()
+                item.getDishNameSnapshot()
         );
 
         response.setDescription(
                 item.getDish().getDescription()
         );
-
         response.setQuantity(
                 item.getQuantity()
         );
@@ -137,12 +137,12 @@ public class ChefServiceImpl implements ChefService {
         item.setStatus(status);
 
         orderItemRepository.save(item);
-        messagingTemplate.convertAndSend("/topic/waiter", "DISH_READY");
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     @Override
     public List<DishListResponse> getDishList() {
-        return dishRepository.findAll()
+        return dishRepository.findByIsHiddenFalse()
                 .stream()
                 .map(dish -> {
                     DishListResponse response =
@@ -207,6 +207,8 @@ public class ChefServiceImpl implements ChefService {
         }
 
         dishRepository.save(dish);
+
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     @Override
@@ -241,65 +243,31 @@ public class ChefServiceImpl implements ChefService {
 
     @Override
     @Transactional
-    public void requestCancel(
-            Long orderItemId,
-            String reason
-    ) {
-        OrderItem selectedItem =
-                findOrderItem(orderItemId);
+    public void requestCancel(Long orderItemId, String reason)
+    {
+        OrderItem selectedItem = findOrderItem(orderItemId);
 
-        if (
-                selectedItem.getStatus()
-                        != OrderItemStatus.PREPARING
-        ) {
-            throw new IllegalStateException(
-                    "Chỉ có thể hủy món đang chuẩn bị"
-            );
+        if (selectedItem.getStatus() != OrderItemStatus.PREPARING)
+        {
+            throw new IllegalStateException("Chỉ có thể hủy món đang chuẩn bị");
         }
 
-        String normalizedReason =
-                reason == null
-                        ? ""
-                        : reason.trim();
+        String normalizedReason = reason == null ? "" : reason.trim();
 
-        if (normalizedReason.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Lý do hủy món không được để trống"
-            );
-        }
-
-        if (normalizedReason.length() > 500) {
-            throw new IllegalArgumentException(
-                    "Lý do hủy món không được vượt quá 500 ký tự"
-            );
-        }
-
-        /*
-         * Hủy trong chi tiết món:
-         * chỉ hủy đúng OrderItem được chọn.
-         */
-        selectedItem.setStatus(
-                OrderItemStatus.CANCELLED
-        );
-
-        selectedItem.setCancelReason(
-                normalizedReason
-        );
-
-        selectedItem.setCancelRequestedAt(
-                LocalDateTime.now()
-        );
-
+         // Hủy trong chi tiết món: chỉ hủy đúng OrderItem được chọn.
+        selectedItem.setStatus(OrderItemStatus.CANCELLED);
+        selectedItem.setCancelReason(normalizedReason);
+        selectedItem.setCancelRequestedAt(LocalDateTime.now());
         orderItemRepository.save(selectedItem);
         recalculateOrderTotal(selectedItem.getOrder());
+
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     @Override
     public List<KitchenOrderResponse> getCompletedOrders() {
         return orderItemRepository
-                .findByStatusOrderByCreatedAtAsc(
-                        OrderItemStatus.COMPLETED
-                )
+                .findByStatusOrderByCreatedAtAsc(OrderItemStatus.COMPLETED)
                 .stream()
                 .map(this::toKitchenOrderResponse)
                 .toList();
@@ -307,45 +275,21 @@ public class ChefServiceImpl implements ChefService {
 
     @Override
     public List<CancelledOrderResponse> getCancelledOrders() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay(); // MỚI
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1); // MỚI
+
         return orderItemRepository
-                .findByStatusOrderByCreatedAtAsc(
-                        OrderItemStatus.CANCELLED
-                )
+                .findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(OrderItemStatus.CANCELLED, startOfDay, endOfDay) // ĐỔI
                 .stream()
                 .map(item -> {
-                    CancelledOrderResponse response =
-                            new CancelledOrderResponse();
-
-                    response.setOrderItemId(
-                            item.getId()
-                    );
-
-                    response.setOrderId(
-                            item.getOrder().getId()
-                    );
-
-                    response.setTableNumber(
-                            item.getOrder()
-                                    .getTable()
-                                    .getTableNumber()
-                    );
-
-                    response.setDishName(
-                            item.getDish().getName()
-                    );
-
-                    response.setQuantity(
-                            item.getQuantity()
-                    );
-
-                    response.setCancelReason(
-                            item.getCancelReason()
-                    );
-
-                    response.setCancelledAt(
-                            item.getCancelRequestedAt()
-                    );
-
+                    CancelledOrderResponse response = new CancelledOrderResponse();
+                    response.setOrderItemId(item.getId());
+                    response.setOrderId(item.getOrder().getId());
+                    response.setTableNumber(item.getOrder().getTable().getTableNumber());
+                    response.setDishName(item.getDishNameSnapshot());
+                    response.setQuantity(item.getQuantity());
+                    response.setCancelReason(item.getCancelReason());
+                    response.setCancelledAt(item.getCancelRequestedAt());
                     return response;
                 })
                 .toList();
@@ -393,6 +337,7 @@ public class ChefServiceImpl implements ChefService {
         }
 
         orderItemRepository.save(item);
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
 
         return getDishDetail(orderItemId);
     }
@@ -570,6 +515,7 @@ public class ChefServiceImpl implements ChefService {
         }
 
         orderItemRepository.saveAll(items);
+        webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
     }
 
     private void cancelAllPreparingItemsOfDish(
@@ -662,7 +608,7 @@ public class ChefServiceImpl implements ChefService {
         );
 
         response.setDishName(
-                item.getDish().getName()
+                item.getDishNameSnapshot()
         );
 
         response.setQuantity(
@@ -696,7 +642,7 @@ public class ChefServiceImpl implements ChefService {
         );
 
         group.setDishName(
-                item.getDish().getName()
+                item.getDishNameSnapshot()
         );
 
         group.setHasNote(
@@ -741,4 +687,5 @@ public class ChefServiceImpl implements ChefService {
                 ? ""
                 : note.trim();
     }
+
 }

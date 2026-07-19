@@ -1,5 +1,8 @@
 import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
+import { getAccessToken } from "../../utils/tokenStorage";
 import {type MenuItemResponse, type OrderDetailResponse, type OrderItemStatus, waiterApi,} from "../../api/waiter";
 import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
 import type {AxiosError} from "axios";
@@ -39,7 +42,7 @@ export default function WaiterUpdateOrderPage() {
                 const draft: Record<number, DraftItem> = {};
                 orderRes.data.forEach((o) => {
                     o.orderItems.forEach((item) => {
-                        const dish = menuRes.data.find((m) => m.name === item.dishName);
+                        const dish = menuRes.data.find((m) => m.dishId === item.dishId);
                         if (dish) {
                             draft[dish.dishId] = {
                                 qty: item.quantity,
@@ -60,6 +63,25 @@ export default function WaiterUpdateOrderPage() {
             })
             .catch(console.error);
     }, [tid]);
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws-rims');
+        const client = Stomp.over(socket);
+
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
+            client.subscribe('/topic/waiter', () => {
+                waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
+            });
+        }, (error) => {
+            console.error('Lỗi kết nối WebSocket cập nhật order: ', error);
+        });
+
+        return () => {
+            if (client.connected) {
+                client.disconnect(() => {});
+            }
+        };
+    }, []);
 
     function showToast(msg: string, type = "success") {
         setToast({msg, type});
@@ -243,10 +265,12 @@ export default function WaiterUpdateOrderPage() {
                             const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
                             const minQty = getMinQty(dish.dishId);
                             const hasExisting = Boolean(d.status);
+                            const isUnavailable = dish.available === false;
                             return (
                                 <div
                                     key={dish.dishId}
                                     className="waiter-menu-card"
+                                    style={isUnavailable ? {opacity: 0.5} : undefined}
                                 >
                                     <div className="waiter-menu-card-top">
                                         {dish.imageUrl ? (
@@ -261,6 +285,9 @@ export default function WaiterUpdateOrderPage() {
                                                 <span className={`waiter-badge waiter-badge-${d.status.toLowerCase()}`}>
                                                 {d.status}
                                             </span>
+                                            )}
+                                            {isUnavailable && (
+                                                <span className="waiter-badge waiter-badge-cancelled">Tạm hết</span>
                                             )}
                                         </div>
                                     </div>
@@ -368,6 +395,7 @@ export default function WaiterUpdateOrderPage() {
                                         <span className="waiter-qty-val">{d.qty}</span>
                                         <button
                                             onClick={() => changeDraftQty(dish.dishId, 1)}
+                                            disabled={isUnavailable}
                                             className="waiter-qty-btn"
                                         >+
                                         </button>

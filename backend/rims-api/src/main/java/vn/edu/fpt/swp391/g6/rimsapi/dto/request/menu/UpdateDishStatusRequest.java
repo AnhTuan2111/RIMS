@@ -10,6 +10,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 @Setter
 public class UpdateDishStatusRequest
 {
-    @NotNull(message = "Trạng thái không được để trống")
+    @NotNull()
     private OrderItemStatus status;
 }
