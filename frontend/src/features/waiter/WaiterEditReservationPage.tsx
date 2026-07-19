@@ -693,20 +693,20 @@ export default function WaiterEditReservationPage() {
                                             >
                                                 {Array.from(
                                                     {
-                                                        length: 13,
+                                                        length: 25,   // (20h - 8h) * 2 + 1 mốc (bước 30 phút)
                                                     },
-                                                    (_, index) => index + 8,
-                                                ).map((hourNumber) => {
-                                                    const hour =
-                                                        String(hourNumber)
-                                                            .padStart(2, '0')
+                                                    (_, index) => 8 * 60 + index * 30,   // tổng số phút kể từ 00:00
+                                                ).map((totalMinutes) => {
+                                                    const hour = String(Math.floor(totalMinutes / 60)).padStart(2, '0')
+                                                    const minute = String(totalMinutes % 60).padStart(2, '0')
+                                                    const value = `${hour}:${minute}`
 
                                                     return (
                                                         <option
-                                                            key={hourNumber}
-                                                            value={`${hour}:00`}
+                                                            key={totalMinutes}
+                                                            value={value}
                                                         >
-                                                            {hour}:00
+                                                            {value}
                                                         </option>
                                                     )
                                                 })}
@@ -842,18 +842,11 @@ export default function WaiterEditReservationPage() {
                                 </p>
                             ) : (
                                 rightReservations.map((reservation) => {
-                                    const itemId =
-                                        getReservationId(reservation)
+                                    const itemId = getReservationId(reservation)
 
-                                    const {
-                                        time,
-                                    } =
-                                        splitReservationTime(
-                                            reservation.reservationTime,
-                                        )
+                                    const {time, } = splitReservationTime(reservation.reservationTime,)
 
-                                    const isCurrent =
-                                        itemId === reservationId
+                                    const isCurrent = itemId === reservationId
 
                                     return (
                                         <div
@@ -884,6 +877,21 @@ export default function WaiterEditReservationPage() {
                                                     </p>
                                                 </div>
                                             </div>
+
+                                            {itemId && !isCurrent && (
+                                                <button
+                                                    type="button"
+                                                    className="waiter-btn-outline"
+                                                    style={editButtonStyle}
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/waiter/reservations/${itemId}/edit`,
+                                                        )
+                                                    }
+                                                >
+                                                    Sửa
+                                                </button>
+                                            )}
                                         </div>
                                     )
                                 })
@@ -924,4 +932,8 @@ const cancelButtonStyle: CSSProperties = {
 const emptyTextStyle: CSSProperties = {
     color: '#94a3b8',
     fontWeight: 500,
+}
+
+const editButtonStyle: CSSProperties = {
+    padding: '0.35rem 0.85rem',
 }

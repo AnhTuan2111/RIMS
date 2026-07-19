@@ -553,20 +553,20 @@ export default function WaiterCreateReservationPage() {
                                     >
                                         {Array.from(
                                             {
-                                                length: 13,
+                                                length: 25,   // (20h - 8h) * 2 + 1 mốc (bước 30 phút)
                                             },
-                                            (_, index) => index + 8,
-                                        ).map((hourNumber) => {
-                                            const hour =
-                                                String(hourNumber)
-                                                    .padStart(2, '0')
+                                            (_, index) => 8 * 60 + index * 30,   // tổng số phút kể từ 00:00
+                                        ).map((totalMinutes) => {
+                                            const hour = String(Math.floor(totalMinutes / 60)).padStart(2, '0')
+                                            const minute = String(totalMinutes % 60).padStart(2, '0')
+                                            const value = `${hour}:${minute}`
 
                                             return (
                                                 <option
-                                                    key={hourNumber}
-                                                    value={`${hour}:00`}
+                                                    key={totalMinutes}
+                                                    value={value}
                                                 >
-                                                    {hour}:00
+                                                    {value}
                                                 </option>
                                             )
                                         })}
