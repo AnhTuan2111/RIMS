@@ -1,9 +1,9 @@
 import {Route} from 'react-router-dom'
 
-import CashierPaymentsPage from '../../pages/cashier/CashierPaymentsPage'
-import CashierInvoicesPage from '../../pages/cashier/CashierInvoicesPage'
-import PaymentSuccess from '../../pages/cashier/PaymentSuccess'
-import PaymentFailed from '../../pages/cashier/PaymentFailed'
+import CashierPaymentsPage from '../../features/cashier/CashierPaymentsPage'
+import CashierInvoicesPage from '../../features/cashier/CashierInvoicesPage'
+import PaymentSuccess from '../../features/cashier/PaymentSuccess'
+import PaymentFailed from '../../features/cashier/PaymentFailed'
 
 export function renderCashierRoutes() {
     return (

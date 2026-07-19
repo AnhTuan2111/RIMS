@@ -1,8 +1,8 @@
 import {Navigate, Route, Routes} from 'react-router-dom'
 
-import DashboardLayout from '../components/layout/DashboardLayout'
-import {DashboardPage} from '../pages/DashboardPage'
-import ProfilePage from '../pages/profile/ProfilePage'
+import DashboardLayout from '@/shared/components/layout/DashboardLayout'
+import {DashboardPage} from '@/features/dashboard/DashboardPage'
+import ProfilePage from '@/features/profile/ProfilePage'
 
 import {renderPublicRoutes} from './routes/PublicRoutes.tsx'
 import {renderAuthRoutes} from './routes/AuthRoutes.tsx'

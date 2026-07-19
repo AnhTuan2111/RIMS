@@ -1,11 +1,11 @@
 import {Route} from 'react-router-dom'
 
-import ChefDashboardPage from '../../pages/chef/ChefDashboardPage'
-import KitchenQueuePage from '../../pages/chef/KitchenQueuePage'
-import DishListPage from '../../pages/chef/DishListPage'
-import CompletedOrdersPage from '../../pages/chef/CompletedOrdersPage'
-import GroupedKitchenPage from '../../pages/chef/GroupedKitchenPage'
-import CancelledOrdersPage from '../../pages/chef/CancelledOrdersPage'
+import ChefDashboardPage from '../../features/chef/ChefDashboardPage'
+import KitchenQueuePage from '../../features/chef/KitchenQueuePage'
+import DishListPage from '../../features/chef/DishListPage'
+import CompletedOrdersPage from '../../features/chef/CompletedOrdersPage'
+import GroupedKitchenPage from '../../features/chef/GroupedKitchenPage'
+import CancelledOrdersPage from '../../features/chef/CancelledOrdersPage'
 
 export function renderChefRoutes() {
     return (
