@@ -82,12 +82,26 @@
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
     overflow: hidden;
+    position: relative;
     text-align: left;
     transition: all 0.2s;
     cursor: pointer;
     width: 100%;
     background: transparent;
     padding: 0;
+}
+
+.waiter-table-notification-dot {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 999px;
+    background: #dc2626;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+    z-index: 1;
 }
 
 .waiter-table-card:hover {

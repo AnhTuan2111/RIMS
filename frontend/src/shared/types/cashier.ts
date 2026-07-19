@@ -14,7 +14,7 @@ export type {
     TableStatus,
 }
 
-export type OrderStatus = 'SERVING' | 'LOCKED' | 'COMPLETED';
+
 export type PaymentMethodType = 'CASH' | 'QRCODE';
 
 export interface PaymentRequest {

@@ -1,5 +1,5 @@
 ﻿import React, { useCallback, useRef, useState } from 'react';
-import { categoryApi } from '@/shared/api/admin';
+import { categoryApi, dishApi } from '@/shared/api/admin';
 import type { CategoryResponse, DishResponse, CategoryFormData } from '@/shared/api/admin';
 import { REALTIME_CONFIG } from '@/app/config/realtime';
 import { usePolling } from '@/shared/hooks/usePolling';
@@ -88,7 +88,7 @@ export default function AdminCategoryPage() {
 
                 const [categoriesData, dishesData] = await Promise.all([
                     categoryApi.getAllCategories(signal),
-                    categoryApi.getAllDishes(signal)
+                    dishApi.getAllDishes(signal)
                 ]);
 
                 const processedDishes = dishesData.data.map((dish) => ({

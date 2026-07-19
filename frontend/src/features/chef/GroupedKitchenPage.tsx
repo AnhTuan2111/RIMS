@@ -1,7 +1,7 @@
-﻿import {
+import {
     useCallback,
+    useEffect,
     useMemo,
-    useRef,
     useState,
 } from 'react'
 import {Link} from 'react-router-dom'
@@ -11,7 +11,7 @@ import {
     getGroupedKitchenOrders,
     type GroupedKitchenOrderResponse,
 } from '@/shared/api/chef'
-import {DEFAULT_POLL_INTERVAL_MS} from '@/app/config/realtime'
+import {useKitchenSocket} from '@/realtime'
 import {
     EmptyState,
     ErrorState,
@@ -21,7 +21,7 @@ import {
     PageCard,
     PageHeader,
 } from '@/shared/components/ui'
-import {usePolling} from '@/shared/hooks/usePolling'
+
 
 
 const ITEMS_PER_PAGE = 6
@@ -103,7 +103,7 @@ export default function GroupedKitchenPage() {
     const [error, setError] =
         useState<string | null>(null)
 
-    const hasLoadedInitialGroupsRef = useRef(false)
+
 
     const loadGroups = useCallback(
         async (
@@ -147,32 +147,17 @@ export default function GroupedKitchenPage() {
         [],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialGroupsRef.current
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadGroups(true, false)
+        }, 0)
 
-            await loadGroups(
-                isInitialLoad,
-                false,
-                signal,
-            )
+        return () => window.clearTimeout(timer)
+    }, [loadGroups])
 
-            hasLoadedInitialGroupsRef.current = true
-        },
-        {
-            intervalMs: DEFAULT_POLL_INTERVAL_MS,
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[CHEF_GROUPED_ORDERS_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+    // WebSocket: refresh when backend broadcasts a kitchen update
+    useKitchenSocket(() => void loadGroups(false, false))
 
     async function handleCompleteGroup(
         group: GroupedKitchenOrderResponse,

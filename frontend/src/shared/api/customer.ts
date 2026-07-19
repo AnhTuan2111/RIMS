@@ -50,6 +50,11 @@ export interface RestaurantTable {
         | 'OCCUPIED'
 }
 
+export interface TimeRangeResponse {
+    start: string
+    end: string
+}
+
 // ===== Profile APIs =====
 export async function getMyProfile(
     signal?: AbortSignal,
@@ -130,9 +135,9 @@ export async function checkReservationByDate(
 
 export async function getCurrentReservation(
     signal?: AbortSignal,
-): Promise<CustomerReservationResponse> {
+): Promise<CustomerReservationResponse[]> {
     const response =
-        await apiClient.get<CustomerReservationResponse>(
+        await apiClient.get<CustomerReservationResponse[]>(
             '/customer/reservations/current',
             {
                 signal,
@@ -150,6 +155,25 @@ export async function getAvailableTables(
         await apiClient.get<RestaurantTable[]>(
             '/customer/tables/available',
             {
+                signal,
+            },
+        )
+
+    return response.data
+}
+
+export async function getBlockedTimeSlots(
+    tableId: number,
+    date: string,
+    signal?: AbortSignal,
+): Promise<TimeRangeResponse[]> {
+    const response =
+        await apiClient.get<TimeRangeResponse[]>(
+            `/customer/tables/${tableId}/blocked-slots`,
+            {
+                params: {
+                    date,
+                },
                 signal,
             },
         )

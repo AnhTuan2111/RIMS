@@ -1,4 +1,4 @@
-﻿import {
+import {
     EmptyState,
     ErrorState,
     LoadingState,
@@ -10,8 +10,8 @@ import {
     useRef,
     useState,
 } from 'react'
-import {usePolling} from '@/shared/hooks/usePolling'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
+import {useKitchenSocket} from '@/realtime'
+
 import {
     getDishDetail,
     getKitchenOrders,
@@ -118,8 +118,7 @@ export default function KitchenQueuePage() {
     const hasLoadedInitialOrdersRef =
         useRef(false)
 
-    const hasInitialKitchenLoadRef =
-        useRef(false)
+
 
     const newOrderMessageTimerRef =
         useRef<number | null>(null)
@@ -315,6 +314,9 @@ export default function KitchenQueuePage() {
     )
 
     useEffect(() => {
+        const originalTitle =
+            originalDocumentTitleRef.current
+
         return () => {
             if (
                 newOrderMessageTimerRef.current
@@ -326,7 +328,7 @@ export default function KitchenQueuePage() {
             }
 
             document.title =
-                originalDocumentTitleRef.current
+                originalTitle
 
             audioContextRef.current
                 ?.close()
@@ -341,38 +343,17 @@ export default function KitchenQueuePage() {
         }
     }, [])
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasInitialKitchenLoadRef.current
+    // Initial load on mount
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void fetchKitchenOrders(true, false)
+        }, 0)
 
-            await fetchKitchenOrders(
-                isInitialLoad,
-                false,
-                signal,
-            )
+        return () => window.clearTimeout(timer)
+    }, [fetchKitchenOrders])
 
-            if (!signal.aborted) {
-                hasInitialKitchenLoadRef.current = true
-            }
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .chef
-                .kitchenQueueIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[CHEF_KITCHEN_QUEUE_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+    // WebSocket: refresh when backend broadcasts a kitchen update
+    useKitchenSocket(() => void fetchKitchenOrders(false, false))
 
     async function loadKitchenOrders() {
         await fetchKitchenOrders(true, true)

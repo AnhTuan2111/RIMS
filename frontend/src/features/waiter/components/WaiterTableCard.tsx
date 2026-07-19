@@ -4,10 +4,17 @@ interface WaiterTableCardProps {
     table: TableDetailResponse;
     statusLabel: string;
     nextReservationTime?: string;
+    hasStatusNotification?: boolean;
     onClick: (table: TableDetailResponse) => void;
 }
 
-export function WaiterTableCard({table, statusLabel, nextReservationTime, onClick}: WaiterTableCardProps) {
+export function WaiterTableCard({
+    table,
+    statusLabel,
+    nextReservationTime,
+    hasStatusNotification = false,
+    onClick,
+}: WaiterTableCardProps) {
     const isAvailableButReserved = table.status === 'AVAILABLE' && table.upcomingReservationTime;
     const cardClass = `waiter-table-card waiter-table-${statusLabel} ${isAvailableButReserved ? 'has-warning' : ''}`;
 
@@ -16,6 +23,13 @@ export function WaiterTableCard({table, statusLabel, nextReservationTime, onClic
             onClick={() => onClick(table)}
             className={cardClass}
         >
+            {hasStatusNotification && (
+                <span
+                    className="waiter-table-notification-dot"
+                    aria-label="Có cập nhật món"
+                />
+            )}
+
             <div className="waiter-table-header">
                 Bàn {table.tableNumber} - {table.capacity} chỗ
             </div>

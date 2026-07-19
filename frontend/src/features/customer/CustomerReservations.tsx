@@ -237,14 +237,14 @@ export default function CustomerReservations() {
                 setLoadingCurrent(true)
             }
 
-            const reservation =
+            const reservations =
                 await getCurrentReservation(signal)
 
             if (signal?.aborted) {
                 return
             }
 
-            setCurrentReservation(reservation)
+            setCurrentReservation(reservations[0] ?? null)
         } catch (requestError: unknown) {
             if (
                 signal?.aborted

@@ -9,24 +9,6 @@ import {
     setTokens,
 } from '../utils/tokenStorage'
 
-export interface UpdateProfileRequest {
-    fullName: string
-    username: string
-    email: string
-    phone: string
-}
-
-export interface UpdateProfileResponse {
-    userId: number
-    id?: number
-    username: string
-    fullName: string
-    phone: string
-    email: string | null
-    role: string
-    rewardPoints?: number
-}
-
 export interface RegisterRequest {
     username: string
     fullName: string
@@ -93,7 +75,7 @@ function normalizeLoginUser(
 }
 
 function normalizeProfileUser(
-    response: UpdateProfileResponse | UserProfile,
+    response: UserProfile,
 ): UserProfile {
     return {
         userId:
@@ -158,22 +140,6 @@ export async function getCurrentUser(
     saveCurrentUser(currentUser)
 
     return currentUser
-}
-
-export async function updateProfile(
-    data: UpdateProfileRequest,
-): Promise<UpdateProfileResponse> {
-    const response =
-        await apiClient.put<UpdateProfileResponse>(
-            '/auth/profile',
-            data,
-        )
-
-    saveCurrentUser(
-        normalizeProfileUser(response.data),
-    )
-
-    return response.data
 }
 
 export function logout() {
