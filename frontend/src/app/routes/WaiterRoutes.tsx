@@ -1,12 +1,12 @@
 import {Route} from 'react-router-dom'
 
-import WaiterTableListPage from '../../pages/waiter/WaiterTableListPage'
-import WaiterCreateOrderPage from '../../pages/waiter/WaiterCreateOrderPage'
-import WaiterOrderDetailPage from '../../pages/waiter/WaiterOrderDetailPage'
-import WaiterUpdateOrderPage from '../../pages/waiter/WaiterUpdateOrderPage'
-import WaiterReservationDetailPage from '../../pages/waiter/WaiterReservationDetailPage'
-import WaiterCreateReservationPage from '../../pages/waiter/WaiterCreateReservationPage'
-import WaiterEditReservationPage from '../../pages/waiter/WaiterEditReservationPage'
+import WaiterTableListPage from '../../features/waiter/WaiterTableListPage'
+import WaiterCreateOrderPage from '../../features/waiter/WaiterCreateOrderPage'
+import WaiterOrderDetailPage from '../../features/waiter/WaiterOrderDetailPage'
+import WaiterUpdateOrderPage from '../../features/waiter/WaiterUpdateOrderPage'
+import WaiterReservationDetailPage from '../../features/waiter/WaiterReservationDetailPage'
+import WaiterCreateReservationPage from '../../features/waiter/WaiterCreateReservationPage'
+import WaiterEditReservationPage from '../../features/waiter/WaiterEditReservationPage'
 
 export function renderWaiterRoutes() {
     return (

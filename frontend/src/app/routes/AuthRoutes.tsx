@@ -1,8 +1,8 @@
 import {Route} from 'react-router-dom'
 
-import LoginPage from '../../pages/login/LoginPage'
-import ForgotPasswordPage from '../../pages/login/ForgotPasswordPage'
-import RegisterPage from '../../pages/login/RegisterPage'
+import LoginPage from '../../features/auth/LoginPage'
+import ForgotPasswordPage from '../../features/auth/ForgotPasswordPage'
+import RegisterPage from '../../features/auth/RegisterPage'
 
 export function renderAuthRoutes() {
     return (

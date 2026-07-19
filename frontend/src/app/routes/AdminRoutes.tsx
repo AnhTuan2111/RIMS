@@ -1,13 +1,13 @@
 import {Route} from 'react-router-dom'
 
-import AdminUsersPage from '../../pages/admin/AdminUsersPage'
-import AdminTablesPage from '../../pages/admin/AdminTablesPage'
-import AdminDishesPage from '../../pages/admin/AdminDishesPage'
-import AdminPaymentHistoryPage from '../../pages/admin/AdminPaymentHistoryPage'
-import AdminPaymentDetailPage from '../../pages/admin/AdminPaymentDetailPage'
-import AdminStatisticsPage from '../../pages/admin/AdminStatisticsPage'
-import AdminMenuDashboardPage from '../../pages/admin/AdminMenuDashboardPage'
-import AdminCategoryPage from '../../pages/admin/AdminCategoryPage'
+import AdminUsersPage from '../../features/admin/AdminUsersPage'
+import AdminTablesPage from '../../features/admin/AdminTablesPage'
+import AdminDishesPage from '../../features/admin/AdminDishesPage'
+import AdminPaymentHistoryPage from '../../features/admin/AdminPaymentHistoryPage'
+import AdminPaymentDetailPage from '../../features/admin/AdminPaymentDetailPage'
+import AdminStatisticsPage from '../../features/admin/AdminStatisticsPage'
+import AdminMenuDashboardPage from '../../features/admin/AdminMenuDashboardPage'
+import AdminCategoryPage from '../../features/admin/AdminCategoryPage'
 
 export function renderAdminRoutes() {
     return (
