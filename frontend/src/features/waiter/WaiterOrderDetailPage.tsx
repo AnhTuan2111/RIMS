@@ -224,6 +224,14 @@ export default function WaiterOrderDetailPage() {
                                                     </div>
                                                 )}
 
+                                                {item.status === 'CANCELLED'
+                                                    && item.cancelReason && (
+                                                    <div style={cancelReasonStyle}>
+                                                        Lý do hủy:{' '}
+                                                        {item.cancelReason}
+                                                    </div>
+                                                )}
+
                                                 {item.chefInternalNote && (
                                                     <div style={chefNoteStyle}>
                                                         Chef:{' '}
@@ -281,6 +289,13 @@ const noteStyle: CSSProperties = {
 const chefNoteStyle: CSSProperties = {
     fontSize: '0.85rem',
     color: '#ea580c',
+    marginTop: '0.25rem',
+    fontWeight: 600,
+}
+
+const cancelReasonStyle: CSSProperties = {
+    fontSize: '0.85rem',
+    color: '#dc2626',
     marginTop: '0.25rem',
     fontWeight: 600,
 }

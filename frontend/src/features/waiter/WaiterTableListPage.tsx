@@ -17,6 +17,8 @@ import {
     WaiterTableCard,
 } from './components'
 import {useWaiterSocket} from '@/realtime'
+import {REALTIME_CONFIG} from '@/app/config/realtime'
+import {usePolling} from '@/shared/hooks/usePolling'
 
 const STATUS_LABEL: Record<string, string> = {
     AVAILABLE: 'available',
@@ -24,13 +26,85 @@ const STATUS_LABEL: Record<string, string> = {
     RESERVED: 'reserved',
 }
 
-const NOTIFIABLE_ITEM_STATUSES = new Set([
+const NOTIFIABLE_ITEM_STATUSES =
+    new Set<string>([
     'CANCELLED',
     'COMPLETED',
 ])
 
-type ServingOrderStatusSnapshot =
-    Record<number, Record<string, string>>
+const ACKNOWLEDGED_SERVING_ITEMS_STORAGE_KEY =
+    'waiterAcknowledgedServingItems'
+
+type ServingOrderNotificationSnapshot =
+    Record<number, string[]>
+
+type AcknowledgedServingItems =
+    Record<number, Set<string>>
+
+function getStatusAcknowledgementKey(
+    itemKey: string,
+    status: string,
+) {
+    return `status:${itemKey}:${status}`
+}
+
+function getChefNoteAcknowledgementKey(
+    itemKey: string,
+    noteCreatedAt?: string | null,
+    noteContent?: string | null,
+) {
+    return `chef-note:${itemKey}:${noteCreatedAt ?? noteContent ?? ''}`
+}
+
+function readAcknowledgedServingItems(): AcknowledgedServingItems {
+    try {
+        const rawValue =
+            localStorage.getItem(
+                ACKNOWLEDGED_SERVING_ITEMS_STORAGE_KEY,
+            )
+
+        if (!rawValue) {
+            return {}
+        }
+
+        const parsedValue =
+            JSON.parse(rawValue) as Record<string, unknown>
+
+        return Object.fromEntries(
+            Object.entries(parsedValue)
+                .filter((entry): entry is [string, string[]] =>
+                    Array.isArray(entry[1])
+                    && entry[1].every(
+                        (value) => typeof value === 'string',
+                    ),
+                )
+                .map(([tableId, itemKeys]) => [
+                    Number(tableId),
+                    new Set(itemKeys),
+                ]),
+        )
+    } catch {
+        return {}
+    }
+}
+
+function saveAcknowledgedServingItems(
+    acknowledgedItems: AcknowledgedServingItems,
+) {
+    const serializableValue =
+        Object.fromEntries(
+            Object.entries(acknowledgedItems)
+                .map(([tableId, itemKeys]) => [
+                    tableId,
+                    Array.from(itemKeys),
+                ]),
+        )
+
+    localStorage.setItem(
+        ACKNOWLEDGED_SERVING_ITEMS_STORAGE_KEY,
+        JSON.stringify(serializableValue),
+    )
+}
 
 function todayString() {
     const date = new Date()
@@ -94,8 +168,13 @@ function isUpcomingReservation(
 export default function WaiterTableListPage() {
     const navigate = useNavigate()
 
-    const previousServingStatusesRef =
-        useRef<ServingOrderStatusSnapshot | null>(null)
+    const servingNotificationsRef =
+        useRef<ServingOrderNotificationSnapshot | null>(null)
+
+    const acknowledgedServingItemsRef =
+        useRef<AcknowledgedServingItems>(
+            readAcknowledgedServingItems(),
+        )
 
     const [tables, setTables] =
         useState<TableDetailResponse[]>([])
@@ -216,12 +295,12 @@ export default function WaiterTableListPage() {
                     )
 
                 if (servingTables.length === 0) {
-                    previousServingStatusesRef.current = {}
+                    servingNotificationsRef.current = {}
                     setTableStatusNotifications({})
                     return
                 }
 
-                const statusEntries =
+                const notificationEntries =
                     await Promise.all(
                         servingTables.map(async (table) => {
                             try {
@@ -235,8 +314,8 @@ export default function WaiterTableListPage() {
                                     return null
                                 }
 
-                                const itemStatuses:
-                                    Record<string, string> = {}
+                                const itemNotificationKeys:
+                                    string[] = []
 
                                 response.data.forEach((order) => {
                                     order.orderItems.forEach((
@@ -248,16 +327,39 @@ export default function WaiterTableListPage() {
                                             ? String(item.orderItemId)
                                             : `${order.orderId}:${item.dishName}:${itemIndex}`
 
-                                        if (item.status) {
-                                            itemStatuses[itemKey] =
-                                                item.status
+                                        if (
+                                            item.status
+                                            && NOTIFIABLE_ITEM_STATUSES
+                                                .has(item.status)
+                                        ) {
+                                            itemNotificationKeys.push(
+                                                getStatusAcknowledgementKey(
+                                                    itemKey,
+                                                    item.status,
+                                                ),
+                                            )
+                                        }
+
+                                        if (
+                                            item.chefInternalNote
+                                            && !item
+                                                .chefInternalNoteAcknowledgedAt
+                                        ) {
+                                            itemNotificationKeys.push(
+                                                getChefNoteAcknowledgementKey(
+                                                    itemKey,
+                                                    item
+                                                        .chefInternalNoteCreatedAt,
+                                                    item.chefInternalNote,
+                                                ),
+                                            )
                                         }
                                     })
                                 })
 
                                 return [
                                     table.tableId,
-                                    itemStatuses,
+                                    itemNotificationKeys,
                                 ] as const
                             } catch (requestError: unknown) {
                                 if (
@@ -283,41 +385,28 @@ export default function WaiterTableListPage() {
 
                 const nextSnapshot =
                     Object.fromEntries(
-                        statusEntries.filter(
+                        notificationEntries.filter(
                             Boolean,
                         ) as Array<
-                            readonly [number, Record<string, string>]
+                            readonly [number, string[]]
                         >,
                     )
 
-                const previousSnapshot =
-                    previousServingStatusesRef.current
-
-                previousServingStatusesRef.current =
+                servingNotificationsRef.current =
                     nextSnapshot
 
-                if (!previousSnapshot) {
-                    return
-                }
-
-                const changedTableIds =
+                const notifiedTableIds =
                     Object.entries(nextSnapshot)
-                        .filter(([tableId, itemStatuses]) => {
-                            const previousItemStatuses =
-                                previousSnapshot[Number(tableId)] ?? {}
+                        .filter(([tableId, notificationKeys]) => {
+                            const acknowledgedItems =
+                                acknowledgedServingItemsRef
+                                    .current[Number(tableId)]
 
-                            return Object.entries(itemStatuses)
-                                .some(([itemKey, status]) => {
-                                    const previousStatus =
-                                        previousItemStatuses[itemKey]
-
-                                    return (
-                                        previousStatus
-                                        && previousStatus !== status
-                                        && NOTIFIABLE_ITEM_STATUSES
-                                            .has(status)
-                                    )
-                                })
+                            return notificationKeys
+                                .some((notificationKey) =>
+                                    !acknowledgedItems
+                                        ?.has(notificationKey),
+                                )
                         })
                         .map(([tableId]) => Number(tableId))
 
@@ -340,7 +429,7 @@ export default function WaiterTableListPage() {
                         }
                     })
 
-                    changedTableIds.forEach((tableId) => {
+                    notifiedTableIds.forEach((tableId) => {
                         nextNotifications[tableId] = true
                     })
 
@@ -428,6 +517,38 @@ export default function WaiterTableListPage() {
         () => void loadTables(undefined, false),
     )
 
+    usePolling(
+        async (signal) => {
+            if (tables.length === 0) {
+                return
+            }
+
+            await loadServingOrderStatuses(
+                tables,
+                signal,
+            )
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .waiter
+                .orderDetailIntervalMs,
+            runImmediately: false,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
+
+                console.error(
+                    '[WAITER_TABLE_STATUS_NOTIFICATION_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
     async function handleTableClick(
         table: TableDetailResponse,
     ) {
@@ -468,6 +589,29 @@ export default function WaiterTableListPage() {
         }
 
         if (table.status === 'SERVING') {
+            const notificationKeys =
+                servingNotificationsRef.current?.[table.tableId]
+
+            if (notificationKeys) {
+                const acknowledgedItems =
+                    acknowledgedServingItemsRef.current[
+                        table.tableId
+                    ] ?? new Set<string>()
+
+                notificationKeys.forEach((notificationKey) => {
+                    acknowledgedItems.add(notificationKey)
+                })
+
+                acknowledgedServingItemsRef.current = {
+                    ...acknowledgedServingItemsRef.current,
+                    [table.tableId]: acknowledgedItems,
+                }
+
+                saveAcknowledgedServingItems(
+                    acknowledgedServingItemsRef.current,
+                )
+            }
+
             setTableStatusNotifications((current) => {
                 if (!current[table.tableId]) {
                     return current
