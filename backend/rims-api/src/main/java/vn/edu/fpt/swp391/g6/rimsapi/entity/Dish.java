@@ -32,6 +32,7 @@ public class Dish
     private String name;
 
     @Nationalized
+    @Column(length = 100)
     private String description;
 
     @Column(nullable = false)

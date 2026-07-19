@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderItemRequest
 {
-    @NotNull(message = "Dish ID cannot be null")
+    @NotNull()
     private Integer dishId;
 
-    @NotNull(message = "Quantity cannot be null")
-    @Min(value = 1, message = "Quantity must be at least 1")
+    @NotNull()
+    @Min(value = 1)
     private Integer quantity;
 
     private String note;

@@ -51,7 +51,7 @@ public class User
 
     private boolean isActive = true;
 
-    @Column(nullable = false, columnDefinition = "int default 0")
+    @Column(nullable = false)
     private Integer rewardPoints = 0;
 
     @CreatedDate
