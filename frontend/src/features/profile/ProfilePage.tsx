@@ -277,6 +277,7 @@ export default function ProfilePage() {
             if (isCustomer) {
                 updated = await customerApi.updateMyProfile({
                     fullName,
+                    username,
                     email,
                     phone,
                 })

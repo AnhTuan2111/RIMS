@@ -29,7 +29,4 @@ public class CreateCustomerRequest {
     @NotBlank()
     @Pattern(regexp = "^0[0-9]{9}$")
     private String phone;
-
-    @Size(min = 6)
-    private String password;
 }

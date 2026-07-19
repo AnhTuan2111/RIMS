@@ -2,6 +2,7 @@
 import type {UserResponse} from '@/shared/types/auth'
 
 export interface UpdateProfileRequest {
+    username: string
     fullName: string
     email: string
     phone: string
