@@ -35,7 +35,7 @@ public interface WaiterService
     // để waiter xem các đơn đặt tương ứng vói số bàn và ngày
     List<ReservationDetailResponse> viewReservationsByTableAndTime(int tableId, LocalDate date);
 
-    // view reservation detail ứng với số bàn
+    // view reservation detail ứng với số bàn (chỉ queued và waiting status)
     ReservationDetailResponse getCurrentReservationByTable(int tableId);
 
     // sử dụng để tự điền thông tin vào form Khi update reservation

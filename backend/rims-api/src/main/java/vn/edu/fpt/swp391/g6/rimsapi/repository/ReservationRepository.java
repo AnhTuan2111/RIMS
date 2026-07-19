@@ -17,6 +17,12 @@ import java.util.Optional;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long>
 {
+    List<Reservation> findByTableIdAndReservationTimeBetweenAndStatusIn(
+            int tableId,
+            LocalDateTime start,
+            LocalDateTime end,
+            List<ReservationStatus> statuses);
+
     List<Reservation> findByTableIdAndReservationTimeBetween(
             int tableId,
             LocalDateTime start,

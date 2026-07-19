@@ -15,6 +15,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Reservation;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler.ResourceNotFoundException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.ReservationRepository;
@@ -26,6 +27,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -52,6 +54,13 @@ public class CustomerServiceImpl implements CustomerService
 
         if (request.getReservationTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
+        }
+        LocalTime time = request.getReservationTime().toLocalTime();
+        LocalTime openTime = LocalTime.of(8, 0);
+        LocalTime closeTime = LocalTime.of(20, 0);
+
+        if (time.isBefore(openTime) || time.isAfter(closeTime)) {
+            throw new GlobalExceptionHandler.BusinessException("Nhà hàng chỉ nhận đặt bàn trong khoảng 08:00 - 20:00");
         }
 
         // Chặn 1 khách có nhiều hơn 1 đặt bàn đang hoạt động trong cùng 1 ngày

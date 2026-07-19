@@ -490,8 +490,19 @@ export default function WaiterEditReservationPage() {
             return
         }
 
-        const reservationTime =
-            `${date}T${time}:00`
+        const timeHour =
+            Number.parseInt(
+                time.split(':')[0] ?? '0',
+                10,
+            )
+
+        if (timeHour < 8 || timeHour > 20)
+        {
+            setResFormError('Giờ đặt bàn phải nằm trong khoảng từ 08:00 đến 20:00.',)
+            return
+        }
+
+        const reservationTime = `${date}T${time}:00`
 
         const payload: CreateReservationRequest = {
             customerName: customerName.trim(),
@@ -670,8 +681,7 @@ export default function WaiterEditReservationPage() {
                                             }}
                                         >
                                             <label>Giờ đặt</label>
-                                            <input
-                                                type="time"
+                                            <select
                                                 value={resForm.time}
                                                 className="waiter-form-input"
                                                 onChange={(event) =>
@@ -680,7 +690,27 @@ export default function WaiterEditReservationPage() {
                                                         event.target.value,
                                                     })
                                                 }
-                                            />
+                                            >
+                                                {Array.from(
+                                                    {
+                                                        length: 13,
+                                                    },
+                                                    (_, index) => index + 8,
+                                                ).map((hourNumber) => {
+                                                    const hour =
+                                                        String(hourNumber)
+                                                            .padStart(2, '0')
+
+                                                    return (
+                                                        <option
+                                                            key={hourNumber}
+                                                            value={`${hour}:00`}
+                                                        >
+                                                            {hour}:00
+                                                        </option>
+                                                    )
+                                                })}
+                                            </select>
                                         </div>
                                     </div>
 

@@ -140,7 +140,7 @@ export default function WaiterCreateReservationPage() {
             customerName: '',
             phone: '',
             date: todayString(),
-            time: '18:00',
+            time: '08:00',
             tableId: preselectedTable || 0,
             note: '',
         })
@@ -391,10 +391,10 @@ export default function WaiterCreateReservationPage() {
 
         if (
             timeHour < 8
-            || timeHour >= 22
+            || timeHour > 20
         ) {
             setResFormError(
-                'Giờ đặt bàn phải nằm trong khoảng từ 08:00 đến 22:00.',
+                'Giờ đặt bàn phải nằm trong khoảng từ 08:00 đến 20:00.',
             )
             return
         }
@@ -422,7 +422,7 @@ export default function WaiterCreateReservationPage() {
                 customerName: '',
                 phone: '',
                 date: todayString(),
-                time: '18:00',
+                time: '08:00',
                 tableId: preselectedTable || 0,
                 note: '',
             })
@@ -540,11 +540,8 @@ export default function WaiterCreateReservationPage() {
                                         flex: 1,
                                     }}
                                 >
-                                    <label>Giờ đặt</label>
-                                    <input
-                                        type="time"
-                                        min="08:00"
-                                        max="22:00"
+                                    <label>Giờ đặt bàn</label>
+                                    <select
                                         value={resForm.time}
                                         className="waiter-form-input"
                                         onChange={(event) =>
@@ -553,7 +550,27 @@ export default function WaiterCreateReservationPage() {
                                                 event.target.value,
                                             })
                                         }
-                                    />
+                                    >
+                                        {Array.from(
+                                            {
+                                                length: 13,
+                                            },
+                                            (_, index) => index + 8,
+                                        ).map((hourNumber) => {
+                                            const hour =
+                                                String(hourNumber)
+                                                    .padStart(2, '0')
+
+                                            return (
+                                                <option
+                                                    key={hourNumber}
+                                                    value={`${hour}:00`}
+                                                >
+                                                    {hour}:00
+                                                </option>
+                                            )
+                                        })}
+                                    </select>
                                 </div>
                             </div>
 
