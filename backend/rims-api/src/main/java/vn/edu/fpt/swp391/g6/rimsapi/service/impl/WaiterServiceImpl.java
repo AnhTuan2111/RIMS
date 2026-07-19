@@ -21,6 +21,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.GlobalExceptionHandler;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TableNotAvailableException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
@@ -30,6 +31,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -386,6 +388,14 @@ public class WaiterServiceImpl implements WaiterService
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
         }
 
+        LocalTime time = request.getReservationTime().toLocalTime();
+        LocalTime openTime = LocalTime.of(8, 0);
+        LocalTime closeTime = LocalTime.of(20, 0);
+
+        if (time.isBefore(openTime) || time.isAfter(closeTime)) {
+            throw new GlobalExceptionHandler.BusinessException("Nhà hàng chỉ nhận đặt bàn trong khoảng 08:00 - 20:00");
+        }
+
         LocalDateTime start = request.getReservationTime().minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
         LocalDateTime end = request.getReservationTime().plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
 
@@ -426,7 +436,8 @@ public class WaiterServiceImpl implements WaiterService
         LocalDateTime end = start.plusDays(1);
 
         // tìm reservation tương ứng với số bàn và ngày, lúc này dữ liệu sẽ ra 1 list
-        return reservationRepository.findByTableIdAndReservationTimeBetween(tableId, start, end)
+        return reservationRepository
+                .findByTableIdAndReservationTimeBetweenAndStatusIn(tableId, start, end, List.of(ReservationStatus.QUEUED, ReservationStatus.WAITING))
                 .stream().map(this::toReservationResponse).toList();
     }
 

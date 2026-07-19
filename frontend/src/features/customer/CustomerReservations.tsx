@@ -106,9 +106,8 @@ function formatDateTime(iso: string) {
 }
 
 const statusLabels: Record<string, string> = {
-    QUEUED: 'Đang chờ',
-    WAITING: 'Chờ xác nhận',
-    CONFIRMED: 'Đã xác nhận',
+    QUEUED: 'Đang trong hàng đợi',
+    WAITING: 'Đang chờ',
     COMPLETED: 'Đã hoàn thành',
     CANCELLED: 'Đã hủy',
 }
@@ -121,7 +120,7 @@ export default function CustomerReservations() {
         useState<CustomerCreateReservationRequest>({
             customerName: '',
             phone: '',
-            reservationTime: `${todayStr}T18:00:00`,
+            reservationTime: `${todayStr}T08:00:00`,
             note: '',
             tableId: 0,
         })
@@ -253,65 +252,14 @@ export default function CustomerReservations() {
                 return
             }
 
-            if (!isNotFoundError(requestError)) {
+            if (isNotFoundError(requestError)) {
+                setCurrentReservation(null)
+            } else {
                 console.error(
                     '[CUSTOMER_CURRENT_RESERVATION_ERROR]',
                     requestError,
                 )
             }
-
-            setCurrentReservation(null)
-        } finally {
-            if (
-                showFullLoading
-                && !signal?.aborted
-            ) {
-                setLoadingCurrent(false)
-            }
-        }
-    }
-
-    async function loadReservationState(
-        signal?: AbortSignal,
-        showFullLoading = true,
-    ) {
-        try {
-            if (showFullLoading) {
-                setLoadingCurrent(true)
-            }
-
-            const hasReservation =
-                await checkReservationByDate(
-                    todayStr,
-                    signal,
-                )
-
-            if (signal?.aborted) {
-                return
-            }
-
-            if (hasReservation) {
-                await loadCurrentReservation(
-                    signal,
-                    false,
-                )
-            } else {
-                setCurrentReservation(null)
-            }
-        } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
-                return
-            }
-
-            console.error(
-                '[CUSTOMER_RESERVATION_STATE_ERROR]',
-                requestError,
-            )
-
-            setCurrentReservation(null)
         } finally {
             if (
                 showFullLoading
@@ -357,7 +305,7 @@ export default function CustomerReservations() {
             const isInitialLoad =
                 !hasLoadedInitialReservationRef.current
 
-            await loadReservationState(
+            await loadCurrentReservation(
                 signal,
                 isInitialLoad,
             )
@@ -402,7 +350,7 @@ export default function CustomerReservations() {
                 customerName: '',
                 phone: '',
                 note: '',
-                reservationTime: `${todayStr}T18:00:00`,
+                reservationTime: `${todayStr}T08:00:00`,
             }))
 
             await loadAvailableTables(
@@ -410,7 +358,7 @@ export default function CustomerReservations() {
                 false,
             )
 
-            await loadReservationState(
+            await loadCurrentReservation(
                 undefined,
                 false,
             )
@@ -466,7 +414,7 @@ export default function CustomerReservations() {
                 false,
             )
 
-            await loadReservationState(
+            await loadCurrentReservation(
                 undefined,
                 false,
             )
@@ -553,7 +501,7 @@ export default function CustomerReservations() {
                     {bookSuccess && (
                         <div className="customer-success-box">
                             <strong>
-                                ✅ Đặt bàn thành công!
+                                Đặt bàn thành công!
                             </strong>
 
                             <div className="customer-success-detail">
@@ -626,7 +574,7 @@ export default function CustomerReservations() {
                                     value={bookForm.phone}
                                     placeholder="0123456789"
                                     required
-                                    pattern="[0-9]{10}"
+                                    pattern="0[0-9]{9}"
                                     onChange={(event) =>
                                         setBookForm((previous) => ({
                                             ...previous,
@@ -659,7 +607,7 @@ export default function CustomerReservations() {
                                         const time =
                                             bookForm.reservationTime
                                                 .split('T')[1]
-                                            || '18:00:00'
+                                            || '08:00:00'
 
                                         setBookForm((previous) => ({
                                             ...previous,
@@ -681,7 +629,7 @@ export default function CustomerReservations() {
                                         bookForm.reservationTime
                                             .split('T')[1]
                                             ?.slice(0, 5)
-                                        || '18:00'
+                                        || '08:00'
                                     }
                                     required
                                     onChange={(event) => {
@@ -699,9 +647,9 @@ export default function CustomerReservations() {
                                 >
                                     {Array.from(
                                         {
-                                            length: 14,
+                                            length: 13,
                                         },
-                                        (_, index) => index + 10,
+                                        (_, index) => index + 8,
                                     ).map((hourNumber) => {
                                         const hour =
                                             String(hourNumber)
@@ -820,7 +768,7 @@ export default function CustomerReservations() {
                                         customerName: '',
                                         phone: '',
                                         reservationTime:
-                                            `${todayStr}T18:00:00`,
+                                            `${todayStr}T08:00:00`,
                                         note: '',
                                         tableId:
                                             availableTables[0]?.id ?? 0,
@@ -885,12 +833,8 @@ export default function CustomerReservations() {
                         </div>
                     ) : (
                         <div className="customer-empty-state">
-                            <span className="customer-empty-icon">
-                                ✅
-                            </span>
-
                             <p>
-                                Bạn không có đặt bàn nào đang hoạt động
+                                Bạn không có đơn đặt bàn nào đang hoạt động
                             </p>
                         </div>
                     )}
@@ -898,7 +842,7 @@ export default function CustomerReservations() {
                     {cancelSuccess && (
                         <div className="customer-success-box">
                             <strong>
-                                ✅ Hủy đặt bàn thành công!
+                                Hủy đặt bàn thành công!
                             </strong>
 
                             <div className="customer-success-detail">

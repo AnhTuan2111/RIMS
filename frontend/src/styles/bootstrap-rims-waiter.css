@@ -586,6 +586,14 @@
     animation: slideUp 0.3s ease-out;
 }
 
+.waiter-toast-success {
+    background: #16a34a;
+}
+
+.waiter-toast-error {
+    background: #dc2626;
+}
+
 @keyframes slideUp {
     from {
         transform: translateY(100%);
