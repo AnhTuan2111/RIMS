@@ -1,0 +1,1055 @@
+/* RIMS Dashboard Layout, Sidebar, Topbar
+   Copy to: src/styles/bootstrap-rims-layout.css
+*/
+
+/* =========================
+   DASHBOARD APP LAYOUT
+========================= */
+
+.app-layout {
+    min-height: 100vh;
+    display: flex;
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.app-sidebar {
+    width: 270px;
+    min-height: 100vh;
+    padding: 1.5rem;
+    background: #0f172a;
+    color: #e2e8f0;
+    flex-shrink: 0;
+}
+
+.app-sidebar-link.active {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.app-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+}
+
+.app-content {
+    padding: 1.5rem;
+    min-height: calc(100vh - 84px);
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.current-role-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 800;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+
+
+/* ==============================
+   NEW RIMS SIDEBAR
+============================== */
+
+.rims-sidebar {
+    position: sticky;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    min-height: 100vh;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: #ffffff;
+
+    background: radial-gradient(
+            circle at 10% 0%,
+            rgba(59, 130, 246, 0.38),
+            transparent 34%
+    ),
+    radial-gradient(
+            circle at 95% 85%,
+            rgba(124, 58, 237, 0.26),
+            transparent 38%
+    ),
+    linear-gradient(
+            180deg,
+            #091426 0%,
+            #0b1930 55%,
+            #07111f 100%
+    );
+
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 16px 0 45px rgba(7, 17, 31, 0.24);
+}
+
+.rims-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 4px 6px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.rims-sidebar-logo {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 17px;
+
+    background: linear-gradient(
+            135deg,
+            #60a5fa,
+            #2563eb 48%,
+            #7c3aed
+    );
+
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 950;
+
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+.rims-sidebar-brand h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+}
+
+.rims-sidebar-brand p {
+    margin: 3px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.rims-sidebar-role {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin: 20px 0 14px;
+    padding: 13px;
+
+    border: 1px solid rgba(147, 197, 253, 0.18);
+    border-radius: 17px;
+
+    background: linear-gradient(
+            135deg,
+            rgba(59, 130, 246, 0.17),
+            rgba(124, 58, 237, 0.11)
+    );
+
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.rims-role-icon {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.1);
+
+    color: #93c5fd;
+    font-size: 17px;
+}
+
+.rims-sidebar-role small,
+.rims-sidebar-role strong {
+    display: block;
+}
+
+.rims-sidebar-role small {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.rims-sidebar-role strong {
+    margin-top: 3px;
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.rims-sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    /* cho phép cuộn riêng phần danh sách menu khi số lượng mục nhiều hơn chiều cao màn hình */
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    margin-right: -4px;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.rims-sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.rims-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.rims-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+}
+
+.rims-sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+.rims-sidebar-title {
+    margin: 5px 0 6px;
+    padding: 0 12px;
+
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+}
+
+.rims-sidebar-link {
+    min-height: 54px;
+    padding: 8px 11px;
+
+    display: grid;
+    grid-template-columns: 36px 1fr 20px;
+    align-items: center;
+    gap: 10px;
+
+    border: 1px solid transparent;
+    border-radius: 16px;
+
+    color: #b8c5d8;
+    text-decoration: none;
+    font-weight: 750;
+
+    transition: transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rims-sidebar-link:hover {
+    transform: translateX(4px);
+
+    border-color: rgba(147, 197, 253, 0.17);
+
+    background: rgba(255, 255, 255, 0.055);
+
+    color: #ffffff;
+}
+
+.rims-sidebar-link.active {
+    color: #ffffff;
+
+    border-color: rgba(191, 219, 254, 0.28);
+
+    background: linear-gradient(
+            100deg,
+            #2563eb,
+            #4f46e5 55%,
+            #7c3aed
+    );
+
+    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.32);
+}
+
+.rims-menu-icon {
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: #bfdbfe;
+    font-size: 17px;
+    font-weight: 950;
+}
+
+.rims-sidebar-link.active .rims-menu-icon {
+    background: rgba(255, 255, 255, 0.18);
+
+    color: #ffffff;
+}
+
+.rims-menu-label {
+    min-width: 0;
+    font-size: 14px;
+}
+
+.rims-menu-arrow {
+    color: #64748b;
+    font-size: 21px;
+}
+
+.rims-sidebar-link.active .rims-menu-arrow {
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.rims-sidebar-status {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    margin-top: 16px;
+    padding: 13px;
+
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 16px;
+
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.rims-online-dot {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+
+    border-radius: 999px;
+    background: #22c55e;
+
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+}
+
+.rims-sidebar-status strong,
+.rims-sidebar-status small {
+    display: block;
+}
+
+.rims-sidebar-status strong {
+    color: #e2e8f0;
+    font-size: 12px;
+}
+
+.rims-sidebar-status small {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 10px;
+}
+
+@media (max-width: 900px) {
+    .rims-sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        min-height: auto;
+    }
+
+    .rims-sidebar-status {
+        display: none;
+    }
+}
+
+/* ==============================
+   NEW RIMS TOPBAR & APP CONTENT
+============================== */
+
+.app-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+
+    background: radial-gradient(
+            circle at 88% 5%,
+            rgba(59, 130, 246, 0.14),
+            transparent 28%
+    ),
+    radial-gradient(
+            circle at 25% 95%,
+            rgba(124, 58, 237, 0.09),
+            transparent 30%
+    ),
+    #eef3f9;
+}
+
+.rims-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+
+    min-height: 100px;
+    padding: 17px 28px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+
+    background: rgba(255, 255, 255, 0.86);
+
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+}
+
+.rims-topbar-heading {
+    min-width: 0;
+}
+
+.rims-topbar-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 6px;
+
+    color: #2563eb;
+
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.16em;
+}
+
+.rims-topbar-live-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 999px;
+
+    background: #22c55e;
+
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+}
+
+.rims-topbar-heading h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+}
+
+.rims-topbar-heading p {
+    margin: 5px 0 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.rims-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.rims-current-role {
+    min-width: 180px;
+    padding: 10px 13px;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    border: 1px solid rgba(99, 102, 241, 0.15);
+
+    border-radius: 16px;
+
+    background: linear-gradient(
+            135deg,
+            #eff6ff,
+            #f5f3ff
+    );
+
+    box-shadow: 0 7px 20px rgba(15, 23, 42, 0.06);
+}
+
+.rims-current-role-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 14px;
+
+    background: linear-gradient(
+            135deg,
+            #dbeafe,
+            #ede9fe
+    );
+
+    font-size: 19px;
+}
+
+.rims-current-role small,
+.rims-current-role strong {
+    display: block;
+}
+
+.rims-current-role small {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rims-current-role strong {
+    margin-top: 3px;
+
+    color: #172554;
+
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.rims-actor-switcher {
+    display: grid;
+    gap: 5px;
+}
+
+.rims-actor-switcher > span {
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 850;
+}
+
+.rims-actor-switcher select {
+    min-width: 135px;
+    height: 43px;
+
+    padding: 0 13px;
+
+    border: 1px solid rgba(148, 163, 184, 0.3);
+
+    border-radius: 13px;
+
+    background: #ffffff;
+    color: #0f172a;
+
+    font-weight: 800;
+
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+.rims-actor-switcher select:focus {
+    outline: none;
+
+    border-color: #60a5fa;
+
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+}
+
+.rims-app-content {
+    min-height: calc(100vh - 100px);
+    padding: 28px;
+}
+
+.rims-logout-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    height: 44px;
+    padding: 0 20px;
+
+    border: none;
+    border-radius: 14px;
+    outline: none;
+
+    background: linear-gradient(135deg, #fef2f2, #fff1f2);
+    color: #be123c;
+
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+
+    box-shadow: 0 0 0 1.5px rgba(190, 18, 60, 0.18),
+    0 4px 14px rgba(190, 18, 60, 0.10);
+
+    cursor: pointer;
+    transition: background 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.18s ease;
+}
+
+.rims-logout-btn:hover {
+    background: linear-gradient(135deg, #be123c, #e11d48);
+    color: #ffffff;
+    box-shadow: 0 0 0 1.5px transparent,
+    0 8px 24px rgba(190, 18, 60, 0.30);
+    transform: translateY(-1px);
+}
+
+.rims-logout-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 0 0 1.5px rgba(190, 18, 60, 0.2),
+    0 2px 8px rgba(190, 18, 60, 0.18);
+}
+
+.rims-logout-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.35),
+    0 4px 14px rgba(190, 18, 60, 0.10);
+}
+
+.rims-logout-icon {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    transition: transform 0.22s ease;
+}
+
+.rims-logout-btn:hover .rims-logout-icon {
+    transform: translateX(2px);
+}
+
+.rims-app-content > * {
+    width: 100%;
+    max-width: 1500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 900px) {
+    .rims-topbar {
+        position: relative;
+
+        align-items: flex-start;
+        flex-direction: column;
+
+        padding: 18px;
+    }
+
+    .rims-topbar-actions {
+        width: 100%;
+    }
+
+    .rims-current-role,
+    .rims-actor-switcher {
+        flex: 1;
+    }
+
+    .rims-actor-switcher select {
+        width: 100%;
+    }
+
+    .rims-app-content {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .rims-topbar-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .rims-current-role {
+        width: 100%;
+    }
+
+    .rims-topbar-heading h1 {
+        font-size: 19px;
+    }
+
+    .rims-app-content {
+        padding: 14px;
+    }
+}
+
+
+
+/* =========================================================
+   RIMS DASHBOARD LAYOUT
+   Dùng cho DashboardLayout.tsx
+   ========================================================= */
+
+#root {
+    min-height: 100vh;
+}
+
+/* Khung lớn gồm Sidebar và phần nội dung bên phải */
+.app-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background: #f1f5f9;
+}
+
+/* Sidebar bên trái */
+.app-sidebar {
+    width: 286px;
+    min-width: 286px;
+    min-height: 100vh;
+    flex-shrink: 0;
+
+    background: #0f172a;
+    color: #ffffff;
+}
+
+/* Toàn bộ phần bên phải Sidebar */
+.app-main {
+    flex: 1;
+    min-width: 0;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+.rims-topbar {
+    min-height: 110px;
+    padding: 20px 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+
+/* Phần tiêu đề bên trái Topbar */
+.rims-topbar-heading {
+    min-width: 0;
+}
+
+.rims-topbar-heading h1 {
+    margin: 4px 0 6px;
+
+    color: #0f172a;
+    font-size: 24px;
+    font-weight: 750;
+    line-height: 1.25;
+}
+
+.rims-topbar-heading p {
+    margin: 0;
+
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Dòng chữ nhỏ RIMS CONTROL CENTER */
+.rims-topbar-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+/* Chấm xanh nhỏ */
+.rims-topbar-live-dot {
+    width: 8px;
+    height: 8px;
+
+    display: inline-block;
+    border-radius: 50%;
+
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.13);
+}
+
+/* Các thành phần bên phải Topbar */
+.rims-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+/* Ô hiển thị vai trò hiện tại */
+.rims-current-role {
+    min-height: 58px;
+    padding: 9px 14px;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    border: 1px solid #dbe4f0;
+    border-radius: 13px;
+    background: #f8fafc;
+}
+
+.rims-current-role-icon {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 10px;
+    background: #e8eef8;
+
+    font-size: 19px;
+}
+
+.rims-current-role div {
+    display: grid;
+    gap: 2px;
+}
+
+.rims-current-role small {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rims-current-role strong {
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 750;
+}
+
+/* Khung chọn vai trò */
+.rims-actor-switcher {
+    display: grid;
+    gap: 4px;
+}
+
+.rims-actor-switcher > span {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rims-actor-switcher select {
+    min-width: 130px;
+    height: 46px;
+    padding: 0 38px 0 14px;
+
+    border: 1px solid #dbe4f0;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #0f172a;
+
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+    outline: none;
+}
+
+.rims-actor-switcher select:hover {
+    border-color: #94a3b8;
+}
+
+.rims-actor-switcher select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* =========================================================
+   PHẦN NỘI DUNG CỦA OUTLET
+   ========================================================= */
+
+.app-content,
+.rims-app-content {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+
+    padding: 26px;
+
+    background: radial-gradient(
+            circle at 85% 5%,
+            rgba(59, 130, 246, 0.1),
+            transparent 32%
+    ),
+    radial-gradient(
+            circle at 15% 90%,
+            rgba(139, 92, 246, 0.06),
+            transparent 30%
+    ),
+    #f1f5f9;
+}
+
+/*
+   Component được React Router đưa vào <Outlet />
+   sẽ chiếm toàn bộ chiều rộng
+*/
+.rims-app-content > * {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Các card cơ bản bên trong Dashboard */
+.rims-app-content .page-card,
+.rims-app-content .dashboard-card {
+    padding: 24px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+/* Khoảng cách giữa các phần trong trang */
+.rims-app-content .chef-page {
+    display: grid;
+    gap: 20px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+    .rims-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .rims-topbar-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-layout {
+        display: block;
+    }
+
+    .app-sidebar {
+        width: 100%;
+        min-width: 0;
+        min-height: auto;
+    }
+
+    .rims-topbar {
+        position: static;
+        padding: 18px;
+    }
+
+    .rims-topbar-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rims-current-role,
+    .rims-actor-switcher,
+    .rims-actor-switcher select {
+        width: 100%;
+    }
+
+    .app-content,
+    .rims-app-content {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rims-topbar-heading h1 {
+        font-size: 20px;
+    }
+
+    .rims-topbar-heading p {
+        font-size: 13px;
+    }
+
+    .app-content,
+    .rims-app-content {
+        padding: 12px;
+    }
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    padding: 22px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.dashboard-stat-link {
+    display: grid;
+    gap: 8px;
+    color: #0f172a;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.dashboard-stat-link:hover {
+    border-color: #94a3b8;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.dashboard-stat-link strong {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.dashboard-stat-link span {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.dashboard-stat-link small {
+    color: #64748b;
+}
+
+@media (max-width: 768px) {
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
