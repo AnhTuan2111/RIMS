@@ -26,7 +26,7 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     private final JwtService jwtService;
     private final RevokedTokenRepository revokedTokenRepository;
 
-    // Danh sách đã xác minh bằng audit toàn repo (không đoán):
+    // Danh sách đã xác minh bằng audit:
     // - /topic/kitchen  : chỉ Chef subscribe (DishListPage, GroupedKitchenPage, KitchenQueuePage)
     // - /topic/waiter   : chỉ Waiter subscribe (WaiterTableListPage, WaiterCreateOrderPage,
     //                     WaiterOrderDetailPage, WaiterUpdateOrderPage)

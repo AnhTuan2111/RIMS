@@ -14,8 +14,6 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
 {
     List<Dish> findByIsAvailableTrue();
 
-    List<Dish> findByIsAvailableTrueAndIsHiddenFalse();
-
     List<Dish> findByIsHiddenFalse();
 
     List<Dish> findByCategoryId(Integer categoryId);
@@ -26,8 +24,6 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
     boolean existsByName(String name);
 
     boolean existsByNameAndIdNot(String name, Integer id);
-
-    List<Dish> findByCategoryIdAndIsAvailableTrue(Integer categoryId);
 
     long countByIsAvailableFalse();
 

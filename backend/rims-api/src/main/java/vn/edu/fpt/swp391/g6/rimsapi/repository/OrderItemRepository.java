@@ -14,12 +14,10 @@ public interface OrderItemRepository
         extends JpaRepository<OrderItem, Long>
 {
 
-    List<OrderItem> findByStatusOrderByCreatedAtAsc(
-            OrderItemStatus status);
+    List<OrderItem> findByStatusOrderByCreatedAtAsc(OrderItemStatus status);
 
     //lọc món hủy chỉ trong khoảng thời gian (dùng cho "Đơn đã hủy" của Chef — chỉ xem trong ngày)
-    List<OrderItem> findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(
-            OrderItemStatus status, LocalDateTime start, LocalDateTime end);
+    List<OrderItem> findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(OrderItemStatus status, LocalDateTime start, LocalDateTime end);
 
     long countByStatus(OrderItemStatus status);
 }
