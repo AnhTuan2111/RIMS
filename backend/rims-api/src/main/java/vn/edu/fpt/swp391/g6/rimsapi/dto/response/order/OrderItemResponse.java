@@ -22,8 +22,8 @@ public class OrderItemResponse
     private BigDecimal unitPrice;
     private BigDecimal subTotal;
     private String note;
+    private String cancelReason;
     private String chefInternalNote;
     private LocalDateTime chefInternalNoteCreatedAt;
-
     private LocalDateTime chefInternalNoteAcknowledgedAt;
 }

@@ -245,55 +245,21 @@ public class ChefServiceImpl implements ChefService {
 
     @Override
     @Transactional
-    public void requestCancel(
-            Long orderItemId,
-            String reason
-    ) {
-        OrderItem selectedItem =
-                findOrderItem(orderItemId);
+    public void requestCancel(Long orderItemId, String reason)
+    {
+        OrderItem selectedItem = findOrderItem(orderItemId);
 
-        if (
-                selectedItem.getStatus()
-                        != OrderItemStatus.PREPARING
-        ) {
-            throw new IllegalStateException(
-                    "Chỉ có thể hủy món đang chuẩn bị"
-            );
+        if (selectedItem.getStatus() != OrderItemStatus.PREPARING)
+        {
+            throw new IllegalStateException("Chỉ có thể hủy món đang chuẩn bị");
         }
 
-        String normalizedReason =
-                reason == null
-                        ? ""
-                        : reason.trim();
+        String normalizedReason = reason == null ? "" : reason.trim();
 
-        if (normalizedReason.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Lý do hủy món không được để trống"
-            );
-        }
-
-        if (normalizedReason.length() > 500) {
-            throw new IllegalArgumentException(
-                    "Lý do hủy món không được vượt quá 500 ký tự"
-            );
-        }
-
-        /*
-         * Hủy trong chi tiết món:
-         * chỉ hủy đúng OrderItem được chọn.
-         */
-        selectedItem.setStatus(
-                OrderItemStatus.CANCELLED
-        );
-
-        selectedItem.setCancelReason(
-                normalizedReason
-        );
-
-        selectedItem.setCancelRequestedAt(
-                LocalDateTime.now()
-        );
-
+         // Hủy trong chi tiết món: chỉ hủy đúng OrderItem được chọn.
+        selectedItem.setStatus(OrderItemStatus.CANCELLED);
+        selectedItem.setCancelReason(normalizedReason);
+        selectedItem.setCancelRequestedAt(LocalDateTime.now());
         orderItemRepository.save(selectedItem);
         recalculateOrderTotal(selectedItem.getOrder());
 
@@ -303,9 +269,7 @@ public class ChefServiceImpl implements ChefService {
     @Override
     public List<KitchenOrderResponse> getCompletedOrders() {
         return orderItemRepository
-                .findByStatusOrderByCreatedAtAsc(
-                        OrderItemStatus.COMPLETED
-                )
+                .findByStatusOrderByCreatedAtAsc(OrderItemStatus.COMPLETED)
                 .stream()
                 .map(this::toKitchenOrderResponse)
                 .toList();

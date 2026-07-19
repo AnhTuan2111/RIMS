@@ -355,7 +355,7 @@ public class WaiterServiceImpl implements WaiterService
                                         response.setQuantity(orderItem.getQuantity());
                                         response.setUnitPrice(orderItem.getUnitPrice());
                                         response.setSubTotal(orderItem.getSubTotal());
-
+                                        response.setCancelReason(orderItem.getCancelReason());
                                         response.setNote(orderItem.getNote());
 
                                         // Ghi chú Chef gửi cho Waiter
