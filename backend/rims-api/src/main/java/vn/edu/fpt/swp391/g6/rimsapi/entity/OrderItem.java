@@ -47,6 +47,10 @@ public class OrderItem
     private BigDecimal subTotal;
 
     @Nationalized
+    @Column(nullable = false, length = 50)
+    private String dishNameSnapshot;
+
+    @Nationalized
     private String note;
 
     @Column(nullable = false)
@@ -61,25 +65,17 @@ public class OrderItem
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(
-            name = "cancel_reason",
-            columnDefinition = "NVARCHAR(500)"
-    )
+    @Column(length = 100)
     private String cancelReason;
 
 
     private LocalDateTime cancelRequestedAt;
+
     @Nationalized
-    @Column(
-            name = "chef_internal_note",
-            length = 500,
-            columnDefinition = "NVARCHAR(500)"
-    )
+    @Column(length = 100)
     private String chefInternalNote;
 
-    @Column(name = "chef_internal_note_created_at")
     private LocalDateTime chefInternalNoteCreatedAt;
 
-    @Column(name = "chef_internal_note_acknowledged_at")
     private LocalDateTime chefInternalNoteAcknowledgedAt;
 }

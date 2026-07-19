@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UpdateOrderRequest
 {
-    @NotEmpty(message = "Order must have at least one item")
+    @NotEmpty()
     @Valid
     private List<UpdateOrderItemRequest> items;
 }

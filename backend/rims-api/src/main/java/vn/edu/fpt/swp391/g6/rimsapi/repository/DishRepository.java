@@ -14,6 +14,8 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
 {
     List<Dish> findByIsAvailableTrue();
 
+    List<Dish> findByIsHiddenFalse();
+
     List<Dish> findByCategoryId(Integer categoryId);
 
     @Query("SELECT d FROM Dish d WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
@@ -22,8 +24,6 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
     boolean existsByName(String name);
 
     boolean existsByNameAndIdNot(String name, Integer id);
-
-    List<Dish> findByCategoryIdAndIsAvailableTrue(Integer categoryId);
 
     long countByIsAvailableFalse();
 

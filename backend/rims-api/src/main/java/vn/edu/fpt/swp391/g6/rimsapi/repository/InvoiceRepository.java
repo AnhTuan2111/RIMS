@@ -87,7 +87,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
     @Query("""
             SELECT o.createdAt
             FROM Invoice i
-            JOIN i.order o 
+            JOIN i.order o
             WHERE o.createdAt BETWEEN :startDate AND :endDate
             """)
     List<LocalDateTime> getPaidOrderCreatedTimesBetween(

@@ -1,7 +1,6 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
@@ -12,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 import vn.edu.fpt.swp391.g6.rimsapi.service.EmailService;
 
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService
@@ -36,23 +34,19 @@ public class EmailServiceImpl implements EmailService
                             "Trân trọng,\nRIMS System"
             );
             mailSender.send(message);
-            log.info("OTP sent successfully to {}", toEmail);
 
         } catch (MailAuthenticationException e)
         {
-            log.error("Mail authentication failed: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "Không thể gửi email: Cấu hình SMTP chưa đúng. Vui lòng kiểm tra username/password trong application.yaml");
 
         } catch (MailSendException e)
         {
-            log.error("Mail send failed to {}: {}", toEmail, e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "Không thể gửi email đến " + toEmail + ". Vui lòng kiểm tra lại địa chỉ email.");
 
         } catch (Exception e)
         {
-            log.error("Unexpected mail error: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "Lỗi gửi email: " + e.getMessage());
         }

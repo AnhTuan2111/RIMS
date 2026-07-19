@@ -1,3 +1,5 @@
+import SockJS from 'sockjs-client'
+import Stomp from 'stompjs'
 import {
     useCallback,
     useEffect,
@@ -5,7 +7,7 @@ import {
     useState,
 } from 'react'
 import { Link } from 'react-router-dom'
-
+import { getAccessToken } from '../../utils/tokenStorage'
 import {
     completeGroupedKitchenOrders,
     getGroupedKitchenOrders,
@@ -114,9 +116,36 @@ export default function GroupedKitchenPage() {
     }, [])
 
     useEffect(() => {
-        loadGroups().catch((requestError) => {
-            console.error(requestError)
+        queueMicrotask(() => {
+            loadGroups().catch((requestError) => {
+                console.error(requestError)
+            })
         })
+    }, [loadGroups])
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws-rims')
+        const client = Stomp.over(socket)
+
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
+            console.log('Gom món đã kết nối WebSocket!')
+
+            client.subscribe('/topic/kitchen', () => {
+                loadGroups().catch((requestError) => {
+                    console.error(requestError)
+                })
+            })
+        }, (error) => {
+            console.error('Lỗi kết nối WebSocket gom món: ', error)
+        })
+
+        return () => {
+            if (client !== null && client.connected) {
+                client.disconnect(() => {
+                    console.log('Đã ngắt kết nối WebSocket gom món.')
+                })
+            }
+        }
     }, [loadGroups])
 
     async function handleCompleteGroup(

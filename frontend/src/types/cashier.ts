@@ -19,7 +19,7 @@ export interface OrderItemResponse {
 
 export interface OrderDetailResponse {
     orderId: number;
-    tableName: string;
+    tableNumber: string;
     createdAt: string;
     orderItems: OrderItemResponse[];
 
@@ -47,6 +47,7 @@ export interface PaymentResponse {
     pointsUsed: number | null;
     pointsEarned: number | null;
     paymentMethod: string;
+    autoClosedNoPayment?: boolean
 }
 
 export interface VNPayResponse {

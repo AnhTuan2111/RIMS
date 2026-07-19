@@ -10,12 +10,7 @@ import lombok.Setter;
 @Setter
 public class CancelDishRequest {
 
-    @NotBlank(
-            message = "Lý do hủy món không được để trống"
-    )
-    @Size(
-            max = 500,
-            message = "Lý do hủy món không được vượt quá 500 ký tự"
-    )
+    @NotBlank()
+    @Size(max = 100)
     private String reason;
 }

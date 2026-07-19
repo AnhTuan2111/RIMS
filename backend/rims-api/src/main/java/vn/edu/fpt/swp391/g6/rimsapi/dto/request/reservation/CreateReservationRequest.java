@@ -1,6 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation;
 
-
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +15,7 @@ public class CreateReservationRequest
 {
     @NotBlank
     @Size(max = 50)
-    @Pattern(regexp = "^\\p{L}+(?: \\p{L}+)*$")
+    @Pattern(regexp = "^\\p{L}+( \\p{L}+)*$")
     private String customerName;
 
     @NotBlank

@@ -33,6 +33,7 @@ public class Category
     private String name;
 
     @Nationalized
+    @Column(length = 100)
     private String description;
 
     @OneToMany(mappedBy = "category")

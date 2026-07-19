@@ -2,7 +2,6 @@ package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,17 +11,19 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.ChangePasswordRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.TimeRangeResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
 @RequestMapping("/rims/customer")
 @RequiredArgsConstructor
-@Slf4j
 public class CustomerController {
 
     private final UserService userService;
@@ -56,7 +57,6 @@ public class CustomerController {
             List<RestaurantTableResponse> response = customerService.getAvailableTables();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Error getting available tables: ", e);
             return ResponseEntity.ok(List.of());
         }
     }
@@ -104,10 +104,10 @@ public class CustomerController {
      * GET /rims/customer/reservations/current
      */
     @GetMapping("/reservations/current")
-    public ResponseEntity<CustomerReservationResponse> getCurrentReservation(
+    public ResponseEntity<List<CustomerReservationResponse>> getCurrentReservation(
             @AuthenticationPrincipal UserPrincipal principal) {
 
-        CustomerReservationResponse response = customerService.getCurrentReservationByUser(principal.getId());
+        List<CustomerReservationResponse> response = customerService.getCurrentReservationByUser(principal.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -122,5 +122,17 @@ public class CustomerController {
 
         boolean exists = customerService.checkCustomerReservationByUser(principal.getId(), date);
         return ResponseEntity.ok(exists);
+    }
+
+    /**
+     * Lấy các khung giờ bị chặn (không đặt được) của 1 bàn trong 1 ngày.
+     * GET /rims/customer/tables/{tableId}/blocked-slots?date=2026-07-23
+     */
+    @GetMapping("/tables/{tableId}/blocked-slots")
+    public ResponseEntity<List<TimeRangeResponse>> getBlockedTimeRanges(
+            @PathVariable int tableId,
+            @RequestParam String date) {
+        LocalDate parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+        return ResponseEntity.ok(customerService.getBlockedTimeRanges(tableId, parsedDate));
     }
 }

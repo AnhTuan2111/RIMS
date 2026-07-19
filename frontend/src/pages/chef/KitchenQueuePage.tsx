@@ -1,3 +1,5 @@
+import SockJS from 'sockjs-client'
+import Stomp from 'stompjs'
 import {
     useCallback,
     useEffect,
@@ -14,6 +16,7 @@ import {
     type DishDetailResponse,
     type KitchenOrderItemResponse,
 } from '../../api/chef'
+import { getAccessToken } from '../../utils/tokenStorage'
 
 const ITEMS_PER_PAGE = 6
 const ORDER_POLL_INTERVAL_MS = 10_000
@@ -114,6 +117,7 @@ export default function KitchenQueuePage() {
 
     const newOrderMessageTimerRef =
         useRef<number | null>(null)
+    const selectedDishIdRef = useRef<number | null>(null)
 
     const originalDocumentTitleRef =
         useRef(document.title)
@@ -298,18 +302,15 @@ export default function KitchenQueuePage() {
     )
 
     useEffect(() => {
-        fetchKitchenOrders(true, false).catch(
-            (requestError) => {
+        queueMicrotask(() => {
+            fetchKitchenOrders(true, false).catch((requestError) => {
                 console.error(requestError)
-            },
-        )
+            })
+        })
 
         const intervalId = window.setInterval(
             () => {
-                fetchKitchenOrders(
-                    false,
-                    false,
-                ).catch((requestError) => {
+                fetchKitchenOrders(false, false).catch((requestError) => {
                     console.error(requestError)
                 })
             },
@@ -319,25 +320,63 @@ export default function KitchenQueuePage() {
         return () => {
             window.clearInterval(intervalId)
 
-            if (
-                newOrderMessageTimerRef.current
-                !== null
-            ) {
-                window.clearTimeout(
-                    newOrderMessageTimerRef.current,
-                )
+            if (newOrderMessageTimerRef.current !== null) {
+                window.clearTimeout(newOrderMessageTimerRef.current)
             }
 
-            document.title =
-                originalDocumentTitleRef.current
+            document.title = originalDocumentTitleRef.current
 
-            audioContextRef.current
-                ?.close()
-                .catch((requestError) => {
-                    console.error(requestError)
-                })
+            audioContextRef.current?.close().catch((requestError) => {
+                console.error(requestError)
+            })
 
             audioContextRef.current = null
+        }
+    }, [fetchKitchenOrders])
+
+    useEffect(() => {
+        selectedDishIdRef.current = selectedDish?.orderItemId ?? null
+    }, [selectedDish])
+
+    useEffect(() => {
+        const socket = new SockJS('http://localhost:8080/ws-rims')
+        const client = Stomp.over(socket)
+
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
+            console.log('Bếp đã kết nối WebSocket!')
+
+            client.subscribe('/topic/kitchen', () => {
+                fetchKitchenOrders(false, false).catch((requestError) => {
+                    console.error(requestError)
+                })
+            })
+
+            client.subscribe('/topic/chef-note', () => {
+                const openDishId = selectedDishIdRef.current
+
+                if (openDishId === null) {
+                    return
+                }
+
+                getDishDetail(openDishId)
+                    .then((data) => {
+                        setSelectedDish(data)
+                        setChefInternalNote(data.chefInternalNote ?? '')
+                    })
+                    .catch((requestError) => {
+                        console.error(requestError)
+                    })
+            })
+        }, (error) => {
+            console.error('Lỗi kết nối WebSocket bếp: ', error)
+        })
+
+        return () => {
+            if (client !== null && client.connected) {
+                client.disconnect(() => {
+                    console.log('Đã ngắt kết nối WebSocket bếp.')
+                })
+            }
         }
     }, [fetchKitchenOrders])
 

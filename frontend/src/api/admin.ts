@@ -357,6 +357,7 @@ export interface DishResponse {
     price: number;
     imageUrl: string;
     isAvailable: boolean;
+    isHidden: boolean;
     categoryName: string;
     createdAt: string;
     updatedAt: string;
@@ -400,6 +401,7 @@ export interface DishFormData {
     description: string;
     imageUrl: string;
     isAvailable: boolean;
+    isHidden: boolean;
 }
 
 // Thêm dishApi
@@ -417,6 +419,7 @@ export const dishApi = {
         imageUrl: string;
         categoryId: number;
         isAvailable: boolean;
+        isHidden: boolean;
     }) =>
         apiClient.post<DishResponse>('/admin/dish/new', data),
 
@@ -427,6 +430,7 @@ export const dishApi = {
         imageUrl: string;
         categoryId: number;
         isAvailable: boolean;
+        isHidden: boolean;
     }) =>
         apiClient.put<DishResponse>(`/admin/dish/update/${id}`, data),
 

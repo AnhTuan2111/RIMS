@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
+import { getAccessToken } from "../../utils/tokenStorage";
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import {type TableDetailResponse, waiterApi} from "../../api/waiter";
@@ -33,20 +34,30 @@ export default function WaiterTableListPage() {
         const socket = new SockJS('http://localhost:8080/ws-rims');
         const client = Stomp.over(socket);
 
-        client.connect({}, () => {
+        client.connect({ Authorization: `Bearer ${getAccessToken()}` }, () => {
             console.log("Waiter đã kết nối đường dây với Bếp!");
 
-            client.subscribe('/topic/waiter', (message) => {
-                if (message.body === 'DISH_READY') {
-                    console.log("🔔 Có món đã nấu xong! Đang cập nhật lại bàn...");
-                    loadTables();
-                }
+            client.subscribe('/topic/waiter', () => {
+                console.log("🔔 Có cập nhật! Đang làm mới lại bàn...");
+                loadTables();
+            });
+
+            // MỚI: lắng nghe thay đổi trạng thái bàn (thanh toán, tự động reserved/hủy)
+            client.subscribe('/topic/tables', () => {
+                console.log("🔔 Trạng thái bàn thay đổi! Đang làm mới lại...");
+                loadTables();
             });
         }, (error) => {
             console.error("Lỗi mất kết nối với Bếp: ", error);
         });
 
+        // MỚI: polling fallback 10s, phòng khi WS mất kết nối (chưa có reconnect)
+        const pollInterval = setInterval(() => {
+            loadTables();
+        }, 10000);
+
         return () => {
+            clearInterval(pollInterval); // MỚI
             if (client !== null && client.connected) {
                 client.disconnect(() => {
                     console.log("Đã ngắt kết nối an toàn.");

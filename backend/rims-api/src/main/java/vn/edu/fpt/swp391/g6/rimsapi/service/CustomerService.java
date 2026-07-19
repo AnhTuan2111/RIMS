@@ -5,7 +5,9 @@ package vn.edu.fpt.swp391.g6.rimsapi.service;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReservationRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.TimeRangeResponse;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface CustomerService
@@ -30,10 +32,18 @@ public interface CustomerService
     /**
      * Lấy đặt bàn hiện tại của customer
      */
-    CustomerReservationResponse getCurrentReservationByUser(Integer userId);
+    List<CustomerReservationResponse> getCurrentReservationByUser(Integer userId);
 
     /**
      * Lấy danh sách bàn còn trống để customer chọn khi đặt bàn
      */
     List<RestaurantTableResponse> getAvailableTables();
+
+    /**
+     * Lấy danh sách khung giờ bị chặn (không thể đặt) của 1 bàn trong 1 ngày,
+     * gộp từ: các reservation đang active (QUEUED/WAITING) tại bàn đó,
+     * và đơn đang SERVING (nếu bàn đang phục vụ).
+     */
+    List<TimeRangeResponse> getBlockedTimeRanges(int tableId, LocalDate date);
+
 }

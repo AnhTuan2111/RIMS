@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 public class CompleteGroupedOrdersRequest {
 
-    @NotEmpty(message = "orderItemIds must not be empty")
+    @NotEmpty()
     private List<Long> orderItemIds;
 }
 

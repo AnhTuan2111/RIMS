@@ -11,15 +11,15 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 @Setter
 public class PaymentRequest
 {
-    @NotNull(message = "Phương thức thanh toán không được để trống")
+    @NotNull()
     private PaymentMethod paymentMethod;
 
-    @NotNull(message = "Số tiền thanh toán không được để trống")
-    @PositiveOrZero(message = "Số tiền thanh toán phải lớn hơn hoặc bằng 0")
+    @NotNull()
+    @PositiveOrZero()
     private Double amountPaid;
 
     private Integer customerId; // Ai đang thanh toán (Có thể null nếu khách không có tài khoản)
 
-    @PositiveOrZero(message = "Số điểm sử dụng không được âm")
+    @PositiveOrZero()
     private Integer pointsUsed = 0;
 }

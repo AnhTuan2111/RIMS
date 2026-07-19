@@ -15,14 +15,15 @@ import java.time.LocalDateTime;
 public class OrderItemResponse
 {
     private Long orderItemId;
+    private Integer dishId;
     private String dishName;
     private OrderItemStatus status;
     private Integer quantity;
     private BigDecimal unitPrice;
     private BigDecimal subTotal;
     private String note;
+    private String cancelReason;
     private String chefInternalNote;
     private LocalDateTime chefInternalNoteCreatedAt;
-
     private LocalDateTime chefInternalNoteAcknowledgedAt;
 }
