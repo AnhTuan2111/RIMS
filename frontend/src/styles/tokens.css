@@ -1,0 +1,74 @@
+:root {
+    /* Brand */
+    --rims-primary: #2563eb;
+    --rims-primary-hover: #1d4ed8;
+    --rims-primary-soft: #eff6ff;
+
+    --rims-success: #16a34a;
+    --rims-success-soft: #f0fdf4;
+
+    --rims-warning: #d97706;
+    --rims-warning-soft: #fffbeb;
+
+    --rims-danger: #dc2626;
+    --rims-danger-soft: #fef2f2;
+
+    /* Surface */
+    --rims-background: #f8fafc;
+    --rims-surface: #ffffff;
+    --rims-surface-soft: #f1f5f9;
+
+    /* Text */
+    --rims-text: #0f172a;
+    --rims-text-secondary: #475569;
+    --rims-text-muted: #64748b;
+
+    /* Border */
+    --rims-border: #e2e8f0;
+    --rims-border-strong: #cbd5e1;
+
+    /* Radius */
+    --rims-radius-sm: 6px;
+    --rims-radius-md: 10px;
+    --rims-radius-lg: 16px;
+    --rims-radius-xl: 20px;
+
+    /* Shadow */
+    --rims-shadow-sm:
+            0 1px 3px rgb(15 23 42 / 8%);
+
+    --rims-shadow-md:
+            0 10px 25px rgb(15 23 42 / 10%);
+
+    --rims-shadow-lg:
+            0 20px 40px rgb(15 23 42 / 14%);
+
+    /* Spacing */
+    --rims-space-1: 4px;
+    --rims-space-2: 8px;
+    --rims-space-3: 12px;
+    --rims-space-4: 16px;
+    --rims-space-5: 20px;
+    --rims-space-6: 24px;
+    --rims-space-8: 32px;
+
+    /* Layout */
+    --rims-sidebar-width: 280px;
+    --rims-topbar-height: 96px;
+
+    /* Bootstrap-compatible values */
+    --bs-body-font-family:
+            "Segoe UI",
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            sans-serif;
+
+    --bs-body-bg: var(--rims-background);
+    --bs-body-color: var(--rims-text);
+    --bs-border-color: var(--rims-border);
+
+    --bs-border-radius: var(--rims-radius-md);
+    --bs-border-radius-sm: var(--rims-radius-sm);
+    --bs-border-radius-lg: var(--rims-radius-lg);
+}

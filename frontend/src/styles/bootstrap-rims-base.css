@@ -1,0 +1,54 @@
+/* RIMS Base Reset + Loading
+   Extracted from index.css
+*/
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+}
+
+main {
+    min-height: 100vh;
+}
+
+/* =========================
+   LOADING
+========================= */
+
+.app-loading {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    color: #e2e8f0;
+    background: #0f172a;
+}
+

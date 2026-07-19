@@ -1,0 +1,507 @@
+/* =========================================================
+   RIMS Bootstrap Theme
+   Bootstrap provides the base system.
+   This file upgrades the shared shell for every actor.
+   ========================================================= */
+
+:root {
+    --rims-sidebar-width: 292px;
+    --rims-sidebar-bg: #0f172a;
+    --rims-sidebar-bg-soft: #111827;
+    --rims-sidebar-border: rgba(255, 255, 255, 0.1);
+    --rims-primary: #2563eb;
+    --rims-primary-2: #7c3aed;
+    --rims-success: #16a34a;
+    --rims-warning: #f97316;
+    --rims-danger: #dc2626;
+    --rims-surface: #ffffff;
+    --rims-page-bg: #f1f5f9;
+    --rims-text: #0f172a;
+    --rims-muted: #64748b;
+    --rims-border: #e2e8f0;
+    --rims-radius-sm: 12px;
+    --rims-radius-md: 18px;
+    --rims-radius-lg: 24px;
+    --rims-shadow-sm: 0 10px 28px rgba(15, 23, 42, 0.07);
+    --rims-shadow-md: 0 18px 50px rgba(15, 23, 42, 0.1);
+}
+
+html {
+    background: var(--rims-page-bg);
+}
+
+body {
+    min-width: 320px;
+    background: var(--rims-page-bg);
+    color: var(--rims-text);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+/* =========================
+   Shared Bootstrap shell
+   ========================= */
+
+.app-layout {
+    min-height: 100vh;
+    background:
+            radial-gradient(circle at top right, rgba(37, 99, 235, 0.1), transparent 28rem),
+            radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.08), transparent 28rem),
+            var(--rims-page-bg);
+}
+
+.app-main {
+    min-width: 0;
+}
+
+.app-topbar {
+    z-index: 50;
+    backdrop-filter: blur(18px);
+    background: rgba(255, 255, 255, 0.88) !important;
+}
+
+.app-topbar h1 {
+    letter-spacing: -0.035em;
+}
+
+.rims-app-content {
+    width: 100%;
+    min-width: 0;
+}
+
+.rims-app-content > * {
+    width: 100%;
+    max-width: 100%;
+}
+
+.rims-app-content .page-card,
+.rims-app-content .dashboard-card,
+.rims-app-content .card {
+    border: 1px solid var(--rims-border);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-sm);
+}
+
+.rims-app-content .page-header {
+    gap: 1rem;
+}
+
+/* =========================
+   Sidebar
+   ========================= */
+
+.app-sidebar,
+.rims-sidebar {
+    width: var(--rims-sidebar-width);
+    min-width: var(--rims-sidebar-width);
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+    color: #e5e7eb;
+    background:
+            radial-gradient(circle at 20% 0%, rgba(96, 165, 250, 0.25), transparent 15rem),
+            radial-gradient(circle at 95% 30%, rgba(124, 58, 237, 0.24), transparent 16rem),
+            linear-gradient(180deg, var(--rims-sidebar-bg), var(--rims-sidebar-bg-soft));
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 22px 0 60px rgba(15, 23, 42, 0.2);
+}
+
+.rims-sidebar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 20%),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent 40%);
+}
+
+.rims-sidebar-brand,
+.rims-sidebar-role,
+.rims-sidebar-nav,
+.rims-sidebar-footer {
+    position: relative;
+    z-index: 1;
+}
+
+.rims-sidebar-brand {
+    padding: 1.35rem 1rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.rims-sidebar-logo {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 16px;
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6 52%, #f97316);
+    box-shadow:
+            0 16px 34px rgba(59, 130, 246, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.rims-sidebar-brand h2 {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.rims-sidebar-brand p {
+    color: rgba(226, 232, 240, 0.72);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.rims-sidebar-role {
+    margin: 0 1rem 1rem;
+    padding: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid var(--rims-sidebar-border);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.075);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.rims-role-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 14px;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.rims-sidebar-role small,
+.rims-sidebar-status small {
+    display: block;
+    color: rgba(226, 232, 240, 0.65);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.rims-sidebar-role strong,
+.rims-sidebar-status strong {
+    display: block;
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 850;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rims-sidebar-nav {
+    padding: 0 0.75rem 1rem;
+    overflow-y: auto;
+}
+
+.rims-sidebar-nav::-webkit-scrollbar {
+    width: 8px;
+}
+
+.rims-sidebar-nav::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.rims-sidebar-title {
+    margin: 0 0 0.55rem;
+    padding: 0 0.45rem;
+    color: rgba(226, 232, 240, 0.58);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.rims-sidebar-link {
+    margin-bottom: 0.35rem;
+    min-height: 46px;
+    padding: 0.72rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.68rem;
+    border: 1px solid transparent;
+    border-radius: 16px;
+    color: rgba(241, 245, 249, 0.78) !important;
+    font-size: 0.93rem;
+    font-weight: 760;
+    transition:
+            transform 0.18s ease,
+            color 0.18s ease,
+            background 0.18s ease,
+            border-color 0.18s ease;
+}
+
+.rims-sidebar-link:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(3px);
+}
+
+.rims-sidebar-link.active {
+    color: #ffffff !important;
+    border-color: rgba(96, 165, 250, 0.38);
+    background:
+            linear-gradient(135deg, rgba(37, 99, 235, 0.88), rgba(124, 58, 237, 0.72));
+    box-shadow:
+            0 18px 36px rgba(37, 99, 235, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.rims-menu-icon {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.09);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 900;
+}
+
+.rims-menu-label {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rims-menu-arrow {
+    color: rgba(226, 232, 240, 0.45);
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.rims-sidebar-link.active .rims-menu-arrow,
+.rims-sidebar-link:hover .rims-menu-arrow {
+    color: #ffffff;
+}
+
+.rims-sidebar-quick-links {
+    margin: -0.1rem 0 0.5rem 2.45rem;
+    display: grid;
+    gap: 0.3rem;
+}
+
+.rims-sidebar-quick-link {
+    padding: 0.54rem 0.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: rgba(226, 232, 240, 0.78);
+    text-decoration: none;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.055);
+    transition:
+            transform 0.18s ease,
+            background 0.18s ease,
+            color 0.18s ease;
+}
+
+.rims-sidebar-quick-link:hover,
+.rims-sidebar-quick-link.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateX(2px);
+}
+
+.rims-sidebar-quick-icon {
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 9px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.rims-sidebar-quick-label {
+    overflow: hidden;
+    font-size: 0.8rem;
+    font-weight: 780;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rims-sidebar-footer {
+    padding: 1rem;
+    display: grid;
+    gap: 0.75rem;
+    border-top: 1px solid var(--rims-sidebar-border);
+    background: rgba(15, 23, 42, 0.35);
+}
+
+.rims-sidebar-status {
+    padding: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    border: 1px solid rgba(255, 255, 255, 0.085);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.rims-online-dot {
+    width: 12px;
+    height: 12px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+}
+
+.rims-logout-button {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(248, 113, 113, 0.24);
+    border-radius: 15px;
+    color: #fecaca;
+    font-size: 0.9rem;
+    font-weight: 850;
+    background: rgba(127, 29, 29, 0.32);
+}
+
+.rims-logout-button:hover {
+    color: #ffffff;
+    border-color: rgba(248, 113, 113, 0.38);
+    background: rgba(220, 38, 38, 0.42);
+}
+
+/* =========================
+   Bootstrap polish
+   ========================= */
+
+.btn {
+    border-radius: 12px;
+    font-weight: 750;
+}
+
+.form-control,
+.form-select {
+    border-radius: 12px;
+}
+
+.badge {
+    border-radius: 999px;
+}
+
+.simple-table,
+.table,
+.card,
+.page-card {
+    overflow: hidden;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 992px) {
+    .app-layout {
+        display: block !important;
+    }
+
+    .app-sidebar,
+    .rims-sidebar {
+        width: 100%;
+        min-width: 0;
+        min-height: auto;
+        position: relative;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .rims-sidebar-brand {
+        padding: 1rem;
+    }
+
+    .rims-sidebar-role {
+        margin: 0 1rem 0.85rem;
+    }
+
+    .rims-sidebar-nav {
+        padding: 0 1rem 0.9rem;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.45rem;
+        overflow: visible;
+    }
+
+    .rims-sidebar-title {
+        grid-column: 1 / -1;
+    }
+
+    .rims-sidebar-link {
+        margin-bottom: 0;
+    }
+
+    .rims-sidebar-quick-links {
+        grid-column: 1 / -1;
+        margin: 0;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rims-sidebar-footer {
+        grid-template-columns: 1fr auto;
+        align-items: center;
+    }
+
+    .rims-logout-button {
+        min-width: 150px;
+    }
+
+    .app-topbar {
+        position: static !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .rims-sidebar-nav,
+    .rims-sidebar-quick-links,
+    .rims-sidebar-footer {
+        grid-template-columns: 1fr;
+    }
+
+    .rims-logout-button {
+        width: 100%;
+    }
+
+    .rims-app-content {
+        padding: 1rem !important;
+    }
+
+    .app-topbar {
+        padding: 1rem !important;
+    }
+}
