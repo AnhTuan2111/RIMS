@@ -1,16 +1,27 @@
 import {
     useCallback,
-    useEffect,
     useMemo,
+    useRef,
     useState,
 } from 'react'
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 
 import {
     completeGroupedKitchenOrders,
     getGroupedKitchenOrders,
     type GroupedKitchenOrderResponse,
 } from '../../api/chef'
+import {DEFAULT_POLL_INTERVAL_MS} from '../../app/config/realtime'
+import {
+    EmptyState,
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback'
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui'
+import {usePolling} from '../../hooks/usePolling'
 
 
 const ITEMS_PER_PAGE = 6
@@ -92,32 +103,76 @@ export default function GroupedKitchenPage() {
     const [error, setError] =
         useState<string | null>(null)
 
-    const loadGroups = useCallback(async () => {
-        try {
-            setIsLoading(true)
-            setError(null)
+    const hasLoadedInitialGroupsRef = useRef(false)
 
-            const data =
-                await getGroupedKitchenOrders()
+    const loadGroups = useCallback(
+        async (
+            showFullLoading: boolean,
+            resetPage: boolean,
+            signal?: AbortSignal,
+        ) => {
+            try {
+                if (showFullLoading) {
+                    setIsLoading(true)
+                }
 
-            setGroups(data)
-            setCurrentPage(1)
-        } catch (requestError) {
-            console.error(requestError)
+                const data =
+                    await getGroupedKitchenOrders(signal)
 
-            setError(
-                'Không thể tải danh sách gom món.',
+                setGroups(data)
+                setError(null)
+
+                if (resetPage) {
+                    setCurrentPage(1)
+                }
+            } catch (requestError) {
+                if (signal?.aborted) {
+                    return
+                }
+
+                console.error(
+                    '[CHEF_GROUPED_ORDERS_FETCH_ERROR]',
+                    requestError,
+                )
+
+                setError(
+                    'Không thể tải danh sách gom món.',
+                )
+            } finally {
+                if (showFullLoading) {
+                    setIsLoading(false)
+                }
+            }
+        },
+        [],
+    )
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialGroupsRef.current
+
+            await loadGroups(
+                isInitialLoad,
+                false,
+                signal,
             )
-        } finally {
-            setIsLoading(false)
-        }
-    }, [])
 
-    useEffect(() => {
-        loadGroups().catch((requestError) => {
-            console.error(requestError)
-        })
-    }, [loadGroups])
+            hasLoadedInitialGroupsRef.current = true
+        },
+        {
+            intervalMs: DEFAULT_POLL_INTERVAL_MS,
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[CHEF_GROUPED_ORDERS_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
 
     async function handleCompleteGroup(
         group: GroupedKitchenOrderResponse,
@@ -147,7 +202,10 @@ export default function GroupedKitchenPage() {
                 ),
             )
 
-            await loadGroups()
+            await loadGroups(
+                false,
+                true,
+            )
         } catch (requestError) {
             console.error(requestError)
 
@@ -339,7 +397,7 @@ export default function GroupedKitchenPage() {
 
         if (totalPages <= maximumVisiblePages) {
             return Array.from(
-                { length: totalPages },
+                {length: totalPages},
                 (_, index) => index + 1,
             )
         }
@@ -349,7 +407,7 @@ export default function GroupedKitchenPage() {
             safeCurrentPage - 2,
         )
 
-        let endPage = Math.min(
+        const endPage = Math.min(
             totalPages,
             startPage + maximumVisiblePages - 1,
         )
@@ -365,7 +423,7 @@ export default function GroupedKitchenPage() {
         }
 
         return Array.from(
-            { length: endPage - startPage + 1 },
+            {length: endPage - startPage + 1},
             (_, index) => startPage + index,
         )
     }, [safeCurrentPage, totalPages])
@@ -386,98 +444,82 @@ export default function GroupedKitchenPage() {
 
     if (isLoading) {
         return (
-            <section className="chef-state-card">
-                <span className="chef-loader" />
-                <p>
-                    Đang tải danh sách gom món...
-                </p>
-            </section>
+            <LoadingState
+                title="Đang tải danh sách gom món..."
+                description="Hệ thống đang lấy dữ liệu nhóm món mới nhất từ bếp."
+            />
         )
     }
 
     if (error) {
         return (
-            <section className="chef-state-card error">
-                <h2>Lỗi tải dữ liệu</h2>
-                <p>{error}</p>
-
-                <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => {
-                        loadGroups().catch(
-                            (requestError) => {
-                                console.error(requestError)
-                            },
-                        )
-                    }}
-                >
-                    Thử lại
-                </button>
-            </section>
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    loadGroups(
+                        true,
+                        true,
+                    ).catch((requestError) => {
+                        console.error(requestError)
+                    })
+                }}
+            />
         )
     }
 
     return (
         <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
-                    <div>
-                        <span className="chef-eyebrow">
-                            BATCH COOKING
-                        </span>
+            <PageCard>
+                <PageHeader
+                    title="Gom món để nấu"
+                    description="Món giống nhau và không có ghi chú được gom thành một nhóm. Món có ghi chú luôn được tách riêng."
+                    actions={
+                        <div className="chef-summary">
+                            <div>
+                                <strong>
+                                    {groups.length}
+                                </strong>
+                                <span>Nhóm cần nấu</span>
+                            </div>
 
-                        <h2>Gom món để nấu</h2>
+                            <div>
+                                <strong>
+                                    {groups.reduce(
+                                        (
+                                            total,
+                                            group,
+                                        ) =>
+                                            total
+                                            + group
+                                                .totalQuantity,
+                                        0,
+                                    )}
+                                </strong>
+                                <span>Tổng số phần</span>
+                            </div>
 
-                        <p>
-                            Món giống nhau và không có
-                            ghi chú được gom thành một nhóm.
-                            Món có ghi chú luôn được tách riêng.
-                        </p>
-                    </div>
-
-                    <div className="chef-summary">
-                        <div>
-                            <strong>
-                                {groups.length}
-                            </strong>
-                            <span>Nhóm cần nấu</span>
+                            <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={() => {
+                                    loadGroups(
+                                        true,
+                                        true,
+                                    ).catch(
+                                        (requestError) => {
+                                            console.error(requestError)
+                                        },
+                                    )
+                                }}
+                            >
+                                Làm mới
+                            </button>
                         </div>
+                    }
+                />
+            </PageCard>
 
-                        <div>
-                            <strong>
-                                {groups.reduce(
-                                    (
-                                        total,
-                                        group,
-                                    ) =>
-                                        total
-                                        + group
-                                            .totalQuantity,
-                                    0,
-                                )}
-                            </strong>
-                            <span>Tổng số phần</span>
-                        </div>
-
-                        <button
-                            type="button"
-                            className="secondary-button"
-                            onClick={() => {
-                                loadGroups().catch(
-                                    (requestError) => {
-                                        console.error(requestError)
-                                    },
-                                )
-                            }}
-                        >
-                            Làm mới
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <section className="page-card">
+            <PageCard>
                 <div className="chef-filter-bar">
                     <input
                         type="search"
@@ -575,21 +617,22 @@ export default function GroupedKitchenPage() {
                         Xóa bộ lọc
                     </button>
                 </div>
-            </section>
+            </PageCard>
 
             {filteredGroups.length === 0 ? (
-                <section className="page-card">
-                    <div className="empty-state">
-                        <h3>
-                            Không có nhóm món phù hợp
-                        </h3>
-
-                        <p>
-                            Hãy thay đổi từ khóa
-                            hoặc bộ lọc.
-                        </p>
-                    </div>
-                </section>
+                <EmptyState
+                    title="Không có nhóm món phù hợp"
+                    description="Hãy thay đổi từ khóa hoặc bộ lọc."
+                    action={
+                        <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={clearFilters}
+                        >
+                            Xóa bộ lọc
+                        </button>
+                    }
+                />
             ) : (
                 <>
                     <div className="grouped-kitchen-grid">

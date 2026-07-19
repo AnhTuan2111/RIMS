@@ -1,8 +1,25 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+    useCallback,
+    useMemo,
+    useRef,
+    useState,
+} from 'react'
+
 import {
     getCompletedOrders,
     type KitchenOrderItemResponse,
 } from '../../api/chef'
+import {DEFAULT_POLL_INTERVAL_MS} from '../../app/config/realtime'
+import {
+    EmptyState,
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback'
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui'
+import {usePolling} from '../../hooks/usePolling'
 
 const ITEMS_PER_PAGE = 6
 
@@ -33,41 +50,91 @@ export default function CompletedOrdersPage() {
         useState<KitchenOrderItemResponse[]>([])
 
     const [isLoading, setIsLoading] = useState(true)
+
     const [error, setError] =
         useState<string | null>(null)
 
     const [searchText, setSearchText] = useState('')
+
     const [selectedTable, setSelectedTable] =
         useState('ALL')
+
     const [sortOrder, setSortOrder] =
         useState<SortOrder>('NEWEST')
+
     const [currentPage, setCurrentPage] = useState(1)
 
-    async function loadCompletedOrders() {
-        try {
-            setIsLoading(true)
-            setError(null)
+    const hasLoadedInitialCompletedOrdersRef =
+        useRef(false)
 
-            const data = await getCompletedOrders()
+    const loadCompletedOrders = useCallback(
+        async (
+            showFullLoading: boolean,
+            resetPage: boolean,
+            signal?: AbortSignal,
+        ) => {
+            try {
+                if (showFullLoading) {
+                    setIsLoading(true)
+                }
 
-            setItems(data)
-            setCurrentPage(1)
-        } catch (requestError) {
-            console.error(requestError)
+                const data =
+                    await getCompletedOrders(signal)
 
-            setError(
-                'Không thể tải danh sách món đã hoàn thành.',
+                setItems(data)
+                setError(null)
+
+                if (resetPage) {
+                    setCurrentPage(1)
+                }
+            } catch (requestError) {
+                if (signal?.aborted) {
+                    return
+                }
+
+                console.error(
+                    '[CHEF_COMPLETED_ORDERS_FETCH_ERROR]',
+                    requestError,
+                )
+
+                setError(
+                    'Không thể tải danh sách món đã hoàn thành.',
+                )
+            } finally {
+                if (showFullLoading) {
+                    setIsLoading(false)
+                }
+            }
+        },
+        [],
+    )
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialCompletedOrdersRef.current
+
+            await loadCompletedOrders(
+                isInitialLoad,
+                false,
+                signal,
             )
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
-    useEffect(() => {
-        loadCompletedOrders().catch((requestError) => {
-            console.error(requestError)
-        })
-    }, [])
+            hasLoadedInitialCompletedOrdersRef.current = true
+        },
+        {
+            intervalMs: DEFAULT_POLL_INTERVAL_MS,
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[CHEF_COMPLETED_ORDERS_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
 
     function clearFilters() {
         setSearchText('')
@@ -87,7 +154,7 @@ export default function CompletedOrdersPage() {
             firstTable.localeCompare(
                 secondTable,
                 'vi',
-                { numeric: true },
+                {numeric: true},
             ),
         )
     }, [items])
@@ -169,79 +236,66 @@ export default function CompletedOrdersPage() {
 
     if (isLoading) {
         return (
-            <section className="page-card">
-                <p>
-                    Đang tải danh sách món đã hoàn thành...
-                </p>
-            </section>
+            <LoadingState
+                title="Đang tải danh sách món đã hoàn thành..."
+                description="Hệ thống đang lấy dữ liệu mới nhất từ bếp."
+            />
         )
     }
 
     if (error) {
         return (
-            <section className="page-card">
-                <h2>Lỗi tải dữ liệu</h2>
-
-                <p className="modal-error">
-                    {error}
-                </p>
-
-                <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => {
-                        loadCompletedOrders().catch(
-                            (requestError) => {
-                                console.error(requestError)
-                            },
-                        )
-                    }}
-                >
-                    Thử lại
-                </button>
-            </section>
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    loadCompletedOrders(
+                        true,
+                        true,
+                    ).catch((requestError) => {
+                        console.error(requestError)
+                    })
+                }}
+            />
         )
     }
 
     return (
         <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
-                    <div>
-                        <h2>Món đã hoàn thành</h2>
+            <PageCard>
+                <PageHeader
+                    title="Món đã hoàn thành"
+                    description="Tìm theo tên món, bàn, mã đơn hoặc mã item."
+                    actions={
+                        <div className="chef-summary">
+                            <div>
+                                <strong>{items.length}</strong>
+                                <span>Đã hoàn thành</span>
+                            </div>
 
-                        <p>
-                            Tìm theo tên món, bàn, mã đơn
-                            hoặc mã item.
-                        </p>
-                    </div>
-
-                    <div className="chef-summary">
-                        <div>
-                            <strong>{items.length}</strong>
-                            <span>Đã hoàn thành</span>
+                            <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={() => {
+                                    loadCompletedOrders(
+                                        true,
+                                        true,
+                                    ).catch(
+                                        (requestError) => {
+                                            console.error(
+                                                requestError,
+                                            )
+                                        },
+                                    )
+                                }}
+                            >
+                                Làm mới
+                            </button>
                         </div>
+                    }
+                />
+            </PageCard>
 
-                        <button
-                            type="button"
-                            className="secondary-button"
-                            onClick={() => {
-                                loadCompletedOrders().catch(
-                                    (requestError) => {
-                                        console.error(
-                                            requestError,
-                                        )
-                                    },
-                                )
-                            }}
-                        >
-                            Làm mới
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <section className="page-card">
+            <PageCard>
                 <div className="chef-filter-bar">
                     <input
                         type="search"
@@ -307,24 +361,25 @@ export default function CompletedOrdersPage() {
                         Xóa bộ lọc
                     </button>
                 </div>
-            </section>
+            </PageCard>
 
             {filteredItems.length === 0 ? (
-                <section className="page-card">
-                    <div className="empty-state">
-                        <h3>
-                            Không tìm thấy món phù hợp
-                        </h3>
-
-                        <p>
-                            Hãy thay đổi từ khóa hoặc
-                            xóa bộ lọc.
-                        </p>
-                    </div>
-                </section>
+                <EmptyState
+                    title="Không tìm thấy món phù hợp"
+                    description="Hãy thay đổi từ khóa hoặc xóa bộ lọc."
+                    action={
+                        <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={clearFilters}
+                        >
+                            Xóa bộ lọc
+                        </button>
+                    }
+                />
             ) : (
                 <>
-                    <section className="page-card">
+                    <PageCard>
                         <div className="completed-orders-list">
                             {paginatedItems.map((item) => (
                                 <article
@@ -383,7 +438,7 @@ export default function CompletedOrdersPage() {
                                 </article>
                             ))}
                         </div>
-                    </section>
+                    </PageCard>
 
                     <div className="chef-pagination">
                         <div className="pagination-result-info">

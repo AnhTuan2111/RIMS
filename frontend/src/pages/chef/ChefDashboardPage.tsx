@@ -1,9 +1,24 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import {
+    useCallback,
+    useRef,
+    useState,
+} from 'react'
+import {Link} from 'react-router-dom'
+
 import {
     getChefDashboard,
     type ChefDashboardResponse,
 } from '../../api/chef'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback'
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui'
+import {usePolling} from '../../hooks/usePolling'
 
 export default function ChefDashboardPage() {
     const [dashboard, setDashboard] =
@@ -12,138 +27,217 @@ export default function ChefDashboardPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const loadDashboard = useCallback(async () => {
-        try {
-            setIsLoading(true)
-            setError(null)
+    const hasLoadedInitialDashboardRef = useRef(false)
 
-            const data = await getChefDashboard()
-            setDashboard(data)
-        } catch (requestError) {
-            console.error(requestError)
-            setError('Không thể tải dữ liệu Dashboard.')
-        } finally {
-            setIsLoading(false)
-        }
-    }, [])
+    const fetchDashboard = useCallback(
+        async (
+            showFullLoading: boolean,
+            signal?: AbortSignal,
+        ) => {
+            try {
+                if (showFullLoading) {
+                    setIsLoading(true)
+                }
 
-    useEffect(() => {
-        loadDashboard().catch((requestError) => {
-            console.error(requestError)
-        })
-    }, [loadDashboard])
+                const data = await getChefDashboard(signal)
+
+                setDashboard(data)
+                setError(null)
+            } catch (requestError) {
+                if (signal?.aborted) {
+                    return
+                }
+
+                console.error(
+                    '[CHEF_DASHBOARD_FETCH_ERROR]',
+                    requestError,
+                )
+
+                setError(
+                    'Không thể tải số liệu Chef Dashboard.',
+                )
+            } finally {
+                if (showFullLoading) {
+                    setIsLoading(false)
+                }
+            }
+        },
+        [],
+    )
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialDashboardRef.current
+
+            await fetchDashboard(
+                isInitialLoad,
+                signal,
+            )
+
+            hasLoadedInitialDashboardRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .chef
+                .dashboardIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[CHEF_DASHBOARD_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
 
     if (isLoading) {
         return (
-            <section className="page-card">
-                <p>Đang tải dữ liệu Dashboard...</p>
-            </section>
+            <LoadingState
+                title="Đang tải Chef Dashboard..."
+                description="Hệ thống đang cập nhật số liệu bếp."
+            />
         )
     }
 
     if (error) {
         return (
-            <section className="page-card">
-                <p className="modal-error">{error}</p>
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    fetchDashboard(true).catch(
+                        (requestError) => {
+                            console.error(requestError)
+                        },
+                    )
+                }}
+            />
+        )
+    }
 
-                <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => {
-                        loadDashboard().catch(
-                            (requestError) => {
-                                console.error(requestError)
-                            },
-                        )
-                    }}
-                >
-                    Thử lại
-                </button>
-            </section>
+    if (!dashboard) {
+        return (
+            <ErrorState
+                title="Không có dữ liệu"
+                message="Chef Dashboard chưa có dữ liệu để hiển thị."
+                onRetry={() => {
+                    fetchDashboard(true).catch(
+                        (requestError) => {
+                            console.error(requestError)
+                        },
+                    )
+                }}
+            />
         )
     }
 
     return (
         <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
-                    <div>
-                        <h2>Chef Dashboard</h2>
+            <PageCard>
+                <PageHeader
+                    title="Chef Dashboard"
+                    description="Theo dõi nhanh trạng thái món ăn, hàng đợi bếp và tình trạng thực đơn."
+                />
+            </PageCard>
 
-                        <p>
-                            Tổng quan trạng thái xử lý món của bếp.
-                        </p>
-                    </div>
+            <div className="chef-dashboard-grid">
+                <Link
+                    to="/chef/orders"
+                    className="chef-dashboard-card"
+                >
+                    <span className="chef-dashboard-card-label">
+                        Đang chế biến
+                    </span>
 
-                    <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={() => {
-                            loadDashboard().catch(
-                                (requestError) => {
-                                    console.error(requestError)
-                                },
-                            )
-                        }}
-                    >
-                        Làm mới
-                    </button>
-                </div>
+                    <strong>
+                        {dashboard.preparingCount}
+                    </strong>
 
-                <div className="stat-grid chef-dashboard-stat-grid">
+                    <p>
+                        Món đang nằm trong hàng đợi bếp.
+                    </p>
+                </Link>
+
+                <Link
+                    to="/chef/completed-orders"
+                    className="chef-dashboard-card success"
+                >
+                    <span className="chef-dashboard-card-label">
+                        Đã hoàn thành
+                    </span>
+
+                    <strong>
+                        {dashboard.completedCount}
+                    </strong>
+
+                    <p>
+                        Món đã được bếp xác nhận hoàn thành.
+                    </p>
+                </Link>
+
+                <Link
+                    to="/chef/cancelled-orders"
+                    className="chef-dashboard-card danger"
+                >
+                    <span className="chef-dashboard-card-label">
+                        Đã hủy
+                    </span>
+
+                    <strong>
+                        {dashboard.cancelledCount}
+                    </strong>
+
+                    <p>
+                        Món đã bị hủy và cần Waiter xử lý với khách.
+                    </p>
+                </Link>
+
+                <Link
+                    to="/chef/dishes"
+                    className="chef-dashboard-card warning"
+                >
+                    <span className="chef-dashboard-card-label">
+                        Món đang tắt bán
+                    </span>
+
+                    <strong>
+                        {dashboard.unavailableDishCount}
+                    </strong>
+
+                    <p>
+                        Món hiện không khả dụng trên thực đơn.
+                    </p>
+                </Link>
+            </div>
+
+            <PageCard>
+                <div className="chef-dashboard-actions">
                     <Link
-                        className="stat-card dashboard-stat-link"
                         to="/chef/orders"
+                        className="primary-button"
                     >
-                        <strong>
-                            {dashboard?.preparingCount ?? 0}
-                        </strong>
-
-                        <span>Món đang chuẩn bị</span>
-
-                        <small>Xem danh sách →</small>
+                        Xem hàng đợi bếp
                     </Link>
 
                     <Link
-                        className="stat-card dashboard-stat-link"
-                        to="/chef/completed-orders"
+                        to="/chef/grouped-orders"
+                        className="secondary-button"
                     >
-                        <strong>
-                            {dashboard?.completedCount ?? 0}
-                        </strong>
-
-                        <span>Món đã hoàn thành</span>
-
-                        <small>Xem danh sách →</small>
+                        Xem món đã gom
                     </Link>
 
                     <Link
-                        className="stat-card dashboard-stat-link"
-                        to="/chef/cancelled-orders"
+                        to="/chef/dishes"
+                        className="secondary-button"
                     >
-                        <strong>
-                            {dashboard?.cancelledCount ?? 0}
-                        </strong>
-
-                        <span>Món đã hủy</span>
-
-                        <small>Xem danh sách →</small>
-                    </Link>
-
-                    <Link
-                        className="stat-card dashboard-stat-link"
-                        to="/chef/dishes?status=unavailable"
-                    >
-                        <strong>
-                            {dashboard?.unavailableDishCount ?? 0}
-                        </strong>
-
-                        <span>Món đang tạm hết</span>
-
-                        <small>Xem danh sách →</small>
+                        Quản lý món ăn
                     </Link>
                 </div>
-            </section>
+            </PageCard>
         </div>
     )
 }

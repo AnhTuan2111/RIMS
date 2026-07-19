@@ -1,161 +1,471 @@
-import {useCallback, useEffect, useState} from 'react';
-import {cashierApi} from '../../api/cashier';
-import type {OrderDetailResponse, TableDashboardResponse, PaymentResponse} from '../../types/cashier';
-import OrderPanel, {type CustomerInfo} from './OrderPanel';
-import PaymentModal from './PaymentModal';
-import PaymentResultManager from './PaymentResultManager';
+import {
+    type CSSProperties,
+    useCallback,
+    useRef,
+    useState,
+} from 'react'
+
+import {cashierApi} from '../../api/cashier'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback'
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui'
+import {usePolling} from '../../hooks/usePolling'
+import type {
+    OrderDetailResponse,
+    PaymentResponse,
+    TableDashboardResponse,
+} from '../../types/cashier'
+import OrderPanel, {type CustomerInfo} from './OrderPanel'
+import PaymentModal from './PaymentModal'
+import PaymentResultManager from './PaymentResultManager'
+
+function isRequestCanceled(error: unknown) {
+    if (typeof error !== 'object' || error === null) {
+        return false
+    }
+
+    const requestError = error as {
+        name?: string
+        code?: string
+        message?: string
+    }
+
+    return (
+        requestError.name === 'CanceledError'
+        || requestError.code === 'ERR_CANCELED'
+        || requestError.message === 'canceled'
+    )
+}
+
+function getTableStatusLabel(status: TableDashboardResponse['status']) {
+    switch (status) {
+        case 'SERVING':
+            return '● Đang Phục Vụ'
+
+        default:
+            return '○ Bàn Trống'
+    }
+}
 
 export default function CashierPaymentsPage() {
-    const [tables, setTables] = useState<TableDashboardResponse[]>([]);
-    const [selectedTable, setSelectedTable] = useState<TableDashboardResponse | null>(null);
-    const [orderDetail, setOrderDetail] = useState<OrderDetailResponse | null>(null);
+    const [tables, setTables] =
+        useState<TableDashboardResponse[]>([])
 
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+    const [selectedTable, setSelectedTable] =
+        useState<TableDashboardResponse | null>(null)
 
-    const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
-    const [paymentResult, setPaymentResult] = useState<PaymentResponse | null>(null);
+    const [orderDetail, setOrderDetail] =
+        useState<OrderDetailResponse | null>(null)
 
-    // ĐÃ THÊM: State khách hàng/điểm được "nâng" lên đây để dùng chung
-    // giữa OrderPanel (nơi tìm kiếm khách) và PaymentModal (nơi tính tiền/thanh toán)
-    const [customer, setCustomer] = useState<CustomerInfo | null>(null);
-    const [pointsUsed, setPointsUsed] = useState<number>(0);
+    const [isLoading, setIsLoading] =
+        useState<boolean>(true)
 
-    const loadTables = useCallback(async (isRefresh = false) => {
-        try {
-            if (isRefresh) {
-                setIsLoading(true);
-            }
-            setError(null);
-            const res = await cashierApi.getTables();
-            setTables(res.data);
-        } catch (err) {
-            console.error(err);
-            setError('Không thể tải danh mục bàn ăn.');
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    const [loadingDetails, setLoadingDetails] =
+        useState<boolean>(false)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            await loadTables(false);
-        };
-        void fetchData();
-    }, [loadTables]);
+    const [error, setError] =
+        useState<string | null>(null)
 
-    const handleSelectTable = async (table: TableDashboardResponse) => {
-        if (table.status !== 'SERVING') {
-            setSelectedTable(null);
-            setOrderDetail(null);
-            return;
-        }
+    const [showPaymentModal, setShowPaymentModal] =
+        useState<boolean>(false)
 
-        setSelectedTable(table);
-        setOrderDetail(null);
-        // ĐÃ THÊM: Reset khách hàng/điểm khi chuyển sang bàn khác
-        setCustomer(null);
-        setPointsUsed(0);
+    const [paymentResult, setPaymentResult] =
+        useState<PaymentResponse | null>(null)
 
-        const targetOrderId = table.orderId;
+    const [customer, setCustomer] =
+        useState<CustomerInfo | null>(null)
 
-        if (targetOrderId) {
-            setLoadingDetails(true);
+    const [pointsUsed, setPointsUsed] =
+        useState<number>(0)
+
+    const hasLoadedInitialTablesRef = useRef(false)
+
+    const loadTables = useCallback(
+        async (
+            signal?: AbortSignal,
+            showFullLoading = true,
+            resetError = true,
+        ) => {
             try {
-                const res = await cashierApi.getOrderDetail(targetOrderId);
-                setOrderDetail(res.data);
-            } catch (err) {
-                console.error("Lỗi khi lấy thông tin chi tiết:", err);
-                alert('Không thể lấy chi tiết đơn hàng.');
+                if (showFullLoading) {
+                    setIsLoading(true)
+                }
+
+                if (resetError) {
+                    setError(null)
+                }
+
+                const response = await cashierApi.getTables(signal)
+
+                if (signal?.aborted) {
+                    return
+                }
+
+                setTables(response.data)
+
+                setSelectedTable((currentTable) => {
+                    if (!currentTable) {
+                        return currentTable
+                    }
+
+                    const updatedTable = response.data.find(
+                        (table) => table.tableId === currentTable.tableId,
+                    )
+
+                    if (!updatedTable) {
+                        return currentTable
+                    }
+
+                    if (updatedTable.status !== 'SERVING') {
+                        setOrderDetail(null)
+                        setCustomer(null)
+                        setPointsUsed(0)
+                        return updatedTable
+                    }
+
+                    return updatedTable
+                })
+
+                setError(null)
+            } catch (requestError: unknown) {
+                if (
+                    signal?.aborted
+                    || isRequestCanceled(requestError)
+                ) {
+                    return
+                }
+
+                console.error(
+                    '[CASHIER_TABLES_FETCH_ERROR]',
+                    requestError,
+                )
+
+                setError('Không thể tải danh mục bàn ăn.')
             } finally {
-                setLoadingDetails(false);
+                if (
+                    showFullLoading
+                    && !signal?.aborted
+                ) {
+                    setIsLoading(false)
+                }
             }
-        }
-    };
+        },
+        [],
+    )
 
-    const handleDownloadPdf = async (invoiceId: number) => {
+    const loadOrderDetail = useCallback(
+        async (
+            orderId: number,
+            signal?: AbortSignal,
+            showLoading = true,
+            showErrorAlert = true,
+        ) => {
+            try {
+                if (showLoading) {
+                    setLoadingDetails(true)
+                }
+
+                const response = await cashierApi.getOrderDetail(
+                    orderId,
+                    signal,
+                )
+
+                if (signal?.aborted) {
+                    return
+                }
+
+                setOrderDetail(response.data)
+            } catch (requestError: unknown) {
+                if (
+                    signal?.aborted
+                    || isRequestCanceled(requestError)
+                ) {
+                    return
+                }
+
+                console.error(
+                    '[CASHIER_ORDER_DETAIL_FETCH_ERROR]',
+                    requestError,
+                )
+
+                if (showErrorAlert) {
+                    alert('Không thể lấy chi tiết đơn hàng.')
+                }
+            } finally {
+                if (
+                    showLoading
+                    && !signal?.aborted
+                ) {
+                    setLoadingDetails(false)
+                }
+            }
+        },
+        [],
+    )
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialTablesRef.current
+
+            await loadTables(
+                signal,
+                isInitialLoad,
+                isInitialLoad,
+            )
+
+            hasLoadedInitialTablesRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .cashier
+                .tablesIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
+
+                console.error(
+                    '[CASHIER_TABLES_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
+    usePolling(
+        async (signal) => {
+            if (
+                !selectedTable?.orderId
+                || selectedTable.status !== 'SERVING'
+                || showPaymentModal
+                || Boolean(paymentResult)
+            ) {
+                return
+            }
+
+            await loadOrderDetail(
+                selectedTable.orderId,
+                signal,
+                false,
+                false,
+            )
+        },
+        {
+            enabled:
+                Boolean(selectedTable?.orderId)
+                && selectedTable?.status === 'SERVING'
+                && !showPaymentModal
+                && !paymentResult,
+
+            intervalMs:
+            REALTIME_CONFIG
+                .cashier.orderDetailIntervalMs,
+            runImmediately: false,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
+
+                console.error(
+                    '[CASHIER_ORDER_DETAIL_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
+    async function handleSelectTable(
+        table: TableDashboardResponse,
+    ) {
+        if (table.status !== 'SERVING') {
+            setSelectedTable(null)
+            setOrderDetail(null)
+            setCustomer(null)
+            setPointsUsed(0)
+            return
+        }
+
+        setSelectedTable(table)
+        setOrderDetail(null)
+        setCustomer(null)
+        setPointsUsed(0)
+
+        if (table.orderId) {
+            await loadOrderDetail(
+                table.orderId,
+                undefined,
+                true,
+                true,
+            )
+        }
+    }
+
+    async function handleDownloadPdf(invoiceId: number) {
         try {
-            const res = await cashierApi.downloadInvoicePdf(invoiceId);
-            const blob = new Blob([res.data], {type: 'application/pdf'});
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `Invoice-${invoiceId}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error(err);
-            alert("Không thể tải PDF!");
-        }
-    };
+            const response = await cashierApi.downloadInvoicePdf(invoiceId)
+            const blob = new Blob(
+                [response.data],
+                {
+                    type: 'application/pdf',
+                },
+            )
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
 
-    const gridLayoutLayout = selectedTable
-        ? {display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1.5rem'}
-        : {display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem'};
+            link.href = url
+            link.setAttribute(
+                'download',
+                `Invoice-${invoiceId}.pdf`,
+            )
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+        } catch (requestError: unknown) {
+            console.error(requestError)
+            alert('Không thể tải PDF!')
+        }
+    }
+
+    const gridLayoutLayout: CSSProperties = selectedTable
+        ? {
+            display: 'grid',
+            gridTemplateColumns: '1.2fr 0.8fr',
+            gap: '1.5rem',
+        }
+        : {
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: '1.5rem',
+        }
 
     if (isLoading) {
         return (
-            <section className="page-card">
-                <p>Đang tải sơ đồ quầy thu ngân...</p>
-            </section>
-        );
+            <LoadingState
+                title="Đang tải sơ đồ quầy thu ngân..."
+                description="Hệ thống đang lấy trạng thái bàn và đơn hàng mới nhất."
+            />
+        )
     }
 
     if (error) {
         return (
-            <section className="page-card">
-                <p className="modal-error">{error}</p>
-                <button type="button" className="primary-button" onClick={() => void loadTables(true)}>
-                    Thử lại
-                </button>
-            </section>
-        );
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    loadTables(
+                        undefined,
+                        true,
+                        true,
+                    ).catch((requestError) => {
+                        console.error(requestError)
+                    })
+                }}
+            />
+        )
     }
 
     return (
-        <div className="dashboard-page" style={gridLayoutLayout}>
-            <div className="page-card">
-                <h2>Sơ Đồ Quầy Thu Ngân</h2>
-                <p style={{color: '#64748b', marginBottom: '1.5rem'}}>Danh sách bàn ăn tại nhà hàng</p>
+        <div
+            className="dashboard-page"
+            style={gridLayoutLayout}
+        >
+            <PageCard>
+                <PageHeader
+                    title="Sơ Đồ Quầy Thu Ngân"
+                    description="Danh sách bàn ăn tại nhà hàng. Dữ liệu được tự cập nhật theo thời gian thực."
+                />
 
-                <div className="table-grid"
-                     style={{display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '1rem'}}>
+                <div
+                    className="table-grid"
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns:
+                            'repeat(4, minmax(0, 1fr))',
+                        gap: '1rem',
+                    }}
+                >
                     {tables.map((table) => {
-                        const isSelected = selectedTable?.tableId === table.tableId;
-                        const isServing = table.status === 'SERVING';
+                        const isSelected =
+                            selectedTable?.tableId === table.tableId
+
+                        const isServing = table.status === 'SERVING'
 
                         return (
                             <button
                                 key={table.tableId}
                                 type="button"
-                                onClick={() => void handleSelectTable(table)}
+                                onClick={() => {
+                                    void handleSelectTable(table)
+                                }}
                                 style={{
-                                    border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                                    background: isServing ? '#fff7ed' : '#ffffff',
-                                    padding: '1.5rem', borderRadius: '12px',
-                                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-                                    cursor: 'pointer', width: '100%', textAlign: 'left'
+                                    border: isSelected
+                                        ? '2px solid #2563eb'
+                                        : '1px solid #e2e8f0',
+                                    background: isServing
+                                        ? '#fff7ed'
+                                        : '#ffffff',
+                                    padding: '1.5rem',
+                                    borderRadius: '12px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    textAlign: 'left',
                                 }}
                             >
-                                <strong style={{fontSize: '1.2rem'}}>{table.tableNumber}</strong>
-                                <span style={{fontSize: '0.85rem', color: '#64748b', marginBottom: '8px'}}>
-                                    ID Đơn: {isServing ? (table.orderId || 'Đang quét...') : 'null'}
+                                <strong
+                                    style={{
+                                        fontSize: '1.2rem',
+                                    }}
+                                >
+                                    {table.tableNumber}
+                                </strong>
+
+                                <span
+                                    style={{
+                                        fontSize: '0.85rem',
+                                        color: '#64748b',
+                                        marginBottom: '8px',
+                                    }}
+                                >
+                                    ID Đơn:{' '}
+                                    {isServing
+                                        ? table.orderId || 'Đang quét...'
+                                        : 'null'}
                                 </span>
-                                <small style={{
-                                    color: isServing ? '#ea580c' : '#16a34a',
-                                    marginTop: 'auto',
-                                    fontWeight: 'bold'
-                                }}>
-                                    {isServing ? '● Đang Phục Vụ' : '○ Bàn Trống'}
+
+                                <small
+                                    style={{
+                                        color: isServing
+                                            ? '#ea580c'
+                                            : '#16a34a',
+                                        marginTop: 'auto',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    {getTableStatusLabel(table.status)}
                                 </small>
                             </button>
-                        );
+                        )
                     })}
                 </div>
-            </div>
+            </PageCard>
 
             {selectedTable && (
                 <OrderPanel
@@ -163,10 +473,10 @@ export default function CashierPaymentsPage() {
                     orderDetail={orderDetail}
                     loading={loadingDetails}
                     onClose={() => {
-                        setSelectedTable(null);
-                        setOrderDetail(null);
-                        setCustomer(null);
-                        setPointsUsed(0);
+                        setSelectedTable(null)
+                        setOrderDetail(null)
+                        setCustomer(null)
+                        setPointsUsed(0)
                     }}
                     onCheckout={() => setShowPaymentModal(true)}
                     customer={customer}
@@ -184,8 +494,8 @@ export default function CashierPaymentsPage() {
                     pointsUsed={pointsUsed}
                     onClose={() => setShowPaymentModal(false)}
                     onSuccess={(result: PaymentResponse) => {
-                        setShowPaymentModal(false);
-                        setPaymentResult(result);
+                        setShowPaymentModal(false)
+                        setPaymentResult(result)
                     }}
                 />
             )}
@@ -194,18 +504,23 @@ export default function CashierPaymentsPage() {
                 <PaymentResultManager
                     paymentResult={paymentResult}
                     orderDetail={orderDetail}
-                    onDownload={(id) => void handleDownloadPdf(id)}
+                    onDownload={(invoiceId) => {
+                        void handleDownloadPdf(invoiceId)
+                    }}
                     onClose={() => {
-                        setPaymentResult(null);
-                        setSelectedTable(null);
-                        setOrderDetail(null);
-                        setCustomer(null);
-                        setPointsUsed(0);
-                        void loadTables(true);
+                        setPaymentResult(null)
+                        setSelectedTable(null)
+                        setOrderDetail(null)
+                        setCustomer(null)
+                        setPointsUsed(0)
+                        void loadTables(
+                            undefined,
+                            true,
+                            true,
+                        )
                     }}
                 />
             )}
-
         </div>
-    );
+    )
 }

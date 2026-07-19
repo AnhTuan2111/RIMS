@@ -6,7 +6,8 @@ export const RoleType = {
     CUSTOMER: 'CUSTOMER',
 } as const
 
-export type RoleType = (typeof RoleType)[keyof typeof RoleType]
+export type RoleType =
+    (typeof RoleType)[keyof typeof RoleType]
 
 export interface LoginRequest {
     username: string
@@ -20,11 +21,13 @@ export interface LoginResponse {
     expiresIn: number
     authenticated: boolean
     userId: number
+    id?: number
     username: string
     fullName: string
     phone: string
     email: string | null
     role: RoleType
+    rewardPoints?: number
 }
 
 export interface RefreshTokenRequest {
@@ -33,11 +36,13 @@ export interface RefreshTokenRequest {
 
 export interface UserProfile {
     userId: number
+    id?: number
     username: string
     fullName: string
     phone: string
     email: string | null
     role: RoleType
+    rewardPoints?: number
 }
 
 export interface LogoutResponse {
@@ -46,20 +51,22 @@ export interface LogoutResponse {
 
 export interface AuthUser {
     userId: number
+    id?: number
     username: string
     fullName: string
     phone: string
     email: string | null
     role: RoleType
+    rewardPoints?: number
 }
 
 export interface UserResponse {
     id: number
+    userId?: number
     username: string
     fullName: string
     email: string | null
     phone: string
-    rewardPoints: number
     role: RoleType
     isActive: boolean
     createdAt: string

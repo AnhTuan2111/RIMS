@@ -78,12 +78,15 @@ export type GroupedKitchenOrderResponse = {
  * Lấy danh sách món đang chuẩn bị.
  * GET /rims/chef/orders
  */
-export async function getKitchenOrders(): Promise<
-    KitchenOrderItemResponse[]
-> {
+export async function getKitchenOrders(
+    signal?: AbortSignal,
+): Promise<KitchenOrderItemResponse[]> {
     const response =
         await apiClient.get<KitchenOrderItemResponse[]>(
             '/chef/orders',
+            {
+                signal,
+            },
         )
 
     return response.data
@@ -126,12 +129,15 @@ export async function updateOrderItemStatus(
  * Lấy danh sách món ăn.
  * GET /rims/chef/dishes
  */
-export async function getChefDishes(): Promise<
-    DishListResponse[]
-> {
+export async function getChefDishes(
+    signal?: AbortSignal,
+): Promise<DishListResponse[]> {
     const response =
         await apiClient.get<DishListResponse[]>(
             '/chef/dishes',
+            {
+                signal,
+            },
         )
 
     return response.data
@@ -159,12 +165,15 @@ export async function updateMenuStatus(
  * Lấy số liệu Chef Dashboard.
  * GET /rims/chef/dashboard
  */
-export async function getChefDashboard(): Promise<
-    ChefDashboardResponse
-> {
+export async function getChefDashboard(
+    signal?: AbortSignal,
+): Promise<ChefDashboardResponse> {
     const response =
         await apiClient.get<ChefDashboardResponse>(
             '/chef/dashboard',
+            {
+                signal,
+            },
         )
 
     return response.data
@@ -190,12 +199,15 @@ export async function cancelDish(
  * Lấy danh sách món đã hoàn thành.
  * GET /rims/chef/orders/completed
  */
-export async function getCompletedOrders(): Promise<
-    KitchenOrderItemResponse[]
-> {
+export async function getCompletedOrders(
+    signal?: AbortSignal,
+): Promise<KitchenOrderItemResponse[]> {
     const response =
         await apiClient.get<KitchenOrderItemResponse[]>(
             '/chef/orders/completed',
+            {
+                signal,
+            },
         )
 
     return response.data
@@ -205,12 +217,15 @@ export async function getCompletedOrders(): Promise<
  * Lấy danh sách món đã hủy.
  * GET /rims/chef/orders/cancelled
  */
-export async function getCancelledOrders(): Promise<
-    CancelledOrderResponse[]
-> {
+export async function getCancelledOrders(
+    signal?: AbortSignal,
+): Promise<CancelledOrderResponse[]> {
     const response =
         await apiClient.get<CancelledOrderResponse[]>(
             '/chef/orders/cancelled',
+            {
+                signal,
+            },
         )
 
     return response.data
@@ -220,12 +235,15 @@ export async function getCancelledOrders(): Promise<
  * Lấy danh sách món đã gom.
  * GET /rims/chef/orders/grouped
  */
-export async function getGroupedKitchenOrders(): Promise<
-    GroupedKitchenOrderResponse[]
-> {
+export async function getGroupedKitchenOrders(
+    signal?: AbortSignal,
+): Promise<GroupedKitchenOrderResponse[]> {
     const response =
         await apiClient.get<GroupedKitchenOrderResponse[]>(
             '/chef/orders/grouped',
+            {
+                signal,
+            },
         )
 
     return response.data

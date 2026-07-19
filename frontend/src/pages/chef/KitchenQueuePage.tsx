@@ -1,10 +1,17 @@
 import {
+    EmptyState,
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback'
+import {
     useCallback,
     useEffect,
     useMemo,
     useRef,
     useState,
 } from 'react'
+import {usePolling} from '../../hooks/usePolling'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
 import {
     getDishDetail,
     getKitchenOrders,
@@ -16,7 +23,6 @@ import {
 } from '../../api/chef'
 
 const ITEMS_PER_PAGE = 6
-const ORDER_POLL_INTERVAL_MS = 10_000
 const NEW_ORDER_MESSAGE_DURATION_MS = 6_000
 
 type BrowserWindow = Window & {
@@ -110,6 +116,9 @@ export default function KitchenQueuePage() {
         useRef<Set<number>>(new Set())
 
     const hasLoadedInitialOrdersRef =
+        useRef(false)
+
+    const hasInitialKitchenLoadRef =
         useRef(false)
 
     const newOrderMessageTimerRef =
@@ -235,13 +244,14 @@ export default function KitchenQueuePage() {
         async (
             showFullLoading: boolean,
             resetPage: boolean,
+            signal?: AbortSignal,
         ) => {
             try {
                 if (showFullLoading) {
                     setIsLoading(true)
                 }
 
-                const data = await getKitchenOrders()
+                const data = await getKitchenOrders(signal)
 
                 if (
                     hasLoadedInitialOrdersRef.current
@@ -280,7 +290,14 @@ export default function KitchenQueuePage() {
                     setCurrentPage(1)
                 }
             } catch (requestError) {
-                console.error(requestError)
+                if (signal?.aborted) {
+                    return
+                }
+
+                console.error(
+                    '[CHEF_KITCHEN_QUEUE_FETCH_ERROR]',
+                    requestError,
+                )
 
                 setError(
                     'Không thể tải danh sách món cần chế biến. Hãy kiểm tra backend hoặc đăng nhập bằng tài khoản Chef.',
@@ -298,27 +315,7 @@ export default function KitchenQueuePage() {
     )
 
     useEffect(() => {
-        fetchKitchenOrders(true, false).catch(
-            (requestError) => {
-                console.error(requestError)
-            },
-        )
-
-        const intervalId = window.setInterval(
-            () => {
-                fetchKitchenOrders(
-                    false,
-                    false,
-                ).catch((requestError) => {
-                    console.error(requestError)
-                })
-            },
-            ORDER_POLL_INTERVAL_MS,
-        )
-
         return () => {
-            window.clearInterval(intervalId)
-
             if (
                 newOrderMessageTimerRef.current
                 !== null
@@ -334,12 +331,48 @@ export default function KitchenQueuePage() {
             audioContextRef.current
                 ?.close()
                 .catch((requestError) => {
-                    console.error(requestError)
+                    console.error(
+                        '[CHEF_AUDIO_CONTEXT_CLOSE_ERROR]',
+                        requestError,
+                    )
                 })
 
             audioContextRef.current = null
         }
-    }, [fetchKitchenOrders])
+    }, [])
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasInitialKitchenLoadRef.current
+
+            await fetchKitchenOrders(
+                isInitialLoad,
+                false,
+                signal,
+            )
+
+            if (!signal.aborted) {
+                hasInitialKitchenLoadRef.current = true
+            }
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .chef
+                .kitchenQueueIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[CHEF_KITCHEN_QUEUE_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
 
     async function loadKitchenOrders() {
         await fetchKitchenOrders(true, true)
@@ -695,32 +728,25 @@ export default function KitchenQueuePage() {
 
     if (isLoading) {
         return (
-            <div className="page-card">
-                Đang tải danh sách món cần chế biến...
-            </div>
+            <LoadingState
+                title="Đang tải danh sách món cần chế biến..."
+                description="Hệ thống đang lấy dữ liệu mới nhất từ bếp."
+            />
         )
     }
 
     if (error) {
         return (
-            <div className="page-card">
-                <h2>Lỗi tải dữ liệu</h2>
-                <p>{error}</p>
-
-                <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => {
-                        loadKitchenOrders().catch(
-                            (requestError) => {
-                                console.error(requestError)
-                            },
-                        )
-                    }}
-                >
-                    Thử lại
-                </button>
-            </div>
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    loadKitchenOrders().catch(
+                        (requestError) => {
+                            console.error(requestError)
+                        },
+                    )
+                }}
+            />
         )
     }
 
@@ -864,12 +890,19 @@ export default function KitchenQueuePage() {
             </section>
 
             {filteredItems.length === 0 ? (
-                <section className="page-card">
-                    <h2>Không tìm thấy món phù hợp</h2>
-                    <p>
-                        Hãy thay đổi từ khóa hoặc xóa bộ lọc.
-                    </p>
-                </section>
+                <EmptyState
+                    title="Không tìm thấy món phù hợp"
+                    description="Hãy thay đổi từ khóa hoặc xóa bộ lọc."
+                    action={
+                        <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={clearFilters}
+                        >
+                            Xóa bộ lọc
+                        </button>
+                    }
+                />
             ) : (
                 <>
                     <div className="kitchen-board">

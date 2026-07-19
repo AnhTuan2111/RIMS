@@ -6,53 +6,142 @@ import type {
     PaymentResponse,
     VNPayResponse,
     PagedInvoiceResponse,
-    InvoiceDetail
+    InvoiceDetail,
 } from '../types/cashier';
+
+export type GetTodayInvoicesParams = {
+    page: number;
+    size: number;
+    tableNumber?: string;
+    keyword?: string;
+    paymentMethod?: string;
+    invoiceCode?: string;
+};
 
 export const cashierApi = {
     // API 1: Lấy danh sách bàn
-    getTables: () =>
-        apiClient.get<TableDashboardResponse[]>('/cashier/tables'),
+    getTables: (signal?: AbortSignal) =>
+        apiClient.get<TableDashboardResponse[]>(
+            '/cashier/tables',
+            {
+                signal,
+            },
+        ),
 
     // API 2: Lấy chi tiết đơn hàng
-    getOrderDetail: (orderId: number) =>
-        apiClient.get<OrderDetailResponse>(`/cashier/orders/${orderId}`),
+    getOrderDetail: (
+        orderId: number,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<OrderDetailResponse>(
+            `/cashier/orders/${orderId}`,
+            {
+                signal,
+            },
+        ),
 
     // API 3: LOCKED trước khi thanh toán
-    processPaymentLock: (orderId: number, request: PaymentRequest) =>
-        apiClient.post<PaymentResponse>(`/cashier/orders/${orderId}/payment`, request),
+    processPaymentLock: (
+        orderId: number,
+        request: PaymentRequest,
+    ) =>
+        apiClient.post<PaymentResponse>(
+            `/cashier/orders/${orderId}/payment`,
+            request,
+        ),
 
     // API 4: Hoàn tất thanh toán tiền mặt
-    completeCashPayment: (orderId: number, request: PaymentRequest) =>
-        apiClient.post<PaymentResponse>(`/cashier/orders/${orderId}/complete-cash`, request),
+    completeCashPayment: (
+        orderId: number,
+        request: PaymentRequest,
+    ) =>
+        apiClient.post<PaymentResponse>(
+            `/cashier/orders/${orderId}/complete-cash`,
+            request,
+        ),
 
     // API 5: Lấy mã QR VNPay
-    getVNPayQrCode: (orderId: number, customerId?: number | null, pointsUsed?: number) =>
-        apiClient.get<VNPayResponse>(`/cashier/orders/${orderId}/vnpay-qr`, {
-            params: { customerId: customerId ?? undefined, pointsUsed }
-        }),
+    getVNPayQrCode: (
+        orderId: number,
+        customerId?: number | null,
+        pointsUsed?: number,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<VNPayResponse>(
+            `/cashier/orders/${orderId}/vnpay-qr`,
+            {
+                params: {
+                    customerId: customerId ?? undefined,
+                    pointsUsed,
+                },
+                signal,
+            },
+        ),
 
-    //API 6 : dowloand invoice pdf
-    downloadInvoicePdf: (invoiceId: number) =>
-        apiClient.get(`/cashier/invoices/${invoiceId}/pdf`, {
-            responseType: 'blob'
-        }),
+    // API 6: Download invoice PDF
+    downloadInvoicePdf: (
+        invoiceId: number,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get(
+            `/cashier/invoices/${invoiceId}/pdf`,
+            {
+                responseType: 'blob',
+                signal,
+            },
+        ),
 
-    searchCustomer: (phone: string) =>
-        apiClient.get(`/cashier/customers/search?phone=${phone}`),
+    searchCustomer: (
+        phone: string,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get(
+            '/cashier/customers/search',
+            {
+                params: {
+                    phone,
+                },
+                signal,
+            },
+        ),
 
-    createCustomerFast: (data: { fullName: string, phone: string, email: string }) =>
-        apiClient.post('/cashier/customers/create', data),
+    createCustomerFast: (
+        data: {
+            fullName: string;
+            phone: string;
+            email: string;
+        },
+    ) =>
+        apiClient.post(
+            '/cashier/customers/create',
+            data,
+        ),
 
-    getTodayInvoices: (params: {
-        page: number; size: number;
-        tableNumber?: string; keyword?: string; paymentMethod?: string; invoiceCode?: string;
-    }) =>
-        apiClient.get<PagedInvoiceResponse>('/cashier/invoices/today', { params }),
+    getTodayInvoices: (
+        params: GetTodayInvoicesParams,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<PagedInvoiceResponse>(
+            '/cashier/invoices/today',
+            {
+                params,
+                signal,
+            },
+        ),
 
-    getInvoiceDetail: (invoiceId: number) =>
-        apiClient.get<InvoiceDetail>(`/cashier/invoices/${invoiceId}`),
+    getInvoiceDetail: (
+        invoiceId: number,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<InvoiceDetail>(
+            `/cashier/invoices/${invoiceId}`,
+            {
+                signal,
+            },
+        ),
 
     unlockOrder: (orderId: number) =>
-        apiClient.post<PaymentResponse>(`/cashier/orders/${orderId}/unlock`)
+        apiClient.post<PaymentResponse>(
+            `/cashier/orders/${orderId}/unlock`,
+        ),
 };

@@ -1,11 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import {
+    useCallback,
+    useRef,
+    useState,
+    type FormEvent,
+} from 'react';
 import { dishApi } from '../../api/admin';
 import type { DishResponse, CategoryResponse, DishFormData } from '../../api/admin';
+import { REALTIME_CONFIG } from '../../app/config/realtime';
+import { usePolling } from '../../hooks/usePolling';
+import {
+    EmptyState,
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback';
+import {
+    PageCard,
+    PageHeader,
+} from '../../components/ui';
 
 type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE';
 
 // --- Pagination Config ---
 const ITEMS_PER_PAGE = 5;
+
+
+type ErrorResponseShape = {
+    response?: {
+        data?: {
+            message?: unknown;
+            error?: unknown;
+        };
+    };
+};
+
+function getRequestErrorMessage(
+    error: unknown,
+    fallbackMessage: string,
+) {
+    const errorResponse = error as ErrorResponseShape;
+    const message = errorResponse.response?.data?.message;
+    const responseError = errorResponse.response?.data?.error;
+
+    if (
+        typeof message === 'string'
+        && message.trim().length > 0
+    ) {
+        return message;
+    }
+
+    if (
+        typeof responseError === 'string'
+        && responseError.trim().length > 0
+    ) {
+        return responseError;
+    }
+
+    return fallbackMessage;
+}
 
 export default function AdminDishesPage() {
     // --- States ---
@@ -38,38 +89,80 @@ export default function AdminDishesPage() {
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+    const hasLoadedInitialDishesRef = useRef(false);
+
     // --- Load Data ---
-    const loadAllData = async () => {
-        try {
-            setLoading(true);
-            const [dishRes, catRes] = await Promise.all([
-                dishApi.getAllDishes(),
-                dishApi.getAllCategories()
-            ]);
+    const loadAllData = useCallback(
+        async (
+            signal?: AbortSignal,
+            showFullLoading = true,
+            resetPage = true,
+        ) => {
+            try {
+                if (showFullLoading) {
+                    setLoading(true);
+                }
 
-            setDishes(dishRes.data);
-            setCategories(catRes.data);
-            setError(null);
-            setCurrentPage(1);
-        } catch (err) {
-            console.error("Lỗi tải dữ liệu món ăn:", err);
-            setError("Không thể tải danh sách món ăn từ hệ thống.");
-        } finally {
-            setLoading(false);
-        }
-    };
+                const [dishRes, catRes] = await Promise.all([
+                    dishApi.getAllDishes(signal),
+                    dishApi.getAllCategories(signal),
+                ]);
 
-    useEffect(() => {
-        loadAllData();
-    }, []);
+                setDishes(dishRes.data);
+                setCategories(catRes.data);
+                setError(null);
 
-    // Reset page khi filter thay đổi
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchKeyword, selectedCategory, selectedStatus]);
+                if (resetPage) {
+                    setCurrentPage(1);
+                }
+            } catch (requestError: unknown) {
+                console.error(
+                    '[ADMIN_DISHES_FETCH_ERROR]',
+                    requestError,
+                );
+                setError("Không thể tải danh sách món ăn từ hệ thống.");
+            } finally {
+                if (showFullLoading) {
+                    setLoading(false);
+                }
+            }
+        },
+        [],
+    );
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialDishesRef.current;
+
+            await loadAllData(
+                signal,
+                isInitialLoad,
+                isInitialLoad,
+            );
+
+            hasLoadedInitialDishesRef.current = true;
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .admin
+                .dashboardIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[ADMIN_DISHES_POLL_ERROR]',
+                    requestError,
+                );
+            },
+        },
+    );
 
     // --- CRUD Handlers ---
-    const handleCreateDish = async (e: React.FormEvent) => {
+    const handleCreateDish = async (e: FormEvent) => {
         e.preventDefault();
 
         const catIdParsed = parseInt(formData.categoryId);
@@ -101,17 +194,20 @@ export default function AdminDishesPage() {
                 isAvailable: formData.isAvailable
             });
             setActiveModal('NONE');
-            loadAllData();
+            await loadAllData(undefined, true, true);
             alert("Thêm món ăn thành công! 🎉");
-        } catch (err: any) {
-            const errMsg = err.response?.data?.message || "Lỗi khi thêm món ăn mới!";
+        } catch (err: unknown) {
+            const errMsg = getRequestErrorMessage(
+                err,
+                "Lỗi khi thêm món ăn mới!",
+            );
             alert(errMsg);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleUpdateDish = async (e: React.FormEvent) => {
+    const handleUpdateDish = async (e: FormEvent) => {
         e.preventDefault();
         if (!selectedDish || isSubmitting) return;
 
@@ -142,10 +238,13 @@ export default function AdminDishesPage() {
                 isAvailable: formData.isAvailable
             });
             setActiveModal('NONE');
-            loadAllData();
+            await loadAllData(undefined, true, true);
             alert("Cập nhật món ăn thành công! ✅");
-        } catch (err: any) {
-            const errMsg = err.response?.data?.message || "Lỗi khi cập nhật món ăn!";
+        } catch (err: unknown) {
+            const errMsg = getRequestErrorMessage(
+                err,
+                "Lỗi khi cập nhật món ăn!",
+            );
             alert(errMsg);
         } finally {
             setIsSubmitting(false);
@@ -157,10 +256,13 @@ export default function AdminDishesPage() {
         try {
             await dishApi.deleteDish(selectedDish.id);
             setActiveModal('NONE');
-            loadAllData();
+            await loadAllData(undefined, true, true);
             alert("Xóa món ăn thành công! 🗑️");
-        } catch (err: any) {
-            const errMsg = err.response?.data?.message || "Lỗi khi xóa món ăn!";
+        } catch (err: unknown) {
+            const errMsg = getRequestErrorMessage(
+                err,
+                "Lỗi khi xóa món ăn!",
+            );
             alert(errMsg);
         }
     };
@@ -194,7 +296,7 @@ export default function AdminDishesPage() {
 
     // --- Pagination Logic ---
     const totalItems = filteredDishes.length;
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     const currentItems = filteredDishes.slice(startIndex, endIndex);
@@ -242,33 +344,56 @@ export default function AdminDishesPage() {
 
     const activeCategories = categories.filter(c => c.isAvailable);
 
-    if (loading) return <div className="admin-dish-status">🔄 Đang tải danh sách món ăn hệ thống...</div>;
-    if (error) return <div className="admin-dish-status admin-dish-status-error">❌ {error}</div>;
+    if (loading) {
+        return (
+            <LoadingState
+                title="Đang tải danh sách món ăn hệ thống..."
+                description="Hệ thống đang lấy dữ liệu món ăn và danh mục mới nhất."
+            />
+        );
+    }
+
+    if (error) {
+        return (
+            <ErrorState
+                message={error}
+                onRetry={() => {
+                    loadAllData(undefined, true, true).catch((requestError) => {
+                        console.error(requestError);
+                    });
+                }}
+            />
+        );
+    }
 
     return (
         <div className="admin-dish-page">
             {/* Header */}
-            <div className="admin-dish-header">
-                <div>
-                    <h2 className="admin-dish-page-title">🍳 QUẢN LÝ MÓN ĂN</h2>
-                </div>
-                <button
-                    onClick={() => {
-                        setFormData({
-                            name: '',
-                            categoryId: activeCategories[0]?.id.toString() || '',
-                            price: 0,
-                            description: '',
-                            imageUrl: '',
-                            isAvailable: true
-                        });
-                        setActiveModal('CREATE');
-                    }}
-                    className="admin-dish-btn-primary"
-                >
-                    <span>+</span> Thêm Món Ăn
-                </button>
-            </div>
+            <PageCard className="admin-dish-header-card">
+                <PageHeader
+                    title="🍳 Quản lý món ăn"
+                    description="Tìm kiếm, thêm, chỉnh sửa và quản lý trạng thái món ăn trong thực đơn."
+                    actions={
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFormData({
+                                    name: '',
+                                    categoryId: activeCategories[0]?.id.toString() || '',
+                                    price: 0,
+                                    description: '',
+                                    imageUrl: '',
+                                    isAvailable: true
+                                });
+                                setActiveModal('CREATE');
+                            }}
+                            className="admin-dish-btn-primary"
+                        >
+                            <span>+</span> Thêm Món Ăn
+                        </button>
+                    }
+                />
+            </PageCard>
 
             {/* Filters */}
             <div className="admin-dish-filter-grid">
@@ -278,12 +403,18 @@ export default function AdminDishesPage() {
                             type="text"
                             placeholder="Tìm theo tên món ăn hoặc mã ID..."
                             value={searchKeyword}
-                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            onChange={(e) => {
+                                setSearchKeyword(e.target.value);
+                                setCurrentPage(1);
+                            }}
                             className="admin-dish-search-input"
                         />
                         <select
                             value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            onChange={(e) => {
+                                setSelectedCategory(e.target.value);
+                                setCurrentPage(1);
+                            }}
                             className="admin-dish-select"
                         >
                             <option value="ALL">Tất cả danh mục</option>
@@ -300,7 +431,10 @@ export default function AdminDishesPage() {
                         </select>
                         <select
                             value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value)}
+                            onChange={(e) => {
+                                setSelectedStatus(e.target.value);
+                                setCurrentPage(1);
+                            }}
                             className="admin-dish-select"
                         >
                             <option value="ALL">Tất cả trạng thái</option>
@@ -403,7 +537,24 @@ export default function AdminDishesPage() {
                     </tbody>
                 </table>
                 {filteredDishes.length === 0 && (
-                    <div className="admin-dish-empty-state">Không tìm thấy món ăn nào phù hợp với bộ lọc.</div>
+                    <EmptyState
+                        title="Không tìm thấy món ăn phù hợp"
+                        description="Hãy thay đổi từ khóa, danh mục hoặc trạng thái để tìm món ăn."
+                        action={
+                            <button
+                                type="button"
+                                className="admin-dish-btn-secondary"
+                                onClick={() => {
+                                    setSearchKeyword('');
+                                    setSelectedCategory('ALL');
+                                    setSelectedStatus('ALL');
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                Xóa bộ lọc
+                            </button>
+                        }
+                    />
                 )}
 
                 {/* Pagination */}

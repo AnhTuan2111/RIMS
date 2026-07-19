@@ -1,169 +1,614 @@
-import {useEffect, useMemo, useState} from "react";
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {type MenuItemResponse, type OrderItemRequest, waiterApi} from "../../api/waiter";
-import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from "../../components/waiter";
+
+import {
+    useMemo,
+    useRef,
+    useState,
+} from 'react'
+import {
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from 'react-router-dom'
+
+import {
+    type CreateOrderRequest,
+    type MenuItemResponse,
+    type OrderItemRequest,
+    waiterApi,
+} from '../../api/waiter'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {
+    BackArrow,
+    ConfirmModal,
+    fmtPrice,
+    WaiterHeader,
+    WaiterToast,
+} from '../../components/waiter'
+import {usePolling} from '../../hooks/usePolling'
+
+type DraftItem = {
+    qty: number
+    note: string
+}
+
+type ToastState = {
+    msg: string
+    type: string
+} | null
+
+function isRequestCanceled(error: unknown) {
+    if (typeof error !== 'object' || error === null) {
+        return false
+    }
+
+    const requestError = error as {
+        name?: string
+        code?: string
+        message?: string
+    }
+
+    return (
+        requestError.name === 'CanceledError'
+        || requestError.code === 'ERR_CANCELED'
+        || requestError.message === 'canceled'
+    )
+}
+
+function getRequestErrorMessage(
+    error: unknown,
+    fallback: string,
+) {
+    if (typeof error !== 'object' || error === null) {
+        return fallback
+    }
+
+    const requestError = error as {
+        response?: {
+            data?: string | {
+                message?: string
+            }
+        }
+        message?: string
+    }
+
+    const responseData = requestError.response?.data
+
+    if (typeof responseData === 'string') {
+        return responseData
+    }
+
+    if (responseData?.message) {
+        return responseData.message
+    }
+
+    return requestError.message || fallback
+}
 
 export default function WaiterCreateOrderPage() {
-    const navigate = useNavigate();
-    const {tableId} = useParams();
-    const tid = parseInt(tableId || "0");
-    const [searchParams] = useSearchParams();
-    const reservationIdParam = searchParams.get("reservationId");
-    const reservationId = reservationIdParam ? parseInt(reservationIdParam) : null;
-    const [menu, setMenu] = useState<MenuItemResponse[]>([]);
-    const [orderDraft, setOrderDraft] = useState<Record<number, { qty: number; note: string }>>({});
-    const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
-    const [showConfirm, setShowConfirm] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [activeCategory, setActiveCategory] = useState<string>("Tất cả");
+    const navigate = useNavigate()
+    const {tableId} = useParams()
+    const [searchParams] = useSearchParams()
 
-    useEffect(() => {
-        waiterApi.getMenu().then((res) => setMenu(res.data)).catch(console.error);
-    }, []);
+    const tableIdNumber =
+        Number.parseInt(tableId ?? '0', 10)
 
-    function showToast(msg: string, type = "success") {
-        setToast({msg, type});
-        setTimeout(() => setToast(null), 3000);
+    const reservationIdParam =
+        searchParams.get('reservationId')
+
+    const reservationId =
+        reservationIdParam
+            ? Number.parseInt(reservationIdParam, 10)
+            : null
+
+    const [menu, setMenu] =
+        useState<MenuItemResponse[]>([])
+
+    const [orderDraft, setOrderDraft] =
+        useState<Record<number, DraftItem>>({})
+
+    const [toast, setToast] =
+        useState<ToastState>(null)
+
+    const [showConfirm, setShowConfirm] =
+        useState(false)
+
+    const [submitting, setSubmitting] =
+        useState(false)
+
+    const [activeCategory, setActiveCategory] =
+        useState('Tất cả')
+
+    const [successData, setSuccessData] =
+        useState<{
+            message: string
+            itemSummary: string
+        } | null>(null)
+
+    const [isLoadingMenu, setIsLoadingMenu] =
+        useState(true)
+
+    const [menuError, setMenuError] =
+        useState<string | null>(null)
+
+    const hasLoadedInitialMenuRef =
+        useRef(false)
+
+    function showToast(
+        msg: string,
+        type = 'success',
+    ) {
+        setToast({
+            msg,
+            type,
+        })
+
+        window.setTimeout(
+            () => setToast(null),
+            3000,
+        )
     }
 
-    const selectedItems = useMemo(() => {
-        return menu
-            .map((dish) => {
-                const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
-                if (d.qty <= 0) return null;
-                return {...dish, qty: d.qty, note: d.note};
-            })
-            .filter(Boolean) as (MenuItemResponse & { qty: number; note: string })[];
-    }, [menu, orderDraft]);
+    async function loadMenu(
+        signal?: AbortSignal,
+        showFullLoading = true,
+    ) {
+        try {
+            if (showFullLoading) {
+                setIsLoadingMenu(true)
+            }
 
-    const orderTotal = selectedItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+            setMenuError(null)
+
+            const response =
+                await waiterApi.getMenu(signal)
+
+            if (signal?.aborted) {
+                return
+            }
+
+            setMenu(response.data)
+        } catch (requestError: unknown) {
+            if (
+                signal?.aborted
+                || isRequestCanceled(requestError)
+            ) {
+                return
+            }
+
+            console.error(
+                '[WAITER_CREATE_ORDER_MENU_ERROR]',
+                requestError,
+            )
+
+            setMenuError(
+                'Không thể tải danh sách món.',
+            )
+        } finally {
+            if (
+                showFullLoading
+                && !signal?.aborted
+            ) {
+                setIsLoadingMenu(false)
+            }
+        }
+    }
+
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialMenuRef.current
+
+            await loadMenu(
+                signal,
+                isInitialLoad,
+            )
+
+            hasLoadedInitialMenuRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .waiter
+                .tablesIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[WAITER_CREATE_ORDER_MENU_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
+    const categories =
+        useMemo(
+            () => [
+                'Tất cả',
+                ...Array.from(
+                    new Set(
+                        menu
+                            .map((dish) => dish.categoryName)
+                            .filter(Boolean),
+                    ),
+                ),
+            ],
+            [menu],
+        )
+
+    const visibleMenu =
+        useMemo(
+            () =>
+                menu.filter(
+                    (dish) =>
+                        activeCategory === 'Tất cả'
+                        || dish.categoryName === activeCategory,
+                ),
+            [
+                menu,
+                activeCategory,
+            ],
+        )
+
+    const selectedItems =
+        useMemo(
+            () =>
+                menu
+                    .map((dish) => {
+                        const draft =
+                            orderDraft[dish.dishId] ?? {
+                                qty: 0,
+                                note: '',
+                            }
+
+                        if (draft.qty <= 0) {
+                            return null
+                        }
+
+                        return {
+                            ...dish,
+                            qty: draft.qty,
+                            note: draft.note,
+                        }
+                    })
+                    .filter(Boolean) as Array<
+                    MenuItemResponse & DraftItem
+                >,
+            [
+                menu,
+                orderDraft,
+            ],
+        )
+
+    const orderTotal =
+        selectedItems.reduce(
+            (sum, item) =>
+                sum + item.price * item.qty,
+            0,
+        )
 
     function openConfirm() {
-        if (!selectedItems.length) {
-            showToast("Vui lòng chọn ít nhất 1 món", "error");
-            return;
+        if (!tableIdNumber) {
+            showToast(
+                'Không xác định được bàn.',
+                'error',
+            )
+            return
         }
-        setShowConfirm(true);
-    }
 
-    const [successData, setSuccessData] = useState<{ message: string; itemSummary: string } | null>(null);
+        if (!selectedItems.length) {
+            showToast(
+                'Vui lòng chọn ít nhất 1 món',
+                'error',
+            )
+            return
+        }
+
+        setShowConfirm(true)
+    }
 
     async function submitCreateOrder() {
-        const items: OrderItemRequest[] = selectedItems.map((item) => ({
-            dishId: item.dishId,
-            quantity: item.qty,
-            note: item.note || "",
-        }));
+        if (!tableIdNumber) {
+            showToast(
+                'Không xác định được bàn.',
+                'error',
+            )
+            return
+        }
 
-        setSubmitting(true);
+        const items: OrderItemRequest[] =
+            selectedItems.map((item) => ({
+                dishId: item.dishId,
+                quantity: item.qty,
+                note: item.note || '',
+            }))
+
+        const payload: CreateOrderRequest = {
+            tableId: tableIdNumber,
+            items,
+        }
+
+        setSubmitting(true)
+
         try {
-            const data = {tableId: tid, items};
-            const res = reservationId 
-                ? await waiterApi.createOrderFromReservation(reservationId, data)
-                : await waiterApi.createOrder(data);
+            const response =
+                reservationId
+                    ? await waiterApi.createOrderFromReservation(
+                        reservationId,
+                        payload,
+                    )
+                    : await waiterApi.createOrder(payload)
 
             setSuccessData({
-                message: res.data.message || "Tạo order thành công",
-                itemSummary: "",
-            });
-        } catch (error: any) {
-            const msg = error.response?.data?.message || typeof error.response?.data === 'string' ? error.response?.data : "Lỗi khi tạo order";
-            showToast(msg, "error");
+                message:
+                    response.data.message
+                    || 'Tạo order thành công',
+                itemSummary: '',
+            })
+        } catch (requestError: unknown) {
+            if (isRequestCanceled(requestError)) {
+                return
+            }
+
+            console.error(
+                '[WAITER_CREATE_ORDER_SUBMIT_ERROR]',
+                requestError,
+            )
+
+            showToast(
+                getRequestErrorMessage(
+                    requestError,
+                    'Lỗi khi tạo order',
+                ),
+                'error',
+            )
         } finally {
-            setSubmitting(false);
-            setShowConfirm(false);
+            setSubmitting(false)
+            setShowConfirm(false)
         }
     }
 
-    function changeDraftQty(dishId: number, delta: number, min = 0) {
-        setOrderDraft((prev) => {
-            const cur = prev[dishId] || {qty: 0, note: ""};
-            const qty = Math.max(min, cur.qty + delta);
-            return {...prev, [dishId]: {...cur, qty}};
-        });
+    function changeDraftQty(
+        dishId: number,
+        delta: number,
+        min = 0,
+    ) {
+        setOrderDraft((previous) => {
+            const current =
+                previous[dishId] ?? {
+                    qty: 0,
+                    note: '',
+                }
+
+            const qty =
+                Math.max(
+                    min,
+                    current.qty + delta,
+                )
+
+            return {
+                ...previous,
+                [dishId]: {
+                    ...current,
+                    qty,
+                },
+            }
+        })
     }
 
-    function setDraftNote(dishId: number, note: string) {
-        setOrderDraft((prev) => ({
-            ...prev,
-            [dishId]: {...(prev[dishId] || {qty: 0}), note},
-        }));
+    function setDraftNote(
+        dishId: number,
+        note: string,
+    ) {
+        setOrderDraft((previous) => {
+            const current =
+                previous[dishId] ?? {
+                    qty: 0,
+                    note: '',
+                }
+
+            return {
+                ...previous,
+                [dishId]: {
+                    ...current,
+                    note,
+                },
+            }
+        })
     }
 
     return (
         <div className="waiter-container">
-            <WaiterHeader/>
+            <WaiterHeader />
+
             <main className="waiter-main">
                 <div className="waiter-sub-header">
-                    <BackArrow onClick={() => navigate("/waiter/tables")}/>
-                    <h2 className="waiter-title">Tạo Order - Bàn {tid}</h2>
-                    <button onClick={openConfirm} className="waiter-action-btn">Tạo Order</button>
+                    <BackArrow
+                        onClick={() =>
+                            navigate('/waiter/tables')
+                        }
+                    />
+
+                    <h2 className="waiter-title">
+                        Tạo Order - Bàn {tableIdNumber || '—'}
+                    </h2>
+
+                    <button
+                        type="button"
+                        className="waiter-action-btn"
+                        disabled={
+                            submitting
+                            || isLoadingMenu
+                            || !tableIdNumber
+                        }
+                        onClick={openConfirm}
+                    >
+                        Tạo Order
+                    </button>
                 </div>
+
                 <div className="waiter-category-nav">
-                    {["Tất cả", ...Array.from(new Set(menu.map((d) => d.categoryName).filter(Boolean)))].map((cat) => (
+                    {categories.map((category) => (
                         <button
-                            key={cat}
-                            className={`waiter-category-tab${activeCategory === cat ? " waiter-category-tab-active" : ""}`}
-                            onClick={() => setActiveCategory(cat)}
+                            key={category}
+                            type="button"
+                            className={`waiter-category-tab${
+                                activeCategory === category
+                                    ? ' waiter-category-tab-active'
+                                    : ''
+                            }`}
+                            onClick={() =>
+                                setActiveCategory(category)
+                            }
                         >
-                            {cat}
+                            {category}
                         </button>
                     ))}
                 </div>
-                <div className="waiter-menu-grid">
-                    {menu
-                        .filter((dish) => activeCategory === "Tất cả" || dish.categoryName === activeCategory)
-                        .map((dish) => {
-                        const d = orderDraft[dish.dishId] || {qty: 0, note: ""};
-                        return (
-                            <div key={dish.dishId} className="waiter-menu-card">
-                                <div className="waiter-menu-card-top">
-                                    {dish.imageUrl ? (
-                                        <img src={dish.imageUrl} alt={dish.name} className="waiter-menu-img"/>
-                                    ) : (
-                                        <span className="waiter-menu-emoji">🍽️</span>
-                                    )}
-                                    <div className="waiter-menu-info">
-                                        <h4>{dish.name}</h4>
-                                        <p>{fmtPrice(dish.price)}</p>
+
+                {isLoadingMenu ? (
+                    <div style={stateBoxStyle}>
+                        Đang tải danh sách món...
+                    </div>
+                ) : menuError ? (
+                    <div style={errorBoxStyle}>
+                        <p>{menuError}</p>
+
+                        <button
+                            type="button"
+                            className="waiter-action-btn"
+                            onClick={() =>
+                                void loadMenu(
+                                    undefined,
+                                    true,
+                                )
+                            }
+                        >
+                            Thử lại
+                        </button>
+                    </div>
+                ) : visibleMenu.length === 0 ? (
+                    <div style={stateBoxStyle}>
+                        Không có món nào trong danh mục này.
+                    </div>
+                ) : (
+                    <div className="waiter-menu-grid">
+                        {visibleMenu.map((dish) => {
+                            const draft =
+                                orderDraft[dish.dishId] ?? {
+                                    qty: 0,
+                                    note: '',
+                                }
+
+                            return (
+                                <div
+                                    key={dish.dishId}
+                                    className="waiter-menu-card"
+                                >
+                                    <div className="waiter-menu-card-top">
+                                        {dish.imageUrl ? (
+                                            <img
+                                                src={dish.imageUrl}
+                                                alt={dish.name}
+                                                className="waiter-menu-img"
+                                            />
+                                        ) : (
+                                            <span className="waiter-menu-emoji">
+                                                🍽️
+                                            </span>
+                                        )}
+
+                                        <div className="waiter-menu-info">
+                                            <h4>{dish.name}</h4>
+                                            <p>{fmtPrice(dish.price)}</p>
+                                        </div>
                                     </div>
+
+                                    <div className="waiter-qty-controls">
+                                        <button
+                                            type="button"
+                                            className="waiter-qty-btn"
+                                            disabled={draft.qty <= 0}
+                                            onClick={() =>
+                                                changeDraftQty(
+                                                    dish.dishId,
+                                                    -1,
+                                                )
+                                            }
+                                        >
+                                            -
+                                        </button>
+
+                                        <span className="waiter-qty-val">
+                                            {draft.qty}
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            className="waiter-qty-btn"
+                                            onClick={() =>
+                                                changeDraftQty(
+                                                    dish.dishId,
+                                                    1,
+                                                )
+                                            }
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+
+                                    <input
+                                        placeholder="Ghi chú"
+                                        value={draft.note}
+                                        className="waiter-note-input"
+                                        onChange={(event) =>
+                                            setDraftNote(
+                                                dish.dishId,
+                                                event.target.value,
+                                            )
+                                        }
+                                    />
                                 </div>
-                                <div className="waiter-qty-controls">
-                                    <button
-                                        onClick={() => changeDraftQty(dish.dishId, -1)}
-                                        disabled={d.qty <= 0}
-                                        className="waiter-qty-btn"
-                                    >-
-                                    </button>
-                                    <span className="waiter-qty-val">{d.qty}</span>
-                                    <button onClick={() => changeDraftQty(dish.dishId, 1)} className="waiter-qty-btn">+
-                                    </button>
-                                </div>
-                                <input
-                                    placeholder="Ghi chú"
-                                    value={d.note}
-                                    onChange={(e) => setDraftNote(dish.dishId, e.target.value)}
-                                    className="waiter-note-input"
-                                />
-                            </div>
-                        );
-                    })}
-                </div>
+                            )
+                        })}
+                    </div>
+                )}
             </main>
 
             {showConfirm && (
                 <ConfirmModal
                     title="Xác nhận tạo Order"
-                    message={`Bàn ${tid} — ${selectedItems.length} món, tổng tạm tính ${fmtPrice(orderTotal)}`}
-                    confirmLabel={submitting ? "Đang tạo..." : "Xác nhận"}
-                    onCancel={() => !submitting && setShowConfirm(false)}
-                    onConfirm={() => !submitting && submitCreateOrder()}
+                    message={`Bàn ${tableIdNumber} — ${selectedItems.length} món, tổng tạm tính ${fmtPrice(orderTotal)}`}
+                    confirmLabel={
+                        submitting
+                            ? 'Đang tạo...'
+                            : 'Xác nhận'
+                    }
+                    onCancel={() => {
+                        if (!submitting) {
+                            setShowConfirm(false)
+                        }
+                    }}
+                    onConfirm={() => {
+                        if (!submitting) {
+                            void submitCreateOrder()
+                        }
+                    }}
                 >
                     <ul className="waiter-confirm-list">
                         {selectedItems.map((item) => (
                             <li key={item.dishId}>
-                                <span>{item.name} × {item.qty}</span>
-                                {item.note && <small>Ghi chú: {item.note}</small>}
+                                <span>
+                                    {item.name} × {item.qty}
+                                </span>
+
+                                {item.note && (
+                                    <small>
+                                        Ghi chú: {item.note}
+                                    </small>
+                                )}
                             </li>
                         ))}
                     </ul>
@@ -176,16 +621,38 @@ export default function WaiterCreateOrderPage() {
                     message={successData.message}
                     confirmLabel="Đóng"
                     cancelLabel=""
-                    onConfirm={() => navigate("/waiter/tables")}
-                    onCancel={() => navigate("/waiter/tables")}
+                    onConfirm={() =>
+                        navigate('/waiter/tables')
+                    }
+                    onCancel={() =>
+                        navigate('/waiter/tables')
+                    }
                 >
-                    <div style={{marginTop: "1rem", whiteSpace: "pre-wrap", color: "#475569"}}>
+                    <div style={successSummaryStyle}>
                         {successData.itemSummary}
                     </div>
                 </ConfirmModal>
             )}
 
-            <WaiterToast toast={toast}/>
+            <WaiterToast toast={toast} />
         </div>
-    );
+    )
+}
+
+const stateBoxStyle: React.CSSProperties = {
+    padding: '2rem',
+    textAlign: 'center',
+    color: '#64748b',
+}
+
+const errorBoxStyle: React.CSSProperties = {
+    padding: '2rem',
+    textAlign: 'center',
+    color: '#dc2626',
+}
+
+const successSummaryStyle: React.CSSProperties = {
+    marginTop: '1rem',
+    whiteSpace: 'pre-wrap',
+    color: '#475569',
 }

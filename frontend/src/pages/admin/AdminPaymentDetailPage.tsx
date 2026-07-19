@@ -1,6 +1,24 @@
-import {useEffect, useState} from 'react'
-import {useNavigate, useParams} from 'react-router-dom'
-import {adminApi, type AdminPaymentDetail,} from '../../api/admin'
+import {
+    useCallback,
+    useRef,
+    useState,
+} from 'react'
+import {
+    useNavigate,
+    useParams,
+} from 'react-router-dom'
+
+import {
+    adminApi,
+    type AdminPaymentDetail,
+} from '../../api/admin'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
+import {
+    ErrorState,
+    LoadingState,
+} from '../../components/feedback'
+import {PageCard} from '../../components/ui'
+import {usePolling} from '../../hooks/usePolling'
 
 function formatCurrency(value: number) {
     return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
@@ -25,107 +43,142 @@ function formatDateTime(value: string) {
 export default function AdminPaymentDetailPage() {
     const navigate = useNavigate()
     const {invoiceId} = useParams()
+
     const parsedInvoiceId = Number(invoiceId)
+
     const hasValidInvoiceId =
-        Boolean(invoiceId) && !Number.isNaN(parsedInvoiceId)
+        Boolean(invoiceId)
+        && Number.isFinite(parsedInvoiceId)
 
     const [payment, setPayment] =
         useState<AdminPaymentDetail | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
 
-    async function loadPaymentDetail() {
-        try {
-            setIsLoading(true)
-            setError(null)
+    const [isLoading, setIsLoading] =
+        useState(true)
 
-            const {data} = await adminApi.getPaymentDetail(
-                parsedInvoiceId,
-            )
-            setPayment(data)
-        } catch (error) {
-            console.error(error)
-            setError('Không thể tải chi tiết hóa đơn.')
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    const [error, setError] =
+        useState<string | null>(null)
 
-    useEffect(() => {
-        if (!hasValidInvoiceId) {
-            return
-        }
+    const hasLoadedInitialPaymentRef =
+        useRef(false)
 
-        let isActive = true
+    const loadPaymentDetail = useCallback(
+        async (
+            showFullLoading = true,
+            signal?: AbortSignal,
+        ) => {
+            if (!hasValidInvoiceId) {
+                setIsLoading(false)
+                setError('Mã hóa đơn không hợp lệ.')
+                return
+            }
 
-        adminApi
-            .getPaymentDetail(parsedInvoiceId)
-            .then(({data}) => {
-                if (!isActive) {
-                    return
+            try {
+                if (showFullLoading) {
+                    setIsLoading(true)
                 }
+
+                setError(null)
+
+                const {data} =
+                    await adminApi.getPaymentDetail(
+                        parsedInvoiceId,
+                        signal,
+                    )
 
                 setPayment(data)
-                setError(null)
-            })
-            .catch((error) => {
-                if (!isActive) {
-                    return
+            } catch (requestError: unknown) {
+                console.error(
+                    '[ADMIN_PAYMENT_DETAIL_FETCH_ERROR]',
+                    requestError,
+                )
+
+                setError(
+                    'Không thể tải chi tiết hóa đơn.',
+                )
+            } finally {
+                if (showFullLoading) {
+                    setIsLoading(false)
                 }
+            }
+        },
+        [
+            hasValidInvoiceId,
+            parsedInvoiceId,
+        ],
+    )
 
-                console.error(error)
-                setError('Không thể tải chi tiết hóa đơn.')
-            })
-            .finally(() => {
-                if (!isActive) {
-                    return
-                }
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialPaymentRef.current
 
-                setIsLoading(false)
-            })
+            await loadPaymentDetail(
+                isInitialLoad,
+                signal,
+            )
 
-        return () => {
-            isActive = false
-        }
-    }, [hasValidInvoiceId, parsedInvoiceId])
+            hasLoadedInitialPaymentRef.current = true
+        },
+        {
+            enabled: hasValidInvoiceId,
+
+            intervalMs:
+            REALTIME_CONFIG
+                .admin
+                .dashboardIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[ADMIN_PAYMENT_DETAIL_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
 
     if (!hasValidInvoiceId) {
         return (
-            <section className="admin-payment-detail-state page-card">
+            <PageCard className="admin-payment-detail-state">
                 <h2>Không thể tải dữ liệu</h2>
+
                 <p>Mã hóa đơn không hợp lệ.</p>
-            </section>
+            </PageCard>
         )
     }
 
     if (isLoading) {
         return (
-            <section className="admin-payment-detail-state page-card">
-                Đang tải chi tiết hóa đơn...
-            </section>
+            <LoadingState
+                title="Đang tải chi tiết hóa đơn..."
+                description="Hệ thống đang lấy thông tin hóa đơn và danh sách món ăn."
+            />
         )
     }
 
     if (error || !payment) {
         return (
-            <section className="admin-payment-detail-state page-card">
-                <h2>Không thể tải dữ liệu</h2>
-                <p>{error ?? 'Không tìm thấy hóa đơn.'}</p>
-
-                <button
-                    className="primary-button"
-                    type="button"
-                    onClick={() => void loadPaymentDetail()}
-                >
-                    Thử lại
-                </button>
-            </section>
+            <ErrorState
+                title="Không thể tải dữ liệu"
+                message={
+                    error ?? 'Không tìm thấy hóa đơn.'
+                }
+                onRetry={() => {
+                    loadPaymentDetail(true)
+                        .catch((requestError) => {
+                            console.error(requestError)
+                        })
+                }}
+            />
         )
     }
 
     return (
         <div className="admin-payment-detail-page">
-            <section className="admin-payment-detail-header">
+            <PageCard className="admin-payment-detail-header">
                 <button
                     aria-label="Quay lại lịch sử hóa đơn"
                     className="admin-payment-detail-back-button"
@@ -137,11 +190,13 @@ export default function AdminPaymentDetailPage() {
 
                 <div>
                     <h2>Đơn hàng ORD-{payment.orderId}</h2>
+
                     <p>
-                        Tạo lúc {formatDateTime(payment.invoiceDate)}
+                        Tạo lúc{' '}
+                        {formatDateTime(payment.invoiceDate)}
                     </p>
                 </div>
-            </section>
+            </PageCard>
 
             <section className="admin-payment-detail-card">
                 <div className="admin-payment-detail-table">
@@ -181,6 +236,7 @@ export default function AdminPaymentDetailPage() {
 
                     <div className="admin-payment-detail-footer">
                         <span>Tổng cộng</span>
+
                         <strong>
                             {formatCurrency(payment.finalAmount)}
                         </strong>

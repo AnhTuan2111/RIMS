@@ -1,32 +1,13 @@
-import { apiClient } from './client'
-import type { LoginRequest, LoginResponse, UserProfile } from '../types/auth'
-import { clearTokens, setTokens } from '../utils/tokenStorage'
-
-export async function login(request: LoginRequest): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>('/auth/login', request)
-
-    setTokens(response.data.accessToken, response.data.refreshToken)
-
-    localStorage.setItem('currentUser', JSON.stringify({
-        userId: response.data.userId,
-        username: response.data.username,
-        fullName: response.data.fullName,
-        phone: response.data.phone,
-        email: response.data.email,
-        role: response.data.role,
-    }))
-
-    return response.data
-}
-
-export async function getCurrentUser(): Promise<UserProfile> {
-    const cached = localStorage.getItem('currentUser')
-    if (cached) {
-        return JSON.parse(cached) as UserProfile
-    }
-    const res = await apiClient.get<UserProfile>('/auth/me')
-    return res.data
-}
+import {apiClient} from './client'
+import type {
+    LoginRequest,
+    LoginResponse,
+    UserProfile,
+} from '../types/auth'
+import {
+    clearTokens,
+    setTokens,
+} from '../utils/tokenStorage'
 
 export interface UpdateProfileRequest {
     fullName: string
@@ -37,55 +18,216 @@ export interface UpdateProfileRequest {
 
 export interface UpdateProfileResponse {
     userId: number
+    id?: number
     username: string
     fullName: string
     phone: string
-    email: string
+    email: string | null
     role: string
+    rewardPoints?: number
 }
 
-// Dùng chung cho mọi vai trò (customer, chef, waiter, cashier, admin...)
-export const updateProfile = async (data: UpdateProfileRequest): Promise<UpdateProfileResponse> => {
-    const response = await apiClient.put<UpdateProfileResponse>('/auth/profile', data)
+export interface RegisterRequest {
+    username: string
+    fullName: string
+    email: string
+    phone: string
+}
+
+export interface RegisterResponse {
+    id: number
+    userId?: number
+    username: string
+    fullName: string
+    email: string | null
+    phone: string
+    role: string
+    isActive: boolean
+    createdAt: string
+    rewardPoints?: number
+}
+
+function saveCurrentUser(user: UserProfile) {
+    localStorage.setItem(
+        'currentUser',
+        JSON.stringify(user),
+    )
+}
+
+function readCachedCurrentUser() {
+    const cached =
+        localStorage.getItem('currentUser')
+
+    if (!cached) {
+        return null
+    }
+
+    try {
+        return JSON.parse(cached) as UserProfile
+    } catch {
+        localStorage.removeItem('currentUser')
+        return null
+    }
+}
+
+function normalizeLoginUser(
+    response: LoginResponse,
+): UserProfile {
+    return {
+        userId:
+            response.userId
+            ?? response.id
+            ?? 0,
+
+        id:
+            response.id
+            ?? response.userId,
+
+        username: response.username,
+        fullName: response.fullName,
+        phone: response.phone,
+        email: response.email,
+        role: response.role,
+        rewardPoints: response.rewardPoints,
+    }
+}
+
+function normalizeProfileUser(
+    response: UpdateProfileResponse | UserProfile,
+): UserProfile {
+    return {
+        userId:
+            response.userId
+            ?? response.id
+            ?? 0,
+
+        id:
+            response.id
+            ?? response.userId,
+        username: response.username,
+        fullName: response.fullName,
+        phone: response.phone,
+        email: response.email,
+        role: response.role as UserProfile['role'],
+        rewardPoints: response.rewardPoints,
+    }
+}
+
+export async function login(
+    request: LoginRequest,
+): Promise<LoginResponse> {
+    const response =
+        await apiClient.post<LoginResponse>(
+            '/auth/login',
+            request,
+        )
+
+    setTokens(
+        response.data.accessToken,
+        response.data.refreshToken,
+    )
+
+    saveCurrentUser(
+        normalizeLoginUser(response.data),
+    )
+
+    return response.data
+}
+
+export async function getCurrentUser(
+    signal?: AbortSignal,
+): Promise<UserProfile> {
+    const cached =
+        readCachedCurrentUser()
+
+    if (cached) {
+        return cached
+    }
+
+    const response =
+        await apiClient.get<UserProfile>(
+            '/auth/me',
+            {
+                signal,
+            },
+        )
+
+    const currentUser =
+        normalizeProfileUser(response.data)
+
+    saveCurrentUser(currentUser)
+
+    return currentUser
+}
+
+export async function updateProfile(
+    data: UpdateProfileRequest,
+): Promise<UpdateProfileResponse> {
+    const response =
+        await apiClient.put<UpdateProfileResponse>(
+            '/auth/profile',
+            data,
+        )
+
+    saveCurrentUser(
+        normalizeProfileUser(response.data),
+    )
+
     return response.data
 }
 
 export function logout() {
     clearTokens()
     localStorage.removeItem('currentUser')
+    localStorage.removeItem('selectedActor')
 }
 
-export async function forgotPassword(email: string): Promise<void> {
-    await apiClient.post('/auth/forgot-password', { email })
+export async function forgotPassword(
+    email: string,
+    signal?: AbortSignal,
+): Promise<void> {
+    await apiClient.post(
+        '/auth/forgot-password',
+        {
+            email,
+        },
+        {
+            signal,
+        },
+    )
 }
 
-export async function resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
-    await apiClient.post('/auth/reset-password', { email, otp, newPassword })
+export async function resetPassword(
+    email: string,
+    otp: string,
+    newPassword: string,
+    signal?: AbortSignal,
+): Promise<void> {
+    await apiClient.post(
+        '/auth/reset-password',
+        {
+            email,
+            otp,
+            newPassword,
+        },
+        {
+            signal,
+        },
+    )
 }
 
-// Định nghĩa interface cho Register request
-export interface RegisterRequest {
-    username: string;
-    fullName: string;
-    email: string;
-    phone: string;
-}
+export async function register(
+    data: RegisterRequest,
+    signal?: AbortSignal,
+): Promise<RegisterResponse> {
+    const response =
+        await apiClient.post<RegisterResponse>(
+            '/auth/register',
+            data,
+            {
+                signal,
+            },
+        )
 
-// Định nghĩa interface cho Register response
-export interface RegisterResponse {
-    id: number;
-    username: string;
-    fullName: string;
-    email: string;
-    phone: string;
-    role: string;
-    isActive: boolean;
-    createdAt: string;
-}
-
-// Hàm register - SỬA: dùng apiClient và path đúng
-export async function register(data: RegisterRequest): Promise<RegisterResponse> {
-    // Vì baseURL đã là '/rims', nên path chỉ cần '/auth/register'
-    const response = await apiClient.post<RegisterResponse>('/auth/register', data);
-    return response.data;
+    return response.data
 }

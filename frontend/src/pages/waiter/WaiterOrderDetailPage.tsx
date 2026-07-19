@@ -1,193 +1,220 @@
 import {
-    Fragment,
-    useCallback,
-    useEffect,
+    useRef,
     useState,
-} from "react";
+    type CSSProperties,
+} from 'react'
 import {
     useNavigate,
     useParams,
-} from "react-router-dom";
+} from 'react-router-dom'
+
 import {
     type OrderDetailResponse,
     waiterApi,
-} from "../../api/waiter";
+} from '../../api/waiter'
+import {REALTIME_CONFIG} from '../../app/config/realtime'
 import {
     BackArrow,
     fmtPrice,
     WaiterHeader,
-} from "../../components/waiter";
+} from '../../components/waiter'
+import {usePolling} from '../../hooks/usePolling'
 
-function formatDateTime(value?: string | null) {
-    if (!value) {
-        return "";
+function isRequestCanceled(error: unknown) {
+    if (typeof error !== 'object' || error === null) {
+        return false
     }
 
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-        return value;
+    const requestError = error as {
+        name?: string
+        code?: string
+        message?: string
     }
 
-    return date.toLocaleString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
+    return (
+        requestError.name === 'CanceledError'
+        || requestError.code === 'ERR_CANCELED'
+        || requestError.message === 'canceled'
+    )
 }
 
 export default function WaiterOrderDetailPage() {
-    const navigate = useNavigate();
-    const {tableId} = useParams();
-    const tid = parseInt(tableId || "0");
+    const navigate = useNavigate()
+    const {tableId} = useParams()
+
+    const tableIdNumber =
+        Number.parseInt(tableId ?? '0', 10)
 
     const [servingOrders, setServingOrders] =
-        useState<OrderDetailResponse[]>([]);
+        useState<OrderDetailResponse[]>([])
 
-    const [loading, setLoading] = useState(true);
-    const [pageError, setPageError] = useState("");
-    const [
-        acknowledgingItemId,
-        setAcknowledgingItemId,
-    ] = useState<number | null>(null);
+    const [isLoading, setIsLoading] =
+        useState(true)
 
-    const loadServingOrders = useCallback(async () => {
-        if (!tid) {
-            setPageError("Mã bàn không hợp lệ.");
-            setLoading(false);
-            return;
+    const [error, setError] =
+        useState<string | null>(null)
+
+    const hasLoadedInitialOrdersRef =
+        useRef(false)
+
+    async function loadServingOrders(
+        signal?: AbortSignal,
+        showFullLoading = true,
+    ) {
+        if (!tableIdNumber) {
+            setServingOrders([])
+            setError('Không xác định được bàn.')
+            setIsLoading(false)
+            return
         }
 
         try {
-            setLoading(true);
-            setPageError("");
+            if (showFullLoading) {
+                setIsLoading(true)
+            }
+
+            setError(null)
 
             const response =
-                await waiterApi.getServingOrders(tid);
+                await waiterApi.getServingOrders(
+                    tableIdNumber,
+                    signal,
+                )
 
-            setServingOrders(response.data ?? []);
-        } catch (error) {
-            console.error(error);
-            setPageError(
-                "Không thể tải chi tiết Order. Vui lòng thử lại.",
-            );
+            if (signal?.aborted) {
+                return
+            }
+
+            setServingOrders(response.data)
+        } catch (requestError: unknown) {
+            if (
+                signal?.aborted
+                || isRequestCanceled(requestError)
+            ) {
+                return
+            }
+
+            console.error(
+                '[WAITER_ORDER_DETAIL_FETCH_ERROR]',
+                requestError,
+            )
+
+            setError(
+                'Không thể tải chi tiết order của bàn.',
+            )
         } finally {
-            setLoading(false);
-        }
-    }, [tid]);
-
-    useEffect(() => {
-        void loadServingOrders();
-    }, [loadServingOrders]);
-
-    async function handleAcknowledgeChefNote(
-        orderItemId: number,
-    ) {
-        try {
-            setAcknowledgingItemId(orderItemId);
-            setPageError("");
-
-            await waiterApi.acknowledgeChefInternalNote(
-                orderItemId,
-            );
-
-            const acknowledgedAt =
-                new Date().toISOString();
-
-            setServingOrders((currentOrders) =>
-                currentOrders.map((order) => ({
-                    ...order,
-                    orderItems: order.orderItems.map(
-                        (item) =>
-                            item.orderItemId === orderItemId
-                                ? {
-                                    ...item,
-                                    chefInternalNoteAcknowledgedAt:
-                                    acknowledgedAt,
-                                }
-                                : item,
-                    ),
-                })),
-            );
-        } catch (error) {
-            console.error(error);
-            setPageError(
-                "Không thể xác nhận đã xem ghi chú từ bếp.",
-            );
-        } finally {
-            setAcknowledgingItemId(null);
+            if (
+                showFullLoading
+                && !signal?.aborted
+            ) {
+                setIsLoading(false)
+            }
         }
     }
 
-    const totalItems = servingOrders.reduce(
-        (total, order) =>
-            total + order.orderItems.length,
-        0,
-    );
+    usePolling(
+        async (signal) => {
+            const isInitialLoad =
+                !hasLoadedInitialOrdersRef.current
+
+            await loadServingOrders(
+                signal,
+                isInitialLoad,
+            )
+
+            hasLoadedInitialOrdersRef.current = true
+        },
+        {
+            intervalMs:
+            REALTIME_CONFIG
+                .waiter
+                .orderDetailIntervalMs,
+
+            runImmediately: true,
+            pauseWhenHidden: true,
+
+            onError: (requestError) => {
+                console.error(
+                    '[WAITER_ORDER_DETAIL_POLL_ERROR]',
+                    requestError,
+                )
+            },
+        },
+    )
+
+    const orderItems =
+        servingOrders.flatMap(
+            (order) => order.orderItems,
+        )
 
     return (
         <div className="waiter-container">
-            <WaiterHeader/>
+            <WaiterHeader />
 
             <main className="waiter-main">
                 <div className="waiter-sub-header">
                     <BackArrow
                         onClick={() =>
-                            navigate("/waiter/tables")
+                            navigate('/waiter/tables')
                         }
                     />
 
                     <h2 className="waiter-title">
-                        Chi tiết Order - Bàn {tid}
+                        Table: {tableIdNumber || '—'}
                     </h2>
 
                     <button
                         type="button"
+                        className="waiter-action-btn"
+                        disabled={!tableIdNumber}
                         onClick={() =>
                             navigate(
-                                `/waiter/tables/${tid}/order/edit`,
+                                `/waiter/tables/${tableIdNumber}/order/edit`,
                             )
                         }
-                        className="waiter-action-btn"
                     >
                         Cập nhật Order
                     </button>
                 </div>
 
-                {pageError && (
-                    <div
-                        className="waiter-form-error"
-                        style={{marginBottom: "1rem"}}
-                    >
-                        {pageError}
-                    </div>
-                )}
-
-                {loading ? (
+                <div className="waiter-detail-layout">
                     <div className="waiter-card">
-                        <div className="waiter-card-body">
-                            Đang tải chi tiết Order...
+                        <div className="waiter-card-header">
+                            Danh sách món
                         </div>
-                    </div>
-                ) : totalItems === 0 ? (
-                    <div className="waiter-card">
-                        <div className="waiter-card-body">
-                            Không có món nào trong Order đang phục vụ.
-                        </div>
-                    </div>
-                ) : (
-                    <div className="waiter-detail-layout">
-                        <div className="waiter-card">
-                            <div className="waiter-card-header">
-                                Danh sách món
-                            </div>
 
-                            <div
-                                className="waiter-card-body"
-                                style={{padding: 0}}
-                            >
+                        <div
+                            className="waiter-card-body"
+                            style={{
+                                padding: 0,
+                            }}
+                        >
+                            {isLoading ? (
+                                <div style={stateBoxStyle}>
+                                    Đang tải chi tiết order...
+                                </div>
+                            ) : error ? (
+                                <div style={errorBoxStyle}>
+                                    <p>{error}</p>
+
+                                    <button
+                                        type="button"
+                                        className="waiter-action-btn"
+                                        onClick={() =>
+                                            void loadServingOrders(
+                                                undefined,
+                                                true,
+                                            )
+                                        }
+                                    >
+                                        Thử lại
+                                    </button>
+                                </div>
+                            ) : orderItems.length === 0 ? (
+                                <div style={stateBoxStyle}>
+                                    Bàn này chưa có món đang phục vụ.
+                                </div>
+                            ) : (
                                 <table className="waiter-table-custom">
                                     <thead>
                                     <tr>
@@ -199,217 +226,74 @@ export default function WaiterOrderDetailPage() {
                                     </thead>
 
                                     <tbody>
-                                    {servingOrders.map(
-                                        (order) =>
-                                            order.orderItems.map(
-                                                (item) => (
-                                                    <Fragment
-                                                        key={
-                                                            item.orderItemId
-                                                        }
+                                    {orderItems.map((item) => (
+                                        <tr key={item.orderItemId}>
+                                            <td>
+                                                {item.dishName}
+
+                                                {item.note && (
+                                                    <div style={noteStyle}>
+                                                        {item.note}
+                                                    </div>
+                                                )}
+
+                                                {item.chefInternalNote && (
+                                                    <div style={chefNoteStyle}>
+                                                        Chef:{' '}
+                                                        {item.chefInternalNote}
+                                                    </div>
+                                                )}
+                                            </td>
+
+                                            <td>
+                                                {item.quantity}
+                                            </td>
+
+                                            <td>
+                                                {fmtPrice(item.unitPrice)}
+                                            </td>
+
+                                            <td>
+                                                    <span
+                                                        className={`waiter-badge waiter-badge-${item.status.toLowerCase()}`}
                                                     >
-                                                        <tr>
-                                                            <td>
-                                                                <strong>
-                                                                    {
-                                                                        item.dishName
-                                                                    }
-                                                                </strong>
-
-                                                                {item.note && (
-                                                                    <div
-                                                                        style={{
-                                                                            fontSize:
-                                                                                "0.85rem",
-                                                                            color:
-                                                                                "#64748b",
-                                                                            marginTop:
-                                                                                "0.25rem",
-                                                                        }}
-                                                                    >
-                                                                        Ghi chú khách:
-                                                                        {" "}
-                                                                        {
-                                                                            item.note
-                                                                        }
-                                                                    </div>
-                                                                )}
-                                                            </td>
-
-                                                            <td>
-                                                                {
-                                                                    item.quantity
-                                                                }
-                                                            </td>
-
-                                                            <td>
-                                                                {fmtPrice(
-                                                                    item.unitPrice,
-                                                                )}
-                                                            </td>
-
-                                                            <td>
-                                                                    <span
-                                                                        className={`waiter-badge waiter-badge-${item.status.toLowerCase()}`}
-                                                                    >
-                                                                        {
-                                                                            item.status
-                                                                        }
-                                                                    </span>
-                                                            </td>
-                                                        </tr>
-
-                                                        {item.chefInternalNote && (
-                                                            <tr>
-                                                                <td
-                                                                    colSpan={
-                                                                        4
-                                                                    }
-                                                                    style={{
-                                                                        paddingTop:
-                                                                            0,
-                                                                    }}
-                                                                >
-                                                                    <div
-                                                                        style={{
-                                                                            margin:
-                                                                                "0.25rem 0 0.75rem",
-                                                                            padding:
-                                                                                "0.9rem 1rem",
-                                                                            border:
-                                                                                item.chefInternalNoteAcknowledgedAt
-                                                                                    ? "1px solid #cbd5e1"
-                                                                                    : "1px solid #f59e0b",
-                                                                            borderLeft:
-                                                                                item.chefInternalNoteAcknowledgedAt
-                                                                                    ? "4px solid #94a3b8"
-                                                                                    : "4px solid #f59e0b",
-                                                                            borderRadius:
-                                                                                "10px",
-                                                                            background:
-                                                                                item.chefInternalNoteAcknowledgedAt
-                                                                                    ? "#f8fafc"
-                                                                                    : "#fffbeb",
-                                                                            color:
-                                                                                item.chefInternalNoteAcknowledgedAt
-                                                                                    ? "#475569"
-                                                                                    : "#78350f",
-                                                                        }}
-                                                                    >
-                                                                        <div
-                                                                            style={{
-                                                                                display:
-                                                                                    "flex",
-                                                                                alignItems:
-                                                                                    "center",
-                                                                                justifyContent:
-                                                                                    "space-between",
-                                                                                gap:
-                                                                                    "1rem",
-                                                                                flexWrap:
-                                                                                    "wrap",
-                                                                            }}
-                                                                        >
-                                                                            <strong>
-                                                                                🔔
-                                                                                Bếp
-                                                                                nhắn
-                                                                            </strong>
-
-                                                                            {item.chefInternalNoteCreatedAt && (
-                                                                                <span
-                                                                                    style={{
-                                                                                        fontSize:
-                                                                                            "0.78rem",
-                                                                                        color:
-                                                                                            "#64748b",
-                                                                                    }}
-                                                                                >
-                                                                                        {formatDateTime(
-                                                                                            item.chefInternalNoteCreatedAt,
-                                                                                        )}
-                                                                                    </span>
-                                                                            )}
-                                                                        </div>
-
-                                                                        <p
-                                                                            style={{
-                                                                                margin:
-                                                                                    "0.5rem 0",
-                                                                                whiteSpace:
-                                                                                    "pre-wrap",
-                                                                                lineHeight:
-                                                                                    1.5,
-                                                                            }}
-                                                                        >
-                                                                            {
-                                                                                item.chefInternalNote
-                                                                            }
-                                                                        </p>
-
-                                                                        {item.chefInternalNoteAcknowledgedAt ? (
-                                                                            <div
-                                                                                style={{
-                                                                                    fontSize:
-                                                                                        "0.82rem",
-                                                                                    fontWeight:
-                                                                                        700,
-                                                                                    color:
-                                                                                        "#15803d",
-                                                                                }}
-                                                                            >
-                                                                                ✓
-                                                                                Đã
-                                                                                xem
-                                                                                lúc
-                                                                                {" "}
-                                                                                {formatDateTime(
-                                                                                    item.chefInternalNoteAcknowledgedAt,
-                                                                                )}
-                                                                            </div>
-                                                                        ) : (
-                                                                            <button
-                                                                                type="button"
-                                                                                className="waiter-btn-primary"
-                                                                                disabled={
-                                                                                    acknowledgingItemId
-                                                                                    ===
-                                                                                    item.orderItemId
-                                                                                }
-                                                                                onClick={() =>
-                                                                                    void handleAcknowledgeChefNote(
-                                                                                        item.orderItemId,
-                                                                                    )
-                                                                                }
-                                                                                style={{
-                                                                                    marginTop:
-                                                                                        "0.25rem",
-                                                                                    padding:
-                                                                                        "0.45rem 0.9rem",
-                                                                                }}
-                                                                            >
-                                                                                {acknowledgingItemId
-                                                                                ===
-                                                                                item.orderItemId
-                                                                                    ? "Đang xác nhận..."
-                                                                                    : "Đã xem"}
-                                                                            </button>
-                                                                        )}
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </Fragment>
-                                                ),
-                                            ),
-                                    )}
+                                                        {item.status}
+                                                    </span>
+                                            </td>
+                                        </tr>
+                                    ))}
                                     </tbody>
                                 </table>
-                            </div>
+                            )}
                         </div>
                     </div>
-                )}
+                </div>
             </main>
         </div>
-    );
+    )
+}
+
+const stateBoxStyle: CSSProperties = {
+    padding: '2rem',
+    textAlign: 'center',
+    color: '#64748b',
+}
+
+const errorBoxStyle: CSSProperties = {
+    padding: '2rem',
+    textAlign: 'center',
+    color: '#dc2626',
+}
+
+const noteStyle: CSSProperties = {
+    fontSize: '0.85rem',
+    color: '#64748b',
+    marginTop: '0.25rem',
+}
+
+const chefNoteStyle: CSSProperties = {
+    fontSize: '0.85rem',
+    color: '#ea580c',
+    marginTop: '0.25rem',
+    fontWeight: 600,
 }
