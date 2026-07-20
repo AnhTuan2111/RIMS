@@ -17,7 +17,4 @@ export * from './menu'
 export const adminApi = {
     ...invoicesApi,
     ...revenueApi,
-
-    getTables: (signal?: AbortSignal) =>
-        apiClient.get<TableDetailResponse[]>('/admin/tables', {signal}),
 }

@@ -16,16 +16,13 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderShift;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
@@ -48,8 +45,7 @@ public class AdminServiceImpl implements AdminService
 {
     private final DishRepository dishRepository; // line ~50
     private final CategoryRepository categoryRepository; // line ~260
-    private final InvoiceRepository invoiceRepository; // line ~470 (invoice) / line ~540 (revenue report)
-    private final RestaurantTableRepository restaurantTableRepository; // line ~455 (table) / line ~410 (menu)
+    private final InvoiceRepository invoiceRepository; // line ~470 (invoice) / line ~540 (revenue report) / line ~410 (menu)
     private final SimpMessagingTemplate messagingTemplate;
 
     // DISH SERVICE
@@ -468,24 +464,6 @@ public class AdminServiceImpl implements AdminService
                 .latestDishes(latestDishes)
                 .categoryStats(categoryStats)
                 .build();
-    }
-
-    // VIEW TABLES
-    @Override
-    public List<TableDetailResponse> getAllTables()
-    {
-        List<RestaurantTable> tables = restaurantTableRepository.findAll();
-        List<TableDetailResponse> responses = new ArrayList<>();
-        for (RestaurantTable t : tables)
-        {
-            responses.add(TableDetailResponse.builder()
-                    .tableId(t.getId())
-                    .tableNumber(t.getTableNumber())
-                    .capacity(t.getCapacity())
-                    .status(t.getStatus())
-                    .build());
-        }
-        return responses;
     }
 
     // INVOICE SERVICE
