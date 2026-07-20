@@ -1,4 +1,4 @@
-﻿import {useRef, useState} from 'react'
+import {useEffect, useState} from 'react'
 import {
     adminApi,
     categoryApi,
@@ -8,8 +8,6 @@ import {
     type OrderShiftReportResponse,
     type RevenueReportResponse,
 } from '@/shared/api/admin'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {usePolling} from '@/shared/hooks/usePolling'
 
 type ReportKey =
     | 'revenue'
@@ -1350,75 +1348,31 @@ export default function AdminStatisticsPage() {
     const bestSellingWeekOptions = buildWeekOptions(bestSellingYear)
     const orderShiftWeekOptions = buildWeekOptions(orderShiftYear)
 
-    const hasLoadedInitialStatisticsRef = useRef(false)
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialStatisticsRef.current
 
-            if (isInitialLoad) {
-                await Promise.all([
-                    loadRevenueDashboard(true, signal),
-                    loadCategoryBestSellingCategories(true, signal),
-                    loadBestSellingReport(
-                        bestSellingPreset,
-                        selectedBestSellingWeek,
-                        true,
-                        signal,
-                    ),
-                    loadOrderShiftReport(
-                        orderShiftPreset,
-                        selectedOrderShiftWeek,
-                        true,
-                        signal,
-                    ),
-                ])
+    useEffect(() => {
+        const controller = new AbortController()
 
-                hasLoadedInitialStatisticsRef.current = true
-                return
-            }
+        void Promise.all([
+            loadRevenueDashboard(true, controller.signal),
+            loadCategoryBestSellingCategories(true, controller.signal),
+            loadBestSellingReport(
+                bestSellingPreset,
+                selectedBestSellingWeek,
+                true,
+                controller.signal,
+            ),
+            loadOrderShiftReport(
+                orderShiftPreset,
+                selectedOrderShiftWeek,
+                true,
+                controller.signal,
+            ),
+        ])
 
-            await Promise.all([
-                loadRevenueDashboard(false, signal),
-                loadCategoryBestSellingReport(
-                    categoryBestSellingPreset,
-                    selectedCategoryBestSellingWeek,
-                    selectedBestSellingCategoryId,
-                    false,
-                    signal,
-                ),
-                loadBestSellingReport(
-                    bestSellingPreset,
-                    selectedBestSellingWeek,
-                    false,
-                    signal,
-                ),
-                loadOrderShiftReport(
-                    orderShiftPreset,
-                    selectedOrderShiftWeek,
-                    false,
-                    signal,
-                ),
-            ])
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[ADMIN_STATISTICS_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+        return () => controller.abort()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     async function loadRevenueDashboard(
         showFullLoading = true,

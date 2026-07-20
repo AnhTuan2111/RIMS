@@ -1,6 +1,6 @@
-﻿import {
+import {
     useCallback,
-    useRef,
+    useEffect,
     useState,
     type CSSProperties,
     type ReactNode,
@@ -17,8 +17,6 @@ import {
     PageCard,
     PageHeader,
 } from '@/shared/components/ui'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {usePolling} from '@/shared/hooks/usePolling'
 
 const ROLE_LABELS: Record<string, string> = {
     ADMIN: 'Quản trị viên',
@@ -98,7 +96,7 @@ export default function AdminUsersPage() {
         setTimeout(() => setSuccessMsg(null), 3000)
     }
 
-    const hasLoadedInitialUsersRef = useRef(false)
+
 
     const loadData = useCallback(
         async (
@@ -190,42 +188,16 @@ export default function AdminUsersPage() {
         [],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialUsersRef.current
+    useEffect(() => {
+        const controller = new AbortController()
 
-            await Promise.all([
-                loadData(
-                    isInitialLoad,
-                    signal,
-                ),
-                loadCounts(signal),
-            ])
+        void Promise.all([
+            loadData(true, controller.signal),
+            loadCounts(controller.signal),
+        ])
 
-            hasLoadedInitialUsersRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                if (isRequestCanceled(requestError)) {
-                    return
-                }
-
-                console.error(
-                    '[ADMIN_USERS_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+        return () => controller.abort()
+    }, [loadData, loadCounts])
 
     const resetForm = () => setForm({username: '', email: '', phone: '', password: '', role: 'CHEF', fullName: ''})
 

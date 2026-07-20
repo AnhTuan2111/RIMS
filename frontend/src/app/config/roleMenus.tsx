@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { RoleType } from '@/shared/types/auth'
 
 export type QuickLink = {

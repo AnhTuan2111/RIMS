@@ -1,6 +1,6 @@
-﻿import {
+import {
     useCallback,
-    useRef,
+    useEffect,
     useState,
 } from 'react'
 import {useNavigate} from 'react-router-dom'
@@ -10,7 +10,6 @@ import {
     type AdminPaymentHistoryItem,
     type AdminPaymentMethod,
 } from '@/shared/api/admin'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     EmptyState,
     ErrorState,
@@ -20,7 +19,6 @@ import {
     PageCard,
     PageHeader,
 } from '@/shared/components/ui'
-import {usePolling} from '@/shared/hooks/usePolling'
 
 const PAYMENT_HISTORY_PAGE_SIZE = 10
 
@@ -127,7 +125,7 @@ export default function AdminPaymentHistoryPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const hasLoadedInitialPaymentsRef = useRef(false)
+
 
     const loadPaymentHistory = useCallback(
         async (
@@ -188,36 +186,13 @@ export default function AdminPaymentHistoryPage() {
         [],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialPaymentsRef.current
+    useEffect(() => {
+        const controller = new AbortController()
 
-            await loadPaymentHistory(
-                page,
-                isInitialLoad,
-                signal,
-            )
+        void loadPaymentHistory(page, true, controller.signal)
 
-            hasLoadedInitialPaymentsRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[ADMIN_PAYMENT_HISTORY_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+        return () => controller.abort()
+    }, [loadPaymentHistory, page])
 
     function handlePageChange(nextPage: number) {
         const safeTotalPages = Math.max(totalPages, 1)
