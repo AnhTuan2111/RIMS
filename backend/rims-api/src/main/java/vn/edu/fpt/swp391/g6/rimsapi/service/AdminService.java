@@ -8,7 +8,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,9 +47,6 @@ public interface AdminService
 
     // menu dash board
     MenuDashboardResponse getMenuDashboardData();
-
-    // all table
-    List<TableDetailResponse> getAllTables();
 
     // invoice service
     InvoiceHistoryPageResponse getInvoiceHistory(int page, int pageSize);

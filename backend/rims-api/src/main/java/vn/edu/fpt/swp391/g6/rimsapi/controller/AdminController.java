@@ -20,7 +20,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
@@ -332,9 +331,4 @@ public class AdminController
         return ResponseEntity.ok(data);
     }
 
-    @GetMapping("/tables")
-    public ResponseEntity<List<TableDetailResponse>> getAllTables()
-    {
-        return ResponseEntity.ok(adminService.getAllTables());
-    }
 }
