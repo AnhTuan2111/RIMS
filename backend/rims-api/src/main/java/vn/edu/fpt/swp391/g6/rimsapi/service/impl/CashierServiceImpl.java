@@ -1,6 +1,7 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
@@ -476,15 +477,13 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional
-    public User createCustomerFast(String fullName, String phone, String email) {
+    public User createCustomerFast(String fullName, String phone) {
         if (userRepository.existsByPhone(phone)) {
             throw new RuntimeException("Số điện thoại này đã tồn tại!");
         }
         User user = new User();
         user.setFullName(fullName);
         user.setPhone(phone);
-        user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
-
         user.setUsername(phone);
         user.setPasswordHash(passwordEncoder.encode("123456"));
         user.setRole(RoleType.CUSTOMER);
@@ -493,7 +492,7 @@ public class CashierServiceImpl implements CashierService {
 
         try {
             return userRepository.save(user);
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             // Bắt trường hợp race condition: 2 request cùng tạo 1 SĐT gần như đồng thời,
             // request đầu đã pass check existsByPhone nhưng request thứ 2 mới thực sự save trước.
             // DB tự chặn nhờ unique constraint trên cột phone — chuyển thành message thân thiện.

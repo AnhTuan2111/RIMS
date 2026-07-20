@@ -120,6 +120,16 @@ export default function OrderPanel({
             ? 'Đang Phục Vụ'
             : 'Bàn Trống'
 
+    function handlePhoneInputChange(raw: string) {
+        // Chỉ giữ lại ký tự số
+        let digitsOnly = raw.replace(/\D/g, '')
+
+        // Giới hạn tối đa 10 số
+        digitsOnly = digitsOnly.slice(0, 10)
+
+        setPhoneSearch(digitsOnly)
+    }
+
     async function handleSearchCustomer() {
         const phone = phoneSearch.trim()
 
@@ -165,7 +175,6 @@ export default function OrderPanel({
     async function handleCreateCustomer() {
         const phone = phoneSearch.trim()
         const fullName = newCusName.trim()
-        const email = newCusEmail.trim()
 
         if (!fullName) {
             alert('Vui lòng nhập tên khách hàng!')
@@ -182,14 +191,6 @@ export default function OrderPanel({
             return
         }
 
-        if (
-            !email
-            || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-        ) {
-            alert('Vui lòng nhập email hợp lệ!')
-            return
-        }
-
         setProcessingCreate(true)
 
         try {
@@ -197,7 +198,6 @@ export default function OrderPanel({
                 await cashierApi.createCustomerFast({
                     fullName,
                     phone,
-                    email,
                 })
 
             if (response?.data) {
@@ -339,14 +339,13 @@ export default function OrderPanel({
                     >
                         <input
                             type="text"
+                            inputMode="numeric"
                             placeholder="Nhập SĐT khách hàng..."
                             style={customerInputStyle}
                             value={phoneSearch}
                             disabled={!!customer}
                             onChange={(event) =>
-                                setPhoneSearch(
-                                    event.target.value,
-                                )
+                                handlePhoneInputChange(event.target.value)
                             }
                         />
 
@@ -390,18 +389,6 @@ export default function OrderPanel({
                                 value={newCusName}
                                 onChange={(event) =>
                                     setNewCusName(
-                                        event.target.value,
-                                    )
-                                }
-                            />
-
-                            <input
-                                type="email"
-                                placeholder="Email (*)"
-                                style={stackedInputStyle}
-                                value={newCusEmail}
-                                onChange={(event) =>
-                                    setNewCusEmail(
                                         event.target.value,
                                     )
                                 }
@@ -518,7 +505,7 @@ export default function OrderPanel({
                                         <span style={cellStyle}>x{item.quantity}</span>
                                         <span
                                             style={{
-                                                cellStyle,
+                                                ...cellStyle,
                                                 textAlign: 'right',
                                             }}
                                         >

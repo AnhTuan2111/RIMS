@@ -43,7 +43,6 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
     ],
 
     [RoleType.CASHIER]: [
-        { label: 'Tổng quan', path: '/dashboard' },
         { label: 'Thanh toán', path: '/cashier/payments' },
         { label: 'Hóa đơn', path: '/cashier/invoices' },
         { label: 'Hồ sơ của tôi', path: '/profile' },
