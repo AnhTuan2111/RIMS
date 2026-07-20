@@ -86,6 +86,32 @@ export default function WaiterOrderDetailPage() {
                 }
 
                 setServingOrders(response.data)
+
+                // Đánh dấu đã xem các ghi chú nội bộ của chef chưa được ack
+                const unacknowledgedItems = response.data
+                    .flatMap((order) => order.orderItems)
+                    .filter(
+                        (item) =>
+                            item.chefInternalNote
+                            && !item.chefInternalNoteAcknowledgedAt,
+                    )
+
+                if (unacknowledgedItems.length > 0 && !signal?.aborted) {
+                    await Promise.all(
+                        unacknowledgedItems.map((item) =>
+                            waiterApi
+                                .acknowledgeChefInternalNote(
+                                    item.orderItemId,
+                                )
+                                .catch((requestError) => {
+                                    console.error(
+                                        '[WAITER_ACK_CHEF_NOTE_ERROR]',
+                                        requestError,
+                                    )
+                                }),
+                        ),
+                    )
+                }
             } catch (requestError: unknown) {
                 if (
                     signal?.aborted

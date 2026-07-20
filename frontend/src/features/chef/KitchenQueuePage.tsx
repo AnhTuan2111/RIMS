@@ -353,7 +353,19 @@ export default function KitchenQueuePage() {
     }, [fetchKitchenOrders])
 
     // WebSocket: refresh when backend broadcasts a kitchen update
-    useKitchenSocket(() => void fetchKitchenOrders(false, false))
+    useKitchenSocket(() =>
+    {
+        void fetchKitchenOrders(false, false)
+
+        // Nếu đang mở modal chi tiết, refetch để cập nhật trạng thái ghi chú/hủy...
+        if (selectedDish) {
+            getDishDetail(selectedDish.orderItemId)
+                .then(setSelectedDish)
+                .catch((requestError) => {
+                    console.error(requestError)
+                })
+        }
+    })
 
     async function loadKitchenOrders() {
         await fetchKitchenOrders(true, true)

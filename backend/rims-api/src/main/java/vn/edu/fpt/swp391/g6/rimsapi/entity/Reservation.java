@@ -38,6 +38,7 @@ public class Reservation
     private LocalDateTime reservationTime;
 
     @Nationalized
+    @Column(length = 100)
     private String note;
 
     @Enumerated(EnumType.STRING)

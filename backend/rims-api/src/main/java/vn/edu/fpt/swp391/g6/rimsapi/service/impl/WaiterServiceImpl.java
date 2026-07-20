@@ -649,7 +649,7 @@ public class WaiterServiceImpl implements WaiterService
         {
             orderItem.setChefInternalNoteAcknowledgedAt(LocalDateTime.now());
             orderItemRepository.save(orderItem);
-            webSocketBroadcaster.broadcastAfterCommit("/topic/chef-note", "NOTE_ACKNOWLEDGED");
+            webSocketBroadcaster.broadcastAfterCommit("/topic/kitchen", "NOTE_ACKNOWLEDGED");
         }
     }
 }

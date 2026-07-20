@@ -14,6 +14,7 @@ public class WebSocketBroadcaster
 
     public void broadcastAfterCommit(String topic, Object payload)
     {
+        System.out.println("broadcastAfterCommit");
         if (TransactionSynchronizationManager.isSynchronizationActive())
         {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization()

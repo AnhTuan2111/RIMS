@@ -27,6 +27,17 @@ let stompClient: ReturnType<typeof Stomp.over> | null = null
 let isConnecting = false
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 
+/**
+ * Generation counter. Incremented every time connect() starts a new
+ * underlying SockJS/STOMP connection attempt. Callbacks captured by a
+ * particular connection attempt (onConnected/onDisconnected) compare
+ * against this value before touching shared state, so a stale attempt
+ * (e.g. superseded by StrictMode double-invoked effects) can never
+ * clobber a newer one — and, importantly, can never null out the
+ * reference to a connection that is still alive.
+ */
+let connectionId = 0
+
 const RECONNECT_DELAY_MS = 5_000
 const WS_ENDPOINT = '/ws-rims'
 
@@ -57,13 +68,21 @@ function subscribeRegisteredTopics() {
     }
 }
 
-function onConnected() {
+function onConnected(myId: number) {
+    // A newer connect() call has already superseded this one; ignore.
+    if (myId !== connectionId) return
+
     isConnecting = false
     clearReconnectTimer()
     subscribeRegisteredTopics()
 }
 
-function onDisconnected() {
+function onDisconnected(myId: number) {
+    // This disconnect event belongs to an old/superseded connection attempt.
+    // Do NOT touch shared state (stompClient, stompSubs) — a newer
+    // connection may already be using them.
+    if (myId !== connectionId) return
+
     isConnecting = false
     stompClient = null
     stompSubs.clear()
@@ -84,6 +103,8 @@ function connect() {
     }
 
     isConnecting = true
+    connectionId += 1
+    const myId = connectionId
 
     const socket = new SockJS(WS_ENDPOINT)
     const client = Stomp.over(socket)
@@ -98,7 +119,11 @@ function connect() {
         ? {Authorization: `Bearer ${token}`}
         : {}
 
-    client.connect(connectHeaders, onConnected, onDisconnected)
+    client.connect(
+        connectHeaders,
+        () => onConnected(myId),
+        () => onDisconnected(myId),
+    )
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────
@@ -121,6 +146,10 @@ export function registerTopicCallback(
     registry.get(topic)!.add(callback)
 
     if (!stompClient?.connected) {
+        // If a connection attempt is already in flight, do NOT start a
+        // second one — connect() already guards against that. When that
+        // attempt reaches onConnected(), subscribeRegisteredTopics() will
+        // pick up this topic since it re-reads the registry at that time.
         connect()
     } else if (!stompSubs.has(topic)) {
         // Already connected but topic not yet subscribed (late registration)
@@ -149,10 +178,30 @@ export function registerTopicCallback(
             clearReconnectTimer()
 
             if (stompClient?.connected) {
+                // Fully connected — safe to disconnect and clear immediately.
                 stompClient.disconnect(() => {})
+                stompClient = null
+            } else if (isConnecting) {
+                // A connection attempt is still in flight (e.g. this cleanup
+                // fired because of a StrictMode double-invoke, or the very
+                // last subscriber unmounted mid-handshake). Do NOT null out
+                // stompClient here — that would orphan the in-flight
+                // connection so its onConnected() silently no-ops (this was
+                // the original bug: CONNECTED frame received, but no
+                // SUBSCRIBE ever sent).
+                //
+                // Instead, just bump connectionId so that when this
+                // in-flight attempt's onConnected/onDisconnected eventually
+                // fires, it recognizes itself as stale and skips touching
+                // shared state — while a fresh registerTopicCallback call
+                // (e.g. StrictMode's second mount) is free to start a new
+                // connection attempt of its own if still needed.
+                connectionId += 1
+                stompClient = null
+                isConnecting = false
+            } else {
+                stompClient = null
             }
-
-            stompClient = null
         }
     }
 }
