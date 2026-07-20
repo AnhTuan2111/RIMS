@@ -51,6 +51,7 @@ public class OrderItem
     private String dishNameSnapshot;
 
     @Nationalized
+    @Column(length = 100)
     private String note;
 
     @Column(nullable = false)
@@ -66,8 +67,8 @@ public class OrderItem
     private LocalDateTime updatedAt;
 
     @Column(length = 100)
+    @Nationalized
     private String cancelReason;
-
 
     private LocalDateTime cancelRequestedAt;
 

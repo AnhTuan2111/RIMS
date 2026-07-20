@@ -2,6 +2,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.dto.request.order;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +21,7 @@ public class UpdateOrderItemRequest
     private Integer dishId;
 
     @NotNull()
-    @Min(value = 1)
+    @PositiveOrZero
     private Integer quantity;
 
     private String note;

@@ -15,6 +15,11 @@ export default defineConfig({
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
+            '/ws-rims': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                ws: true,
+            },
         },
     },
 })
