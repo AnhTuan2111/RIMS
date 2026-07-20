@@ -742,18 +742,18 @@ export default function CashierInvoicesPage() {
                                     className="simple-table"
                                     style={{
                                         marginBottom: 16,
+                                        minWidth: 0,
                                     }}
                                 >
                                     <div
                                         className="simple-table-header"
                                         style={{
-                                            gridTemplateColumns:
-                                                '2fr 1fr 1fr',
+                                            gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
                                             display: 'grid',
                                             fontWeight: 'bold',
-                                            borderBottom:
-                                                '1px solid #cbd5e1',
-                                            paddingBottom: 6,
+                                            borderBottom: '1px solid #cbd5e1',
+                                            paddingBottom: '8px',
+                                            minWidth: 0,
                                         }}
                                     >
                                         <span>Món ăn</span>

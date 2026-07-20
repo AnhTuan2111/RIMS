@@ -85,7 +85,8 @@ export default function CashierPaymentsPage() {
     const [pointsUsed, setPointsUsed] =
         useState<number>(0)
 
-
+    const [invoiceSnapshot, setInvoiceSnapshot] =
+        useState<OrderDetailResponse | null>(null)
 
     const loadTables = useCallback(
         async (
@@ -473,20 +474,22 @@ export default function CashierPaymentsPage() {
                     onClose={() => setShowPaymentModal(false)}
                     onSuccess={(result: PaymentResponse) => {
                         setShowPaymentModal(false)
+                        setInvoiceSnapshot(orderDetail)
                         setPaymentResult(result)
                     }}
                 />
             )}
 
-            {paymentResult && orderDetail && (
+            {paymentResult && invoiceSnapshot && (
                 <PaymentResultManager
                     paymentResult={paymentResult}
-                    orderDetail={orderDetail}
+                    orderDetail={invoiceSnapshot}
                     onDownload={(invoiceId) => {
                         void handleDownloadPdf(invoiceId)
                     }}
                     onClose={() => {
                         setPaymentResult(null)
+                        setInvoiceSnapshot(null)
                         setSelectedTable(null)
                         setOrderDetail(null)
                         setCustomer(null)
