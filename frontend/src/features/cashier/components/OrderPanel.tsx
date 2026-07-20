@@ -297,6 +297,12 @@ export default function OrderPanel({
             className="page-card"
             style={{
                 position: 'relative',
+                width: 'min(400px, 50vw)',
+                maxWidth: '100%',
+                boxSizing: 'border-box',
+                // swap the line above for the two below instead.
+                // transform: 'scale(0.55)',
+                // transformOrigin: 'top left',
             }}
         >
             <button
@@ -475,17 +481,20 @@ export default function OrderPanel({
                     <div
                         className="simple-table"
                         style={{
-                            display: 'block',
+                            display: 'grid',
+                            minWidth: 0,
+                            width: '100%',
                         }}
                     >
                         <div
                             className="simple-table-header"
                             style={orderHeaderStyle}
                         >
-                            <span>Món ăn</span>
-                            <span>SL</span>
+                            <span style={cellStyle}>Món ăn</span>
+                            <span style={cellStyle}>SL</span>
                             <span
                                 style={{
+                                    cellStyle,
                                     textAlign: 'right',
                                 }}
                             >
@@ -505,10 +514,11 @@ export default function OrderPanel({
                                         className="simple-table-row"
                                         style={orderRowStyle}
                                     >
-                                        <span>{item.dishName}</span>
-                                        <span>x{item.quantity}</span>
+                                        <span style={cellStyle}>{item.dishName}</span>
+                                        <span style={cellStyle}>x{item.quantity}</span>
                                         <span
                                             style={{
+                                                cellStyle,
                                                 textAlign: 'right',
                                             }}
                                         >
@@ -740,11 +750,12 @@ const pointsInputStyle: CSSProperties = {
 }
 
 const orderHeaderStyle: CSSProperties = {
-    gridTemplateColumns: '2fr 1fr 1fr',
+    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
     display: 'grid',
     fontWeight: 'bold',
     borderBottom: '1px solid #cbd5e1',
     paddingBottom: '4px',
+    minWidth: 0,
 }
 
 const orderListStyle: CSSProperties = {
@@ -760,10 +771,11 @@ const emptyItemsStyle: CSSProperties = {
 }
 
 const orderRowStyle: CSSProperties = {
-    gridTemplateColumns: '2fr 1fr 1fr',
+    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
     display: 'grid',
     padding: '6px 0',
     borderBottom: '1px dashed #f1f5f9',
+    minWidth: 0,
 }
 
 const summaryBoxStyle: CSSProperties = {
@@ -789,6 +801,13 @@ const summaryLineStyle: CSSProperties = {
 const totalLineStyle: CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
-    fontSize: '1.25rem',
+    fontSize: '1.05rem',
     fontWeight: 'bold',
+}
+
+const cellStyle: CSSProperties = {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
 }

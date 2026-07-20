@@ -322,7 +322,7 @@ export default function CashierPaymentsPage() {
     const gridLayoutLayout: CSSProperties = selectedTable
         ? {
             display: 'grid',
-            gridTemplateColumns: '1.2fr 0.8fr',
+            gridTemplateColumns: '1.4fr 0.6fr',
             gap: '1.5rem',
         }
         : {

@@ -91,9 +91,7 @@ public class CashierController
     @GetMapping("/invoices/{invoiceId}/pdf")
     public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long invoiceId)
     {
-        Invoice invoice = cashierService.getInvoiceWithDetails(invoiceId);
-
-        byte[] pdfBytes = invoicePdfService.generateInvoicePdf(invoice);
+        byte[] pdfBytes = invoicePdfService.generateInvoicePdf(invoiceId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

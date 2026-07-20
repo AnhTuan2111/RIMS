@@ -40,10 +40,4 @@ public interface CashierService
     PagedInvoiceResponse getTodayInvoices(String tableNumber, String keyword, String paymentMethod, String invoiceCode, int page, int size);
 
     CashierInvoiceDetailResponse getInvoiceDetailForCashier(Long invoiceId);
-
-    /**
-     * Lấy Invoice kèm đầy đủ thông tin Order, OrderItems và Table để xuất PDF.
-     * Sử dụng EntityGraph eager-fetch để tránh N+1 query.
-     */
-    Invoice getInvoiceWithDetails(Long invoiceId);
 }

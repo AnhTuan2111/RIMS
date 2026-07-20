@@ -610,13 +610,6 @@ public class CashierServiceImpl implements CashierService {
                 .build();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Invoice getInvoiceWithDetails(Long invoiceId) {
-        return invoiceRepository.findWithOrderAndItemsById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + invoiceId));
-    }
-
     @Scheduled(fixedRate = 3600000) // 1 giờ/lần — không cấp thiết như 2 job kia
     @Transactional
     public void cleanupStaleCancelledOrders()
