@@ -1,10 +1,17 @@
-// src/config/roleMenus.ts
-
+import { ReactNode } from 'react'
 import { RoleType } from '@/shared/types/auth'
+
+export type QuickLink = {
+    label: string
+    path: string
+    variant: string
+    icon: ReactNode
+}
 
 export type RoleMenuItem = {
     label: string
     path: string
+    quickLinks?: QuickLink[]
 }
 
 export const ROLE_LABELS: Record<string, string> = {
@@ -23,6 +30,8 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
         { label: 'Quản lý menu', path: '/admin/menu' },
         { label: 'Quản lý danh mục', path: '/admin/categories' },
         { label: 'Quản lý món ăn', path: '/admin/dishes' },
+        { label: 'Thống kê', path: '/admin/statistics' },
+        { label: 'Lịch sử hóa đơn', path: '/admin/invoices' },
         { label: 'Hồ sơ của tôi', path: '/profile' },
     ],
 

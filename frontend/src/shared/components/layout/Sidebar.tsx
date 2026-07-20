@@ -1,58 +1,7 @@
-import {Fragment} from 'react'
-import {NavLink, useNavigate} from 'react-router-dom'
-import {ROLE_LABELS, roleMenus} from '@/app/config/roleMenus'
-import {useActor} from '@/app/providers/ActorContext'
-import {logout} from '@/shared/api/auth'
-
-
-const adminQuickLinks = [
-    {
-        label: 'Thống kê',
-        path: '/admin/statistics',
-        variant: 'primary',
-        icon: <StatisticsQuickIcon/>,
-    },
-    {
-        label: 'Lịch sử hóa đơn',
-        path: '/admin/invoices',
-        variant: 'secondary',
-        icon: <InvoiceStackIcon/>,
-    },
-]
-
-function StatisticsQuickIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            className="rims-quick-svg"
-            focusable="false"
-            viewBox="0 0 24 24"
-        >
-            <path d="M4.5 18.5h14"/>
-            <path d="M6.5 18.5v-6"/>
-            <path d="M10.5 18.5v-9"/>
-            <path d="M14.5 18.5v-4"/>
-            <circle cx="16.5" cy="7.5" r="3"/>
-            <path d="m19 10 2.2 2.2"/>
-        </svg>
-    )
-}
-
-function InvoiceStackIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            className="rims-quick-svg"
-            focusable="false"
-            viewBox="0 0 24 24"
-        >
-            <path d="M7 5h10a2 2 0 0 1 2 2v11H7z"/>
-            <path d="M5 8h10a2 2 0 0 1 2 2v9H5z"/>
-            <path d="M8.5 12h5.5"/>
-            <path d="M8.5 15h4"/>
-        </svg>
-    )
-}
+import { Fragment } from 'react'
+import { NavLink } from 'react-router-dom'
+import { ROLE_LABELS, roleMenus } from '@/app/config/roleMenus'
+import { useActor } from '@/app/providers/ActorContext'
 
 function getMenuIcon(path: string) {
     if (path.includes('dashboard')) return '▦'
@@ -99,17 +48,11 @@ function getMenuIcon(path: string) {
 }
 
 export function Sidebar() {
-    const {actor} = useActor()
-    const navigate = useNavigate()
+    const { actor } = useActor()
     const menus = roleMenus[actor] ?? []
 
     const stored = localStorage.getItem('currentUser')
     const currentUser = stored ? JSON.parse(stored) as { fullName: string; username: string } : null
-
-    const handleLogout = () => {
-        logout()
-        navigate('/login', {replace: true})
-    }
 
     return (
         <aside className="app-sidebar rims-sidebar">
@@ -136,7 +79,7 @@ export function Sidebar() {
                     <Fragment key={item.path}>
                         <NavLink
                             to={item.path}
-                            className={({isActive}) =>
+                            className={({ isActive }) =>
                                 isActive
                                     ? 'rims-sidebar-link active'
                                     : 'rims-sidebar-link'
@@ -155,13 +98,13 @@ export function Sidebar() {
                             </span>
                         </NavLink>
 
-                        {item.path === '/admin/dishes' && (
+                        {item.quickLinks && item.quickLinks.length > 0 && (
                             <div className="rims-sidebar-quick-links">
-                                {adminQuickLinks.map((quickLink) => (
+                                {item.quickLinks.map((quickLink) => (
                                     <NavLink
                                         key={quickLink.path}
                                         to={quickLink.path}
-                                        className={({isActive}) =>
+                                        className={({ isActive }) =>
                                             [
                                                 'rims-sidebar-quick-link',
                                                 `quick-${quickLink.variant}`,
@@ -191,30 +134,12 @@ export function Sidebar() {
             </nav>
 
             <div className="rims-sidebar-status">
-                <span className="rims-online-dot"/>
+                <span className="rims-online-dot" />
                 <div>
                     <strong>{currentUser?.fullName ?? currentUser?.username ?? 'Người dùng'}</strong>
                     <small>Hệ thống hoạt động</small>
                 </div>
             </div>
-
-            <button
-                onClick={handleLogout}
-                style={{
-                    margin: '8px 16px 16px',
-                    padding: '10px',
-                    background: '#fee2e2',
-                    color: '#991b1b',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '13px',
-                    width: 'calc(100% - 32px)',
-                }}
-            >
-                🚪 Đăng xuất
-            </button>
         </aside>
     )
 }
