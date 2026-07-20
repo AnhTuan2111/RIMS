@@ -127,16 +127,18 @@ export default function PaymentResultManager({
                 </h2>
 
                 <div style={tableWrapperStyle}>
-                    <div className="simple-table">
+                    <div className="simple-table"
+                         style={{ minWidth: 0 }}
+                    >
                         <div
                             className="simple-table-header"
                             style={tableHeaderStyle}
                         >
-                            <span>Món ăn</span>
-                            <span style={centerTextStyle}>
+                            <span style={cellStyle}>Món ăn</span>
+                            <span style={{centerTextStyle, cellStyle}}>
                                 SL
                             </span>
-                            <span style={rightTextStyle}>
+                            <span style={{rightTextStyle, cellStyle}}>
                                 Thành tiền
                             </span>
                         </div>
@@ -152,15 +154,15 @@ export default function PaymentResultManager({
                                         key={`${item.dishName}-${index}`}
                                         style={tableRowStyle}
                                     >
-                                        <span>
+                                        <span style={cellStyle}>
                                             {item.dishName}
                                         </span>
 
-                                        <span style={centerTextStyle}>
+                                        <span style={{rightTextStyle, cellStyle}}>
                                             {item.quantity}
                                         </span>
 
-                                        <span style={rightTextStyle}>
+                                        <span style={{rightTextStyle, cellStyle}}>
                                             {formatCurrency(item.subTotal)}
                                         </span>
                                     </div>
@@ -384,14 +386,16 @@ const billCodeStyle: CSSProperties = {
 
 const tableWrapperStyle: CSSProperties = {
     margin: '1.5rem 0',
+    minWidth: 0,
 }
 
 const tableHeaderStyle: CSSProperties = {
-    gridTemplateColumns: '2fr 1fr 1fr',
+    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
     display: 'grid',
     fontWeight: 'bold',
     borderBottom: '1px solid #cbd5e1',
     paddingBottom: '8px',
+    minWidth: 0,
 }
 
 const itemsListStyle: CSSProperties = {
@@ -401,10 +405,11 @@ const itemsListStyle: CSSProperties = {
 }
 
 const tableRowStyle: CSSProperties = {
-    gridTemplateColumns: '2fr 1fr 1fr',
+    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
     display: 'grid',
     padding: '10px 0',
     borderBottom: '1px dashed #f1f5f9',
+    minWidth: 0,
 }
 
 const centerTextStyle: CSSProperties = {
@@ -477,4 +482,11 @@ const closeButtonStyle: CSSProperties = {
     borderRadius: '8px',
     fontWeight: 'bold',
     cursor: 'pointer',
+}
+
+const cellStyle: CSSProperties = {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
 }

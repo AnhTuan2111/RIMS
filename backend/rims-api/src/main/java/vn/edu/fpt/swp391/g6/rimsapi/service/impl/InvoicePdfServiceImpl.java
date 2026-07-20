@@ -5,6 +5,9 @@ import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
@@ -13,6 +16,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Payment;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
 
 import java.io.ByteArrayOutputStream;
@@ -22,12 +26,20 @@ import java.util.List;
 
 
 @Service
+@RequiredArgsConstructor
 public class InvoicePdfServiceImpl implements InvoicePdfService
 {
 
+    private final InvoiceRepository invoiceRepository;
+
     @Override
-    public byte[] generateInvoicePdf(Invoice invoice)
+    @Transactional
+    public byte[] generateInvoicePdf(Long invoiceId)
     {
+        // Load fresh bên trong transaction hiện tại -> session còn sống
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new EntityNotFoundException("Invoice not found: " + invoiceId));
+
         Document document = new Document(PageSize.A6, 10, 10, 15, 15);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -64,8 +76,6 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             // Thông tin meta (Số HĐ, Ngày, Bàn, Thu ngân)
             Order order = invoice.getOrder();
             String tableName = (order.getTable() != null) ? order.getTable().getTableNumber() : "Mang về";
-            String cashierName = (order.getCreatedBy() != null && order.getCreatedBy().getFullName() != null)
-                    ? order.getCreatedBy().getFullName() : "Admin";
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -76,7 +86,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             infoTable.addCell(createCell("Số HĐ: " + String.format("%04d", invoice.getId()), fontNormal, Element.ALIGN_LEFT, false));
             infoTable.addCell(createCell("Bàn: " + tableName, fontBold, Element.ALIGN_RIGHT, false));
             infoTable.addCell(createCell("Ngày in: " + invoice.getInvoiceDate().format(formatter), fontNormal, Element.ALIGN_LEFT, false));
-            infoTable.addCell(createCell("Thu ngân: " + cashierName, fontNormal, Element.ALIGN_RIGHT, false));
+            infoTable.addCell(createCell("", fontNormal, Element.ALIGN_RIGHT, false));
 
             document.add(infoTable);
 
