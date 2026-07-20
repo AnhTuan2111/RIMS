@@ -1,13 +1,11 @@
-﻿import {
+import {
     useCallback,
-    useRef,
+    useEffect,
     useState,
     type FormEvent,
 } from 'react';
 import { categoryApi, dishApi } from '@/shared/api/admin';
 import type { DishResponse, CategoryResponse, DishFormData } from '@/shared/api/admin';
-import { REALTIME_CONFIG } from '@/app/config/realtime';
-import { usePolling } from '@/shared/hooks/usePolling';
 import {
     EmptyState,
     ErrorState,
@@ -89,7 +87,7 @@ export default function AdminDishesPage() {
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-    const hasLoadedInitialDishesRef = useRef(false);
+
 
     // --- Load Data ---
     const loadAllData = useCallback(
@@ -130,36 +128,13 @@ export default function AdminDishesPage() {
         [],
     );
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialDishesRef.current;
+    useEffect(() => {
+        const controller = new AbortController();
 
-            await loadAllData(
-                signal,
-                isInitialLoad,
-                isInitialLoad,
-            );
+        void loadAllData(controller.signal, true, true);
 
-            hasLoadedInitialDishesRef.current = true;
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[ADMIN_DISHES_POLL_ERROR]',
-                    requestError,
-                );
-            },
-        },
-    );
+        return () => controller.abort();
+    }, [loadAllData]);
 
     // --- CRUD Handlers ---
     const handleCreateDish = async (e: FormEvent) => {

@@ -1,6 +1,6 @@
-﻿import {
+import {
     useCallback,
-    useRef,
+    useEffect,
     useState,
 } from 'react'
 import {
@@ -12,13 +12,11 @@ import {
     adminApi,
     type AdminPaymentDetail,
 } from '@/shared/api/admin'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     ErrorState,
     LoadingState,
 } from '@/shared/components/feedback'
 import {PageCard} from '@/shared/components/ui'
-import {usePolling} from '@/shared/hooks/usePolling'
 
 function formatCurrency(value: number) {
     return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
@@ -59,8 +57,6 @@ export default function AdminPaymentDetailPage() {
     const [error, setError] =
         useState<string | null>(null)
 
-    const hasLoadedInitialPaymentRef =
-        useRef(false)
 
     const loadPaymentDetail = useCallback(
         async (
@@ -108,37 +104,17 @@ export default function AdminPaymentDetailPage() {
         ],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialPaymentRef.current
+    useEffect(() => {
+        if (!hasValidInvoiceId) {
+            return
+        }
 
-            await loadPaymentDetail(
-                isInitialLoad,
-                signal,
-            )
+        const controller = new AbortController()
 
-            hasLoadedInitialPaymentRef.current = true
-        },
-        {
-            enabled: hasValidInvoiceId,
+        void loadPaymentDetail(true, controller.signal)
 
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[ADMIN_PAYMENT_DETAIL_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+        return () => controller.abort()
+    }, [hasValidInvoiceId, loadPaymentDetail])
 
     if (!hasValidInvoiceId) {
         return (

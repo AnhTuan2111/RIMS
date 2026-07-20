@@ -1,8 +1,6 @@
-﻿import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { categoryApi, dishApi } from '@/shared/api/admin';
 import type { CategoryResponse, DishResponse, CategoryFormData } from '@/shared/api/admin';
-import { REALTIME_CONFIG } from '@/app/config/realtime';
-import { usePolling } from '@/shared/hooks/usePolling';
 import {
     EmptyState,
     ErrorState,
@@ -72,7 +70,7 @@ export default function AdminCategoryPage() {
     const [deleteModal, setDeleteModal] = useState({ open: false, id: null as number | null });
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-    const hasLoadedInitialCategoriesRef = useRef(false);
+
 
     // --- Load Data ---
     const loadCategories = useCallback(
@@ -121,36 +119,13 @@ export default function AdminCategoryPage() {
         [],
     );
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialCategoriesRef.current;
+    useEffect(() => {
+        const controller = new AbortController();
 
-            await loadCategories(
-                isInitialLoad,
-                isInitialLoad,
-                signal,
-            );
+        void loadCategories(true, true, controller.signal);
 
-            hasLoadedInitialCategoriesRef.current = true;
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[ADMIN_CATEGORY_POLL_ERROR]',
-                    requestError,
-                );
-            },
-        },
-    );
+        return () => controller.abort();
+    }, [loadCategories]);
 
     // --- CRUD Handlers ---
     const handleSave = async (e: React.FormEvent) => {

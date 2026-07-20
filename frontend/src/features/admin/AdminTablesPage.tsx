@@ -1,13 +1,12 @@
-﻿import {
+import {
     useCallback,
+    useEffect,
     useMemo,
-    useRef,
     useState,
 } from 'react'
 
 import {adminApi} from '@/shared/api/admin'
 import type {TableDetailResponse} from '@/shared/api/waiter'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     EmptyState,
     ErrorState,
@@ -17,7 +16,6 @@ import {
     PageCard,
     PageHeader,
 } from '@/shared/components/ui'
-import {usePolling} from '@/shared/hooks/usePolling'
 
 function getTableStatusLabel(status: TableDetailResponse['status']) {
     switch (status) {
@@ -60,7 +58,7 @@ export default function AdminTablesPage() {
     const [error, setError] =
         useState<string | null>(null)
 
-    const hasLoadedInitialTablesRef = useRef(false)
+
 
     const loadTables = useCallback(
         async (
@@ -103,36 +101,13 @@ export default function AdminTablesPage() {
         [],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialTablesRef.current
+    useEffect(() => {
+        const controller = new AbortController()
 
-            await loadTables(
-                signal,
-                isInitialLoad,
-                isInitialLoad,
-            )
+        void loadTables(controller.signal, true, true)
 
-            hasLoadedInitialTablesRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[ADMIN_TABLES_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+        return () => controller.abort()
+    }, [loadTables])
 
     const statistics = useMemo(() => {
         const totalTables = tables.length

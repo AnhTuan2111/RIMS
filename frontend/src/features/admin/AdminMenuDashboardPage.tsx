@@ -1,6 +1,6 @@
-﻿import {
+import {
     useCallback,
-    useRef,
+    useEffect,
     useState,
 } from 'react'
 import {useNavigate} from 'react-router-dom'
@@ -11,7 +11,6 @@ import {
     menuApi,
 } from '@/shared/api/admin'
 import type {MenuDashboardData} from '@/shared/api/admin'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     ErrorState,
     LoadingState,
@@ -20,7 +19,6 @@ import {
     PageCard,
     PageHeader,
 } from '@/shared/components/ui'
-import {usePolling} from '@/shared/hooks/usePolling'
 
 export default function AdminMenuDashboardPage() {
     const [data, setData] =
@@ -32,7 +30,7 @@ export default function AdminMenuDashboardPage() {
     const [error, setError] =
         useState<string | null>(null)
 
-    const hasLoadedInitialDashboardRef = useRef(false)
+
 
     const navigate = useNavigate()
 
@@ -129,36 +127,13 @@ export default function AdminMenuDashboardPage() {
         [],
     )
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialDashboardRef.current
+    useEffect(() => {
+        const controller = new AbortController()
 
-            await loadDashboardData(
-                signal,
-                isInitialLoad,
-                isInitialLoad,
-            )
+        void loadDashboardData(controller.signal, true, true)
 
-            hasLoadedInitialDashboardRef.current = true
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-
-            runImmediately: true,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[ADMIN_MENU_DASHBOARD_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+        return () => controller.abort()
+    }, [loadDashboardData])
 
     if (loading) {
         return (

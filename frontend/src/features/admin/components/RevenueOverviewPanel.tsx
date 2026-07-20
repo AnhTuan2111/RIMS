@@ -1,4 +1,4 @@
-﻿import {type ReactNode, useRef, useState} from 'react'
+import {type ReactNode, useEffect, useState} from 'react'
 import {
     adminApi,
     type BestSellingDishItem,
@@ -7,8 +7,6 @@ import {
     type RevenueReportResponse,
     type WeeklyRevenueChartResponse,
 } from '@/shared/api/admin'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {usePolling} from '@/shared/hooks/usePolling'
 
 interface WeekOption {
     value: string
@@ -881,7 +879,7 @@ export default function AdminRevenueOverviewDashboard() {
     const [isOverviewLoading, setIsOverviewLoading] = useState(false)
     const weekOptions = buildWeekOptions(new Date().getFullYear())
 
-    const hasLoadedInitialOverviewRef = useRef(false)
+
 
     async function loadWeeklyRevenueOverview(
         week: WeekOption = selectedWeek,
@@ -949,36 +947,14 @@ export default function AdminRevenueOverviewDashboard() {
         }
     }
 
-    usePolling(
-        async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialOverviewRef.current
+    useEffect(() => {
+        const controller = new AbortController()
 
-            await loadWeeklyRevenueOverview(
-                selectedWeek,
-                isInitialLoad,
-                signal,
-            )
+        void loadWeeklyRevenueOverview(selectedWeek, true, controller.signal)
 
-            if (!signal.aborted) {
-                hasLoadedInitialOverviewRef.current = true
-            }
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .admin
-                .dashboardIntervalMs,
-            runImmediately: true,
-            pauseWhenHidden: true,
-            onError: (requestError) => {
-                console.error(
-                    '[ADMIN_REVENUE_OVERVIEW_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
+        return () => controller.abort()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     function handleWeekChange(weekValue: string) {
         const nextWeek = weekOptions.find(
