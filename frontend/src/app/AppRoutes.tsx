@@ -1,7 +1,6 @@
 import {Navigate, Route, Routes} from 'react-router-dom'
 
 import DashboardLayout from '@/shared/components/layout/DashboardLayout'
-import {DashboardPage} from '@/features/dashboard/DashboardPage'
 import ProfilePage from '@/features/profile/ProfilePage'
 
 import {renderPublicRoutes} from './routes/PublicRoutes.tsx'
@@ -23,7 +22,6 @@ function AppRoutes() {
             {renderPaymentResultRoutes()}
 
             <Route element={<DashboardLayout/>}>
-                <Route path="/dashboard" element={<DashboardPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
 
                 {renderAdminRoutes()}

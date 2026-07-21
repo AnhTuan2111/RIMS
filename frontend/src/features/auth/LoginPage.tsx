@@ -34,10 +34,10 @@ function isRequestCanceled(error: unknown) {
 function getRedirectPath(role: RoleType) {
     switch (role) {
         case RoleType.ADMIN:
-            return '/dashboard'
+            return '/admin/dashboard'
 
         case RoleType.CHEF:
-            return '/chef/orders'
+            return '/chef/dashboard'
 
         case RoleType.WAITER:
             return '/waiter/tables'

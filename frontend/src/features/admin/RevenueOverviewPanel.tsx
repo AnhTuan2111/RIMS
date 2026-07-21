@@ -970,14 +970,16 @@ export default function AdminRevenueOverviewDashboard() {
     }
 
     return (
-        <WeeklyRevenueOverviewDashboard
-            data={overviewData}
-            error={overviewError}
-            isLoading={isOverviewLoading}
-            selectedWeek={selectedWeek}
-            weekOptions={weekOptions}
-            onReload={() => void loadWeeklyRevenueOverview(selectedWeek, true)}
-            onWeekChange={handleWeekChange}
-        />
+        <div>
+            <WeeklyRevenueOverviewDashboard
+                data={overviewData}
+                error={overviewError}
+                isLoading={isOverviewLoading}
+                selectedWeek={selectedWeek}
+                weekOptions={weekOptions}
+                onReload={() => void loadWeeklyRevenueOverview(selectedWeek, true)}
+                onWeekChange={handleWeekChange}
+            />
+        </div>
     )
 }
