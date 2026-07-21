@@ -1,4 +1,5 @@
 import {type ReactNode, useEffect, useState} from 'react'
+import {useAdminSocket} from '@/realtime/useAdminSocket'
 import {
     adminApi,
     type BestSellingDishItem,
@@ -879,8 +880,10 @@ export default function AdminRevenueOverviewDashboard() {
     const [isOverviewLoading, setIsOverviewLoading] = useState(false)
     const weekOptions = buildWeekOptions(new Date().getFullYear())
 
-
-
+    useAdminSocket(() => {
+        void loadWeeklyRevenueOverview(selectedWeek, false)
+    })
+    
     async function loadWeeklyRevenueOverview(
         week: WeekOption = selectedWeek,
         showFullLoading = true,
