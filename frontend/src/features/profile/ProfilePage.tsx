@@ -441,7 +441,7 @@ export default function ProfilePage() {
 
                             <EditField
                                 label="Số điện thoại *"
-                                value={phone}
+                                value={phone} pattern="0[0-9]{9}"
                                 placeholder="0xxxxxxxxx"
                                 onChange={setPhone}
                             />

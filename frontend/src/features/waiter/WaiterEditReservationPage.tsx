@@ -643,6 +643,7 @@ export default function WaiterEditReservationPage() {
                                         <label>Số điện thoại</label>
                                         <input
                                             value={resForm.phone}
+                                            pattern="0[0-9]{9}"
                                             className="waiter-form-input"
                                             onChange={(event) =>
                                                 updateForm({

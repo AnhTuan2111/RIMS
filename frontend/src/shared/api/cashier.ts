@@ -109,6 +109,7 @@ export const cashierApi = {
         data: {
             fullName: string;
             phone: string;
+            email: string;
         },
     ) =>
         apiClient.post(

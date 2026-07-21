@@ -175,6 +175,7 @@ export default function OrderPanel({
     async function handleCreateCustomer() {
         const phone = phoneSearch.trim()
         const fullName = newCusName.trim()
+        const email = newCusEmail.trim()
 
         if (!fullName) {
             alert('Vui lòng nhập tên khách hàng!')
@@ -188,6 +189,14 @@ export default function OrderPanel({
             alert(
                 'Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và đủ 10 số.',
             )
+            return
+        }
+
+        if (
+            !email
+            || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        ) {
+            alert('Vui lòng nhập email hợp lệ!')
             return
         }
 
@@ -274,7 +283,7 @@ export default function OrderPanel({
 
             alert(
                 response.data.message
-                ?? 'Không thể khóa đơn hàng để thanh toán.',
+                ?? 'Đơn hàng còn món chưa hoàn thành. Hãy hoàn thành để có thể thanh toán.',
             )
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
@@ -344,6 +353,7 @@ export default function OrderPanel({
                             style={customerInputStyle}
                             value={phoneSearch}
                             disabled={!!customer}
+                            pattern="0[0-9]{9}"
                             onChange={(event) =>
                                 handlePhoneInputChange(event.target.value)
                             }
@@ -389,6 +399,18 @@ export default function OrderPanel({
                                 value={newCusName}
                                 onChange={(event) =>
                                     setNewCusName(
+                                        event.target.value,
+                                    )
+                                }
+                            />
+
+                            <input
+                                type="email"
+                                placeholder="Email (*)"
+                                style={stackedInputStyle}
+                                value={newCusEmail}
+                                onChange={(event) =>
+                                    setNewCusEmail(
                                         event.target.value,
                                     )
                                 }
@@ -492,7 +514,7 @@ export default function OrderPanel({
                         <div style={orderListStyle}>
                             {itemsList.length === 0 ? (
                                 <p style={emptyItemsStyle}>
-                                    Bàn này chưa gọi món nào.
+                                    Bàn hiện tại chưa có món nào hoàn thành.
                                 </p>
                             ) : (
                                 itemsList.map((item, index) => (

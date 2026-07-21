@@ -35,7 +35,7 @@ public interface CashierService
 
     User searchCustomerByPhone(String phone);
 
-    User createCustomerFast(String fullName, String phone);
+    User createCustomerFast(String fullName, String phone, String email);
 
     PagedInvoiceResponse getTodayInvoices(String tableNumber, String keyword, String paymentMethod, String invoiceCode, int page, int size);
 
