@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useAdminSocket} from '@/realtime/useAdminSocket'
 import {
     adminApi,
     categoryApi,
@@ -76,6 +77,7 @@ const shiftCatalog = [
         color: '#f97316',
     },
 ]
+
 
 function formatDateForApi(date: Date) {
     const year = date.getFullYear()
@@ -1348,7 +1350,17 @@ export default function AdminStatisticsPage() {
     const bestSellingWeekOptions = buildWeekOptions(bestSellingYear)
     const orderShiftWeekOptions = buildWeekOptions(orderShiftYear)
 
-
+    useAdminSocket(() => {
+        void loadRevenueDashboard(false)
+        void loadCategoryBestSellingReport(
+            categoryBestSellingPreset,
+            selectedCategoryBestSellingWeek,
+            selectedBestSellingCategoryId,
+            false,
+        )
+        void loadBestSellingReport(bestSellingPreset, selectedBestSellingWeek, false)
+        void loadOrderShiftReport(orderShiftPreset, selectedOrderShiftWeek, false)
+    })
 
     useEffect(() => {
         const controller = new AbortController()

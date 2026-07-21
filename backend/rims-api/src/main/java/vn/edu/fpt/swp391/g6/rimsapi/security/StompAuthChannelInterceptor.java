@@ -38,7 +38,8 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
             "/topic/kitchen", Set.of("CHEF", "ADMIN"),
             "/topic/waiter", Set.of("WAITER", "ADMIN"),
             "/topic/tables", Set.of("WAITER", "CASHIER", "ADMIN"),
-            "/topic/chef-note", Set.of("CHEF", "ADMIN")
+            "/topic/chef-note", Set.of("CHEF", "ADMIN"),
+            "/topic/admin", Set.of("ADMIN")
     );
 
     @Override

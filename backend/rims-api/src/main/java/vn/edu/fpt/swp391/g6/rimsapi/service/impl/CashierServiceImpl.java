@@ -225,6 +225,7 @@ public class CashierServiceImpl implements CashierService {
         invoice.addPayment(payment);
 
         invoiceRepository.save(invoice);
+        webSocketBroadcaster.broadcastAfterCommit("/topic/admin", "{\"type\":\"STATS_UPDATED\"}");
         order.setLockedAt(null);
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
@@ -455,6 +456,7 @@ public class CashierServiceImpl implements CashierService {
         invoice.addPayment(payment);
 
         invoiceRepository.save(invoice);
+        webSocketBroadcaster.broadcastAfterCommit("/topic/admin", "{\"type\":\"STATS_UPDATED\"}");
 
         order.setLockedAt(null);
         order.setStatus(OrderStatus.COMPLETED);
