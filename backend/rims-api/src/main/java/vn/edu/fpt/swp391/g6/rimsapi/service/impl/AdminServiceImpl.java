@@ -161,6 +161,7 @@ public class AdminServiceImpl implements AdminService
             dish.setCategory(category);
 
             Dish savedDish = dishRepository.save(dish);
+            broadcastMenuChanged();
             return convertToResponse(savedDish);
 
         } catch (IllegalArgumentException | EntityNotFoundException e)
@@ -205,12 +206,9 @@ public class AdminServiceImpl implements AdminService
                 dish.setAvailable(updateDishRequest.getIsAvailable());
             }
 
-            boolean hiddenChanged = false;
-            if (updateDishRequest.getIsHidden() != null
-                    && !updateDishRequest.getIsHidden().equals(dish.isHidden()))
+            if (updateDishRequest.getIsHidden() != null)
             {
                 dish.setHidden(updateDishRequest.getIsHidden());
-                hiddenChanged = true;
             }
 
             // Cập nhật category nếu có thay đổi
@@ -223,10 +221,7 @@ public class AdminServiceImpl implements AdminService
 
             Dish updatedDish = dishRepository.save(dish);
 
-            if (hiddenChanged)
-            {
-                broadcastMenuVisibilityChanged(updatedDish);
-            }
+            broadcastMenuChanged();
 
             return convertToResponse(updatedDish);
 
@@ -255,6 +250,7 @@ public class AdminServiceImpl implements AdminService
             {
                 // Món mới tạo, chưa từng nằm trong order_items -> Cho phép xóa hẳn khỏi DB
                 dishRepository.delete(dish);
+                broadcastMenuChanged();
             } else
             {
                 // Món đã từng được đặt -> Không cho xóa, bắt dùng "Tạm dừng" thay thế
@@ -934,12 +930,9 @@ public class AdminServiceImpl implements AdminService
             case SUNDAY -> "CN";
         };
     }
-    private void broadcastMenuVisibilityChanged(Dish dish)
+    private void broadcastMenuChanged()
     {
-        String payload = String.format(
-                "{\"type\":\"MENU_VISIBILITY_CHANGED\",\"dishId\":%d,\"hidden\":%b}",
-                dish.getId(), dish.isHidden()
-        );
+        String payload = "{\"type\":\"MENU_UPDATED\"}";
         messagingTemplate.convertAndSend("/topic/waiter", payload);
         messagingTemplate.convertAndSend("/topic/kitchen", payload);
     }
