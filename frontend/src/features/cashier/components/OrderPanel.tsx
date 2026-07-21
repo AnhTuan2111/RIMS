@@ -65,6 +65,9 @@ function formatCurrency(value: number) {
     return `${value.toLocaleString()} đ`
 }
 
+const PHONE_REGEX = /^0[0-9]{9}$/
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function OrderPanel({
                                        selectedTable,
                                        orderDetail,
@@ -91,6 +94,9 @@ export default function OrderPanel({
 
     const [phoneSearch, setPhoneSearch] =
         useState('')
+
+    const [phoneError, setPhoneError] =
+        useState<string | null>(null)
 
     const [isSearching, setIsSearching] =
         useState(false)
@@ -125,6 +131,11 @@ export default function OrderPanel({
             ? 'Đang Phục Vụ'
             : 'Bàn Trống'
 
+    const isCreateFormValid =
+        newCusName.trim().length > 0
+        && PHONE_REGEX.test(phoneSearch)
+        && EMAIL_REGEX.test(newCusEmail.trim())
+
     useEffect(() => {
         setLockError(null)
     }, [selectedTable.tableId])
@@ -137,15 +148,25 @@ export default function OrderPanel({
         digitsOnly = digitsOnly.slice(0, 10)
 
         setPhoneSearch(digitsOnly)
+        setPhoneError(null)
     }
 
     async function handleSearchCustomer() {
         const phone = phoneSearch.trim()
 
         if (!phone) {
+            setPhoneError('Vui lòng nhập số điện thoại!')
             return
         }
 
+        if (!PHONE_REGEX.test(phone)) {
+            setPhoneError(
+                'Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và đủ 10 số.',
+            )
+            return
+        }
+
+        setPhoneError(null)
         setIsSearching(true)
         setShowCreate(false)
         onCustomerChange(null)
@@ -381,8 +402,20 @@ export default function OrderPanel({
                         ) : (
                             <button
                                 type="button"
-                                style={searchButtonStyle}
-                                disabled={isSearching}
+                                style={{
+                                    ...searchButtonStyle,
+                                    opacity:
+                                        !PHONE_REGEX.test(phoneSearch) || isSearching
+                                            ? 0.6
+                                            : 1,
+                                    cursor:
+                                        !PHONE_REGEX.test(phoneSearch) || isSearching
+                                            ? 'not-allowed'
+                                            : 'pointer',
+                                }}
+                                disabled={
+                                    !PHONE_REGEX.test(phoneSearch) || isSearching
+                                }
                                 onClick={() =>
                                     void handleSearchCustomer()
                                 }
@@ -391,6 +424,18 @@ export default function OrderPanel({
                             </button>
                         )}
                     </div>
+
+                    {phoneError && (
+                        <div
+                            style={{
+                                color: '#dc2626',
+                                fontSize: '0.85rem',
+                                marginTop: '4px',
+                            }}
+                        >
+                            ⚠️ {phoneError}
+                        </div>
+                    )}
 
                     {showCreate && !customer && (
                         <div style={createCustomerBoxStyle}>
@@ -429,8 +474,20 @@ export default function OrderPanel({
 
                             <button
                                 type="button"
-                                style={createCustomerButtonStyle}
-                                disabled={processingCreate}
+                                style={{
+                                    ...createCustomerButtonStyle,
+                                    opacity:
+                                        !isCreateFormValid || processingCreate
+                                            ? 0.6
+                                            : 1,
+                                    cursor:
+                                        !isCreateFormValid || processingCreate
+                                            ? 'not-allowed'
+                                            : 'pointer',
+                                }}
+                                disabled={
+                                    !isCreateFormValid || processingCreate
+                                }
                                 onClick={() =>
                                     void handleCreateCustomer()
                                 }
