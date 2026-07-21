@@ -1,4 +1,5 @@
 ﻿import {
+    useEffect,
     useState,
     type CSSProperties,
 } from 'react'
@@ -84,6 +85,10 @@ export default function OrderPanel({
     const [isLocking, setIsLocking] =
         useState(false)
 
+    const [lockError, setLockError] =
+        useState<string | null>(null)
+
+
     const [phoneSearch, setPhoneSearch] =
         useState('')
 
@@ -119,6 +124,10 @@ export default function OrderPanel({
         selectedTable.status === 'SERVING'
             ? 'Đang Phục Vụ'
             : 'Bàn Trống'
+
+    useEffect(() => {
+        setLockError(null)
+    }, [selectedTable.tableId])
 
     function handlePhoneInputChange(raw: string) {
         // Chỉ giữ lại ký tự số
@@ -207,6 +216,7 @@ export default function OrderPanel({
                 await cashierApi.createCustomerFast({
                     fullName,
                     phone,
+                    email,
                 })
 
             if (response?.data) {
@@ -260,10 +270,11 @@ export default function OrderPanel({
 
     async function handleCheckoutClick() {
         if (!orderDetail) {
-            alert('Chưa có thông tin đơn hàng để thanh toán!')
+            setLockError('Chưa có thông tin đơn hàng để thanh toán!')
             return
         }
 
+        setLockError(null)
         setIsLocking(true)
 
         try {
@@ -281,9 +292,9 @@ export default function OrderPanel({
                 return
             }
 
-            alert(
+            setLockError(
                 response.data.message
-                ?? 'Đơn hàng còn món chưa hoàn thành. Hãy hoàn thành để có thể thanh toán.',
+                ?? 'Đơn hàng còn món chưa hoàn thành hoặc chưa hủy. Hãy hoàn thành để có thể thanh toán.',
             )
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
@@ -295,7 +306,7 @@ export default function OrderPanel({
                 requestError,
             )
 
-            alert('Không thể khóa đơn hàng để thanh toán!')
+            setLockError('Không thể thực hiện thanh toán đơn hàng.Vui lòng huỷ hoặc hoàn thành các món còn lại!')
         } finally {
             setIsLocking(false)
         }
@@ -503,7 +514,7 @@ export default function OrderPanel({
                             <span style={cellStyle}>SL</span>
                             <span
                                 style={{
-                                    cellStyle,
+                                    ...cellStyle,
                                     textAlign: 'right',
                                 }}
                             >
@@ -590,6 +601,12 @@ export default function OrderPanel({
                                 )}
                             </strong>
                         </div>
+
+                        {lockError && (
+                            <div style={lockErrorBoxStyle}>
+                                ⚠️ {lockError}
+                            </div>
+                        )}
 
                         {selectedTable.status === 'SERVING' && (
                             <button
@@ -812,6 +829,17 @@ const totalLineStyle: CSSProperties = {
     justifyContent: 'space-between',
     fontSize: '1.05rem',
     fontWeight: 'bold',
+}
+
+const lockErrorBoxStyle: CSSProperties = {
+    marginTop: '0.75rem',
+    padding: '0.6rem 0.75rem',
+    background: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '6px',
+    color: '#b91c1c',
+    fontSize: '0.9rem',
+    lineHeight: 1.4,
 }
 
 const cellStyle: CSSProperties = {
