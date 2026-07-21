@@ -336,6 +336,7 @@ frontend\src\features\waiter\components\WaiterToast.tsx
 frontend\src\features\waiter\components\waiterUtils.ts
 frontend\src\realtime\index.ts
 frontend\src\realtime\stompClient.ts
+frontend\src\realtime\useAdminSocket.ts
 frontend\src\realtime\useCashierSocket.ts
 frontend\src\realtime\useKitchenSocket.ts
 frontend\src\realtime\useWaiterSocket.ts
