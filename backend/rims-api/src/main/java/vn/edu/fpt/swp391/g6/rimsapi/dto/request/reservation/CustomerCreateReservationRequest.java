@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class CustomerCreateReservationRequest {
 
     @NotBlank()
-    @Size(max = 50)
+    @Size(max = 50 , message = "Tên không được vượt quá 50 kí tự")
     @Pattern(regexp = "^\\p{L}+( \\p{L}+)*$")
     private String customerName;
 
@@ -25,6 +25,7 @@ public class CustomerCreateReservationRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime reservationTime;
 
+    @Size(max = 100, message = "Ghi chú không được vượt quá 100 ký tự")
     private String note;
 
     @NotNull()
