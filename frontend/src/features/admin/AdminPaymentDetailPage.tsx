@@ -1,6 +1,7 @@
 import {
     useCallback,
     useEffect,
+    useRef,
     useState,
 } from 'react'
 import {
@@ -38,6 +39,24 @@ function formatDateTime(value: string) {
     }).format(date)
 }
 
+function isRequestCanceled(error: unknown) {
+    if (typeof error !== 'object' || error === null) {
+        return false
+    }
+
+    const requestError = error as {
+        name?: string
+        code?: string
+        message?: string
+    }
+
+    return (
+        requestError.name === 'CanceledError'
+        || requestError.code === 'ERR_CANCELED'
+        || requestError.message === 'canceled'
+    )
+}
+
 export default function AdminPaymentDetailPage() {
     const navigate = useNavigate()
     const {invoiceId} = useParams()
@@ -58,16 +77,18 @@ export default function AdminPaymentDetailPage() {
         useState<string | null>(null)
 
 
+    // Đếm số lần gọi, chỉ request mới nhất mới được phép set state
+    const requestIdRef = useRef(0)
+
     const loadPaymentDetail = useCallback(
-        async (
-            showFullLoading = true,
-            signal?: AbortSignal,
-        ) => {
+        async (showFullLoading = true) => {
             if (!hasValidInvoiceId) {
                 setIsLoading(false)
                 setError('Mã hóa đơn không hợp lệ.')
                 return
             }
+
+            const requestId = ++requestIdRef.current
 
             try {
                 if (showFullLoading) {
@@ -79,11 +100,19 @@ export default function AdminPaymentDetailPage() {
                 const {data} =
                     await adminApi.getPaymentDetail(
                         parsedInvoiceId,
-                        signal,
                     )
+
+                // Nếu đã có request mới hơn chạy sau, bỏ qua kết quả cũ này
+                if (requestId !== requestIdRef.current) {
+                    return
+                }
 
                 setPayment(data)
             } catch (requestError: unknown) {
+                if (requestId !== requestIdRef.current) {
+                    return
+                }
+
                 console.error(
                     '[ADMIN_PAYMENT_DETAIL_FETCH_ERROR]',
                     requestError,
@@ -93,7 +122,10 @@ export default function AdminPaymentDetailPage() {
                     'Không thể tải chi tiết hóa đơn.',
                 )
             } finally {
-                if (showFullLoading) {
+                if (
+                    requestId === requestIdRef.current
+                    && showFullLoading
+                ) {
                     setIsLoading(false)
                 }
             }

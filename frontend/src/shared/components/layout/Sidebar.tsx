@@ -12,6 +12,9 @@ function getMenuIcon(path: string) {
     if (path.includes('reservations')) return '◷'
     if (path.includes('payments')) return '₫'
     if (path.includes('invoices')) return '▧'
+    if (path.includes('menu')) return '❏'
+    if (path.includes('categories')) return '🞖'
+    if (path.includes('statistics')) return '🛈'
     if (path.includes('users')) return '♙'
     if (path.includes('profile'))
         return (

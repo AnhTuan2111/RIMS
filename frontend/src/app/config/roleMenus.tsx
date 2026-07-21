@@ -24,7 +24,7 @@ export const ROLE_LABELS: Record<string, string> = {
 
 export const roleMenus: Record<string, RoleMenuItem[]> = {
     [RoleType.ADMIN]: [
-        { label: 'Tổng quan', path: '/dashboard' },
+        { label: 'Tổng quan', path: '/admin/dashboard' },
         { label: 'Quản lý tài khoản', path: '/admin/users' },
         { label: 'Quản lý menu', path: '/admin/menu' },
         { label: 'Quản lý danh mục', path: '/admin/categories' },
