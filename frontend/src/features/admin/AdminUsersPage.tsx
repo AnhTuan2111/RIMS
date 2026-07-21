@@ -58,6 +58,18 @@ function isRequestCanceled(error: unknown) {
     )
 }
 
+function isValidPhone(phone: string) {
+    return /^0[0-9]{9}$/.test(phone.trim())
+}
+
+function isValidEmail(email: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+}
+
+function sanitizePhoneInput(raw: string) {
+    return raw.replace(/\D/g, '').slice(0, 10)
+}
+
 export default function AdminUsersPage() {
     const [tab, setTab] = useState<Tab>('staff')
 
@@ -241,8 +253,20 @@ export default function AdminUsersPage() {
     }
 
     const handleCreateStaff = async () => {
-        if (!form.username || !form.fullName || !form.email || !form.phone || !form.password) {
+        if (!form.username.trim() || !form.fullName.trim() || !form.email.trim() || !form.phone.trim() || !form.password) {
             setFormError('Vui lòng điền đầy đủ các trường bắt buộc')
+            return
+        }
+        if (!isValidPhone(form.phone)) {
+            setFormError('Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và đủ 10 số.')
+            return
+        }
+        if (!isValidEmail(form.email)) {
+            setFormError('Email không hợp lệ!')
+            return
+        }
+        if (form.password.length < 6) {
+            setFormError('Mật khẩu phải có ít nhất 6 ký tự!')
             return
         }
         setFormLoading(true);
@@ -267,8 +291,20 @@ export default function AdminUsersPage() {
     }
 
     const handleCreateCustomer = async () => {
-        if (!form.username || !form.fullName || !form.email || !form.phone || !form.password) {
+        if (!form.username.trim() || !form.fullName.trim() || !form.email.trim() || !form.phone.trim() || !form.password) {
             setFormError('Vui lòng điền đầy đủ các trường bắt buộc')
+            return
+        }
+        if (!isValidPhone(form.phone)) {
+            setFormError('Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và đủ 10 số.')
+            return
+        }
+        if (!isValidEmail(form.email)) {
+            setFormError('Email không hợp lệ!')
+            return
+        }
+        if (form.password.length < 6) {
+            setFormError('Mật khẩu phải có ít nhất 6 ký tự!')
             return
         }
         setFormLoading(true);
@@ -293,8 +329,16 @@ export default function AdminUsersPage() {
 
     const handleUpdate = async () => {
         if (!selectedUser) return
-        if (!form.username || !form.fullName || !form.phone) {
+        if (!form.username.trim() || !form.fullName.trim() || !form.phone.trim()) {
             setFormError('Tên đăng nhập, họ tên và số điện thoại không được để trống')
+            return
+        }
+        if (!isValidPhone(form.phone)) {
+            setFormError('Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và đủ 10 số.')
+            return
+        }
+        if (form.email.trim() && !isValidEmail(form.email)) {
+            setFormError('Email không hợp lệ!')
             return
         }
         setFormLoading(true);
@@ -535,7 +579,9 @@ export default function AdminUsersPage() {
                                                       onChange={e => setForm({...form, email: e.target.value})}
                                                       placeholder="email@example.com"/></Field>
                         <Field label="Số điện thoại *"><input value={form.phone} pattern="0[0-9]{9}"
-                                                              onChange={e => setForm({...form, phone: e.target.value})}
+                                                              inputMode="numeric"
+                                                              maxLength={10}
+                                                              onChange={e => setForm({...form, phone: sanitizePhoneInput(e.target.value)})}
                                                               placeholder="0xxxxxxxxx"/></Field>
                         <Field label="Vai trò *">
                             <select value={form.role} onChange={e => setForm({...form, role: e.target.value})}>
@@ -574,7 +620,9 @@ export default function AdminUsersPage() {
                                                       onChange={e => setForm({...form, email: e.target.value})}
                                                       placeholder="email@example.com"/></Field>
                         <Field label="Số điện thoại *"><input value={form.phone} pattern="0[0-9]{9}"
-                                                              onChange={e => setForm({...form, phone: e.target.value})}
+                                                              inputMode="numeric"
+                                                              maxLength={10}
+                                                              onChange={e => setForm({...form, phone: sanitizePhoneInput(e.target.value)})}
                                                               placeholder="0xxxxxxxxx"/></Field>
                         <Field label="Mật khẩu *">
                             <PasswordInput value={form.password}
@@ -670,7 +718,9 @@ export default function AdminUsersPage() {
                                                     onChange={e => setForm({...form, email: e.target.value})}
                                                     placeholder="email@example.com"/></Field>
                         <Field label="Số điện thoại *"><input value={form.phone} pattern="0[0-9]{9}"
-                                                              onChange={e => setForm({...form, phone: e.target.value})}
+                                                              inputMode="numeric"
+                                                              maxLength={10}
+                                                              onChange={e => setForm({...form, phone: sanitizePhoneInput(e.target.value)})}
                                                               placeholder="0xxxxxxxxx"/></Field>
                         {selectedUser.role !== 'CUSTOMER' && selectedUser.role !== 'ADMIN' && (
                             <Field label="Vai trò *">
