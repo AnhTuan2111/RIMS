@@ -183,6 +183,7 @@ export interface DishResponse {
     price: number
     imageUrl: string
     isAvailable: boolean
+    isHidden: boolean
     categoryName: string
     createdAt: string
     updatedAt: string
@@ -200,7 +201,7 @@ export interface DishFormData {
     price: number
     description: string
     imageUrl: string
-    isAvailable: boolean
+    isHidden: boolean
 }
 
 export interface DishSummary {

@@ -15,6 +15,7 @@ import {
     PageCard,
     PageHeader,
 } from '@/shared/components/ui';
+import {useWaiterSocket} from '@/realtime';
 
 type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE';
 
@@ -82,7 +83,7 @@ export default function AdminDishesPage() {
         price: 0,
         description: '',
         imageUrl: '',
-        isAvailable: true
+        isHidden: false
     });
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -131,10 +132,20 @@ export default function AdminDishesPage() {
     useEffect(() => {
         const controller = new AbortController();
 
-        void loadAllData(controller.signal, true, true);
+        queueMicrotask(() => {
+            void loadAllData(controller.signal, true, true);
+        });
 
         return () => controller.abort();
     }, [loadAllData]);
+
+    // WebSocket: silently refresh dish list when any menu-visibility
+    // change is broadcast (Admin ẩn/hiện món, hoặc Chef đổi hết hàng).
+    // /topic/waiter đã cho phép role ADMIN subscribe từ trước, không cần sửa backend.
+    useWaiterSocket(
+        () => void loadAllData(undefined, false, false),
+        () => {},
+    );
 
     // --- CRUD Handlers ---
     const handleCreateDish = async (e: FormEvent) => {
@@ -166,7 +177,7 @@ export default function AdminDishesPage() {
                 price: formData.price,
                 imageUrl: formData.imageUrl,
                 categoryId: catIdParsed,
-                isAvailable: formData.isAvailable
+                isHidden: formData.isHidden
             });
             setActiveModal('NONE');
             await loadAllData(undefined, true, true);
@@ -210,7 +221,8 @@ export default function AdminDishesPage() {
                 price: formData.price,
                 imageUrl: formData.imageUrl,
                 categoryId: catIdParsed,
-                isAvailable: formData.isAvailable
+                isAvailable: selectedDish.isAvailable, // giữ nguyên — Chef sở hữu field này
+                isHidden: formData.isHidden
             });
             setActiveModal('NONE');
             await loadAllData(undefined, true, true);
@@ -252,7 +264,7 @@ export default function AdminDishesPage() {
             price: dish.price,
             description: dish.description || '',
             imageUrl: dish.imageUrl || '',
-            isAvailable: dish.isAvailable
+            isHidden: dish.isHidden
         });
         setActiveModal(modalType);
     };
@@ -263,8 +275,8 @@ export default function AdminDishesPage() {
             `#ID-${String(dish.id).padStart(2, '0')}`.includes(searchKeyword.toLowerCase());
         const matchesCategory = selectedCategory === 'ALL' || dish.categoryName === selectedCategory;
         const matchesStatus = selectedStatus === 'ALL' ||
-            (selectedStatus === 'AVAILABLE' && dish.isAvailable) ||
-            (selectedStatus === 'PAUSED' && !dish.isAvailable);
+            (selectedStatus === 'VISIBLE' && !dish.isHidden) ||
+            (selectedStatus === 'HIDDEN' && dish.isHidden);
 
         return matchesKeyword && matchesCategory && matchesStatus;
     });
@@ -358,7 +370,7 @@ export default function AdminDishesPage() {
                                     price: 0,
                                     description: '',
                                     imageUrl: '',
-                                    isAvailable: true
+                                    isHidden: false
                                 });
                                 setActiveModal('CREATE');
                             }}
@@ -413,8 +425,8 @@ export default function AdminDishesPage() {
                             className="admin-dish-select"
                         >
                             <option value="ALL">Tất cả trạng thái</option>
-                            <option value="AVAILABLE">Đang bán</option>
-                            <option value="PAUSED">Tạm dừng</option>
+                            <option value="VISIBLE">Đang hiển thị</option>
+                            <option value="HIDDEN">Đã ẩn</option>
                         </select>
                     </div>
                 </div>
@@ -473,8 +485,8 @@ export default function AdminDishesPage() {
                                     {dish.price.toLocaleString('vi-VN')}đ
                                 </td>
                                 <td className="admin-dish-cell-status">
-                                        <span className={`admin-dish-status-badge ${dish.isAvailable ? 'available' : 'paused'}`}>
-                                            {dish.isAvailable ? '● Đang bán' : '● Tạm dừng'}
+                                        <span className={`admin-dish-status-badge ${dish.isHidden ? 'paused' : 'available'}`}>
+                                            {dish.isHidden ? '● Đã ẩn khỏi menu' : '● Đang hiển thị'}
                                         </span>
                                 </td>
                                 <td className="admin-dish-cell-date">
@@ -634,13 +646,13 @@ export default function AdminDishesPage() {
 
                                 <div className="admin-dish-toggle-row">
                                     <div>
-                                        <strong className="admin-dish-toggle-label">Trạng thái công khai</strong>
-                                        <small className="admin-dish-toggle-description">Cho phép hiển thị và đặt món trên menu trực tuyến</small>
+                                        <strong className="admin-dish-toggle-label">Hiển thị trên menu</strong>
+                                        <small className="admin-dish-toggle-description">Cho phép Bếp và Phục vụ nhìn thấy món này</small>
                                     </div>
                                     <input
                                         type="checkbox"
-                                        checked={formData.isAvailable}
-                                        onChange={e => setFormData({...formData, isAvailable: e.target.checked})}
+                                        checked={!formData.isHidden}
+                                        onChange={e => setFormData({...formData, isHidden: !e.target.checked})}
                                         className="admin-dish-toggle-checkbox"
                                     />
                                 </div>
@@ -698,8 +710,8 @@ export default function AdminDishesPage() {
                         <div className="admin-dish-view-left">
                             <div className="admin-dish-view-header">
                                 <button onClick={() => setActiveModal('NONE')} className="admin-dish-back-btn">&larr;</button>
-                                <span className={`admin-dish-view-status ${selectedDish.isAvailable ? 'available' : 'paused'}`}>
-                                    {selectedDish.isAvailable ? '● Đang bán' : '● Tạm ngưng'}
+                                <span className={`admin-dish-view-status ${selectedDish.isHidden ? 'paused' : 'available'}`}>
+                                    {selectedDish.isHidden ? '● Đã ẩn khỏi menu' : '● Đang hiển thị'}
                                 </span>
                             </div>
                             <div className="admin-dish-view-image">
@@ -798,23 +810,23 @@ export default function AdminDishesPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="admin-dish-input-label">TRẠNG THÁI KINH DOANH</label>
+                                        <label className="admin-dish-input-label">TRẠNG THÁI HIỂN THỊ</label>
                                         <div className="admin-dish-radio-group">
                                             <label className="admin-dish-radio-label">
                                                 <input
                                                     type="radio"
-                                                    name="availability"
-                                                    checked={formData.isAvailable === true}
-                                                    onChange={() => setFormData({...formData, isAvailable: true})}
-                                                /> 🟢 Có sẵn
+                                                    name="visibility"
+                                                    checked={formData.isHidden === false}
+                                                    onChange={() => setFormData({...formData, isHidden: false})}
+                                                /> 🟢 Hiển thị
                                             </label>
                                             <label className="admin-dish-radio-label">
                                                 <input
                                                     type="radio"
-                                                    name="availability"
-                                                    checked={formData.isAvailable === false}
-                                                    onChange={() => setFormData({...formData, isAvailable: false})}
-                                                /> 🔴 Tạm dừng
+                                                    name="visibility"
+                                                    checked={formData.isHidden === true}
+                                                    onChange={() => setFormData({...formData, isHidden: true})}
+                                                /> 🔴 Ẩn khỏi menu
                                             </label>
                                         </div>
                                     </div>

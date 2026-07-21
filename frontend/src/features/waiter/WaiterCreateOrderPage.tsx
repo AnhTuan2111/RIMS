@@ -489,10 +489,17 @@ export default function WaiterCreateOrderPage() {
                                     note: '',
                                 }
 
+                            const isUnavailable = !dish.available
+
                             return (
                                 <div
                                     key={dish.dishId}
                                     className="waiter-menu-card"
+                                    style={
+                                        isUnavailable
+                                            ? {opacity: 0.5}
+                                            : undefined
+                                    }
                                 >
                                     <div className="waiter-menu-card-top">
                                         {dish.imageUrl ? (
@@ -511,6 +518,11 @@ export default function WaiterCreateOrderPage() {
                                         <div className="waiter-menu-info">
                                             <h4>{dish.name}</h4>
                                             <p>{fmtPrice(dish.price)}</p>
+                                            {isUnavailable && (
+                                                <span className="waiter-badge waiter-badge-cancelled">
+                                                    Hết hàng
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -536,6 +548,7 @@ export default function WaiterCreateOrderPage() {
                                         <button
                                             type="button"
                                             className="waiter-qty-btn"
+                                            disabled={isUnavailable}
                                             onClick={() =>
                                                 changeDraftQty(
                                                     dish.dishId,
@@ -550,6 +563,7 @@ export default function WaiterCreateOrderPage() {
                                     <input
                                         placeholder="Ghi chú"
                                         value={draft.note}
+                                        disabled={isUnavailable}
                                         className="waiter-note-input"
                                         onChange={(event) =>
                                             setDraftNote(
