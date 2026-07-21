@@ -17,8 +17,6 @@ import {
     WaiterTableCard,
 } from './components'
 import {useWaiterSocket} from '@/realtime'
-import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {usePolling} from '@/shared/hooks/usePolling'
 
 const STATUS_LABEL: Record<string, string> = {
     AVAILABLE: 'available',
@@ -517,37 +515,7 @@ export default function WaiterTableListPage() {
         () => void loadTables(undefined, false),
     )
 
-    usePolling(
-        async (signal) => {
-            if (tables.length === 0) {
-                return
-            }
 
-            await loadServingOrderStatuses(
-                tables,
-                signal,
-            )
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .waiter
-                .orderDetailIntervalMs,
-            runImmediately: false,
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                if (isRequestCanceled(requestError)) {
-                    return
-                }
-
-                console.error(
-                    '[WAITER_TABLE_STATUS_NOTIFICATION_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
 
     async function handleTableClick(
         table: TableDetailResponse,
