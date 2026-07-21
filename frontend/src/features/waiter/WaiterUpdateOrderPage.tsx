@@ -30,6 +30,7 @@ import {useWaiterSocket} from '@/realtime'
 type DraftItem = {
     qty: number
     originalQty?: number
+    originalNote?: string
     note: string
     orderItemId?: number | null
     status?: OrderItemStatus
@@ -46,6 +47,15 @@ type ToastState = {
 
 type UpdateItemWithName = UpdateOrderItemRequest & {
     name: string
+}
+type ChangeKind = 'new' | 'increase' | 'decrease' | 'cancel' | 'note'
+
+type ChangeSummaryItem = {
+    dishId: number
+    name: string
+    kind: ChangeKind
+    qty: number
+    note?: string
 }
 
 function isRequestCanceled(error: unknown) {
@@ -147,6 +157,7 @@ function buildDraftFromOrders(
             draft[dish.dishId] = {
                 qty: item.quantity,
                 originalQty: item.quantity,
+                originalNote: item.note ?? '',
                 note: item.note ?? '',
                 orderItemId: item.orderItemId,
                 status: item.status,
@@ -434,6 +445,83 @@ export default function WaiterUpdateOrderPage() {
             ],
         )
 
+    const changeSummary =
+        useMemo<ChangeSummaryItem[]>(
+            () => {
+                const result: ChangeSummaryItem[] = []
+
+                Object.entries(orderDraft).forEach(
+                    ([dishId, value]) => {
+                        const numericDishId =
+                            Number.parseInt(dishId, 10)
+
+                        const name =
+                            menu.find(
+                                (dish) =>
+                                    dish.dishId === numericDishId,
+                            )?.name ?? 'Món'
+
+                        const isNew = !value.orderItemId
+
+                        if (isNew) {
+                            if (value.qty > 0) {
+                                result.push({
+                                    dishId: numericDishId,
+                                    name,
+                                    kind: 'new',
+                                    qty: value.qty,
+                                    note: value.note || undefined,
+                                })
+                            }
+                            return
+                        }
+
+                        const original = value.originalQty ?? 0
+                        const delta = value.qty - original
+
+                        if (value.qty === 0 && original > 0) {
+                            result.push({
+                                dishId: numericDishId,
+                                name,
+                                kind: 'cancel',
+                                qty: 0,
+                            })
+                        } else if (delta > 0) {
+                            result.push({
+                                dishId: numericDishId,
+                                name,
+                                kind: 'increase',
+                                qty: delta,
+                                note: value.note || undefined,
+                            })
+                        } else if (delta < 0) {
+                            result.push({
+                                dishId: numericDishId,
+                                name,
+                                kind: 'decrease',
+                                qty: Math.abs(delta),
+                                note: value.note || undefined,
+                            })
+                        } else if (
+                            (value.note || '')
+                            !== (value.originalNote || '')
+                        ) {
+                            result.push({
+                                dishId: numericDishId,
+                                name,
+                                kind: 'note',
+                                qty: value.qty,
+                                note: value.note || undefined,
+                            })
+                        }
+                    },
+                )
+
+                return result
+            },
+            [orderDraft, menu],
+        )
+
     function openConfirm() {
         if (!servingOrders.length) {
             showToast(
@@ -443,9 +531,9 @@ export default function WaiterUpdateOrderPage() {
             return
         }
 
-        if (updateItems.length === 0) {
+        if (changeSummary.length === 0) {
             showToast(
-                'Không có món nào để cập nhật.',
+                'Không có thay đổi nào để cập nhật.',
                 'error',
             )
             return
@@ -930,20 +1018,26 @@ export default function WaiterUpdateOrderPage() {
                     }}
                 >
                     <ul className="waiter-confirm-list">
-                        {updateItems.map((item) => (
+                        {changeSummary.map((item) => (
                             <li key={item.dishId}>
                                 <span>
-                                    {item.name} × {item.quantity}
+                                    {item.name}
+                                    {item.kind === 'new'
+                                        && ` × ${item.qty} (Món mới)`}
+                                    {item.kind === 'increase'
+                                        && ` +${item.qty}`}
+                                    {item.kind === 'decrease'
+                                        && ` −${item.qty}`}
+                                    {item.kind === 'cancel'
+                                        && ' (Hủy món)'}
+                                    {item.kind === 'note'
+                                        && ' (Cập nhật ghi chú)'}
                                 </span>
 
                                 {item.note && (
                                     <small>
                                         Ghi chú: {item.note}
                                     </small>
-                                )}
-
-                                {!item.quantity && (
-                                    <small> (Hủy món)</small>
                                 )}
                             </li>
                         ))}

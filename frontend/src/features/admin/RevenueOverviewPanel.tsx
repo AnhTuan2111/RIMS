@@ -883,7 +883,7 @@ export default function AdminRevenueOverviewDashboard() {
     useAdminSocket(() => {
         void loadWeeklyRevenueOverview(selectedWeek, false)
     })
-    
+
     async function loadWeeklyRevenueOverview(
         week: WeekOption = selectedWeek,
         showFullLoading = true,
