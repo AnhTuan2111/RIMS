@@ -477,13 +477,14 @@ public class CashierServiceImpl implements CashierService {
 
     @Override
     @Transactional
-    public User createCustomerFast(String fullName, String phone) {
+    public User createCustomerFast(String fullName, String phone, String email) {
         if (userRepository.existsByPhone(phone)) {
             throw new RuntimeException("Số điện thoại này đã tồn tại!");
         }
         User user = new User();
         user.setFullName(fullName);
         user.setPhone(phone);
+        user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
         user.setUsername(phone);
         user.setPasswordHash(passwordEncoder.encode("123456"));
         user.setRole(RoleType.CUSTOMER);

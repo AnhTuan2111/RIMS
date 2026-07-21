@@ -504,6 +504,7 @@ export default function WaiterCreateReservationPage() {
                                 <input
                                     value={resForm.phone}
                                     className="waiter-form-input"
+                                    pattern="0[0-9]{9}"
                                     onChange={(event) =>
                                         updateForm({
                                             phone:

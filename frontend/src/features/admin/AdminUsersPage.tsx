@@ -534,7 +534,7 @@ export default function AdminUsersPage() {
                         <Field label="Email *"><input type="email" value={form.email}
                                                       onChange={e => setForm({...form, email: e.target.value})}
                                                       placeholder="email@example.com"/></Field>
-                        <Field label="Số điện thoại *"><input value={form.phone}
+                        <Field label="Số điện thoại *"><input value={form.phone} pattern="0[0-9]{9}"
                                                               onChange={e => setForm({...form, phone: e.target.value})}
                                                               placeholder="0xxxxxxxxx"/></Field>
                         <Field label="Vai trò *">
@@ -573,7 +573,7 @@ export default function AdminUsersPage() {
                         <Field label="Email *"><input type="email" value={form.email}
                                                       onChange={e => setForm({...form, email: e.target.value})}
                                                       placeholder="email@example.com"/></Field>
-                        <Field label="Số điện thoại *"><input value={form.phone}
+                        <Field label="Số điện thoại *"><input value={form.phone} pattern="0[0-9]{9}"
                                                               onChange={e => setForm({...form, phone: e.target.value})}
                                                               placeholder="0xxxxxxxxx"/></Field>
                         <Field label="Mật khẩu *">
@@ -669,7 +669,7 @@ export default function AdminUsersPage() {
                         <Field label="Email"><input type="email" value={form.email}
                                                     onChange={e => setForm({...form, email: e.target.value})}
                                                     placeholder="email@example.com"/></Field>
-                        <Field label="Số điện thoại *"><input value={form.phone}
+                        <Field label="Số điện thoại *"><input value={form.phone} pattern="0[0-9]{9}"
                                                               onChange={e => setForm({...form, phone: e.target.value})}
                                                               placeholder="0xxxxxxxxx"/></Field>
                         {selectedUser.role !== 'CUSTOMER' && selectedUser.role !== 'ADMIN' && (

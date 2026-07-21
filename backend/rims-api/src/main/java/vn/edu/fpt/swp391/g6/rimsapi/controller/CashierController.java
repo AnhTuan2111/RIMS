@@ -151,7 +151,7 @@ public class CashierController
 
     @PostMapping("/customers/create")
     public ResponseEntity<?> createCustomer(@RequestBody Map<String, String> body) {
-        User newCustomer = cashierService.createCustomerFast(body.get("fullName"), body.get("phone"));
+        User newCustomer = cashierService.createCustomerFast(body.get("fullName"), body.get("phone"), body.get("email"));
         return ResponseEntity.ok(Map.of(
                 "id", newCustomer.getId(),
                 "fullName", newCustomer.getFullName(),
