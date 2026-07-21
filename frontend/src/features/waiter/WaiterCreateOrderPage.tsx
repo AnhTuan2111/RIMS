@@ -497,14 +497,15 @@ export default function WaiterCreateOrderPage() {
                                     <div className="waiter-menu-card-top">
                                         {dish.imageUrl ? (
                                             <img
-                                                src={dish.imageUrl}
+                                                src={dish.imageUrl.startsWith('http') ? dish.imageUrl : `/image/${dish.imageUrl}`}
                                                 alt={dish.name}
                                                 className="waiter-menu-img"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src = 'https://placehold.co/64x64?text=🍽️'
+                                                }}
                                             />
                                         ) : (
-                                            <span className="waiter-menu-emoji">
-                                                🍽️
-                                            </span>
+                                            <span className="waiter-menu-emoji">🍽️</span>
                                         )}
 
                                         <div className="waiter-menu-info">
