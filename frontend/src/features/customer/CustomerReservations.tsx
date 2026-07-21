@@ -737,10 +737,11 @@ export default function CustomerReservations() {
                                     type="text"
                                     value={bookForm.note}
                                     placeholder="Yêu cầu đặc biệt..."
+                                    maxLength={100}
                                     onChange={(event) =>
                                         setBookForm((previous) => ({
                                             ...previous,
-                                            note: event.target.value,
+                                             note: event.target.value,
                                         }))
                                     }
                                 />
