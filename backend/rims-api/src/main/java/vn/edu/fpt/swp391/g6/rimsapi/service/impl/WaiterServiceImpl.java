@@ -379,11 +379,11 @@ public class WaiterServiceImpl implements WaiterService
     }
 
     @Override
+    @Transactional
     public String createReservation(CreateReservationRequest request)
     {
         RestaurantTable table = restaurantTableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
-
         if (request.getReservationTime().isBefore(LocalDateTime.now()))
         {
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
