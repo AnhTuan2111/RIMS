@@ -6,11 +6,13 @@
 
 import {
     cancelReservation,
-    checkReservationByDate,
     createReservation,
     getAvailableTables,
+    getBlockedTimeSlots,
     getCurrentReservation,
 } from '@/shared/api/customer'
+import {getAvailableTimeSlots} from '@/shared/utils/reservationTime'
+
 import type {
     CustomerCreateReservationRequest,
     CustomerReservationResponse,
@@ -140,6 +142,9 @@ export default function CustomerReservations() {
     const [loadingTables, setLoadingTables] =
         useState(true)
 
+    const [blockedRanges, setBlockedRanges] =
+        useState<{ start: string; end: string }[]>([])
+
     const [tableError, setTableError] =
         useState<string | null>(null)
 
@@ -195,6 +200,13 @@ export default function CustomerReservations() {
                         tableId: tables[0].id,
                     }
                 })
+
+                const firstTableId = tables[0].id
+
+                void loadBlockedSlots(
+                    firstTableId,
+                    bookForm.reservationTime.split('T')[0],
+                )
             }
         } catch (requestError: unknown) {
             if (
@@ -224,6 +236,42 @@ export default function CustomerReservations() {
             ) {
                 setLoadingTables(false)
             }
+        }
+    }
+
+    async function loadBlockedSlots(
+        tableId: number,
+        date: string,
+        signal?: AbortSignal,
+    ) {
+        if (!tableId || !date) {
+            setBlockedRanges([])
+            return
+        }
+
+        try {
+            const ranges =
+                await getBlockedTimeSlots(tableId, date, signal)
+
+            if (signal?.aborted) {
+                return
+            }
+
+            setBlockedRanges(ranges ?? [])
+        } catch (requestError: unknown) {
+            if (
+                signal?.aborted
+                || isRequestCanceled(requestError)
+            ) {
+                return
+            }
+
+            console.error(
+                '[CUSTOMER_BLOCKED_SLOTS_ERROR]',
+                requestError,
+            )
+
+            setBlockedRanges([])
         }
     }
 
@@ -614,6 +662,11 @@ export default function CustomerReservations() {
                                             reservationTime:
                                                 `${event.target.value}T${time}`,
                                         }))
+
+                                        void loadBlockedSlots(
+                                            bookForm.tableId,
+                                            event.target.value,
+                                        )
                                     }}
                                 />
                             </div>
@@ -645,27 +698,17 @@ export default function CustomerReservations() {
                                         }))
                                     }}
                                 >
-                                    {Array.from(
-                                        {
-                                            length: 25,   // (20h - 8h) * 2 + 1 mốc (bước 30 phút)
-                                        },
-                                        (_, index) => 8 * 60 + index * 30,   // tổng số phút kể từ 00:00
-                                    ).map((totalMinutes) => {
-                                        const hour = String(Math.floor(totalMinutes / 60)).padStart(2, '0')
-
-                                        const minute = String(totalMinutes % 60).padStart(2, '0')
-
-                                        const value = `${hour}:${minute}`
-
-                                        return (
-                                            <option
-                                                key={totalMinutes}
-                                                value={value}
-                                            >
-                                                {value}
-                                            </option>
-                                        )
-                                    })}
+                                    {getAvailableTimeSlots(
+                                        bookForm.reservationTime.split('T')[0] || todayStr,
+                                        blockedRanges,
+                                    ).map((value) => (
+                                        <option
+                                            key={value}
+                                            value={value}
+                                        >
+                                            {value}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -681,13 +724,20 @@ export default function CustomerReservations() {
                                     value={bookForm.tableId}
                                     required
                                     disabled={loadingTables}
-                                    onChange={(event) =>
+                                    onChange={(event) => {
+                                        const nextTableId =
+                                            Number(event.target.value)
+
                                         setBookForm((previous) => ({
                                             ...previous,
-                                            tableId:
-                                                Number(event.target.value),
+                                            tableId: nextTableId,
                                         }))
-                                    }
+
+                                        void loadBlockedSlots(
+                                            nextTableId,
+                                            bookForm.reservationTime.split('T')[0],
+                                        )
+                                    }}
                                 >
                                     {loadingTables ? (
                                         <option value={0}>

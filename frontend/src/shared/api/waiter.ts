@@ -82,6 +82,11 @@ export type CreateReservationRequest = {
     reservationTime: string
 }
 
+export type TimeRangeResponse = {
+    start: string
+    end: string
+}
+
 export type ReservationResponse = {
     id?: number
     reservationId?: number
@@ -210,5 +215,22 @@ export const waiterApi = {
     ) =>
         apiClient.put<void>(
             `/waiter/order-items/${orderItemId}/chef-note/acknowledge`,
+        ),
+
+    getBlockedTimeSlots: (
+        tableId: number,
+        date: string,
+        excludeReservationId?: number,
+        signal?: AbortSignal,
+    ) =>
+        apiClient.get<TimeRangeResponse[]>(
+            `/waiter/tables/${tableId}/blocked-slots`,
+            {
+                params: {
+                    date,
+                    excludeReservationId,
+                },
+                signal,
+            },
         ),
 }

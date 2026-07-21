@@ -17,6 +17,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.ReservationDetailRe
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.TimeRangeResponse;
+import java.time.format.DateTimeFormatter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -119,6 +121,16 @@ public class WaiterController
     {
         waiterService.acknowledgeChefInternalNote(orderItemId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/tables/{tableId}/blocked-slots")
+    public ResponseEntity<List<TimeRangeResponse>> getBlockedTimeRanges(
+            @PathVariable int tableId,
+            @RequestParam String date,
+            @RequestParam(required = false) Long excludeReservationId)
+    {
+        LocalDate parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+        return ResponseEntity.ok(waiterService.getBlockedTimeRanges(tableId, parsedDate, excludeReservationId));
     }
 }
 

@@ -28,6 +28,6 @@ export const REALTIME_CONFIG = {
     },
 
     customer: {
-        reservationIntervalMs: DEFAULT_POLL_INTERVAL_MS,
+        reservationIntervalMs: 30_000,
     },
 } as const
