@@ -7,7 +7,6 @@ import {REALTIME_CONFIG} from '@/app/config/realtime'
 import * as adminApi from '@/shared/api/admin'
 import * as customerApi from '@/shared/api/customer'
 import {useActor} from '@/app/providers/ActorContext'
-import {usePolling} from '@/shared/hooks/usePolling'
 import {RoleType} from '@/shared/types/auth'
 import {getErrorMessage} from '@/shared/utils/error'
 
@@ -166,6 +165,12 @@ export default function ProfilePage() {
         actor === RoleType.CUSTOMER
         || savedUser?.role === RoleType.CUSTOMER
 
+    const isAdmin =
+        actor === RoleType.ADMIN
+        || savedUser?.role === RoleType.ADMIN
+
+    const canEditProfile = isCustomer || isAdmin
+
     function syncFormFromUser(user: StoredUser) {
         setUsername(user.username)
         setFullName(user.fullName)
@@ -215,32 +220,7 @@ export default function ProfilePage() {
         }
     }
 
-    usePolling(
-        async (signal) => {
-            if (!isCustomer) {
-                return
-            }
 
-            await loadCustomerProfile(signal)
-        },
-        {
-            intervalMs:
-            REALTIME_CONFIG
-                .customer
-                .reservationIntervalMs,
-
-            runImmediately: true,
-
-            pauseWhenHidden: true,
-
-            onError: (requestError) => {
-                console.error(
-                    '[PROFILE_CUSTOMER_POLL_ERROR]',
-                    requestError,
-                )
-            },
-        },
-    )
 
     if (!savedUser) {
         return (
@@ -253,6 +233,10 @@ export default function ProfilePage() {
     const currentUser = savedUser
 
     async function handleSaveProfile() {
+        if (!canEditProfile) {
+            return
+        }
+
         setUpdateLoading(true)
         setUpdateError(null)
 
@@ -387,7 +371,7 @@ export default function ProfilePage() {
                     </p>
                 </div>
 
-                {!isEditing && (
+                {!isEditing && canEditProfile && (
                     <button
                         type="button"
                         className="primary-button"
