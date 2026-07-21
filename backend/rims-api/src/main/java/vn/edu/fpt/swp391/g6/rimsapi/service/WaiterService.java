@@ -9,6 +9,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.UpdateOrderResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.ReservationDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.TimeRangeResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.List;
 
 public interface WaiterService
 {
+    List<TimeRangeResponse> getBlockedTimeRanges(int tableId, LocalDate date, Long excludeReservationId);
+
     List<TableDetailResponse> getAllTables();
 
     CreateOrderResponse createOrder(CreateOrderRequest request, Integer waiterId);

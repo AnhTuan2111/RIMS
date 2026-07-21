@@ -12,8 +12,11 @@ import {
     type CreateReservationRequest,
     type ReservationResponse,
     type TableDetailResponse,
+    type TimeRangeResponse,
     waiterApi,
 } from '@/shared/api/waiter'
+import {getAvailableTimeSlots} from '@/shared/utils/reservationTime'
+
 import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {
     WaiterHeader,
@@ -134,6 +137,9 @@ export default function WaiterCreateReservationPage() {
 
     const [rightReservations, setRightReservations] =
         useState<ReservationResponse[]>([])
+
+    const [blockedRanges, setBlockedRanges] =
+        useState<TimeRangeResponse[]>([])
 
     const [resForm, setResForm] =
         useState<ReservationForm>({
@@ -275,6 +281,52 @@ export default function WaiterCreateReservationPage() {
         }
     }
 
+    async function loadBlockedSlots(
+        signal?: AbortSignal,
+        override?: Partial<Pick<ReservationForm, 'tableId' | 'date'>>,
+    ) {
+        const tableId =
+            override?.tableId ?? resForm.tableId
+
+        const date =
+            override?.date ?? resForm.date
+
+        if (!tableId || !date) {
+            setBlockedRanges([])
+            return
+        }
+
+        try {
+            const response =
+                await waiterApi.getBlockedTimeSlots(
+                    tableId,
+                    date,
+                    undefined,
+                    signal,
+                )
+
+            if (signal?.aborted) {
+                return
+            }
+
+            setBlockedRanges(response.data ?? [])
+        } catch (requestError: unknown) {
+            if (
+                signal?.aborted
+                || isRequestCanceled(requestError)
+            ) {
+                return
+            }
+
+            console.error(
+                '[WAITER_BLOCKED_SLOTS_ERROR]',
+                requestError,
+            )
+
+            setBlockedRanges([])
+        }
+    }
+
     usePolling(
         async (signal) => {
             const isInitialLoad =
@@ -315,6 +367,8 @@ export default function WaiterCreateReservationPage() {
                 isInitialLoad,
             )
 
+            await loadBlockedSlots(signal)
+
             hasLoadedInitialReservationsRef.current = true
         },
         {
@@ -352,6 +406,14 @@ export default function WaiterCreateReservationPage() {
             void loadReservations(
                 undefined,
                 true,
+                {
+                    tableId: nextForm.tableId,
+                    date: nextForm.date,
+                },
+            )
+
+            void loadBlockedSlots(
+                undefined,
                 {
                     tableId: nextForm.tableId,
                     date: nextForm.date,
@@ -490,6 +552,7 @@ export default function WaiterCreateReservationPage() {
                                 <input
                                     value={resForm.customerName}
                                     className="waiter-form-input"
+                                    maxLength={50}
                                     onChange={(event) =>
                                         updateForm({
                                             customerName:
@@ -508,7 +571,9 @@ export default function WaiterCreateReservationPage() {
                                     onChange={(event) =>
                                         updateForm({
                                             phone:
-                                            event.target.value,
+                                                event.target.value
+                                                    .replace(/\D/g, '')
+                                                    .slice(0, 10),
                                         })
                                     }
                                 />
@@ -552,25 +617,17 @@ export default function WaiterCreateReservationPage() {
                                             })
                                         }
                                     >
-                                        {Array.from(
-                                            {
-                                                length: 25,   // (20h - 8h) * 2 + 1 mốc (bước 30 phút)
-                                            },
-                                            (_, index) => 8 * 60 + index * 30,   // tổng số phút kể từ 00:00
-                                        ).map((totalMinutes) => {
-                                            const hour = String(Math.floor(totalMinutes / 60)).padStart(2, '0')
-                                            const minute = String(totalMinutes % 60).padStart(2, '0')
-                                            const value = `${hour}:${minute}`
-
-                                            return (
-                                                <option
-                                                    key={totalMinutes}
-                                                    value={value}
-                                                >
-                                                    {value}
-                                                </option>
-                                            )
-                                        })}
+                                        {getAvailableTimeSlots(
+                                            resForm.date,
+                                            blockedRanges,
+                                        ).map((value) => (
+                                            <option
+                                                key={value}
+                                                value={value}
+                                            >
+                                                {value}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
@@ -616,6 +673,7 @@ export default function WaiterCreateReservationPage() {
                                     value={resForm.note}
                                     className="waiter-form-input"
                                     rows={3}
+                                    maxLength={100}
                                     onChange={(event) =>
                                         updateForm({
                                             note:

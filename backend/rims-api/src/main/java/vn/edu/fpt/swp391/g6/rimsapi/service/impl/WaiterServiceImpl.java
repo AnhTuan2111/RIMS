@@ -27,6 +27,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.TimeRangeResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -396,6 +397,16 @@ public class WaiterServiceImpl implements WaiterService
             throw new GlobalExceptionHandler.BusinessException("Nhà hàng chỉ nhận đặt bàn trong khoảng 08:00 - 20:00");
         }
 
+        // Chặn 1 số điện thoại có nhiều hơn 1 đặt bàn đang hoạt động trong cùng 1 ngày
+        LocalDate reservationDate = request.getReservationTime().toLocalDate();
+        List<Reservation> phoneReservations = reservationRepository
+                .findActiveReservationsByPhoneAndDate(request.getPhone(), reservationDate);
+
+        if (!phoneReservations.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Số điện thoại này đã có một đặt bàn đang hoạt động trong ngày này, vui lòng hủy đặt bàn cũ trước khi đặt bàn mới.");
+        }
+
         LocalDateTime start = request.getReservationTime().minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
         LocalDateTime end = request.getReservationTime().plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
 
@@ -493,6 +504,20 @@ public class WaiterServiceImpl implements WaiterService
         if (request.getReservationTime().isBefore(LocalDateTime.now()))
         {
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
+        }
+
+        // Chặn 1 số điện thoại có nhiều hơn 1 đặt bàn đang hoạt động trong cùng 1 ngày
+        // (loại trừ chính reservation đang sửa)
+        LocalDate reservationDate = request.getReservationTime().toLocalDate();
+        List<Reservation> phoneReservations = reservationRepository
+                .findActiveReservationsByPhoneAndDate(request.getPhone(), reservationDate);
+
+        boolean hasOtherActiveReservation = phoneReservations.stream()
+                .anyMatch(r -> !r.getId().equals(reservationId));
+
+        if (hasOtherActiveReservation) {
+            throw new IllegalArgumentException(
+                    "Số điện thoại này đã có một đặt bàn khác đang hoạt động trong ngày này.");
         }
 
         LocalDateTime start = request.getReservationTime().minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
@@ -651,5 +676,58 @@ public class WaiterServiceImpl implements WaiterService
             orderItemRepository.save(orderItem);
             webSocketBroadcaster.broadcastAfterCommit("/topic/kitchen", "NOTE_ACKNOWLEDGED");
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TimeRangeResponse> getBlockedTimeRanges(int tableId, LocalDate date, Long excludeReservationId)
+    {
+        RestaurantTable table = restaurantTableRepository.findById(tableId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + tableId));
+
+        LocalDateTime dayStart = date.atStartOfDay();
+        LocalDateTime dayEnd = dayStart.plusDays(1);
+
+        List<Reservation> activeReservations = reservationRepository.findActiveReservationsByTableId(tableId);
+
+        List<TimeRangeResponse> blockedRanges = new ArrayList<>();
+
+        for (Reservation res : activeReservations)
+        {
+            if (excludeReservationId != null && excludeReservationId.equals(res.getId()))
+            {
+                continue;
+            }
+
+            LocalDateTime resTime = res.getReservationTime();
+            LocalDateTime start = resTime.minusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+            LocalDateTime end = resTime.plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+
+            if (end.isAfter(dayStart) && start.isBefore(dayEnd))
+            {
+                blockedRanges.add(TimeRangeResponse.builder().start(start).end(end).build());
+            }
+        }
+
+        if (table.getStatus() == TableStatus.SERVING)
+        {
+            LocalDateTime servingOrderCreatedAt = orderRepository.findServingOrdersWithDetails(table.getId())
+                    .stream().findFirst()
+                    .map(Order::getCreatedAt)
+                    .orElse(null);
+
+            if (servingOrderCreatedAt != null)
+            {
+                LocalDateTime start = servingOrderCreatedAt;
+                LocalDateTime end = servingOrderCreatedAt.plusMinutes(ReservationConflictValidator.TABLE_TURNAROUND_MINUTES);
+
+                if (end.isAfter(dayStart) && start.isBefore(dayEnd))
+                {
+                    blockedRanges.add(TimeRangeResponse.builder().start(start).end(end).build());
+                }
+            }
+        }
+
+        return blockedRanges;
     }
 }

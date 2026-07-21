@@ -64,4 +64,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>
     @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.user.id = :userId AND CAST(r.reservationTime AS date) = :date AND r.status NOT IN ('COMPLETED', 'CANCELLED')")
     boolean existsActiveReservationByUserIdAndDate(@Param("userId") Integer userId, @Param("date") LocalDate date);
 
+    // Dùng cho Waiter đặt hộ khách (walk-in, không có tài khoản) — chặn 1 SĐT chỉ được
+    // có 1 đặt bàn đang hoạt động trong cùng 1 ngày. Trả về List thay vì boolean để
+    // service có thể loại trừ chính reservation đang sửa (update flow).
+    @Query("SELECT r FROM Reservation r WHERE r.phone = :phone AND CAST(r.reservationTime AS date) = :date AND r.status NOT IN ('COMPLETED', 'CANCELLED')")
+    List<Reservation> findActiveReservationsByPhoneAndDate(@Param("phone") String phone, @Param("date") LocalDate date);
+
 }
