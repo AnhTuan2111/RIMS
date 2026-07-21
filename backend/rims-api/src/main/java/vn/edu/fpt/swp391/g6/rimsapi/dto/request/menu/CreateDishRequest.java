@@ -17,7 +17,7 @@ public class CreateDishRequest
     @Length(max = 100)
     private String description;
 
-    @NotBlank
+    @NotNull
     @Positive()
     private Integer price;
 
