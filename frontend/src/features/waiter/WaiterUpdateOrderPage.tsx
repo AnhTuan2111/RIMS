@@ -835,10 +835,17 @@ export default function WaiterUpdateOrderPage() {
                                     draft.chefInternalNoteAcknowledgedAt,
                                 )
 
+                            const isUnavailable = !dish.available
+
                             return (
                                 <div
                                     key={dish.dishId}
                                     className="waiter-menu-card"
+                                    style={
+                                        isUnavailable
+                                            ? {opacity: 0.5}
+                                            : undefined
+                                    }
                                 >
                                     <div className="waiter-menu-card-top">
                                         {dish.imageUrl ? (
@@ -863,6 +870,12 @@ export default function WaiterUpdateOrderPage() {
                                                     className={`waiter-badge waiter-badge-${draft.status.toLowerCase()}`}
                                                 >
                                                     {draft.status}
+                                                </span>
+                                            )}
+
+                                            {!hasExisting && isUnavailable && (
+                                                <span className="waiter-badge waiter-badge-cancelled">
+                                                    Hết hàng
                                                 </span>
                                             )}
                                         </div>
@@ -945,6 +958,7 @@ export default function WaiterUpdateOrderPage() {
                                         <button
                                             type="button"
                                             className="waiter-qty-btn"
+                                            disabled={isUnavailable}
                                             onClick={() =>
                                                 changeDraftQty(
                                                     dish.dishId,
@@ -967,6 +981,12 @@ export default function WaiterUpdateOrderPage() {
                                             )
                                         }
                                     />
+
+                                    {isUnavailable && (
+                                        <p className="waiter-item-hint">
+                                            Món hiện đang tạm hết — không thể gọi thêm.
+                                        </p>
+                                    )}
 
                                     {draft.status === 'COMPLETED' && (
                                         <p className="waiter-item-hint">

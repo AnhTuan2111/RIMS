@@ -52,18 +52,20 @@ export const dishApi = {
 
 
 
-    /** Creates a new dish */
+    /** Creates a new dish. isAvailable is omitted — backend defaults it to true;
+     *  chỉ Chef mới đổi field này qua trang riêng của Chef. */
     createDish: (data: {
         name: string
         description: string
         price: number
         imageUrl: string
         categoryId: number
-        isAvailable: boolean
+        isHidden: boolean
     }) =>
         apiClient.post<DishResponse>('/admin/dish/new', data),
 
-    /** Updates an existing dish */
+    /** Updates an existing dish. isAvailable phải gửi kèm (backend @NotNull)
+     *  nhưng luôn là giá trị hiện tại, không cho Admin sửa — field này do Chef sở hữu. */
     updateDish: (
         id: number,
         data: {
@@ -73,6 +75,7 @@ export const dishApi = {
             imageUrl: string
             categoryId: number
             isAvailable: boolean
+            isHidden: boolean
         },
     ) =>
         apiClient.put<DishResponse>(`/admin/dish/update/${id}`, data),
