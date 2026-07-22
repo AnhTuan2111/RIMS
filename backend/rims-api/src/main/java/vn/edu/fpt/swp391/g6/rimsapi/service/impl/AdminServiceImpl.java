@@ -476,16 +476,19 @@ public class AdminServiceImpl implements AdminService
     {
         long totalDishes = dishRepository.count();
         long totalCategories = categoryRepository.count();
-        long totalPausedDishes = dishRepository.countByIsAvailable(false);
 
-        var latestDishes = dishRepository.findTop4ByOrderByCreatedAtDesc().stream()
+        // SỬA: Tính số món bị ẩn (isHidden = true) thay vì isAvailable = false
+        long totalHiddenDishes = dishRepository.countByIsHidden(true);
+
+        // SỬA: Chỉ lấy 4 món mới nhất ĐANG HIỂN THỊ (isHidden = false)
+        var latestDishes = dishRepository.findTop4ByIsHiddenFalseOrderByCreatedAtDesc().stream()
                 .map(dish -> MenuDashboardResponse.DishSummaryResponse.builder()
                         .id(dish.getId())
                         .name(dish.getName())
                         .categoryName(dish.getCategory().getName())
                         .price((double) dish.getPrice())
                         .imageUrl(dish.getImageUrl())
-                        .status(dish.isAvailable() ? "AVAILABLE" : "PAUSED")
+                        .status(dish.isHidden() ? "HIDDEN" : "AVAILABLE") // SỬA: dùng isHidden
                         .build())
                 .collect(Collectors.toList());
 
@@ -504,12 +507,13 @@ public class AdminServiceImpl implements AdminService
         return MenuDashboardResponse.builder()
                 .totalDishes(totalDishes)
                 .totalCategories(totalCategories)
-                .totalPausedDishes(totalPausedDishes)
-                .totalHiddenDishes(0)
+                .totalPausedDishes(totalHiddenDishes) // SỬA: đồng bộ với frontend
+                .totalHiddenDishes(totalHiddenDishes) // SỬA: tính đúng giá trị
                 .latestDishes(latestDishes)
                 .categoryStats(categoryStats)
                 .build();
     }
+
 
     // INVOICE SERVICE
 

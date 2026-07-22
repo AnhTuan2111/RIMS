@@ -40,4 +40,11 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
     List<Object[]> getCategoryStatistics();
     @Query("SELECT COUNT(oi) FROM OrderItem oi WHERE oi.dish.id = :dishId")
     long countOrderItemsByDishId(@Param("dishId") Integer dishId);
+
+    // THÊM: Đếm số món bị ẩn
+    long countByIsHidden(boolean isHidden);
+
+    // THÊM: Lấy top 4 món mới nhất đang hiển thị
+    List<Dish> findTop4ByIsHiddenFalseOrderByCreatedAtDesc();
+
 }
