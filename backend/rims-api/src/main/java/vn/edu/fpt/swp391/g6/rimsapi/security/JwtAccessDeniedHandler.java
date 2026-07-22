@@ -31,8 +31,8 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.FORBIDDEN.value())
-                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
-                .message("Access denied")
+                .error("Không có quyền truy cập")
+                .message("Bạn không có quyền thực hiện thao tác này")
                 .path(request.getRequestURI())
                 .build();
 

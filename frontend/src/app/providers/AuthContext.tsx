@@ -201,7 +201,7 @@ export function useAuth(): AuthContextValue {
 
     if (!context) {
         throw new Error(
-            'useAuth must be used within AuthProvider',
+            'useAuth phải được sử dụng bên trong AuthProvider',
         )
     }
 

@@ -145,7 +145,7 @@ export function useActor() {
 
     if (!context) {
         throw new Error(
-            'useActor must be used inside ActorProvider',
+            'useActor phải được sử dụng bên trong ActorProvider',
         )
     }
 

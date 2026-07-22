@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
 
                 String jti = jwtService.extractJti(claims);
                 if (jti != null && revokedTokenRepository.existsByJti(jti)) {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token has been revoked");
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token đã bị thu hồi");
                     return;
                 }
 

@@ -183,7 +183,7 @@ public class ChefServiceImpl implements ChefService {
                 .findById(dishId)
                 .orElseThrow(
                         () -> new RuntimeException(
-                                "Dish not found"
+                                "Không tìm thấy món ăn"
                         )
                 );
 
@@ -582,7 +582,7 @@ public class ChefServiceImpl implements ChefService {
                 .findById(orderItemId)
                 .orElseThrow(
                         () -> new RuntimeException(
-                                "Order item not found"
+                                "Không tìm thấy món trong đơn hàng"
                         )
                 );
     }

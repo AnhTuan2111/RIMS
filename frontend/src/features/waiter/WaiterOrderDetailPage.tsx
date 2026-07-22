@@ -126,7 +126,7 @@ export default function WaiterOrderDetailPage() {
                 )
 
                 setError(
-                    'Không thể tải chi tiết order của bàn.',
+                    'Không thể tải chi tiết đơn hàng của bàn.',
                 )
             } finally {
                 if (
@@ -173,7 +173,7 @@ export default function WaiterOrderDetailPage() {
                     />
 
                     <h2 className="waiter-title">
-                        Table: {tableIdNumber || '—'}
+                        Bàn: {tableIdNumber || '—'}
                     </h2>
 
                     <button
@@ -186,7 +186,7 @@ export default function WaiterOrderDetailPage() {
                             )
                         }
                     >
-                        Cập nhật Order
+                        Cập nhật đơn hàng
                     </button>
                 </div>
 
@@ -204,7 +204,7 @@ export default function WaiterOrderDetailPage() {
                         >
                             {isLoading ? (
                                 <div style={stateBoxStyle}>
-                                    Đang tải chi tiết order...
+                                    Đang tải chi tiết đơn hàng...
                                 </div>
                             ) : error ? (
                                 <div style={errorBoxStyle}>

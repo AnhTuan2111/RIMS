@@ -52,7 +52,7 @@ public class JwtServiceImpl implements JwtService
             return signClaims(claimsSet);
         } catch (JOSEException e)
         {
-            throw new RuntimeException("Cannot generate access token", e);
+            throw new RuntimeException("Không thể tạo access token", e);
         }
     }
 
@@ -73,7 +73,7 @@ public class JwtServiceImpl implements JwtService
             return signClaims(claimsSet);
         } catch (JOSEException e)
         {
-            throw new RuntimeException("Cannot generate refresh token", e);
+            throw new RuntimeException("Không thể tạo refresh token", e);
         }
     }
 
@@ -85,26 +85,26 @@ public class JwtServiceImpl implements JwtService
             JWSObject jwsObject = JWSObject.parse(token);
             if (!jwsObject.verify(new MACVerifier(signerKey.getBytes())))
             {
-                throw new InvalidTokenException("Invalid token signature");
+                throw new InvalidTokenException("Chữ ký token không hợp lệ");
             }
 
             JWTClaimsSet claims = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
 
             if (!ISSUER.equals(claims.getIssuer()))
             {
-                throw new InvalidTokenException("Invalid token issuer");
+                throw new InvalidTokenException("Nguồn phát hành token không hợp lệ");
             }
 
             Date expiration = claims.getExpirationTime();
             if (expiration == null || expiration.before(new Date()))
             {
-                throw new InvalidTokenException("Token has expired");
+                throw new InvalidTokenException("Token đã hết hạn");
             }
 
             return claims;
         } catch (ParseException | JOSEException e)
         {
-            throw new InvalidTokenException("Invalid token");
+            throw new InvalidTokenException("Token không hợp lệ");
         }
     }
 
