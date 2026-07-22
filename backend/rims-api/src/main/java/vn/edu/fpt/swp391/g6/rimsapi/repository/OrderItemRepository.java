@@ -20,4 +20,10 @@ public interface OrderItemRepository
     List<OrderItem> findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(OrderItemStatus status, LocalDateTime start, LocalDateTime end);
 
     long countByStatus(OrderItemStatus status);
+
+    long countByStatusAndCreatedAtBetween(
+            OrderItemStatus status,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 }
