@@ -3,6 +3,7 @@ package vn.edu.fpt.swp391.g6.rimsapi.config;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.*;
@@ -11,10 +12,14 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 
 @Component
@@ -23,6 +28,15 @@ public class DatabaseSeeder implements CommandLineRunner
 {
 
     private static final String DEFAULT_PASSWORD = "123456";
+
+    // Số lượng order lịch sử cần seed
+    private static final int HISTORICAL_ORDER_COUNT = 3000;
+
+    // Seed cố định để dữ liệu sinh ra ổn định giữa các lần chạy lại (dễ debug/test)
+    private static final Random RNG = new Random(100);
+
+    // Mốc bắt đầu rải dữ liệu lịch sử
+    private static final LocalDateTime HISTORY_START = LocalDateTime.of(2025, 1, 1, 8, 0);
 
     /**
      * Table layout: each entry represents a group {count, capacity}.
@@ -45,7 +59,13 @@ public class DatabaseSeeder implements CommandLineRunner
     private final RestaurantTableRepository tableRepository;
     private final InvoiceRepository invoiceRepository;
     private final PaymentRepository paymentRepository;
+    private final PaymentTransactionRepository paymentTransactionRepository;
     private final ReservationRepository reservationRepository;
+
+    // Dùng để ghi đè các cột do @CreatedDate/@LastModifiedDate tự set = now() khi save(),
+    // bằng cách UPDATE thẳng qua SQL thuần (không đi qua vòng đời entity nên auditing
+    // không can thiệp lại lần nữa). Không cần sửa entity.
+    private final JdbcTemplate jdbcTemplate;
 
 
     @Override
@@ -54,13 +74,16 @@ public class DatabaseSeeder implements CommandLineRunner
         seedUsers();
         seedTables();
         seedCategoriesAndDishes();
-        seedOrdersInvoicesAndPayments();
+        seedHistoricalOrders();
+        seedLiveServingOrders();
         seedReservations();
         backfillInvoiceRestaurantRevenueAmount();
         System.out.println("Database seeder done!");
     }
 
-    // Users
+    // ══════════════════════════════════════════════════════════════════
+    // Users – 6 tài khoản: 1 admin, 1 chef, 1 waiter, 1 cashier, 2 customer
+    // ══════════════════════════════════════════════════════════════════
     private void seedUsers()
     {
         if (userRepository.count() > 0) return;
@@ -70,11 +93,12 @@ public class DatabaseSeeder implements CommandLineRunner
         }
 
         List<UserDef> defs = List.of(
-                new UserDef("admin", "Quản trị viên", "admin@rims.local", "0900000001", RoleType.ADMIN),
-                new UserDef("chef", "Đầu bếp", "chef@rims.local", "0900000002", RoleType.CHEF),
-                new UserDef("waiter", "Phục vụ", "waiter@rims.local", "0900000003", RoleType.WAITER),
-                new UserDef("cashier", "Thu ngân", "cashier@rims.local", "0900000004", RoleType.CASHIER),
-                new UserDef("customer", "Khách hàng", "customer@rims.local", "0900000005", RoleType.CUSTOMER)
+                new UserDef("admin", "Nguyễn Thành Vinh", "admin@rims.local", "0900000001", RoleType.ADMIN),
+                new UserDef("chef", "Phạm Minh Nghĩa", "chef@rims.local", "0900000002", RoleType.CHEF),
+                new UserDef("waiter", "Nguyễn Anh Tuấn", "waiter@rims.local", "0900000003", RoleType.WAITER),
+                new UserDef("cashier", "Phạm Tuấn Anh", "cashier@rims.local", "0900000004", RoleType.CASHIER),
+                new UserDef("customer1", "Nguyễn Thị Thu Hiền", "customer1@rims.local", "0900000005", RoleType.CUSTOMER),
+                new UserDef("customer2", "Nguyễn Xuân Bắc", "customer2@rims.local", "0900000006", RoleType.CUSTOMER)
         );
 
         List<User> users = defs.stream()
@@ -97,11 +121,12 @@ public class DatabaseSeeder implements CommandLineRunner
         return user;
     }
 
-    // Restaurant Tables  –  12 tables, status distribution:
+    // ══════════════════════════════════════════════════════════════════
+    // Restaurant Tables – giữ nguyên số lượng bàn + sức chứa như bản mẫu
     //   7 SERVING  : T01, T02, T03, T05, T06, T07, T08
     //   3 AVAILABLE: T09, T11, T12
     //   2 RESERVED : T04, T10
-
+    // ══════════════════════════════════════════════════════════════════
     private void seedTables()
     {
         if (tableRepository.count() > 0) return;
@@ -119,15 +144,8 @@ public class DatabaseSeeder implements CommandLineRunner
             }
         }
         tableRepository.saveAll(tables);
-
     }
 
-    /**
-     * Maps table number (1–12) to the required status:
-     * RESERVED : T04, T10
-     * AVAILABLE: T09, T11, T12
-     * SERVING  : T01, T02, T03, T05, T06, T07, T08   (7 tables)
-     */
     private TableStatus resolveTableStatus(int num)
     {
         return switch (num)
@@ -148,54 +166,66 @@ public class DatabaseSeeder implements CommandLineRunner
     }
 
 
-    // Categories & Dishes  –  3 categories, 30 dishes (15 food + 8 drinks + 7 desserts)
-
+    // ══════════════════════════════════════════════════════════════════
+    // Categories & Dishes – 6 category, 30 món theo phong cách Nhật Bản
+    //   Sushi (6) · Sashimi (4) · Món chính Nhật (8) · Khai vị (4)
+    //   Tráng miệng (3) · Đồ uống (5)
+    // ══════════════════════════════════════════════════════════════════
     private void seedCategoriesAndDishes()
     {
         if (dishRepository.count() > 0) return;
 
-        Category food = buildCategory("Đồ ăn", "Các món ăn chính trong thực đơn");
-        Category drink = buildCategory("Nước uống", "Đồ uống giải khát các loại");
-        Category dessert = buildCategory("Đồ tráng miệng", "Bánh ngọt và món tráng miệng");
-        categoryRepository.saveAll(List.of(food, drink, dessert));
+        Category sushi = buildCategory("Sushi", "Các loại sushi nigiri và maki tươi ngon");
+        Category sashimi = buildCategory("Sashimi", "Cá và hải sản tươi sống thái lát kiểu Nhật");
+        Category mainDish = buildCategory("Món chính Nhật Bản", "Các món chính đặc trưng ẩm thực Nhật: ramen, udon, teriyaki...");
+        Category appetizer = buildCategory("Khai vị Nhật Bản", "Các món khai vị và món phụ kiểu Nhật");
+        Category dessert = buildCategory("Tráng miệng", "Bánh và món tráng miệng kiểu Nhật");
+        Category drink = buildCategory("Đồ uống", "Đồ uống Nhật Bản và giải khát các loại");
+        categoryRepository.saveAll(List.of(sushi, sashimi, mainDish, appetizer, dessert, drink));
 
         List<Dish> dishes = new ArrayList<>();
 
-        // 15 Food dishes
-        dishes.add(buildDish("Cơm chiên hải sản", "Cơm chiên với tôm, mực và rau củ tươi, thơm béo đậm đà", 85_000, "com-chien-hai-san.jpg", food));
-        dishes.add(buildDish("Cơm gà nướng mật ong", "Cơm trắng dẻo kèm gà nướng mật ong vàng giòn hấp dẫn", 80_000, "com-ga-nuong.jpg", food));
-        dishes.add(buildDish("Bò lúc lắc", "Thịt bò xào lúc lắc với ớt chuông, hành tây và sốt tiêu đen", 120_000, "bo-luc-lac.jpg", food));
-        dishes.add(buildDish("Bún bò Huế", "Bún bò chuẩn vị Huế với chả cua, giò heo và sả tươi", 75_000, "bun-bo-hue.jpg", food));
-        dishes.add(buildDish("Phở bò đặc biệt", "Phở bò truyền thống với tái, nạm, gân và nước dùng ninh 12 giờ", 70_000, "pho-bo.jpg", food));
-        dishes.add(buildDish("Mì xào hải sản", "Mì trứng xào với tôm, mực, ngao và rau cải tươi giòn", 90_000, "mi-xao-hai-san.jpg", food));
-        dishes.add(buildDish("Gà nướng ngũ vị", "Nửa con gà ta nướng ngũ vị hương, da giòn vàng ươm", 95_000, "ga-nuong.jpg", food));
-        dishes.add(buildDish("Cá kho tộ", "Cá lóc kho tộ sốt caramel đậm đà, ăn kèm cơm trắng", 85_000, "ca-kho-to.jpg", food));
-        dishes.add(buildDish("Lẩu thái hải sản", "Lẩu thái chua cay đặc trưng với tôm, mực và nấm kim châm", 320_000, "lau-thai.jpg", food));
-        dishes.add(buildDish("Sườn nướng BBQ", "Sườn heo nướng than hoa sốt BBQ Mỹ, kèm khoai tây chiên", 130_000, "suon-nuong.jpg", food));
-        dishes.add(buildDish("Bún chả Hà Nội", "Bún chả thịt nướng than hoa đúng điệu Hà Nội, nước chấm chuẩn", 65_000, "bun-cha.jpg", food));
-        dishes.add(buildDish("Cơm tấm sườn bì", "Cơm tấm sườn nướng, bì lợn, chả trứng và đồ chua cà rốt", 75_000, "com-tam.jpg", food));
-        dishes.add(buildDish("Bánh mì thịt nướng", "Bánh mì giòn nhân thịt nướng, rau sống, pate và đồ chua tươi", 35_000, "banh-mi.jpg", food));
-        dishes.add(buildDish("Gỏi cuốn tôm thịt", "Gỏi cuốn bánh tráng tươi, tôm luộc, thịt heo và rau sống", 45_000, "goi-cuon.jpg", food));
-        dishes.add(buildDish("Canh chua cá bông lau", "Canh chua miền Nam nấu với cá bông lau, me tươi và rau thơm", 95_000, "canh-chua.jpg", food));
+        // 6 Sushi
+        dishes.add(buildDish("Nigiri cá hồi - 2 miếng", "Sushi nigiri cá hồi Na Uy tươi, cơm giấm chuẩn vị Nhật", 55_000, "nigiri-ca-hoi.jpg", sushi));
+        dishes.add(buildDish("Nigiri cá ngừ - 2 miếng", "Sushi nigiri cá ngừ đại dương tươi ngon, thịt săn chắc", 60_000, "nigiri-ca-ngu.jpg", sushi));
+        dishes.add(buildDish("Nigiri tôm - 2 miếng", "Sushi nigiri tôm sú hấp chín, ngọt thanh tự nhiên", 48_000, "nigiri-tom.jpg", sushi));
+        dishes.add(buildDish("Maki cá hồi bơ - 8 cuộn", "Cuộn sushi cá hồi kết hợp bơ béo ngậy, rong biển giòn", 79_000, "maki-ca-hoi-bo.jpg", sushi));
+        dishes.add(buildDish("California Roll - 8 cuộn", "Sushi cuộn kiểu Mỹ với thanh cua, bơ và trứng cá tobiko", 89_000, "california-roll.jpg", sushi));
+        dishes.add(buildDish("Dragon Roll - 8 cuộn", "Sushi cuộn lươn nướng phủ bơ và sốt unagi đặc trưng", 119_000, "dragon-roll.jpg", sushi));
 
-        // 8 Drinks
-        dishes.add(buildDish("Coca Cola", "Nước ngọt có ga Coca-Cola lon 330ml", 20_000, "coca-cola.jpg", drink));
-        dishes.add(buildDish("Pepsi", "Nước ngọt có ga Pepsi lon 330ml", 20_000, "pepsi.jpg", drink));
-        dishes.add(buildDish("Trà đào cam sả", "Trà đào cam sả mát lạnh, thanh ngọt đặc trưng", 35_000, "tra-dao.jpg", drink));
-        dishes.add(buildDish("Trà chanh đường đá", "Trà xanh pha chanh tươi, đường đá mát lạnh giải nhiệt", 30_000, "tra-chanh.jpg", drink));
-        dishes.add(buildDish("Cam ép tươi", "Nước cam vắt tươi 100%, không đường không đá", 40_000, "cam-ep.jpg", drink));
-        dishes.add(buildDish("Chanh dây mật ong", "Nước chanh dây mật ong, vị chua ngọt tự nhiên kích thích vị giác", 35_000, "chanh-day.jpg", drink));
-        dishes.add(buildDish("Matcha Latte", "Matcha Nhật hòa với sữa tươi và đá viên, vị thơm đặc biệt", 55_000, "matcha-latte.jpg", drink));
-        dishes.add(buildDish("Cà phê sữa đá", "Cà phê phin Việt Nam truyền thống với sữa đặc và đá viên", 30_000, "ca-phe-sua-da.jpg", drink));
+        // 4 Sashimi
+        dishes.add(buildDish("Sashimi cá hồi - 6 lát", "Cá hồi tươi thái lát mỏng, ăn kèm wasabi và nước tương", 129_000, "sashimi-ca-hoi.jpg", sashimi));
+        dishes.add(buildDish("Sashimi cá ngừ - 6 lát", "Cá ngừ đại dương thái lát, thịt đỏ tươi đậm đà", 139_000, "sashimi-ca-ngu.jpg", sashimi));
+        dishes.add(buildDish("Sashimi cá trắng - 6 lát", "Cá tráp trắng thái lát mỏng, vị thanh nhẹ tinh tế", 119_000, "sashimi-ca-trang.jpg", sashimi));
+        dishes.add(buildDish("Sashimi bạch tuộc - 6 lát", "Bạch tuộc tươi thái lát, giòn sần sật đặc trưng", 109_000, "sashimi-bach-tuoc.jpg", sashimi));
 
-        // 7 Desserts
-        dishes.add(buildDish("Bánh flan caramel", "Bánh flan mềm mịn sốt caramel đắng nhẹ, vị ngọt dịu hấp dẫn", 35_000, "banh-flan.jpg", dessert));
-        dishes.add(buildDish("Chè khúc bạch", "Chè hạnh nhân, thạch sương sáo và vải lạnh ngọt mát thanh", 45_000, "che-khuc-bach.jpg", dessert));
-        dishes.add(buildDish("Rau câu hoa quả", "Rau câu nhiều màu sắc hoa quả tươi, mát lạnh thanh đạm", 30_000, "rau-cau.jpg", dessert));
-        dishes.add(buildDish("Kem vani dừa", "Kem vani Ý phủ mảnh dừa nạo và sốt chocolate đen", 40_000, "kem-vani.jpg", dessert));
-        dishes.add(buildDish("Tiramisu", "Bánh Tiramisu Ý truyền thống, phủ bột cacao đắng thơm quyến rũ", 65_000, "tiramisu.jpg", dessert));
-        dishes.add(buildDish("Bánh mousse chanh leo", "Bánh mousse chanh leo tươi, xốp nhẹ, vị chua ngọt hài hoà", 60_000, "banh-mousse.jpg", dessert));
-        dishes.add(buildDish("Yogurt dâu tây", "Sữa chua Hy Lạp tự làm kết hợp mứt dâu tây và granola giòn", 40_000, "yogurt-dau.jpg", dessert));
+        // 8 Món chính Nhật
+        dishes.add(buildDish("Ramen Tonkotsu - 1 tô", "Mì ramen nước dùng xương heo ninh 12 giờ, chả cá và trứng lòng đào", 109_000, "ramen-tonkotsu.jpg", mainDish));
+        dishes.add(buildDish("Ramen Miso - 1 tô", "Mì ramen nước dùng miso đậm đà, bắp ngô và rong biển", 119_000, "ramen-miso.jpg", mainDish));
+        dishes.add(buildDish("Udon bò - 1 tô", "Mì udon dai mềm cùng thịt bò xào sốt teriyaki", 99_000, "udon-bo.jpg", mainDish));
+        dishes.add(buildDish("Tempura tôm - 5 con", "Tôm tẩm bột chiên giòn kiểu Nhật, chấm sốt tentsuyu", 99_000, "tempura-tom.jpg", mainDish));
+        dishes.add(buildDish("Gà Teriyaki - 1 phần", "Đùi gà áp chảo sốt teriyaki ngọt mặn hài hoà", 139_000, "ga-teriyaki.jpg", mainDish));
+        dishes.add(buildDish("Donburi bò - 1 tô", "Cơm phủ thịt bò xào hành tây sốt dashi kiểu Nhật", 109_000, "donburi-bo.jpg", mainDish));
+        dishes.add(buildDish("Cơm cà ri Nhật - 1 phần", "Cơm trắng dẻo cùng cà ri Nhật sánh mịn vị ngọt dịu", 99_000, "com-cari-nhat.jpg", mainDish));
+        dishes.add(buildDish("Lẩu Sukiyaki - 1 suất", "Lẩu Sukiyaki bò Mỹ, đậu phụ và rau củ nấu cùng sốt shoyu", 329_000, "sukiyaki.jpg", mainDish));
+
+        // 4 Khai vị
+        dishes.add(buildDish("Gyoza - 6 cái", "Bánh xếp nhân thịt heo chiên giòn đáy, kiểu Nhật truyền thống", 69_000, "gyoza.jpg", appetizer));
+        dishes.add(buildDish("Edamame - 1 đĩa", "Đậu nành Nhật luộc rắc muối biển, món khai vị thanh đạm", 45_000, "edamame.jpg", appetizer));
+        dishes.add(buildDish("Súp Miso - 1 chén", "Súp miso truyền thống với đậu phụ, rong biển wakame", 35_000, "sup-miso.jpg", appetizer));
+        dishes.add(buildDish("Chả cá viên chiên - 6 viên", "Chả cá viên Nhật chiên giòn, ăn kèm sốt mù tạt", 59_000, "cha-ca-vien.jpg", appetizer));
+
+        // 3 Tráng miệng
+        dishes.add(buildDish("Mochi - 2 bánh", "Bánh mochi Nhật nhân đậu đỏ, vỏ dẻo dai đặc trưng", 49_000, "mochi.jpg", dessert));
+        dishes.add(buildDish("Dorayaki - 2 bánh", "Bánh rán Nhật nhân đậu đỏ ngọt dịu, mềm xốp", 45_000, "dorayaki.jpg", dessert));
+        dishes.add(buildDish("Kem trà xanh - 1 cốc", "Kem matcha Nhật Bản béo mịn, vị trà xanh đậm đà", 55_000, "kem-tra-xanh.jpg", dessert));
+
+        // 5 Đồ uống
+        dishes.add(buildDish("Trà xanh nóng - 1 cốc", "Trà xanh Nhật Bản nguyên chất, thanh mát tự nhiên", 25_000, "tra-xanh-nong.jpg", drink));
+        dishes.add(buildDish("Trà sữa Matcha - 500ml", "Trà sữa vị matcha Nhật đậm đà, béo ngậy vừa phải", 55_000, "tra-sua-matcha.jpg", drink));
+        dishes.add(buildDish("Soda chanh - 450ml", "Soda chanh tươi mát lạnh, sủi bọt sảng khoái", 39_000, "soda-chanh.jpg", drink));
+        dishes.add(buildDish("Ramune - 200ml", "Nước ngọt có ga Nhật Bản vị nguyên bản trong chai bi đặc trưng", 45_000, "ramune.jpg", drink));
+        dishes.add(buildDish("Coca Cola - 330ml", "Nước ngọt có ga Coca-Cola lon 330ml", 20_000, "coca-cola.jpg", drink));
 
         dishRepository.saveAll(dishes);
     }
@@ -222,18 +252,170 @@ public class DatabaseSeeder implements CommandLineRunner
     }
 
 
-    // Orders, Invoices, Payments
-    //   10 orders: 3 COMPLETED (historical on SERVING tables) + 7 SERVING
-    //   3 Invoices  →  one per COMPLETED order
-    //   3 Payments  →  CASH, success = true, no PaymentTransactions
-
-    private void seedOrdersInvoicesAndPayments()
+    // ══════════════════════════════════════════════════════════════════
+    // Orders lịch sử – 3000 order, rải ngẫu nhiên từ đầu năm 2025 đến gần
+    // hiện tại. Toàn bộ đã thanh toán thành công (có Invoice + Payment) nên
+    // Order luôn ở trạng thái COMPLETED; từng OrderItem chủ yếu COMPLETED,
+    // một tỉ lệ nhỏ (~8%) bị CANCELLED. Phương thức thanh toán (CASH /
+    // QRCODE) chọn ngẫu nhiên cho mỗi order.
+    //
+    // LƯU Ý VỀ AUDITING: Order/OrderItem/Invoice/Payment/PaymentTransaction
+    // đều dùng @EntityListeners(AuditingEntityListener.class) nên các cột
+    // @CreatedDate (createdAt/invoiceDate/paymentDate/transactionDate) và
+    // @LastModifiedDate (updatedAt) sẽ luôn bị Spring Data JPA auditing ghi
+    // đè thành thời điểm chạy seeder thực tế ngay khi save() được gọi — bất
+    // kể ta đã set giá trị "quá khứ" trước đó. Vì không được sửa entity, ta
+    // để auditing set như bình thường, sau đó UPDATE thẳng qua SQL thuần
+    // (JdbcTemplate) để ghi đè lại đúng mốc thời gian mong muốn — vì UPDATE
+    // thuần không đi qua vòng đời entity/@PrePersist nên auditing không có
+    // cơ hội can thiệp lại lần nữa. Toàn bộ được gom lại và chạy 1 lần bằng
+    // batchUpdate() sau vòng lặp để tránh 15.000 lượt round-trip riêng lẻ.
+    // ══════════════════════════════════════════════════════════════════
+    private void seedHistoricalOrders()
     {
         if (orderRepository.count() > 0) return;
 
         List<RestaurantTable> allTables = tableRepository.findAll();
-        allTables.sort(Comparator.comparing(RestaurantTable::getTableNumber));
+        List<Dish> dishes = dishRepository.findAll();
 
+        User waiter = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == RoleType.WAITER).toList().getFirst();
+
+        // Chừa lại 3 giờ gần nhất để không đụng với các order đang SERVING "thời gian thực"
+        LocalDateTime historyEnd = LocalDateTime.now().minusHours(3);
+
+        // Sinh trước toàn bộ mốc thời gian rồi sort tăng dần, để khi insert theo
+        // đúng thứ tự này thì auto-increment ID cũng tăng dần theo thời gian tạo.
+        List<LocalDateTime> orderTimes = new ArrayList<>(HISTORICAL_ORDER_COUNT);
+        for (int i = 0; i < HISTORICAL_ORDER_COUNT; i++)
+        {
+            orderTimes.add(randomDateTimeBetween(HISTORY_START, historyEnd));
+        }
+        orderTimes.sort(Comparator.naturalOrder());
+
+        // Gom các cặp (thời gian đúng, id) lại để backdate hàng loạt sau vòng lặp,
+        // thay vì UPDATE từng dòng một (rất chậm với 3000 order).
+        List<Object[]> orderBackdates = new ArrayList<>();
+        List<Object[]> itemBackdates = new ArrayList<>();
+        List<Object[]> invoiceBackdates = new ArrayList<>();
+        List<Object[]> paymentBackdates = new ArrayList<>();
+        List<Object[]> transactionBackdates = new ArrayList<>();
+
+        for (LocalDateTime orderTime : orderTimes)
+        {
+            RestaurantTable table = allTables.get(RNG.nextInt(allTables.size()));
+
+            Order order = buildOrder(table, waiter, OrderStatus.COMPLETED, orderTime);
+
+            // Build items và gắn vào order qua addOrderItem() để đồng bộ 2 chiều
+            // (order.orderItems <-> item.order), tránh Hibernate hiểu nhầm
+            // collection rỗng rồi orphanRemoval xoá mất item ở lần save thứ 2.
+            List<OrderItem> items = buildRandomOrderItems(order, dishes, orderTime);
+            items.forEach(order::addOrderItem);
+
+            recalcTotal(order, items);
+            orderRepository.save(order);   // save 1 lần duy nhất, cascade lo phần OrderItem
+
+            orderBackdates.add(new Object[]{Timestamp.valueOf(orderTime), order.getId()});
+
+            for (OrderItem item : items)
+            {
+                Timestamp ts = Timestamp.valueOf(item.getCreatedAt());
+                itemBackdates.add(new Object[]{ts, ts, item.getId()});
+            }
+            recalcTotal(order, items);
+            orderRepository.save(order);
+
+            LocalDateTime invoiceDate = orderTime.plusMinutes(60 + RNG.nextInt(90));
+            Invoice invoice = buildInvoice(order, invoiceDate);
+            invoiceRepository.save(invoice);
+            invoiceBackdates.add(new Object[]{Timestamp.valueOf(invoiceDate), invoice.getId()});
+
+            PaymentMethod method = RNG.nextBoolean() ? PaymentMethod.CASH : PaymentMethod.QRCODE;
+            LocalDateTime paymentDate = invoiceDate.plusMinutes(1 + RNG.nextInt(5));
+            Payment payment = buildPayment(invoice, method, paymentDate);
+            paymentRepository.save(payment);
+            paymentBackdates.add(new Object[]{Timestamp.valueOf(paymentDate), payment.getId()});
+
+            if (method == PaymentMethod.QRCODE)
+            {
+                LocalDateTime txDate = paymentDate.plusSeconds(2);
+                PaymentTransaction tx = buildPaymentTransaction(payment, txDate);
+                paymentTransactionRepository.save(tx);
+                transactionBackdates.add(new Object[]{Timestamp.valueOf(txDate), tx.getId()});
+            }
+        }
+
+        // Ghi đè hàng loạt các cột do auditing tự set = now() về lại đúng mốc thời gian mong muốn
+        jdbcTemplate.batchUpdate("UPDATE orders SET created_at = ? WHERE order_id = ?", orderBackdates);
+        jdbcTemplate.batchUpdate("UPDATE order_items SET created_at = ?, updated_at = ? WHERE order_item_id = ?", itemBackdates);
+        jdbcTemplate.batchUpdate("UPDATE invoices SET invoice_date = ? WHERE invoice_id = ?", invoiceBackdates);
+        jdbcTemplate.batchUpdate("UPDATE payments SET payment_date = ? WHERE payment_id = ?", paymentBackdates);
+        if (!transactionBackdates.isEmpty())
+        {
+            jdbcTemplate.batchUpdate("UPDATE payment_transaction SET transaction_date = ? WHERE transaction_id = ?", transactionBackdates);
+        }
+    }
+
+    private List<OrderItem> buildRandomOrderItems(Order order, List<Dish> dishes, LocalDateTime orderTime)
+    {
+        int itemCount = 1 + RNG.nextInt(5); // 1-5 món mỗi order
+        List<OrderItem> items = new ArrayList<>();
+        boolean hasNonCancelled = false;
+
+        for (int i = 0; i < itemCount; i++)
+        {
+            Dish dish = dishes.get(RNG.nextInt(dishes.size()));
+            int qty = 1 + RNG.nextInt(3);
+            LocalDateTime itemTime = orderTime.plusMinutes(RNG.nextInt(10));
+            boolean isLastItem = (i == itemCount - 1);
+
+            OrderItemStatus status;
+            if (!hasNonCancelled && isLastItem)
+            {
+                // Đảm bảo order luôn có ít nhất 1 món không bị huỷ (order đã thanh toán thành công)
+                status = OrderItemStatus.COMPLETED;
+            }
+            else
+            {
+                status = RNG.nextInt(100) < 8 ? OrderItemStatus.CANCELLED : OrderItemStatus.COMPLETED;
+            }
+            if (status != OrderItemStatus.CANCELLED) hasNonCancelled = true;
+
+            items.add(buildItem(order, dish, qty, null, status, itemTime));
+        }
+        return items;
+    }
+
+    // Random ngày trong khoảng [start, end], sau đó random giờ riêng trong khung
+    // 8h00 - 19h59 (đảm bảo luôn <= 20h00) để khớp giờ hoạt động của nhà hàng.
+    private LocalDateTime randomDateTimeBetween(LocalDateTime start, LocalDateTime end)
+    {
+        long startDay = start.toLocalDate().toEpochDay();
+        long endDay = end.toLocalDate().toEpochDay();
+        long randomDay = startDay + (long) (RNG.nextDouble() * (endDay - startDay + 1));
+        LocalDate date = LocalDate.ofEpochDay(Math.min(randomDay, endDay));
+
+        int hour = 8 + RNG.nextInt(12);   // 8 - 19h
+        int minute = RNG.nextInt(60);
+        return LocalDateTime.of(date, LocalTime.of(hour, minute));
+    }
+
+
+    // ══════════════════════════════════════════════════════════════════
+    // 7 order đang phục vụ tại thời điểm hiện tại (khớp với 7 bàn đang
+    // SERVING: T01, T02, T03, T05, T06, T07, T08). Mỗi order có 2-5 món,
+    // từng món ở trạng thái COMPLETED hoặc PREPARING; chưa có Invoice/Payment
+    // vì khách chưa thanh toán.
+    //
+    // Các order này chỉ lệch "vài chục phút" so với now() nên việc auditing
+    // ghi đè createdAt = now() gần như không đáng kể — nhưng vẫn backdate lại
+    // cho chính xác 100% (số lượng nhỏ nên update từng dòng, không cần batch).
+    // ══════════════════════════════════════════════════════════════════
+    private void seedLiveServingOrders()
+    {
+        List<RestaurantTable> allTables = tableRepository.findAll();
+        allTables.sort(Comparator.comparing(RestaurantTable::getTableNumber));
         List<Dish> dishes = dishRepository.findAll();
 
         User waiter = userRepository.findAll().stream()
@@ -241,161 +423,48 @@ public class DatabaseSeeder implements CommandLineRunner
                 .findFirst()
                 .orElseThrow();
 
-        // Dish references
-        Dish phoBo = findDish(dishes, "Phở bò đặc biệt");
-        Dish bunBoHue = findDish(dishes, "Bún bò Huế");
-        Dish boLucLac = findDish(dishes, "Bò lúc lắc");
-        Dish comChienHaiSan = findDish(dishes, "Cơm chiên hải sản");
-        Dish comGaNuong = findDish(dishes, "Cơm gà nướng mật ong");
-        Dish miXaoHaiSan = findDish(dishes, "Mì xào hải sản");
-        Dish gaNuong = findDish(dishes, "Gà nướng ngũ vị");
-        Dish caKhoTo = findDish(dishes, "Cá kho tộ");
-        Dish suonNuong = findDish(dishes, "Sườn nướng BBQ");
-        Dish bunCha = findDish(dishes, "Bún chả Hà Nội");
-        Dish comTam = findDish(dishes, "Cơm tấm sườn bì");
-        Dish canhChua = findDish(dishes, "Canh chua cá bông lau");
-        Dish cocaCola = findDish(dishes, "Coca Cola");
-        Dish pepsi = findDish(dishes, "Pepsi");
-        Dish traDao = findDish(dishes, "Trà đào cam sả");
-        Dish traChanh = findDish(dishes, "Trà chanh đường đá");
-        Dish camEp = findDish(dishes, "Cam ép tươi");
-        Dish matcha = findDish(dishes, "Matcha Latte");
-        Dish caPhe = findDish(dishes, "Cà phê sữa đá");
-        Dish banhFlan = findDish(dishes, "Bánh flan caramel");
-        Dish tiramisu = findDish(dishes, "Tiramisu");
-        Dish cheKhucBach = findDish(dishes, "Chè khúc bạch");
-        Dish mousse = findDish(dishes, "Bánh mousse chanh leo");
-        Dish yogurt = findDish(dishes, "Yogurt dâu tây");
-
-        // Table references (all SERVING tables)
-        RestaurantTable t01 = getTable(allTables, "T01");
-        RestaurantTable t02 = getTable(allTables, "T02");
-        RestaurantTable t03 = getTable(allTables, "T03");
-        RestaurantTable t05 = getTable(allTables, "T05");
-        RestaurantTable t06 = getTable(allTables, "T06");
-        RestaurantTable t07 = getTable(allTables, "T07");
-        RestaurantTable t08 = getTable(allTables, "T08");
-
+        List<String> servingTableNumbers = List.of("T01", "T02", "T03", "T05", "T06", "T07", "T08");
         LocalDateTime now = LocalDateTime.now();
 
-        // 3 COMPLETED orders (historical)
+        // Sinh createdAt trước cho từng bàn, rồi sort tăng dần theo thời gian
+        // trước khi insert, để ID cũng tăng đúng thứ tự thời gian.
+        record LivePlan(RestaurantTable table, LocalDateTime createdAt) {}
 
-        Order comp1 = buildOrder(t01, waiter, OrderStatus.COMPLETED, now.minusHours(3));
-        Order comp2 = buildOrder(t03, waiter, OrderStatus.COMPLETED, now.minusHours(2));
-        Order comp3 = buildOrder(t05, waiter, OrderStatus.COMPLETED, now.minusHours(1));
-        orderRepository.saveAll(List.of(comp1, comp2, comp3));
+        List<LivePlan> plans = servingTableNumbers.stream()
+                .map(tn -> new LivePlan(getTable(allTables, tn), now.minusMinutes(15 + RNG.nextInt(45))))
+                .sorted(Comparator.comparing(LivePlan::createdAt))
+                .toList();
 
-        List<OrderItem> completedItems = new ArrayList<>();
+        for (LivePlan plan : plans)
+        {
+            RestaurantTable table = plan.table();
+            LocalDateTime createdAt = plan.createdAt();
 
-        // comp1: T01 (2 seats) – Phở bò × 1, Bún chả × 1, Trà đào × 2
-        int c1Start = completedItems.size();
-        completedItems.add(buildItem(comp1, phoBo, 1, null, OrderItemStatus.COMPLETED, now.minusHours(3).plusMinutes(2)));
-        completedItems.add(buildItem(comp1, bunCha, 1, null, OrderItemStatus.COMPLETED, now.minusHours(3).plusMinutes(2)));
-        completedItems.add(buildItem(comp1, traDao, 2, null, OrderItemStatus.COMPLETED, now.minusHours(3).plusMinutes(3)));
-        recalcTotal(comp1, completedItems.subList(c1Start, completedItems.size()));
+            Order order = buildOrder(table, waiter, OrderStatus.SERVING, createdAt);
 
-        // comp2: T03 (2 seats) – Cơm gà × 2, Coca × 1, Bánh flan × 1 (CANCELLED)
-        int c2Start = completedItems.size();
-        completedItems.add(buildItem(comp2, comGaNuong, 2, null, OrderItemStatus.COMPLETED, now.minusHours(2).plusMinutes(2)));
-        completedItems.add(buildItem(comp2, cocaCola, 1, null, OrderItemStatus.COMPLETED, now.minusHours(2).plusMinutes(3)));
-        completedItems.add(buildItem(comp2, banhFlan, 1, "Ít đường", OrderItemStatus.CANCELLED, now.minusHours(2).plusMinutes(5)));
-        recalcTotal(comp2, completedItems.subList(c2Start, completedItems.size()));
+            int itemCount = 2 + RNG.nextInt(4);
+            List<OrderItem> items = new ArrayList<>();
+            for (int i = 0; i < itemCount; i++)
+            {
+                Dish dish = dishes.get(RNG.nextInt(dishes.size()));
+                int qty = 1 + RNG.nextInt(3);
+                LocalDateTime itemTime = createdAt.plusMinutes(2 + RNG.nextInt(10));
+                OrderItemStatus status = RNG.nextBoolean() ? OrderItemStatus.COMPLETED : OrderItemStatus.PREPARING;
+                items.add(buildItem(order, dish, qty, null, status, itemTime));
+            }
+            items.forEach(order::addOrderItem);
 
-        // comp3: T05 (4 seats) – Bò lúc lắc × 1, Cơm chiên hải sản × 1, Cam ép × 2, Tiramisu × 2
-        int c3Start = completedItems.size();
-        completedItems.add(buildItem(comp3, boLucLac, 1, null, OrderItemStatus.COMPLETED, now.minusHours(1).plusMinutes(2)));
-        completedItems.add(buildItem(comp3, comChienHaiSan, 1, null, OrderItemStatus.COMPLETED, now.minusHours(1).plusMinutes(2)));
-        completedItems.add(buildItem(comp3, camEp, 2, null, OrderItemStatus.COMPLETED, now.minusHours(1).plusMinutes(3)));
-        completedItems.add(buildItem(comp3, tiramisu, 2, null, OrderItemStatus.COMPLETED, now.minusHours(1).plusMinutes(4)));
-        recalcTotal(comp3, completedItems.subList(c3Start, completedItems.size()));
+            recalcTotal(order, items);
+            orderRepository.save(order);
+            jdbcTemplate.update("UPDATE orders SET created_at = ? WHERE order_id = ?",
+                    Timestamp.valueOf(createdAt), order.getId());
 
-        orderRepository.saveAll(List.of(comp1, comp2, comp3));
-        orderItemRepository.saveAll(completedItems);
-
-        // ══ 7 SERVING orders ══════════════════════════════════════════════
-
-        Order serv1 = buildOrder(t01, waiter, OrderStatus.SERVING, now.minusMinutes(55));
-        Order serv2 = buildOrder(t02, waiter, OrderStatus.SERVING, now.minusMinutes(40));
-        Order serv3 = buildOrder(t03, waiter, OrderStatus.SERVING, now.minusMinutes(30));
-        Order serv4 = buildOrder(t05, waiter, OrderStatus.SERVING, now.minusMinutes(50));
-        Order serv5 = buildOrder(t06, waiter, OrderStatus.SERVING, now.minusMinutes(25));
-        Order serv6 = buildOrder(t07, waiter, OrderStatus.SERVING, now.minusMinutes(45));
-        Order serv7 = buildOrder(t08, waiter, OrderStatus.SERVING, now.minusMinutes(20));
-        orderRepository.saveAll(List.of(serv1, serv2, serv3, serv4, serv5, serv6, serv7));
-
-        List<OrderItem> servingItems = new ArrayList<>();
-
-        // serv1: T01 – Phở bò × 1 (COMPLETED), Cà phê sữa đá × 1 (PREPARING), Bánh flan × 1 (PREPARING)
-        int s1Start = servingItems.size();
-        servingItems.add(buildItem(serv1, phoBo, 1, null, OrderItemStatus.COMPLETED, now.minusMinutes(50)));
-        servingItems.add(buildItem(serv1, caPhe, 1, "Ít đá", OrderItemStatus.PREPARING, now.minusMinutes(48)));
-        servingItems.add(buildItem(serv1, banhFlan, 1, null, OrderItemStatus.PREPARING, now.minusMinutes(47)));
-        recalcTotal(serv1, servingItems.subList(s1Start, servingItems.size()));
-
-        // serv2: T02 – Bún bò Huế × 2 (PREPARING), Cam ép × 2 (COMPLETED), Chè khúc bạch × 1 (PREPARING)
-        int s2Start = servingItems.size();
-        servingItems.add(buildItem(serv2, bunBoHue, 2, "Thêm sả", OrderItemStatus.PREPARING, now.minusMinutes(38)));
-        servingItems.add(buildItem(serv2, camEp, 2, null, OrderItemStatus.COMPLETED, now.minusMinutes(36)));
-        servingItems.add(buildItem(serv2, cheKhucBach, 1, null, OrderItemStatus.PREPARING, now.minusMinutes(35)));
-        recalcTotal(serv2, servingItems.subList(s2Start, servingItems.size()));
-
-        // serv3: T03 – Cơm chiên hải sản × 1 (COMPLETED), Pepsi × 1 (CANCELLED), Trà đào × 1 (COMPLETED)
-        int s3Start = servingItems.size();
-        servingItems.add(buildItem(serv3, comChienHaiSan, 1, null, OrderItemStatus.COMPLETED, now.minusMinutes(28)));
-        servingItems.add(buildItem(serv3, pepsi, 1, null, OrderItemStatus.CANCELLED, now.minusMinutes(27)));
-        servingItems.add(buildItem(serv3, traDao, 1, null, OrderItemStatus.COMPLETED, now.minusMinutes(26)));
-        recalcTotal(serv3, servingItems.subList(s3Start, servingItems.size()));
-
-        // serv4: T05 – Gà nướng × 2 (COMPLETED), Mì xào hải sản × 1 (PREPARING), Matcha × 2 (COMPLETED), Mousse × 2 (PREPARING)
-        int s4Start = servingItems.size();
-        servingItems.add(buildItem(serv4, gaNuong, 2, null, OrderItemStatus.COMPLETED, now.minusMinutes(48)));
-        servingItems.add(buildItem(serv4, miXaoHaiSan, 1, "Không cay", OrderItemStatus.PREPARING, now.minusMinutes(45)));
-        servingItems.add(buildItem(serv4, matcha, 2, null, OrderItemStatus.COMPLETED, now.minusMinutes(44)));
-        servingItems.add(buildItem(serv4, mousse, 2, null, OrderItemStatus.PREPARING, now.minusMinutes(40)));
-        recalcTotal(serv4, servingItems.subList(s4Start, servingItems.size()));
-
-        // serv5: T06 – Sườn nướng × 2 (PREPARING), Trà chanh × 2 (COMPLETED), Yogurt × 1 (PREPARING), Coca × 2 (COMPLETED)
-        int s5Start = servingItems.size();
-        servingItems.add(buildItem(serv5, suonNuong, 2, null, OrderItemStatus.PREPARING, now.minusMinutes(23)));
-        servingItems.add(buildItem(serv5, traChanh, 2, "Ít đường", OrderItemStatus.COMPLETED, now.minusMinutes(22)));
-        servingItems.add(buildItem(serv5, yogurt, 1, null, OrderItemStatus.PREPARING, now.minusMinutes(21)));
-        servingItems.add(buildItem(serv5, cocaCola, 2, null, OrderItemStatus.COMPLETED, now.minusMinutes(20)));
-        recalcTotal(serv5, servingItems.subList(s5Start, servingItems.size()));
-
-        // serv6: T07 – Bò lúc lắc × 1 (COMPLETED), Cá kho tộ × 2 (PREPARING), Cà phê × 2 (COMPLETED), Tiramisu × 1 (PREPARING)
-        int s6Start = servingItems.size();
-        servingItems.add(buildItem(serv6, boLucLac, 1, null, OrderItemStatus.COMPLETED, now.minusMinutes(43)));
-        servingItems.add(buildItem(serv6, caKhoTo, 2, "Ăn kèm cơm", OrderItemStatus.PREPARING, now.minusMinutes(40)));
-        servingItems.add(buildItem(serv6, caPhe, 2, null, OrderItemStatus.COMPLETED, now.minusMinutes(39)));
-        servingItems.add(buildItem(serv6, tiramisu, 1, null, OrderItemStatus.PREPARING, now.minusMinutes(38)));
-        recalcTotal(serv6, servingItems.subList(s6Start, servingItems.size()));
-
-        // serv7: T08 – Cơm tấm × 3 (PREPARING), Canh chua × 2 (PREPARING), Cam ép × 3 (COMPLETED), Bánh flan × 2 (COMPLETED), Chè × 1 (PREPARING)
-        int s7Start = servingItems.size();
-        servingItems.add(buildItem(serv7, comTam, 3, null, OrderItemStatus.PREPARING, now.minusMinutes(18)));
-        servingItems.add(buildItem(serv7, canhChua, 2, "Thêm me", OrderItemStatus.PREPARING, now.minusMinutes(17)));
-        servingItems.add(buildItem(serv7, camEp, 3, null, OrderItemStatus.COMPLETED, now.minusMinutes(16)));
-        servingItems.add(buildItem(serv7, banhFlan, 2, null, OrderItemStatus.COMPLETED, now.minusMinutes(15)));
-        servingItems.add(buildItem(serv7, cheKhucBach, 1, null, OrderItemStatus.PREPARING, now.minusMinutes(14)));
-        recalcTotal(serv7, servingItems.subList(s7Start, servingItems.size()));
-
-        orderRepository.saveAll(List.of(serv1, serv2, serv3, serv4, serv5, serv6, serv7));
-        orderItemRepository.saveAll(servingItems);
-
-        // 3 Invoices for COMPLETED orders
-
-        Invoice inv1 = buildInvoice(comp1, now.minusHours(2).minusMinutes(45));
-        Invoice inv2 = buildInvoice(comp2, now.minusHours(1).minusMinutes(45));
-        Invoice inv3 = buildInvoice(comp3, now.minusMinutes(45));
-        invoiceRepository.saveAll(List.of(inv1, inv2, inv3));
-
-        // 3 CASH Payments (no PaymentTransactions for CASH)
-
-        paymentRepository.saveAll(List.of(
-                buildPayment(inv1, now.minusHours(2).minusMinutes(43)),
-                buildPayment(inv2, now.minusHours(1).minusMinutes(43)),
-                buildPayment(inv3, now.minusMinutes(43))
-        ));
+            for (OrderItem item : items)
+            {
+                jdbcTemplate.update("UPDATE order_items SET created_at = ?, updated_at = ? WHERE order_item_id = ?",
+                        Timestamp.valueOf(item.getCreatedAt()), Timestamp.valueOf(item.getCreatedAt()), item.getId());
+            }
+        }
     }
 
     private Order buildOrder(RestaurantTable table, User createdBy, OrderStatus status, LocalDateTime createdAt)
@@ -456,15 +525,27 @@ public class DatabaseSeeder implements CommandLineRunner
         return invoice;
     }
 
-    private Payment buildPayment(Invoice invoice, LocalDateTime paymentDate)
+    private Payment buildPayment(Invoice invoice, PaymentMethod method, LocalDateTime paymentDate)
     {
         Payment payment = new Payment();
         payment.setInvoice(invoice);
-        payment.setPaymentMethod(PaymentMethod.CASH);
+        payment.setPaymentMethod(method);
         payment.setAmount(invoice.getFinalAmount());
         payment.setSuccess(true);
         payment.setPaymentDate(paymentDate);
         return payment;
+    }
+
+    private PaymentTransaction buildPaymentTransaction(Payment payment, LocalDateTime transactionDate)
+    {
+        PaymentTransaction tx = new PaymentTransaction();
+        tx.setPayment(payment);
+        tx.setTransactionCode("QR" + (100_000_000 + RNG.nextInt(900_000_000)));
+        tx.setGateway("VNPAY");
+        tx.setGatewayResponse("{\"status\":\"SUCCESS\",\"code\":\"00\"}");
+        tx.setSuccess(true);
+        tx.setTransactionDate(transactionDate);
+        return tx;
     }
 
     private void backfillInvoiceRestaurantRevenueAmount()
@@ -487,7 +568,6 @@ public class DatabaseSeeder implements CommandLineRunner
                         invoice.getOrder().getTotalAmount().setScale(0, RoundingMode.HALF_UP);
             } else
             {
-                // Tự chia trực tiếp inline để làm dữ liệu mẫu (thay vì gọi hàm đã xóa bên Invoice)
                 restaurantRevenueAmount = invoice.getFinalAmount()
                         .divide(new BigDecimal("1.10"), 0, RoundingMode.HALF_UP);
             }
@@ -499,7 +579,11 @@ public class DatabaseSeeder implements CommandLineRunner
     }
 
 
-    // Reservations  –  2 WAITING reservations on T04 and T10 (RESERVED tables)
+    // ══════════════════════════════════════════════════════════════════
+    // Reservations – 5 đơn:
+    //   2 đơn WAITING cách hiện tại 15 phút (khớp 2 bàn RESERVED: T04, T10)
+    //   3 đơn QUEUED cho những ngày sắp tới (còn trong hàng chờ, chưa tới giờ)
+    // ══════════════════════════════════════════════════════════════════
     private void seedReservations()
     {
         if (reservationRepository.count() > 0) return;
@@ -507,19 +591,35 @@ public class DatabaseSeeder implements CommandLineRunner
         List<RestaurantTable> allTables = tableRepository.findAll();
         RestaurantTable t04 = getTable(allTables, "T04");
         RestaurantTable t10 = getTable(allTables, "T10");
+        RestaurantTable t09 = getTable(allTables, "T09");
+        RestaurantTable t11 = getTable(allTables, "T11");
+        RestaurantTable t12 = getTable(allTables, "T12");
 
-        LocalDateTime arrivalTime = LocalDateTime.now().plusMinutes(15);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime arrivalSoon = now.plusMinutes(15);
 
-        reservationRepository.saveAll(List.of(
+        List<Reservation> reservations = List.of(
                 buildReservation(t04, "Nguyễn Thị Lan", "0912345678",
-                        arrivalTime, "Kỷ niệm ngày cưới, cần bàn yên tĩnh"),
+                        arrivalSoon, "Kỷ niệm ngày cưới, cần bàn yên tĩnh", ReservationStatus.WAITING),
                 buildReservation(t10, "Trần Văn Minh", "0987654321",
-                        arrivalTime, "Nhóm 6 người, cần ghế cao cho trẻ em")
-        ));
+                        arrivalSoon, "Nhóm 6 người, cần ghế cao cho trẻ em", ReservationStatus.WAITING),
+                buildReservation(t09, "Lê Thị Hoa", "0934567890",
+                        now.plusDays(1).withHour(18).withMinute(30),
+                        "Sinh nhật, cần trang trí bàn", ReservationStatus.QUEUED),
+                buildReservation(t11, "Phạm Văn Đức", "0945678901",
+                        now.plusDays(2).withHour(19).withMinute(0),
+                        "Họp mặt gia đình 8 người", ReservationStatus.QUEUED),
+                buildReservation(t12, "Hoàng Thị Mai", "0956789012",
+                        now.plusDays(3).withHour(12).withMinute(0),
+                        "Đặt bàn trưa, nhóm công ty", ReservationStatus.QUEUED)
+        );
+
+        reservationRepository.saveAll(reservations);
     }
 
     private Reservation buildReservation(RestaurantTable table, String customerName,
-                                         String phone, LocalDateTime reservationTime, String note)
+                                         String phone, LocalDateTime reservationTime, String note,
+                                         ReservationStatus status)
     {
         Reservation r = new Reservation();
         r.setTable(table);
@@ -527,21 +627,14 @@ public class DatabaseSeeder implements CommandLineRunner
         r.setPhone(phone);
         r.setReservationTime(reservationTime);
         r.setNote(note);
-        r.setStatus(ReservationStatus.WAITING);
+        r.setStatus(status);
         return r;
     }
 
 
+    // ══════════════════════════════════════════════════════════════════
     // Utility helpers
-
-    private Dish findDish(List<Dish> dishes, String name)
-    {
-        return dishes.stream()
-                .filter(d -> d.getName().equals(name))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Dish not found: " + name));
-    }
-
+    // ══════════════════════════════════════════════════════════════════
     private RestaurantTable getTable(List<RestaurantTable> tables, String tableNumber)
     {
         return tables.stream()
