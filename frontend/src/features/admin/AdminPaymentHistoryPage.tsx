@@ -2,6 +2,7 @@ import {
     useCallback,
     useEffect,
     useState,
+    type CSSProperties,
 } from 'react'
 import {useNavigate} from 'react-router-dom'
 
@@ -125,6 +126,11 @@ export default function AdminPaymentHistoryPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
+    const [tableFilter, setTableFilter] = useState('')
+    const [customerFilter, setCustomerFilter] = useState('')
+    const [methodFilter, setMethodFilter] = useState('ALL')
+    const [keywordFilter, setKeywordFilter] = useState('')
+
 
 
     const loadPaymentHistory = useCallback(
@@ -133,41 +139,55 @@ export default function AdminPaymentHistoryPage() {
             showFullLoading = true,
             signal?: AbortSignal,
         ) => {
+            const filters = {
+                tableNumber: tableFilter.trim() || undefined,
+                customerKeyword: customerFilter.trim() || undefined,
+                paymentMethod:
+                    methodFilter === 'ALL'
+                        ? undefined
+                        : methodFilter,
+                keyword: keywordFilter.trim() || undefined,
+            }
+
             try {
                 if (showFullLoading) {
                     setIsLoading(true)
                 }
 
-                const {data} = await adminApi.getPaymentHistory(
-                    targetPage,
+                let effectivePage = targetPage
+
+                let {data} = await adminApi.getPaymentHistory(
+                    effectivePage,
                     PAYMENT_HISTORY_PAGE_SIZE,
+                    filters,
                     signal,
                 )
 
                 if (
                     data.totalPages > 0
-                    && targetPage > data.totalPages
+                    && effectivePage > data.totalPages
                 ) {
-                    setPage(data.totalPages)
+                    effectivePage = data.totalPages
 
                     const retryResponse =
                         await adminApi.getPaymentHistory(
-                            data.totalPages,
+                            effectivePage,
                             PAYMENT_HISTORY_PAGE_SIZE,
+                            filters,
                             signal,
                         )
 
-                    setPayments(retryResponse.data.items)
-                    setTotalItems(retryResponse.data.totalItems)
-                    setTotalPages(retryResponse.data.totalPages)
-                    setError(null)
-                    return
+                    data = retryResponse.data
                 }
 
                 setPayments(data.items)
                 setTotalItems(data.totalItems)
                 setTotalPages(data.totalPages)
                 setError(null)
+
+                if (effectivePage !== targetPage) {
+                    setPage(effectivePage)
+                }
             } catch (requestError: unknown) {
                 console.error(
                     '[ADMIN_PAYMENT_HISTORY_FETCH_ERROR]',
@@ -183,7 +203,12 @@ export default function AdminPaymentHistoryPage() {
                 }
             }
         },
-        [],
+        [
+            tableFilter,
+            customerFilter,
+            methodFilter,
+            keywordFilter,
+        ],
     )
 
     useEffect(() => {
@@ -193,6 +218,18 @@ export default function AdminPaymentHistoryPage() {
 
         return () => controller.abort()
     }, [loadPaymentHistory, page])
+
+    function handleFilterChange() {
+        setPage(1)
+    }
+
+    function clearFilters() {
+        setTableFilter('')
+        setCustomerFilter('')
+        setMethodFilter('ALL')
+        setKeywordFilter('')
+        setPage(1)
+    }
 
     function handlePageChange(nextPage: number) {
         const safeTotalPages = Math.max(totalPages, 1)
@@ -266,6 +303,84 @@ export default function AdminPaymentHistoryPage() {
                         </button>
                     }
                 />
+            </PageCard>
+
+            <PageCard>
+                <div
+                    style={{
+                        display: 'flex',
+                        gap: 10,
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    <select
+                        value={tableFilter}
+                        style={filterInputStyle}
+                        onChange={(event) => {
+                            setTableFilter(event.target.value)
+                            handleFilterChange()
+                        }}
+                    >
+                        <option value="">Tất cả bàn</option>
+                        {Array.from({length: 12}, (_, i) =>
+                            `T${String(i + 1).padStart(2, '0')}`,
+                        ).map((tableNumber) => (
+                            <option key={tableNumber} value={tableNumber}>
+                                Bàn {tableNumber}
+                            </option>
+                        ))}
+                    </select>
+
+                    <input
+                        type="text"
+                        value={customerFilter}
+                        placeholder="Tìm theo tên/SĐT khách hàng..."
+                        style={{
+                            ...filterInputStyle,
+                            flex: 1,
+                            minWidth: 200,
+                        }}
+                        onChange={(event) => {
+                            setCustomerFilter(event.target.value)
+                            handleFilterChange()
+                        }}
+                    />
+
+                    <select
+                        value={methodFilter}
+                        style={filterInputStyle}
+                        onChange={(event) => {
+                            setMethodFilter(event.target.value)
+                            handleFilterChange()
+                        }}
+                    >
+                        <option value="ALL">Tất cả phương thức</option>
+                        <option value="CASH">Tiền mặt</option>
+                        <option value="QRCODE">VNPay/QR</option>
+                    </select>
+
+                    <input
+                        type="text"
+                        value={keywordFilter}
+                        placeholder="Mã hóa đơn..."
+                        style={{
+                            ...filterInputStyle,
+                            width: 140,
+                        }}
+                        onChange={(event) => {
+                            setKeywordFilter(event.target.value)
+                            handleFilterChange()
+                        }}
+                    />
+
+                    <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={clearFilters}
+                    >
+                        Xóa bộ lọc
+                    </button>
+                </div>
             </PageCard>
 
             <section className="admin-payment-table-card">
@@ -380,4 +495,11 @@ export default function AdminPaymentHistoryPage() {
             </section>
         </div>
     )
+
+}
+const filterInputStyle: CSSProperties = {
+    padding: '8px 12px',
+    border: '1px solid #d1d5db',
+    borderRadius: 8,
+    fontSize: 13,
 }

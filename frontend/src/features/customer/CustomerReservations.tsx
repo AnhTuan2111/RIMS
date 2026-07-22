@@ -1,4 +1,6 @@
 ﻿import {
+    useEffect,
+    useMemo,
     useRef,
     useState,
     type FormEvent,
@@ -168,6 +170,36 @@ export default function CustomerReservations() {
 
     const hasLoadedInitialReservationRef =
         useRef(false)
+
+    const selectedDate =
+        bookForm.reservationTime.split('T')[0] || todayStr
+
+    const selectedTime =
+        bookForm.reservationTime.split('T')[1]?.slice(0, 5) || '08:00'
+
+    const availableTimeSlots = useMemo(
+        () => getAvailableTimeSlots(selectedDate, blockedRanges),
+        [selectedDate, blockedRanges],
+    )
+
+    // Tự chuyển sang slot khả dụng đầu tiên nếu giờ đang chọn không còn
+    // hợp lệ (mặc định "08:00" thường đã qua giờ, hoặc slot vừa bị chặn).
+    useEffect(() => {
+        if (availableTimeSlots.length === 0) {
+            return
+        }
+
+        if (!availableTimeSlots.includes(selectedTime)) {
+            queueMicrotask(() => {
+                setBookForm((previous) => ({
+                    ...previous,
+                    reservationTime:
+                        `${selectedDate}T${availableTimeSlots[0]}:00`,
+                }))
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [availableTimeSlots, selectedTime, selectedDate])
 
     async function loadAvailableTables(
         signal?: AbortSignal,
@@ -673,30 +705,17 @@ export default function CustomerReservations() {
                                 </label>
 
                                 <select
-                                    value={
-                                        bookForm.reservationTime
-                                            .split('T')[1]
-                                            ?.slice(0, 5)
-                                        || '08:00'
-                                    }
+                                    value={selectedTime}
                                     required
                                     onChange={(event) => {
-                                        const date =
-                                            bookForm.reservationTime
-                                                .split('T')[0]
-                                            || todayStr
-
                                         setBookForm((previous) => ({
                                             ...previous,
                                             reservationTime:
-                                                `${date}T${event.target.value}:00`,
+                                                `${selectedDate}T${event.target.value}:00`,
                                         }))
                                     }}
                                 >
-                                    {getAvailableTimeSlots(
-                                        bookForm.reservationTime.split('T')[0] || todayStr,
-                                        blockedRanges,
-                                    ).map((value) => (
+                                    {availableTimeSlots.map((value) => (
                                         <option
                                             key={value}
                                             value={value}

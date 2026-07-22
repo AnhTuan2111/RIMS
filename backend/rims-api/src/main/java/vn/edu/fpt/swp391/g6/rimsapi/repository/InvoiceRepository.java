@@ -5,8 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.InvoiceHistoryProjection;
@@ -96,7 +98,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
     );
 
 
-    //Get invoice history for a specific table.
+    //Get invoice history, có filter theo bàn / phương thức / mã HĐ-đơn / tên-SĐT khách hàng.
     @Query(
             value = """
                     SELECT
@@ -110,15 +112,33 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
                     JOIN i.order o
                     JOIN o.table t
                     JOIN i.payments p
+                    LEFT JOIN User u ON u.id = o.pendingCustomerId
+                    WHERE (:tableNumber IS NULL OR LOWER(t.tableNumber) LIKE LOWER(CONCAT('%', :tableNumber, '%')))
+                      AND (:paymentMethod IS NULL OR p.paymentMethod = :paymentMethod)
+                      AND (:keyword IS NULL OR CAST(i.id AS string) LIKE CONCAT('%', :keyword, '%') OR CAST(o.id AS string) LIKE CONCAT('%', :keyword, '%'))
+                      AND (:customerKeyword IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :customerKeyword, '%')) OR u.phone LIKE CONCAT('%', :customerKeyword, '%'))
                     ORDER BY i.invoiceDate DESC
                     """,
             countQuery = """
                     SELECT COUNT(i)
                     FROM Invoice i
+                    JOIN i.order o
+                    JOIN o.table t
                     JOIN i.payments p
+                    LEFT JOIN User u ON u.id = o.pendingCustomerId
+                    WHERE (:tableNumber IS NULL OR LOWER(t.tableNumber) LIKE LOWER(CONCAT('%', :tableNumber, '%')))
+                      AND (:paymentMethod IS NULL OR p.paymentMethod = :paymentMethod)
+                      AND (:keyword IS NULL OR CAST(i.id AS string) LIKE CONCAT('%', :keyword, '%') OR CAST(o.id AS string) LIKE CONCAT('%', :keyword, '%'))
+                      AND (:customerKeyword IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :customerKeyword, '%')) OR u.phone LIKE CONCAT('%', :customerKeyword, '%'))
                     """
     )
-    Page<InvoiceHistoryProjection> getInvoiceHistory(Pageable pageable);
+    Page<InvoiceHistoryProjection> getInvoiceHistory(
+            @Param("tableNumber") String tableNumber,
+            @Param("paymentMethod") PaymentMethod paymentMethod,
+            @Param("keyword") String keyword,
+            @Param("customerKeyword") String customerKeyword,
+            Pageable pageable
+    );
 
 
     @EntityGraph(attributePaths = {"order", "order.orderItems", "order.orderItems.dish", "order.table"})

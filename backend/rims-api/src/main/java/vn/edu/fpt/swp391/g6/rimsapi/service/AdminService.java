@@ -49,7 +49,10 @@ public interface AdminService
     MenuDashboardResponse getMenuDashboardData();
 
     // invoice service
-    InvoiceHistoryPageResponse getInvoiceHistory(int page, int pageSize);
+    InvoiceHistoryPageResponse getInvoiceHistory(
+            int page, int pageSize,
+            String tableNumber, String paymentMethod,
+            String keyword, String customerKeyword);
 
     InvoiceDetailResponse getInvoiceDetail(Long invoiceId);
 

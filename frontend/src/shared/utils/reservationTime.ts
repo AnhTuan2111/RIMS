@@ -35,7 +35,10 @@ function isSlotBlocked(
     return blockedRanges.some((range) => {
         const start = new Date(range.start)
         const end = new Date(range.end)
-        return candidate >= start && candidate < end
+        // Cả 2 phía đều strict (không bao gồm bằng), khớp với
+        // ReservationConflictValidator.hasConflict ở backend (isAfter/isBefore
+        // không kèm bằng) — đúng biên 150 phút (2.5 tiếng) thì được phép đặt.
+        return candidate > start && candidate < end
     })
 }
 

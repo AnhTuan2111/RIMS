@@ -22,15 +22,30 @@ export type {
     AdminPaymentMethod,
 }
 
+export interface InvoiceHistoryFilters {
+    tableNumber?: string
+    paymentMethod?: string
+    keyword?: string
+    customerKeyword?: string
+}
+
 export const invoicesApi = {
-    /** Returns paginated payment history */
+    /** Returns paginated payment history, có filter tùy chọn */
     getPaymentHistory: (
         page = 1,
         pageSize = 10,
+        filters?: InvoiceHistoryFilters,
         signal?: AbortSignal,
     ) =>
         apiClient.get<AdminPaymentHistoryPage>('/admin/invoice/history', {
-            params: {page, pageSize},
+            params: {
+                page,
+                pageSize,
+                tableNumber: filters?.tableNumber || undefined,
+                paymentMethod: filters?.paymentMethod || undefined,
+                keyword: filters?.keyword || undefined,
+                customerKeyword: filters?.customerKeyword || undefined,
+            },
             signal,
         }),
 
