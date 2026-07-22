@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RefreshTokenRequest
 {
-    @NotBlank
+    @NotBlank(message = "Refresh token không được để trống")
     private String refreshToken;
 }

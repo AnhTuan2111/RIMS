@@ -14,26 +14,27 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 @AllArgsConstructor
 public class CreateStaffRequest
 {
-    @NotBlank()
-    @Size(min = 3, max = 50)
+    @NotBlank(message = "Tên đăng nhập không được để trống")
+    @Size(min = 3, max = 50, message = "Tên đăng nhập phải từ 3 đến 50 ký tự")
     private String username;
 
-    @NotBlank()
-    @Pattern(regexp = "^\\p{L}+( \\p{L}+)*$")
+    @NotBlank(message = "Họ tên không được để trống")
+    @Size(min = 3, max = 50, message = "Họ tên phải từ 3 đến 50 ký tự")
+    @Pattern(regexp = "^\\p{L}+( \\p{L}+)*$", message = "Họ tên chỉ được chứa chữ cái và khoảng trắng")
     private String fullName;
 
-    @Email()
-    @Size(max = 50)
+    @Email(message = "Email không đúng định dạng")
+    @Size(max = 50, message = "Email không được vượt quá 50 ký tự")
     private String email;
 
-    @NotBlank()
-    @Pattern(regexp = "^0[0-9]{9}$")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Pattern(regexp = "^0[0-9]{9}$", message = "Số điện thoại phải có 10 số và bắt đầu bằng 0")
     private String phone;
 
-    @NotNull
+    @NotNull(message = "Vai trò không được để trống")
     private RoleType role;
 
-    @NotBlank()
-    @Size(min = 6)
+    @NotBlank(message = "Mật khẩu không được để trống")
+    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String password;
 }

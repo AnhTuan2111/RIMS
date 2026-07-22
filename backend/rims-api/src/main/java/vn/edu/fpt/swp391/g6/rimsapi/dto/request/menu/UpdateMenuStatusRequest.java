@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 public class UpdateMenuStatusRequest
 {
-    @NotNull()
+    @NotNull(message = "Trạng thái hiển thị không được để trống")
     private Boolean available;
 }
