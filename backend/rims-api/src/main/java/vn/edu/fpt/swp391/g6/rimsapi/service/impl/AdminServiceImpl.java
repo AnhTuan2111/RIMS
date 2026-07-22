@@ -587,7 +587,7 @@ public class AdminServiceImpl implements AdminService
     {
 
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
 
         InvoiceDetailResponse response =
                 new InvoiceDetailResponse();
@@ -599,7 +599,7 @@ public class AdminServiceImpl implements AdminService
         response.setInvoiceDate(invoice.getInvoiceDate());
 
         response.setPaymentMethod(invoice.getPayments().isEmpty()
-                ? "UNKNOWN" : invoice.getPayments().getFirst().getPaymentMethod().name());
+                ? "Không xác định" : invoice.getPayments().getFirst().getPaymentMethod().name());
 
         List<InvoiceItemResponse> items =
                 invoice.getOrder().getOrderItems().stream().map(orderItem ->
@@ -625,7 +625,7 @@ public class AdminServiceImpl implements AdminService
     public RevenueReportResponse getTotalRevenue()
     {
         BigDecimal revenue = invoiceRepository.getTotalRevenue();
-        return new RevenueReportResponse(revenue, "ALL");
+        return new RevenueReportResponse(revenue, "Tất cả");
     }
 
     @Override
@@ -675,7 +675,7 @@ public class AdminServiceImpl implements AdminService
         // Validate date range
         if (fromDate.isAfter(toDate))
         {
-            throw new RuntimeException("fromDate must be before or equal to toDate");
+            throw new RuntimeException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
         }
 
         LocalDateTime start = fromDate.atStartOfDay();
@@ -696,7 +696,7 @@ public class AdminServiceImpl implements AdminService
 
         if (fromDate.isAfter(toDate))
         {
-            throw new RuntimeException("fromDate must be before or equal to toDate");
+            throw new RuntimeException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
         }
 
         LocalDateTime start = fromDate.atStartOfDay();
@@ -746,24 +746,24 @@ public class AdminServiceImpl implements AdminService
             {
                 fromDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
                 toDate = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-                dataRangeNote = "Current week until now";
+                dataRangeNote = "Tuần hiện tại đến hôm nay";
             }
 
             case "MONTH" ->
             {
                 fromDate = today.withDayOfMonth(1);
                 toDate = today.withDayOfMonth(today.lengthOfMonth());
-                dataRangeNote = "Current month until now";
+                dataRangeNote = "Tháng hiện tại đến hôm nay";
             }
 
             case "YEAR" ->
             {
                 fromDate = today.withDayOfYear(1);
                 toDate = today.withDayOfYear(today.lengthOfYear());
-                dataRangeNote = "Current year until now";
+                dataRangeNote = "Năm hiện tại đến hôm nay";
             }
 
-            default -> throw new RuntimeException("Best selling period must be WEEK, MONTH or YEAR");
+            default -> throw new RuntimeException("Khoảng thời gian món bán chạy không hợp lệ. Chỉ hỗ trợ tuần, tháng hoặc năm");
         }
 
         if (toDate.isAfter(today))
@@ -807,7 +807,7 @@ public class AdminServiceImpl implements AdminService
 
         if (fromDate.isAfter(toDate))
         {
-            throw new RuntimeException("fromDate must be before or equal to toDate");
+            throw new RuntimeException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
         }
 
         LocalDateTime start = fromDate.atStartOfDay();
@@ -833,7 +833,7 @@ public class AdminServiceImpl implements AdminService
             );
         }
 
-        return new BestSellingReportResponse(fromDate, toDate, "Selected week range", items);
+        return new BestSellingReportResponse(fromDate, toDate, "Khoảng thời gian đã chọn", items);
     }
 
     @Override
@@ -847,7 +847,7 @@ public class AdminServiceImpl implements AdminService
         {
             case "WEEK" -> fromDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
             case "YEAR" -> fromDate = today.withDayOfYear(1);
-            default -> throw new RuntimeException("Order shift period must be WEEK or YEAR");
+            default -> throw new RuntimeException("Khoảng thời gian thống kê theo ca không hợp lệ. Chỉ hỗ trợ tuần hoặc năm");
         }
 
         return getOrderShiftReport(fromDate, today);
@@ -866,7 +866,7 @@ public class AdminServiceImpl implements AdminService
 
         if (fromDate.isAfter(toDate))
         {
-            throw new RuntimeException("fromDate must be before or equal to toDate");
+            throw new RuntimeException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
         }
 
         LocalDateTime start = fromDate.atStartOfDay();

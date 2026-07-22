@@ -63,7 +63,7 @@ export function Sidebar() {
                 <div className="rims-sidebar-logo">R</div>
                 <div>
                     <h2>RIMS</h2>
-                    <p>Restaurant Operations</p>
+                    <p>Vận hành nhà hàng</p>
                 </div>
             </div>
 

@@ -525,9 +525,9 @@ function StatisticsReportSelector({
                 type="button"
                 onClick={() => onSelectReport('categoryBestsellers')}
             >
-                <StatIcon className="icon-category-bestsellers">Cat</StatIcon>
+                <StatIcon className="icon-category-bestsellers">DM</StatIcon>
                 <div className="rims-stat-card-body">
-                    <h3>Top món theo category</h3>
+                    <h3>Top món theo danh mục</h3>
                     <p>Lọc món bán chạy theo danh mục</p>
                 </div>
                 <span className="rims-stat-card-action">›</span>
@@ -616,7 +616,7 @@ function RevenueDateInput({
                     id={id}
                     inputMode="numeric"
                     maxLength={10}
-                    placeholder="Select date"
+                    placeholder="Chọn ngày"
                     type="text"
                     value={value}
                     onChange={(event) =>
@@ -794,28 +794,28 @@ function RevenueDashboard({
             >
                 <RevenueCard
                     amount={data.totalRevenue?.revenue}
-                    title="Total Revenue"
+                    title="Tổng doanh thu"
                 />
                 <RevenueCard
                     amount={data.todayRevenue?.revenue}
-                    title="Today Revenue"
+                    title="Doanh thu hôm nay"
                 />
                 <RevenueCard
                     amount={data.weeklyRevenue?.revenue}
-                    title="Weekly Revenue"
+                    title="Doanh thu tuần"
                 />
                 <RevenueCard
                     amount={data.monthlyRevenue?.revenue}
-                    title="Monthly Revenue"
+                    title="Doanh thu tháng"
                 />
                 <RevenueCard
                     amount={data.yearlyRevenue?.revenue}
-                    title="Yearly Revenue"
+                    title="Doanh thu năm"
                 />
             </div>
 
             <section className="admin-revenue-filter-panel">
-                <h3>Custom Date Range Filter</h3>
+                <h3>Bộ lọc khoảng ngày tùy chỉnh</h3>
 
                 <form
                     className="admin-revenue-filter-content"
@@ -828,14 +828,14 @@ function RevenueDashboard({
                         <div className="admin-revenue-filter-controls">
                             <RevenueDateInput
                                 id="admin-revenue-from-date"
-                                label="From Date"
+                                label="Từ ngày"
                                 value={fromDate}
                                 onChange={onFromDateChange}
                             />
 
                             <RevenueDateInput
                                 id="admin-revenue-to-date"
-                                label="To Date"
+                                label="Đến ngày"
                                 value={toDate}
                                 onChange={onToDateChange}
                             />
@@ -846,8 +846,8 @@ function RevenueDashboard({
                                 type="submit"
                             >
                                 {isCustomLoading
-                                    ? 'Applying...'
-                                    : 'Apply Custom Range'}
+                                    ? 'Đang áp dụng...'
+                                    : 'Áp dụng khoảng ngày'}
                             </button>
                         </div>
 
@@ -861,7 +861,7 @@ function RevenueDashboard({
                     <RevenueCard
                         amount={data.customRangeRevenue?.revenue}
                         className="admin-revenue-custom-card"
-                        title="Custom Range Revenue"
+                        title="Doanh thu khoảng ngày"
                     />
                 </form>
             </section>
@@ -1723,7 +1723,7 @@ export default function AdminStatisticsPage() {
 
         if (apiFromDate > apiToDate) {
             setCustomRangeError(
-                'From Date phải nhỏ hơn hoặc bằng To Date.',
+                'Từ ngày phải nhỏ hơn hoặc bằng đến ngày.',
             )
             return
         }
@@ -1793,7 +1793,7 @@ export default function AdminStatisticsPage() {
                     selectedWeek={selectedCategoryBestSellingWeek}
                     selectedYear={categoryBestSellingYear}
                     subtitle="Lọc top món bán chạy theo từng danh mục, theo hôm nay, 7 ngày gần nhất hoặc tuần của một năm cụ thể."
-                    title="Top món bán chạy theo category"
+                    title="Top món bán chạy theo danh mục"
                     weekOptions={categoryBestSellingWeekOptions}
                     yearOptions={yearOptions}
                     onCategoryChange={handleBestSellingCategoryChange}

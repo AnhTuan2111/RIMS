@@ -10,10 +10,10 @@ export function DashboardTopbar({
             <div className="rims-topbar-heading">
                 <span className="rims-topbar-eyebrow">
                     <span className="rims-topbar-live-dot"/>
-                    RIMS CONTROL CENTER
+                    TRUNG TÂM ĐIỀU HÀNH RIMS
                 </span>
 
-                <h1>Restaurant Management System</h1>
+                <h1>Hệ thống quản lý nhà hàng</h1>
 
                 <p>
                     Theo dõi và điều phối hoạt động nhà hàng theo thời

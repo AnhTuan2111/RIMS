@@ -54,7 +54,7 @@ export default function ChefDashboardPage() {
                 )
 
                 setError(
-                    'Không thể tải số liệu Chef Dashboard.',
+                    'Không thể tải số liệu tổng quan bếp.',
                 )
             } finally {
                 if (showFullLoading) {
@@ -98,7 +98,7 @@ export default function ChefDashboardPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải Chef Dashboard..."
+                title="Đang tải tổng quan bếp..."
                 description="Hệ thống đang cập nhật số liệu bếp."
             />
         )
@@ -123,7 +123,7 @@ export default function ChefDashboardPage() {
         return (
             <ErrorState
                 title="Không có dữ liệu"
-                message="Chef Dashboard chưa có dữ liệu để hiển thị."
+                message="Tổng quan bếp chưa có dữ liệu để hiển thị."
                 onRetry={() => {
                     fetchDashboard(true).catch(
                         (requestError) => {
@@ -139,7 +139,7 @@ export default function ChefDashboardPage() {
         <div className="chef-page">
             <PageCard>
                 <PageHeader
-                    title="Chef Dashboard"
+                    title="Tổng quan bếp"
                     description="Theo dõi nhanh trạng thái món ăn, hàng đợi bếp và tình trạng thực đơn."
                 />
             </PageCard>

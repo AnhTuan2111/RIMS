@@ -30,7 +30,7 @@ export default function HomePage() {
                 <div className="restaurant-hero-overlay"></div>
 
                 <div className="restaurant-hero-content">
-                    <p className="restaurant-subtitle">Authentic Japanese Dining</p>
+                    <p className="restaurant-subtitle">Ẩm thực Nhật Bản chính thống</p>
 
                     <h2>
                         NIHON BITES
