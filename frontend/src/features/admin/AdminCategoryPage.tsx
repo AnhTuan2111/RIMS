@@ -16,6 +16,7 @@ type FilterStatus = 'ALL' | 'ACTIVE' | 'HIDDEN';
 
 // --- Pagination Config ---
 const ITEMS_PER_PAGE = 5;
+const DISH_ITEMS_PER_PAGE = 5; // THÊM: config cho số món hiển thị mỗi trang
 
 
 type ErrorResponseShape = {
@@ -60,6 +61,7 @@ export default function AdminCategoryPage() {
 
     // --- Pagination States ---
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [dishPage, setDishPage] = useState<number>(1); // THÊM: state cho phân trang món
 
     const [formData, setFormData] = useState<CategoryFormData>({
         name: '',
@@ -106,6 +108,7 @@ export default function AdminCategoryPage() {
 
                 if (resetPage) {
                     setCurrentPage(1);
+                    setDishPage(1); // Reset trang món khi load lại
                 }
             } catch (err: unknown) {
                 console.error("Lỗi khi tải dữ liệu:", err);
@@ -192,7 +195,7 @@ export default function AdminCategoryPage() {
         return matchesSearch;
     });
 
-    // --- Pagination Logic ---
+    // --- Pagination Logic for Categories ---
     const totalItems = filteredCategories.length;
     const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -240,10 +243,59 @@ export default function AdminCategoryPage() {
         return pages;
     };
 
-    const totalDishes = categories.reduce((sum, c) => sum + (c.dishCount || 0), 0);
+    // --- Pagination Logic for Dishes in Detail ---
     const categoryDishes = selectedCategory
         ? dishes.filter(d => d.categoryName === selectedCategory.name)
         : [];
+
+    const totalDishItems = categoryDishes.length;
+    const totalDishPages = Math.max(1, Math.ceil(totalDishItems / DISH_ITEMS_PER_PAGE));
+    const dishStartIndex = (dishPage - 1) * DISH_ITEMS_PER_PAGE;
+    const dishEndIndex = dishStartIndex + DISH_ITEMS_PER_PAGE;
+    const currentDishItems = categoryDishes.slice(dishStartIndex, dishEndIndex);
+
+    const goToDishPage = (page: number) => {
+        if (page >= 1 && page <= totalDishPages) {
+            setDishPage(page);
+        }
+    };
+
+    const goToPreviousDishPage = () => goToDishPage(dishPage - 1);
+    const goToNextDishPage = () => goToDishPage(dishPage + 1);
+
+    const getDishPageNumbers = () => {
+        const pages: (number | string)[] = [];
+        const maxVisible = 5;
+
+        if (totalDishPages <= maxVisible) {
+            for (let i = 1; i <= totalDishPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            pages.push(1);
+
+            if (dishPage > 3) {
+                pages.push('...');
+            }
+
+            const start = Math.max(2, dishPage - 1);
+            const end = Math.min(totalDishPages - 1, dishPage + 1);
+
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+
+            if (dishPage < totalDishPages - 2) {
+                pages.push('...');
+            }
+
+            pages.push(totalDishPages);
+        }
+
+        return pages;
+    };
+
+    const totalDishes = categories.reduce((sum, c) => sum + (c.dishCount || 0), 0);
 
     if (loading) {
         return (
@@ -410,6 +462,7 @@ export default function AdminCategoryPage() {
                                         <button
                                             onClick={() => {
                                                 setSelectedCategory(item);
+                                                setDishPage(1); // Reset dish page khi mở detail
                                                 setView('DETAIL');
                                             }}
                                             className="admin-category-action-btn"
@@ -464,7 +517,7 @@ export default function AdminCategoryPage() {
                             />
                         )}
 
-                        {/* Pagination */}
+                        {/* Pagination for Categories */}
                         {filteredCategories.length > 0 && (
                             <div className="admin-category-pagination">
                                 <div className="admin-category-pagination-info">
@@ -582,53 +635,92 @@ export default function AdminCategoryPage() {
                         </div>
 
                         {categoryDishes.length > 0 ? (
-                            <div className="admin-category-dish-table-wrapper">
-                                <table className="admin-category-dish-table">
-                                    <thead>
-                                    <tr className="admin-category-table-header">
-                                        <th className="admin-category-dish-col-name">TÊN MÓN</th>
-                                        <th className="admin-category-dish-col-price">GIÁ (VND)</th>
-                                        <th className="admin-category-dish-col-status">TRẠNG THÁI</th>
-                                        <th className="admin-category-dish-col-date">NGÀY TẠO</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {categoryDishes.map((dish) => (
-                                        <tr key={dish.id} className="admin-category-table-row admin-category-dish-row">
-                                            <td className="admin-category-dish-cell-name">
-                                                <div className="admin-category-dish-info">
-                                                    <div className="admin-category-dish-image">
-                                                        <img
-                                                            src={dish.imageUrl && dish.imageUrl.startsWith('http') ? dish.imageUrl : `/image/${dish.imageUrl}`}
-                                                            alt={dish.name}
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).src = 'https://placehold.co/40x40?text=🍲';
-                                                                (e.target as HTMLImageElement).onerror = null;
-                                                            }}
-                                                        />
+                            <>
+                                <div className="admin-category-dish-table-wrapper">
+                                    <table className="admin-category-dish-table">
+                                        <thead>
+                                        <tr className="admin-category-table-header">
+                                            <th className="admin-category-dish-col-name">TÊN MÓN</th>
+                                            <th className="admin-category-dish-col-price">GIÁ (VND)</th>
+                                            <th className="admin-category-dish-col-status">TRẠNG THÁI</th>
+                                            <th className="admin-category-dish-col-date">NGÀY TẠO</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {currentDishItems.map((dish) => (
+                                            <tr key={dish.id} className="admin-category-table-row admin-category-dish-row">
+                                                <td className="admin-category-dish-cell-name">
+                                                    <div className="admin-category-dish-info">
+                                                        <div className="admin-category-dish-image">
+                                                            <img
+                                                                src={dish.imageUrl && dish.imageUrl.startsWith('http') ? dish.imageUrl : `/image/${dish.imageUrl}`}
+                                                                alt={dish.name}
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).src = 'https://placehold.co/40x40?text=🍲';
+                                                                    (e.target as HTMLImageElement).onerror = null;
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <strong className="admin-category-dish-name">{dish.name}</strong>
+                                                            {dish.description && (
+                                                                <div className="admin-category-dish-description-short">{dish.description}</div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <strong className="admin-category-dish-name">{dish.name}</strong>
-                                                        {dish.description && (
-                                                            <div className="admin-category-dish-description-short">{dish.description}</div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="admin-category-dish-cell-price">{dish.price.toLocaleString('vi-VN')}đ</td>
-                                            <td className="admin-category-dish-cell-status">
+                                                </td>
+                                                <td className="admin-category-dish-cell-price">{dish.price.toLocaleString('vi-VN')}đ</td>
+                                                <td className="admin-category-dish-cell-status">
                                                     <span className={`admin-category-status-badge ${dish.isAvailable ? 'active' : 'hidden'}`}>
                                                         {dish.isAvailable ? '● Đang bán' : '● Tạm dừng'}
                                                     </span>
-                                            </td>
-                                            <td className="admin-category-dish-cell-date">
-                                                {dish.createdAt ? new Date(dish.createdAt).toLocaleDateString('vi-VN') : '---'}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </td>
+                                                <td className="admin-category-dish-cell-date">
+                                                    {dish.createdAt ? new Date(dish.createdAt).toLocaleDateString('vi-VN') : '---'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* THÊM: Pagination for Dishes */}
+                                {categoryDishes.length > DISH_ITEMS_PER_PAGE && (
+                                    <div className="admin-category-pagination admin-category-dish-pagination">
+                                        <div className="admin-category-pagination-info">
+                                            <span className="admin-category-pagination-current-page">
+                                                Trang {dishPage} / {totalDishPages}
+                                            </span>
+                                        </div>
+                                        <div className="admin-category-pagination-controls">
+                                            <button
+                                                onClick={goToPreviousDishPage}
+                                                disabled={dishPage === 1}
+                                                className="admin-category-pagination-btn"
+                                            >
+                                                ◀
+                                            </button>
+                                            {getDishPageNumbers().map((page, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => typeof page === 'number' && goToDishPage(page)}
+                                                    className={`admin-category-pagination-btn ${dishPage === page ? 'active' : ''} ${typeof page === 'string' ? 'dots' : ''}`}
+                                                    disabled={typeof page === 'string'}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ))}
+                                            <button
+                                                onClick={goToNextDishPage}
+                                                disabled={dishPage === totalDishPages}
+                                                className="admin-category-pagination-btn"
+                                            >
+                                                ▶
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <EmptyState
                                 title="Chưa có món ăn nào trong danh mục này"
