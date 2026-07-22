@@ -21,7 +21,7 @@ import {
 } from '@/shared/components/ui'
 
 
-const ITEMS_PER_PAGE = 6
+const ITEMS_PER_PAGE = 20
 
 type SortOrder = 'NEWEST' | 'OLDEST'
 
@@ -199,6 +199,54 @@ export default function CompletedOrdersPage() {
         currentPage,
         totalPages,
     )
+
+    const pageNumbersToShow = useMemo(() => {
+        const pages: (number | 'ellipsis')[] = []
+        const siblingCount = 1 // số trang hiển thị mỗi bên trang hiện tại
+
+        const totalNumbersShown = siblingCount * 2 + 5 // first, last, current, 2 ellipsis
+
+        if (totalPages <= totalNumbersShown) {
+            for (let page = 1; page <= totalPages; page++) {
+                pages.push(page)
+            }
+            return pages
+        }
+
+        const leftSibling = Math.max(safeCurrentPage - siblingCount, 1)
+        const rightSibling = Math.min(safeCurrentPage + siblingCount, totalPages)
+
+        const showLeftEllipsis = leftSibling > 2
+        const showRightEllipsis = rightSibling < totalPages - 1
+
+        pages.push(1)
+
+        if (showLeftEllipsis) {
+            pages.push('ellipsis')
+        } else {
+            for (let page = 2; page < leftSibling; page++) {
+                pages.push(page)
+            }
+        }
+
+        for (let page = leftSibling; page <= rightSibling; page++) {
+            if (page !== 1 && page !== totalPages) {
+                pages.push(page)
+            }
+        }
+
+        if (showRightEllipsis) {
+            pages.push('ellipsis')
+        } else {
+            for (let page = rightSibling + 1; page < totalPages; page++) {
+                pages.push(page)
+            }
+        }
+
+        pages.push(totalPages)
+
+        return pages
+    }, [totalPages, safeCurrentPage])
 
     const startIndex =
         (safeCurrentPage - 1) * ITEMS_PER_PAGE
@@ -448,31 +496,27 @@ export default function CompletedOrdersPage() {
                             </button>
 
                             <div className="pagination-pages">
-                                {Array.from(
-                                    {
-                                        length: totalPages,
-                                    },
-                                    (_, index) =>
-                                        index + 1,
-                                ).map((pageNumber) => (
-                                    <button
-                                        type="button"
-                                        key={pageNumber}
-                                        className={
-                                            pageNumber
-                                            === safeCurrentPage
-                                                ? 'pagination-number active'
-                                                : 'pagination-number'
-                                        }
-                                        onClick={() => {
-                                            setCurrentPage(
-                                                pageNumber,
-                                            )
-                                        }}
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                ))}
+                                {pageNumbersToShow.map((pageNumber, index) =>
+                                        pageNumber === 'ellipsis' ? (
+                                            <span key={`ellipsis-${index}`}
+                                                className="pagination-ellipsis">…</span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                key={pageNumber}
+                                                className={
+                                                    pageNumber === safeCurrentPage
+                                                        ? 'pagination-number active'
+                                                        : 'pagination-number'
+                                                }
+                                                onClick={() => {
+                                                    setCurrentPage(pageNumber)
+                                                }}
+                                            >
+                                                {pageNumber}
+                                            </button>
+                                        ),
+                                )}
                             </div>
 
                             <button
