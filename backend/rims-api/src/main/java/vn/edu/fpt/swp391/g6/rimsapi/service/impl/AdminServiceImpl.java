@@ -16,13 +16,16 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderShift;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
@@ -45,7 +48,8 @@ public class AdminServiceImpl implements AdminService
 {
     private final DishRepository dishRepository; // line ~50
     private final CategoryRepository categoryRepository; // line ~260
-    private final InvoiceRepository invoiceRepository; // line ~470 (invoice) / line ~540 (revenue report) / line ~410 (menu)
+    private final InvoiceRepository invoiceRepository; // line ~470 (invoice) / line ~540 (revenue report)
+    private final RestaurantTableRepository restaurantTableRepository; // line ~455 (table) / line ~410 (menu)
     private final SimpMessagingTemplate messagingTemplate;
 
     // DISH SERVICE
@@ -161,7 +165,6 @@ public class AdminServiceImpl implements AdminService
             dish.setCategory(category);
 
             Dish savedDish = dishRepository.save(dish);
-            broadcastMenuChanged();
             return convertToResponse(savedDish);
 
         } catch (IllegalArgumentException | EntityNotFoundException e)
@@ -206,9 +209,12 @@ public class AdminServiceImpl implements AdminService
                 dish.setAvailable(updateDishRequest.getIsAvailable());
             }
 
-            if (updateDishRequest.getIsHidden() != null)
+            boolean hiddenChanged = false;
+            if (updateDishRequest.getIsHidden() != null
+                    && !updateDishRequest.getIsHidden().equals(dish.isHidden()))
             {
                 dish.setHidden(updateDishRequest.getIsHidden());
+                hiddenChanged = true;
             }
 
             // Cập nhật category nếu có thay đổi
@@ -221,7 +227,10 @@ public class AdminServiceImpl implements AdminService
 
             Dish updatedDish = dishRepository.save(dish);
 
-            broadcastMenuChanged();
+            if (hiddenChanged)
+            {
+                broadcastMenuVisibilityChanged(updatedDish);
+            }
 
             return convertToResponse(updatedDish);
 
@@ -250,7 +259,6 @@ public class AdminServiceImpl implements AdminService
             {
                 // Món mới tạo, chưa từng nằm trong order_items -> Cho phép xóa hẳn khỏi DB
                 dishRepository.delete(dish);
-                broadcastMenuChanged();
             } else
             {
                 // Món đã từng được đặt -> Không cho xóa, bắt dùng "Tạm dừng" thay thế
@@ -343,56 +351,74 @@ public class AdminServiceImpl implements AdminService
     }
 
     @Override
+    @Transactional
     public CategoryResponse updateCategory(Integer id, UpdateCategoryRequest updateCategoryRequest)
     {
         try
         {
+            // 1. Tìm category cần update
             Category category = categoryRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy category với ID: " + id));
 
-            // Kiểm tra tên mới có bị trùng không (bỏ qua chính nó)
+            // 2. Kiểm tra tên mới có bị trùng không (bỏ qua chính nó)
             if (!category.getName().equals(updateCategoryRequest.getName())
                     && categoryRepository.existsByName(updateCategoryRequest.getName()))
             {
                 throw new IllegalArgumentException("Tên danh mục '" + updateCategoryRequest.getName() + "' đã tồn tại!");
             }
 
+            // 3. Cập nhật thông tin cơ bản
             category.setName(updateCategoryRequest.getName());
             category.setDescription(updateCategoryRequest.getDescription());
 
-            // Cập nhật trạng thái nếu có
+            // 4. Xử lý cập nhật trạng thái
             if (updateCategoryRequest.getIsAvailable() != null)
             {
                 boolean newStatus = updateCategoryRequest.getIsAvailable();
+                boolean oldStatus = category.isAvailable();
 
-                // Nếu đang chuyển từ Hoạt động -> Ẩn thì phải kiểm tra còn món ăn không
-                if (category.isAvailable() && !newStatus)
+                // ✅ LOGIC 1: Khi ẩn category -> tự động ẩn tất cả dishes trong category đó
+                if (oldStatus && !newStatus)
                 {
-                    long dishCount = categoryRepository.countDishesByCategoryId(id);
-                    if (dishCount > 0)
+                    List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
+
+                    if (!dishesInCategory.isEmpty())
                     {
-                        throw new IllegalStateException(
-                                String.format("Không thể ẩn category vì đang có %d món ăn thuộc danh mục này!", dishCount)
-                        );
+                        // Ẩn tất cả dishes trong category
+                        for (Dish dish : dishesInCategory)
+                        {
+                            dish.setAvailable(false);
+                            dish.setHidden(true);
+                        }
+                        dishRepository.saveAll(dishesInCategory);
+
+                        // Broadcast cho từng dish bị ẩn
+                        for (Dish dish : dishesInCategory)
+                        {
+                            broadcastMenuVisibilityChanged(dish);
+                        }
                     }
                 }
 
+                // Cập nhật trạng thái category
                 category.setAvailable(newStatus);
             }
 
+            // 5. Lưu category
             Category updatedCategory = categoryRepository.save(category);
+
             return convertToResponse(updatedCategory);
 
-        } catch (EntityNotFoundException | IllegalArgumentException | IllegalStateException e)
+        } catch (EntityNotFoundException | IllegalArgumentException e)
         {
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
+            throw e;
         } catch (Exception e)
         {
             throw new RuntimeException("Không thể cập nhật danh mục: " + e.getMessage());
         }
     }
-
     @Override
+    @Transactional
     public void deleteCategory(Integer id)
     {
         try
@@ -400,16 +426,38 @@ public class AdminServiceImpl implements AdminService
             Category category = categoryRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
-            // Kiểm tra xem category có đang chứa dishes không[cite: 2]
-            long dishCount = categoryRepository.countDishesByCategoryId(id); // Giả định hàm này đã viết trong repo[cite: 2]
-            if (dishCount > 0)
+            // Lấy tất cả dishes thuộc category này
+            List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
+
+            // ✅ SỬA PHẦN NÀY: Kiểm tra xem có dish nào đã có order không
+            boolean hasDishWithOrders = false;
+            for (Dish dish : dishesInCategory)
+            {
+                long orderCount = dishRepository.countOrderItemsByDishId(dish.getId());
+                if (orderCount > 0)
+                {
+                    hasDishWithOrders = true;
+                    break;
+                }
+            }
+
+            // ✅ LOGIC MỚI: Nếu có bất kỳ dish nào đã có order -> KHÔNG cho xóa
+            if (hasDishWithOrders)
             {
                 throw new IllegalStateException(
-                        String.format("Không thể xóa danh mục này vì đang có %d món ăn thuộc danh mục!", dishCount)
+                        "Không thể xóa danh mục này vì có món ăn đã phát sinh đơn hàng. " +
+                                "Vui lòng dùng chức năng \"Tạm dừng\" để ẩn danh mục."
                 );
             }
 
-            // HỢP LỆ: Danh mục trống -> Cho phép xóa hẳn khỏi hệ thống
+            // ✅ LOGIC MỚI: Nếu không có dish nào có order -> Xóa cứng (xóa cả category và dishes)
+            // Xóa tất cả dishes trong category trước (do FK constraint)
+            if (!dishesInCategory.isEmpty())
+            {
+                dishRepository.deleteAll(dishesInCategory);
+            }
+
+            // Sau đó xóa category
             categoryRepository.delete(category);
 
         } catch (EntityNotFoundException | IllegalStateException e)
@@ -930,9 +978,12 @@ public class AdminServiceImpl implements AdminService
             case SUNDAY -> "CN";
         };
     }
-    private void broadcastMenuChanged()
+    private void broadcastMenuVisibilityChanged(Dish dish)
     {
-        String payload = "{\"type\":\"MENU_UPDATED\"}";
+        String payload = String.format(
+                "{\"type\":\"MENU_VISIBILITY_CHANGED\",\"dishId\":%d,\"hidden\":%b}",
+                dish.getId(), dish.isHidden()
+        );
         messagingTemplate.convertAndSend("/topic/waiter", payload);
         messagingTemplate.convertAndSend("/topic/kitchen", payload);
     }
