@@ -167,7 +167,7 @@ export default function ChefDashboardPage() {
                     className="chef-dashboard-card success"
                 >
                     <span className="chef-dashboard-card-label">
-                        Đã hoàn thành
+                        Đã hoàn thành hôm nay
                     </span>
 
                     <strong>
@@ -175,7 +175,7 @@ export default function ChefDashboardPage() {
                     </strong>
 
                     <p>
-                        Món đã được bếp xác nhận hoàn thành.
+                        Món đã được bếp xác nhận hoàn thành trong ngày hôm nay.
                     </p>
                 </Link>
 
@@ -184,7 +184,7 @@ export default function ChefDashboardPage() {
                     className="chef-dashboard-card danger"
                 >
                     <span className="chef-dashboard-card-label">
-                        Đã hủy
+                        Đã hủy hôm nay
                     </span>
 
                     <strong>
@@ -192,10 +192,9 @@ export default function ChefDashboardPage() {
                     </strong>
 
                     <p>
-                        Món đã bị hủy và cần Waiter xử lý với khách.
+                        Món đã bị hủy trong ngày hôm nay và cần Waiter xử lý với khách.
                     </p>
                 </Link>
-
                 <Link
                     to="/chef/dishes"
                     className="chef-dashboard-card warning"
