@@ -70,6 +70,15 @@ public class CustomerServiceImpl implements CustomerService
                     "Bạn đã có một đặt bàn đang hoạt động trong ngày này, vui lòng hủy đặt bàn cũ trước khi đặt bàn mới.");
         }
 
+        // Chặn thêm theo số điện thoại: phòng trường hợp 1 khách dùng nhiều tài khoản
+        // khác nhau nhưng cùng 1 SĐT để đặt trùng ngày (bypass check theo userId ở trên).
+        if (!reservationRepository
+                .findActiveReservationsByPhoneAndDate(request.getPhone(), reservationDate)
+                .isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Số điện thoại này đã có một đặt bàn đang hoạt động trong ngày này, vui lòng hủy đặt bàn cũ trước khi đặt bàn mới.");
+        }
+
         RestaurantTable table = tableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 

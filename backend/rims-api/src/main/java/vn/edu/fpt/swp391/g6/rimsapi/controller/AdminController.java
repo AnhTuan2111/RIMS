@@ -122,12 +122,19 @@ public class AdminController
     @GetMapping("/invoice/history")
     public InvoiceHistoryPageResponse getInvoiceHistory(
             @RequestParam(defaultValue = "1") int page,
-
-            @RequestParam(defaultValue = "10") int pageSize)
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String tableNumber,
+            @RequestParam(required = false) String paymentMethod,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String customerKeyword)
     {
         return adminService.getInvoiceHistory(
                 page,
-                pageSize);
+                pageSize,
+                tableNumber,
+                paymentMethod,
+                keyword,
+                customerKeyword);
     }
 
     @GetMapping("/invoice/{invoiceId}")

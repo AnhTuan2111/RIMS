@@ -22,6 +22,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderShift;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
@@ -513,13 +514,40 @@ public class AdminServiceImpl implements AdminService
     // INVOICE SERVICE
 
     @Override
-    public InvoiceHistoryPageResponse getInvoiceHistory(int page, int pageSize)
+    public InvoiceHistoryPageResponse getInvoiceHistory(
+            int page, int pageSize,
+            String tableNumber, String paymentMethod,
+            String keyword, String customerKeyword)
     {
         int requestedPage = Math.max(page, 1);
         int requestedPageSize = Math.clamp(pageSize, 1, 50);
 
+        String normalizedTableNumber = normalizeFilter(tableNumber);
+        String normalizedKeyword = normalizeFilter(keyword);
+        String normalizedCustomerKeyword = normalizeFilter(customerKeyword);
+
+        PaymentMethod normalizedPaymentMethod = null;
+        String trimmedMethod = normalizeFilter(paymentMethod);
+
+        if (trimmedMethod != null && !"ALL".equalsIgnoreCase(trimmedMethod))
+        {
+            try
+            {
+                normalizedPaymentMethod = PaymentMethod.valueOf(trimmedMethod.toUpperCase(Locale.ROOT));
+            }
+            catch (IllegalArgumentException ex)
+            {
+                throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ: " + paymentMethod);
+            }
+        }
+
         Page<InvoiceHistoryResponse> historyPage = invoiceRepository
-                .getInvoiceHistory(PageRequest.of(requestedPage - 1, requestedPageSize))
+                .getInvoiceHistory(
+                        normalizedTableNumber,
+                        normalizedPaymentMethod,
+                        normalizedKeyword,
+                        normalizedCustomerKeyword,
+                        PageRequest.of(requestedPage - 1, requestedPageSize))
                 .map(row -> new InvoiceHistoryResponse(
                         row.getInvoiceId(),
                         row.getOrderId(),
@@ -536,6 +564,17 @@ public class AdminServiceImpl implements AdminService
                 historyPage.getTotalElements(),
                 historyPage.getTotalPages()
         );
+    }
+
+    private String normalizeFilter(String value)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     @Override

@@ -1,4 +1,6 @@
 ﻿import {
+    useEffect,
+    useMemo,
     useRef,
     useState,
     type CSSProperties,
@@ -165,6 +167,30 @@ export default function WaiterCreateReservationPage() {
 
     const hasLoadedInitialReservationsRef =
         useRef(false)
+
+    const availableTimeSlots = useMemo(
+        () => getAvailableTimeSlots(resForm.date, blockedRanges),
+        [resForm.date, blockedRanges],
+    )
+
+    // Nếu giờ đang chọn không còn nằm trong danh sách slot khả dụng
+    // (do đã qua giờ đó, hoặc slot vừa bị chặn), tự chuyển sang slot
+    // đầu tiên còn khả dụng — tránh submit với giờ đã ở quá khứ.
+    useEffect(() => {
+        if (availableTimeSlots.length === 0) {
+            return
+        }
+
+        if (!availableTimeSlots.includes(resForm.time)) {
+            queueMicrotask(() => {
+                setResForm((previous) => ({
+                    ...previous,
+                    time: availableTimeSlots[0],
+                }))
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [availableTimeSlots, resForm.time])
 
     function showToast(
         msg: string,
@@ -617,10 +643,7 @@ export default function WaiterCreateReservationPage() {
                                             })
                                         }
                                     >
-                                        {getAvailableTimeSlots(
-                                            resForm.date,
-                                            blockedRanges,
-                                        ).map((value) => (
+                                        {availableTimeSlots.map((value) => (
                                             <option
                                                 key={value}
                                                 value={value}
