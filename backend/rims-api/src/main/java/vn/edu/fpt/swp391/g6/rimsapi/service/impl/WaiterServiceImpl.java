@@ -199,7 +199,7 @@ public class WaiterServiceImpl implements WaiterService
         // các món đã trong trạng thái COMPLETE thì chỉ có thêm số lượng chứ không giảm đi được, tức là số lượng lúc sau phải luôn >= số lượng ban đầu, nếu không thì lỗi
         // còn các món mà trong trạng thái PREPARING thì thêm bớt tùy ý
 
-        Order order = orderRepository.findOrderWithDetailsById(id).orElseThrow(() -> new IllegalArgumentException("order Id " + id + " not found"));
+        Order order = orderRepository.findOrderWithDetailsById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng với ID: " + id));
 
         if (!userRepository.existsById(waiterId))
         {
@@ -208,12 +208,12 @@ public class WaiterServiceImpl implements WaiterService
 
         if (order.getStatus() != OrderStatus.SERVING)
         {
-            throw new IllegalArgumentException("cannot update order that not in serving status");
+            throw new IllegalArgumentException("Chỉ có thể cập nhật đơn hàng đang phục vụ");
         }
 
         if (order.getTable().getStatus() != TableStatus.SERVING)
         {
-            throw new IllegalArgumentException("you can only update table that its status is SERVING");
+            throw new IllegalArgumentException("Chỉ có thể cập nhật bàn đang ở trạng thái phục vụ");
         }
 
         // bây giờ đã validate xong order, việc cần làm tiếp theo là đối chiếu order request với order gốc, xem có thay đổi cập nhật gì, lúc này sẽ validate các item trong order
@@ -230,19 +230,19 @@ public class WaiterServiceImpl implements WaiterService
 
                 if (existedItem == null)
                 {
-                    throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " not found");
+                    throw new IllegalArgumentException("Không tìm thấy món trong đơn hàng với ID: " + itemRequest.getOrderItemId());
                 }
 
                 if (itemRequest.getQuantity() == null || itemRequest.getDishId() == null)
                 {
-                    throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " cannot have empty quantity or dish");
+                    throw new IllegalArgumentException("Món trong đơn hàng với ID " + itemRequest.getOrderItemId() + " không được thiếu số lượng hoặc món ăn");
                 }
 
                 if (existedItem.getStatus().equals(OrderItemStatus.COMPLETED)) // chỉ có thể thêm số lượng chứ không bớt đi được. nếu thêm số lượng thì sẽ tạo order item mới với số lượng bằng phần dư khi trừ (để không bị trùng)
                 {
                     if (itemRequest.getQuantity() < existedItem.getQuantity())
                     {
-                        throw new IllegalArgumentException("item Id " + itemRequest.getOrderItemId() + " is COMPLETE, cannot reduce quantity");
+                        throw new IllegalArgumentException("Món trong đơn hàng với ID " + itemRequest.getOrderItemId() + " đã hoàn thành, không thể giảm số lượng");
                     } else if (itemRequest.getQuantity() > existedItem.getQuantity())
                     {
                         // tạo order item mới đế không bị nhầm lẫn với order item khác
@@ -271,7 +271,7 @@ public class WaiterServiceImpl implements WaiterService
             } else // món mới khi gửi đi sẽ có orderitem id là null
             {
                 Dish dish = dishRepository.findById(itemRequest.getDishId())
-                        .orElseThrow(() -> new IllegalArgumentException("not found dishID: " + itemRequest.getDishId()));
+                        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy món ăn với ID: " + itemRequest.getDishId()));
 
                 OrderItem orderItem = new OrderItem();
                 orderItem.setDish(dish);
@@ -457,7 +457,7 @@ public class WaiterServiceImpl implements WaiterService
     {
         return reservationRepository.findById(reservationId)
                 .map(this::toReservationResponse)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find ReservationDetail for reservationId " + reservationId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi tiết đặt bàn với ID: " + reservationId));
     }
 
     @Override

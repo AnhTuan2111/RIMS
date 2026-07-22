@@ -325,7 +325,7 @@ export default function WaiterUpdateOrderPage() {
                 )
 
                 setPageError(
-                    'Không thể tải dữ liệu cập nhật order.',
+                    'Không thể tải dữ liệu cập nhật đơn hàng.',
                 )
             } finally {
                 if (
@@ -525,7 +525,7 @@ export default function WaiterUpdateOrderPage() {
     function openConfirm() {
         if (!servingOrders.length) {
             showToast(
-                'Không có order đang phục vụ để cập nhật.',
+                'Không có đơn hàng đang phục vụ để cập nhật.',
                 'error',
             )
             return
@@ -574,7 +574,7 @@ export default function WaiterUpdateOrderPage() {
             setSuccessData({
                 message:
                     response.data?.message
-                    || 'Cập nhật order thành công!',
+                    || 'Cập nhật đơn hàng thành công!',
                 itemSummary: '',
             })
         } catch (requestError: unknown) {
@@ -748,7 +748,7 @@ export default function WaiterUpdateOrderPage() {
                     />
 
                     <h2 className="waiter-title">
-                        Cập nhật Order - Bàn {tableIdNumber || '—'}
+                        Cập nhật đơn hàng - Bàn {tableIdNumber || '—'}
                     </h2>
 
                     <button
@@ -809,7 +809,7 @@ export default function WaiterUpdateOrderPage() {
 
                 {isLoading ? (
                     <div style={stateBoxStyle}>
-                        Đang tải dữ liệu cập nhật order...
+                        Đang tải dữ liệu cập nhật đơn hàng...
                     </div>
                 ) : visibleMenu.length === 0 ? (
                     <div style={stateBoxStyle}>
@@ -1019,7 +1019,7 @@ export default function WaiterUpdateOrderPage() {
 
             {showConfirm && (
                 <ConfirmModal
-                    title="Xác nhận cập nhật Order"
+                    title="Xác nhận cập nhật đơn hàng"
                     message={`Bàn ${tableIdNumber} — Bạn đang gửi yêu cầu cập nhật các món sau:`}
                     confirmLabel={
                         submitting

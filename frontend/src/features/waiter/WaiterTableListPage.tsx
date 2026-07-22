@@ -844,7 +844,7 @@ export default function WaiterTableListPage() {
                                     )
                                 }
                             >
-                                Tạo Order
+                                Tạo đơn hàng
                             </button>
                         </div>
                     </div>
