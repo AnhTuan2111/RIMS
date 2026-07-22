@@ -313,18 +313,24 @@ public class DatabaseSeeder implements CommandLineRunner
             List<OrderItem> items = buildRandomOrderItems(order, dishes, orderTime);
             items.forEach(order::addOrderItem);
 
+            // Chụp lại createdAt gốc TRƯỚC khi save() — vì auditing sẽ ghi đè
+            // thẳng field createdAt trong bộ nhớ của item thành now() lúc insert,
+            // nên đọc lại item.getCreatedAt() sau save() sẽ cho giá trị sai.
+            List<LocalDateTime> originalItemTimes = items.stream()
+                    .map(OrderItem::getCreatedAt)
+                    .toList();
+
             recalcTotal(order, items);
             orderRepository.save(order);   // save 1 lần duy nhất, cascade lo phần OrderItem
 
             orderBackdates.add(new Object[]{Timestamp.valueOf(orderTime), order.getId()});
 
-            for (OrderItem item : items)
+            for (int i = 0; i < items.size(); i++)
             {
-                Timestamp ts = Timestamp.valueOf(item.getCreatedAt());
+                OrderItem item = items.get(i);
+                Timestamp ts = Timestamp.valueOf(originalItemTimes.get(i));
                 itemBackdates.add(new Object[]{ts, ts, item.getId()});
             }
-            recalcTotal(order, items);
-            orderRepository.save(order);
 
             LocalDateTime invoiceDate = orderTime.plusMinutes(60 + RNG.nextInt(90));
             Invoice invoice = buildInvoice(order, invoiceDate);
