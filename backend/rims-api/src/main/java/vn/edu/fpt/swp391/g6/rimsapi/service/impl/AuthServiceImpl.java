@@ -40,16 +40,16 @@ public class AuthServiceImpl implements AuthService
     public AuthenticationResponse login(AuthenticationRequest loginRequest)
     {
         User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
+                .orElseThrow(() -> new BadCredentialsException("Tên đăng nhập hoặc mật khẩu không đúng"));
 
         if (!user.isActive())
         {
-            throw new DisabledException("Account is disabled");
+            throw new DisabledException("Tài khoản đã bị vô hiệu hóa");
         }
 
         if (!passwordEncoder.matches(loginRequest.getRawPassword(), user.getPasswordHash()))
         {
-            throw new BadCredentialsException("Invalid username or password");
+            throw new BadCredentialsException("Tên đăng nhập hoặc mật khẩu không đúng");
         }
 
         return buildAuthenticationResponse(user);
@@ -62,16 +62,16 @@ public class AuthServiceImpl implements AuthService
 
         if (!jwtService.isRefreshToken(claims))
         {
-            throw new InvalidTokenException("Invalid refresh token");
+            throw new InvalidTokenException("Refresh token không hợp lệ");
         }
 
         Integer userId = jwtService.extractUserId(claims);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new InvalidTokenException("User not found"));
+                .orElseThrow(() -> new InvalidTokenException("Không tìm thấy người dùng"));
 
         if (!user.isActive())
         {
-            throw new DisabledException("Account is disabled");
+            throw new DisabledException("Tài khoản đã bị vô hiệu hóa");
         }
 
         return buildAuthenticationResponse(user);
@@ -81,7 +81,7 @@ public class AuthServiceImpl implements AuthService
     public UserProfileResponse getCurrentUser(UserPrincipal principal)
     {
         User user = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new BadCredentialsException("User not found"));
+                .orElseThrow(() -> new BadCredentialsException("Không tìm thấy người dùng"));
 
         return toUserProfile(user);
     }
@@ -97,7 +97,7 @@ public class AuthServiceImpl implements AuthService
         }
 
         return LogoutResponse.builder()
-                .message("Logged out successfully")
+                .message("Đăng xuất thành công")
                 .build();
     }
 

@@ -165,7 +165,7 @@ export default function AdminMenuDashboardPage() {
         return (
             <ErrorState
                 title="Không có dữ liệu"
-                message="Dashboard thực đơn chưa có dữ liệu để hiển thị."
+                message="Tổng quan thực đơn chưa có dữ liệu để hiển thị."
                 onRetry={() => {
                     loadDashboardData(
                         undefined,

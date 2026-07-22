@@ -38,7 +38,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
     {
         // Load fresh bên trong transaction hiện tại -> session còn sống
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new EntityNotFoundException("Invoice not found: " + invoiceId));
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hóa đơn: " + invoiceId));
 
         Document document = new Document(PageSize.A6, 10, 10, 15, 15);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -59,7 +59,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             Font fontNormal = new Font(bf, 9, Font.NORMAL);
             Font fontItalic = new Font(bf, 9, Font.ITALIC);
 
-            Paragraph restaurantName = new Paragraph("RIMS RESTAURANT", fontTitle);
+            Paragraph restaurantName = new Paragraph("NHÀ HÀNG RIMS", fontTitle);
             restaurantName.setAlignment(Element.ALIGN_CENTER);
             document.add(restaurantName);
 
