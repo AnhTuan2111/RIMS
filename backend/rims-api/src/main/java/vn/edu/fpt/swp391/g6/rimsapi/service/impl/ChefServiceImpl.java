@@ -213,19 +213,22 @@ public class ChefServiceImpl implements ChefService {
 
     @Override
     public ChefDashboardResponse getDashboard() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
         long preparingCount =
                 orderItemRepository.countByStatus(
                         OrderItemStatus.PREPARING
                 );
 
         long completedCount =
-                orderItemRepository.countByStatus(
-                        OrderItemStatus.COMPLETED
+                orderItemRepository.countByStatusAndCreatedAtBetween(
+                        OrderItemStatus.COMPLETED, startOfDay, endOfDay
                 );
 
         long cancelledCount =
-                orderItemRepository.countByStatus(
-                        OrderItemStatus.CANCELLED
+                orderItemRepository.countByStatusAndCreatedAtBetween(
+                        OrderItemStatus.CANCELLED, startOfDay, endOfDay
                 );
 
         long unavailableDishCount =
@@ -266,8 +269,13 @@ public class ChefServiceImpl implements ChefService {
 
     @Override
     public List<KitchenOrderResponse> getCompletedOrders() {
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
         return orderItemRepository
-                .findByStatusOrderByCreatedAtAsc(OrderItemStatus.COMPLETED)
+                .findByStatusAndCreatedAtBetweenOrderByCreatedAtAsc(
+                        OrderItemStatus.COMPLETED, startOfDay, endOfDay
+                )
                 .stream()
                 .map(this::toKitchenOrderResponse)
                 .toList();
