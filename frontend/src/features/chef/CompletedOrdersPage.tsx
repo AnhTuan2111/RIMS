@@ -247,13 +247,13 @@ export default function CompletedOrdersPage() {
         <div className="chef-page">
             <PageCard>
                 <PageHeader
-                    title="Món đã hoàn thành"
-                    description="Tìm theo tên món, bàn, mã đơn hoặc mã item."
+                    title="Món đã hoàn thành hôm nay"
+                    description="Chỉ hiển thị món hoàn thành trong ngày hôm nay. Tìm theo tên món, bàn, mã đơn hoặc mã item."
                     actions={
                         <div className="chef-summary">
                             <div>
                                 <strong>{items.length}</strong>
-                                <span>Đã hoàn thành</span>
+                                <span>Đã hoàn thành hôm nay</span>
                             </div>
 
                             <button

@@ -134,12 +134,12 @@ export default function CancelledOrdersPage() {
             <section className="page-card">
                 <div className="page-header">
                     <div>
-                        <h2>Món đã hủy</h2>
+                        <h2>Món đã hủy hôm nay</h2>
 
                         <p>
                             Danh sách món Chef hủy trực tiếp
                             hoặc tự động bị hủy khi món được
-                            đánh dấu tạm hết.
+                            đánh dấu tạm hết, trong ngày hôm nay.
                         </p>
                     </div>
 
@@ -157,7 +157,7 @@ export default function CancelledOrdersPage() {
                 </div>
 
                 <div className="completed-summary">
-                    Tổng cộng:
+                    Tổng cộng hôm nay:
                     <strong>{items.length}</strong>
                     món đã hủy
                 </div>
