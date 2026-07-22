@@ -31,8 +31,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                .message("Unauthorized")
+                .error("Chưa xác thực")
+                .message("Vui lòng đăng nhập để tiếp tục")
                 .path(request.getRequestURI())
                 .build();
 

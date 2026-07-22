@@ -331,7 +331,7 @@ export default function WaiterCreateOrderPage() {
             setSuccessData({
                 message:
                     response.data.message
-                    || 'Tạo order thành công',
+                    || 'Tạo đơn hàng thành công',
                 itemSummary: '',
             })
         } catch (requestError: unknown) {
@@ -347,7 +347,7 @@ export default function WaiterCreateOrderPage() {
             showToast(
                 getRequestErrorMessage(
                     requestError,
-                    'Lỗi khi tạo order',
+                    'Lỗi khi tạo đơn hàng',
                 ),
                 'error',
             )
@@ -419,7 +419,7 @@ export default function WaiterCreateOrderPage() {
                     />
 
                     <h2 className="waiter-title">
-                        Tạo Order - Bàn {tableIdNumber || '—'}
+                        Tạo đơn hàng - Bàn {tableIdNumber || '—'}
                     </h2>
 
                     <button
@@ -432,7 +432,7 @@ export default function WaiterCreateOrderPage() {
                         }
                         onClick={openConfirm}
                     >
-                        Tạo Order
+                        Tạo đơn hàng
                     </button>
                 </div>
 
@@ -581,7 +581,7 @@ export default function WaiterCreateOrderPage() {
 
             {showConfirm && (
                 <ConfirmModal
-                    title="Xác nhận tạo Order"
+                    title="Xác nhận tạo đơn hàng"
                     message={`Bàn ${tableIdNumber} — ${selectedItems.length} món, tổng tạm tính ${fmtPrice(orderTotal)}`}
                     confirmLabel={
                         submitting

@@ -646,6 +646,6 @@ public class DatabaseSeeder implements CommandLineRunner
         return tables.stream()
                 .filter(t -> t.getTableNumber().equals(tableNumber))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Table not found: " + tableNumber));
+                .orElseThrow(() -> new IllegalStateException("Không tìm thấy bàn: " + tableNumber));
     }
 }

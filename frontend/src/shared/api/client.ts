@@ -68,7 +68,7 @@ async function refreshAccessToken(): Promise<string> {
         getRefreshToken()
 
     if (!storedRefreshToken) {
-        throw new Error('Missing refresh token')
+        throw new Error('Thiếu token làm mới phiên đăng nhập')
     }
 
     const {data} =
