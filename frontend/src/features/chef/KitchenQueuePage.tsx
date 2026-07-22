@@ -1194,7 +1194,7 @@ export default function KitchenQueuePage() {
                                             {[
                                                 'Hết sốt, vui lòng hỏi khách đổi lựa chọn.',
                                                 'Món sẽ chậm thêm khoảng 10 phút.',
-                                                'Hết nguyên liệu, vui lòng báo khách đổi món.',
+                                                'Món này hiện chỉ còn 1 phần.',
                                                 'Có thể phục vụ nhưng thiếu phần trang trí.',
                                             ].map((quickNote) => (
                                                 <button
