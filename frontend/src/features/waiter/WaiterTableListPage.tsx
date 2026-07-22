@@ -18,17 +18,22 @@ import {
 } from './components'
 import {useWaiterSocket} from '@/realtime'
 
-const STATUS_LABEL: Record<string, string> = {
-    AVAILABLE: 'available',
-    SERVING: 'serving',
-    RESERVED: 'reserved',
+type WaiterTableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED'
+
+const STATUS_META: Record<
+    WaiterTableStatus,
+    {label: string}
+> = {
+    AVAILABLE: {label: '○ Bàn trống'},
+    SERVING: {label: '● Đang phục vụ'},
+    RESERVED: {label: '● Đã đặt trước'},
 }
 
 const NOTIFIABLE_ITEM_STATUSES =
     new Set<string>([
-    'CANCELLED',
-    'COMPLETED',
-])
+        'CANCELLED',
+        'COMPLETED',
+    ])
 
 const ACKNOWLEDGED_SERVING_ITEMS_STORAGE_KEY =
     'waiterAcknowledgedServingItems'
@@ -71,10 +76,10 @@ function readAcknowledgedServingItems(): AcknowledgedServingItems {
         return Object.fromEntries(
             Object.entries(parsedValue)
                 .filter((entry): entry is [string, string[]] =>
-                    Array.isArray(entry[1])
-                    && entry[1].every(
-                        (value) => typeof value === 'string',
-                    ),
+                        Array.isArray(entry[1])
+                        && entry[1].every(
+                            (value) => typeof value === 'string',
+                        ),
                 )
                 .map(([tableId, itemKeys]) => [
                     Number(tableId),
@@ -322,8 +327,8 @@ export default function WaiterTableListPage() {
                                     ) => {
                                         const itemKey =
                                             item.orderItemId
-                                            ? String(item.orderItemId)
-                                            : `${order.orderId}:${item.dishName}:${itemIndex}`
+                                                ? String(item.orderItemId)
+                                                : `${order.orderId}:${item.dishName}:${itemIndex}`
 
                                         if (
                                             item.status
@@ -564,7 +569,7 @@ export default function WaiterTableListPage() {
                 const acknowledgedItems =
                     acknowledgedServingItemsRef.current[
                         table.tableId
-                    ] ?? new Set<string>()
+                        ] ?? new Set<string>()
 
                 notificationKeys.forEach((notificationKey) => {
                     acknowledgedItems.add(notificationKey)
@@ -618,17 +623,17 @@ export default function WaiterTableListPage() {
                 <div className="waiter-legend">
                     <span className="waiter-legend-item">
                         <span className="waiter-legend-dot waiter-dot-available" />
-                        Available
+                        Bàn trống
                     </span>
 
                     <span className="waiter-legend-item">
                         <span className="waiter-legend-dot waiter-dot-serving" />
-                        Serving
+                        Đang phục vụ
                     </span>
 
                     <span className="waiter-legend-item">
                         <span className="waiter-legend-dot waiter-dot-reserved" />
-                        Reserved
+                        Đã đặt trước
                     </span>
                 </div>
 
@@ -660,9 +665,14 @@ export default function WaiterTableListPage() {
                 ) : (
                     <div className="waiter-table-grid">
                         {displayTables.map((table) => {
+                            const status =
+                                (table.status as WaiterTableStatus)
+                                in STATUS_META
+                                    ? (table.status as WaiterTableStatus)
+                                    : 'AVAILABLE'
+
                             const statusLabel =
-                                STATUS_LABEL[table.status]
-                                ?? 'available'
+                                STATUS_META[status].label
 
                             const nextReservationTime =
                                 resTimes[table.tableId]
@@ -671,6 +681,7 @@ export default function WaiterTableListPage() {
                                 <WaiterTableCard
                                     key={table.tableId}
                                     table={table}
+                                    status={status}
                                     statusLabel={statusLabel}
                                     nextReservationTime={
                                         nextReservationTime
@@ -679,7 +690,7 @@ export default function WaiterTableListPage() {
                                         Boolean(
                                             tableStatusNotifications[
                                                 table.tableId
-                                            ],
+                                                ],
                                         )
                                     }
                                     onClick={handleTableClick}

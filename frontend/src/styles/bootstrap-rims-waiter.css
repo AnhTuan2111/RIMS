@@ -64,7 +64,7 @@
 }
 
 .waiter-dot-serving {
-    background: #60a5fa;
+    background: #fb923c;
 }
 
 .waiter-dot-reserved {
@@ -80,15 +80,18 @@
 
 .waiter-table-card {
     border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    overflow: hidden;
+    border-radius: 12px;
     position: relative;
     text-align: left;
     transition: all 0.2s;
     cursor: pointer;
     width: 100%;
-    background: transparent;
-    padding: 0;
+    background: #ffffff;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 120px;
 }
 
 .waiter-table-notification-dot {
@@ -109,65 +112,52 @@
     transform: translateY(-2px);
 }
 
-.waiter-table-header {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
+.waiter-table-number {
+    font-size: 1.2rem;
     font-weight: 700;
     color: #0f172a;
+    margin-bottom: 8px;
 }
 
-.waiter-table-body {
-    padding: 1.5rem 1rem;
-    text-align: center;
+.waiter-table-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
 }
 
 .waiter-table-status {
     font-size: 0.9rem;
-    font-weight: 600;
-    color: #1e293b;
-    text-transform: capitalize;
-    margin: 0;
+    font-weight: 700;
 }
 
 .waiter-table-res-time {
     font-size: 0.8rem;
     color: #475569;
-    margin: 0.35rem 0 0 0;
     font-weight: 500;
 }
 
-/* Status variants */
-.waiter-table-available .waiter-table-header {
-    background: #bbf7d0;
-    border-bottom: 1px solid #86efac;
+/* Status variants — same look as the cashier table grid */
+.waiter-table-available {
+    background: #ffffff;
 }
 
-.waiter-table-available .waiter-table-body {
-    background: #f0fdf4;
+.waiter-table-available .waiter-table-status {
+    color: #16a34a;
 }
 
 .waiter-table-card.has-warning {
-    border-color: #f59e0b;
-}
-
-.waiter-table-card.has-warning .waiter-table-header {
-    background: #fef3c7;
-    border-bottom: 1px solid #fcd34d;
-    color: #92400e;
-}
-
-.waiter-table-card.has-warning .waiter-table-body {
-    background: #fffbeb;
+    border: 1.5px dashed #f59e0b;
 }
 
 .waiter-table-warning-badge {
     display: inline-block;
-    margin-top: 0.5rem;
     font-size: 0.75rem;
-    background: #f59e0b;
-    color: white;
-    padding: 0.2rem 0.5rem;
-    border-radius: 1rem;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
     font-weight: 600;
 }
 
@@ -190,22 +180,20 @@
     margin: 0;
 }
 
-.waiter-table-serving .waiter-table-header {
-    background: #bfdbfe;
-    border-bottom: 1px solid #93c5fd;
+.waiter-table-serving {
+    background: #fff7ed;
 }
 
-.waiter-table-serving .waiter-table-body {
-    background: #eff6ff;
+.waiter-table-serving .waiter-table-status {
+    color: #ea580c;
 }
 
-.waiter-table-reserved .waiter-table-header {
-    background: #fecaca;
-    border-bottom: 1px solid #fca5a5;
-}
-
-.waiter-table-reserved .waiter-table-body {
+.waiter-table-reserved {
     background: #fef2f2;
+}
+
+.waiter-table-reserved .waiter-table-status {
+    color: #dc2626;
 }
 
 /* Sub screen headers */
@@ -696,4 +684,3 @@
     color: #0f172a;
     text-align: right;
 }
-
