@@ -42,7 +42,7 @@ public class ChefController
     public String updateDishStatus(@PathVariable Long id, @RequestBody UpdateDishStatusRequest request)
     {
         chefService.updateDishStatus(id, request.getStatus());
-        return "Status updated successfully";
+        return "Cập nhật trạng thái món thành công";
     }
     @GetMapping("/dishes")
     public List<DishListResponse> getDishList()
@@ -58,7 +58,7 @@ public class ChefController
                 id,
                 request.getAvailable());
 
-        return "Menu status updated successfully";
+        return "Cập nhật trạng thái thực đơn thành công";
     }
     @GetMapping("/dashboard")
     public ChefDashboardResponse getDashboard()
@@ -82,7 +82,7 @@ public class ChefController
                 request.getReason()
         );
 
-        return "Dish cancelled successfully";
+        return "Hủy món thành công";
     }
     @PutMapping("/orders/{orderItemId}/internal-note")
     public DishDetailResponse updateChefInternalNote(
@@ -113,7 +113,7 @@ public class ChefController
                 request.getOrderItemIds()
         );
 
-        return "Grouped kitchen orders completed successfully";
+        return "Hoàn thành nhóm món trong bếp thành công";
     }
     @GetMapping("/orders/cancelled")
     public List<CancelledOrderResponse> getCancelledOrders() {
