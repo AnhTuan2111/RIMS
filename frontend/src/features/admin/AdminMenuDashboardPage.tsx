@@ -89,14 +89,14 @@ export default function AdminMenuDashboardPage() {
 
                 const allPausedDishes =
                     allDishesRes.data
-                        .filter((dish) => !dish.isAvailable)
+                        .filter((dish) => dish.isHidden)
                         .map((dish) => ({
                             id: dish.id,
                             name: dish.name,
                             categoryName: dish.categoryName,
                             price: dish.price,
                             imageUrl: dish.imageUrl,
-                            status: 'PAUSED' as const,
+                            status: 'HIDDEN' as const,
                         }))
 
                 setData({
