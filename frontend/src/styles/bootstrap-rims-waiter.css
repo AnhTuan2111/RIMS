@@ -57,18 +57,19 @@
     width: 0.85rem;
     height: 0.85rem;
     border-radius: 0.25rem;
+    border: 0.1rem solid #ededed;
 }
 
 .waiter-dot-available {
-    background: #4ade80;
+    background: #ffffff;
 }
 
 .waiter-dot-serving {
-    background: #fb923c;
+    background: #fff7ed;
 }
 
 .waiter-dot-reserved {
-    background: #f87171;
+    background: #EFF6FF;
 }
 
 .waiter-table-grid {
@@ -189,11 +190,11 @@
 }
 
 .waiter-table-reserved {
-    background: #fef2f2;
+    background: #EFF6FF;
 }
 
 .waiter-table-reserved .waiter-table-status {
-    color: #dc2626;
+    color: #2563EB;
 }
 
 /* Sub screen headers */
