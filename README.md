@@ -1,6 +1,16 @@
 # RIMS - Restaurant Internal Management System
 
-## Dự án môn học SWP301 - FPT
+## Dự án môn học SWP391 - FPT
+Thành viên tham gia:
+|MSSV     |Tên                 |
+|---------|--------------------|
+|HE190385 |Nguyễn Thành Vinh   |
+|HE194015 |Phạm Tuấn Anh       |
+|HE172532 |Nguyễn Thị Thu Hiền |
+|HE191779 |Nguyễn Xuân Bắc     |
+|HE191410 |Phạm Minh Nghĩa     |
+|HE200426 |Nguyễn Anh Tuấn     |
+
 Hệ thống quản lý nhà hàng gồm 2 phần:
 - **Backend**: Spring Boot (Java) - `backend/rims-api`
 - **Frontend**: React + TypeScript + Vite - `frontend`
