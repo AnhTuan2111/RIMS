@@ -405,3 +405,54 @@
         padding: 1.5rem;
     }
 }
+.restaurant-best-selling-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.restaurant-best-selling-card {
+    position: relative;
+    padding: 1rem;
+    border-radius: 2px;
+    background: #ffffff;
+    border: 1px solid #ead9b3;
+    box-shadow: 0 18px 40px rgba(122, 16, 48, 0.1);
+    text-align: center;
+}
+
+.restaurant-best-selling-rank {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: #7a1030;
+    color: #d4af37;
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.restaurant-best-selling-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 2px;
+    margin-bottom: 0.75rem;
+}
+
+.restaurant-best-selling-card h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #241512;
+}
+
+@media (max-width: 1000px) {
+    .restaurant-best-selling-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
