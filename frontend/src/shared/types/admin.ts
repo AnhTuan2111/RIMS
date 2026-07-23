@@ -210,7 +210,7 @@ export interface DishSummary {
     categoryName: string
     price: number
     imageUrl: string
-    status: 'AVAILABLE' | 'PAUSED'
+    status: 'AVAILABLE' | 'PAUSED' | 'HIDDEN'
 }
 
 export interface CategoryStat {

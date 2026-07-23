@@ -135,11 +135,10 @@ export default function LoginPage() {
                 </Link>
 
                 <div className="login-header">
-                    <h1>Đăng nhập RIMS</h1>
+                    <h1>Đăng nhập Nihon Bites</h1>
 
                     <p>
-                        Nhập tài khoản để truy cập hệ thống quản lý
-                        nhà hàng.
+                        Đăng nhập tài khoản để đặt bàn ngay hôm nay!
                     </p>
                 </div>
 
@@ -208,15 +207,6 @@ export default function LoginPage() {
                     >
                         Đăng ký ngay
                     </Link>
-                </div>
-
-                <div className="login-demo">
-                    <p>Tài khoản test:</p>
-                    <span>admin / 123456</span>
-                    <span>chef / 123456</span>
-                    <span>waiter / 123456</span>
-                    <span>cashier / 123456</span>
-                    <span>customer / 123456</span>
                 </div>
             </section>
         </main>
