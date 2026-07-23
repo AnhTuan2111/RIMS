@@ -404,7 +404,17 @@ public class DatabaseSeeder implements CommandLineRunner
 
         int hour = 8 + RNG.nextInt(12);   // 8 - 19h
         int minute = RNG.nextInt(60);
-        return LocalDateTime.of(date, LocalTime.of(hour, minute));
+        LocalDateTime candidate = LocalDateTime.of(date, LocalTime.of(hour, minute));
+
+        // Nếu ngày random ra trùng đúng ngày cuối (end.toLocalDate()) thì giờ random
+        // ra không được vượt quá "end" thực tế (tránh sinh mốc thời gian tương lai
+        // khi ngày được chọn là hôm nay nhưng giờ hiện tại chưa tới 20h).
+        if (candidate.isAfter(end))
+        {
+            candidate = end;
+        }
+
+        return candidate;
     }
 
 
