@@ -1,6 +1,22 @@
 import {Link} from 'react-router-dom'
+import {useEffect, useState} from 'react'
+import {getPublicBestSellingDishes, type PublicBestSellingDish} from '@/shared/api/public'
 
 export default function HomePage() {
+    const [bestSellingDishes, setBestSellingDishes] = useState<PublicBestSellingDish[]>([])
+
+    useEffect(() => {
+        const controller = new AbortController()
+
+        getPublicBestSellingDishes(controller.signal)
+            .then(setBestSellingDishes)
+            .catch(() => {
+                // Im lặng bỏ qua lỗi — nếu API lỗi, section này chỉ đơn giản không hiển thị
+            })
+
+        return () => controller.abort()
+    }, [])
+
     return (
         <main className="restaurant-home">
             <header className="restaurant-navbar">
@@ -10,6 +26,7 @@ export default function HomePage() {
                     <div>
                         <h1>MÃN VỊ LÂU</h1>
                         <p>满味楼 · Ẩm thực Trung Hoa cao cấp</p>
+                        <p className="restaurant-slogan">BOUTIQUE CHINESE DINING</p>
                     </div>
                 </div>
 
@@ -103,6 +120,29 @@ export default function HomePage() {
                     </article>
                 </div>
             </section>
+
+            {bestSellingDishes.length > 0 && (
+                <section id="best-selling" className="restaurant-section restaurant-best-selling">
+                    <div className="restaurant-section-header">
+                        <p className="restaurant-section-label">Tuần này</p>
+                        <h2>Top món bán chạy</h2>
+                    </div>
+
+                    <div className="restaurant-best-selling-grid">
+                        {bestSellingDishes.map((dish) => (
+                            <article key={dish.rank} className="restaurant-best-selling-card">
+                                <span className="restaurant-best-selling-rank">#{dish.rank}</span>
+                                <img
+                                    src={`/image/${dish.imageUrl}`}
+                                    alt={dish.dishName}
+                                    className="restaurant-best-selling-image"
+                                />
+                                <h3>{dish.dishName}</h3>
+                            </article>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             <section id="features" className="restaurant-feature-section">
                 <div className="restaurant-feature-content">
