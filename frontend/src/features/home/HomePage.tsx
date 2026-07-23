@@ -21,7 +21,7 @@ export default function HomePage() {
                     <a href="#contact">LIÊN HỆ</a>
 
                     <Link className="restaurant-login-btn" to="/login">
-                        Đặt bàn
+                        Đăng nhập
                     </Link>
                 </nav>
             </header>
