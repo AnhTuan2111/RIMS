@@ -1,4 +1,4 @@
-﻿import {apiClient} from './client'
+import {apiClient} from './client'
 import type {
     LoginRequest,
     LoginResponse,
@@ -142,10 +142,17 @@ export async function getCurrentUser(
     return currentUser
 }
 
-export function logout() {
-    clearTokens()
-    localStorage.removeItem('currentUser')
-    localStorage.removeItem('selectedActor')
+export async function logout(): Promise<void> {
+    try {
+        await apiClient.post('/auth/logout')
+    } catch (error) {
+        console.error('[AUTH_LOGOUT_API_ERROR]', error)
+        // vẫn tiếp tục clear local dù API lỗi, tránh kẹt UI
+    } finally {
+        clearTokens()
+        localStorage.removeItem('currentUser')
+        localStorage.removeItem('selectedActor')
+    }
 }
 
 export async function forgotPassword(
