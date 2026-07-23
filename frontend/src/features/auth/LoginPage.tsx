@@ -135,7 +135,7 @@ export default function LoginPage() {
                 </Link>
 
                 <div className="login-header">
-                    <h1>Đăng nhập Nihon Bites</h1>
+                    <h1>Đăng nhập Mãn Vị Lâu</h1>
 
                     <p>
                         Đăng nhập tài khoản để đặt bàn ngay hôm nay!
@@ -220,7 +220,7 @@ const forgotPasswordRowStyle: CSSProperties = {
 
 const forgotPasswordLinkStyle: CSSProperties = {
     fontSize: '13px',
-    color: '#4f46e5',
+    color: '#7a1030',
     textDecoration: 'none',
 }
 
@@ -232,7 +232,7 @@ const registerTextStyle: CSSProperties = {
 }
 
 const registerLinkStyle: CSSProperties = {
-    color: '#4f46e5',
+    color: '#7a1030',
     textDecoration: 'none',
     fontWeight: 600,
 }
