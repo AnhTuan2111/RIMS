@@ -585,8 +585,7 @@ function StatisticsReportSelector({
             >
                 <StatIcon className="icon-category-bestsellers">DM</StatIcon>
                 <div className="rims-stat-card-body">
-                    <h3>Top món theo danh mục</h3>
-                    <p>Lọc món bán chạy theo danh mục</p>
+                    <h3>Lọc món bán chạy theo danh mục</h3>
                 </div>
                 <span className="rims-stat-card-action">›</span>
             </button>
