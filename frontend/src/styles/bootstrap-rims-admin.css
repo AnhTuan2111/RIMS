@@ -1559,6 +1559,21 @@
     gap: 1rem;
 }
 
+.admin-bestseller-dashboard-panel .order-shift-dashboard-header > div:first-child {
+    min-width: 260px;
+    flex: 1 1 320px;
+}
+
+.admin-bestseller-dashboard-panel .order-shift-filter-area {
+    flex: 0 0 auto;
+}
+
+.admin-bestseller-category-filter-row {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: -6px;
+}
+
 .admin-bestseller-category-filter {
     min-width: 220px;
     display: grid;

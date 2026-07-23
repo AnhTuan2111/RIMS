@@ -1248,34 +1248,6 @@ function BestSellersReport({
                 </div>
 
                 <div className="order-shift-filter-area">
-                    {categories && selectedCategoryId && onCategoryChange && (
-                        <label className="admin-bestseller-category-filter">
-                            <span>Danh mục</span>
-                            <select
-                                disabled={isLoading || categories.length === 0}
-                                value={selectedCategoryId}
-                                onChange={(event) =>
-                                    onCategoryChange(event.target.value)
-                                }
-                            >
-                                {categories.length === 0 ? (
-                                    <option value="ALL">
-                                        Chưa có danh mục
-                                    </option>
-                                ) : (
-                                    categories.map((category) => (
-                                        <option
-                                            key={category.id}
-                                            value={String(category.id)}
-                                        >
-                                            {category.name}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                        </label>
-                    )}
-
                     <PresetButtonGroup
                         activePreset={preset}
                         isLoading={isLoading}
@@ -1289,6 +1261,36 @@ function BestSellersReport({
                     />
                 </div>
             </header>
+
+            {categories && selectedCategoryId && onCategoryChange && (
+                <div className="admin-bestseller-category-filter-row">
+                    <label className="admin-bestseller-category-filter">
+                        <span>Danh mục</span>
+                        <select
+                            disabled={isLoading || categories.length === 0}
+                            value={selectedCategoryId}
+                            onChange={(event) =>
+                                onCategoryChange(event.target.value)
+                            }
+                        >
+                            {categories.length === 0 ? (
+                                <option value="ALL">
+                                    Chưa có danh mục
+                                </option>
+                            ) : (
+                                categories.map((category) => (
+                                    <option
+                                        key={category.id}
+                                        value={String(category.id)}
+                                    >
+                                        {category.name}
+                                    </option>
+                                ))
+                            )}
+                        </select>
+                    </label>
+                </div>
+            )}
 
             {error && (
                 <p className="revenue-comparison-error">
