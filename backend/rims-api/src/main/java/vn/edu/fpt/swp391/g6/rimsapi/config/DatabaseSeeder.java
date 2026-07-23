@@ -285,7 +285,8 @@ public class DatabaseSeeder implements CommandLineRunner
         LocalDateTime historyEnd = LocalDateTime.now().minusHours(3);
 
         // Sinh trước toàn bộ mốc thời gian rồi sort tăng dần, để khi insert theo
-        // đúng thứ tự này thì auto-increment ID cũng tăng dần theo thời gian tạo.
+        // đúng thứ tự này thì auto-increment ID của Order cũng tăng dần theo
+        // thời gian TẠO đơn.
         List<LocalDateTime> orderTimes = new ArrayList<>(HISTORICAL_ORDER_COUNT);
         for (int i = 0; i < HISTORICAL_ORDER_COUNT; i++)
         {
@@ -300,6 +301,14 @@ public class DatabaseSeeder implements CommandLineRunner
         List<Object[]> invoiceBackdates = new ArrayList<>();
         List<Object[]> paymentBackdates = new ArrayList<>();
         List<Object[]> transactionBackdates = new ArrayList<>();
+
+        // ─── Giai đoạn 1: tạo Order + OrderItem theo đúng thứ tự orderTime
+        // tăng dần (order_id tăng theo thời gian TẠO đơn). Chưa tạo Invoice/
+        // Payment ngay ở đây — chỉ tính trước invoiceDate và gom lại, để giai
+        // đoạn 2 sort riêng theo invoiceDate trước khi insert. ───
+        record PendingInvoice(Order order, LocalDateTime invoiceDate) {}
+
+        List<PendingInvoice> pendingInvoices = new ArrayList<>(HISTORICAL_ORDER_COUNT);
 
         for (LocalDateTime orderTime : orderTimes)
         {
@@ -333,6 +342,21 @@ public class DatabaseSeeder implements CommandLineRunner
             }
 
             LocalDateTime invoiceDate = orderTime.plusMinutes(60 + RNG.nextInt(90));
+            pendingInvoices.add(new PendingInvoice(order, invoiceDate));
+        }
+
+        // ─── Giai đoạn 2: tạo Invoice + Payment theo đúng thứ tự invoiceDate
+        // tăng dần — để invoice_id/payment_id tăng đúng theo thời gian THANH
+        // TOÁN thực tế (khách thanh toán trước nhận mã hóa đơn nhỏ hơn), độc
+        // lập với thứ tự tạo đơn ở giai đoạn 1. ───
+        List<PendingInvoice> sortedByInvoiceDate = new ArrayList<>(pendingInvoices);
+        sortedByInvoiceDate.sort(Comparator.comparing(PendingInvoice::invoiceDate));
+
+        for (PendingInvoice pending : sortedByInvoiceDate)
+        {
+            Order order = pending.order();
+            LocalDateTime invoiceDate = pending.invoiceDate();
+
             Invoice invoice = buildInvoice(order, invoiceDate);
             invoiceRepository.save(invoice);
             invoiceBackdates.add(new Object[]{Timestamp.valueOf(invoiceDate), invoice.getId()});
