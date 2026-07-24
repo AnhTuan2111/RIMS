@@ -61,15 +61,15 @@
 }
 
 .waiter-dot-available {
-    background: #ffffff;
+    background: #16a34a;
 }
 
 .waiter-dot-serving {
-    background: #fff7ed;
+    background: #ea580c;
 }
 
 .waiter-dot-reserved {
-    background: #EFF6FF;
+    background: #2563EB;
 }
 
 .waiter-table-grid {
