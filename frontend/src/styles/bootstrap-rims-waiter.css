@@ -685,3 +685,17 @@
     color: #0f172a;
     text-align: right;
 }
+
+.waiter-search-input {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    margin: 0.75rem 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.waiter-search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
