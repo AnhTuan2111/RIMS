@@ -616,6 +616,30 @@ public class AdminServiceImpl implements AdminService
 
         response.setItems(items);
 
+        // Tính tạm tính = tổng subTotal các món
+        BigDecimal totalBeforeVat = invoice.getOrder().getOrderItems().stream()
+                .map(oi -> oi.getSubTotal() != null ? oi.getSubTotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        response.setTotalBeforeVat(totalBeforeVat);
+
+        // Tính VAT = finalAmount - totalBeforeVat
+        BigDecimal vatAmount = invoice.getFinalAmount().subtract(totalBeforeVat);
+        response.setVatAmount(vatAmount);
+
+        // Số tiền khách trả (lấy từ payment đầu tiên)
+        BigDecimal amountPaid = invoice.getPayments().isEmpty()
+                ? invoice.getFinalAmount()
+                : invoice.getPayments().getFirst().getAmount();
+        response.setAmountPaid(amountPaid);
+
+        // Tiền thừa = khách trả - thành tiền (nếu > 0)
+        BigDecimal excessAmount = amountPaid.subtract(invoice.getFinalAmount());
+        if (excessAmount.compareTo(BigDecimal.ZERO) < 0)
+        {
+            excessAmount = BigDecimal.ZERO;
+        }
+        response.setExcessAmount(excessAmount);
+
         return response;
     }
 
