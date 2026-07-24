@@ -188,6 +188,7 @@ public class AuthServiceImpl implements AuthService
                 .phone(user.getPhone())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .rewardPoints(user.getRewardPoints())
                 .build();
     }
 
@@ -200,6 +201,7 @@ public class AuthServiceImpl implements AuthService
                 .phone(user.getPhone())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .rewardPoints(user.getRewardPoints())
                 .build();
     }
 
