@@ -82,33 +82,37 @@ public class DatabaseSeeder implements CommandLineRunner
     }
 
     // ══════════════════════════════════════════════════════════════════
-    // Users – 6 tài khoản: 1 admin, 1 chef, 1 waiter, 1 cashier, 2 customer
+    // Users – 8 tài khoản: 1 admin, 1 chef, 1 waiter, 1 cashier, 6 customer
     // ══════════════════════════════════════════════════════════════════
     private void seedUsers()
     {
         if (userRepository.count() > 0) return;
 
-        record UserDef(String username, String fullName, String email, String phone, RoleType role)
+        record UserDef(String username, String fullName, String email, String phone, RoleType role, int rewardPoints)
         {
         }
 
         List<UserDef> defs = List.of(
-                new UserDef("admin", "Nguyễn Thành Vinh", "admin@rims.local", "0900000001", RoleType.ADMIN),
-                new UserDef("chef", "Phạm Minh Nghĩa", "chef@rims.local", "0900000002", RoleType.CHEF),
-                new UserDef("waiter", "Nguyễn Anh Tuấn", "waiter@rims.local", "0900000003", RoleType.WAITER),
-                new UserDef("cashier", "Phạm Tuấn Anh", "cashier@rims.local", "0900000004", RoleType.CASHIER),
-                new UserDef("customer1", "Nguyễn Thị Thu Hiền", "customer1@rims.local", "0900000005", RoleType.CUSTOMER),
-                new UserDef("customer2", "Nguyễn Xuân Bắc", "customer2@rims.local", "0900000006", RoleType.CUSTOMER)
+                new UserDef("admin", "Nguyễn Thành Vinh", "admin@rims.local", "0900000001", RoleType.ADMIN, 0),
+                new UserDef("chef", "Phạm Minh Nghĩa", "chef@rims.local", "0900000002", RoleType.CHEF, 0),
+                new UserDef("waiter", "Nguyễn Anh Tuấn", "waiter@rims.local", "0900000003", RoleType.WAITER, 0),
+                new UserDef("cashier", "Phạm Tuấn Anh", "cashier@rims.local", "0900000004", RoleType.CASHIER, 0),
+                new UserDef("customer1", "Nguyễn Thị Thu Hiền", "customer1@rims.local", "0900000005", RoleType.CUSTOMER, 0),
+                new UserDef("customer2", "Nguyễn Xuân Bắc", "customer2@rims.local", "0900000006", RoleType.CUSTOMER, 0),
+                new UserDef("customer3", "Trần Văn Long", "customer3@rims.local", "0900000007", RoleType.CUSTOMER, 100),
+                new UserDef("customer4", "Lê Thị Mai Anh", "customer4@rims.local", "0900000008", RoleType.CUSTOMER, 500),
+                new UserDef("customer5", "Đỗ Quang Huy", "customer5@rims.local", "0900000009", RoleType.CUSTOMER, 1500),
+                new UserDef("customer6", "Vũ Thị Ngọc Ánh", "customer6@rims.local", "0900000010", RoleType.CUSTOMER, 3000)
         );
 
         List<User> users = defs.stream()
-                .map(d -> buildUser(d.username(), d.fullName(), d.email(), d.phone(), d.role()))
+                .map(d -> buildUser(d.username(), d.fullName(), d.email(), d.phone(), d.role(), d.rewardPoints()))
                 .toList();
 
         userRepository.saveAll(users);
     }
 
-    private User buildUser(String username, String fullName, String email, String phone, RoleType role)
+    private User buildUser(String username, String fullName, String email, String phone, RoleType role, int rewardPoints)
     {
         User user = new User();
         user.setUsername(username);
@@ -118,6 +122,7 @@ public class DatabaseSeeder implements CommandLineRunner
         user.setRole(role);
         user.setPasswordHash(passwordEncoder.encode(DEFAULT_PASSWORD));
         user.setActive(true);
+        user.setRewardPoints(rewardPoints);
         return user;
     }
 
