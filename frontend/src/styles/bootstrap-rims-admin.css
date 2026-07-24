@@ -274,9 +274,234 @@
 }
 
 /* =========================
-   ADMIN PAYMENT DETAIL
+   ADMIN INVOICE DETAIL
 ========================= */
 
+.admin-invoice-detail-page {
+    position: relative;
+
+    display: grid;
+    gap: 18px;
+
+    min-height: calc(100vh - 100px);
+    margin: -28px;
+    padding: 28px;
+
+    background: #f4f5f7;
+}
+
+.admin-invoice-detail-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 4px;
+    border-radius: 999px;
+
+    background: linear-gradient(90deg, #7c3aed 0%, #f97316 100%);
+}
+
+.admin-invoice-detail-card {
+    overflow: hidden;
+
+    border: 1px solid #e8eaed;
+    border-radius: 16px;
+
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.admin-invoice-detail-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 22px 24px 18px;
+}
+
+.admin-invoice-detail-back-button {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+
+    background: #ffffff;
+    color: #333333;
+
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.admin-invoice-detail-back-button:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.admin-invoice-detail-header h1 {
+    margin: 0;
+
+    color: #333333;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.admin-invoice-detail-header p {
+    margin: 6px 0 0;
+
+    color: #555555;
+    font-size: 14px;
+}
+
+.admin-invoice-detail-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-invoice-detail-table-head,
+.admin-invoice-detail-row {
+    min-width: 640px;
+
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) 72px minmax(120px, 1fr) minmax(140px, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+}
+
+.admin-invoice-detail-table-head {
+    border-top: 1px solid #eef1f4;
+    border-bottom: 1px solid #eef1f4;
+
+    color: #555555;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+
+.admin-invoice-detail-table-head span:nth-child(2) {
+    text-align: center;
+}
+
+.admin-invoice-detail-table-head span:nth-child(3),
+.admin-invoice-detail-table-head span:nth-child(4) {
+    text-align: right;
+}
+
+.admin-invoice-detail-row {
+    border-bottom: 1px solid #f1f3f5;
+
+    color: #333333;
+    font-size: 14px;
+}
+
+.admin-invoice-detail-row:last-of-type {
+    border-bottom: 0;
+}
+
+.admin-invoice-dish-name {
+    color: #333333;
+    font-weight: 700;
+}
+
+.admin-invoice-qty {
+    text-align: center;
+    color: #555555;
+}
+
+.admin-invoice-price,
+.admin-invoice-line-total {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-invoice-line-total {
+    color: #333333;
+    font-weight: 800;
+}
+
+.admin-invoice-detail-empty {
+    min-width: 640px;
+    min-height: 140px;
+
+    display: grid;
+    place-items: center;
+
+    color: #64748b;
+    font-size: 14px;
+}
+
+.admin-invoice-summary-card {
+    padding: 20px 24px 22px;
+
+    display: grid;
+    gap: 10px;
+}
+
+.admin-invoice-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    color: #555555;
+    font-size: 14px;
+}
+
+.admin-invoice-summary-row span:last-child {
+    color: #333333;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-invoice-summary-row-total {
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid #eef1f4;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.admin-invoice-summary-row-total span:first-child {
+    color: #333333;
+}
+
+.admin-invoice-summary-highlight {
+    color: #d32f2f !important;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.admin-invoice-detail-state {
+    min-height: 220px;
+    padding: 32px 24px;
+
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 12px;
+
+    color: #64748b;
+    text-align: center;
+}
+
+.admin-invoice-detail-state h2 {
+    margin: 0;
+    color: #333333;
+}
+
+.admin-invoice-detail-state p {
+    margin: 0;
+}
+
+/* Legacy aliases kept for any remaining references */
 .admin-payment-detail-page {
     display: grid;
     gap: 18px;
