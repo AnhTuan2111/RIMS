@@ -267,7 +267,7 @@ function getCalendarYearOptions(viewYear: number) {
 }
 
 function formatRevenueCurrency(value?: number | null) {
-    return `${new Intl.NumberFormat('vi-VN').format(value ?? 0)} đ`
+    return `${new Intl.NumberFormat('vi-VN').format(value ?? 0)} ₫`
 }
 
 function formatNumber(value?: number | null) {
@@ -462,13 +462,13 @@ function StatIcon({
     )
 }
 
-function DollarIcon() {
+function DongIcon() {
     return (
         <span
             aria-hidden="true"
             className="admin-revenue-card-icon"
         >
-            $
+            ₫
         </span>
     )
 }
@@ -640,7 +640,7 @@ function RevenueCard({
         <article className={`admin-revenue-card ${className}`.trim()}>
             <div className="admin-revenue-card-header">
                 <span>{title}</span>
-                <DollarIcon/>
+                <DongIcon/>
             </div>
 
             <strong>{formatRevenueCurrency(amount)}</strong>

@@ -37,7 +37,11 @@ export interface AdminPaymentDetail {
     orderId: number
     tableNumber: string
     paymentMethod: string
+    totalBeforeVat: number
+    vatAmount: number
     finalAmount: number
+    amountPaid: number
+    excessAmount: number
     invoiceDate: string
     items: AdminPaymentDetailItem[]
 }
