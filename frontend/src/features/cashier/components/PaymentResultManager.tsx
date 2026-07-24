@@ -97,7 +97,7 @@ export default function PaymentResultManager({
                         </p>
 
                         <p style={successPointsStyle}>
-                            🎉 Tích lũy thêm:{' '}
+                            Tích lũy thêm:{' '}
                             <strong>
                                 +{pointsEarned} điểm
                             </strong>

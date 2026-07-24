@@ -7,6 +7,7 @@ import type {
 import {
     clearTokens,
     setTokens,
+    getRefreshToken
 } from '../utils/tokenStorage'
 
 export interface RegisterRequest {
@@ -143,11 +144,14 @@ export async function getCurrentUser(
 }
 
 export async function logout(): Promise<void> {
+    const refreshToken = getRefreshToken()
+
     try {
-        await apiClient.post('/auth/logout')
+        await apiClient.post('/auth/logout', {
+            refreshToken,
+        })
     } catch (error) {
         console.error('[AUTH_LOGOUT_API_ERROR]', error)
-        // vẫn tiếp tục clear local dù API lỗi, tránh kẹt UI
     } finally {
         clearTokens()
         localStorage.removeItem('currentUser')

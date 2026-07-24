@@ -83,7 +83,6 @@ export function Sidebar() {
             </div>
 
             <nav className="rims-sidebar-nav">
-                <p className="rims-sidebar-title">CHỨC NĂNG</p>
 
                 {menus.map((item) => (
                     <Fragment key={item.path}>
