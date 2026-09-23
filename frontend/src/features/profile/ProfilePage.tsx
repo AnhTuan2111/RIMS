@@ -316,11 +316,9 @@ export default function ProfilePage() {
                 )}
             </div>
 
-            {updateSuccess && (
-                <div style={successStyle}>✓ Cập nhật hồ sơ thành công!</div>
-            )}
+            {updateSuccess && <div style={successStyle}> Cập nhật hồ sơ thành công!</div>}
 
-            {pwSuccess && <div style={successStyle}>✓ Đổi mật khẩu thành công!</div>}
+            {pwSuccess && <div style={successStyle}> Đổi mật khẩu thành công!</div>}
 
             <div style={cardStyle}>
                 <div style={profileHeaderStyle}>

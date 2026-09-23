@@ -1,3 +1,5 @@
+import {X} from 'lucide-react'
+
 import {type CSSProperties} from 'react'
 import {useNavigate} from 'react-router-dom'
 
@@ -7,7 +9,9 @@ export default function PaymentFailed() {
     return (
         <div style={pageStyle}>
             <div className="page-card" style={cardStyle}>
-                <div style={iconStyle}>✖</div>
+                <div style={iconStyle}>
+                    <X className="rk-icon" aria-hidden="true" />
+                </div>
 
                 <h1 style={titleStyle}>Giao Dịch Thất Bại</h1>
 

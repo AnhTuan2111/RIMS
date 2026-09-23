@@ -1,4 +1,6 @@
-﻿import {type CSSProperties} from 'react'
+import {Check, Download} from 'lucide-react'
+
+import {type CSSProperties} from 'react'
 import {useNavigate, useSearchParams} from 'react-router-dom'
 
 import * as cashierApi from '@/shared/api/cashier'
@@ -48,7 +50,9 @@ export default function PaymentSuccess() {
     return (
         <div style={pageStyle}>
             <div className="page-card" style={cardStyle}>
-                <div style={iconStyle}>✔</div>
+                <div style={iconStyle}>
+                    <Check className="rk-icon" aria-hidden="true" />
+                </div>
 
                 <h1 style={titleStyle}>Thanh Toán Thành Công!</h1>
 
@@ -70,7 +74,8 @@ export default function PaymentSuccess() {
                         disabled={!invoiceId}
                         onClick={() => void handleDownloadPdf()}
                     >
-                        📥 Tải PDF Hóa Đơn
+                        <Download className="rk-icon" aria-hidden="true" /> Tải PDF Hóa
+                        Đơn
                     </button>
 
                     <button

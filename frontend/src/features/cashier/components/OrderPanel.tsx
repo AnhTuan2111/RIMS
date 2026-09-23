@@ -1,4 +1,6 @@
-﻿import {useState, type CSSProperties} from 'react'
+import {Coins, User, X} from 'lucide-react'
+
+import {useState, type CSSProperties} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
 import type {OrderDetailResponse, TableDashboardResponse} from '@/shared/types/cashier'
@@ -269,7 +271,7 @@ export default function OrderPanel({
             }}
         >
             <button type="button" style={closeButtonStyle} onClick={onClose}>
-                ✖
+                <X className="rk-icon" aria-hidden="true" />
             </button>
 
             <h2>Chi tiết đơn hàng</h2>
@@ -282,7 +284,7 @@ export default function OrderPanel({
 
             {selectedTable.status === 'SERVING' && (
                 <div style={customerBoxStyle}>
-                    <h4 style={customerTitleStyle}>🌟 Tích Điểm Thành Viên</h4>
+                    <h4 style={customerTitleStyle}> Tích Điểm Thành Viên</h4>
 
                     <div
                         style={{
@@ -341,7 +343,7 @@ export default function OrderPanel({
                                 marginTop: '4px',
                             }}
                         >
-                            ⚠️ {phoneError}
+                            {phoneError}
                         </div>
                     )}
 
@@ -393,11 +395,13 @@ export default function OrderPanel({
                     {customer && (
                         <div style={customerFoundBoxStyle}>
                             <p style={compactParagraphStyle}>
-                                👤 Khách: <strong>{customer.fullName}</strong>
+                                <User className="rk-icon" aria-hidden="true" /> Khách:{' '}
+                                <strong>{customer.fullName}</strong>
                             </p>
 
                             <p style={pointsParagraphStyle}>
-                                💰 Điểm hiện có:{' '}
+                                <Coins className="rk-icon" aria-hidden="true" /> Điểm hiện
+                                có:{' '}
                                 <strong
                                     style={{
                                         color: '#059669',
@@ -530,7 +534,7 @@ export default function OrderPanel({
                             </strong>
                         </div>
 
-                        {lockError && <div style={lockErrorBoxStyle}>⚠️ {lockError}</div>}
+                        {lockError && <div style={lockErrorBoxStyle}> {lockError}</div>}
 
                         {selectedTable.status === 'SERVING' && (
                             <button

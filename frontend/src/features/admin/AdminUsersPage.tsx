@@ -1,3 +1,5 @@
+import {X} from 'lucide-react'
+
 import {Pagination} from '@/features/admin/users/Pagination'
 import {
     DR,
@@ -375,7 +377,7 @@ export default function AdminUsersPage() {
                 >
                     <span>{error}</span>
                     <button onClick={() => setError(null)} style={ghostBtn}>
-                        ✕
+                        <X className="rk-icon" aria-hidden="true" />
                     </button>
                 </div>
             )}
@@ -390,7 +392,7 @@ export default function AdminUsersPage() {
                         fontWeight: 500,
                     }}
                 >
-                    ✓ {successMsg}
+                    {successMsg}
                 </div>
             )}
 
@@ -471,8 +473,8 @@ export default function AdminUsersPage() {
                         {s === 'all'
                             ? 'Tất cả'
                             : s === 'active'
-                              ? '✓ Hoạt động'
-                              : '✕ Đã khóa'}
+                              ? 'Hoạt động'
+                              : 'Đã khóa'}
                     </button>
                 ))}
             </div>
@@ -852,7 +854,7 @@ export default function AdminUsersPage() {
                     )}
                     <DR
                         label="Trạng thái"
-                        value={selectedUser.isActive ? '✓ Đang hoạt động' : '✕ Đã khóa'}
+                        value={selectedUser.isActive ? 'Đang hoạt động' : 'Đã khóa'}
                         color={selectedUser.isActive ? '#065f46' : '#991b1b'}
                     />
                     <DR

@@ -1,3 +1,5 @@
+import {AlertTriangle} from 'lucide-react'
+
 import {useCallback, useEffect, useRef, useState, type CSSProperties} from 'react'
 import {useNavigate} from 'react-router-dom'
 
@@ -514,8 +516,12 @@ export default function WaiterTableListPage() {
                             <div className="waiter-warning-box">
                                 <p>
                                     <strong>
-                                        ⚠️ Bàn này đã có {modalReservations.length} lịch
-                                        đặt trong hôm nay:
+                                        <AlertTriangle
+                                            className="rk-icon"
+                                            aria-hidden="true"
+                                        />{' '}
+                                        Bàn này đã có {modalReservations.length} lịch đặt
+                                        trong hôm nay:
                                     </strong>
                                 </p>
 
@@ -564,8 +570,8 @@ export default function WaiterTableListPage() {
                         ) : tableModal.upcomingReservationTime ? (
                             <div className="waiter-warning-box">
                                 <p>
-                                    <strong>⚠️ Cảnh báo:</strong> Bàn này đã được đặt
-                                    trước bởi{' '}
+                                    <strong> Cảnh báo:</strong> Bàn này đã được đặt trước
+                                    bởi{' '}
                                     <b>{tableModal.upcomingCustomerName || 'Khách'}</b>{' '}
                                     vào lúc{' '}
                                     <b>

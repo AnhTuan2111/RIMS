@@ -1,3 +1,24 @@
+import {
+    Ban,
+    BookOpen,
+    CalendarClock,
+    ChartColumn,
+    CheckCheck,
+    CircleUser,
+    Dot,
+    Flame,
+    FolderTree,
+    Grid2x2,
+    Layers,
+    LayoutGrid,
+    ReceiptText,
+    Sparkles,
+    Store,
+    Users,
+    Utensils,
+    Wallet,
+} from 'lucide-react'
+
 import {Fragment} from 'react'
 import {NavLink} from 'react-router-dom'
 import {ROLE_LABELS, roleMenus} from '@/app/config/roleMenus'
@@ -5,39 +26,34 @@ import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
 import {useRestaurant} from '@/app/providers/useRestaurant'
 
-function getMenuIcon(path: string) {
-    if (path.includes('dashboard')) return '▦'
-    if (path.includes('completed')) return '✓'
-    if (path.includes('orders')) return '⌁'
-    if (path.includes('dishes')) return '◉'
-    if (path.includes('tables')) return '▤'
-    if (path.includes('reservations')) return '◷'
-    if (path.includes('payments')) return '₫'
-    if (path.includes('invoices')) return '▧'
-    if (path.includes('menu')) return '❏'
-    if (path.includes('categories')) return '🞖'
-    if (path.includes('statistics')) return '🛈'
-    if (path.includes('users')) return '♙'
-    if (path.includes('profile'))
-        return (
-            <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-                <circle cx="12" cy="9" r="3" stroke="currentColor" strokeWidth="2" />
-                <path
-                    d="M7.5 17C8.8 14.8 15.2 14.8 16.5 17"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                />
-            </svg>
-        )
-    return '•'
+/**
+ * Icon cho từng mục menu.
+ *
+ * <p>Trước đây hàm này trả về ký tự Unicode nhặt ngẫu nhiên (▦ ⌁ ◉ ▤ ◷ ₫ ▧ ❏ 🞖 🛈 ♙)
+ * cộng một SVG vẽ tay — mỗi icon một nét vẽ, một cỡ, và hiển thị khác nhau trên từng
+ * hệ điều hành. Nay dùng chung một bộ lucide.
+ */
+function MenuIcon({path}: {path: string}) {
+    const props = {className: 'rk-icon', 'aria-hidden': true} as const
+
+    if (path.includes('restaurant')) return <Store {...props} />
+    if (path.includes('dashboard')) return <LayoutGrid {...props} />
+    if (path.includes('completed')) return <CheckCheck {...props} />
+    if (path.includes('cancelled')) return <Ban {...props} />
+    if (path.includes('grouped')) return <Layers {...props} />
+    if (path.includes('orders')) return <Flame {...props} />
+    if (path.includes('dishes')) return <Utensils {...props} />
+    if (path.includes('tables')) return <Grid2x2 {...props} />
+    if (path.includes('reservations')) return <CalendarClock {...props} />
+    if (path.includes('payments')) return <Wallet {...props} />
+    if (path.includes('invoices')) return <ReceiptText {...props} />
+    if (path.includes('menu')) return <BookOpen {...props} />
+    if (path.includes('categories')) return <FolderTree {...props} />
+    if (path.includes('statistics')) return <ChartColumn {...props} />
+    if (path.includes('users')) return <Users {...props} />
+    if (path.includes('profile')) return <CircleUser {...props} />
+
+    return <Dot {...props} />
 }
 
 export function Sidebar() {
@@ -76,7 +92,9 @@ export function Sidebar() {
             </div>
 
             <div className="rims-sidebar-role">
-                <div className="rims-role-icon">✦</div>
+                <div className="rims-role-icon">
+                    <Sparkles className="rk-icon" aria-hidden="true" />
+                </div>
                 <div>
                     <small>Không gian làm việc</small>
                     <strong>{ROLE_LABELS[actor]}</strong>
@@ -95,7 +113,7 @@ export function Sidebar() {
                             }
                         >
                             <span className="rims-menu-icon">
-                                {getMenuIcon(item.path)}
+                                <MenuIcon path={item.path} />
                             </span>
 
                             <span className="rims-menu-label">{item.label}</span>

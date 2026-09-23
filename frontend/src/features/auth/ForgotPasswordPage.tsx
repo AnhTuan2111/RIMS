@@ -1,4 +1,6 @@
-﻿import {useState, type CSSProperties, type KeyboardEvent} from 'react'
+import {Check, X} from 'lucide-react'
+
+import {useState, type CSSProperties, type KeyboardEvent} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
 
 import {forgotPassword, resetPassword} from '@/shared/api/auth'
@@ -163,7 +165,7 @@ export default function ForgotPasswordPage() {
                                             index <= currentStepIdx ? '#fff' : '#9ca3af',
                                     }}
                                 >
-                                    {index < currentStepIdx ? '✓' : index + 1}
+                                    {index < currentStepIdx ? '' : index + 1}
                                 </div>
 
                                 <span
@@ -204,7 +206,7 @@ export default function ForgotPasswordPage() {
                             style={errorCloseButtonStyle}
                             onClick={() => setError(null)}
                         >
-                            ✕
+                            <X className="rk-icon" aria-hidden="true" />
                         </button>
                     </div>
                 )}
@@ -245,7 +247,8 @@ export default function ForgotPasswordPage() {
                 {step === 'otp' && (
                     <>
                         <div style={otpNoticeStyle}>
-                            ✓ Đã gửi mã OTP đến <strong>{email}</strong>
+                            <Check className="rk-icon" aria-hidden="true" /> Đã gửi mã OTP
+                            đến <strong>{email}</strong>
                         </div>
 
                         <label className="auth-field">
@@ -315,7 +318,9 @@ export default function ForgotPasswordPage() {
 
                 {step === 'done' && (
                     <div style={doneBoxStyle}>
-                        <div style={doneIconStyle}>✅</div>
+                        <div style={doneIconStyle}>
+                            <Check className="rk-icon" aria-hidden="true" />
+                        </div>
 
                         <h3 style={doneTitleStyle}>Đặt lại mật khẩu thành công!</h3>
 

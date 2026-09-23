@@ -1,3 +1,13 @@
+import {
+    AlertTriangle,
+    ChefHat,
+    Eye,
+    FolderOpen,
+    Pencil,
+    Trash2,
+    UtensilsCrossed,
+} from 'lucide-react'
+
 import React, {useCallback, useEffect, useState} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {CategoryResponse, DishResponse, CategoryFormData} from '@/shared/api/admin'
@@ -291,7 +301,7 @@ export default function AdminCategoryPage() {
                     {/* Header */}
                     <PageCard className="admin-category-header-card">
                         <PageHeader
-                            title="📁 QUẢN LÝ DANH MỤC"
+                            title="QUẢN LÝ DANH MỤC"
                             description="Quản lý nhóm món ăn, trạng thái hiển thị và số món thuộc từng danh mục."
                             actions={
                                 <button
@@ -378,7 +388,9 @@ export default function AdminCategoryPage() {
                                         {categories.length}
                                     </h2>
                                 </div>
-                                <span className="admin-category-stats-icon">🗂️</span>
+                                <span className="admin-category-stats-icon">
+                                    <FolderOpen className="rk-icon" aria-hidden="true" />
+                                </span>
                             </div>
                         </div>
 
@@ -392,7 +404,9 @@ export default function AdminCategoryPage() {
                                         {totalDishes}
                                     </h2>
                                 </div>
-                                <span className="admin-category-stats-icon">🍳</span>
+                                <span className="admin-category-stats-icon">
+                                    <ChefHat className="rk-icon" aria-hidden="true" />
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -428,7 +442,10 @@ export default function AdminCategoryPage() {
                                         <td className="admin-category-cell-name">
                                             <div className="admin-category-info">
                                                 <div className="admin-category-icon">
-                                                    📁
+                                                    <FolderOpen
+                                                        className="rk-icon"
+                                                        aria-hidden="true"
+                                                    />
                                                 </div>
                                                 <div>
                                                     <strong className="admin-category-name">
@@ -477,7 +494,10 @@ export default function AdminCategoryPage() {
                                                 className="admin-category-action-btn"
                                                 title="Xem chi tiết"
                                             >
-                                                👁️
+                                                <Eye
+                                                    className="rk-icon"
+                                                    aria-hidden="true"
+                                                />
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -492,7 +512,10 @@ export default function AdminCategoryPage() {
                                                 className="admin-category-action-btn admin-category-edit-btn"
                                                 title="Chỉnh sửa"
                                             >
-                                                ✏️
+                                                <Pencil
+                                                    className="rk-icon"
+                                                    aria-hidden="true"
+                                                />
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -504,7 +527,10 @@ export default function AdminCategoryPage() {
                                                 className="admin-category-action-btn admin-category-delete-btn"
                                                 title="Xóa"
                                             >
-                                                🗑️
+                                                <Trash2
+                                                    className="rk-icon"
+                                                    aria-hidden="true"
+                                                />
                                             </button>
                                         </td>
                                     </tr>
@@ -599,7 +625,8 @@ export default function AdminCategoryPage() {
                                 }}
                                 className="admin-category-btn-secondary"
                             >
-                                ✏️ Sửa danh mục
+                                <Pencil className="rk-icon" aria-hidden="true" /> Sửa danh
+                                mục
                             </button>
                             <button
                                 onClick={() =>
@@ -607,7 +634,8 @@ export default function AdminCategoryPage() {
                                 }
                                 className="admin-category-btn-secondary admin-category-btn-danger"
                             >
-                                🗑️ Xóa danh mục
+                                <Trash2 className="rk-icon" aria-hidden="true" /> Xóa danh
+                                mục
                             </button>
                         </div>
                     </div>
@@ -638,8 +666,8 @@ export default function AdminCategoryPage() {
                                         className={`admin-category-detail-status ${selectedCategory.isAvailable ? 'active' : 'hidden'}`}
                                     >
                                         {selectedCategory.isAvailable
-                                            ? '🟢 Đang hoạt động'
-                                            : '⚫ Đang tạm ẩn'}
+                                            ? 'Đang hoạt động'
+                                            : 'Đang tạm ẩn'}
                                     </span>
                                 </div>
                                 <div>
@@ -684,8 +712,8 @@ export default function AdminCategoryPage() {
                     <div className="admin-category-card">
                         <div className="admin-category-dish-list-header">
                             <h4 className="admin-category-dish-list-title">
-                                🍽️ DANH SÁCH MÓN TRONG DANH MỤC ({categoryDishes.length}{' '}
-                                món)
+                                <UtensilsCrossed className="rk-icon" aria-hidden="true" />{' '}
+                                DANH SÁCH MÓN TRONG DANH MỤC ({categoryDishes.length} món)
                             </h4>
                         </div>
 
@@ -732,7 +760,7 @@ export default function AdminCategoryPage() {
                                                                         ;(
                                                                             e.target as HTMLImageElement
                                                                         ).src =
-                                                                            'https://placehold.co/40x40?text=🍲'
+                                                                            'https://placehold.co/40x40?text='
                                                                         ;(
                                                                             e.target as HTMLImageElement
                                                                         ).onerror = null
@@ -842,8 +870,8 @@ export default function AdminCategoryPage() {
                         </button>
                         <h3 className="admin-category-form-title">
                             {view === 'CREATE'
-                                ? '➕ THÊM DANH MỤC MỚI'
-                                : '✏️ CHỈNH SỬA DANH MỤC'}
+                                ? 'THÊM DANH MỤC MỚI'
+                                : 'CHỈNH SỬA DANH MỤC'}
                         </h3>
                     </div>
 
@@ -928,7 +956,7 @@ export default function AdminCategoryPage() {
                                 disabled={isSubmitting}
                                 className={`admin-category-btn-primary ${isSubmitting ? 'loading' : ''}`}
                             >
-                                {isSubmitting ? '⏳ Đang lưu...' : '💾 Lưu dữ liệu'}
+                                {isSubmitting ? ' Đang lưu...' : 'Lưu dữ liệu'}
                             </button>
                         </div>
                     </form>
@@ -938,7 +966,9 @@ export default function AdminCategoryPage() {
             {deleteModal.open && (
                 <div className="admin-category-modal-backdrop">
                     <div className="admin-category-modal-card">
-                        <div className="admin-category-modal-icon">⚠️</div>
+                        <div className="admin-category-modal-icon">
+                            <AlertTriangle className="rk-icon" aria-hidden="true" />
+                        </div>
                         <h4 className="admin-category-modal-title">
                             XÓA DANH MỤC THỰC ĐƠN
                         </h4>

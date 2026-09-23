@@ -1,3 +1,5 @@
+import {UtensilsCrossed} from 'lucide-react'
+
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom'
 
@@ -342,11 +344,16 @@ export default function WaiterCreateOrderPage() {
                                                 className="waiter-menu-img"
                                                 onError={(e) => {
                                                     ;(e.target as HTMLImageElement).src =
-                                                        'https://placehold.co/64x64?text=🍽️'
+                                                        'https://placehold.co/64x64?text='
                                                 }}
                                             />
                                         ) : (
-                                            <span className="waiter-menu-emoji">🍽️</span>
+                                            <span className="waiter-menu-emoji">
+                                                <UtensilsCrossed
+                                                    className="rk-icon"
+                                                    aria-hidden="true"
+                                                />
+                                            </span>
                                         )}
 
                                         <div className="waiter-menu-info">

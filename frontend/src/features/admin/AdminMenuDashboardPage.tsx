@@ -1,3 +1,5 @@
+import {AlertTriangle, EyeOff, FolderOpen, Soup, Utensils} from 'lucide-react'
+
 import {useCallback, useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 
@@ -156,7 +158,9 @@ export default function AdminMenuDashboardPage() {
                             <h2 className="admin-menu-stat-number">{data.totalDishes}</h2>
                         </div>
 
-                        <span className="admin-menu-stat-icon">🍴</span>
+                        <span className="admin-menu-stat-icon">
+                            <Utensils className="rk-icon" aria-hidden="true" />
+                        </span>
                     </div>
                 </div>
 
@@ -170,7 +174,9 @@ export default function AdminMenuDashboardPage() {
                             </h2>
                         </div>
 
-                        <span className="admin-menu-stat-icon">🗂️</span>
+                        <span className="admin-menu-stat-icon">
+                            <FolderOpen className="rk-icon" aria-hidden="true" />
+                        </span>
                     </div>
                 </div>
 
@@ -198,7 +204,9 @@ export default function AdminMenuDashboardPage() {
                             </h2>
                         </div>
 
-                        <span className="admin-menu-stat-icon">👁️‍🗨️</span>
+                        <span className="admin-menu-stat-icon">
+                            <EyeOff className="rk-icon" aria-hidden="true" />
+                        </span>
                     </div>
                 </div>
             </div>
@@ -342,12 +350,15 @@ export default function AdminMenuDashboardPage() {
                                                                 event.currentTarget.onerror =
                                                                     null
                                                                 event.currentTarget.src =
-                                                                    'https://placehold.co/36x36?text=🍲'
+                                                                    'https://placehold.co/36x36?text='
                                                             }}
                                                         />
                                                     ) : (
                                                         <span className="admin-menu-dish-emoji">
-                                                            🍲
+                                                            <Soup
+                                                                className="rk-icon"
+                                                                aria-hidden="true"
+                                                            />
                                                         </span>
                                                     )}
                                                 </div>
@@ -389,7 +400,8 @@ export default function AdminMenuDashboardPage() {
 
                     <div className="admin-menu-card admin-menu-warning">
                         <h3 className="admin-menu-section-title admin-menu-warning-title">
-                            ⚠️ Cần chú ý (Món đang tạm dừng bán)
+                            <AlertTriangle className="rk-icon" aria-hidden="true" /> Cần
+                            chú ý (Món đang tạm dừng bán)
                         </h3>
 
                         <div className="admin-menu-scroll-container admin-menu-warning-scroll">
@@ -420,12 +432,15 @@ export default function AdminMenuDashboardPage() {
                                                             event.currentTarget.onerror =
                                                                 null
                                                             event.currentTarget.src =
-                                                                'https://placehold.co/36x36?text=🍲'
+                                                                'https://placehold.co/36x36?text='
                                                         }}
                                                     />
                                                 ) : (
                                                     <span className="admin-menu-dish-emoji">
-                                                        🍲
+                                                        <Soup
+                                                            className="rk-icon"
+                                                            aria-hidden="true"
+                                                        />
                                                     </span>
                                                 )}
                                             </div>

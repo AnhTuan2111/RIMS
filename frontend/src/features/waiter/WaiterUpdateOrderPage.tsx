@@ -1,3 +1,5 @@
+import {Check, UtensilsCrossed} from 'lucide-react'
+
 import {
     useCallback,
     useEffect,
@@ -618,11 +620,16 @@ export default function WaiterUpdateOrderPage() {
                                                 className="waiter-menu-img"
                                                 onError={(e) => {
                                                     ;(e.target as HTMLImageElement).src =
-                                                        'https://placehold.co/64x64?text=🍽️'
+                                                        'https://placehold.co/64x64?text='
                                                 }}
                                             />
                                         ) : (
-                                            <span className="waiter-menu-emoji">🍽️</span>
+                                            <span className="waiter-menu-emoji">
+                                                <UtensilsCrossed
+                                                    className="rk-icon"
+                                                    aria-hidden="true"
+                                                />
+                                            </span>
                                         )}
 
                                         <div className="waiter-menu-info">
@@ -650,7 +657,7 @@ export default function WaiterUpdateOrderPage() {
                                             style={getChefNoteBoxStyle(noteAcknowledged)}
                                         >
                                             <div style={chefNoteHeaderStyle}>
-                                                <strong>🔔 Bếp nhắn</strong>
+                                                <strong> Bếp nhắn</strong>
 
                                                 {draft.chefInternalNoteCreatedAt && (
                                                     <span style={chefNoteTimeStyle}>
@@ -667,7 +674,11 @@ export default function WaiterUpdateOrderPage() {
 
                                             {noteAcknowledged ? (
                                                 <small style={seenTextStyle}>
-                                                    ✓ Đã xem
+                                                    <Check
+                                                        className="rk-icon"
+                                                        aria-hidden="true"
+                                                    />{' '}
+                                                    Đã xem
                                                 </small>
                                             ) : (
                                                 draft.orderItemId && (

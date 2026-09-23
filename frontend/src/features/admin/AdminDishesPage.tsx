@@ -1,3 +1,5 @@
+import {AlertTriangle, Eye, Image, Pencil, Plus, Trash2, Utensils} from 'lucide-react'
+
 import {useCallback, useEffect, useState, type FormEvent} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {DishResponse, CategoryResponse, DishFormData} from '@/shared/api/admin'
@@ -171,7 +173,7 @@ export default function AdminDishesPage() {
             })
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
-            alert('Cập nhật món ăn thành công! ✅')
+            alert('Cập nhật món ăn thành công!')
         } catch (err: unknown) {
             const errMsg = getErrorMessage(err, 'Lỗi khi cập nhật món ăn!')
             alert(errMsg)
@@ -186,7 +188,7 @@ export default function AdminDishesPage() {
             await adminApi.deleteDish(selectedDish.id)
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
-            alert('Xóa món ăn thành công! 🗑️')
+            alert('Xóa món ăn thành công!')
         } catch (err: unknown) {
             const errMsg = getErrorMessage(err, 'Lỗi khi xóa món ăn!')
             alert(errMsg)
@@ -302,7 +304,7 @@ export default function AdminDishesPage() {
             {/* Header */}
             <PageCard className="admin-dish-header-card">
                 <PageHeader
-                    title="🍳 Quản lý món ăn"
+                    title="Quản lý món ăn"
                     description="Tìm kiếm, thêm, chỉnh sửa và quản lý trạng thái món ăn trong thực đơn."
                     actions={
                         <button
@@ -384,7 +386,9 @@ export default function AdminDishesPage() {
                                 {filteredDishes.length}
                             </h2>
                         </div>
-                        <span className="admin-dish-stats-icon">🍴</span>
+                        <span className="admin-dish-stats-icon">
+                            <Utensils className="rk-icon" aria-hidden="true" />
+                        </span>
                     </div>
                 </div>
             </div>
@@ -422,7 +426,7 @@ export default function AdminDishesPage() {
                                                 alt={dish.name}
                                                 onError={(e) => {
                                                     ;(e.target as HTMLImageElement).src =
-                                                        'https://placehold.co/48x48?text=🍲'
+                                                        'https://placehold.co/48x48?text='
                                                 }}
                                             />
                                         </div>
@@ -464,14 +468,17 @@ export default function AdminDishesPage() {
                                             className="admin-dish-action-btn"
                                             title="Xem chi tiết"
                                         >
-                                            👁️
+                                            <Eye className="rk-icon" aria-hidden="true" />
                                         </button>
                                         <button
                                             onClick={() => openFormWithDish(dish, 'EDIT')}
                                             className="admin-dish-action-btn admin-dish-edit-btn"
                                             title="Chỉnh sửa"
                                         >
-                                            ✏️
+                                            <Pencil
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />
                                         </button>
                                         <button
                                             onClick={() => {
@@ -481,7 +488,10 @@ export default function AdminDishesPage() {
                                             className="admin-dish-action-btn admin-dish-delete-btn"
                                             title="Xóa món"
                                         >
-                                            🗑️
+                                            <Trash2
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />
                                         </button>
                                     </td>
                                 </tr>
@@ -569,7 +579,8 @@ export default function AdminDishesPage() {
                                     &larr;
                                 </button>
                                 <h3 className="admin-dish-modal-title">
-                                    ➕ THÊM MÓN ĂN MỚI
+                                    <Plus className="rk-icon" aria-hidden="true" /> THÊM
+                                    MÓN ĂN MỚI
                                 </h3>
                             </div>
 
@@ -694,7 +705,12 @@ export default function AdminDishesPage() {
                                         <img src={formData.imageUrl} alt="Preview" />
                                     ) : (
                                         <div className="admin-dish-image-placeholder">
-                                            <span>🖼️ </span>
+                                            <span>
+                                                <Image
+                                                    className="rk-icon"
+                                                    aria-hidden="true"
+                                                />
+                                            </span>
                                             <small>Chưa có hình ảnh</small>
                                         </div>
                                     )}
@@ -721,7 +737,7 @@ export default function AdminDishesPage() {
                                     }
                                     className={`admin-dish-btn-primary ${activeCategories.length === 0 || isSubmitting ? 'disabled' : ''}`}
                                 >
-                                    {isSubmitting ? '⏳ Đang thêm...' : '💾 Thêm món ăn'}
+                                    {isSubmitting ? ' Đang thêm...' : 'Thêm món ăn'}
                                 </button>
                                 <button
                                     type="button"
@@ -812,7 +828,7 @@ export default function AdminDishesPage() {
                                     }}
                                     className="admin-dish-btn-danger"
                                 >
-                                    🗑️ Xóa
+                                    <Trash2 className="rk-icon" aria-hidden="true" /> Xóa
                                 </button>
                             </div>
                         </div>
@@ -839,7 +855,8 @@ export default function AdminDishesPage() {
                                     &larr;
                                 </button>
                                 <h3 className="admin-dish-modal-title">
-                                    ✏️ CHỈNH SỬA MÓN ĂN
+                                    <Pencil className="rk-icon" aria-hidden="true" />{' '}
+                                    CHỈNH SỬA MÓN ĂN
                                 </h3>
                             </div>
 
@@ -920,7 +937,7 @@ export default function AdminDishesPage() {
                                                         })
                                                     }
                                                 />{' '}
-                                                🟢 Hiển thị
+                                                Hiển thị
                                             </label>
                                             <label className="admin-dish-radio-label">
                                                 <input
@@ -934,7 +951,7 @@ export default function AdminDishesPage() {
                                                         })
                                                     }
                                                 />{' '}
-                                                🔴 Ẩn khỏi menu
+                                                Ẩn khỏi menu
                                             </label>
                                         </div>
                                     </div>
@@ -997,7 +1014,7 @@ export default function AdminDishesPage() {
                                     disabled={isSubmitting}
                                     className={`admin-dish-btn-primary ${isSubmitting ? 'loading' : ''}`}
                                 >
-                                    {isSubmitting ? '⏳ ĐANG LƯU...' : '💾 CẬP NHẬT'}
+                                    {isSubmitting ? ' ĐANG LƯU...' : 'CẬP NHẬT'}
                                 </button>
                             </div>
                         </div>
@@ -1032,7 +1049,7 @@ export default function AdminDishesPage() {
                             </div>
 
                             <div className="admin-dish-danger-zone">
-                                <h5>🚨 KHU VỰC NGUY HIỂM</h5>
+                                <h5> KHU VỰC NGUY HIỂM</h5>
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -1054,7 +1071,9 @@ export default function AdminDishesPage() {
             {activeModal === 'DELETE' && selectedDish && (
                 <div className="admin-dish-modal-backdrop">
                     <div className="admin-dish-modal admin-dish-modal-delete">
-                        <div className="admin-dish-delete-icon">⚠️</div>
+                        <div className="admin-dish-delete-icon">
+                            <AlertTriangle className="rk-icon" aria-hidden="true" />
+                        </div>
                         <h3 className="admin-dish-delete-title">XÓA MÓN ĂN</h3>
                         <p className="admin-dish-delete-text">
                             Bạn có chắc chắn muốn xóa món ăn{' '}

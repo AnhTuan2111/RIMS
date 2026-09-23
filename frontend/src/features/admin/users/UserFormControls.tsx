@@ -1,3 +1,5 @@
+import {X} from 'lucide-react'
+
 import {ghostBtn} from './styles'
 import {useState} from 'react'
 import type {ReactNode} from 'react'
@@ -47,7 +49,7 @@ export function Modal({
                         onClick={onClose}
                         style={{...ghostBtn, fontSize: 22, color: '#9ca3af'}}
                     >
-                        ✕
+                        <X className="rk-icon" aria-hidden="true" />
                     </button>
                 </div>
                 {children}

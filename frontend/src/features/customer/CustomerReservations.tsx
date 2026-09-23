@@ -1,4 +1,6 @@
-﻿import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react'
+import {AlertTriangle} from 'lucide-react'
+
+import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react'
 
 import {
     cancelReservation,
@@ -411,9 +413,7 @@ export default function CustomerReservations() {
                         </div>
                     )}
 
-                    {bookError && (
-                        <div className="customer-error-box">❌ {bookError}</div>
-                    )}
+                    {bookError && <div className="customer-error-box"> {bookError}</div>}
 
                     <form
                         className="customer-reservation-form"
@@ -559,7 +559,7 @@ export default function CustomerReservations() {
 
                                 {tableError && (
                                     <span className="customer-error-text">
-                                        ⚠️ {tableError}
+                                        {tableError}
                                     </span>
                                 )}
 
@@ -567,7 +567,11 @@ export default function CustomerReservations() {
                                     !tableError &&
                                     availableTables.length === 0 && (
                                         <span className="customer-warning-text">
-                                            ⚠️ Hiện không có bàn trống
+                                            <AlertTriangle
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />{' '}
+                                            Hiện không có bàn trống
                                         </span>
                                     )}
                             </div>
@@ -600,7 +604,7 @@ export default function CustomerReservations() {
                                     Boolean(tableError)
                                 }
                             >
-                                {bookLoading ? 'Đang xử lý...' : '📌 Lưu đặt bàn'}
+                                {bookLoading ? 'Đang xử lý...' : 'Lưu đặt bàn'}
                             </button>
 
                             <button
@@ -628,7 +632,7 @@ export default function CustomerReservations() {
 
             {activeTab === 'cancel' && (
                 <div className="customer-reservation-card">
-                    <h2>❌ Hủy đặt bàn</h2>
+                    <h2> Hủy đặt bàn</h2>
 
                     <p className="customer-reservation-sub">
                         Danh sách các đặt bàn đang hoạt động của bạn (có thể ở nhiều ngày
@@ -651,7 +655,7 @@ export default function CustomerReservations() {
                     )}
 
                     {cancelError && (
-                        <div className="customer-error-box">❌ {cancelError}</div>
+                        <div className="customer-error-box"> {cancelError}</div>
                     )}
 
                     {loadingCurrent ? (
@@ -702,7 +706,7 @@ export default function CustomerReservations() {
                                     >
                                         {cancelingId === reservation.id
                                             ? 'Đang xử lý...'
-                                            : '🗑️ Hủy đặt bàn'}
+                                            : 'Hủy đặt bàn'}
                                     </button>
                                 </div>
                             ))}

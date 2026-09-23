@@ -1,3 +1,5 @@
+import {Globe, User} from 'lucide-react'
+
 import {useEffect, useState, type CSSProperties} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
@@ -20,9 +22,9 @@ interface PaymentModalProps {
 }
 
 function methodDisplay(method: string) {
-    if (method === 'CASH') return {icon: '💵', label: 'Tiền mặt'}
-    if (method === 'QRCODE') return {icon: '💳', label: 'Thẻ / VNPay'}
-    return {icon: '💳', label: method}
+    if (method === 'CASH') return {icon: '', label: 'Tiền mặt'}
+    if (method === 'QRCODE') return {icon: '', label: 'Thẻ / VNPay'}
+    return {icon: '', label: method}
 }
 
 export default function PaymentModal({
@@ -188,7 +190,8 @@ export default function PaymentModal({
                 >
                     {customer && (
                         <div style={customerSummaryStyle}>
-                            👤 Khách: <strong>{customer.fullName}</strong>
+                            <User className="rk-icon" aria-hidden="true" /> Khách:{' '}
+                            <strong>{customer.fullName}</strong>
                             {pointsUsed > 0 && (
                                 <span
                                     style={{
@@ -304,7 +307,9 @@ export default function PaymentModal({
                             }}
                         >
                             <div style={vnpayBoxStyle}>
-                                <div style={vnpayIconStyle}>🌐</div>
+                                <div style={vnpayIconStyle}>
+                                    <Globe className="rk-icon" aria-hidden="true" />
+                                </div>
 
                                 <h3 style={vnpayTitleStyle}>Cổng thanh toán VNPay</h3>
 

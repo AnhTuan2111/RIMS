@@ -1,4 +1,6 @@
-﻿import {useCallback, useRef, useState, type CSSProperties} from 'react'
+import {Download, X} from 'lucide-react'
+
+import {useCallback, useRef, useState, type CSSProperties} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
 import type {InvoiceDetail, InvoiceSummary} from '@/shared/types/cashier'
@@ -524,7 +526,7 @@ export default function CashierInvoicesPage() {
                                         }}
                                         onClick={() => setSelectedInvoice(null)}
                                     >
-                                        ✕
+                                        <X className="rk-icon" aria-hidden="true" />
                                     </button>
                                 </div>
 
@@ -687,7 +689,11 @@ export default function CashierInvoicesPage() {
                                             )
                                         }
                                     >
-                                        📥 Tải PDF
+                                        <Download
+                                            className="rk-icon"
+                                            aria-hidden="true"
+                                        />{' '}
+                                        Tải PDF
                                     </button>
 
                                     <button

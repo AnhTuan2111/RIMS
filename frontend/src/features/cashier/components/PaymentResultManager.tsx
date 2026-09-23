@@ -1,4 +1,6 @@
-﻿import {useState, type CSSProperties} from 'react'
+import {Check, Download} from 'lucide-react'
+
+import {useState, type CSSProperties} from 'react'
 
 import type {OrderDetailResponse, PaymentResponse} from '@/shared/types/cashier'
 import {formatCurrency} from '@/shared/utils/format'
@@ -57,7 +59,9 @@ export default function PaymentResultManager({
     if (step === 'SUCCESS') {
         return (
             <div style={successScreenStyle} onClick={() => setStep('BILL')}>
-                <div style={successIconStyle}>✔</div>
+                <div style={successIconStyle}>
+                    <Check className="rk-icon" aria-hidden="true" />
+                </div>
 
                 <h1 style={successTitleStyle}>THANH TOÁN THÀNH CÔNG</h1>
 
@@ -198,7 +202,7 @@ export default function PaymentResultManager({
                         style={downloadButtonStyle}
                         onClick={() => void onDownload(invoiceId)}
                     >
-                        📥 Tải PDF
+                        <Download className="rk-icon" aria-hidden="true" /> Tải PDF
                     </button>
 
                     <button type="button" style={closeButtonStyle} onClick={onClose}>

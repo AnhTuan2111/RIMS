@@ -1,4 +1,4 @@
-import {Check, MessageSquare} from 'lucide-react'
+import {Bell, Check, MessageSquare} from 'lucide-react'
 
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
@@ -162,8 +162,7 @@ export default function KitchenQueuePage() {
 
         setNewOrderMessage(message)
 
-        document.title =
-            `🔔 ${newOrderCount} món mới - ` + originalDocumentTitleRef.current
+        document.title = `${newOrderCount} món mới - ` + originalDocumentTitleRef.current
 
         if (newOrderMessageTimerRef.current !== null) {
             window.clearTimeout(newOrderMessageTimerRef.current)
@@ -621,7 +620,7 @@ export default function KitchenQueuePage() {
                                 })
                             }}
                         >
-                            {isSoundEnabled ? '🔊 Âm thanh đang bật' : '🔇 Bật âm thanh'}
+                            {isSoundEnabled ? 'Âm thanh đang bật' : 'Bật âm thanh'}
                         </button>
 
                         <button
@@ -641,7 +640,9 @@ export default function KitchenQueuePage() {
 
             {newOrderMessage && (
                 <div className="new-order-notification" role="status" aria-live="polite">
-                    <span className="new-order-notification-icon">🔔</span>
+                    <span className="new-order-notification-icon">
+                        <Bell className="rk-icon" aria-hidden="true" />
+                    </span>
 
                     <div>
                         <strong>Đơn mới</strong>
