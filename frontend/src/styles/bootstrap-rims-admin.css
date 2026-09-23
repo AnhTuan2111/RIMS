@@ -4161,11 +4161,13 @@
 }
 
 .admin-category-stats-categories {
-    background: linear-gradient(135deg, var(--rims-brand-soft) 0%, var(--rims-brand-line) 100%);
+    /* Hai chặng cùng nằm trong vùng nhạt: chặng đậm (brand-line) làm chữ màu
+       thương hiệu trên nó chỉ đạt 3.98:1 ở chế độ tối. */
+    background: linear-gradient(135deg, var(--rims-brand-soft) 0%, var(--rims-brand-soft) 100%);
 }
 
 .admin-category-stats-dishes {
-    background: linear-gradient(135deg, var(--rims-busy-soft) 0%, var(--rims-busy-line) 100%);
+    background: linear-gradient(135deg, var(--rims-busy-soft) 0%, var(--rims-busy-soft) 100%);
 }
 
 .admin-category-stats-inner {

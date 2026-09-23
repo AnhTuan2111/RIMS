@@ -8,7 +8,7 @@
 
 .restaurant-home {
     min-height: 100vh;
-    background: var(--rims-ink);
+    background: var(--rims-shell);
     color: var(--rims-ink-on-brand);
 }
 
@@ -320,7 +320,7 @@
 
 .restaurant-footer {
     padding: 1.5rem 4rem;
-    background: var(--rims-ink);
+    background: var(--rims-shell);
     color: rgba(242, 226, 184, 0.65);
     text-align: center;
 }

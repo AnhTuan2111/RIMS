@@ -9,6 +9,35 @@
    thể chuyển từng màn một mà không sợ đụng nhau.
    ========================================================================= */
 
+/* ---------- Cầu nối sang Bootstrap ----------
+
+   Bootstrap mang bảng biến riêng với giá trị cố định. Mọi thẻ .card đều đặt
+   lại color về --bs-body-color (#212529), nên ở chế độ tối chữ trong thẻ vẫn
+   là màu tối trên nền tối — 1:1. Trỏ các biến đó vào token để Bootstrap đi
+   theo chủ đề thay vì chống lại nó. */
+
+:root {
+    --bs-body-color: var(--rims-ink);
+    --bs-body-color-rgb: 36, 21, 18;
+    --bs-body-bg: var(--rims-paper);
+    --bs-emphasis-color: var(--rims-ink);
+    --bs-secondary-color: var(--rims-ink-2);
+    --bs-tertiary-color: var(--rims-ink-3);
+    --bs-border-color: var(--rims-line);
+    --bs-border-color-translucent: var(--rims-line);
+    --bs-link-color: var(--rims-brand);
+    --bs-link-hover-color: var(--rims-brand-hover);
+    /* Giữ nguyên `inherit` như mặc định của Bootstrap. Đặt một màu cố định ở
+       đây thì tiêu đề nằm trong thẻ tô màu thương hiệu mất quyền thừa kế và
+       tụt xuống 1.63:1. */
+    --bs-heading-color: inherit;
+    --bs-secondary-bg: var(--rims-surface-2);
+    --bs-tertiary-bg: var(--rims-surface-3);
+    --bs-card-bg: var(--rims-surface);
+    --bs-card-color: var(--rims-ink);
+    --bs-card-border-color: var(--rims-line);
+}
+
 /* ---------- Nền chung ---------- */
 
 body {
@@ -1078,4 +1107,57 @@ textarea.rk-input {
 
 .rk-btn--danger-solid:hover:not(:disabled) {
     filter: brightness(1.08);
+}
+
+/* ---------- Nút chuyển chế độ hiển thị ----------
+   Nằm trong thanh bên, vốn luôn tối, nên dùng bộ màu trên nền tối. */
+
+.rk-themetoggle {
+    /* Nằm dưới vùng menu cuộn được. Không co lại, để mục menu cuối không bị
+       trông như bị cắt cụt. */
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: var(--rims-space-4);
+    padding: 3px;
+    border: 1px solid rgb(253 248 239 / 12%);
+    border-radius: var(--rims-radius-md);
+    background: rgb(253 248 239 / 5%);
+}
+
+.rk-themetoggle__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: var(--rims-space-2) 2px;
+    border: 0;
+    border-radius: var(--rims-radius-sm);
+    background: transparent;
+    color: var(--rims-ink-on-dark-2);
+    font: inherit;
+    font-size: var(--rims-text-xs);
+    cursor: pointer;
+    transition: background var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-themetoggle__btn:hover {
+    background: rgb(253 248 239 / 8%);
+    color: var(--rims-ink-on-dark);
+}
+
+.rk-themetoggle__btn[aria-pressed='true'] {
+    background: rgb(253 248 239 / 14%);
+    color: var(--rims-ink-on-dark);
+}
+
+.rk-themetoggle__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-gold);
+    outline-offset: 1px;
+}
+
+.rk-themetoggle__label {
+    line-height: 1.2;
+    white-space: nowrap;
 }

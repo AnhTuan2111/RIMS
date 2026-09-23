@@ -12,7 +12,7 @@ export default function DashboardLayout() {
         navigate('/login', {replace: true})
     }
 
-    const layoutClassName = 'app-layout theme-customer'
+    const layoutClassName = 'app-layout rims-shell-theme'
 
     return (
         <div className={layoutClassName}>

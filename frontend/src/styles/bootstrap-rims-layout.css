@@ -17,7 +17,7 @@
     width: 270px;
     min-height: 100vh;
     padding: 1.5rem;
-    background: var(--rims-ink);
+    background: var(--rims-shell);
     color: var(--rims-ink-on-dark);
     flex-shrink: 0;
 }
@@ -76,7 +76,7 @@
     background:
         radial-gradient(circle at 10% 0%, rgb(122 16 48 / 38%), transparent 34%),
         radial-gradient(circle at 95% 85%, rgb(122 16 48 / 26%), transparent 38%),
-        linear-gradient(180deg, var(--rims-ink) 0%, var(--rims-ink) 55%, var(--rims-ink) 100%);
+        linear-gradient(180deg, var(--rims-shell-2) 0%, var(--rims-shell) 55%, var(--rims-shell) 100%);
 
     border-right: 1px solid rgb(253 248 239 / 8%);
     box-shadow: 16px 0 45px rgb(36 21 18 / 24%);
@@ -178,9 +178,12 @@
     flex-direction: column;
     gap: 7px;
 
-    /* cho phép cuộn riêng phần danh sách menu khi số lượng mục nhiều hơn chiều cao màn hình */
+    /* cho phép cuộn riêng phần danh sách menu khi số lượng mục nhiều hơn
+       chiều cao màn hình. Chừa một khoảng dưới để mục cuối không dính sát
+       vào phần bên dưới khi cuộn hết. */
     min-height: 0;
     overflow-y: auto;
+    padding-bottom: 4px;
     overflow-x: hidden;
     padding-right: 4px;
     margin-right: -4px;
@@ -250,7 +253,7 @@
 }
 
 .rims-sidebar-link.active {
-    color: var(--rims-ink-on-dark);
+    color: var(--rims-ink-on-brand);
 
     border-color: rgb(253 248 239 / 0.28);
 
@@ -276,9 +279,9 @@
 }
 
 .rims-sidebar-link.active .rims-menu-icon {
-    background: rgb(253 248 239 / 18%);
+    background: rgb(36 21 18 / 14%);
 
-    color: var(--rims-ink-on-dark);
+    color: var(--rims-ink-on-brand);
 }
 
 .rims-menu-label {
@@ -292,7 +295,8 @@
 }
 
 .rims-sidebar-link.active .rims-menu-arrow {
-    color: rgb(253 248 239 / 88%);
+    color: var(--rims-ink-on-brand);
+    opacity: 0.8;
 }
 
 .rims-sidebar-status {
@@ -678,7 +682,7 @@
     min-height: 100vh;
     flex-shrink: 0;
 
-    background: var(--rims-ink);
+    background: var(--rims-shell);
     color: var(--rims-ink-on-dark);
 }
 
@@ -1007,77 +1011,80 @@
 }
 
 /* =========================================================
-   THEME RIÊNG CHO CUSTOMER (vàng kim / burgundy, đồng bộ trang public)
+   LỚP KHUNG DÙNG CHUNG (vang / vàng kim, đồng bộ trang công khai)
+
+   Trước đây khối này tên là .theme-customer, nhưng DashboardLayout gắn nó
+   cho MỌI vai trò chứ không riêng khách hàng — tên cũ nói sai việc nó làm.
    ========================================================= */
 
-.theme-customer .rims-sidebar {
+.rims-shell-theme .rims-sidebar {
     background:
         radial-gradient(circle at 10% 0%, rgba(212, 175, 55, 0.22), transparent 34%),
         radial-gradient(circle at 95% 85%, rgba(122, 16, 48, 0.3), transparent 38%),
-        linear-gradient(180deg, var(--rims-ink) 0%, var(--rims-ink) 55%, var(--rims-ink) 100%);
+        linear-gradient(180deg, var(--rims-shell-2) 0%, var(--rims-shell) 55%, var(--rims-shell) 100%);
 }
 
-.theme-customer .rims-sidebar-logo {
+.rims-shell-theme .rims-sidebar-logo {
     background: linear-gradient(135deg, var(--rims-gold), var(--rims-gold-deep) 48%, var(--rims-brand));
     box-shadow:
         0 12px 30px rgba(122, 16, 48, 0.4),
         inset 0 1px 0 rgb(253 248 239 / 38%);
 }
 
-.theme-customer .rims-sidebar-role {
+.rims-shell-theme .rims-sidebar-role {
     border-color: rgba(212, 175, 55, 0.22);
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.16), rgba(122, 16, 48, 0.14));
 }
 
-.theme-customer .rims-role-icon {
+.rims-shell-theme .rims-role-icon {
     color: var(--rims-gold-deep);
 }
 
-.theme-customer .rims-sidebar-link:hover {
+.rims-shell-theme .rims-sidebar-link:hover {
     border-color: rgba(212, 175, 55, 0.2);
     color: var(--rims-ink-on-dark);
 }
 
-.theme-customer .rims-sidebar-link.active {
-    border-color: rgba(212, 175, 55, 0.32);
-    background: linear-gradient(100deg, var(--rims-brand), var(--rims-brand-hover) 55%, var(--rims-gold-deep));
-    box-shadow: 0 14px 32px rgba(122, 16, 48, 0.35);
+.rims-shell-theme .rims-sidebar-link.active {
+    border-color: rgb(212 175 55 / 32%);
+    background: linear-gradient(100deg, var(--rims-brand-active), var(--rims-brand) 55%, var(--rims-brand-hover));
+    box-shadow: 0 14px 32px rgb(122 16 48 / 35%);
 }
 
-.theme-customer .rims-menu-icon {
-    color: var(--rims-ink-on-dark);
+.rims-shell-theme .rims-sidebar-link.active .rims-menu-icon {
+    color: var(--rims-ink-on-brand);
 }
 
-.theme-customer .rims-topbar-eyebrow {
+.rims-shell-theme .rims-topbar-eyebrow {
     color: var(--rims-brand);
 }
 
-.theme-customer .rims-current-role {
+.rims-shell-theme .rims-current-role {
     border-color: rgba(212, 175, 55, 0.25);
     background: linear-gradient(135deg, var(--rims-gold-soft), var(--rims-gold-soft));
 }
 
-.theme-customer .rims-current-role-icon {
+.rims-shell-theme .rims-current-role-icon {
     background: linear-gradient(135deg, var(--rims-gold-soft), var(--rims-gold-soft));
 }
 
-.theme-customer .rims-current-role strong {
+.rims-shell-theme .rims-current-role strong {
     color: var(--rims-ink);
 }
 
-.theme-customer .rims-actor-switcher select:focus {
+.rims-shell-theme .rims-actor-switcher select:focus {
     border-color: var(--rims-gold);
     box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
 }
 
-.theme-customer .app-content,
-.theme-customer .rims-app-content {
+.rims-shell-theme .app-content,
+.rims-shell-theme .rims-app-content {
     background:
         radial-gradient(circle at 85% 5%, rgba(212, 175, 55, 0.08), transparent 32%),
         radial-gradient(circle at 15% 90%, rgba(122, 16, 48, 0.06), transparent 30%), var(--rims-gold-soft);
 }
 
-.theme-customer .rims-sidebar-brand h2 {
+.rims-shell-theme .rims-sidebar-brand h2 {
     font-size: 19px;
     letter-spacing: 0.02em;
 }

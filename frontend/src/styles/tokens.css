@@ -45,6 +45,12 @@
     --rims-ink-on-dark: #fdf8ef;
     --rims-ink-on-dark-2: #9c8d7c;
 
+    /* Nền của phần khung luôn tối: thanh bên, màn đăng nhập, trang công khai.
+       KHÔNG đảo theo chủ đề — dùng --rims-ink thì ở chế độ tối nó lật thành
+       nền sáng, và chữ kem trên đó không đọc được. */
+    --rims-shell: #241512;
+    --rims-shell-2: #3a2119;
+
     /* ---------- Thương hiệu ---------- */
     /* Vang là màu hành động chính. Vàng chỉ dùng cho khoảnh khắc nhận diện
        (logo, viền nhấn), không dùng cho nút — vàng trên nền sáng không đủ

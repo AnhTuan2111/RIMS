@@ -25,6 +25,7 @@ import {ROLE_LABELS, roleMenus} from '@/app/config/roleMenus'
 import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
 import {useRestaurant} from '@/app/providers/useRestaurant'
+import {ThemeToggle} from '@/shared/components/ui'
 
 /**
  * Icon cho từng mục menu.
@@ -151,6 +152,8 @@ export function Sidebar() {
                     </Fragment>
                 ))}
             </nav>
+
+            <ThemeToggle />
 
             <div className="rims-sidebar-status">
                 <span className="rims-online-dot" />

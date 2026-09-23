@@ -35,6 +35,14 @@ select {
 
 button {
     cursor: pointer;
+
+    /* Nút không tự khai báo nền thì phải trong suốt. Trước đây chúng nhận nền
+       mặc định của trình duyệt — ở chế độ tối đó là xám đặc, nên chữ màu
+       thương hiệu trên nó chỉ còn 1.74:1. Class nào có đặt nền vẫn thắng luật
+       này vì độ ưu tiên cao hơn. */
+    background: transparent;
+    border: 0;
+    color: inherit;
 }
 
 a {
@@ -54,5 +62,5 @@ main {
     place-items: center;
     min-height: 100vh;
     color: var(--rims-ink-on-brand);
-    background: var(--rims-ink);
+    background: var(--rims-shell);
 }
