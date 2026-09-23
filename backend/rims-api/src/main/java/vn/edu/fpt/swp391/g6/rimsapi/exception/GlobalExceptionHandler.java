@@ -206,7 +206,14 @@ public class GlobalExceptionHandler
 
     // ==================== Lỗi ngoài dự kiến ====================
 
-    /** Hệ thống hỏng chứ không phải người dùng gửi sai — vẫn phải log đầy đủ stack trace. */
+    /**
+     * Hệ thống hỏng chứ không phải người dùng gửi sai — vẫn phải log đầy đủ stack
+     * trace.
+     *
+     * <p>Chỗ này CÓ trả message ra ngoài, khác với lưới an toàn bên dưới: thông
+     * điệp của {@link TechnicalException} là câu do chính mình viết ("Lỗi mã hoá
+     * dữ liệu VNPay"), không phải văn bản thô của ngoại lệ gốc.
+     */
     @ExceptionHandler(TechnicalException.class)
     public ResponseEntity<ErrorResponse> handleTechnical(
             TechnicalException ex, HttpServletRequest request)
