@@ -2329,65 +2329,6 @@
     box-sizing: border-box;
 }
 
-.admin-category-table-card {
-    padding: 0;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgb(36 21 18 / 3%);
-}
-
-/* Stats Cards */
-.admin-category-stats-card {
-    border: none;
-}
-
-.admin-category-stats-categories {
-    /* Hai chặng cùng nằm trong vùng nhạt: chặng đậm (brand-line) làm chữ màu
-       thương hiệu trên nó chỉ đạt 3.98:1 ở chế độ tối. */
-    background: linear-gradient(135deg, var(--rims-brand-soft) 0%, var(--rims-brand-soft) 100%);
-}
-
-.admin-category-stats-dishes {
-    background: linear-gradient(135deg, var(--rims-busy-soft) 0%, var(--rims-busy-soft) 100%);
-}
-
-.admin-category-stats-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
-}
-
-.admin-category-stats-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--rims-brand);
-}
-
-.admin-category-stats-dishes .admin-category-stats-label {
-    color: var(--rims-busy);
-}
-
-.admin-category-stats-number {
-    margin: 4px 0 0 0;
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--rims-ink);
-    letter-spacing: -0.03em;
-}
-
-.admin-category-stats-dishes .admin-category-stats-number {
-    color: var(--rims-busy);
-}
-
-.admin-category-stats-icon {
-    font-size: 22px;
-    background: var(--rims-surface);
-    padding: 10px;
-    border-radius: 12px;
-    line-height: 1;
-    box-shadow: 0 2px 6px rgb(36 21 18 / 4%);
-}
-
 /* Filter */
 .admin-category-filter-container {
     display: flex;
@@ -2454,34 +2395,6 @@
 
 .admin-category-search-input:focus {
     border-color: var(--rims-brand);
-}
-
-/* Table */
-.admin-category-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 13.5px;
-}
-
-.admin-category-table-header {
-    background: var(--rims-surface-2);
-    border-bottom: 1px solid var(--rims-line);
-    color: var(--rims-ink-2);
-    font-weight: 700;
-}
-
-.admin-category-table-header th {
-    padding: 16px;
-}
-
-.admin-category-table-row {
-    border-bottom: 1px solid var(--rims-line);
-    transition: background-color 0.2s ease;
-}
-
-.admin-category-table-row:hover {
-    background-color: var(--rims-surface);
 }
 
 .admin-category-col-id {
@@ -2594,15 +2507,6 @@
     white-space: pre-wrap;
     max-height: 60px;
     overflow-y: auto;
-}
-
-.admin-category-count-number {
-    font-weight: 800;
-}
-
-.admin-category-count-label {
-    font-weight: 400;
-    font-size: 11px;
 }
 
 .admin-category-status-badge.active {
@@ -2795,24 +2699,6 @@
 
 .admin-category-dish-table-wrapper {
     overflow-x: auto;
-}
-
-.admin-category-dish-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 13px;
-}
-
-.admin-category-dish-table .admin-category-table-header {
-    background: var(--rims-surface-2);
-    border-bottom: 1px solid var(--rims-line);
-    color: var(--rims-ink-2);
-    font-weight: 700;
-}
-
-.admin-category-dish-table .admin-category-table-header th {
-    padding: 12px;
 }
 
 .admin-category-dish-col-name {
@@ -3057,10 +2943,6 @@
         flex-direction: column;
     }
 
-    .admin-category-table {
-        font-size: 12px;
-    }
-
     .admin-category-col-date {
         display: none;
     }
@@ -3154,48 +3036,6 @@
     box-sizing: border-box;
 }
 
-.admin-dish-table-card {
-    padding: 0;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgb(36 21 18 / 2%);
-}
-
-/* Stats Card */
-.admin-dish-stats-card {
-    background: linear-gradient(135deg, var(--rims-brand) 0%, var(--rims-brand) 100%);
-    border: none;
-    color: var(--rims-ink-on-brand);
-}
-
-.admin-dish-stats-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
-}
-
-.admin-dish-stats-label {
-    font-size: 11px;
-    opacity: 0.8;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-}
-
-.admin-dish-stats-number {
-    margin: 2px 0 0 0;
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-}
-
-.admin-dish-stats-icon {
-    font-size: 22px;
-    background: rgb(253 248 239 / 18%);
-    padding: 8px 12px;
-    border-radius: 12px;
-    line-height: 1;
-}
-
 /* Filter Container */
 .admin-dish-filter-container {
     display: flex;
@@ -3236,34 +3076,6 @@
 
 .admin-dish-select:focus {
     border-color: var(--rims-brand);
-}
-
-/* Table */
-.admin-dish-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 13.5px;
-}
-
-.admin-dish-table-header {
-    background: var(--rims-surface-2);
-    border-bottom: 1px solid var(--rims-line);
-    color: var(--rims-ink-2);
-    font-weight: 700;
-}
-
-.admin-dish-table-header th {
-    padding: 16px;
-}
-
-.admin-dish-table-row {
-    border-bottom: 1px solid var(--rims-line);
-    transition: background-color 0.2s ease;
-}
-
-.admin-dish-table-row:hover {
-    background-color: var(--rims-surface);
 }
 
 .admin-dish-col-image {
@@ -3383,16 +3195,6 @@
 .admin-dish-category-badge.hidden {
     background: var(--rims-alert-soft);
     color: var(--rims-alert);
-}
-
-.admin-dish-status-badge.available {
-    background-color: var(--rims-ok-soft);
-    color: var(--rims-ok);
-}
-
-.admin-dish-status-badge.paused {
-    background-color: var(--rims-surface-2);
-    color: var(--rims-ink-2);
 }
 
 /* Action Buttons */
@@ -3656,16 +3458,6 @@
     line-height: 1.5;
 }
 
-.admin-dish-view-status.available {
-    background: var(--rims-ok-soft);
-    color: var(--rims-ok);
-}
-
-.admin-dish-view-status.paused {
-    background: var(--rims-busy-soft);
-    color: var(--rims-busy);
-}
-
 .admin-dish-view-image {
     width: 100%;
     height: 230px;
@@ -3757,10 +3549,6 @@
         max-width: 100%;
     }
 
-    .admin-dish-table {
-        font-size: 12px;
-    }
-
     .admin-dish-col-date {
         display: none;
     }
@@ -3797,88 +3585,6 @@
     background-color: var(--rims-surface-2);
     min-height: 100vh;
     color: var(--rims-ink-2);
-}
-
-/* Stats Grid */
-.admin-menu-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 28px;
-}
-
-.admin-menu-stat-card {
-    background-color: var(--rims-surface);
-    padding: 20px;
-    border-radius: 16px;
-    border: 1px solid var(--rims-line);
-    box-sizing: border-box;
-}
-
-.admin-menu-stat-card.admin-menu-stat-total {
-    background: linear-gradient(135deg, var(--rims-brand-soft) 0%, var(--rims-brand-soft) 100%);
-    border: none;
-}
-
-.admin-menu-stat-card.admin-menu-stat-categories {
-    background: linear-gradient(135deg, var(--rims-ok-soft) 0%, var(--rims-ok-soft) 100%);
-    border: none;
-}
-
-.admin-menu-stat-card.admin-menu-stat-paused {
-    background: linear-gradient(135deg, var(--rims-busy-soft) 0%, var(--rims-busy-soft) 100%);
-    border: none;
-}
-
-.admin-menu-stat-card.admin-menu-stat-hidden {
-    background: linear-gradient(135deg, var(--rims-alert-soft) 0%, var(--rims-alert-soft) 100%);
-    border: none;
-}
-
-.admin-menu-stat-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
-}
-
-.admin-menu-stat-label {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-}
-
-.admin-menu-stat-total .admin-menu-stat-label {
-    color: var(--rims-brand);
-}
-
-.admin-menu-stat-categories .admin-menu-stat-label {
-    color: var(--rims-ok);
-}
-
-.admin-menu-stat-paused .admin-menu-stat-label {
-    color: var(--rims-busy);
-}
-
-.admin-menu-stat-hidden .admin-menu-stat-label {
-    color: var(--rims-alert);
-}
-
-.admin-menu-stat-number {
-    margin: 4px 0 0 0;
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--rims-ink);
-    letter-spacing: -0.03em;
-}
-
-.admin-menu-stat-icon {
-    font-size: 22px;
-    background: var(--rims-surface);
-    padding: 10px;
-    border-radius: 12px;
-    line-height: 1;
-    box-shadow: 0 2px 5px rgb(36 21 18 / 3%);
 }
 
 /* Two Columns */
@@ -3998,15 +3704,6 @@
     display: block;
 }
 
-/* Status Badge */
-.admin-menu-status-badge {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 11.5px;
-    font-weight: 700;
-    display: inline-block;
-}
-
 .admin-menu-status-badge.active {
     background-color: var(--rims-ok-soft);
     color: var(--rims-ok);
@@ -4060,37 +3757,6 @@
     overflow-x: auto;
 }
 
-.admin-menu-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 13.5px;
-}
-
-.admin-menu-table-header {
-    color: var(--rims-ink-3);
-    font-size: 12px;
-    font-weight: 700;
-    border-bottom: 1px solid var(--rims-line);
-}
-
-.admin-menu-table-header th {
-    padding: 12px 8px;
-}
-
-.admin-menu-table-row {
-    border-bottom: 1px solid var(--rims-surface-2);
-    transition: background-color 0.15s ease;
-}
-
-.admin-menu-table-row:hover {
-    background-color: var(--rims-surface);
-}
-
-.admin-menu-table-row td {
-    padding: 12px 8px;
-}
-
 .admin-menu-text-center {
     text-align: center;
 }
@@ -4134,25 +3800,6 @@
 .admin-menu-dish-price {
     font-weight: 700;
     color: var(--rims-brand);
-}
-
-/* Dish Status */
-.admin-menu-dish-status {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    display: inline-block;
-}
-
-.admin-menu-dish-status.available {
-    background-color: var(--rims-ok-soft);
-    color: var(--rims-ok);
-}
-
-.admin-menu-dish-status.paused {
-    background-color: var(--rims-busy-soft);
-    color: var(--rims-busy);
 }
 
 /* Warning Section */
@@ -4214,10 +3861,6 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-    .admin-menu-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .admin-menu-two-columns {
         grid-template-columns: 1fr;
     }
@@ -4226,15 +3869,6 @@
 @media (max-width: 768px) {
     .admin-menu-page {
         padding: 16px;
-    }
-
-    .admin-menu-stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    .admin-menu-stat-number {
-        font-size: 24px;
     }
 
     .admin-menu-two-columns {
@@ -4254,20 +3888,12 @@
         font-size: 14px;
     }
 
-    .admin-menu-table {
-        font-size: 12px;
-    }
-
     .admin-menu-dish-name {
         font-size: 12px;
     }
 }
 
 @media (max-width: 480px) {
-    .admin-menu-stats-grid {
-        grid-template-columns: 1fr;
-    }
-
     .admin-menu-scroll-container {
         max-height: 200px;
     }

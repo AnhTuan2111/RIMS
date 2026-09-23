@@ -1,3 +1,4 @@
+import {ArrowLeft} from 'lucide-react'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import {Link, useSearchParams} from 'react-router-dom'
 
@@ -267,7 +268,8 @@ export default function DishListPage() {
 
                 {routeStatus === 'unavailable' && (
                     <Link className="rk-btn rk-btn--quiet" to="/chef/dishes">
-                        ← Xem tất cả món
+                        <ArrowLeft className="rk-icon" aria-hidden="true" /> Xem tất cả
+                        món
                     </Link>
                 )}
             </PageCard>

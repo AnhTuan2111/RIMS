@@ -10,6 +10,7 @@ import {
     PageCard,
     PageHeader,
     Pagination,
+    StatCard,
 } from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage} from '@/shared/utils/error'
@@ -351,26 +352,19 @@ export default function AdminDishesPage() {
                         </select>
                     </div>
                 </div>
-                <div className="admin-dish-card admin-dish-stats-card">
-                    <div className="admin-dish-stats-inner">
-                        <div>
-                            <span className="admin-dish-stats-label">Món tìm thấy</span>
-                            <h2 className="admin-dish-stats-number">
-                                {filteredDishes.length}
-                            </h2>
-                        </div>
-                        <span className="admin-dish-stats-icon">
-                            <Utensils className="rk-icon" aria-hidden="true" />
-                        </span>
-                    </div>
-                </div>
+                <StatCard
+                    label="Món tìm thấy"
+                    value={filteredDishes.length}
+                    tone="brand"
+                    icon={<Utensils className="rk-icon" aria-hidden="true" />}
+                />
             </div>
 
             {/* Table */}
-            <div className="admin-dish-card admin-dish-table-card">
-                <table className="admin-dish-table">
+            <div className="rk-tablewrap">
+                <table className="rk-table">
                     <thead>
-                        <tr className="admin-dish-table-header">
+                        <tr>
                             <th className="admin-dish-col-image">Hình ảnh</th>
                             <th className="admin-dish-col-name">Tên món ăn</th>
                             <th className="admin-dish-col-category">Danh mục</th>
@@ -387,7 +381,7 @@ export default function AdminDishesPage() {
                                     ?.isAvailable === false
 
                             return (
-                                <tr key={dish.id} className="admin-dish-table-row">
+                                <tr key={dish.id}>
                                     <td className="admin-dish-cell-image">
                                         <div className="admin-dish-image-container">
                                             <img

@@ -4,7 +4,13 @@ import React, {useCallback, useEffect, useState} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {CategoryResponse, DishResponse, CategoryFormData} from '@/shared/api/admin'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {ConfirmDialog, PageCard, PageHeader, Pagination} from '@/shared/components/ui'
+import {
+    ConfirmDialog,
+    PageCard,
+    PageHeader,
+    Pagination,
+    StatCard,
+} from '@/shared/components/ui'
 import {getErrorMessage} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 
@@ -326,7 +332,7 @@ export default function AdminCategoryPage() {
                                 </div>
                                 <div className="admin-category-search-section">
                                     <span className="admin-category-filter-label">
-                                        TÌM KIẾM NHANH
+                                        Tìm kiếm nhanh
                                     </span>
                                     <input
                                         type="text"
@@ -342,49 +348,29 @@ export default function AdminCategoryPage() {
                             </div>
                         </div>
 
-                        <div className="admin-category-card admin-category-stats-card admin-category-stats-categories">
-                            <div className="admin-category-stats-inner">
-                                <div>
-                                    <span className="admin-category-stats-label">
-                                        Tổng Danh mục
-                                    </span>
-                                    <h2 className="admin-category-stats-number">
-                                        {categories.length}
-                                    </h2>
-                                </div>
-                                <span className="admin-category-stats-icon">
-                                    <FolderOpen className="rk-icon" aria-hidden="true" />
-                                </span>
-                            </div>
-                        </div>
+                        <StatCard
+                            label="Tổng danh mục"
+                            value={categories.length}
+                            tone="brand"
+                            icon={<FolderOpen className="rk-icon" aria-hidden="true" />}
+                        />
 
-                        <div className="admin-category-card admin-category-stats-card admin-category-stats-dishes">
-                            <div className="admin-category-stats-inner">
-                                <div>
-                                    <span className="admin-category-stats-label">
-                                        Tổng Món ăn
-                                    </span>
-                                    <h2 className="admin-category-stats-number">
-                                        {totalDishes}
-                                    </h2>
-                                </div>
-                                <span className="admin-category-stats-icon">
-                                    <ChefHat className="rk-icon" aria-hidden="true" />
-                                </span>
-                            </div>
-                        </div>
+                        <StatCard
+                            label="Tổng món ăn"
+                            value={totalDishes}
+                            tone="busy"
+                            icon={<ChefHat className="rk-icon" aria-hidden="true" />}
+                        />
                     </div>
 
                     {/* Table */}
-                    <div className="admin-category-card admin-category-table-card">
-                        <table className="admin-category-table">
+                    <div className="rk-tablewrap">
+                        <table className="rk-table">
                             <thead>
-                                <tr className="admin-category-table-header">
+                                <tr>
                                     <th className="admin-category-col-id">ID</th>
-                                    <th className="admin-category-col-name">
-                                        Danh mục & MÔ TẢ
-                                    </th>
-                                    <th className="admin-category-col-count">SỐ MÓN</th>
+                                    <th className="admin-category-col-name">Danh mục</th>
+                                    <th className="admin-category-col-count">Số món</th>
                                     <th className="admin-category-col-status">
                                         Trạng thái
                                     </th>
@@ -396,10 +382,7 @@ export default function AdminCategoryPage() {
                             </thead>
                             <tbody>
                                 {currentItems.map((item) => (
-                                    <tr
-                                        key={item.id}
-                                        className="admin-category-table-row"
-                                    >
+                                    <tr key={item.id}>
                                         <td className="admin-category-cell-id">
                                             {String(item.id).padStart(2, '0')}
                                         </td>
@@ -424,12 +407,7 @@ export default function AdminCategoryPage() {
                                         </td>
                                         <td className="admin-category-cell-count">
                                             <span className="rk-tag">
-                                                <span className="admin-category-count-number">
-                                                    {item.dishCount || 0}
-                                                </span>
-                                                <span className="admin-category-count-label">
-                                                    món
-                                                </span>
+                                                {item.dishCount || 0} món
                                             </span>
                                         </td>
                                         <td className="admin-category-cell-status">
@@ -587,7 +565,7 @@ export default function AdminCategoryPage() {
                             </p>
 
                             <span className="admin-category-input-label">
-                                MÔ TẢ Danh mục
+                                Mô tả danh mục
                             </span>
                             <p className="admin-category-detail-description">
                                 {selectedCategory.description ||
@@ -609,7 +587,7 @@ export default function AdminCategoryPage() {
                                 </div>
                                 <div>
                                     <span className="admin-category-input-label">
-                                        SỐ MÓN LIÊN KẾT
+                                        Số món liên kết
                                     </span>
                                     <span className="admin-category-detail-dish-count">
                                         {categoryDishes.length} món ăn
@@ -657,9 +635,9 @@ export default function AdminCategoryPage() {
                         {categoryDishes.length > 0 ? (
                             <>
                                 <div className="admin-category-dish-table-wrapper">
-                                    <table className="admin-category-dish-table">
+                                    <table className="rk-table rk-table--compact">
                                         <thead>
-                                            <tr className="admin-category-table-header">
+                                            <tr>
                                                 <th className="admin-category-dish-col-name">
                                                     Tên món
                                                 </th>
@@ -678,7 +656,7 @@ export default function AdminCategoryPage() {
                                             {currentDishItems.map((dish) => (
                                                 <tr
                                                     key={dish.id}
-                                                    className="admin-category-table-row admin-category-dish-row"
+                                                    className="admin-category-dish-row"
                                                 >
                                                     <td className="admin-category-dish-cell-name">
                                                         <div className="admin-category-dish-info">

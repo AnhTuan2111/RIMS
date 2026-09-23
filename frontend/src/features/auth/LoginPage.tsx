@@ -1,4 +1,5 @@
-﻿import {useState, type CSSProperties, type FormEvent} from 'react'
+import {ArrowLeft} from 'lucide-react'
+import {useState, type CSSProperties, type FormEvent} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
 
 import {login} from '@/shared/api/auth'
@@ -87,7 +88,8 @@ export default function LoginPage() {
         <main className="login-page">
             <section className="login-card">
                 <Link className="login-back-link" to="/">
-                    ← Quay lại trang chủ
+                    <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại trang
+                    chủ
                 </Link>
 
                 <div className="login-header">
@@ -100,7 +102,7 @@ export default function LoginPage() {
 
                 <form onSubmit={(event) => void handleSubmit(event)}>
                     <label className="auth-field">
-                        Username
+                        Tên đăng nhập
                         <input
                             value={username}
                             placeholder="Nhập tên đăng nhập"
@@ -111,7 +113,7 @@ export default function LoginPage() {
                     </label>
 
                     <label className="auth-field">
-                        Password
+                        Mật khẩu
                         <input
                             type="password"
                             value={rawPassword}

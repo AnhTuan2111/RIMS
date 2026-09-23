@@ -6,12 +6,11 @@ import * as cashierApi from '@/shared/api/cashier'
 import type {InvoiceDetail, InvoiceSummary} from '@/shared/types/cashier'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {Modal, PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {formatCurrency} from '@/shared/utils/format'
 import {useToast} from '@/app/providers/useToast'
-import {Modal} from '@/shared/components/ui'
 
 const PAGE_SIZE = 10
 
@@ -266,8 +265,6 @@ export default function CashierInvoicesPage() {
         }
     }
 
-    const safeTotalPages = Math.max(totalPages, 1)
-
     return (
         <PageCard>
             <PageHeader
@@ -432,44 +429,12 @@ export default function CashierInvoicesPage() {
                 </div>
             )}
 
-            {totalPages > 1 && (
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: 8,
-                        marginTop: 20,
-                        alignItems: 'center',
-                    }}
-                >
-                    <button
-                        type="button"
-                        disabled={page === 0}
-                        style={btn('var(--rims-surface-2)', 'var(--rims-ink-2)')}
-                        onClick={() => handlePageChange(page - 1)}
-                    >
-                        ← Trước
-                    </button>
-
-                    <span
-                        style={{
-                            fontSize: 13,
-                            color: 'var(--rims-ink-3)',
-                        }}
-                    >
-                        Trang {page + 1} / {safeTotalPages}
-                    </span>
-
-                    <button
-                        type="button"
-                        disabled={page >= totalPages - 1}
-                        style={btn('var(--rims-surface-2)', 'var(--rims-ink-2)')}
-                        onClick={() => handlePageChange(page + 1)}
-                    >
-                        Sau →
-                    </button>
-                </div>
-            )}
+            <Pagination
+                page={page + 1}
+                totalPages={totalPages}
+                totalItems={totalElements}
+                onPageChange={(next) => handlePageChange(next - 1)}
+            />
 
             <Modal
                 open={Boolean(selectedInvoice) || loadingDetail}

@@ -346,9 +346,9 @@ export default function ProfilePage() {
                             />
 
                             <EditField
-                                label="Username *"
+                                label="Tên đăng nhập *"
                                 value={username}
-                                placeholder="abc"
+                                placeholder="Ví dụ: nguyenvana"
                                 onChange={setUsername}
                             />
 
@@ -372,7 +372,10 @@ export default function ProfilePage() {
                         <>
                             <ProfileField label="Họ tên" value={currentUser.fullName} />
 
-                            <ProfileField label="Username" value={currentUser.username} />
+                            <ProfileField
+                                label="Tên đăng nhập"
+                                value={currentUser.username}
+                            />
 
                             <ProfileField
                                 label="Email"

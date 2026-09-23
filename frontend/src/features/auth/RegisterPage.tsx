@@ -1,4 +1,5 @@
-﻿import {useState, type CSSProperties, type FormEvent} from 'react'
+import {ArrowLeft, Info} from 'lucide-react'
+import {useState, type CSSProperties, type FormEvent} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
 
 import {register, type RegisterRequest} from '@/shared/api/auth'
@@ -111,7 +112,8 @@ export default function RegisterPage() {
         <main className="login-page">
             <section className="login-card">
                 <Link className="login-back-link" to="/login">
-                    ← Quay lại đăng nhập
+                    <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại đăng
+                    nhập
                 </Link>
 
                 <div className="login-header">
@@ -123,7 +125,7 @@ export default function RegisterPage() {
 
                 <form onSubmit={(event) => void handleSubmit(event)}>
                     <label className="auth-field">
-                        Username *
+                        Tên đăng nhập *
                         <input
                             value={formData.username}
                             placeholder="Tên đăng nhập"
@@ -176,7 +178,8 @@ export default function RegisterPage() {
                     </label>
 
                     <div style={defaultPasswordNoticeStyle}>
-                        ℹ️ Mật khẩu mặc định sẽ là: <strong>123456</strong>
+                        <Info className="rk-icon" aria-hidden="true" /> Mật khẩu mặc định
+                        sẽ là: <strong>123456</strong>
                         <br />
                         <small>
                             Vui lòng thay đổi mật khẩu sau khi đăng nhập lần đầu.

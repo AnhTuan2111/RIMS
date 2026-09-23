@@ -1,4 +1,4 @@
-import {Check, X} from 'lucide-react'
+import {ArrowLeft, Check, X} from 'lucide-react'
 
 import {useState, type CSSProperties, type KeyboardEvent} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
@@ -134,7 +134,8 @@ export default function ForgotPasswordPage() {
         <main className="login-page">
             <section className="login-card">
                 <Link className="login-back-link" to="/login">
-                    ← Quay lại đăng nhập
+                    <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại đăng
+                    nhập
                 </Link>
 
                 <div className="login-header">
@@ -241,7 +242,7 @@ export default function ForgotPasswordPage() {
                             disabled={isLoading}
                             onClick={() => void handleSendOtp()}
                         >
-                            {isLoading ? 'Đang gửi…' : 'Gửi mã OTP →'}
+                            {isLoading ? 'Đang gửi…' : 'Gửi mã OTP'}
                         </button>
                     </>
                 )}
@@ -313,7 +314,8 @@ export default function ForgotPasswordPage() {
                             style={backToEmailButtonStyle}
                             onClick={goBackToEmailStep}
                         >
-                            ← Quay lại / Gửi lại OTP
+                            <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại
+                            / Gửi lại OTP
                         </button>
                     </>
                 )}

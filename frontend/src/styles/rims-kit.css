@@ -1081,3 +1081,134 @@ textarea.rk-input {
     line-height: 1.2;
     white-space: nowrap;
 }
+
+/* ---------- Bảng dữ liệu ----------
+
+   Bốn màn Quản trị từng dựng bảng riêng với gần như cùng một bộ quy tắc, chỉ
+   khác vài pixel đệm. Một định nghĩa duy nhất cho thẻ <table> thật; biến thể
+   dựng bằng lưới div vẫn nằm ở .simple-table. */
+
+.rk-tablewrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+}
+
+.rk-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: var(--rims-text-sm);
+}
+
+.rk-table thead th {
+    padding: var(--rims-space-4);
+    border-bottom: 1px solid var(--rims-line);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    letter-spacing: var(--rims-tracking-label);
+    white-space: nowrap;
+}
+
+.rk-table tbody tr {
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-table tbody tr:last-child {
+    border-bottom: 0;
+}
+
+.rk-table tbody tr:hover {
+    background: var(--rims-surface-2);
+}
+
+.rk-table td {
+    padding: var(--rims-space-4);
+    color: var(--rims-ink-2);
+    vertical-align: middle;
+}
+
+/* Bảng lồng trong hộp thoại hoặc trong thẻ, chỗ hẹp hơn. */
+.rk-table--compact thead th,
+.rk-table--compact td {
+    padding: var(--rims-space-3);
+}
+
+/* ---------- Ô số liệu ----------
+
+   Trước đây mỗi màn Quản trị tự dựng một bộ (admin-menu-stat-*,
+   admin-category-stats-*, admin-dish-stats-*) nhưng cùng một bố cục. */
+
+.rk-statgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: var(--rims-space-4);
+}
+
+.rk-statcard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-5);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+}
+
+.rk-statcard__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+}
+
+/* Sắc nền cho ô cần nổi hơn phần còn lại. Chữ vẫn là màu mực thường để
+   không phải tính lại tương phản cho từng sắc. */
+.rk-statcard--brand {
+    border-color: var(--rims-brand-line);
+    background: var(--rims-brand-soft);
+}
+
+.rk-statcard--brand .rk-statcard__icon {
+    background: var(--rims-surface);
+    color: var(--rims-brand);
+}
+
+.rk-statcard--ok {
+    border-color: var(--rims-ok-line);
+    background: var(--rims-ok-soft);
+}
+
+.rk-statcard--ok .rk-statcard__icon {
+    background: var(--rims-surface);
+    color: var(--rims-ok);
+}
+
+.rk-statcard--busy {
+    border-color: var(--rims-busy-line);
+    background: var(--rims-busy-soft);
+}
+
+.rk-statcard--busy .rk-statcard__icon {
+    background: var(--rims-surface);
+    color: var(--rims-busy);
+}
+
+.rk-statcard--alert {
+    border-color: var(--rims-alert-line);
+    background: var(--rims-alert-soft);
+}
+
+.rk-statcard--alert .rk-statcard__icon {
+    background: var(--rims-surface);
+    color: var(--rims-alert);
+}

@@ -1,4 +1,12 @@
-import {AlertTriangle, EyeOff, FolderOpen, Soup, Utensils} from 'lucide-react'
+import {
+    AlertTriangle,
+    ArrowRight,
+    EyeOff,
+    FolderOpen,
+    PauseCircle,
+    Soup,
+    Utensils,
+} from 'lucide-react'
 
 import {useCallback, useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
@@ -6,7 +14,7 @@ import {useNavigate} from 'react-router-dom'
 import * as adminApi from '@/shared/api/admin'
 import type {MenuDashboardData} from '@/shared/api/admin'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
 
 export default function AdminMenuDashboardPage() {
     const [data, setData] = useState<MenuDashboardData | null>(null)
@@ -152,66 +160,32 @@ export default function AdminMenuDashboardPage() {
                 />
             </PageCard>
 
-            <div className="admin-menu-stats-grid">
-                <div className="admin-menu-stat-card admin-menu-stat-total">
-                    <div className="admin-menu-stat-inner">
-                        <div>
-                            <span className="admin-menu-stat-label">Tổng số món</span>
+            <div className="rk-statgrid">
+                <StatCard
+                    label="Tổng số món"
+                    value={data.totalDishes}
+                    icon={<Utensils className="rk-icon" aria-hidden="true" />}
+                />
 
-                            <h2 className="admin-menu-stat-number">{data.totalDishes}</h2>
-                        </div>
+                <StatCard
+                    label="Danh mục"
+                    value={data.totalCategories}
+                    icon={<FolderOpen className="rk-icon" aria-hidden="true" />}
+                />
 
-                        <span className="admin-menu-stat-icon">
-                            <Utensils className="rk-icon" aria-hidden="true" />
-                        </span>
-                    </div>
-                </div>
+                <StatCard
+                    label="Tạm dừng bán"
+                    value={data.totalPausedDishes}
+                    tone="busy"
+                    icon={<PauseCircle className="rk-icon" aria-hidden="true" />}
+                />
 
-                <div className="admin-menu-stat-card admin-menu-stat-categories">
-                    <div className="admin-menu-stat-inner">
-                        <div>
-                            <span className="admin-menu-stat-label">Danh mục</span>
-
-                            <h2 className="admin-menu-stat-number">
-                                {data.totalCategories}
-                            </h2>
-                        </div>
-
-                        <span className="admin-menu-stat-icon">
-                            <FolderOpen className="rk-icon" aria-hidden="true" />
-                        </span>
-                    </div>
-                </div>
-
-                <div className="admin-menu-stat-card admin-menu-stat-paused">
-                    <div className="admin-menu-stat-inner">
-                        <div>
-                            <span className="admin-menu-stat-label">Tạm dừng bán</span>
-
-                            <h2 className="admin-menu-stat-number">
-                                {data.totalPausedDishes}
-                            </h2>
-                        </div>
-
-                        <span className="admin-menu-stat-icon">⏸️</span>
-                    </div>
-                </div>
-
-                <div className="admin-menu-stat-card admin-menu-stat-hidden">
-                    <div className="admin-menu-stat-inner">
-                        <div>
-                            <span className="admin-menu-stat-label">Danh mục ẩn</span>
-
-                            <h2 className="admin-menu-stat-number">
-                                {data.totalHiddenDishes}
-                            </h2>
-                        </div>
-
-                        <span className="admin-menu-stat-icon">
-                            <EyeOff className="rk-icon" aria-hidden="true" />
-                        </span>
-                    </div>
-                </div>
+                <StatCard
+                    label="Danh mục ẩn"
+                    value={data.totalHiddenDishes}
+                    tone="alert"
+                    icon={<EyeOff className="rk-icon" aria-hidden="true" />}
+                />
             </div>
 
             <div className="admin-menu-two-columns">
@@ -227,7 +201,8 @@ export default function AdminMenuDashboardPage() {
                                 onClick={() => navigate('/admin/categories')}
                                 className="admin-menu-manage-link"
                             >
-                                Quản lý danh mục →
+                                Quản lý danh mục{' '}
+                                <ArrowRight className="rk-icon" aria-hidden="true" />
                             </button>
                         </div>
 
@@ -248,10 +223,10 @@ export default function AdminMenuDashboardPage() {
                                     </div>
 
                                     <span
-                                        className={`admin-menu-status-badge ${
+                                        className={`rk-chip ${
                                             category.status === 'ACTIVE'
-                                                ? 'active'
-                                                : 'hidden'
+                                                ? 'rk-chip--ok'
+                                                : 'rk-chip--idle'
                                         }`}
                                     >
                                         {category.status === 'ACTIVE'
@@ -314,14 +289,15 @@ export default function AdminMenuDashboardPage() {
                                 onClick={() => navigate('/admin/dishes')}
                                 className="admin-menu-manage-link"
                             >
-                                Quản lý món →
+                                Quản lý món{' '}
+                                <ArrowRight className="rk-icon" aria-hidden="true" />
                             </button>
                         </div>
 
                         <div className="admin-menu-table-wrapper">
-                            <table className="admin-menu-table">
+                            <table className="rk-table rk-table--compact">
                                 <thead>
-                                    <tr className="admin-menu-table-header">
+                                    <tr>
                                         <th>Món ăn</th>
                                         <th>Danh mục</th>
                                         <th>Giá niêm yết</th>
@@ -333,10 +309,7 @@ export default function AdminMenuDashboardPage() {
 
                                 <tbody>
                                     {data.latestDishes.map((dish) => (
-                                        <tr
-                                            key={dish.id}
-                                            className="admin-menu-table-row"
-                                        >
+                                        <tr key={dish.id}>
                                             <td className="admin-menu-dish-cell">
                                                 <div className="admin-menu-dish-image-wrapper">
                                                     {dish.imageUrl ? (
@@ -383,10 +356,10 @@ export default function AdminMenuDashboardPage() {
 
                                             <td className="admin-menu-text-center">
                                                 <span
-                                                    className={`admin-menu-dish-status ${
+                                                    className={`rk-chip ${
                                                         dish.status === 'AVAILABLE'
-                                                            ? 'available'
-                                                            : 'paused'
+                                                            ? 'rk-chip--ok'
+                                                            : 'rk-chip--idle'
                                                     }`}
                                                 >
                                                     {dish.status === 'AVAILABLE'
