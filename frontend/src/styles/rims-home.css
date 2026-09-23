@@ -192,7 +192,6 @@
     font-size: var(--rims-text-xs);
     font-weight: var(--rims-weight-semibold);
     letter-spacing: var(--rims-tracking-label);
-    text-transform: uppercase;
     color: var(--rims-ink-3);
 }
 

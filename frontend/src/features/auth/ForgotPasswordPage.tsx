@@ -239,7 +239,7 @@ export default function ForgotPasswordPage() {
                             disabled={isLoading}
                             onClick={() => void handleSendOtp()}
                         >
-                            {isLoading ? 'Đang gửi...' : 'Gửi mã OTP →'}
+                            {isLoading ? 'Đang gửi…' : 'Gửi mã OTP →'}
                         </button>
                     </>
                 )}
@@ -303,7 +303,7 @@ export default function ForgotPasswordPage() {
                             style={resetButtonStyle}
                             onClick={() => void handleResetPassword()}
                         >
-                            {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
+                            {isLoading ? 'Đang xử lý…' : 'Đặt lại mật khẩu'}
                         </button>
 
                         <button

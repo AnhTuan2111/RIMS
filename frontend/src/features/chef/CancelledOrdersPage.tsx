@@ -100,7 +100,7 @@ export default function CancelledOrdersPage() {
     const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
     if (isLoading) {
-        return <LoadingState title="Đang tải danh sách món đã hủy..." />
+        return <LoadingState title="Đang tải danh sách món đã hủy…" />
     }
 
     if (error) {
@@ -149,7 +149,7 @@ export default function CancelledOrdersPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder={'Tìm tên món, bàn, mã đơn ' + 'hoặc lý do hủy...'}
+                        placeholder={'Tìm tên món, bàn, mã đơn ' + 'hoặc lý do hủy…'}
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -203,22 +203,22 @@ export default function CancelledOrdersPage() {
                                         <h3>{item.dishName}</h3>
                                     </div>
 
-                                    <span className="status-badge danger">Đã hủy</span>
+                                    <span className="rk-chip rk-chip--alert">Đã hủy</span>
                                 </div>
 
                                 <div className="completed-order-info">
                                     <div>
-                                        <small>BÀN</small>
+                                        <small>Bàn</small>
                                         <strong>{item.tableNumber}</strong>
                                     </div>
 
                                     <div>
-                                        <small>SỐ LƯỢNG</small>
+                                        <small>Số lượng</small>
                                         <strong>x{item.quantity}</strong>
                                     </div>
 
                                     <div>
-                                        <small>THỜI GIAN HỦY</small>
+                                        <small>Thời gian huỷ</small>
                                         <strong>
                                             {formatDateTime(item.cancelledAt)}
                                         </strong>

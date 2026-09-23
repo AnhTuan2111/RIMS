@@ -239,7 +239,7 @@ export default function AdminCategoryPage() {
     if (loading) {
         return (
             <LoadingState
-                title="Đang tải dữ liệu danh mục thực đơn..."
+                title="Đang tải dữ liệu danh mục thực đơn…"
                 description="Hệ thống đang lấy danh sách danh mục và món ăn liên quan."
             />
         )
@@ -265,7 +265,7 @@ export default function AdminCategoryPage() {
                     {/* Header */}
                     <PageCard className="admin-category-header-card">
                         <PageHeader
-                            title="QUẢN LÝ DANH MỤC"
+                            title="Quản lý danh mục"
                             description="Quản lý nhóm món ăn, trạng thái hiển thị và số món thuộc từng danh mục."
                             actions={
                                 <button
@@ -292,7 +292,7 @@ export default function AdminCategoryPage() {
                             <div className="admin-category-filter-container">
                                 <div className="admin-category-filter-section">
                                     <span className="admin-category-filter-label">
-                                        TRẠNG THÁI
+                                        Trạng thái
                                     </span>
                                     <div className="admin-category-filter-group">
                                         <button
@@ -330,7 +330,7 @@ export default function AdminCategoryPage() {
                                     </span>
                                     <input
                                         type="text"
-                                        placeholder="Tìm tên danh mục, mã ID..."
+                                        placeholder="Tìm theo tên danh mục hoặc mã danh mục…"
                                         value={searchTerm}
                                         onChange={(e) => {
                                             setSearchTerm(e.target.value)
@@ -346,7 +346,7 @@ export default function AdminCategoryPage() {
                             <div className="admin-category-stats-inner">
                                 <div>
                                     <span className="admin-category-stats-label">
-                                        TỔNG DANH MỤC
+                                        Tổng Danh mục
                                     </span>
                                     <h2 className="admin-category-stats-number">
                                         {categories.length}
@@ -362,7 +362,7 @@ export default function AdminCategoryPage() {
                             <div className="admin-category-stats-inner">
                                 <div>
                                     <span className="admin-category-stats-label">
-                                        TỔNG MÓN ĂN
+                                        Tổng Món ăn
                                     </span>
                                     <h2 className="admin-category-stats-number">
                                         {totalDishes}
@@ -382,15 +382,15 @@ export default function AdminCategoryPage() {
                                 <tr className="admin-category-table-header">
                                     <th className="admin-category-col-id">ID</th>
                                     <th className="admin-category-col-name">
-                                        DANH MỤC & MÔ TẢ
+                                        Danh mục & MÔ TẢ
                                     </th>
                                     <th className="admin-category-col-count">SỐ MÓN</th>
                                     <th className="admin-category-col-status">
-                                        TRẠNG THÁI
+                                        Trạng thái
                                     </th>
-                                    <th className="admin-category-col-date">NGÀY TẠO</th>
+                                    <th className="admin-category-col-date">Ngày tạo</th>
                                     <th className="admin-category-col-actions">
-                                        THAO TÁC
+                                        Thao tác
                                     </th>
                                 </tr>
                             </thead>
@@ -423,7 +423,7 @@ export default function AdminCategoryPage() {
                                             </div>
                                         </td>
                                         <td className="admin-category-cell-count">
-                                            <span className="admin-category-dish-count-badge">
+                                            <span className="rk-tag">
                                                 <span className="admin-category-count-number">
                                                     {item.dishCount || 0}
                                                 </span>
@@ -434,11 +434,9 @@ export default function AdminCategoryPage() {
                                         </td>
                                         <td className="admin-category-cell-status">
                                             <span
-                                                className={`admin-category-status-badge ${item.isAvailable ? 'active' : 'hidden'}`}
+                                                className={`rk-chip ${item.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
                                             >
-                                                {item.isAvailable
-                                                    ? '● Hoạt động'
-                                                    : '● Đã ẩn'}
+                                                {item.isAvailable ? 'Hoạt động' : 'Đã ẩn'}
                                             </span>
                                         </td>
                                         <td className="admin-category-cell-date">
@@ -546,7 +544,7 @@ export default function AdminCategoryPage() {
                                 &larr;
                             </button>
                             <h3 className="admin-category-detail-title">
-                                CHI TIẾT DANH MỤC
+                                CHI TIẾT Danh mục
                             </h3>
                         </div>
                         <div className="admin-category-detail-header-right">
@@ -582,14 +580,14 @@ export default function AdminCategoryPage() {
                     <div className="admin-category-detail-grid">
                         <div className="admin-category-card">
                             <span className="admin-category-input-label">
-                                TÊN DANH MỤC
+                                TÊN Danh mục
                             </span>
                             <p className="admin-category-detail-name">
                                 {selectedCategory.name}
                             </p>
 
                             <span className="admin-category-input-label">
-                                MÔ TẢ DANH MỤC
+                                MÔ TẢ Danh mục
                             </span>
                             <p className="admin-category-detail-description">
                                 {selectedCategory.description ||
@@ -599,7 +597,7 @@ export default function AdminCategoryPage() {
                             <div className="admin-category-detail-metrics">
                                 <div>
                                     <span className="admin-category-input-label">
-                                        TRẠNG THÁI HIỂN THỊ
+                                        Trạng thái HIỂN THỊ
                                     </span>
                                     <span
                                         className={`admin-category-detail-status ${selectedCategory.isAvailable ? 'active' : 'hidden'}`}
@@ -635,7 +633,7 @@ export default function AdminCategoryPage() {
                             </div>
                             <div className="admin-category-card admin-category-meta-card">
                                 <span className="admin-category-input-label">
-                                    CẬP NHẬT CUỐI MÁY CHỦ
+                                    Cập nhật cuối
                                 </span>
                                 <p className="admin-category-meta-value">
                                     {selectedCategory.updatedAt
@@ -652,7 +650,7 @@ export default function AdminCategoryPage() {
                         <div className="admin-category-dish-list-header">
                             <h4 className="admin-category-dish-list-title">
                                 <UtensilsCrossed className="rk-icon" aria-hidden="true" />{' '}
-                                DANH SÁCH MÓN TRONG DANH MỤC ({categoryDishes.length} món)
+                                DANH SÁCH MÓN TRONG Danh mục ({categoryDishes.length} món)
                             </h4>
                         </div>
 
@@ -663,16 +661,16 @@ export default function AdminCategoryPage() {
                                         <thead>
                                             <tr className="admin-category-table-header">
                                                 <th className="admin-category-dish-col-name">
-                                                    TÊN MÓN
+                                                    Tên món
                                                 </th>
                                                 <th className="admin-category-dish-col-price">
-                                                    GIÁ (VND)
+                                                    Giá (VNĐ)
                                                 </th>
                                                 <th className="admin-category-dish-col-status">
-                                                    TRẠNG THÁI
+                                                    Trạng thái
                                                 </th>
                                                 <th className="admin-category-dish-col-date">
-                                                    NGÀY TẠO
+                                                    Ngày tạo
                                                 </th>
                                             </tr>
                                         </thead>
@@ -726,11 +724,11 @@ export default function AdminCategoryPage() {
                                                     </td>
                                                     <td className="admin-category-dish-cell-status">
                                                         <span
-                                                            className={`admin-category-status-badge ${dish.isAvailable ? 'active' : 'hidden'}`}
+                                                            className={`rk-chip ${dish.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
                                                         >
                                                             {dish.isAvailable
-                                                                ? '● Đang bán'
-                                                                : '● Tạm dừng'}
+                                                                ? 'Đang bán'
+                                                                : 'Tạm dừng'}
                                                         </span>
                                                     </td>
                                                     <td className="admin-category-dish-cell-date">
@@ -809,21 +807,21 @@ export default function AdminCategoryPage() {
                         </button>
                         <h3 className="admin-category-form-title">
                             {view === 'CREATE'
-                                ? 'THÊM DANH MỤC MỚI'
-                                : 'CHỈNH SỬA DANH MỤC'}
+                                ? 'THÊM Danh mục MỚI'
+                                : 'CHỈNH SỬA Danh mục'}
                         </h3>
                     </div>
 
                     <form onSubmit={handleSave} className="admin-category-form-card">
                         <div className="admin-category-form-group">
                             <label className="admin-category-input-label">
-                                TÊN DANH MỤC{' '}
+                                TÊN Danh mục{' '}
                                 <span className="admin-category-required">*</span>
                             </label>
                             <input
                                 type="text"
                                 required
-                                placeholder="Ví dụ: Hải Sản, Món Nướng, Đồ Tráng Miệng..."
+                                placeholder="Ví dụ: Hải Sản, Món Nướng, Đồ Tráng Miệng…"
                                 maxLength={50}
                                 value={formData.name}
                                 onChange={(e) =>
@@ -836,7 +834,7 @@ export default function AdminCategoryPage() {
                         <div className="admin-category-form-group">
                             <div className="admin-category-textarea-header">
                                 <label className="admin-category-input-label">
-                                    MÔ TẢ CHI TIẾT
+                                    Mô tả chi tiết
                                 </label>
                                 <span className="admin-category-char-count">
                                     {formData.description.length}/100
@@ -845,7 +843,7 @@ export default function AdminCategoryPage() {
                             <textarea
                                 maxLength={100}
                                 rows={4}
-                                placeholder="Nhập tóm tắt thông tin mô tả về nhóm món ăn này..."
+                                placeholder="Nhập tóm tắt thông tin mô tả về nhóm món ăn này…"
                                 value={formData.description}
                                 onChange={(e) =>
                                     setFormData({
@@ -895,7 +893,7 @@ export default function AdminCategoryPage() {
                                 disabled={isSubmitting}
                                 className="rk-btn rk-btn--primary"
                             >
-                                {isSubmitting ? ' Đang lưu...' : 'Lưu dữ liệu'}
+                                {isSubmitting ? ' Đang lưu…' : 'Lưu dữ liệu'}
                             </button>
                         </div>
                     </form>

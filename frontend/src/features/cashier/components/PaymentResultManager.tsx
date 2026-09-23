@@ -196,7 +196,7 @@ export default function PaymentResultManager({
                             borderTop: customerName ? 'none' : '1px dashed #cbd5e1',
                         }}
                     >
-                        <span>TỔNG THANH TOÁN:</span>
+                        <span>Tổng thanh toán:</span>
                         <span>{formatCurrency(finalAmount)}</span>
                     </div>
 

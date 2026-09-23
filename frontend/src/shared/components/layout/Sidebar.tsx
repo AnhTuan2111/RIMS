@@ -78,11 +78,7 @@ export function Sidebar() {
                     {actor === RoleType.CUSTOMER ? brandInitial : 'R'}
                 </div>
                 <div>
-                    <h2>
-                        {actor === RoleType.CUSTOMER
-                            ? restaurantName.toUpperCase()
-                            : 'RIMS'}
-                    </h2>
+                    <h2>{actor === RoleType.CUSTOMER ? restaurantName : 'RIMS'}</h2>
                     <p>
                         {actor === RoleType.CUSTOMER
                             ? restaurantTagline

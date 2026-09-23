@@ -108,7 +108,7 @@ export default function AdminMenuDashboardPage() {
     if (loading) {
         return (
             <LoadingState
-                title="Đang tải tổng quan thực đơn..."
+                title="Đang tải tổng quan thực đơn…"
                 description="Hệ thống đang cập nhật danh mục, món ăn và trạng thái kinh doanh."
             />
         )
@@ -156,7 +156,7 @@ export default function AdminMenuDashboardPage() {
                 <div className="admin-menu-stat-card admin-menu-stat-total">
                     <div className="admin-menu-stat-inner">
                         <div>
-                            <span className="admin-menu-stat-label">TỔNG SỐ MÓN</span>
+                            <span className="admin-menu-stat-label">Tổng số món</span>
 
                             <h2 className="admin-menu-stat-number">{data.totalDishes}</h2>
                         </div>
@@ -170,7 +170,7 @@ export default function AdminMenuDashboardPage() {
                 <div className="admin-menu-stat-card admin-menu-stat-categories">
                     <div className="admin-menu-stat-inner">
                         <div>
-                            <span className="admin-menu-stat-label">DANH MỤC</span>
+                            <span className="admin-menu-stat-label">Danh mục</span>
 
                             <h2 className="admin-menu-stat-number">
                                 {data.totalCategories}
@@ -186,7 +186,7 @@ export default function AdminMenuDashboardPage() {
                 <div className="admin-menu-stat-card admin-menu-stat-paused">
                     <div className="admin-menu-stat-inner">
                         <div>
-                            <span className="admin-menu-stat-label">TẠM DỪNG BÁN</span>
+                            <span className="admin-menu-stat-label">Tạm dừng bán</span>
 
                             <h2 className="admin-menu-stat-number">
                                 {data.totalPausedDishes}
@@ -200,7 +200,7 @@ export default function AdminMenuDashboardPage() {
                 <div className="admin-menu-stat-card admin-menu-stat-hidden">
                     <div className="admin-menu-stat-inner">
                         <div>
-                            <span className="admin-menu-stat-label">DANH MỤC ẨN</span>
+                            <span className="admin-menu-stat-label">Danh mục ẩn</span>
 
                             <h2 className="admin-menu-stat-number">
                                 {data.totalHiddenDishes}
@@ -255,8 +255,8 @@ export default function AdminMenuDashboardPage() {
                                         }`}
                                     >
                                         {category.status === 'ACTIVE'
-                                            ? '● Hoạt động'
-                                            : '● Đang ẩn'}
+                                            ? 'Hoạt động'
+                                            : 'Đang ẩn'}
                                     </span>
                                 </div>
                             ))}
@@ -322,11 +322,11 @@ export default function AdminMenuDashboardPage() {
                             <table className="admin-menu-table">
                                 <thead>
                                     <tr className="admin-menu-table-header">
-                                        <th>MÓN ĂN</th>
-                                        <th>DANH MỤC</th>
-                                        <th>GIÁ NIÊM YẾT</th>
+                                        <th>Món ăn</th>
+                                        <th>Danh mục</th>
+                                        <th>Giá niêm yết</th>
                                         <th className="admin-menu-text-center">
-                                            TRẠNG THÁI
+                                            Trạng thái
                                         </th>
                                     </tr>
                                 </thead>
@@ -372,7 +372,7 @@ export default function AdminMenuDashboardPage() {
                                             </td>
 
                                             <td>
-                                                <span className="admin-menu-category-tag">
+                                                <span className="rk-tag">
                                                     {dish.categoryName}
                                                 </span>
                                             </td>
@@ -460,7 +460,7 @@ export default function AdminMenuDashboardPage() {
                                         </div>
 
                                         <span className="admin-menu-paused-label">
-                                            TẠM NGƯNG
+                                            Tạm ngưng
                                         </span>
                                     </div>
                                 ))

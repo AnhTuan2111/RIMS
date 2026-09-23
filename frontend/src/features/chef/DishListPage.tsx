@@ -211,7 +211,7 @@ export default function DishListPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món ăn..."
+                title="Đang tải danh sách món ăn…"
                 description="Hệ thống đang lấy dữ liệu thực đơn mới nhất."
             />
         )
@@ -277,7 +277,7 @@ export default function DishListPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm tên món, danh mục hoặc mã món..."
+                        placeholder="Tìm theo tên món, danh mục hoặc mã món…"
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -373,7 +373,7 @@ export default function DishListPage() {
                                     </span>
 
                                     <span>
-                                        <span className="category-pill">
+                                        <span className="rk-tag">
                                             {dishItem.category}
                                         </span>
                                     </span>
@@ -386,8 +386,8 @@ export default function DishListPage() {
                                         <span
                                             className={
                                                 dishItem.available
-                                                    ? 'status-badge completed'
-                                                    : 'status-badge danger'
+                                                    ? 'rk-chip rk-chip--ok'
+                                                    : 'rk-chip rk-chip--alert'
                                             }
                                         >
                                             {dishItem.available ? 'Đang bán' : 'Tạm hết'}
@@ -412,7 +412,7 @@ export default function DishListPage() {
                                             }}
                                         >
                                             {updatingDishId === dishItem.dishId
-                                                ? 'Đang cập nhật...'
+                                                ? 'Đang cập nhật…'
                                                 : dishItem.available
                                                   ? 'Tạm hết'
                                                   : 'Mở bán'}

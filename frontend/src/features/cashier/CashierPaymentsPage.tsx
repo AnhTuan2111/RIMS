@@ -260,7 +260,7 @@ export default function CashierPaymentsPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải sơ đồ quầy thu ngân..."
+                title="Đang tải sơ đồ quầy thu ngân…"
                 description="Hệ thống đang lấy trạng thái bàn và đơn hàng mới nhất."
             />
         )

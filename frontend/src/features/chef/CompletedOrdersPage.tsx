@@ -150,7 +150,7 @@ export default function CompletedOrdersPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món đã hoàn thành..."
+                title="Đang tải danh sách món đã hoàn thành…"
                 description="Hệ thống đang lấy dữ liệu mới nhất từ bếp."
             />
         )
@@ -205,7 +205,7 @@ export default function CompletedOrdersPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm tên món, bàn, mã đơn hoặc mã item..."
+                        placeholder="Tìm theo tên món, bàn, mã đơn hoặc mã món…"
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -284,26 +284,26 @@ export default function CompletedOrdersPage() {
                                             <h3>{item.dishName}</h3>
                                         </div>
 
-                                        <span className="status-badge completed">
+                                        <span className="rk-chip rk-chip--ok">
                                             Hoàn thành
                                         </span>
                                     </div>
 
                                     <div className="completed-order-info">
                                         <div>
-                                            <small>BÀN</small>
+                                            <small>Bàn</small>
 
                                             <strong>{item.tableNumber}</strong>
                                         </div>
 
                                         <div>
-                                            <small>SỐ LƯỢNG</small>
+                                            <small>Số lượng</small>
 
                                             <strong>x{item.quantity}</strong>
                                         </div>
 
                                         <div>
-                                            <small>THỜI GIAN TẠO</small>
+                                            <small>Thời gian tạo</small>
 
                                             <strong>
                                                 {formatDateTime(item.createdAt)}

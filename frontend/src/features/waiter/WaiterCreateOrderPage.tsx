@@ -265,7 +265,7 @@ export default function WaiterCreateOrderPage() {
 
                 <input
                     type="text"
-                    placeholder="Tìm kiếm món ăn..."
+                    placeholder="Tìm theo tên món hoặc danh mục…"
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     className="waiter-search-input"

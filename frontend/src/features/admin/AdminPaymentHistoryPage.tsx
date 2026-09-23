@@ -211,7 +211,7 @@ export default function AdminPaymentHistoryPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải lịch sử thanh toán..."
+                title="Đang tải lịch sử thanh toán…"
                 description="Hệ thống đang lấy danh sách hóa đơn đã thanh toán."
             />
         )
@@ -301,7 +301,7 @@ export default function AdminPaymentHistoryPage() {
                     <input
                         type="text"
                         value={keywordInput}
-                        placeholder="Mã hóa đơn..."
+                        placeholder="Mã hóa đơn…"
                         style={{
                             ...filterInputStyle,
                             width: 140,

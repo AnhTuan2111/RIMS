@@ -204,6 +204,34 @@ body {
     color: var(--rims-alert);
 }
 
+/* Chip bấm được (bật/tắt trạng thái) phải cho thấy là bấm được. */
+button.rk-chip {
+    cursor: pointer;
+}
+
+button.rk-chip:hover {
+    filter: brightness(0.96);
+}
+
+/*
+ * Nhãn phân loại: tên danh mục, nhóm món. Không có chấm tròn vì đây không
+ * phải trạng thái — chấm tròn chỉ dành cho thứ đang thay đổi theo thời gian.
+ */
+.rk-tag {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    padding: var(--rims-space-1) var(--rims-space-3);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-medium);
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
 .rk-chip--idle {
     background: var(--rims-idle-soft);
     border-color: var(--rims-idle-line);
@@ -301,7 +329,6 @@ body {
     font-size: var(--rims-text-xs);
     font-weight: var(--rims-weight-semibold);
     letter-spacing: var(--rims-tracking-label);
-    text-transform: uppercase;
     opacity: 0.85;
 }
 
@@ -447,7 +474,6 @@ body {
     font-size: var(--rims-text-xs);
     font-weight: var(--rims-weight-semibold);
     letter-spacing: var(--rims-tracking-label);
-    text-transform: uppercase;
     color: var(--rims-ink-3);
 }
 
@@ -476,7 +502,6 @@ body {
     font-size: var(--rims-text-xs);
     font-weight: var(--rims-weight-semibold);
     letter-spacing: var(--rims-tracking-label);
-    text-transform: uppercase;
     color: var(--rims-ink-3);
 }
 

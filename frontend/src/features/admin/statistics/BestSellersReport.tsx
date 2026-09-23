@@ -160,7 +160,7 @@ export function BestSellersReport({
                                 <div className="item-info">
                                     <div className="item-title-row">
                                         <strong>{item.dishName}</strong>
-                                        <span className="item-category-tag">
+                                        <span className="rk-tag">
                                             {formatRevenueCurrency(item.totalRevenue)}
                                         </span>
                                     </div>

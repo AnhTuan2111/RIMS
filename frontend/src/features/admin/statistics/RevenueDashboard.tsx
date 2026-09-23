@@ -472,7 +472,7 @@ export function RevenueDashboard({
                                 type="submit"
                             >
                                 {isCustomLoading
-                                    ? 'Đang áp dụng...'
+                                    ? 'Đang áp dụng…'
                                     : 'Áp dụng khoảng ngày'}
                             </button>
                         </div>

@@ -253,7 +253,7 @@ export default function AdminDishesPage() {
     if (loading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món ăn hệ thống..."
+                title="Đang tải danh sách món ăn hệ thống…"
                 description="Hệ thống đang lấy dữ liệu món ăn và danh mục mới nhất."
             />
         )
@@ -307,7 +307,7 @@ export default function AdminDishesPage() {
                     <div className="admin-dish-filter-container">
                         <input
                             type="text"
-                            placeholder="Tìm theo tên món ăn hoặc mã ID..."
+                            placeholder="Tìm theo tên món hoặc mã món…"
                             value={searchKeyword}
                             onChange={(e) => {
                                 setSearchKeyword(e.target.value)
@@ -354,7 +354,7 @@ export default function AdminDishesPage() {
                 <div className="admin-dish-card admin-dish-stats-card">
                     <div className="admin-dish-stats-inner">
                         <div>
-                            <span className="admin-dish-stats-label">MÓN TÌM THẤY</span>
+                            <span className="admin-dish-stats-label">Món tìm thấy</span>
                             <h2 className="admin-dish-stats-number">
                                 {filteredDishes.length}
                             </h2>
@@ -371,13 +371,13 @@ export default function AdminDishesPage() {
                 <table className="admin-dish-table">
                     <thead>
                         <tr className="admin-dish-table-header">
-                            <th className="admin-dish-col-image">HÌNH ẢNH</th>
-                            <th className="admin-dish-col-name">TÊN MÓN ĂN</th>
-                            <th className="admin-dish-col-category">DANH MỤC</th>
-                            <th className="admin-dish-col-price">GIÁ NIÊM YẾT</th>
-                            <th className="admin-dish-col-status">TRẠNG THÁI</th>
-                            <th className="admin-dish-col-date">NGÀY TẠO</th>
-                            <th className="admin-dish-col-actions">THAO TÁC</th>
+                            <th className="admin-dish-col-image">Hình ảnh</th>
+                            <th className="admin-dish-col-name">Tên món ăn</th>
+                            <th className="admin-dish-col-category">Danh mục</th>
+                            <th className="admin-dish-col-price">Giá niêm yết</th>
+                            <th className="admin-dish-col-status">Trạng thái</th>
+                            <th className="admin-dish-col-date">Ngày tạo</th>
+                            <th className="admin-dish-col-actions">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -423,11 +423,11 @@ export default function AdminDishesPage() {
                                     </td>
                                     <td className="admin-dish-cell-status">
                                         <span
-                                            className={`admin-dish-status-badge ${dish.isHidden ? 'paused' : 'available'}`}
+                                            className={`rk-chip ${dish.isHidden ? 'rk-chip--idle' : 'rk-chip--ok'}`}
                                         >
                                             {dish.isHidden
-                                                ? '● Đã ẩn khỏi menu'
-                                                : '● Đang hiển thị'}
+                                                ? 'Đã ẩn khỏi thực đơn'
+                                                : 'Đang hiển thị'}
                                         </span>
                                     </td>
                                     <td className="admin-dish-cell-date">
@@ -520,7 +520,7 @@ export default function AdminDishesPage() {
                             <div className="admin-dish-form-group">
                                 <div>
                                     <label className="admin-dish-input-label">
-                                        TÊN MÓN ĂN *
+                                        Tên món ăn *
                                     </label>
                                     <input
                                         type="text"
@@ -541,7 +541,7 @@ export default function AdminDishesPage() {
                                 <div className="admin-dish-form-row">
                                     <div>
                                         <label className="admin-dish-input-label">
-                                            DANH MỤC THỰC ĐƠN
+                                            Danh mục thực đơn
                                         </label>
                                         <select
                                             value={formData.categoryId}
@@ -567,7 +567,7 @@ export default function AdminDishesPage() {
                                     </div>
                                     <div>
                                         <label className="admin-dish-input-label">
-                                            GIÁ BÁN (VNĐ) *
+                                            Giá bán (VNĐ) *
                                         </label>
                                         <input
                                             type="number"
@@ -587,11 +587,11 @@ export default function AdminDishesPage() {
 
                                 <div>
                                     <label className="admin-dish-input-label">
-                                        MÔ TẢ MÓN ĂN
+                                        Mô tả món ăn
                                     </label>
                                     <textarea
                                         rows={4}
-                                        placeholder="Mô tả tóm tắt hương vị, các thành phần nguyên liệu đặc biệt..."
+                                        placeholder="Mô tả tóm tắt hương vị, các thành phần nguyên liệu đặc biệt…"
                                         maxLength={100}
                                         value={formData.description}
                                         onChange={(e) =>
@@ -631,7 +631,7 @@ export default function AdminDishesPage() {
                         <div>
                             <div>
                                 <label className="admin-dish-input-label">
-                                    HÌNH ẢNH MINH HỌA
+                                    Hình ảnh minh hoạ
                                 </label>
                                 <div className="admin-dish-image-preview">
                                     {formData.imageUrl ? (
@@ -670,7 +670,7 @@ export default function AdminDishesPage() {
                                     }
                                     className="rk-btn rk-btn--primary rk-btn--block"
                                 >
-                                    {isSubmitting ? ' Đang thêm...' : 'Thêm món ăn'}
+                                    {isSubmitting ? ' Đang thêm…' : 'Thêm món ăn'}
                                 </button>
                                 <button
                                     type="button"
@@ -739,7 +739,7 @@ export default function AdminDishesPage() {
                                 />
                             </div>
                             <div className="admin-dish-view-sku">
-                                <span className="admin-dish-view-sku-label">MÃ ID:</span>
+                                <span className="admin-dish-view-sku-label">Mã món</span>
                                 <strong>
                                     {String(selectedDish.id).padStart(2, '0')}
                                 </strong>
@@ -753,7 +753,7 @@ export default function AdminDishesPage() {
                                 </h3>
                                 <hr className="admin-dish-divider" />
                                 <h4 className="admin-dish-view-desc-label">
-                                    MÔ TẢ CHI TIẾT
+                                    Mô tả chi tiết
                                 </h4>
                                 <div className="admin-dish-view-description">
                                     {selectedDish.description ||
@@ -782,7 +782,7 @@ export default function AdminDishesPage() {
                                 <div className="admin-dish-form-row">
                                     <div>
                                         <label className="admin-dish-input-label">
-                                            TÊN MÓN ĂN
+                                            Tên món ăn
                                         </label>
                                         <input
                                             type="text"
@@ -799,7 +799,7 @@ export default function AdminDishesPage() {
                                     </div>
                                     <div>
                                         <label className="admin-dish-input-label">
-                                            DANH MỤC
+                                            Danh mục
                                         </label>
                                         <select
                                             value={formData.categoryId}
@@ -824,7 +824,7 @@ export default function AdminDishesPage() {
                                 <div className="admin-dish-form-row">
                                     <div>
                                         <label className="admin-dish-input-label">
-                                            GIÁ BÁN (VNĐ)
+                                            Giá bán (VNĐ)
                                         </label>
                                         <input
                                             type="number"
@@ -840,7 +840,7 @@ export default function AdminDishesPage() {
                                     </div>
                                     <div>
                                         <label className="admin-dish-input-label">
-                                            TRẠNG THÁI HIỂN THỊ
+                                            Trạng thái HIỂN THỊ
                                         </label>
                                         <div className="admin-dish-radio-group">
                                             <label className="admin-dish-radio-label">
@@ -877,7 +877,7 @@ export default function AdminDishesPage() {
 
                                 <div>
                                     <label className="admin-dish-input-label">
-                                        MÔ TẢ CHI TIẾT
+                                        Mô tả chi tiết
                                     </label>
                                     <textarea
                                         rows={4}
@@ -932,7 +932,7 @@ export default function AdminDishesPage() {
                                     disabled={isSubmitting}
                                     className="rk-btn rk-btn--primary rk-btn--block"
                                 >
-                                    {isSubmitting ? ' ĐANG LƯU...' : 'CẬP NHẬT'}
+                                    {isSubmitting ? ' Đang lưu…' : 'Cập nhật'}
                                 </button>
                             </div>
                         </div>
@@ -940,7 +940,7 @@ export default function AdminDishesPage() {
                         <div>
                             <div>
                                 <div className="admin-dish-preview-header">
-                                    XEM TRƯỚC HIỂN THỊ CHUẨN
+                                    Xem trước trên thực đơn
                                 </div>
                                 <div className="admin-dish-preview-body">
                                     {/* Thay thế phần này */}
@@ -967,7 +967,7 @@ export default function AdminDishesPage() {
                             </div>
 
                             <div className="admin-dish-danger-zone">
-                                <h5> KHU VỰC NGUY HIỂM</h5>
+                                <h5> Khu vực nguy hiểm</h5>
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -975,7 +975,7 @@ export default function AdminDishesPage() {
                                     }}
                                     className="rk-btn rk-btn--danger rk-btn--block"
                                 >
-                                    XÓA MÓN ĂN KHỎI MENU
+                                    XÓA Món ăn KHỎI MENU
                                 </button>
                             </div>
                         </div>

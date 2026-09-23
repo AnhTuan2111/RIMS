@@ -129,7 +129,7 @@ export default function LoginPage() {
                     </div>
 
                     <button type="submit" className="auth-submit" disabled={isLoading}>
-                        {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                        {isLoading ? 'Đang đăng nhập…' : 'Đăng nhập'}
                     </button>
                 </form>
 

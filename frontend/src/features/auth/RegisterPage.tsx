@@ -184,7 +184,7 @@ export default function RegisterPage() {
                     </div>
 
                     <button type="submit" className="auth-submit" disabled={isLoading}>
-                        {isLoading ? 'Đang đăng ký...' : 'Tạo tài khoản'}
+                        {isLoading ? 'Đang đăng ký…' : 'Tạo tài khoản'}
                     </button>
                 </form>
 

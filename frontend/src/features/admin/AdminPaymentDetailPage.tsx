@@ -147,7 +147,7 @@ export default function AdminPaymentDetailPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải chi tiết hóa đơn..."
+                title="Đang tải chi tiết hóa đơn…"
                 description="Hệ thống đang lấy thông tin hóa đơn và danh sách món ăn."
             />
         )
@@ -197,10 +197,10 @@ export default function AdminPaymentDetailPage() {
 
                     <div className="admin-invoice-detail-table">
                         <div className="admin-invoice-detail-table-head">
-                            <span>MÓN ĂN</span>
+                            <span>Món ăn</span>
                             <span>SL</span>
-                            <span>ĐƠN GIÁ</span>
-                            <span>THÀNH TIỀN</span>
+                            <span>Đơn giá</span>
+                            <span>Thành tiền</span>
                         </div>
 
                         {payment.items.length === 0 ? (
@@ -253,7 +253,7 @@ export default function AdminPaymentDetailPage() {
                         <div className="admin-invoice-summary-divider" />
 
                         <div className="admin-invoice-summary-row admin-invoice-summary-row-total">
-                            <span className="admin-invoice-total-label">THÀNH TIỀN</span>
+                            <span className="admin-invoice-total-label">Thành tiền</span>
                             <span className="admin-invoice-summary-highlight">
                                 {formatCurrency(payment.finalAmount)}
                             </span>

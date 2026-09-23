@@ -529,7 +529,7 @@ export default function WaiterUpdateOrderPage() {
 
                 <input
                     type="text"
-                    placeholder="Tìm kiếm món ăn..."
+                    placeholder="Tìm theo tên món hoặc danh mục…"
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     className="waiter-search-input"
@@ -686,7 +686,7 @@ export default function WaiterUpdateOrderPage() {
                                                     >
                                                         {acknowledgingItemId ===
                                                         draft.orderItemId
-                                                            ? 'Đang xác nhận...'
+                                                            ? 'Đang xác nhận…'
                                                             : 'Đã xem'}
                                                     </button>
                                                 )

@@ -561,7 +561,7 @@ export default function KitchenQueuePage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món cần chế biến..."
+                title="Đang tải danh sách món cần chế biến…"
                 description="Hệ thống đang lấy dữ liệu mới nhất từ bếp."
             />
         )
@@ -650,7 +650,7 @@ export default function KitchenQueuePage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm tên món, bàn hoặc mã đơn..."
+                        placeholder="Tìm theo tên món, bàn hoặc mã đơn…"
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -969,7 +969,7 @@ export default function KitchenQueuePage() {
                                         }
                                     >
                                         {isInternalNoteSubmitting
-                                            ? 'Đang gửi...'
+                                            ? 'Đang gửi…'
                                             : chefInternalNote.trim()
                                               ? 'Gửi cho Waiter'
                                               : 'Xóa ghi chú'}
@@ -993,7 +993,7 @@ export default function KitchenQueuePage() {
                                     rows={4}
                                     maxLength={500}
                                     value={cancelReason}
-                                    placeholder="Nhập lý do hủy món..."
+                                    placeholder="Nhập lý do hủy món…"
                                     onChange={(event) => {
                                         setCancelReason(event.target.value)
                                         setCancelError(null)

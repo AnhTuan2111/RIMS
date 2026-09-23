@@ -558,7 +558,7 @@ export default function WaiterEditReservationPage() {
                                         >
                                             <option value={0}>
                                                 {isTablesLoading
-                                                    ? 'Đang tải bàn...'
+                                                    ? 'Đang tải bàn…'
                                                     : 'Chọn bàn'}
                                             </option>
 
@@ -599,7 +599,7 @@ export default function WaiterEditReservationPage() {
                                             disabled={submitting || canceling}
                                             onClick={() => void submitReservation()}
                                         >
-                                            {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                            {submitting ? 'Đang lưu…' : 'Lưu thay đổi'}
                                         </button>
 
                                         <button
@@ -609,7 +609,7 @@ export default function WaiterEditReservationPage() {
                                             disabled={submitting || canceling}
                                             onClick={() => void handleCancelReservation()}
                                         >
-                                            {canceling ? 'Đang hủy...' : 'Hủy đặt bàn'}
+                                            {canceling ? 'Đang hủy…' : 'Hủy đặt bàn'}
                                         </button>
 
                                         <button

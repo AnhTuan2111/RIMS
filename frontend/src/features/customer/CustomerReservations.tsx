@@ -582,7 +582,7 @@ export default function CustomerReservations() {
                                 <input
                                     type="text"
                                     value={bookForm.note}
-                                    placeholder="Yêu cầu đặc biệt..."
+                                    placeholder="Yêu cầu đặc biệt…"
                                     maxLength={100}
                                     onChange={(event) =>
                                         setBookForm((previous) => ({
@@ -604,7 +604,7 @@ export default function CustomerReservations() {
                                     Boolean(tableError)
                                 }
                             >
-                                {bookLoading ? 'Đang xử lý...' : 'Lưu đặt bàn'}
+                                {bookLoading ? 'Đang xử lý…' : 'Lưu đặt bàn'}
                             </button>
 
                             <button
@@ -705,7 +705,7 @@ export default function CustomerReservations() {
                                         }
                                     >
                                         {cancelingId === reservation.id
-                                            ? 'Đang xử lý...'
+                                            ? 'Đang xử lý…'
                                             : 'Hủy đặt bàn'}
                                     </button>
                                 </div>

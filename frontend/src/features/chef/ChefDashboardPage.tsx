@@ -66,7 +66,7 @@ export default function ChefDashboardPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải tổng quan bếp..."
+                title="Đang tải tổng quan bếp…"
                 description="Hệ thống đang cập nhật số liệu bếp."
             />
         )

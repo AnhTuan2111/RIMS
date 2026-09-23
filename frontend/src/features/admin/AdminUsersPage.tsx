@@ -436,7 +436,7 @@ export default function AdminUsersPage() {
                         setSearch(e.target.value)
                         setPage(0)
                     }}
-                    placeholder="Tìm theo tên, tài khoản, email, SĐT..."
+                    placeholder="Tìm theo tên, tài khoản, email hoặc số điện thoại…"
                     style={{
                         flex: 1,
                         minWidth: 200,
@@ -477,7 +477,7 @@ export default function AdminUsersPage() {
             {/* ── Table ── */}
             {isLoading ? (
                 <LoadingState
-                    title="Đang tải danh sách tài khoản..."
+                    title="Đang tải danh sách tài khoản…"
                     description="Hệ thống đang lấy dữ liệu tài khoản mới nhất."
                 />
             ) : (
@@ -487,7 +487,7 @@ export default function AdminUsersPage() {
                         <span>Họ tên</span>
                         <span>Tài khoản</span>
                         <span>Email</span>
-                        <span>SĐT</span>
+                        <span>Số điện thoại</span>
                         <span>Vai trò</span>
                         <span>Trạng thái</span>
                         <span>Thao tác</span>
@@ -554,29 +554,20 @@ export default function AdminUsersPage() {
                                     </span>
                                     <span>
                                         <button
+                                            type="button"
+                                            className={`rk-chip ${
+                                                user.isActive
+                                                    ? 'rk-chip--ok'
+                                                    : 'rk-chip--alert'
+                                            }`}
                                             onClick={() => void handleStatusToggle(user)}
                                             title={
                                                 user.isActive
-                                                    ? 'Nhấn để khóa tài khoản'
+                                                    ? 'Nhấn để khoá tài khoản'
                                                     : 'Nhấn để kích hoạt tài khoản'
                                             }
-                                            style={{
-                                                background: user.isActive
-                                                    ? '#d1fae5'
-                                                    : '#fee2e2',
-                                                color: user.isActive
-                                                    ? '#065f46'
-                                                    : '#991b1b',
-                                                padding: '4px 10px',
-                                                borderRadius: 12,
-                                                fontSize: 11,
-                                                fontWeight: 600,
-                                                border: `1px solid ${user.isActive ? '#6ee7b7' : '#fca5a5'}`,
-                                                cursor: 'pointer',
-                                                transition: 'all 0.15s ease',
-                                            }}
                                         >
-                                            {user.isActive ? '● Hoạt động' : '● Đã khóa'}
+                                            {user.isActive ? 'Hoạt động' : 'Đã khoá'}
                                         </button>
                                     </span>
                                     <span
@@ -640,7 +631,7 @@ export default function AdminUsersPage() {
                                 disabled={formLoading}
                                 onClick={() => void handleCreateStaff()}
                             >
-                                {formLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
+                                {formLoading ? 'Đang tạo…' : 'Tạo tài khoản'}
                             </button>
                         </>
                     }
@@ -737,7 +728,7 @@ export default function AdminUsersPage() {
                                 disabled={formLoading}
                                 onClick={() => void handleCreateCustomer()}
                             >
-                                {formLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
+                                {formLoading ? 'Đang tạo…' : 'Tạo tài khoản'}
                             </button>
                         </>
                     }
@@ -913,7 +904,7 @@ export default function AdminUsersPage() {
                                 disabled={formLoading}
                                 onClick={() => void handleUpdate()}
                             >
-                                {formLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                {formLoading ? 'Đang lưu…' : 'Lưu thay đổi'}
                             </button>
                         </>
                     }

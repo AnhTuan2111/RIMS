@@ -302,7 +302,7 @@ export default function OrderPanel({
                         <input
                             type="text"
                             inputMode="numeric"
-                            placeholder="Nhập SĐT khách hàng..."
+                            placeholder="Nhập Số điện thoại khách hàng…"
                             style={customerInputStyle}
                             value={phoneSearch}
                             disabled={!!customer}
@@ -361,7 +361,8 @@ export default function OrderPanel({
                             </p>
 
                             <div style={phoneHintStyle}>
-                                SĐT dùng để đăng ký: <strong>{phoneSearch}</strong>
+                                Số điện thoại dùng để đăng ký:{' '}
+                                <strong>{phoneSearch}</strong>
                             </div>
 
                             <input
@@ -394,7 +395,7 @@ export default function OrderPanel({
                                 disabled={!isCreateFormValid || processingCreate}
                                 onClick={() => void handleCreateCustomer()}
                             >
-                                {processingCreate ? 'Đang tạo...' : 'Tạo Tài Khoản'}
+                                {processingCreate ? 'Đang tạo…' : 'Tạo Tài Khoản'}
                             </button>
                         </div>
                     )}
@@ -555,7 +556,7 @@ export default function OrderPanel({
                                 disabled={isLocking}
                                 onClick={() => void handleCheckoutClick()}
                             >
-                                {isLocking ? 'Đang khóa đơn...' : 'CheckOut'}
+                                {isLocking ? 'Đang khóa đơn…' : 'CheckOut'}
                             </button>
                         )}
                     </div>

@@ -299,7 +299,7 @@ export default function CashierInvoicesPage() {
 
                 <input
                     value={keyword}
-                    placeholder="Tìm theo tên/SĐT khách hàng..."
+                    placeholder="Tìm theo tên hoặc số điện thoại khách…"
                     style={{
                         ...filterInputStyle,
                         flex: 1,
@@ -320,7 +320,7 @@ export default function CashierInvoicesPage() {
 
                 <input
                     value={invoiceCode}
-                    placeholder="Mã hóa đơn..."
+                    placeholder="Mã hóa đơn…"
                     style={{
                         ...filterInputStyle,
                         width: 140,
@@ -335,7 +335,7 @@ export default function CashierInvoicesPage() {
 
             {isLoading ? (
                 <LoadingState
-                    title="Đang tải lịch sử hóa đơn..."
+                    title="Đang tải lịch sử hóa đơn…"
                     description="Hệ thống đang lấy danh sách hóa đơn mới nhất."
                 />
             ) : invoices.length === 0 ? (
@@ -613,7 +613,7 @@ export default function CashierInvoicesPage() {
 
                             <Row
                                 bold
-                                label="THÀNH TIỀN:"
+                                label="Thành tiền:"
                                 value={`${formatCurrency(selectedInvoice.finalAmount)}`}
                                 color="#b91c1c"
                             />

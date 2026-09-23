@@ -5,7 +5,7 @@ type LoadingStateProps = {
 }
 
 export function LoadingState({
-    title = 'Đang tải dữ liệu...',
+    title = 'Đang tải dữ liệu…',
     description = 'Hệ thống đang đồng bộ thông tin mới nhất.',
     size = 'md',
 }: LoadingStateProps) {

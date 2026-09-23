@@ -279,7 +279,7 @@ export default function PaymentModal({
                                 disabled={amountReceived < finalAmount || processing}
                                 onClick={() => void handleConfirmCash()}
                             >
-                                {processing ? 'Đang xử lý...' : 'Xác nhận & In Hóa Đơn'}
+                                {processing ? 'Đang xử lý…' : 'Xác nhận & In Hóa Đơn'}
                             </button>
                         </div>
                     </div>
@@ -323,7 +323,7 @@ export default function PaymentModal({
                                 disabled={processing}
                                 onClick={() => void handleRedirectToVNPay()}
                             >
-                                {processing ? 'Đang kết nối...' : 'Chuyển hướng ngay'}
+                                {processing ? 'Đang kết nối…' : 'Chuyển hướng ngay'}
                             </button>
                         </div>
                     </div>

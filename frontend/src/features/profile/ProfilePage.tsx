@@ -420,7 +420,7 @@ export default function ProfilePage() {
                             disabled={updateLoading}
                             onClick={() => void handleSaveProfile()}
                         >
-                            {updateLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                            {updateLoading ? 'Đang lưu…' : 'Lưu thay đổi'}
                         </button>
                     </div>
                 )}
@@ -486,9 +486,7 @@ export default function ProfilePage() {
                                     disabled={pwLoading}
                                     onClick={() => void handleChangePassword()}
                                 >
-                                    {pwLoading
-                                        ? 'Đang xử lý...'
-                                        : 'Xác nhận đổi mật khẩu'}
+                                    {pwLoading ? 'Đang xử lý…' : 'Xác nhận đổi mật khẩu'}
                                 </button>
                             </div>
                         </div>

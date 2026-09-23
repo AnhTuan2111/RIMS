@@ -226,7 +226,7 @@ export default function GroupedKitchenPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách gom món..."
+                title="Đang tải danh sách gom món…"
                 description="Hệ thống đang lấy dữ liệu nhóm món mới nhất từ bếp."
             />
         )
@@ -289,7 +289,7 @@ export default function GroupedKitchenPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder={'Tìm món, bàn, ' + 'mã đơn hoặc ghi chú...'}
+                        placeholder="Tìm theo tên món, bàn, mã đơn hoặc ghi chú…"
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -397,8 +397,8 @@ export default function GroupedKitchenPage() {
                                                 }
                                             >
                                                 {group.hasNote
-                                                    ? 'CÓ GHI CHÚ — LÀM RIÊNG'
-                                                    : 'GOM CHUNG'}
+                                                    ? 'Có ghi chú — làm riêng'
+                                                    : 'Gom chung'}
                                             </span>
 
                                             <h3>{group.dishName}</h3>
@@ -417,7 +417,7 @@ export default function GroupedKitchenPage() {
                                         </div>
 
                                         <div className="group-total">
-                                            <small>TỔNG</small>
+                                            <small>Tổng</small>
                                             <strong>x{group.totalQuantity}</strong>
                                         </div>
                                     </div>
@@ -482,7 +482,7 @@ export default function GroupedKitchenPage() {
                                             }}
                                         >
                                             {completingGroupKey === group.groupKey
-                                                ? 'Đang cập nhật...'
+                                                ? 'Đang cập nhật…'
                                                 : group.hasNote
                                                   ? 'Xong món'
                                                   : 'Xong cả nhóm'}
