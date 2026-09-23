@@ -83,9 +83,12 @@ export default function AdminMenuDashboardPage() {
 
                 setError('Không thể tải dữ liệu thống kê từ hệ thống.')
             } finally {
-                if (showFullLoading) {
-                    setLoading(false)
-                }
+                // setLoading(false) phải chạy trong MỌI trường hợp. Trước đây nó nằm
+                // trong if (showFullLoading), nên khi gọi với showFullLoading=false thì
+                // loading khởi tạo là true không bao giờ được tắt -> trang kẹt ở màn
+                // hình "đang tải" vĩnh viễn. Cờ này chỉ quyết định có BẬT spinner hay
+                // không, chứ không quyết định có TẮT hay không.
+                setLoading(false)
             }
         },
         [],
