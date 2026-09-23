@@ -398,48 +398,6 @@
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-/* Modal */
-.waiter-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    backdrop-filter: blur(2px);
-}
-
-.waiter-modal {
-    background: #ffffff;
-    border-radius: 0.75rem;
-    padding: 2rem;
-    width: 26rem;
-    text-align: center;
-    box-shadow:
-        0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.waiter-modal h3 {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0 0 0.75rem 0;
-}
-
-.waiter-modal p {
-    font-size: 0.95rem;
-    color: #475569;
-    margin: 0 0 1.75rem 0;
-}
-
-.waiter-modal-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-
 .waiter-btn-outline {
     border: 1px solid #cbd5e1;
     background: #ffffff;
@@ -567,40 +525,6 @@
     font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 1.25rem;
-}
-
-.waiter-toast {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    padding: 1.1rem 1.5rem;
-    border-radius: 0.35rem;
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-    animation: slideUp 0.3s ease-out;
-}
-
-.waiter-toast-success {
-    background: #16a34a;
-}
-
-.waiter-toast-error {
-    background: #dc2626;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
 }
 
 .waiter-res-card {

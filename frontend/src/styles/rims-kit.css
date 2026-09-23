@@ -161,6 +161,8 @@ body {
    người mù màu vẫn đọc được trạng thái. */
 
 .rk-chip {
+    /* Trong cột flex, chip phải bó sát nội dung chứ không kéo hết chiều ngang. */
+    align-self: flex-start;
     display: inline-flex;
     align-items: center;
     gap: var(--rims-space-2);
@@ -200,6 +202,12 @@ body {
     background: var(--rims-alert-soft);
     border-color: var(--rims-alert-line);
     color: var(--rims-alert);
+}
+
+.rk-chip--idle {
+    background: var(--rims-idle-soft);
+    border-color: var(--rims-idle-line);
+    color: var(--rims-idle);
 }
 
 .rk-chip--brand {
@@ -980,6 +988,52 @@ textarea.rk-input {
 
 .rk-modal__body {
     padding: var(--rims-space-6);
+
+    /* Biểu mẫu dài phải cuộn trong hộp, không đẩy hộp dài quá màn hình. */
+    max-height: calc(100vh - 14rem);
+    overflow-y: auto;
+}
+
+/*
+ * Thân hộp chia hai cột: bên trái là các trường nhập, bên phải là phần phụ
+ * trợ (ảnh minh hoạ, tóm tắt). Thu về một cột khi màn hẹp.
+ */
+.rk-modal__split {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: var(--rims-space-6);
+}
+
+.rk-modal__split > * {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+    min-width: 0;
+}
+
+.rk-modal__split > * + * {
+    padding-left: var(--rims-space-6);
+    border-left: 1px solid var(--rims-line);
+}
+
+@media (max-width: 860px) {
+    .rk-modal__split {
+        grid-template-columns: 1fr;
+    }
+
+    .rk-modal__split > * + * {
+        padding-left: 0;
+        padding-top: var(--rims-space-5);
+        border-left: 0;
+        border-top: 1px solid var(--rims-line);
+    }
+}
+
+.rk-modal__loading {
+    margin: 0;
+    padding: var(--rims-space-8) 0;
+    text-align: center;
+    color: var(--rims-ink-2);
 }
 
 .rk-modal__foot {

@@ -313,7 +313,7 @@ export default function AdminPaymentHistoryPage() {
 
                     <button
                         type="button"
-                        className="secondary-button"
+                        className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
                         Xóa bộ lọc

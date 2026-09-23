@@ -184,7 +184,7 @@ export default function CompletedOrdersPage() {
 
                             <button
                                 type="button"
-                                className="secondary-button"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => {
                                     loadCompletedOrders(true, true).catch(
                                         (requestError) => {
@@ -242,7 +242,7 @@ export default function CompletedOrdersPage() {
 
                     <button
                         type="button"
-                        className="secondary-button"
+                        className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
                         Xóa bộ lọc
@@ -257,7 +257,7 @@ export default function CompletedOrdersPage() {
                     action={
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
                             Xóa bộ lọc

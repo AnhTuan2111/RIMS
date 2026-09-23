@@ -17,9 +17,11 @@ import type {
     OrderItemStatus,
     UpdateOrderItemRequest,
 } from '@/shared/api/waiter'
-import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from './components'
+import {BackArrow, fmtPrice, WaiterHeader} from './components'
+import {Modal} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
+import {useToast} from '@/app/providers/useToast'
 
 type DraftItem = {
     qty: number
@@ -33,11 +35,6 @@ type DraftItem = {
     chefInternalNoteCreatedAt?: string | null
     chefInternalNoteAcknowledgedAt?: string | null
 }
-
-type ToastState = {
-    msg: string
-    type: string
-} | null
 
 type UpdateItemWithName = UpdateOrderItemRequest & {
     name: string
@@ -114,6 +111,8 @@ function getChefNoteBoxStyle(acknowledged: boolean): CSSProperties {
 }
 
 export default function WaiterUpdateOrderPage() {
+    const {notify} = useToast()
+
     const navigate = useNavigate()
     const {tableId} = useParams()
 
@@ -124,8 +123,6 @@ export default function WaiterUpdateOrderPage() {
     const [servingOrders, setServingOrders] = useState<OrderDetailResponse[]>([])
 
     const [orderDraft, setOrderDraft] = useState<Record<number, DraftItem>>({})
-
-    const [toast, setToast] = useState<ToastState>(null)
 
     const [showConfirm, setShowConfirm] = useState(false)
 
@@ -147,15 +144,6 @@ export default function WaiterUpdateOrderPage() {
     const [pageError, setPageError] = useState<string | null>(null)
 
     const hasUserEditedDraftRef = useRef(false)
-
-    function showToast(msg: string, type = 'success') {
-        setToast({
-            msg,
-            type,
-        })
-
-        window.setTimeout(() => setToast(null), 3000)
-    }
 
     const loadOrderData = useCallback(
         async (signal?: AbortSignal, showFullLoading = true) => {
@@ -356,12 +344,12 @@ export default function WaiterUpdateOrderPage() {
 
     function openConfirm() {
         if (!servingOrders.length) {
-            showToast('Không có đơn hàng đang phục vụ để cập nhật.', 'error')
+            notify('Không có đơn hàng đang phục vụ để cập nhật.', {tone: 'alert'})
             return
         }
 
         if (changeSummary.length === 0) {
-            showToast('Không có thay đổi nào để cập nhật.', 'error')
+            notify('Không có thay đổi nào để cập nhật.', {tone: 'alert'})
             return
         }
 
@@ -402,12 +390,12 @@ export default function WaiterUpdateOrderPage() {
 
             console.error('[WAITER_UPDATE_ORDER_SUBMIT_ERROR]', requestError)
 
-            showToast(
+            notify(
                 `Cập nhật thất bại: ${getErrorMessage(
                     requestError,
                     'Lỗi không xác định',
                 )}`,
-                'error',
+                {tone: 'alert'},
             )
         } finally {
             setSubmitting(false)
@@ -497,7 +485,7 @@ export default function WaiterUpdateOrderPage() {
                 },
             }))
 
-            showToast('Đã xác nhận ghi chú từ bếp.')
+            notify('Đã xác nhận ghi chú từ bếp.')
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
                 return
@@ -505,10 +493,9 @@ export default function WaiterUpdateOrderPage() {
 
             console.error('[WAITER_UPDATE_ORDER_ACK_NOTE_ERROR]', requestError)
 
-            showToast(
-                getErrorMessage(requestError, 'Không thể xác nhận ghi chú từ bếp.'),
-                'error',
-            )
+            notify(getErrorMessage(requestError, 'Không thể xác nhận ghi chú từ bếp.'), {
+                tone: 'alert',
+            })
         } finally {
             setAcknowledgingItemId(null)
         }
@@ -571,7 +558,7 @@ export default function WaiterUpdateOrderPage() {
 
                         <button
                             type="button"
-                            className="waiter-btn-outline"
+                            className="rk-btn rk-btn--quiet"
                             style={retryButtonStyle}
                             onClick={() => void loadOrderData(undefined, true)}
                         >
@@ -684,7 +671,7 @@ export default function WaiterUpdateOrderPage() {
                                                 draft.orderItemId && (
                                                     <button
                                                         type="button"
-                                                        className="waiter-btn-outline"
+                                                        className="rk-btn rk-btn--quiet"
                                                         style={ackButtonStyle}
                                                         disabled={
                                                             acknowledgingItemId ===
@@ -775,55 +762,77 @@ export default function WaiterUpdateOrderPage() {
                 )}
             </main>
 
-            {showConfirm && (
-                <ConfirmModal
-                    title="Xác nhận cập nhật đơn hàng"
-                    message={`Bàn ${tableIdNumber} — Bạn đang gửi yêu cầu cập nhật các món sau:`}
-                    confirmLabel={submitting ? 'Đang gửi...' : 'Xác nhận'}
-                    onCancel={() => {
-                        if (!submitting) {
-                            setShowConfirm(false)
-                        }
-                    }}
-                    onConfirm={() => {
-                        if (!submitting) {
-                            void submitUpdateOrder()
-                        }
-                    }}
-                >
-                    <ul className="waiter-confirm-list">
-                        {changeSummary.map((item) => (
-                            <li key={item.dishId}>
-                                <span>
-                                    {item.name}
-                                    {item.kind === 'new' && ` × ${item.qty} (Món mới)`}
-                                    {item.kind === 'increase' && ` +${item.qty}`}
-                                    {item.kind === 'decrease' && ` −${item.qty}`}
-                                    {item.kind === 'cancel' && ' (Hủy món)'}
-                                    {item.kind === 'note' && ' (Cập nhật ghi chú)'}
-                                </span>
+            <Modal
+                open={showConfirm}
+                title="Xác nhận cập nhật đơn hàng"
+                description={`Bàn ${tableIdNumber} — bạn đang gửi yêu cầu cập nhật các món sau:`}
+                onClose={() => {
+                    if (!submitting) {
+                        setShowConfirm(false)
+                    }
+                }}
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--quiet"
+                            disabled={submitting}
+                            onClick={() => setShowConfirm(false)}
+                        >
+                            Quay lại
+                        </button>
 
-                                {item.note && <small>Ghi chú: {item.note}</small>}
-                            </li>
-                        ))}
-                    </ul>
-                </ConfirmModal>
-            )}
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--primary"
+                            disabled={submitting}
+                            onClick={() => {
+                                if (!submitting) {
+                                    void submitUpdateOrder()
+                                }
+                            }}
+                        >
+                            {submitting ? 'Đang gửi…' : 'Gửi cập nhật xuống bếp'}
+                        </button>
+                    </>
+                }
+            >
+                <ul className="waiter-confirm-list">
+                    {changeSummary.map((item) => (
+                        <li key={item.dishId}>
+                            <span>
+                                {item.name}
+                                {item.kind === 'new' && ` × ${item.qty} (Món mới)`}
+                                {item.kind === 'increase' && ` +${item.qty}`}
+                                {item.kind === 'decrease' && ` −${item.qty}`}
+                                {item.kind === 'cancel' && ' (Hủy món)'}
+                                {item.kind === 'note' && ' (Cập nhật ghi chú)'}
+                            </span>
 
-            {successData && (
-                <ConfirmModal
-                    title="Thành công"
-                    message={successData.message}
-                    confirmLabel="Đóng"
-                    cancelLabel=""
-                    onConfirm={() => navigate('/waiter/tables')}
-                    onCancel={() => navigate('/waiter/tables')}
-                >
-                    <div style={successSummaryStyle}>{successData.itemSummary}</div>
-                </ConfirmModal>
-            )}
+                            {item.note && <small>Ghi chú: {item.note}</small>}
+                        </li>
+                    ))}
+                </ul>
+            </Modal>
 
-            <WaiterToast toast={toast} />
+            <Modal
+                open={Boolean(successData)}
+                title="Đã gửi cập nhật xuống bếp"
+                description={successData?.message}
+                size="sm"
+                onClose={() => navigate('/waiter/tables')}
+                footer={
+                    <button
+                        type="button"
+                        className="rk-btn rk-btn--primary"
+                        onClick={() => navigate('/waiter/tables')}
+                    >
+                        Về sơ đồ bàn
+                    </button>
+                }
+            >
+                <div style={successSummaryStyle}>{successData?.itemSummary}</div>
+            </Modal>
         </div>
     )
 }

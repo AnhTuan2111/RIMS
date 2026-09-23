@@ -136,7 +136,7 @@ export default function WaiterReservationDetailPage() {
 
                             <button
                                 type="button"
-                                className="waiter-btn-primary"
+                                className="rk-btn rk-btn--primary"
                                 style={buttonTopStyle}
                                 onClick={() => void loadReservation(undefined, true)}
                             >
@@ -170,7 +170,7 @@ export default function WaiterReservationDetailPage() {
 
                             <button
                                 type="button"
-                                className="waiter-btn-primary"
+                                className="rk-btn rk-btn--primary"
                                 style={buttonTopStyle}
                                 onClick={() => navigate('/waiter/tables')}
                             >

@@ -270,7 +270,7 @@ export default function GroupedKitchenPage() {
 
                             <button
                                 type="button"
-                                className="secondary-button"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => {
                                     loadGroups(true, true).catch((requestError) => {
                                         console.error(requestError)
@@ -346,7 +346,7 @@ export default function GroupedKitchenPage() {
 
                     <button
                         type="button"
-                        className="secondary-button"
+                        className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
                         Xóa bộ lọc
@@ -361,7 +361,7 @@ export default function GroupedKitchenPage() {
                     action={
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
                             Xóa bộ lọc
@@ -469,7 +469,7 @@ export default function GroupedKitchenPage() {
 
                                         <button
                                             type="button"
-                                            className="primary-button"
+                                            className="rk-btn rk-btn--primary"
                                             disabled={
                                                 completingGroupKey === group.groupKey
                                             }

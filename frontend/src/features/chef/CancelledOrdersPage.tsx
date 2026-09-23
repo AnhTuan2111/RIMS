@@ -129,7 +129,7 @@ export default function CancelledOrdersPage() {
                     <div className="completed-page-actions">
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={() => void loadCancelledOrders()}
                         >
                             Làm mới
@@ -158,7 +158,7 @@ export default function CancelledOrdersPage() {
 
                     <button
                         type="button"
-                        className="secondary-button"
+                        className="rk-btn rk-btn--quiet"
                         onClick={() => {
                             setSearchText('')
                             setCurrentPage(1)

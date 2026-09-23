@@ -308,7 +308,7 @@ export default function ProfilePage() {
                 {!isEditing && canEditProfile && (
                     <button
                         type="button"
-                        className="primary-button"
+                        className="rk-btn rk-btn--primary"
                         onClick={() => setIsEditing(true)}
                     >
                         Chỉnh sửa
@@ -404,7 +404,7 @@ export default function ProfilePage() {
                     <div style={profileActionStyle}>
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={() => {
                                 setIsEditing(false)
                                 syncFormFromUser(currentUser)
@@ -416,7 +416,7 @@ export default function ProfilePage() {
 
                         <button
                             type="button"
-                            className="primary-button"
+                            className="rk-btn rk-btn--primary"
                             disabled={updateLoading}
                             onClick={() => void handleSaveProfile()}
                         >
@@ -482,7 +482,7 @@ export default function ProfilePage() {
                             <div style={passwordActionStyle}>
                                 <button
                                     type="button"
-                                    className="primary-button"
+                                    className="rk-btn rk-btn--primary"
                                     disabled={pwLoading}
                                     onClick={() => void handleChangePassword()}
                                 >

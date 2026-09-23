@@ -11,14 +11,10 @@ import type {
 import {getAvailableTimeSlots} from '@/shared/utils/reservationTime'
 
 import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {WaiterHeader, WaiterToast} from './components'
+import {WaiterHeader} from './components'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
-
-type ToastState = {
-    msg: string
-    type: string
-} | null
+import {useToast} from '@/app/providers/useToast'
 
 type ReservationForm = {
     customerName: string
@@ -60,14 +56,14 @@ function splitReservationTime(value?: string | null) {
 }
 
 export default function WaiterCreateReservationPage() {
+    const {notify} = useToast()
+
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
 
     const preselectedTable = Number.parseInt(searchParams.get('tableId') ?? '0', 10)
 
     const [tables, setTables] = useState<TableDetailResponse[]>([])
-
-    const [toast, setToast] = useState<ToastState>(null)
 
     const [resFormError, setResFormError] = useState('')
 
@@ -116,15 +112,6 @@ export default function WaiterCreateReservationPage() {
             })
         }
     }, [availableTimeSlots, resForm.time])
-
-    function showToast(msg: string, type = 'success') {
-        setToast({
-            msg,
-            type,
-        })
-
-        window.setTimeout(() => setToast(null), 3000)
-    }
 
     async function loadTables(signal?: AbortSignal, showFullLoading = true) {
         try {
@@ -332,7 +319,7 @@ export default function WaiterCreateReservationPage() {
         try {
             await waiterApi.createReservation(payload)
 
-            showToast('Đã tạo đặt bàn')
+            notify('Đã tạo đặt bàn')
             setResFormError('')
 
             setResForm({
@@ -504,7 +491,7 @@ export default function WaiterCreateReservationPage() {
                             <div style={actionRowStyle}>
                                 <button
                                     type="button"
-                                    className="waiter-btn-primary"
+                                    className="rk-btn rk-btn--primary"
                                     style={{
                                         flex: 1,
                                     }}
@@ -516,7 +503,7 @@ export default function WaiterCreateReservationPage() {
 
                                 <button
                                     type="button"
-                                    className="waiter-btn-outline"
+                                    className="rk-btn rk-btn--quiet"
                                     disabled={submitting}
                                     onClick={() => navigate('/waiter/tables')}
                                 >
@@ -589,7 +576,7 @@ export default function WaiterCreateReservationPage() {
                                             {reservationId && (
                                                 <button
                                                     type="button"
-                                                    className="waiter-btn-outline"
+                                                    className="rk-btn rk-btn--quiet"
                                                     style={editButtonStyle}
                                                     onClick={() =>
                                                         navigate(
@@ -608,8 +595,6 @@ export default function WaiterCreateReservationPage() {
                     </div>
                 </div>
             </main>
-
-            <WaiterToast toast={toast} />
         </div>
     )
 }

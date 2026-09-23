@@ -5,10 +5,9 @@ import {
     ErrBox,
     Field,
     FieldGroup,
-    Modal,
-    ModalActions,
     PasswordInput,
 } from '@/features/admin/users/UserFormControls'
+import {Modal} from '@/shared/components/ui'
 import {ROLE_COLORS, ROLE_LABELS, STAFF_ROLES} from '@/features/admin/users/constants'
 import type {ModalType, Tab} from '@/features/admin/users/constants'
 import {btn, ghostBtn, gridCols} from '@/features/admin/users/styles'
@@ -352,7 +351,7 @@ export default function AdminUsersPage() {
                 actions={
                     <button
                         type="button"
-                        className="primary-button"
+                        className="rk-btn rk-btn--primary"
                         onClick={() => openCreate(tab)}
                     >
                         + Thêm {tab === 'staff' ? 'nhân viên' : 'khách hàng'}
@@ -509,7 +508,7 @@ export default function AdminUsersPage() {
                             action={
                                 <button
                                     type="button"
-                                    className="primary-button"
+                                    className="rk-btn rk-btn--primary"
                                     onClick={() => openCreate(tab)}
                                 >
                                     + Thêm {tab === 'staff' ? 'nhân viên' : 'khách hàng'}
@@ -624,7 +623,28 @@ export default function AdminUsersPage() {
 
             {/* ── Modals ── */}
             {modal === 'create-staff' && (
-                <Modal title="Thêm tài khoản nhân viên" onClose={() => setModal(null)}>
+                <Modal
+                    open
+                    title="Thêm tài khoản nhân viên"
+                    onClose={() => setModal(null)}
+                    footer={
+                        <>
+                            <button
+                                className="rk-btn rk-btn--quiet"
+                                onClick={() => setModal(null)}
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                className="rk-btn rk-btn--primary"
+                                disabled={formLoading}
+                                onClick={() => void handleCreateStaff()}
+                            >
+                                {formLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
+                            </button>
+                        </>
+                    }
+                >
                     <FieldGroup>
                         <Field label="Họ tên *">
                             <input
@@ -696,26 +716,32 @@ export default function AdminUsersPage() {
                         </Field>
                     </FieldGroup>
                     {formError && <ErrBox msg={formError} />}
-                    <ModalActions>
-                        <button
-                            className="secondary-button"
-                            onClick={() => setModal(null)}
-                        >
-                            Hủy
-                        </button>
-                        <button
-                            className="primary-button"
-                            disabled={formLoading}
-                            onClick={() => void handleCreateStaff()}
-                        >
-                            {formLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
-                        </button>
-                    </ModalActions>
                 </Modal>
             )}
 
             {modal === 'create-customer' && (
-                <Modal title="Thêm tài khoản khách hàng" onClose={() => setModal(null)}>
+                <Modal
+                    open
+                    title="Thêm tài khoản khách hàng"
+                    onClose={() => setModal(null)}
+                    footer={
+                        <>
+                            <button
+                                className="rk-btn rk-btn--quiet"
+                                onClick={() => setModal(null)}
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                className="rk-btn rk-btn--primary"
+                                disabled={formLoading}
+                                onClick={() => void handleCreateCustomer()}
+                            >
+                                {formLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
+                            </button>
+                        </>
+                    }
+                >
                     <FieldGroup>
                         <Field label="Họ tên *">
                             <input
@@ -775,26 +801,31 @@ export default function AdminUsersPage() {
                         </Field>
                     </FieldGroup>
                     {formError && <ErrBox msg={formError} />}
-                    <ModalActions>
-                        <button
-                            className="secondary-button"
-                            onClick={() => setModal(null)}
-                        >
-                            Hủy
-                        </button>
-                        <button
-                            className="primary-button"
-                            disabled={formLoading}
-                            onClick={() => void handleCreateCustomer()}
-                        >
-                            {formLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
-                        </button>
-                    </ModalActions>
                 </Modal>
             )}
 
             {modal === 'detail' && selectedUser && (
-                <Modal title="Chi tiết tài khoản" onClose={() => setModal(null)}>
+                <Modal
+                    open
+                    title="Chi tiết tài khoản"
+                    onClose={() => setModal(null)}
+                    footer={
+                        <>
+                            <button
+                                className="rk-btn rk-btn--quiet"
+                                onClick={() => setModal(null)}
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                className="rk-btn rk-btn--primary"
+                                onClick={() => openEdit(selectedUser)}
+                            >
+                                Chỉnh sửa
+                            </button>
+                        </>
+                    }
+                >
                     <div style={{marginBottom: 20}}>
                         <div
                             style={{
@@ -861,27 +892,31 @@ export default function AdminUsersPage() {
                                 : '—'
                         }
                     />
-                    <ModalActions>
-                        <button
-                            className="secondary-button"
-                            onClick={() => setModal(null)}
-                        >
-                            Đóng
-                        </button>
-                        <button
-                            className="primary-button"
-                            onClick={() => openEdit(selectedUser)}
-                        >
-                            Chỉnh sửa
-                        </button>
-                    </ModalActions>
                 </Modal>
             )}
 
             {modal === 'edit' && selectedUser && (
                 <Modal
+                    open
                     title={`Chỉnh sửa — ${selectedUser.username}`}
                     onClose={() => setModal(null)}
+                    footer={
+                        <>
+                            <button
+                                className="rk-btn rk-btn--quiet"
+                                onClick={() => setModal(null)}
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                className="rk-btn rk-btn--primary"
+                                disabled={formLoading}
+                                onClick={() => void handleUpdate()}
+                            >
+                                {formLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                            </button>
+                        </>
+                    }
                 >
                     <div
                         style={{
@@ -964,21 +999,6 @@ export default function AdminUsersPage() {
                             )}
                     </FieldGroup>
                     {formError && <ErrBox msg={formError} />}
-                    <ModalActions>
-                        <button
-                            className="secondary-button"
-                            onClick={() => setModal(null)}
-                        >
-                            Hủy
-                        </button>
-                        <button
-                            className="primary-button"
-                            disabled={formLoading}
-                            onClick={() => void handleUpdate()}
-                        >
-                            {formLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
-                        </button>
-                    </ModalActions>
                 </Modal>
             )}
         </PageCard>

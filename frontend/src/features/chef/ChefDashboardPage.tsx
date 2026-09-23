@@ -145,15 +145,15 @@ export default function ChefDashboardPage() {
 
             <PageCard>
                 <div className="chef-dashboard-actions">
-                    <Link to="/chef/orders" className="primary-button">
+                    <Link to="/chef/orders" className="rk-btn rk-btn--primary">
                         Xem hàng đợi bếp
                     </Link>
 
-                    <Link to="/chef/grouped-orders" className="secondary-button">
+                    <Link to="/chef/grouped-orders" className="rk-btn rk-btn--quiet">
                         Xem món đã gom
                     </Link>
 
-                    <Link to="/chef/dishes" className="secondary-button">
+                    <Link to="/chef/dishes" className="rk-btn rk-btn--quiet">
                         Quản lý món ăn
                     </Link>
                 </div>

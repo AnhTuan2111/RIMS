@@ -13,9 +13,9 @@ import {
     type DishDetailResponse,
     type KitchenOrderItemResponse,
 } from '@/shared/api/chef'
-import {Pagination} from '@/shared/components/ui'
+import {ConfirmDialog, Modal, Pagination} from '@/shared/components/ui'
 import {useToast} from '@/app/providers/useToast'
-import {ConfirmDialog} from '@/shared/components/ui'
+import {ORDER_ITEM_STATUS_LABELS, type OrderItemStatus} from '@/shared/types/order'
 
 const ITEMS_PER_PAGE = 6
 const NEW_ORDER_MESSAGE_DURATION_MS = 6_000
@@ -619,7 +619,7 @@ export default function KitchenQueuePage() {
 
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={() => {
                                 loadKitchenOrders().catch((requestError) => {
                                     console.error(requestError)
@@ -687,7 +687,7 @@ export default function KitchenQueuePage() {
 
                     <button
                         type="button"
-                        className="secondary-button"
+                        className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
                         Xóa bộ lọc
@@ -702,7 +702,7 @@ export default function KitchenQueuePage() {
                     action={
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
                             Xóa bộ lọc
@@ -802,251 +802,216 @@ export default function KitchenQueuePage() {
                 </>
             )}
 
-            {(isDetailLoading || detailError || selectedDish) && (
-                <div className="modal-backdrop" onClick={closeDishDetail}>
-                    <div
-                        className="modal-card"
-                        onClick={(event) => event.stopPropagation()}
-                    >
-                        <div className="modal-header">
-                            <div>
-                                <h2>Chi tiết món cần chế biến</h2>
-                                <p>Thông tin chi tiết từ bếp.</p>
-                            </div>
+            <Modal
+                open={isDetailLoading || Boolean(detailError) || Boolean(selectedDish)}
+                title={selectedDish ? selectedDish.dishName : 'Chi tiết món'}
+                description={
+                    selectedDish
+                        ? `Bàn ${selectedDish.tableNumber} · ${selectedDish.quantity} phần`
+                        : undefined
+                }
+                size="lg"
+                onClose={closeDishDetail}
+                footer={
+                    selectedDish ? (
+                        <>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet"
+                                onClick={closeDishDetail}
+                            >
+                                Quay lại
+                            </button>
 
                             <button
                                 type="button"
-                                className="modal-close"
-                                onClick={closeDishDetail}
+                                className="rk-btn rk-btn--danger"
+                                disabled={isCancelSubmitting}
+                                onClick={() =>
+                                    handleCancelDish().catch((requestError) => {
+                                        console.error(requestError)
+                                    })
+                                }
                             >
-                                ×
+                                {isCancelSubmitting ? 'Đang huỷ…' : 'Huỷ món'}
                             </button>
-                        </div>
 
-                        {isDetailLoading && (
-                            <div className="modal-body">
-                                <p>Đang tải chi tiết món...</p>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--go"
+                                disabled={completingItemId === selectedDish.orderItemId}
+                                onClick={() =>
+                                    handleComplete(selectedDish.orderItemId).catch(
+                                        (requestError) => {
+                                            console.error(requestError)
+                                        },
+                                    )
+                                }
+                            >
+                                {completingItemId === selectedDish.orderItemId
+                                    ? 'Đang cập nhật…'
+                                    : 'Xong món'}
+                            </button>
+                        </>
+                    ) : undefined
+                }
+            >
+                {isDetailLoading && (
+                    <p className="rk-modal__loading">Đang tải chi tiết món…</p>
+                )}
+
+                {detailError && <p className="rk-formerror">{detailError}</p>}
+
+                {selectedDish && (
+                    <>
+                        <div>
+                            <div className="detail-grid">
+                                <div>
+                                    <span>Trạng thái</span>
+                                    <strong>
+                                        {ORDER_ITEM_STATUS_LABELS[
+                                            selectedDish.status as OrderItemStatus
+                                        ] ?? selectedDish.status}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Vào bếp lúc</span>
+                                    <strong>{formatTime(selectedDish.createdAt)}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Mã món</span>
+                                    <strong>#{selectedDish.orderItemId}</strong>
+                                </div>
                             </div>
-                        )}
 
-                        {detailError && (
-                            <div className="modal-body">
-                                <p className="modal-error">{detailError}</p>
+                            <div className="detail-section">
+                                <h3>Mô tả món</h3>
+                                <p>{selectedDish.description || 'Không có mô tả.'}</p>
                             </div>
-                        )}
 
-                        {selectedDish && (
-                            <>
-                                <div className="modal-body">
-                                    <div className="detail-grid">
-                                        <div>
-                                            <span>Bàn</span>
-                                            <strong>{selectedDish.tableNumber}</strong>
-                                        </div>
+                            <div className="detail-section">
+                                <h3>Ghi chú</h3>
+                                <p>{selectedDish.note || 'Không có ghi chú.'}</p>
+                            </div>
 
-                                        <div>
-                                            <span>Mã item</span>
-                                            <strong>#{selectedDish.orderItemId}</strong>
-                                        </div>
+                            <div className="chef-internal-note-box">
+                                <div className="chef-internal-note-heading">
+                                    <div>
+                                        <h3>Ghi chú nội bộ cho Waiter</h3>
 
-                                        <div>
-                                            <span>Tên món</span>
-                                            <strong>{selectedDish.dishName}</strong>
-                                        </div>
-
-                                        <div>
-                                            <span>Số lượng</span>
-                                            <strong>x{selectedDish.quantity}</strong>
-                                        </div>
-
-                                        <div>
-                                            <span>Trạng thái</span>
-                                            <strong>{selectedDish.status}</strong>
-                                        </div>
-
-                                        <div>
-                                            <span>Thời gian</span>
-                                            <strong>
-                                                {formatTime(selectedDish.createdAt)}
-                                            </strong>
-                                        </div>
-                                    </div>
-
-                                    <div className="detail-section">
-                                        <h3>Mô tả món</h3>
                                         <p>
-                                            {selectedDish.description ||
-                                                'Không có mô tả.'}
+                                            Dùng để báo tình trạng bếp trước khi Waiter
+                                            trao đổi với khách.
                                         </p>
                                     </div>
 
-                                    <div className="detail-section">
-                                        <h3>Ghi chú</h3>
-                                        <p>{selectedDish.note || 'Không có ghi chú.'}</p>
-                                    </div>
+                                    {selectedDish.chefInternalNote && (
+                                        <span
+                                            className={
+                                                selectedDish.chefInternalNoteAcknowledgedAt
+                                                    ? 'internal-note-status acknowledged'
+                                                    : 'internal-note-status waiting'
+                                            }
+                                        >
+                                            {selectedDish.chefInternalNoteAcknowledgedAt
+                                                ? 'Waiter đã xem'
+                                                : 'Chờ Waiter xem'}
+                                        </span>
+                                    )}
+                                </div>
 
-                                    <div className="chef-internal-note-box">
-                                        <div className="chef-internal-note-heading">
-                                            <div>
-                                                <h3>Ghi chú nội bộ cho Waiter</h3>
-
-                                                <p>
-                                                    Dùng để báo tình trạng bếp trước khi
-                                                    Waiter trao đổi với khách.
-                                                </p>
-                                            </div>
-
-                                            {selectedDish.chefInternalNote && (
-                                                <span
-                                                    className={
-                                                        selectedDish.chefInternalNoteAcknowledgedAt
-                                                            ? 'internal-note-status acknowledged'
-                                                            : 'internal-note-status waiting'
-                                                    }
-                                                >
-                                                    {selectedDish.chefInternalNoteAcknowledgedAt
-                                                        ? 'Waiter đã xem'
-                                                        : 'Chờ Waiter xem'}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className="internal-note-quick-actions">
-                                            {[
-                                                'Hết sốt, vui lòng hỏi khách đổi lựa chọn.',
-                                                'Món sẽ chậm thêm khoảng 10 phút.',
-                                                'Món này hiện chỉ còn 1 phần.',
-                                                'Có thể phục vụ nhưng thiếu phần trang trí.',
-                                            ].map((quickNote) => (
-                                                <button
-                                                    type="button"
-                                                    key={quickNote}
-                                                    onClick={() => {
-                                                        setChefInternalNote(quickNote)
-                                                        setInternalNoteError(null)
-                                                    }}
-                                                >
-                                                    {quickNote}
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        <textarea
-                                            rows={4}
-                                            maxLength={500}
-                                            value={chefInternalNote}
-                                            placeholder="Ví dụ: Hết sốt tiêu đen, vui lòng hỏi khách đổi sang sốt nấm."
-                                            onChange={(event) => {
-                                                setChefInternalNote(event.target.value)
+                                <div className="internal-note-quick-actions">
+                                    {[
+                                        'Hết sốt, vui lòng hỏi khách đổi lựa chọn.',
+                                        'Món sẽ chậm thêm khoảng 10 phút.',
+                                        'Món này hiện chỉ còn 1 phần.',
+                                        'Có thể phục vụ nhưng thiếu phần trang trí.',
+                                    ].map((quickNote) => (
+                                        <button
+                                            type="button"
+                                            key={quickNote}
+                                            onClick={() => {
+                                                setChefInternalNote(quickNote)
                                                 setInternalNoteError(null)
                                             }}
-                                        />
-
-                                        <div className="internal-note-bottom-row">
-                                            <span>{chefInternalNote.length}/500</span>
-
-                                            <button
-                                                type="button"
-                                                className="secondary-button internal-note-save-button"
-                                                disabled={isInternalNoteSubmitting}
-                                                onClick={() =>
-                                                    handleSaveInternalNote().catch(
-                                                        (requestError) => {
-                                                            console.error(requestError)
-                                                        },
-                                                    )
-                                                }
-                                            >
-                                                {isInternalNoteSubmitting
-                                                    ? 'Đang gửi...'
-                                                    : chefInternalNote.trim()
-                                                      ? 'Gửi cho Waiter'
-                                                      : 'Xóa ghi chú'}
-                                            </button>
-                                        </div>
-
-                                        {internalNoteError && (
-                                            <p className="modal-error">
-                                                {internalNoteError}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="cancel-request-box">
-                                        <h3>Hủy món</h3>
-
-                                        <p>
-                                            Món sẽ bị hủy ngay. Waiter chỉ nhận thông báo
-                                            để báo lại với khách.
-                                        </p>
-
-                                        <textarea
-                                            rows={4}
-                                            maxLength={500}
-                                            value={cancelReason}
-                                            placeholder="Nhập lý do hủy món..."
-                                            onChange={(event) => {
-                                                setCancelReason(event.target.value)
-                                                setCancelError(null)
-                                            }}
-                                        />
-
-                                        <div className="cancel-reason-count">
-                                            {cancelReason.length}/500
-                                        </div>
-
-                                        {cancelError && (
-                                            <p className="modal-error">{cancelError}</p>
-                                        )}
-                                    </div>
+                                        >
+                                            {quickNote}
+                                        </button>
+                                    ))}
                                 </div>
 
-                                <div className="modal-footer">
-                                    <button
-                                        type="button"
-                                        className="secondary-button"
-                                        onClick={closeDishDetail}
-                                    >
-                                        Quay lại
-                                    </button>
+                                <textarea
+                                    rows={4}
+                                    maxLength={500}
+                                    value={chefInternalNote}
+                                    placeholder="Ví dụ: Hết sốt tiêu đen, vui lòng hỏi khách đổi sang sốt nấm."
+                                    onChange={(event) => {
+                                        setChefInternalNote(event.target.value)
+                                        setInternalNoteError(null)
+                                    }}
+                                />
+
+                                <div className="internal-note-bottom-row">
+                                    <span>{chefInternalNote.length}/500</span>
 
                                     <button
                                         type="button"
-                                        className="danger-button"
-                                        disabled={isCancelSubmitting}
+                                        className="rk-btn rk-btn--quiet internal-note-save-button"
+                                        disabled={isInternalNoteSubmitting}
                                         onClick={() =>
-                                            handleCancelDish().catch((requestError) => {
-                                                console.error(requestError)
-                                            })
+                                            handleSaveInternalNote().catch(
+                                                (requestError) => {
+                                                    console.error(requestError)
+                                                },
+                                            )
                                         }
                                     >
-                                        {isCancelSubmitting ? 'Đang hủy...' : 'Hủy món'}
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="primary-button"
-                                        disabled={
-                                            completingItemId === selectedDish.orderItemId
-                                        }
-                                        onClick={() =>
-                                            handleComplete(
-                                                selectedDish.orderItemId,
-                                            ).catch((requestError) => {
-                                                console.error(requestError)
-                                            })
-                                        }
-                                    >
-                                        {completingItemId === selectedDish.orderItemId
-                                            ? 'Đang cập nhật...'
-                                            : 'Xong món'}
+                                        {isInternalNoteSubmitting
+                                            ? 'Đang gửi...'
+                                            : chefInternalNote.trim()
+                                              ? 'Gửi cho Waiter'
+                                              : 'Xóa ghi chú'}
                                     </button>
                                 </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+
+                                {internalNoteError && (
+                                    <p className="rk-formerror">{internalNoteError}</p>
+                                )}
+                            </div>
+
+                            <div className="cancel-request-box">
+                                <h3>Hủy món</h3>
+
+                                <p>
+                                    Món sẽ bị hủy ngay. Waiter chỉ nhận thông báo để báo
+                                    lại với khách.
+                                </p>
+
+                                <textarea
+                                    rows={4}
+                                    maxLength={500}
+                                    value={cancelReason}
+                                    placeholder="Nhập lý do hủy món..."
+                                    onChange={(event) => {
+                                        setCancelReason(event.target.value)
+                                        setCancelError(null)
+                                    }}
+                                />
+
+                                <div className="cancel-reason-count">
+                                    {cancelReason.length}/500
+                                </div>
+
+                                {cancelError && (
+                                    <p className="rk-formerror">{cancelError}</p>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+            </Modal>
 
             <ConfirmDialog
                 open={pendingComplete !== null}

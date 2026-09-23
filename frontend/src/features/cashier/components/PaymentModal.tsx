@@ -12,6 +12,7 @@ import type {CustomerInfo} from './OrderPanel'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {formatCurrency} from '@/shared/utils/format'
 import {useToast} from '@/app/providers/useToast'
+import {Modal} from '@/shared/components/ui'
 
 interface PaymentModalProps {
     orderId: number
@@ -169,226 +170,167 @@ export default function PaymentModal({
     }
 
     return (
-        <div className="modal-backdrop" style={backdropStyle}>
-            <div className="modal-card" style={modalCardStyle}>
-                <div className="modal-header" style={modalHeaderStyle}>
-                    <h2
+        <Modal
+            open
+            title="Thanh toán"
+            description={`Bàn ${orderDetail.tableNumber} — đơn #${orderDetail.orderId}`}
+            onClose={() => void handleCloseModal()}
+        >
+            <div>
+                {customer && (
+                    <div style={customerSummaryStyle}>
+                        <User className="rk-icon" aria-hidden="true" /> Khách:{' '}
+                        <strong>{customer.fullName}</strong>
+                        {pointsUsed > 0 && (
+                            <span
+                                style={{
+                                    color: '#059669',
+                                }}
+                            >
+                                {' '}
+                                — Đã dùng {pointsUsed} điểm giảm giá
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                <div style={amountSummaryStyle}>
+                    <span>Cần thu:</span>
+                    <strong
                         style={{
-                            margin: 0,
+                            color: '#b91c1c',
                         }}
                     >
-                        Thanh Toán
-                    </h2>
-
-                    <button
-                        type="button"
-                        style={closeButtonStyle}
-                        onClick={() => void handleCloseModal()}
-                    >
-                        ×
-                    </button>
+                        {formatCurrency(finalAmount)}
+                    </strong>
                 </div>
 
-                <div
-                    className="modal-body"
-                    style={{
-                        marginTop: '1.5rem',
-                    }}
-                >
-                    {customer && (
-                        <div style={customerSummaryStyle}>
-                            <User className="rk-icon" aria-hidden="true" /> Khách:{' '}
-                            <strong>{customer.fullName}</strong>
-                            {pointsUsed > 0 && (
-                                <span
-                                    style={{
-                                        color: '#059669',
-                                    }}
-                                >
-                                    {' '}
-                                    — Đã dùng {pointsUsed} điểm giảm giá
-                                </span>
-                            )}
+                {method === null &&
+                    (loadingMethods ? (
+                        <p style={{textAlign: 'center', color: '#64748b'}}>
+                            Đang tải phương thức thanh toán...
+                        </p>
+                    ) : (
+                        <div style={methodGridStyle}>
+                            {paymentMethods.map((m) => {
+                                const {icon, label} = methodDisplay(m)
+                                return (
+                                    <button
+                                        key={m}
+                                        type="button"
+                                        className="rk-btn rk-btn--quiet"
+                                        style={methodButtonStyle}
+                                        onClick={() => setMethod(m as PaymentMethodType)}
+                                    >
+                                        {icon} {label}
+                                    </button>
+                                )
+                            })}
                         </div>
-                    )}
+                    ))}
 
-                    <div style={amountSummaryStyle}>
-                        <span>Cần thu:</span>
-                        <strong
-                            style={{
-                                color: '#b91c1c',
-                            }}
-                        >
-                            {formatCurrency(finalAmount)}
-                        </strong>
-                    </div>
-
-                    {method === null &&
-                        (loadingMethods ? (
-                            <p style={{textAlign: 'center', color: '#64748b'}}>
-                                Đang tải phương thức thanh toán...
-                            </p>
-                        ) : (
-                            <div style={methodGridStyle}>
-                                {paymentMethods.map((m) => {
-                                    const {icon, label} = methodDisplay(m)
-                                    return (
-                                        <button
-                                            key={m}
-                                            type="button"
-                                            className="secondary-button"
-                                            style={methodButtonStyle}
-                                            onClick={() =>
-                                                setMethod(m as PaymentMethodType)
-                                            }
-                                        >
-                                            {icon} {label}
-                                        </button>
+                {method === 'CASH' && (
+                    <div style={cashFormStyle}>
+                        <label style={fieldLabelStyle}>
+                            Khách đưa (VND):
+                            <input
+                                type="number"
+                                min={0}
+                                style={numberInputStyle}
+                                value={amountReceived || ''}
+                                onChange={(event) =>
+                                    setAmountReceived(
+                                        Math.max(0, Number(event.target.value)),
                                     )
-                                })}
-                            </div>
-                        ))}
+                                }
+                            />
+                        </label>
 
-                    {method === 'CASH' && (
-                        <div style={cashFormStyle}>
-                            <label style={fieldLabelStyle}>
-                                Khách đưa (VND):
-                                <input
-                                    type="number"
-                                    min={0}
-                                    style={numberInputStyle}
-                                    value={amountReceived || ''}
-                                    onChange={(event) =>
-                                        setAmountReceived(
-                                            Math.max(0, Number(event.target.value)),
-                                        )
-                                    }
-                                />
-                            </label>
+                        <div style={changeBoxStyle}>
+                            <span
+                                style={{
+                                    color: '#475569',
+                                }}
+                            >
+                                Tiền thừa trả khách:{' '}
+                            </span>
 
-                            <div style={changeBoxStyle}>
-                                <span
-                                    style={{
-                                        color: '#475569',
-                                    }}
-                                >
-                                    Tiền thừa trả khách:{' '}
-                                </span>
-
-                                <strong style={changeAmountStyle}>
-                                    {formatCurrency(changeReturned)}
-                                </strong>
-                            </div>
-
-                            <div style={actionRowStyle}>
-                                <button
-                                    type="button"
-                                    className="secondary-button"
-                                    style={{
-                                        flex: 1,
-                                    }}
-                                    disabled={processing}
-                                    onClick={() => setMethod(null)}
-                                >
-                                    Quay lại
-                                </button>
-
-                                <button
-                                    type="button"
-                                    style={confirmCashButtonStyle}
-                                    disabled={amountReceived < finalAmount || processing}
-                                    onClick={() => void handleConfirmCash()}
-                                >
-                                    {processing
-                                        ? 'Đang xử lý...'
-                                        : 'Xác nhận & In Hóa Đơn'}
-                                </button>
-                            </div>
+                            <strong style={changeAmountStyle}>
+                                {formatCurrency(changeReturned)}
+                            </strong>
                         </div>
-                    )}
 
-                    {method === 'QRCODE' && (
-                        <div
-                            style={{
-                                textAlign: 'center',
-                            }}
-                        >
-                            <div style={vnpayBoxStyle}>
-                                <div style={vnpayIconStyle}>
-                                    <Globe className="rk-icon" aria-hidden="true" />
-                                </div>
+                        <div style={actionRowStyle}>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet"
+                                style={{
+                                    flex: 1,
+                                }}
+                                disabled={processing}
+                                onClick={() => setMethod(null)}
+                            >
+                                Quay lại
+                            </button>
 
-                                <h3 style={vnpayTitleStyle}>Cổng thanh toán VNPay</h3>
-
-                                <p style={vnpayDescriptionStyle}>
-                                    Hệ thống sẽ chuyển hướng sang VNPay để nhập thông tin
-                                    thẻ. Hóa đơn sẽ được in sau khi thanh toán thành công.
-                                </p>
-                            </div>
-
-                            <div style={actionRowStyle}>
-                                <button
-                                    type="button"
-                                    className="secondary-button"
-                                    style={{
-                                        flex: 1,
-                                    }}
-                                    disabled={processing}
-                                    onClick={() => setMethod(null)}
-                                >
-                                    Hủy bỏ
-                                </button>
-
-                                <button
-                                    type="button"
-                                    style={vnpayButtonStyle}
-                                    disabled={processing}
-                                    onClick={() => void handleRedirectToVNPay()}
-                                >
-                                    {processing ? 'Đang kết nối...' : 'Chuyển hướng ngay'}
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                style={confirmCashButtonStyle}
+                                disabled={amountReceived < finalAmount || processing}
+                                onClick={() => void handleConfirmCash()}
+                            >
+                                {processing ? 'Đang xử lý...' : 'Xác nhận & In Hóa Đơn'}
+                            </button>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
+
+                {method === 'QRCODE' && (
+                    <div
+                        style={{
+                            textAlign: 'center',
+                        }}
+                    >
+                        <div style={vnpayBoxStyle}>
+                            <div style={vnpayIconStyle}>
+                                <Globe className="rk-icon" aria-hidden="true" />
+                            </div>
+
+                            <h3 style={vnpayTitleStyle}>Cổng thanh toán VNPay</h3>
+
+                            <p style={vnpayDescriptionStyle}>
+                                Hệ thống sẽ chuyển hướng sang VNPay để nhập thông tin thẻ.
+                                Hóa đơn sẽ được in sau khi thanh toán thành công.
+                            </p>
+                        </div>
+
+                        <div style={actionRowStyle}>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet"
+                                style={{
+                                    flex: 1,
+                                }}
+                                disabled={processing}
+                                onClick={() => setMethod(null)}
+                            >
+                                Hủy bỏ
+                            </button>
+
+                            <button
+                                type="button"
+                                style={vnpayButtonStyle}
+                                disabled={processing}
+                                onClick={() => void handleRedirectToVNPay()}
+                            >
+                                {processing ? 'Đang kết nối...' : 'Chuyển hướng ngay'}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
-        </div>
+        </Modal>
     )
-}
-
-const backdropStyle: CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    background: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 999,
-}
-
-const modalCardStyle: CSSProperties = {
-    background: '#fff',
-    padding: '2rem',
-    borderRadius: '12px',
-    width: '100%',
-    maxWidth: '480px',
-}
-
-const modalHeaderStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    borderBottom: '1px solid #e2e8f0',
-    paddingBottom: '0.5rem',
-}
-
-const closeButtonStyle: CSSProperties = {
-    background: 'none',
-    border: 'none',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
 }
 
 const customerSummaryStyle: CSSProperties = {

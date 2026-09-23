@@ -595,7 +595,7 @@ export default function WaiterTableListPage() {
                         <div className="waiter-modal-actions">
                             <button
                                 type="button"
-                                className="waiter-btn-outline"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => setTableModal(null)}
                             >
                                 {modalReservations.length > 0 ||
@@ -606,7 +606,7 @@ export default function WaiterTableListPage() {
 
                             <button
                                 type="button"
-                                className="waiter-btn-outline"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() =>
                                     navigate(
                                         `/waiter/reservations?tableId=${tableModal.tableId}`,
@@ -618,7 +618,7 @@ export default function WaiterTableListPage() {
 
                             <button
                                 type="button"
-                                className="waiter-btn-primary"
+                                className="rk-btn rk-btn--primary"
                                 onClick={() =>
                                     navigate(
                                         `/waiter/tables/${tableModal.tableId}/order/new`,

@@ -330,7 +330,7 @@ export default function ForgotPasswordPage() {
 
                         <button
                             type="button"
-                            className="primary-button"
+                            className="rk-btn rk-btn--primary"
                             style={doneButtonStyle}
                             onClick={() => navigate('/login')}
                         >

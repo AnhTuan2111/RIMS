@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react'
+import {TriangleAlert} from 'lucide-react'
 
 type ErrorStateProps = {
     title?: string
@@ -21,7 +22,9 @@ export function ErrorState({
 
     return (
         <div className="rims-feedback-state rims-feedback-error">
-            <div className="rims-feedback-icon error">!</div>
+            <div className="rims-feedback-icon error">
+                <TriangleAlert className="rims-feedback-glyph" aria-hidden="true" />
+            </div>
 
             <div>
                 <h3>{title}</h3>
@@ -32,7 +35,7 @@ export function ErrorState({
                         {onRetry && (
                             <button
                                 type="button"
-                                className="btn btn-danger"
+                                className="rk-btn rk-btn--danger"
                                 onClick={onRetry}
                             >
                                 {retryLabel}

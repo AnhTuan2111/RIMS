@@ -1,62 +1,5 @@
-import {X} from 'lucide-react'
-
-import {ghostBtn} from './styles'
 import {useState} from 'react'
 import type {ReactNode} from 'react'
-export function Modal({
-    title,
-    onClose,
-    children,
-}: {
-    title: string
-    onClose: () => void
-    children: ReactNode
-}) {
-    return (
-        <div
-            style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0,0,0,0.45)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1000,
-            }}
-        >
-            <div
-                style={{
-                    background: '#fff',
-                    borderRadius: 14,
-                    padding: 28,
-                    width: 500,
-                    maxWidth: '92vw',
-                    maxHeight: '82vh',
-                    overflowY: 'auto',
-                    boxShadow: '0 24px 64px rgba(0,0,0,0.28)',
-                }}
-            >
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 20,
-                    }}
-                >
-                    <h3 style={{margin: 0, fontSize: 18, fontWeight: 700}}>{title}</h3>
-                    <button
-                        onClick={onClose}
-                        style={{...ghostBtn, fontSize: 22, color: '#9ca3af'}}
-                    >
-                        <X className="rk-icon" aria-hidden="true" />
-                    </button>
-                </div>
-                {children}
-            </div>
-        </div>
-    )
-}
 
 export function FieldGroup({children}: {children: ReactNode}) {
     return (
@@ -110,14 +53,6 @@ export function DR({
             <span style={{fontWeight: 500, fontSize: 14, color: color ?? '#111827'}}>
                 {value}
             </span>
-        </div>
-    )
-}
-
-export function ModalActions({children}: {children: ReactNode}) {
-    return (
-        <div style={{display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 22}}>
-            {children}
         </div>
     )
 }

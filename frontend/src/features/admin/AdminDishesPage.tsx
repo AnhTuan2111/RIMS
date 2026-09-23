@@ -1,10 +1,16 @@
-import {AlertTriangle, Eye, Image, Pencil, Plus, Trash2, Utensils} from 'lucide-react'
+import {Eye, Image, Pencil, Trash2, Utensils} from 'lucide-react'
 
 import {useCallback, useEffect, useState, type FormEvent} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {DishResponse, CategoryResponse, DishFormData} from '@/shared/api/admin'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
+import {
+    ConfirmDialog,
+    Modal,
+    PageCard,
+    PageHeader,
+    Pagination,
+} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
@@ -287,7 +293,7 @@ export default function AdminDishesPage() {
                                 })
                                 setActiveModal('CREATE')
                             }}
-                            className="admin-dish-btn-primary"
+                            className="rk-btn rk-btn--primary"
                         >
                             <span>+</span> Thêm Món Ăn
                         </button>
@@ -473,7 +479,7 @@ export default function AdminDishesPage() {
                         action={
                             <button
                                 type="button"
-                                className="admin-dish-btn-secondary"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => {
                                     setSearchKeyword('')
                                     setSelectedCategory('ALL')
@@ -503,26 +509,14 @@ export default function AdminDishesPage() {
             {/* CREATE MODAL */}
             {/* ========================================================= */}
             {activeModal === 'CREATE' && (
-                <div className="admin-dish-modal-backdrop">
-                    <form
-                        onSubmit={handleCreateDish}
-                        className="admin-dish-modal admin-dish-modal-create"
-                    >
-                        <div className="admin-dish-modal-left">
-                            <div className="admin-dish-modal-header">
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveModal('NONE')}
-                                    className="admin-dish-back-btn"
-                                >
-                                    &larr;
-                                </button>
-                                <h3 className="admin-dish-modal-title">
-                                    <Plus className="rk-icon" aria-hidden="true" /> THÊM
-                                    MÓN ĂN MỚI
-                                </h3>
-                            </div>
-
+                <Modal
+                    open
+                    title="Thêm món ăn mới"
+                    size="lg"
+                    onClose={() => setActiveModal('NONE')}
+                >
+                    <form onSubmit={handleCreateDish} className="rk-modal__split">
+                        <div>
                             <div className="admin-dish-form-group">
                                 <div>
                                     <label className="admin-dish-input-label">
@@ -634,7 +628,7 @@ export default function AdminDishesPage() {
                             </div>
                         </div>
 
-                        <div className="admin-dish-modal-right">
+                        <div>
                             <div>
                                 <label className="admin-dish-input-label">
                                     HÌNH ẢNH MINH HỌA
@@ -674,45 +668,66 @@ export default function AdminDishesPage() {
                                     disabled={
                                         activeCategories.length === 0 || isSubmitting
                                     }
-                                    className={`admin-dish-btn-primary ${activeCategories.length === 0 || isSubmitting ? 'disabled' : ''}`}
+                                    className="rk-btn rk-btn--primary rk-btn--block"
                                 >
                                     {isSubmitting ? ' Đang thêm...' : 'Thêm món ăn'}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveModal('NONE')}
-                                    className="admin-dish-btn-secondary"
+                                    className="rk-btn rk-btn--quiet"
                                 >
                                     Hủy bỏ
                                 </button>
                             </div>
                         </div>
                     </form>
-                </div>
+                </Modal>
             )}
 
             {/* ========================================================= */}
             {/* VIEW MODAL */}
             {/* ========================================================= */}
             {activeModal === 'VIEW' && selectedDish && (
-                <div className="admin-dish-modal-backdrop">
-                    <div className="admin-dish-modal admin-dish-modal-view">
-                        <div className="admin-dish-view-left">
-                            <div className="admin-dish-view-header">
-                                <button
-                                    onClick={() => setActiveModal('NONE')}
-                                    className="admin-dish-back-btn"
-                                >
-                                    &larr;
-                                </button>
-                                <span
-                                    className={`admin-dish-view-status ${selectedDish.isHidden ? 'paused' : 'available'}`}
-                                >
-                                    {selectedDish.isHidden
-                                        ? '● Đã ẩn khỏi menu'
-                                        : '● Đang hiển thị'}
-                                </span>
-                            </div>
+                <Modal
+                    open
+                    title={selectedDish.name}
+                    description={selectedDish.categoryName}
+                    size="lg"
+                    onClose={() => setActiveModal('NONE')}
+                    footer={
+                        <>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--danger"
+                                onClick={() => setActiveModal('DELETE')}
+                            >
+                                <Trash2 className="rk-icon" aria-hidden="true" /> Xoá món
+                            </button>
+
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--primary"
+                                onClick={() => setActiveModal('EDIT')}
+                            >
+                                Chỉnh sửa
+                            </button>
+                        </>
+                    }
+                >
+                    <div className="rk-modal__split">
+                        <div>
+                            <span
+                                className={`rk-chip ${
+                                    selectedDish.isHidden
+                                        ? 'rk-chip--idle'
+                                        : 'rk-chip--ok'
+                                }`}
+                            >
+                                {selectedDish.isHidden
+                                    ? 'Đã ẩn khỏi thực đơn'
+                                    : 'Đang bán'}
+                            </span>
                             <div className="admin-dish-view-image">
                                 <img
                                     src={
@@ -731,14 +746,8 @@ export default function AdminDishesPage() {
                             </div>
                         </div>
 
-                        <div className="admin-dish-view-right">
+                        <div>
                             <div>
-                                <span className="admin-dish-view-category">
-                                    {selectedDish.categoryName.toUpperCase()}
-                                </span>
-                                <h2 className="admin-dish-view-name">
-                                    {selectedDish.name}
-                                </h2>
                                 <h3 className="admin-dish-view-price">
                                     {selectedDish.price.toLocaleString('vi-VN')}đ
                                 </h3>
@@ -751,54 +760,24 @@ export default function AdminDishesPage() {
                                         'Không có mô tả thông tin cụ thể cho món ăn này.'}
                                 </div>
                             </div>
-
-                            <div className="admin-dish-view-actions">
-                                <button
-                                    onClick={() => {
-                                        setActiveModal('EDIT')
-                                    }}
-                                    className="admin-dish-btn-primary"
-                                >
-                                    Chỉnh sửa
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setActiveModal('DELETE')
-                                    }}
-                                    className="admin-dish-btn-danger"
-                                >
-                                    <Trash2 className="rk-icon" aria-hidden="true" /> Xóa
-                                </button>
-                            </div>
                         </div>
                     </div>
-                </div>
+                </Modal>
             )}
 
             {/* ========================================================= */}
             {/* EDIT MODAL */}
             {/* ========================================================= */}
             {activeModal === 'EDIT' && selectedDish && (
-                <div className="admin-dish-modal-backdrop">
-                    <form
-                        onSubmit={handleUpdateDish}
-                        className="admin-dish-modal admin-dish-modal-edit"
-                    >
-                        <div className="admin-dish-modal-left">
-                            <div className="admin-dish-modal-header">
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveModal('NONE')}
-                                    className="admin-dish-back-btn"
-                                >
-                                    &larr;
-                                </button>
-                                <h3 className="admin-dish-modal-title">
-                                    <Pencil className="rk-icon" aria-hidden="true" />{' '}
-                                    CHỈNH SỬA MÓN ĂN
-                                </h3>
-                            </div>
-
+                <Modal
+                    open
+                    title="Chỉnh sửa món ăn"
+                    description={selectedDish.name}
+                    size="lg"
+                    onClose={() => setActiveModal('NONE')}
+                >
+                    <form onSubmit={handleUpdateDish} className="rk-modal__split">
+                        <div>
                             <div className="admin-dish-form-group">
                                 <div className="admin-dish-form-row">
                                     <div>
@@ -944,21 +923,21 @@ export default function AdminDishesPage() {
                                 <button
                                     type="button"
                                     onClick={() => setActiveModal('NONE')}
-                                    className="admin-dish-btn-secondary"
+                                    className="rk-btn rk-btn--quiet"
                                 >
                                     HỦY
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className={`admin-dish-btn-primary ${isSubmitting ? 'loading' : ''}`}
+                                    className="rk-btn rk-btn--primary rk-btn--block"
                                 >
                                     {isSubmitting ? ' ĐANG LƯU...' : 'CẬP NHẬT'}
                                 </button>
                             </div>
                         </div>
 
-                        <div className="admin-dish-modal-right">
+                        <div>
                             <div>
                                 <div className="admin-dish-preview-header">
                                     XEM TRƯỚC HIỂN THỊ CHUẨN
@@ -994,48 +973,32 @@ export default function AdminDishesPage() {
                                     onClick={() => {
                                         setActiveModal('DELETE')
                                     }}
-                                    className="admin-dish-btn-danger-full"
+                                    className="rk-btn rk-btn--danger rk-btn--block"
                                 >
                                     XÓA MÓN ĂN KHỎI MENU
                                 </button>
                             </div>
                         </div>
                     </form>
-                </div>
+                </Modal>
             )}
 
             {/* ========================================================= */}
             {/* DELETE MODAL */}
             {/* ========================================================= */}
-            {activeModal === 'DELETE' && selectedDish && (
-                <div className="admin-dish-modal-backdrop">
-                    <div className="admin-dish-modal admin-dish-modal-delete">
-                        <div className="admin-dish-delete-icon">
-                            <AlertTriangle className="rk-icon" aria-hidden="true" />
-                        </div>
-                        <h3 className="admin-dish-delete-title">XÓA MÓN ĂN</h3>
-                        <p className="admin-dish-delete-text">
-                            Bạn có chắc chắn muốn xóa món ăn{' '}
-                            <strong>“{selectedDish.name}”</strong>? Hành động gỡ bỏ này
-                            không thể hoàn tác.
-                        </p>
-                        <div className="admin-dish-delete-actions">
-                            <button
-                                onClick={handleDeleteDish}
-                                className="admin-dish-btn-danger-modal"
-                            >
-                                Xác nhận xóa
-                            </button>
-                            <button
-                                onClick={() => setActiveModal('NONE')}
-                                className="admin-dish-btn-secondary"
-                            >
-                                Hủy
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmDialog
+                open={activeModal === 'DELETE' && Boolean(selectedDish)}
+                title="Xoá món ăn này?"
+                description={
+                    selectedDish
+                        ? `Món “${selectedDish.name}” sẽ bị gỡ khỏi thực đơn. Việc này không hoàn tác được — nếu chỉ muốn tạm dừng bán, hãy ẩn món thay vì xoá.`
+                        : undefined
+                }
+                confirmLabel="Xoá món ăn"
+                destructive
+                onConfirm={handleDeleteDish}
+                onCancel={() => setActiveModal('NONE')}
+            />
         </div>
     )
 }

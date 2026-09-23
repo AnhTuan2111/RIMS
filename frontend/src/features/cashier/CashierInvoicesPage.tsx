@@ -1,4 +1,4 @@
-import {Download, X} from 'lucide-react'
+import {Download} from 'lucide-react'
 
 import {useCallback, useRef, useState, type CSSProperties} from 'react'
 
@@ -11,6 +11,7 @@ import {usePolling} from '@/shared/hooks/usePolling'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {formatCurrency} from '@/shared/utils/format'
 import {useToast} from '@/app/providers/useToast'
+import {Modal} from '@/shared/components/ui'
 
 const PAGE_SIZE = 10
 
@@ -467,254 +468,177 @@ export default function CashierInvoicesPage() {
                 </div>
             )}
 
-            {(selectedInvoice || loadingDetail) && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        background: 'rgba(0,0,0,0.45)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000,
-                    }}
-                >
-                    <div
-                        style={{
-                            background: '#fff',
-                            borderRadius: 14,
-                            padding: 28,
-                            width: 480,
-                            maxWidth: '92vw',
-                            maxHeight: '85vh',
-                            overflowY: 'auto',
-                            boxShadow: '0 24px 64px rgba(0,0,0,0.28)',
-                        }}
-                    >
-                        {loadingDetail || !selectedInvoice ? (
-                            <p
+            <Modal
+                open={Boolean(selectedInvoice) || loadingDetail}
+                title={
+                    selectedInvoice
+                        ? `Hoá đơn INV-${selectedInvoice.invoiceId}`
+                        : 'Đang tải hoá đơn'
+                }
+                description={
+                    selectedInvoice
+                        ? `Bàn ${selectedInvoice.tableNumber} · ${formatTime(
+                              selectedInvoice.invoiceDate,
+                          )}`
+                        : undefined
+                }
+                onClose={() => setSelectedInvoice(null)}
+                footer={
+                    selectedInvoice ? (
+                        <>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet"
+                                onClick={() => setSelectedInvoice(null)}
+                            >
+                                Đóng
+                            </button>
+
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--primary"
+                                onClick={() =>
+                                    void handleDownloadPdf(selectedInvoice.invoiceId)
+                                }
+                            >
+                                <Download className="rk-icon" aria-hidden="true" /> Tải
+                                PDF
+                            </button>
+                        </>
+                    ) : undefined
+                }
+            >
+                {loadingDetail || !selectedInvoice ? (
+                    <p className="rk-modal__loading">Đang tải chi tiết…</p>
+                ) : (
+                    <>
+                        <div
+                            className="simple-table"
+                            style={{
+                                marginBottom: 16,
+                                minWidth: 0,
+                            }}
+                        >
+                            <div
+                                className="simple-table-header"
                                 style={{
-                                    textAlign: 'center',
-                                    padding: 40,
+                                    gridTemplateColumns:
+                                        'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
+                                    display: 'grid',
+                                    fontWeight: 'bold',
+                                    borderBottom: '1px solid #cbd5e1',
+                                    paddingBottom: '8px',
+                                    minWidth: 0,
                                 }}
                             >
-                                Đang tải chi tiết...
-                            </p>
-                        ) : (
-                            <>
-                                <div
+                                <span>Món ăn</span>
+                                <span>SL</span>
+                                <span
                                     style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        marginBottom: 16,
+                                        textAlign: 'right',
                                     }}
                                 >
-                                    <h3
+                                    Thành tiền
+                                </span>
+                            </div>
+
+                            {selectedInvoice.items.map((item, index) => (
+                                <div
+                                    key={`${item.dishName}-${index}`}
+                                    style={{
+                                        gridTemplateColumns: '2fr 1fr 1fr',
+                                        display: 'grid',
+                                        padding: '6px 0',
+                                        borderBottom: '1px dashed #f1f5f9',
+                                    }}
+                                >
+                                    <span>{item.dishName}</span>
+                                    <span>x{item.quantity}</span>
+                                    <span
                                         style={{
-                                            margin: 0,
+                                            textAlign: 'right',
                                         }}
                                     >
-                                        Hóa đơn INV-{selectedInvoice.invoiceId}
-                                    </h3>
-
-                                    <button
-                                        type="button"
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            fontSize: 22,
-                                            cursor: 'pointer',
-                                            color: '#9ca3af',
-                                        }}
-                                        onClick={() => setSelectedInvoice(null)}
-                                    >
-                                        <X className="rk-icon" aria-hidden="true" />
-                                    </button>
+                                        {formatCurrency(item.subTotal)}
+                                    </span>
                                 </div>
+                            ))}
+                        </div>
 
-                                <div
-                                    style={{
-                                        fontSize: 13,
-                                        color: '#64748b',
-                                        marginBottom: 12,
-                                    }}
-                                >
-                                    Bàn: <strong>{selectedInvoice.tableNumber}</strong>
-                                    {' · '}
-                                    Giờ:{' '}
-                                    <strong>
-                                        {formatTime(selectedInvoice.invoiceDate)}
-                                    </strong>
-                                </div>
+                        <div
+                            style={{
+                                background: '#f8fafc',
+                                padding: 12,
+                                borderRadius: 8,
+                                marginBottom: 16,
+                                fontSize: 14,
+                            }}
+                        >
+                            <Row
+                                label="Tạm tính:"
+                                value={`${formatCurrency(selectedInvoice.totalBeforeVat)}`}
+                            />
+                            <Row
+                                label="VAT (10%):"
+                                value={`${formatCurrency(selectedInvoice.vatAmount)}`}
+                            />
 
-                                <div
-                                    className="simple-table"
-                                    style={{
-                                        marginBottom: 16,
-                                        minWidth: 0,
-                                    }}
-                                >
-                                    <div
-                                        className="simple-table-header"
-                                        style={{
-                                            gridTemplateColumns:
-                                                'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
-                                            display: 'grid',
-                                            fontWeight: 'bold',
-                                            borderBottom: '1px solid #cbd5e1',
-                                            paddingBottom: '8px',
-                                            minWidth: 0,
-                                        }}
-                                    >
-                                        <span>Món ăn</span>
-                                        <span>SL</span>
-                                        <span
-                                            style={{
-                                                textAlign: 'right',
-                                            }}
-                                        >
-                                            Thành tiền
-                                        </span>
-                                    </div>
-
-                                    {selectedInvoice.items.map((item, index) => (
-                                        <div
-                                            key={`${item.dishName}-${index}`}
-                                            style={{
-                                                gridTemplateColumns: '2fr 1fr 1fr',
-                                                display: 'grid',
-                                                padding: '6px 0',
-                                                borderBottom: '1px dashed #f1f5f9',
-                                            }}
-                                        >
-                                            <span>{item.dishName}</span>
-                                            <span>x{item.quantity}</span>
-                                            <span
-                                                style={{
-                                                    textAlign: 'right',
-                                                }}
-                                            >
-                                                {formatCurrency(item.subTotal)}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div
-                                    style={{
-                                        background: '#f8fafc',
-                                        padding: 12,
-                                        borderRadius: 8,
-                                        marginBottom: 16,
-                                        fontSize: 14,
-                                    }}
-                                >
+                            {selectedInvoice.customerName && (
+                                <>
                                     <Row
-                                        label="Tạm tính:"
-                                        value={`${formatCurrency(selectedInvoice.totalBeforeVat)}`}
-                                    />
-                                    <Row
-                                        label="VAT (10%):"
-                                        value={`${formatCurrency(selectedInvoice.vatAmount)}`}
+                                        label="Khách hàng:"
+                                        value={selectedInvoice.customerName}
                                     />
 
-                                    {selectedInvoice.customerName && (
-                                        <>
+                                    {!!selectedInvoice.pointsUsed &&
+                                        selectedInvoice.pointsUsed > 0 && (
                                             <Row
-                                                label="Khách hàng:"
-                                                value={selectedInvoice.customerName}
-                                            />
-
-                                            {!!selectedInvoice.pointsUsed &&
-                                                selectedInvoice.pointsUsed > 0 && (
-                                                    <Row
-                                                        label="Điểm đã dùng:"
-                                                        value={`-${
-                                                            selectedInvoice.pointsUsed *
-                                                            1000
-                                                        }`}
-                                                        color="#059669"
-                                                    />
-                                                )}
-
-                                            <Row
-                                                label="Điểm tích thêm:"
-                                                value={`+${
-                                                    selectedInvoice.pointsEarned ?? 0
-                                                } điểm`}
+                                                label="Điểm đã dùng:"
+                                                value={`-${
+                                                    selectedInvoice.pointsUsed * 1000
+                                                }`}
                                                 color="#059669"
                                             />
-                                        </>
-                                    )}
+                                        )}
 
                                     <Row
-                                        bold
-                                        label="THÀNH TIỀN:"
-                                        value={`${formatCurrency(selectedInvoice.finalAmount)}`}
-                                        color="#b91c1c"
+                                        label="Điểm tích thêm:"
+                                        value={`+${
+                                            selectedInvoice.pointsEarned ?? 0
+                                        } điểm`}
+                                        color="#059669"
                                     />
+                                </>
+                            )}
 
+                            <Row
+                                bold
+                                label="THÀNH TIỀN:"
+                                value={`${formatCurrency(selectedInvoice.finalAmount)}`}
+                                color="#b91c1c"
+                            />
+
+                            <Row
+                                label="Phương thức:"
+                                value={methodLabel(selectedInvoice.paymentMethod)}
+                            />
+
+                            {selectedInvoice.paymentMethod === 'CASH' && (
+                                <>
                                     <Row
-                                        label="Phương thức:"
-                                        value={methodLabel(selectedInvoice.paymentMethod)}
+                                        label="Khách trả:"
+                                        value={`${formatCurrency(selectedInvoice.amountPaid)}`}
                                     />
-
-                                    {selectedInvoice.paymentMethod === 'CASH' && (
-                                        <>
-                                            <Row
-                                                label="Khách trả:"
-                                                value={`${formatCurrency(selectedInvoice.amountPaid)}`}
-                                            />
-                                            <Row
-                                                label="Tiền thừa:"
-                                                value={`${formatCurrency(selectedInvoice.excessAmount)}`}
-                                            />
-                                        </>
-                                    )}
-                                </div>
-
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        gap: 8,
-                                    }}
-                                >
-                                    <button
-                                        type="button"
-                                        className="primary-button"
-                                        style={{
-                                            flex: 1,
-                                        }}
-                                        onClick={() =>
-                                            void handleDownloadPdf(
-                                                selectedInvoice.invoiceId,
-                                            )
-                                        }
-                                    >
-                                        <Download
-                                            className="rk-icon"
-                                            aria-hidden="true"
-                                        />{' '}
-                                        Tải PDF
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="secondary-button"
-                                        style={{
-                                            flex: 1,
-                                        }}
-                                        onClick={() => setSelectedInvoice(null)}
-                                    >
-                                        Đóng
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+                                    <Row
+                                        label="Tiền thừa:"
+                                        value={`${formatCurrency(selectedInvoice.excessAmount)}`}
+                                    />
+                                </>
+                            )}
+                        </div>
+                    </>
+                )}
+            </Modal>
         </PageCard>
     )
 }

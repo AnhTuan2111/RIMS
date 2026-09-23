@@ -47,3 +47,15 @@ export interface KitchenOrderItemResponse {
     status: OrderItemStatus
     createdAt?: string
 }
+
+/**
+ * Nhãn tiếng Việt cho trạng thái món.
+ *
+ * <p>Trước đây một số màn in thẳng giá trị enum ra màn hình, nên bếp nhìn thấy
+ * "PREPARING" thay vì "Đang chế biến".
+ */
+export const ORDER_ITEM_STATUS_LABELS: Record<OrderItemStatus, string> = {
+    PREPARING: 'Đang chế biến',
+    COMPLETED: 'Đã hoàn thành',
+    CANCELLED: 'Đã huỷ',
+}

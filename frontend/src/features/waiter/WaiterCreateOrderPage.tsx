@@ -9,21 +9,20 @@ import type {
     MenuItemResponse,
     OrderItemRequest,
 } from '@/shared/api/waiter'
-import {BackArrow, ConfirmModal, fmtPrice, WaiterHeader, WaiterToast} from './components'
+import {BackArrow, fmtPrice, WaiterHeader} from './components'
+import {Modal} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
+import {useToast} from '@/app/providers/useToast'
 
 type DraftItem = {
     qty: number
     note: string
 }
 
-type ToastState = {
-    msg: string
-    type: string
-} | null
-
 export default function WaiterCreateOrderPage() {
+    const {notify} = useToast()
+
     const navigate = useNavigate()
     const {tableId} = useParams()
     const [searchParams] = useSearchParams()
@@ -39,8 +38,6 @@ export default function WaiterCreateOrderPage() {
     const [menu, setMenu] = useState<MenuItemResponse[]>([])
 
     const [orderDraft, setOrderDraft] = useState<Record<number, DraftItem>>({})
-
-    const [toast, setToast] = useState<ToastState>(null)
 
     const [showConfirm, setShowConfirm] = useState(false)
 
@@ -58,15 +55,6 @@ export default function WaiterCreateOrderPage() {
     const [isLoadingMenu, setIsLoadingMenu] = useState(true)
 
     const [menuError, setMenuError] = useState<string | null>(null)
-
-    function showToast(msg: string, type = 'success') {
-        setToast({
-            msg,
-            type,
-        })
-
-        window.setTimeout(() => setToast(null), 3000)
-    }
 
     const loadMenu = useCallback(async (signal?: AbortSignal, showFullLoading = true) => {
         try {
@@ -163,12 +151,12 @@ export default function WaiterCreateOrderPage() {
 
     function openConfirm() {
         if (!tableIdNumber) {
-            showToast('Không xác định được bàn.', 'error')
+            notify('Không xác định được bàn.', {tone: 'alert'})
             return
         }
 
         if (!selectedItems.length) {
-            showToast('Vui lòng chọn ít nhất 1 món', 'error')
+            notify('Vui lòng chọn ít nhất 1 món', {tone: 'alert'})
             return
         }
 
@@ -177,7 +165,7 @@ export default function WaiterCreateOrderPage() {
 
     async function submitCreateOrder() {
         if (!tableIdNumber) {
-            showToast('Không xác định được bàn.', 'error')
+            notify('Không xác định được bàn.', {tone: 'alert'})
             return
         }
 
@@ -210,7 +198,7 @@ export default function WaiterCreateOrderPage() {
 
             console.error('[WAITER_CREATE_ORDER_SUBMIT_ERROR]', requestError)
 
-            showToast(getErrorMessage(requestError, 'Lỗi khi tạo đơn hàng'), 'error')
+            notify(getErrorMessage(requestError, 'Lỗi khi tạo đơn hàng'), {tone: 'alert'})
         } finally {
             setSubmitting(false)
             setShowConfirm(false)
@@ -409,50 +397,72 @@ export default function WaiterCreateOrderPage() {
                 )}
             </main>
 
-            {showConfirm && (
-                <ConfirmModal
-                    title="Xác nhận tạo đơn hàng"
-                    message={`Bàn ${tableIdNumber} — ${selectedItems.length} món, tổng tạm tính ${fmtPrice(orderTotal)}`}
-                    confirmLabel={submitting ? 'Đang tạo...' : 'Xác nhận'}
-                    onCancel={() => {
-                        if (!submitting) {
-                            setShowConfirm(false)
-                        }
-                    }}
-                    onConfirm={() => {
-                        if (!submitting) {
-                            void submitCreateOrder()
-                        }
-                    }}
-                >
-                    <ul className="waiter-confirm-list">
-                        {selectedItems.map((item) => (
-                            <li key={item.dishId}>
-                                <span>
-                                    {item.name} × {item.qty}
-                                </span>
+            <Modal
+                open={showConfirm}
+                title="Xác nhận tạo đơn hàng"
+                description={`Bàn ${tableIdNumber} — ${selectedItems.length} món, tổng tạm tính ${fmtPrice(orderTotal)}`}
+                onClose={() => {
+                    if (!submitting) {
+                        setShowConfirm(false)
+                    }
+                }}
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--quiet"
+                            disabled={submitting}
+                            onClick={() => setShowConfirm(false)}
+                        >
+                            Quay lại
+                        </button>
 
-                                {item.note && <small>Ghi chú: {item.note}</small>}
-                            </li>
-                        ))}
-                    </ul>
-                </ConfirmModal>
-            )}
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--primary"
+                            disabled={submitting}
+                            onClick={() => {
+                                if (!submitting) {
+                                    void submitCreateOrder()
+                                }
+                            }}
+                        >
+                            {submitting ? 'Đang tạo…' : 'Gửi đơn xuống bếp'}
+                        </button>
+                    </>
+                }
+            >
+                <ul className="waiter-confirm-list">
+                    {selectedItems.map((item) => (
+                        <li key={item.dishId}>
+                            <span>
+                                {item.name} × {item.qty}
+                            </span>
 
-            {successData && (
-                <ConfirmModal
-                    title="Thành công"
-                    message={successData.message}
-                    confirmLabel="Đóng"
-                    cancelLabel=""
-                    onConfirm={() => navigate('/waiter/tables')}
-                    onCancel={() => navigate('/waiter/tables')}
-                >
-                    <div style={successSummaryStyle}>{successData.itemSummary}</div>
-                </ConfirmModal>
-            )}
+                            {item.note && <small>Ghi chú: {item.note}</small>}
+                        </li>
+                    ))}
+                </ul>
+            </Modal>
 
-            <WaiterToast toast={toast} />
+            <Modal
+                open={Boolean(successData)}
+                title="Đã gửi đơn xuống bếp"
+                description={successData?.message}
+                size="sm"
+                onClose={() => navigate('/waiter/tables')}
+                footer={
+                    <button
+                        type="button"
+                        className="rk-btn rk-btn--primary"
+                        onClick={() => navigate('/waiter/tables')}
+                    >
+                        Về sơ đồ bàn
+                    </button>
+                }
+            >
+                <div style={successSummaryStyle}>{successData?.itemSummary}</div>
+            </Modal>
         </div>
     )
 }

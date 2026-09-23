@@ -546,7 +546,7 @@ export default function OrderPanel({
                         {selectedTable.status === 'SERVING' && (
                             <button
                                 type="button"
-                                className="primary-button"
+                                className="rk-btn rk-btn--primary"
                                 style={{
                                     marginTop: '1rem',
                                     width: '100%',

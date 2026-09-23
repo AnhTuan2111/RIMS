@@ -4,6 +4,7 @@ import {useState, type CSSProperties} from 'react'
 
 import type {OrderDetailResponse, PaymentResponse} from '@/shared/types/cashier'
 import {formatCurrency} from '@/shared/utils/format'
+import {Modal} from '@/shared/components/ui'
 
 interface Props {
     paymentResult: PaymentResponse
@@ -58,12 +59,16 @@ export default function PaymentResultManager({
 
     if (step === 'SUCCESS') {
         return (
-            <div style={successScreenStyle} onClick={() => setStep('BILL')}>
+            <button
+                type="button"
+                style={successScreenStyle}
+                onClick={() => setStep('BILL')}
+            >
                 <div style={successIconStyle}>
                     <Check className="rk-icon" aria-hidden="true" />
                 </div>
 
-                <h1 style={successTitleStyle}>THANH TOÁN THÀNH CÔNG</h1>
+                <h1 style={successTitleStyle}>Thanh toán thành công</h1>
 
                 <p style={successInvoiceStyle}>Mã hóa đơn: INV-{invoiceId}</p>
 
@@ -79,19 +84,38 @@ export default function PaymentResultManager({
                     </div>
                 )}
 
-                <p style={successHintStyle}>— Chạm vào màn hình để xem hóa đơn —</p>
-            </div>
+                <p style={successHintStyle}>Chạm vào màn hình để xem hoá đơn</p>
+            </button>
         )
     }
 
     return (
-        <div style={billOverlayStyle}>
-            <div className="page-card" style={billCardStyle}>
-                <h2 style={billTitleStyle}>
-                    HÓA ĐƠN THANH TOÁN
-                    <div style={billCodeStyle}>Mã: INV-{invoiceId}</div>
-                </h2>
+        <Modal
+            open
+            title="Hoá đơn thanh toán"
+            description={`Mã hoá đơn INV-${invoiceId}`}
+            onClose={onClose}
+            footer={
+                <>
+                    <button
+                        type="button"
+                        className="rk-btn rk-btn--quiet"
+                        onClick={() => void onDownload(invoiceId)}
+                    >
+                        <Download className="rk-icon" aria-hidden="true" /> Tải PDF
+                    </button>
 
+                    <button
+                        type="button"
+                        className="rk-btn rk-btn--primary"
+                        onClick={onClose}
+                    >
+                        Đóng và tiếp tục
+                    </button>
+                </>
+            }
+        >
+            <div>
                 <div style={tableWrapperStyle}>
                     <div className="simple-table" style={{minWidth: 0}}>
                         <div className="simple-table-header" style={tableHeaderStyle}>
@@ -195,22 +219,8 @@ export default function PaymentResultManager({
                         </>
                     )}
                 </div>
-
-                <div style={actionGridStyle}>
-                    <button
-                        type="button"
-                        style={downloadButtonStyle}
-                        onClick={() => void onDownload(invoiceId)}
-                    >
-                        <Download className="rk-icon" aria-hidden="true" /> Tải PDF
-                    </button>
-
-                    <button type="button" style={closeButtonStyle} onClick={onClose}>
-                        Đóng & Tiếp tục
-                    </button>
-                </div>
             </div>
-        </div>
+        </Modal>
     )
 }
 
@@ -303,40 +313,6 @@ const successHintStyle: CSSProperties = {
     fontStyle: 'italic',
 }
 
-const billOverlayStyle: CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    background: '#f8fafc',
-    zIndex: 9999,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '20px',
-}
-
-const billCardStyle: CSSProperties = {
-    width: '100%',
-    maxWidth: '500px',
-    boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
-}
-
-const billTitleStyle: CSSProperties = {
-    textAlign: 'center',
-    color: '#1e293b',
-    borderBottom: '2px dashed #e2e8f0',
-    paddingBottom: '1rem',
-}
-
-const billCodeStyle: CSSProperties = {
-    fontSize: '1rem',
-    color: '#64748b',
-    marginTop: '4px',
-    fontWeight: 'normal',
-}
-
 const tableWrapperStyle: CSSProperties = {
     margin: '1.5rem 0',
     minWidth: 0,
@@ -409,32 +385,6 @@ const paymentMethodRowStyle: CSSProperties = {
     fontSize: '0.9rem',
     color: '#16a34a',
     fontWeight: 'bold',
-}
-
-const actionGridStyle: CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '1rem',
-}
-
-const downloadButtonStyle: CSSProperties = {
-    padding: '1rem',
-    background: '#2563eb',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-}
-
-const closeButtonStyle: CSSProperties = {
-    padding: '1rem',
-    background: '#64748b',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
 }
 
 const cellStyle: CSSProperties = {

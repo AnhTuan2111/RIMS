@@ -1,18 +1,10 @@
-import {
-    AlertTriangle,
-    ChefHat,
-    Eye,
-    FolderOpen,
-    Pencil,
-    Trash2,
-    UtensilsCrossed,
-} from 'lucide-react'
+import {ChefHat, Eye, FolderOpen, Pencil, Trash2, UtensilsCrossed} from 'lucide-react'
 
 import React, {useCallback, useEffect, useState} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {CategoryResponse, DishResponse, CategoryFormData} from '@/shared/api/admin'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
+import {ConfirmDialog, PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {getErrorMessage} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 
@@ -49,10 +41,10 @@ export default function AdminCategoryPage() {
         isAvailable: true,
     })
 
-    const [deleteModal, setDeleteModal] = useState({
-        open: false,
-        id: null as number | null,
-    })
+    const [deleteTarget, setDeleteTarget] = useState<{
+        id: number
+        name: string
+    } | null>(null)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     // --- Load Data ---
@@ -150,16 +142,20 @@ export default function AdminCategoryPage() {
     }
 
     const confirmDelete = async () => {
-        if (deleteModal.id === null) return
+        if (!deleteTarget) {
+            return
+        }
+
         try {
-            await adminApi.deleteCategory(deleteModal.id)
-            setDeleteModal({open: false, id: null})
+            await adminApi.deleteCategory(deleteTarget.id)
+            setDeleteTarget(null)
             await loadCategories(true, true)
+            notify(`Đã ẩn danh mục ${deleteTarget.name}.`)
         } catch (err: unknown) {
             console.error('Lỗi khi xóa danh mục:', err)
             const errMsg = getErrorMessage(err, 'Không thể thực hiện xóa danh mục!')
             notify(errMsg, {tone: 'alert'})
-            setDeleteModal({open: false, id: null})
+            setDeleteTarget(null)
         }
     }
 
@@ -282,7 +278,7 @@ export default function AdminCategoryPage() {
                                         })
                                         setView('CREATE')
                                     }}
-                                    className="admin-category-btn-primary"
+                                    className="rk-btn rk-btn--primary"
                                 >
                                     <span>+</span> Thêm Danh Mục
                                 </button>
@@ -487,9 +483,9 @@ export default function AdminCategoryPage() {
                                             </button>
                                             <button
                                                 onClick={() =>
-                                                    setDeleteModal({
-                                                        open: true,
+                                                    setDeleteTarget({
                                                         id: item.id,
+                                                        name: item.name,
                                                     })
                                                 }
                                                 className="admin-category-action-btn admin-category-delete-btn"
@@ -512,7 +508,7 @@ export default function AdminCategoryPage() {
                                 action={
                                     <button
                                         type="button"
-                                        className="admin-category-btn-secondary"
+                                        className="rk-btn rk-btn--quiet"
                                         onClick={() => {
                                             setSearchTerm('')
                                             setFilterStatus('ALL')
@@ -563,16 +559,19 @@ export default function AdminCategoryPage() {
                                     })
                                     setView('EDIT')
                                 }}
-                                className="admin-category-btn-secondary"
+                                className="rk-btn rk-btn--quiet"
                             >
                                 <Pencil className="rk-icon" aria-hidden="true" /> Sửa danh
                                 mục
                             </button>
                             <button
                                 onClick={() =>
-                                    setDeleteModal({open: true, id: selectedCategory.id})
+                                    setDeleteTarget({
+                                        id: selectedCategory.id,
+                                        name: selectedCategory.name,
+                                    })
                                 }
-                                className="admin-category-btn-secondary admin-category-btn-danger"
+                                className="rk-btn rk-btn--danger"
                             >
                                 <Trash2 className="rk-icon" aria-hidden="true" /> Xóa danh
                                 mục
@@ -887,14 +886,14 @@ export default function AdminCategoryPage() {
                             <button
                                 type="button"
                                 onClick={() => setView('LIST')}
-                                className="admin-category-btn-secondary"
+                                className="rk-btn rk-btn--quiet"
                             >
                                 Hủy bỏ
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className={`admin-category-btn-primary ${isSubmitting ? 'loading' : ''}`}
+                                className="rk-btn rk-btn--primary"
                             >
                                 {isSubmitting ? ' Đang lưu...' : 'Lưu dữ liệu'}
                             </button>
@@ -903,37 +902,19 @@ export default function AdminCategoryPage() {
                 </div>
             )}
 
-            {deleteModal.open && (
-                <div className="admin-category-modal-backdrop">
-                    <div className="admin-category-modal-card">
-                        <div className="admin-category-modal-icon">
-                            <AlertTriangle className="rk-icon" aria-hidden="true" />
-                        </div>
-                        <h4 className="admin-category-modal-title">
-                            XÓA DANH MỤC THỰC ĐƠN
-                        </h4>
-                        <p className="admin-category-modal-text">
-                            Bạn có chắc chắn muốn xóa danh mục này? Hành động này sẽ thực
-                            hiện ẩn danh mục (xóa mềm). Hệ thống sẽ chặn nếu có các món ăn
-                            đang liên kết trực tiếp.
-                        </p>
-                        <div className="admin-category-modal-actions">
-                            <button
-                                onClick={() => setDeleteModal({open: false, id: null})}
-                                className="admin-category-btn-secondary"
-                            >
-                                Hủy quay lại
-                            </button>
-                            <button
-                                onClick={confirmDelete}
-                                className="admin-category-btn-danger-modal"
-                            >
-                                XÁC NHẬN XÓA
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmDialog
+                open={Boolean(deleteTarget)}
+                title="Ẩn danh mục này?"
+                description={
+                    deleteTarget
+                        ? `Danh mục “${deleteTarget.name}” sẽ không còn hiện trong thực đơn. Dữ liệu cũ vẫn giữ nguyên, nhưng hệ thống sẽ chặn nếu còn món ăn đang thuộc danh mục này.`
+                        : undefined
+                }
+                confirmLabel="Ẩn danh mục"
+                destructive
+                onConfirm={() => void confirmDelete()}
+                onCancel={() => setDeleteTarget(null)}
+            />
         </div>
     )
 }

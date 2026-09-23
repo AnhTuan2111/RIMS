@@ -10,14 +10,10 @@ import type {
 } from '@/shared/api/waiter'
 import {getAvailableTimeSlots} from '@/shared/utils/reservationTime'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {WaiterHeader, WaiterToast} from './components'
+import {WaiterHeader} from './components'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
-
-type ToastState = {
-    msg: string
-    type: string
-} | null
+import {useToast} from '@/app/providers/useToast'
 
 type ReservationForm = {
     customerName: string
@@ -49,14 +45,14 @@ function splitReservationTime(value?: string | null) {
 }
 
 export default function WaiterEditReservationPage() {
+    const {notify} = useToast()
+
     const navigate = useNavigate()
     const {resId} = useParams()
 
     const reservationId = Number.parseInt(resId ?? '0', 10)
 
     const [tables, setTables] = useState<TableDetailResponse[]>([])
-
-    const [toast, setToast] = useState<ToastState>(null)
 
     const [resFormError, setResFormError] = useState('')
 
@@ -110,15 +106,6 @@ export default function WaiterEditReservationPage() {
             })
         }
     }, [availableTimeSlots, resForm.time])
-
-    function showToast(msg: string, type = 'success') {
-        setToast({
-            msg,
-            type,
-        })
-
-        window.setTimeout(() => setToast(null), 3000)
-    }
 
     async function loadTables(signal?: AbortSignal, showFullLoading = true) {
         try {
@@ -404,7 +391,7 @@ export default function WaiterEditReservationPage() {
         try {
             await waiterApi.updateReservation(reservationId, payload)
 
-            showToast('Đã lưu thay đổi đặt bàn')
+            notify('Đã lưu thay đổi đặt bàn')
             setResFormError('')
 
             window.setTimeout(() => navigate('/waiter/tables'), 800)
@@ -423,7 +410,7 @@ export default function WaiterEditReservationPage() {
 
     async function handleCancelReservation() {
         if (!reservationId) {
-            showToast('Không xác định được đặt bàn.', 'error')
+            notify('Không xác định được đặt bàn.', {tone: 'alert'})
             return
         }
 
@@ -432,7 +419,7 @@ export default function WaiterEditReservationPage() {
         try {
             await waiterApi.cancelReservation(reservationId)
 
-            showToast('Đã hủy đặt bàn')
+            notify('Đã hủy đặt bàn')
 
             window.setTimeout(() => navigate('/waiter/tables'), 800)
         } catch (requestError: unknown) {
@@ -442,7 +429,9 @@ export default function WaiterEditReservationPage() {
 
             console.error('[WAITER_EDIT_RESERVATION_CANCEL_ERROR]', requestError)
 
-            showToast(getErrorMessage(requestError, 'Hủy đặt bàn thất bại.'), 'error')
+            notify(getErrorMessage(requestError, 'Hủy đặt bàn thất bại.'), {
+                tone: 'alert',
+            })
         } finally {
             setCanceling(false)
         }
@@ -603,7 +592,7 @@ export default function WaiterEditReservationPage() {
                                     <div style={actionRowStyle}>
                                         <button
                                             type="button"
-                                            className="waiter-btn-primary"
+                                            className="rk-btn rk-btn--primary"
                                             style={{
                                                 flex: 1,
                                             }}
@@ -615,7 +604,7 @@ export default function WaiterEditReservationPage() {
 
                                         <button
                                             type="button"
-                                            className="waiter-btn-outline"
+                                            className="rk-btn rk-btn--quiet"
                                             style={cancelButtonStyle}
                                             disabled={submitting || canceling}
                                             onClick={() => void handleCancelReservation()}
@@ -625,7 +614,7 @@ export default function WaiterEditReservationPage() {
 
                                         <button
                                             type="button"
-                                            className="waiter-btn-outline"
+                                            className="rk-btn rk-btn--quiet"
                                             disabled={submitting || canceling}
                                             onClick={() => navigate('/waiter/tables')}
                                         >
@@ -689,7 +678,7 @@ export default function WaiterEditReservationPage() {
                                             {itemId && !isCurrent && (
                                                 <button
                                                     type="button"
-                                                    className="waiter-btn-outline"
+                                                    className="rk-btn rk-btn--quiet"
                                                     style={editButtonStyle}
                                                     onClick={() =>
                                                         navigate(
@@ -708,8 +697,6 @@ export default function WaiterEditReservationPage() {
                     </div>
                 </div>
             </main>
-
-            <WaiterToast toast={toast} />
         </div>
     )
 }

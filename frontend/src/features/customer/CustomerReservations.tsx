@@ -597,7 +597,7 @@ export default function CustomerReservations() {
                         <div className="customer-form-actions">
                             <button
                                 type="submit"
-                                className="customer-btn-primary"
+                                className="rk-btn rk-btn--primary"
                                 disabled={
                                     bookLoading ||
                                     availableTables.length === 0 ||
@@ -609,7 +609,7 @@ export default function CustomerReservations() {
 
                             <button
                                 type="button"
-                                className="customer-btn-secondary"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => {
                                     setBookForm({
                                         customerName: '',
@@ -698,7 +698,7 @@ export default function CustomerReservations() {
 
                                     <button
                                         type="button"
-                                        className="customer-btn-danger"
+                                        className="rk-btn rk-btn--danger"
                                         disabled={cancelingId !== null}
                                         onClick={() =>
                                             void handleCancelReservation(reservation.id)
@@ -716,7 +716,7 @@ export default function CustomerReservations() {
                     <div className="customer-form-actions">
                         <button
                             type="button"
-                            className="customer-btn-secondary"
+                            className="rk-btn rk-btn--quiet"
                             onClick={() => {
                                 setCancelError('')
                                 setCancelSuccess(null)

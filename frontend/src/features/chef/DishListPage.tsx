@@ -252,7 +252,7 @@ export default function DishListPage() {
 
                             <button
                                 type="button"
-                                className="secondary-button"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => {
                                     loadDishes(true, true).catch((requestError) => {
                                         console.error(requestError)
@@ -266,7 +266,7 @@ export default function DishListPage() {
                 />
 
                 {routeStatus === 'unavailable' && (
-                    <Link className="secondary-button" to="/chef/dishes">
+                    <Link className="rk-btn rk-btn--quiet" to="/chef/dishes">
                         ← Xem tất cả món
                     </Link>
                 )}
@@ -332,7 +332,7 @@ export default function DishListPage() {
 
                     <button
                         type="button"
-                        className="secondary-button"
+                        className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
                         Xóa bộ lọc
@@ -347,7 +347,7 @@ export default function DishListPage() {
                     action={
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
                             Xóa bộ lọc
