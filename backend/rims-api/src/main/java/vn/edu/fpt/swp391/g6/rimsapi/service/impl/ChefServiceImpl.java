@@ -27,6 +27,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.BusinessRuleException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.OrderItemRepository;
@@ -107,6 +108,9 @@ public class ChefServiceImpl implements ChefService
         return response;
     }
 
+    /** Khớp với giới hạn của cột cancel_reason và của ô nhập bên giao diện Bếp. */
+    private static final int MAX_CANCEL_REASON_LENGTH = 500;
+
     @Override
     @Transactional
     public void updateDishStatus(
@@ -121,13 +125,18 @@ public class ChefServiceImpl implements ChefService
                     "Món đã được hoàn thành hoặc đã hủy");
         }
 
-        if (status == null)
+        // Endpoint này CHỈ dùng để báo xong món. Trước đây nó nhận mọi giá trị
+        // enum, nên gửi CANCELLED vào đây là huỷ được món mà không cần lý do,
+        // không ghi thời điểm huỷ, và không tính lại tổng tiền của đơn — tức là
+        // đi vòng qua toàn bộ ràng buộc của luồng huỷ món.
+        if (status != OrderItemStatus.COMPLETED)
         {
-            throw new IllegalArgumentException(
-                    "Trạng thái món không được để trống");
+            throw new BusinessRuleException(
+                    "Chỉ có thể đánh dấu món đã hoàn thành ở đây. "
+                            + "Muốn huỷ món thì dùng chức năng huỷ kèm lý do.");
         }
 
-        item.setStatus(status);
+        item.setStatus(OrderItemStatus.COMPLETED);
 
         orderItemRepository.save(item);
         webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "DISH_READY");
@@ -236,7 +245,20 @@ public class ChefServiceImpl implements ChefService
             throw new IllegalStateException("Chỉ có thể hủy món đang chuẩn bị");
         }
 
+        // Waiter phải nói được với khách vì sao món bị huỷ, nên lý do là bắt buộc.
+        // Giao diện Bếp đã chặn để trống, nhưng backend là nơi giữ quy tắc.
         String normalizedReason = reason == null ? "" : reason.trim();
+
+        if (normalizedReason.isEmpty())
+        {
+            throw new BusinessRuleException("Vui lòng nhập lý do huỷ món.");
+        }
+
+        if (normalizedReason.length() > MAX_CANCEL_REASON_LENGTH)
+        {
+            throw new BusinessRuleException(
+                    "Lý do huỷ không được vượt quá " + MAX_CANCEL_REASON_LENGTH + " ký tự.");
+        }
 
         // Hủy trong chi tiết món: chỉ hủy đúng OrderItem được chọn.
         selectedItem.setStatus(OrderItemStatus.CANCELLED);
