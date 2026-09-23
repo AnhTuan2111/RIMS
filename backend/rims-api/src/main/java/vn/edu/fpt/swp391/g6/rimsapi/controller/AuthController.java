@@ -53,7 +53,7 @@ public class AuthController
     public LogoutResponse logout(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestHeader("Authorization") String authHeader,
-            @RequestBody(required = false) RefreshTokenRequest refreshTokenRequest)
+            @Valid @RequestBody(required = false) RefreshTokenRequest refreshTokenRequest)
     {
         if (authHeader == null || !authHeader.startsWith("Bearer "))
         {

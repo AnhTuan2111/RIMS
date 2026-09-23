@@ -116,7 +116,7 @@ public class AdminController
     @PatchMapping("/user/{id}/status")
     public ResponseEntity<Void> setAccountStatus(
             @PathVariable Integer id,
-            @RequestBody SetAccountStatusRequest request)
+            @Valid @RequestBody SetAccountStatusRequest request)
     {
         userService.setAccountStatus(id, request);
         return ResponseEntity.noContent().build();

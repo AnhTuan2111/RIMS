@@ -211,7 +211,7 @@ public class UserServiceImpl implements UserService
         {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Không thể khóa tài khoản Admin");
         }
-        user.setActive(request.isActive());
+        user.setActive(request.getActive());
         userRepository.save(user);
     }
 

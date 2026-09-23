@@ -40,7 +40,7 @@ public class ChefController
     }
 
     @PutMapping("/orders/{id}/status")
-    public String updateDishStatus(@PathVariable Long id, @RequestBody UpdateDishStatusRequest request)
+    public String updateDishStatus(@PathVariable Long id, @Valid @RequestBody UpdateDishStatusRequest request)
     {
         chefService.updateDishStatus(id, request.getStatus());
         return "Cập nhật trạng thái món thành công";
@@ -53,7 +53,7 @@ public class ChefController
     @PutMapping("/dishes/{id}/status")
     public String updateMenuStatus(
             @PathVariable Integer id,
-            @RequestBody UpdateMenuStatusRequest request)
+            @Valid @RequestBody UpdateMenuStatusRequest request)
     {
         chefService.updateMenuStatus(
                 id,

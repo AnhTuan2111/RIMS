@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.cashier.CreateCustomerRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.payment.PaymentRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.order.OrderDetailResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.payment.PaymentResponse;
@@ -57,7 +59,7 @@ public class CashierController
     @PostMapping("/orders/{id}/payment")
     public ResponseEntity<PaymentResponse> processPayment(
             @PathVariable Long id,
-            @RequestBody PaymentRequest request)
+            @Valid @RequestBody PaymentRequest request)
     {
         return ResponseEntity.ok(cashierService.processPayment(id, request));
     }
@@ -76,7 +78,7 @@ public class CashierController
     @PostMapping("/orders/{id}/complete-cash")
     public ResponseEntity<PaymentResponse> completeCashPayment(
             @PathVariable Long id,
-            @RequestBody PaymentRequest request)
+            @Valid @RequestBody PaymentRequest request)
     {
         return ResponseEntity.ok(cashierService.completeCashPayment(id, request));
     }
@@ -155,10 +157,10 @@ public class CashierController
     }
 
     @PostMapping("/customers/create")
-    public ResponseEntity<?> createCustomer(@RequestBody Map<String, String> body)
+    public ResponseEntity<?> createCustomer(@Valid @RequestBody CreateCustomerRequest body)
     {
-        User newCustomer = cashierService.createCustomerFast(body.get("fullName"), body.get("phone"),
-                body.get("email"));
+        User newCustomer = cashierService.createCustomerFast(body.getFullName(), body.getPhone(),
+                body.getEmail());
         return ResponseEntity.ok(Map.of(
                 "id", newCustomer.getId(),
                 "fullName", newCustomer.getFullName(),

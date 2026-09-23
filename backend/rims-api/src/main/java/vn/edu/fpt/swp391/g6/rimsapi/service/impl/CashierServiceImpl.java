@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CashierServiceImpl implements CashierService
 {
 
@@ -339,8 +341,9 @@ public class CashierServiceImpl implements CashierService
         // trừ/cộng điểm thật vào tài khoản khách — việc đó chỉ làm khi callback báo thành công.
         if (customerId != null)
         {
-            User customer = userRepository.findById(customerId).orElse(null);
-            if (customer != null && pointsUsed != null && pointsUsed > 0)
+            User customer = requireActiveCustomer(customerId);
+
+            if (pointsUsed != null && pointsUsed > 0)
             {
                 if (customer.getRewardPoints() < pointsUsed)
                 {
@@ -456,7 +459,7 @@ public class CashierServiceImpl implements CashierService
         // rồi áp dụng đúng logic trừ/cộng điểm y hệt luồng tiền mặt
         Integer customerId = order.getPendingCustomerId();
         Integer pointsUsed = order.getPendingPointsUsed();
-        finalAmount = applyLoyaltyPoints(invoice, customerId, pointsUsed, finalAmount);
+        finalAmount = applyLoyaltyPointsAfterPayment(invoice, customerId, pointsUsed, finalAmount);
 
         // Dọn dẹp dữ liệu tạm sau khi đã dùng xong
         order.setPendingCustomerId(null);
@@ -492,7 +495,10 @@ public class CashierServiceImpl implements CashierService
     public User searchCustomerByPhone(String phone)
     {
         User user = userRepository.findByPhone(phone).orElse(null);
-        if (user != null && user.getRole() == RoleType.CUSTOMER)
+
+        // Không trả về tài khoản đã bị khoá: thu ngân chọn trúng thì hệ thống sẽ
+        // từ chối ở bước thanh toán, lúc đó khách đã đứng chờ ở quầy rồi.
+        if (user != null && user.getRole() == RoleType.CUSTOMER && user.isActive())
         {
             return user;
         }
@@ -683,6 +689,41 @@ public class CashierServiceImpl implements CashierService
     // HÀM DÙNG CHUNG: công thức tính tiền chuẩn (chỉ cộng các món COMPLETED) - dùng ở nhiều nơi (completeCashPayment,
     // createVNPayPaymentUrl, processVnPaySuccess). Đổi công thức tính tiền thì sửa ở đây trước, nhưng nhớ kiểm tra
     // thêm các chỗ viết logic tương tự thủ công ở getOrderDetail/getInvoiceDetailForCashier.
+    /**
+     * Lấy khách hàng theo id, chặn mọi trường hợp id không hợp lệ.
+     *
+     * <p>Trước đây chỉ gọi {@code findById} rồi bỏ qua nếu không thấy. Thực tế
+     * tài khoản không bao giờ bị xoá cứng nên nhánh đó gần như không chạy,
+     * trong khi hai trường hợp thật sự xảy ra lại không được chặn:
+     *
+     * <ul>
+     *   <li>id trỏ tới tài khoản NHÂN VIÊN — điểm thưởng cộng vào tài khoản
+     *       nhân viên, và nhân viên đó dùng điểm để giảm giá cho chính mình;</li>
+     *   <li>khách đã bị khoá — tài khoản không đăng nhập được nữa nhưng vẫn
+     *       tiếp tục tích điểm, nên số điểm đó không ai tiêu được.</li>
+     * </ul>
+     */
+    private User requireActiveCustomer(Integer customerId)
+    {
+        User customer = userRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy khách hàng đã chọn"));
+
+        if (customer.getRole() != RoleType.CUSTOMER)
+        {
+            throw new BusinessRuleException(
+                    "Tài khoản được chọn không phải tài khoản khách hàng!");
+        }
+
+        if (!customer.isActive())
+        {
+            throw new BusinessRuleException(
+                    "Tài khoản khách hàng này đã bị khoá!");
+        }
+
+        return customer;
+    }
+
     private BigDecimal calculateActualTotal(Order order)
     {
         if (order.getOrderItems() == null)
@@ -698,40 +739,96 @@ public class CashierServiceImpl implements CashierService
     // HÀM LÕI hệ thống điểm thưởng - dùng chung cho cả CASH và QRCODE:
     // 1) set customer vào invoice, 2) nếu dùng điểm: check đủ điểm -> check không vượt 50% hóa đơn -> trừ điểm -> trừ tiền,
     // 3) LUÔN cộng điểm mới = 1% giá trị hóa đơn SAU KHI đã trừ điểm dùng (làm tròn xuống theo mỗi 1.000đ).
+    /**
+     * Áp điểm thưởng trước khi thu tiền: sai điều kiện nào thì từ chối luôn.
+     */
     private BigDecimal applyLoyaltyPoints(Invoice invoice, Integer customerId, Integer pointsUsed,
-            BigDecimal finalAmount)
+            BigDecimal amountAfterVat)
     {
         if (customerId == null)
-            return finalAmount;
+            return amountAfterVat;
 
-        // Nếu thu ngân đã chọn một khách mà không tìm thấy khách đó thì phải dừng.
-        // Trước đây chỗ này lặng lẽ bỏ qua, nên số tiền hiển thị cho thu ngân (đã
-        // trừ điểm) lệch với số ghi vào hoá đơn (chưa trừ), và khách mất điểm tích.
-        User customer = userRepository.findById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Không tìm thấy khách hàng đã chọn"));
-
-        invoice.setCustomer(customer);
+        User customer = requireActiveCustomer(customerId);
         int safePointsUsed = pointsUsed != null ? pointsUsed : 0;
 
-        if (safePointsUsed > 0)
+        if (safePointsUsed > 0 && customer.getRewardPoints() < safePointsUsed)
         {
-            if (customer.getRewardPoints() < safePointsUsed)
-            {
-                throw new BusinessRuleException("Khách hàng không đủ điểm!");
-            }
-
-            finalAmount = PaymentCalculator.amountDue(finalAmount, safePointsUsed);
-            customer.setRewardPoints(customer.getRewardPoints() - safePointsUsed);
-            invoice.setPointsUsedOnInvoice(safePointsUsed);
+            throw new BusinessRuleException("Khách hàng không đủ điểm!");
         }
 
-        int earnedPoints = PaymentCalculator.pointsEarned(finalAmount);
+        return recordLoyalty(invoice, customer, safePointsUsed, amountAfterVat);
+    }
+
+    /**
+     * Áp điểm thưởng SAU khi khách đã trả tiền qua VNPay.
+     *
+     * <p>Ở đây tuyệt đối không được ném lỗi. Tiền đã bị trừ khỏi thẻ khách rồi,
+     * nên một ngoại lệ sẽ cuộn ngược cả giao dịch: không có hoá đơn nào được
+     * tạo, đơn kệt ở trạng thái LOCKED, và khách mất tiền không dấu vết.
+     *
+     * <p>Số tiền trên hoá đơn luôn phải bằng số VNPay đã thu, nên phần giảm giá
+     * vẫn giữ nguyên dù sổ điểm của khách trong lúc đó có thay đổi. Chên lệch
+     * (nếu có) được ghi log để đối soát.
+     */
+    private BigDecimal applyLoyaltyPointsAfterPayment(Invoice invoice, Integer customerId,
+            Integer pointsUsed, BigDecimal amountAfterVat)
+    {
+        int safePointsUsed = pointsUsed != null ? pointsUsed : 0;
+
+        if (customerId == null)
+        {
+            return amountAfterVat;
+        }
+
+        User customer = userRepository.findById(customerId).orElse(null);
+
+        if (customer == null || customer.getRole() != RoleType.CUSTOMER)
+        {
+            log.warn("[VNPAY_LOYALTY_SKIPPED] customerId={} không còn hợp lệ, "
+                    + "bỏ phần điểm nhưng vẫn ghi giảm giá {} điểm đã thu theo",
+                    customerId, safePointsUsed);
+
+            return PaymentCalculator.amountDue(amountAfterVat, safePointsUsed);
+        }
+
+        if (safePointsUsed > customer.getRewardPoints())
+        {
+            log.warn("[VNPAY_LOYALTY_OVERDRAWN] customerId={} chỉ còn {} điểm nhưng đã "
+                    + "thu tiền theo mức giảm {} điểm — trừ hết số đang có",
+                    customerId, customer.getRewardPoints(), safePointsUsed);
+        }
+
+        return recordLoyalty(invoice, customer, safePointsUsed, amountAfterVat);
+    }
+
+    /**
+     * Ghi phần điểm vào hoá đơn và vào sổ điểm của khách.
+     *
+     * <p>Số tiền trả về luôn tính theo {@code pointsUsed} đã thoả thuận, kể cả khi
+     * sổ điểm không đủ để trừ — vì đó mới là số khách thực sự phải trả.
+     */
+    private BigDecimal recordLoyalty(Invoice invoice, User customer, int pointsUsed,
+            BigDecimal amountAfterVat)
+    {
+        invoice.setCustomer(customer);
+
+        BigDecimal amountDue = amountAfterVat;
+
+        if (pointsUsed > 0)
+        {
+            amountDue = PaymentCalculator.amountDue(amountAfterVat, pointsUsed);
+
+            int deducted = Math.min(pointsUsed, customer.getRewardPoints());
+            customer.setRewardPoints(customer.getRewardPoints() - deducted);
+            invoice.setPointsUsedOnInvoice(deducted);
+        }
+
+        int earnedPoints = PaymentCalculator.pointsEarned(amountDue);
         customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
         userRepository.save(customer);
         invoice.setPointsEarnedOnInvoice(earnedPoints);
 
-        return finalAmount;
+        return amountDue;
     }
 
     // Giải phóng bàn sau khi đóng đơn: chỉ giữ RESERVED nếu có reservation đang ở đúng trạng thái WAITING.
