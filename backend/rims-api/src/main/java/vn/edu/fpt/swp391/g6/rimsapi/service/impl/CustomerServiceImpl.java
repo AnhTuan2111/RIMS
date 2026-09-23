@@ -2,8 +2,8 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
+import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationWindow;
 import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 @Service
@@ -43,6 +44,8 @@ public class CustomerServiceImpl implements CustomerService
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ReservationConflictValidator conflictValidator;
+
+    private final ReservationWindow reservationWindow;
     private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
@@ -54,18 +57,7 @@ public class CustomerServiceImpl implements CustomerService
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Không tìm thấy người dùng với ID: " + request.getUserId()));
 
-        if (request.getReservationTime().isBefore(LocalDateTime.now()))
-        {
-            throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
-        }
-        LocalTime time = request.getReservationTime().toLocalTime();
-        LocalTime openTime = LocalTime.of(8, 0);
-        LocalTime closeTime = LocalTime.of(20, 0);
-
-        if (time.isBefore(openTime) || time.isAfter(closeTime))
-        {
-            throw new BusinessRuleException("Nhà hàng chỉ nhận đặt bàn trong khoảng 08:00 - 20:00");
-        }
+        reservationWindow.validate(request.getReservationTime());
 
         // Chặn 1 khách có nhiều hơn 1 đặt bàn đang hoạt động trong cùng 1 ngày
         LocalDate reservationDate = request.getReservationTime().toLocalDate();
@@ -188,20 +180,25 @@ public class CustomerServiceImpl implements CustomerService
     @Transactional(readOnly = true)
     public boolean checkCustomerReservationByUser(Integer userId, String date)
     {
+        // Trước đây mọi lỗi ở đây đều trả về false, tức là "chưa đặt bàn nào".
+        // Ngày sai định dạng hay lỗi truy vấn đều bị che thành câu trả lời hợp lệ,
+        // nên giao diện mở form đặt bàn rồi mới bị từ chối ở bước gửi.
+        LocalDate reservationDate;
+
         try
         {
-
-            LocalDate reservationDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-            if (!userRepository.existsById(userId))
-            {
-                return false;
-            }
-
-            return reservationRepository.existsActiveReservationByUserIdAndDate(userId, reservationDate);
-        } catch (Exception e)
+            reservationDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException ex)
         {
-            return false;
+            throw new BusinessRuleException("Ngày không hợp lệ, cần theo dạng yyyy-MM-dd: " + date);
         }
+
+        if (!userRepository.existsById(userId))
+        {
+            throw new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId);
+        }
+
+        return reservationRepository.existsActiveReservationByUserIdAndDate(userId, reservationDate);
     }
 
     @Override

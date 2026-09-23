@@ -8,7 +8,11 @@ import type {
     TableDetailResponse,
     TimeRangeResponse,
 } from '@/shared/api/waiter'
-import {getAvailableTimeSlots} from '@/shared/utils/reservationTime'
+import {
+    getAvailableTimeSlots,
+    parseReservationWindow,
+} from '@/shared/utils/reservationTime'
+import {useRestaurant} from '@/app/providers/useRestaurant'
 
 import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {WaiterHeader} from './components'
@@ -56,6 +60,8 @@ function splitReservationTime(value?: string | null) {
 }
 
 export default function WaiterCreateReservationPage() {
+    const {profile} = useRestaurant()
+
     const {notify} = useToast()
 
     const navigate = useNavigate()
@@ -90,9 +96,17 @@ export default function WaiterCreateReservationPage() {
 
     const hasLoadedInitialReservationsRef = useRef(false)
 
+    // Khung gio nhan dat ban do backend quyet dinh. Tu go cung o day thi
+    // doi quy tac ben backend ma quen sua se sinh ra o gio khach chon duoc
+    // nhung gui len lai bi tu choi.
+    const reservationWindow = useMemo(
+        () => parseReservationWindow(profile?.reservationHours),
+        [profile?.reservationHours],
+    )
+
     const availableTimeSlots = useMemo(
-        () => getAvailableTimeSlots(resForm.date, blockedRanges),
-        [resForm.date, blockedRanges],
+        () => getAvailableTimeSlots(resForm.date, blockedRanges, reservationWindow),
+        [resForm.date, blockedRanges, reservationWindow],
     )
 
     // Nếu giờ đang chọn không còn nằm trong danh sách slot khả dụng

@@ -9,6 +9,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.restaurant.RestaurantProfileRes
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantProfile;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantProfileRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.RestaurantProfileService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationWindow;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +17,8 @@ public class RestaurantProfileServiceImpl implements RestaurantProfileService
 {
 
     private final RestaurantProfileRepository restaurantProfileRepository;
+
+    private final ReservationWindow reservationWindow;
 
     @Override
     @Transactional
@@ -55,7 +58,11 @@ public class RestaurantProfileServiceImpl implements RestaurantProfileService
 
             profile.setName("Nhà hàng của bạn");
             profile.setTagline("Hãy vào mục Cấu hình nhà hàng để đổi thông tin này");
-            profile.setOpeningHours("10:00 - 22:00 hằng ngày");
+
+            // Lấy từ chính khung giờ nhận đặt bàn. Giá trị cũ gõ tay là
+            // "10:00 - 22:00" trong khi hệ thống chỉ nhận đặt 08:00 - 20:00,
+            // nên trang công khai nói một đằng còn form đặt bàn từ chối một nẻo.
+            profile.setOpeningHours(reservationWindow.describe() + " hằng ngày");
 
             return restaurantProfileRepository.save(profile);
         });
@@ -85,6 +92,7 @@ public class RestaurantProfileServiceImpl implements RestaurantProfileService
                 .phone(profile.getPhone())
                 .email(profile.getEmail())
                 .openingHours(profile.getOpeningHours())
+                .reservationHours(reservationWindow.describe())
                 .build();
     }
 }

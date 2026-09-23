@@ -297,7 +297,8 @@ public class AdminServiceImpl implements AdminService
             boolean newStatus = updateCategoryRequest.getIsAvailable();
             boolean oldStatus = category.isAvailable();
 
-            // ✅ LOGIC 1: Khi ẩn category -> tự động ẩn tất cả dishes trong category đó
+            // Ẩn danh mục thì ẩn luôn mọi món thuộc nó: để sót món lẻ trong một
+            // danh mục đã ẩn thì bếp vẫn nhận được đơn cho món đó.
             if (oldStatus && !newStatus)
             {
                 List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
@@ -337,37 +338,24 @@ public class AdminServiceImpl implements AdminService
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
-        // Lấy tất cả dishes thuộc category này
-        List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
-
-        // ✅ SỬA PHẦN NÀY: Kiểm tra xem có dish nào đã có order không
-        boolean hasDishWithOrders = false;
-        for (Dish dish : dishesInCategory)
-        {
-            long orderCount = dishRepository.countOrderItemsByDishId(dish.getId());
-            if (orderCount > 0)
-            {
-                hasDishWithOrders = true;
-                break;
-            }
-        }
-
-        // ✅ LOGIC MỚI: Nếu có bất kỳ dish nào đã có order -> KHÔNG cho xóa
-        if (hasDishWithOrders)
+        // Đã có đơn nào gọi món trong danh mục này thì không xoá được: xoá sẽ làm
+        // mất lịch sử bán hàng. Một truy vấn có/không, không lặp qua từng món.
+        if (dishRepository.existsOrderItemByCategoryId(id))
         {
             throw new IllegalStateException(
                     "Không thể xóa danh mục này vì có món ăn đã phát sinh đơn hàng. " +
                             "Vui lòng dùng chức năng \"Tạm dừng\" để ẩn danh mục.");
         }
 
-        // ✅ LOGIC MỚI: Nếu không có dish nào có order -> Xóa cứng (xóa cả category và dishes)
-        // Xóa tất cả dishes trong category trước (do FK constraint)
+        // XOÁ CỨNG, không phải ẩn: danh mục và toàn bộ món thuộc nó biến mất khỏi
+        // cơ sở dữ liệu. Món phải xoá trước vì khoá ngoại trỏ về danh mục.
+        List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
+
         if (!dishesInCategory.isEmpty())
         {
             dishRepository.deleteAll(dishesInCategory);
         }
 
-        // Sau đó xóa category
         categoryRepository.delete(category);
 
     }

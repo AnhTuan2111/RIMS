@@ -9,7 +9,15 @@ export interface RestaurantProfile {
     address?: string | null
     phone?: string | null
     email?: string | null
+    /** Giờ mở cửa do chủ quán tự điền, dạng chữ tự do. */
     openingHours?: string | null
+    /**
+     * Khung giờ hệ thống thực sự nhận đặt bàn, ví dụ "08:00 - 20:00".
+     *
+     * <p>Backend sinh ra, không sửa được từ màn Cấu hình — nó là quy tắc nghiệp vụ
+     * chứ không phải thông tin hiển thị.
+     */
+    reservationHours?: string | null
 }
 
 export type UpdateRestaurantProfileRequest = RestaurantProfile

@@ -62,7 +62,7 @@ public class CashierServiceImpl implements CashierService
     public List<TableDashboardResponse> getTablesDashboard()
     {
         List<RestaurantTable> tables = tableRepository.findAll();
-        List<Order> activeOrders = orderRepository.findByStatusIn(List.of(OrderStatus.SERVING, OrderStatus.LOCKED)); // ĐỔI: gộp cả LOCKED
+        List<Order> activeOrders = orderRepository.findByStatusIn(List.of(OrderStatus.SERVING, OrderStatus.LOCKED));
 
         // Giữ nguyên cả Order thay vì chỉ id, để lấy luôn totalAmount mà không phải
         // gọi DB thêm lần nữa.
@@ -136,7 +136,7 @@ public class CashierServiceImpl implements CashierService
     @Transactional
     public PaymentResponse processPayment(Long orderId, PaymentRequest request)
     {
-        Order order = orderRepository.findOrderWithDetailsById(orderId) // ĐỔI: cần load kèm orderItems
+        Order order = orderRepository.findOrderWithDetailsById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
 
         // Idempotent: nếu đã LOCKED sẵn (Cashier bấm lại/F5) thì trả về luôn, không làm gì thêm
@@ -155,7 +155,8 @@ public class CashierServiceImpl implements CashierService
 
         List<OrderItem> items = order.getOrderItems() != null ? order.getOrderItems() : List.of();
 
-        // MỚI: chặn nếu còn món chưa xử lý xong
+        // Còn món đang nấu thì chưa chốt được: chốt rồi thì những món đó
+        // không vào được hoá đơn nữa.
         boolean hasPreparingItem = items.stream()
                 .anyMatch(item -> item.getStatus() == OrderItemStatus.PREPARING);
 
@@ -165,7 +166,7 @@ public class CashierServiceImpl implements CashierService
                     .filter(item -> item.getStatus() == OrderItemStatus.PREPARING)
                     .map(item -> item.getDishNameSnapshot() + " x" + item.getQuantity())
                     .collect(Collectors.joining(", "));
-            throw new IllegalArgumentException("Không thể thanh toán, còn món chưa hoàn thành: " + preparingNames); // ĐỔI: RuntimeException -> IllegalArgumentException để trả đúng mã 400
+            throw new IllegalArgumentException("Không thể thanh toán, còn món chưa hoàn thành: " + preparingNames);
         }
 
         // QUAN TRỌNG - CASE ĐẶC BIỆT: không còn PREPARING nhưng cũng không có món nào COMPLETED
@@ -327,7 +328,7 @@ public class CashierServiceImpl implements CashierService
             throw new ConflictException("Đơn hàng này đã thanh toán xong hoặc không hợp lệ!");
         }
 
-        // ĐÃ SỬA: Lấy tổng tiền thực tế của các món COMPLETED
+        // Chỉ tính món đã hoàn thành. Món bị huỷ không thu tiền.
         BigDecimal totalBeforeVat = calculateActualTotal(order);
 
         if (totalBeforeVat == null || totalBeforeVat.compareTo(BigDecimal.ZERO) <= 0)
@@ -354,7 +355,8 @@ public class CashierServiceImpl implements CashierService
             }
         }
 
-        // ĐÃ THÊM: Lưu tạm customerId/pointsUsed vào Order để lấy lại lúc VNPay callback về
+        // Lưu tạm customerId/pointsUsed vào Order để lấy lại lúc VNPay callback về:
+        // callback do VNPay gọi nên không mang theo phiên làm việc của thu ngân.
         order.setPendingCustomerId(customerId);
         order.setPendingPointsUsed(pointsUsed);
         order.setStatus(OrderStatus.LOCKED);
@@ -448,15 +450,15 @@ public class CashierServiceImpl implements CashierService
             throw new ConflictException("Đơn hàng này đã được thanh toán rồi!");
         }
 
-        // ĐÃ SỬA: Tính lại VAT dựa trên tổng tiền thực tế của các món COMPLETED
+        // Tính lại từ đầu thay vì tin số đã gửi sang VNPay: giữa lúc tạo link và
+        // lúc callback về, bếp có thể đã huỷ thêm món.
         BigDecimal totalBeforeVat = calculateActualTotal(order);
         BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
         BigDecimal finalAmount = PaymentCalculator.totalAfterVat(totalBeforeVat);
 
         Invoice invoice = new Invoice();
 
-        // ĐÃ THÊM: Lấy lại customerId/pointsUsed đã lưu tạm lúc tạo link VNPay,
-        // rồi áp dụng đúng logic trừ/cộng điểm y hệt luồng tiền mặt
+        // Lấy lại customerId/pointsUsed đã lưu tạm lúc tạo link VNPay.
         Integer customerId = order.getPendingCustomerId();
         Integer pointsUsed = order.getPendingPointsUsed();
         finalAmount = applyLoyaltyPointsAfterPayment(invoice, customerId, pointsUsed, finalAmount);

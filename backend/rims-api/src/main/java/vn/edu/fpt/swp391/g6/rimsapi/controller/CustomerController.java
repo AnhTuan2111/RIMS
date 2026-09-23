@@ -60,14 +60,10 @@ public class CustomerController
     @GetMapping("/tables/available")
     public ResponseEntity<List<RestaurantTableResponse>> getAvailableTables()
     {
-        try
-        {
-            List<RestaurantTableResponse> response = customerService.getAvailableTables();
-            return ResponseEntity.ok(response);
-        } catch (Exception e)
-        {
-            return ResponseEntity.ok(List.of());
-        }
+        // Không bọc try/catch ở đây: trả danh sách rỗng khi có lỗi khiến khách
+        // thấy "hết bàn" và bỏ đi, trong khi thật ra hệ thống đang hỏng.
+        // GlobalExceptionHandler trả 500 để phía giao diện hiện được lỗi thật.
+        return ResponseEntity.ok(customerService.getAvailableTables());
     }
 
     // ========== Reservation Management for Customer ==========

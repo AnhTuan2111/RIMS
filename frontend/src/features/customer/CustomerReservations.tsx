@@ -9,7 +9,11 @@ import {
     getBlockedTimeSlots,
     getCurrentReservation,
 } from '@/shared/api/customer'
-import {getAvailableTimeSlots} from '@/shared/utils/reservationTime'
+import {
+    getAvailableTimeSlots,
+    parseReservationWindow,
+} from '@/shared/utils/reservationTime'
+import {useRestaurant} from '@/app/providers/useRestaurant'
 
 import type {
     CustomerCreateReservationRequest,
@@ -64,6 +68,8 @@ const statusLabels: Record<string, string> = {
 }
 
 export default function CustomerReservations() {
+    const {profile} = useRestaurant()
+
     const [activeTab, setActiveTab] = useState<ReservationTab>('book')
 
     const [bookForm, setBookForm] = useState<CustomerCreateReservationRequest>({
@@ -111,9 +117,17 @@ export default function CustomerReservations() {
 
     const selectedTime = bookForm.reservationTime.split('T')[1]?.slice(0, 5) || '08:00'
 
+    // Khung gio nhan dat ban do backend quyet dinh. Tu go cung o day thi
+    // doi quy tac ben backend ma quen sua se sinh ra o gio khach chon duoc
+    // nhung gui len lai bi tu choi.
+    const reservationWindow = useMemo(
+        () => parseReservationWindow(profile?.reservationHours),
+        [profile?.reservationHours],
+    )
+
     const availableTimeSlots = useMemo(
-        () => getAvailableTimeSlots(selectedDate, blockedRanges),
-        [selectedDate, blockedRanges],
+        () => getAvailableTimeSlots(selectedDate, blockedRanges, reservationWindow),
+        [selectedDate, blockedRanges, reservationWindow],
     )
 
     // Tự chuyển sang slot khả dụng đầu tiên nếu giờ đang chọn không còn

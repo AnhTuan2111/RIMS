@@ -50,6 +50,7 @@ export default function AdminCategoryPage() {
     const [deleteTarget, setDeleteTarget] = useState<{
         id: number
         name: string
+        dishCount: number
     } | null>(null)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
@@ -156,7 +157,7 @@ export default function AdminCategoryPage() {
             await adminApi.deleteCategory(deleteTarget.id)
             setDeleteTarget(null)
             await loadCategories(true, true)
-            notify(`Đã ẩn danh mục ${deleteTarget.name}.`)
+            notify(`Đã xoá danh mục ${deleteTarget.name}.`)
         } catch (err: unknown) {
             console.error('Lỗi khi xóa danh mục:', err)
             const errMsg = getErrorMessage(err, 'Không thể thực hiện xóa danh mục!')
@@ -462,6 +463,7 @@ export default function AdminCategoryPage() {
                                                     setDeleteTarget({
                                                         id: item.id,
                                                         name: item.name,
+                                                        dishCount: item.dishCount || 0,
                                                     })
                                                 }
                                                 className="admin-category-action-btn admin-category-delete-btn"
@@ -545,6 +547,7 @@ export default function AdminCategoryPage() {
                                     setDeleteTarget({
                                         id: selectedCategory.id,
                                         name: selectedCategory.name,
+                                        dishCount: selectedCategory.dishCount || 0,
                                     })
                                 }
                                 className="rk-btn rk-btn--danger"
@@ -878,15 +881,21 @@ export default function AdminCategoryPage() {
                 </div>
             )}
 
+            {/* Backend XOÁ HẲN danh mục và mọi món thuộc nó, không phải ẩn đi.
+                Nói rõ số món sẽ mất để người xoá thấy được phạm vi ảnh hưởng. */}
             <ConfirmDialog
                 open={Boolean(deleteTarget)}
-                title="Ẩn danh mục này?"
+                title="Xoá danh mục này?"
                 description={
                     deleteTarget
-                        ? `Danh mục “${deleteTarget.name}” sẽ không còn hiện trong thực đơn. Dữ liệu cũ vẫn giữ nguyên, nhưng hệ thống sẽ chặn nếu còn món ăn đang thuộc danh mục này.`
+                        ? `Danh mục “${deleteTarget.name}”${
+                              deleteTarget.dishCount
+                                  ? ` và ${deleteTarget.dishCount} món thuộc nó`
+                                  : ''
+                          } sẽ bị xoá khỏi hệ thống. Việc này không hoàn tác được. Nếu chỉ muốn tạm ngừng bán, hãy sửa danh mục và tắt trạng thái hiển thị.`
                         : undefined
                 }
-                confirmLabel="Ẩn danh mục"
+                confirmLabel="Xoá vĩnh viễn"
                 destructive
                 onConfirm={() => void confirmDelete()}
                 onCancel={() => setDeleteTarget(null)}

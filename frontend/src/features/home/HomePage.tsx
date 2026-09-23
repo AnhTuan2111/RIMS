@@ -1,6 +1,6 @@
 import {Link} from 'react-router-dom'
 import {useEffect, useState} from 'react'
-import {Clock, MapPin, Phone} from 'lucide-react'
+import {CalendarClock, Clock, MapPin, Phone} from 'lucide-react'
 
 import {useRestaurant} from '@/app/providers/useRestaurant'
 import {getPublicBestSellingDishes, type PublicBestSellingDish} from '@/shared/api/public'
@@ -46,6 +46,14 @@ export default function HomePage() {
             icon: Clock,
             label: 'Giờ mở cửa',
             value: profile.openingHours,
+        },
+        // Giờ mở cửa và giờ nhận đặt bàn là hai thứ khác nhau: quán có thể mở
+        // tới 22:30 nhưng hệ thống chỉ nhận đặt tới 20:00. Nói rõ cả hai để
+        // khách không chọn giờ rồi mới bị từ chối.
+        profile?.reservationHours && {
+            icon: CalendarClock,
+            label: 'Nhận đặt bàn',
+            value: profile.reservationHours,
         },
     ].filter(Boolean) as {icon: typeof MapPin; label: string; value: string}[]
 

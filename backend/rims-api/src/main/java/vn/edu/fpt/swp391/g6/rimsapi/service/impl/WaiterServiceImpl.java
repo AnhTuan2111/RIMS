@@ -3,7 +3,6 @@ package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -30,11 +29,11 @@ import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.ReservationStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
-import vn.edu.fpt.swp391.g6.rimsapi.exception.BusinessRuleException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TableNotAvailableException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.WaiterService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationConflictValidator;
+import vn.edu.fpt.swp391.g6.rimsapi.util.ReservationWindow;
 import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 @Service
@@ -48,6 +47,8 @@ public class WaiterServiceImpl implements WaiterService
     private final UserRepository userRepository;
     private final OrderItemRepository orderItemRepository;
     private final ReservationConflictValidator conflictValidator;
+
+    private final ReservationWindow reservationWindow;
     private final WebSocketBroadcaster webSocketBroadcaster;
 
     @Override
@@ -403,19 +404,7 @@ public class WaiterServiceImpl implements WaiterService
     {
         RestaurantTable table = restaurantTableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
-        if (request.getReservationTime().isBefore(LocalDateTime.now()))
-        {
-            throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
-        }
-
-        LocalTime time = request.getReservationTime().toLocalTime();
-        LocalTime openTime = LocalTime.of(8, 0);
-        LocalTime closeTime = LocalTime.of(20, 0);
-
-        if (time.isBefore(openTime) || time.isAfter(closeTime))
-        {
-            throw new BusinessRuleException("Nhà hàng chỉ nhận đặt bàn trong khoảng 08:00 - 20:00");
-        }
+        reservationWindow.validate(request.getReservationTime());
 
         // Chặn 1 số điện thoại có nhiều hơn 1 đặt bàn đang hoạt động trong cùng 1 ngày
         LocalDate reservationDate = request.getReservationTime().toLocalDate();

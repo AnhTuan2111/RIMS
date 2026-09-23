@@ -134,7 +134,8 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             document.add(table);
             document.add(lineSeparator);
 
-            //Phần Tổng kết tài chính — ĐÃ SỬA: tự tính từ các món COMPLETED, không dùng order.getTotalAmount() nữa
+            // Tổng kết tài chính: tự tính từ các món đã hoàn thành chứ không dùng
+            // order.getTotalAmount(), vì số đó bao gồm cả món đã bị huỷ.
             BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
             BigDecimal finalAmount = invoice.getFinalAmount();
 
