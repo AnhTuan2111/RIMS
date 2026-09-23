@@ -3,6 +3,7 @@ import {NavLink} from 'react-router-dom'
 import {ROLE_LABELS, roleMenus} from '@/app/config/roleMenus'
 import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
+import {useRestaurant} from '@/app/providers/useRestaurant'
 
 function getMenuIcon(path: string) {
     if (path.includes('dashboard')) return '▦'
@@ -41,7 +42,13 @@ function getMenuIcon(path: string) {
 
 export function Sidebar() {
     const {actor} = useActor()
+    const {profile} = useRestaurant()
     const menus = roleMenus[actor] ?? []
+
+    // Khách hàng nhìn thấy thương hiệu nhà hàng; nhân viên nhìn thấy tên hệ thống.
+    const restaurantName = profile?.name ?? 'Nhà hàng'
+    const restaurantTagline = profile?.tagline ?? 'Thực đơn & đặt bàn'
+    const brandInitial = restaurantName.trim().charAt(0).toUpperCase() || 'R'
 
     const stored = localStorage.getItem('currentUser')
     const currentUser = stored
@@ -52,13 +59,17 @@ export function Sidebar() {
         <aside className="app-sidebar rims-sidebar">
             <div className="rims-sidebar-brand">
                 <div className="rims-sidebar-logo">
-                    {actor === RoleType.CUSTOMER ? '满' : 'R'}
+                    {actor === RoleType.CUSTOMER ? brandInitial : 'R'}
                 </div>
                 <div>
-                    <h2>{actor === RoleType.CUSTOMER ? 'MÃN VỊ LÂU' : 'RIMS'}</h2>
+                    <h2>
+                        {actor === RoleType.CUSTOMER
+                            ? restaurantName.toUpperCase()
+                            : 'RIMS'}
+                    </h2>
                     <p>
                         {actor === RoleType.CUSTOMER
-                            ? 'Ẩm thực Trung Hoa cao cấp'
+                            ? restaurantTagline
                             : 'Vận hành nhà hàng'}
                     </p>
                 </div>

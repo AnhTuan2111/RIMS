@@ -5,6 +5,7 @@ import {login} from '@/shared/api/auth'
 import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
+import {useRestaurant} from '@/app/providers/useRestaurant'
 
 function getRedirectPath(role: RoleType) {
     switch (role) {
@@ -29,6 +30,9 @@ function getRedirectPath(role: RoleType) {
 }
 
 export default function LoginPage() {
+    const {profile} = useRestaurant()
+    const restaurantName = profile?.name ?? 'RIMS'
+
     const navigate = useNavigate()
     const {setActor} = useActor()
 
@@ -87,7 +91,7 @@ export default function LoginPage() {
                 </Link>
 
                 <div className="login-header">
-                    <h1>Đăng nhập Mãn Vị Lâu</h1>
+                    <h1>Đăng nhập {restaurantName}</h1>
 
                     <p>Đăng nhập tài khoản để đặt bàn ngay hôm nay!</p>
                 </div>

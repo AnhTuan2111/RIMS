@@ -652,3 +652,54 @@ table,
     font-family: var(--rims-font-sans);
     letter-spacing: var(--rims-tracking-tight);
 }
+
+/* ---------- Biểu mẫu ---------- */
+
+.rk-formgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: var(--rims-space-5);
+}
+
+.rk-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-2);
+}
+
+.rk-field__label {
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    color: var(--rims-ink-2);
+}
+
+.rk-field__hint {
+    margin: 0;
+    font-size: var(--rims-text-xs);
+    color: var(--rims-ink-3);
+}
+
+.rk-formerror {
+    margin: 0;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-alert-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+    font-size: var(--rims-text-sm);
+}
+
+/* Báo lưu thành công lặng lẽ, không dùng toast ăn mừng. */
+.rk-savedhint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    color: var(--rims-ok);
+}
+
+textarea.rk-input {
+    resize: vertical;
+    line-height: var(--rims-leading-normal);
+}

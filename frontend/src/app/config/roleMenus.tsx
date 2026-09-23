@@ -31,6 +31,7 @@ export const roleMenus: Record<string, RoleMenuItem[]> = {
         {label: 'Quản lý món ăn', path: '/admin/dishes'},
         {label: 'Thống kê', path: '/admin/statistics'},
         {label: 'Lịch sử hóa đơn', path: '/admin/invoices'},
+        {label: 'Cấu hình nhà hàng', path: '/admin/restaurant'},
         {label: 'Hồ sơ của tôi', path: '/profile'},
     ],
 
