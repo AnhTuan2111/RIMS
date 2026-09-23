@@ -197,15 +197,21 @@ public class WaiterServiceImpl implements WaiterService
     }
 
     @Override
+    /**
+     * Cập nhật các món của một đơn đang phục vụ.
+     *
+     * <p>Quy tắc về số lượng phụ thuộc vào trạng thái từng món:
+     * <ul>
+     *   <li>món đã COMPLETED: chỉ được TĂNG số lượng, vì phần đã nấu xong thì
+     *       không rút lại được nữa — muốn bỏ thì phải huỷ món;</li>
+     *   <li>món còn PREPARING: thêm bớt tuỳ ý, bếp chưa làm tới.</li>
+     * </ul>
+     *
+     * <p>Đơn và bàn đều phải đang ở trạng thái phục vụ.
+     */
     @Transactional
     public UpdateOrderResponse updateOrder(Long id, UpdateOrderRequest updateOrderRequest, Integer waiterId)
     {
-        // nhận order id để validate (order đang serving và table đang serving)
-        // update order request là danh sách (update order items request) bao gồm các món (dish) số lượng món (quantity) và note của món tương ứng
-
-        // các món đã trong trạng thái COMPLETE thì chỉ có thêm số lượng chứ không giảm đi được, tức là số lượng lúc sau phải luôn >= số lượng ban đầu, nếu không thì lỗi
-        // còn các món mà trong trạng thái PREPARING thì thêm bớt tùy ý
-
         Order order = orderRepository.findOrderWithDetailsById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng với ID: " + id));
 
@@ -224,10 +230,8 @@ public class WaiterServiceImpl implements WaiterService
             throw new IllegalArgumentException("Chỉ có thể cập nhật bàn đang ở trạng thái phục vụ");
         }
 
-        // bây giờ đã validate xong order, việc cần làm tiếp theo là đối chiếu order request với order gốc, xem có thay đổi cập nhật gì, lúc này sẽ validate các item trong order
-
-        // vì bên trong order request có các order item request và trong order có các order item, nên bản chất cả bên trong cả 2 là 2 object khác nhau nên không thể so sánh bình thường được.
-        // thay vào đó, ta sẽ sử dụng order item id để lọc và tạo trung gian
+        // Đối chiếu từng dòng gửi lên với dòng gốc trong đơn. Hai bên là hai loại
+        // đối tượng khác nhau nên ghép theo orderItemId chứ không so sánh trực tiếp.
         for (UpdateOrderItemRequest itemRequest : updateOrderRequest.getItems())
         {
             // cập nhật món cũ
