@@ -227,71 +227,6 @@
     border-top: 1px solid var(--rims-line);
 }
 
-.customer-btn-primary,
-.customer-btn-secondary,
-.customer-btn-danger {
-    padding: 12px 28px;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 46px;
-}
-
-.customer-btn-primary {
-    background: var(--rims-brand);
-    color: var(--rims-ink-on-brand);
-    box-shadow: 0 4px 14px rgb(122 16 48 / 20%);
-    flex: 1;
-}
-
-.customer-btn-primary:hover:not(:disabled) {
-    background: var(--rims-brand);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgb(122 16 48 / 25%);
-}
-
-.customer-btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.customer-btn-secondary {
-    background: var(--rims-surface-2);
-    color: var(--rims-ink-2);
-    flex: 0.5;
-}
-
-.customer-btn-secondary:hover {
-    background: var(--rims-surface-3);
-}
-
-.customer-btn-danger {
-    background: var(--rims-alert);
-    color: var(--rims-ink-on-brand);
-    box-shadow: 0 4px 14px rgb(201 50 36 / 20%);
-    flex: 1;
-}
-
-.customer-btn-danger:hover:not(:disabled) {
-    background: var(--rims-alert);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgb(201 50 36 / 25%);
-}
-
-.customer-btn-danger:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
 /* ===== Current Reservation ===== */
 .customer-current-reservation {
     padding: 16px 20px;
@@ -368,12 +303,6 @@
     color: var(--rims-ink-3);
 }
 
-.customer-empty-icon {
-    font-size: 48px;
-    display: block;
-    margin-bottom: 12px;
-}
-
 .customer-empty-state p {
     margin: 0;
     font-size: 15px;
@@ -433,14 +362,6 @@
         flex-direction: column;
     }
 
-    .customer-btn-primary,
-    .customer-btn-secondary,
-    .customer-btn-danger {
-        width: 100%;
-        flex: none;
-        justify-content: center;
-    }
-
     .customer-reservations-tabs {
         width: 100%;
         flex-direction: column;
@@ -487,14 +408,6 @@
     .customer-form-group textarea {
         padding: 8px 12px;
         font-size: 13px;
-    }
-
-    .customer-btn-primary,
-    .customer-btn-secondary,
-    .customer-btn-danger {
-        padding: 10px 16px;
-        font-size: 13px;
-        min-height: 40px;
     }
 
     .customer-current-reservation {

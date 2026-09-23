@@ -273,42 +273,6 @@ button.rk-chip:hover {
     color: var(--rims-brand);
 }
 
-/* ---------- Bề mặt ----------
-   Một lớp bọc duy nhất. Không bọc thẻ trong thẻ. */
-
-.rk-panel {
-    background: var(--rims-surface);
-    border: 1px solid var(--rims-line);
-    border-radius: var(--rims-radius-lg);
-}
-
-.rk-panel__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--rims-space-4);
-    flex-wrap: wrap;
-    padding: var(--rims-space-5) var(--rims-space-6);
-    border-bottom: 1px solid var(--rims-line);
-}
-
-.rk-panel__title {
-    margin: 0;
-    font-size: var(--rims-text-xl);
-    font-weight: var(--rims-weight-bold);
-    letter-spacing: var(--rims-tracking-tight);
-}
-
-.rk-panel__note {
-    margin: var(--rims-space-1) 0 0;
-    font-size: var(--rims-text-sm);
-    color: var(--rims-ink-3);
-}
-
-.rk-panel__body {
-    padding: var(--rims-space-6);
-}
-
 /* ---------- Phiếu món trong bếp ----------
    Thành phần quan trọng nhất của app. Số lượng là thứ đọc được trước tiên,
    trước cả tên món — đầu bếp nhìn từ xa phải thấy ngay "mấy phần". */
@@ -476,11 +440,6 @@ button.rk-chip:hover {
     border-color: var(--rims-busy-line);
 }
 
-.rk-tablecard--alert {
-    background: var(--rims-alert-soft);
-    border-color: var(--rims-alert-line);
-}
-
 /* ---------- Ô số liệu ----------
    Không có ô icon màu mè. Nhãn nhỏ ở trên, số to ở dưới, hết. */
 
@@ -519,21 +478,6 @@ button.rk-chip:hover {
     white-space: nowrap;
 }
 
-.rk-stat__sub {
-    margin-top: var(--rims-space-1);
-    font-size: var(--rims-text-sm);
-    color: var(--rims-ink-3);
-}
-
-/* ---------- Nhãn nhóm ---------- */
-
-.rk-label {
-    font-size: var(--rims-text-xs);
-    font-weight: var(--rims-weight-semibold);
-    letter-spacing: var(--rims-tracking-label);
-    color: var(--rims-ink-3);
-}
-
 /* ---------- Thanh công cụ ---------- */
 
 .rk-toolbar {
@@ -541,11 +485,6 @@ button.rk-chip:hover {
     align-items: center;
     gap: var(--rims-space-3);
     flex-wrap: wrap;
-}
-
-.rk-toolbar__grow {
-    flex: 1 1 240px;
-    min-width: 0;
 }
 
 /* ---------- Lưới chung ---------- */
@@ -570,25 +509,6 @@ button.rk-chip:hover {
     width: 18px;
     height: 18px;
     stroke-width: 1.75;
-}
-
-.rk-icon--lg {
-    width: 22px;
-    height: 22px;
-}
-
-/* ---------- Không chữ, chỉ cho trình đọc màn hình ---------- */
-
-.rk-sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
 }
 
 /* ---------- Tôn trọng người tắt hiệu ứng ---------- */

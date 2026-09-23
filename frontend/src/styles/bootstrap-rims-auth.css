@@ -107,37 +107,8 @@
     font-size: 0.9rem;
 }
 
-.login-demo {
-    margin-top: 1.25rem;
-    padding: 1rem;
-    border-radius: 14px;
-    background: var(--rims-gold-soft);
-    border: 1px solid var(--rims-gold-soft);
-}
-
-.login-demo p {
-    margin: 0 0 0.5rem;
-    font-weight: 900;
-    color: var(--rims-ink);
-}
-
-.login-demo span {
-    display: block;
-    color: var(--rims-ink-2);
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-/* Old auth compatibility */
-
-/* =========================
-   OLD AUTH COMPATIBILITY
-========================= */
-
-.auth-layout {
-    display: grid;
-    place-items: center;
-    min-height: 100vh;
-    padding: 1.5rem;
-    background: var(--rims-shell);
+@media (max-width: 640px) {
+    .login-card {
+        padding: 1.5rem;
+    }
 }
