@@ -3,7 +3,7 @@ import {Link, useSearchParams} from 'react-router-dom'
 
 import {getChefDishes, updateMenuStatus, type DishListResponse} from '@/shared/api/chef'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {useKitchenSocket} from '@/realtime'
 
 const ITEMS_PER_PAGE = 8
@@ -197,10 +197,6 @@ export default function DishListPage() {
     const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE
 
     const paginatedDishes = filteredDishes.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-
-    const firstVisibleItem = filteredDishes.length === 0 ? 0 : startIndex + 1
-
-    const lastVisibleItem = Math.min(startIndex + ITEMS_PER_PAGE, filteredDishes.length)
 
     const showUnavailableOnly = selectedStatus === 'UNAVAILABLE'
 
@@ -419,60 +415,13 @@ export default function DishListPage() {
                         </div>
                     </PageCard>
 
-                    <div className="chef-pagination">
-                        <div className="pagination-result-info">
-                            Hiển thị {firstVisibleItem}–{lastVisibleItem} trong{' '}
-                            {filteredDishes.length} món
-                        </div>
-
-                        <div className="pagination-controls">
-                            <button
-                                type="button"
-                                className="pagination-button"
-                                disabled={safeCurrentPage === 1}
-                                onClick={() => {
-                                    setCurrentPage(safeCurrentPage - 1)
-                                }}
-                            >
-                                ← Trang trước
-                            </button>
-
-                            <div className="pagination-pages">
-                                {Array.from(
-                                    {
-                                        length: totalPages,
-                                    },
-                                    (_, index) => index + 1,
-                                ).map((pageNumber) => (
-                                    <button
-                                        type="button"
-                                        key={pageNumber}
-                                        className={
-                                            pageNumber === safeCurrentPage
-                                                ? 'pagination-number active'
-                                                : 'pagination-number'
-                                        }
-                                        onClick={() => {
-                                            setCurrentPage(pageNumber)
-                                        }}
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <button
-                                type="button"
-                                className="pagination-button"
-                                disabled={safeCurrentPage === totalPages}
-                                onClick={() => {
-                                    setCurrentPage(safeCurrentPage + 1)
-                                }}
-                            >
-                                Trang sau →
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination
+                        page={safeCurrentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredDishes.length}
+                        pageSize={ITEMS_PER_PAGE}
+                        onPageChange={setCurrentPage}
+                    />
                 </>
             )}
         </div>

@@ -4,7 +4,7 @@ import {useCallback, useEffect, useState, type FormEvent} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {DishResponse, CategoryResponse, DishFormData} from '@/shared/api/admin'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage} from '@/shared/utils/error'
 
@@ -238,41 +238,6 @@ export default function AdminDishesPage() {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page)
         }
-    }
-
-    const goToPreviousPage = () => goToPage(currentPage - 1)
-    const goToNextPage = () => goToPage(currentPage + 1)
-
-    const getPageNumbers = () => {
-        const pages: (number | string)[] = []
-        const maxVisible = 5
-
-        if (totalPages <= maxVisible) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i)
-            }
-        } else {
-            pages.push(1)
-
-            if (currentPage > 3) {
-                pages.push('...')
-            }
-
-            const start = Math.max(2, currentPage - 1)
-            const end = Math.min(totalPages - 1, currentPage + 1)
-
-            for (let i = start; i <= end; i++) {
-                pages.push(i)
-            }
-
-            if (currentPage < totalPages - 2) {
-                pages.push('...')
-            }
-
-            pages.push(totalPages)
-        }
-
-        return pages
     }
 
     const activeCategories = categories.filter((c) => c.isAvailable)
@@ -522,41 +487,13 @@ export default function AdminDishesPage() {
 
                 {/* Pagination */}
                 {filteredDishes.length > 0 && (
-                    <div className="admin-dish-pagination">
-                        <div className="admin-dish-pagination-info">
-                            <span className="admin-dish-pagination-current-page">
-                                Trang {currentPage} / {totalPages}
-                            </span>
-                        </div>
-                        <div className="admin-dish-pagination-controls">
-                            <button
-                                onClick={goToPreviousPage}
-                                disabled={currentPage === 1}
-                                className="admin-dish-pagination-btn"
-                            >
-                                ◀
-                            </button>
-                            {getPageNumbers().map((page, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() =>
-                                        typeof page === 'number' && goToPage(page)
-                                    }
-                                    className={`admin-dish-pagination-btn ${currentPage === page ? 'active' : ''} ${typeof page === 'string' ? 'dots' : ''}`}
-                                    disabled={typeof page === 'string'}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={goToNextPage}
-                                disabled={currentPage === totalPages}
-                                className="admin-dish-pagination-btn"
-                            >
-                                ▶
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination
+                        page={currentPage}
+                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        pageSize={ITEMS_PER_PAGE}
+                        onPageChange={goToPage}
+                    />
                 )}
             </div>
 

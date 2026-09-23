@@ -1,6 +1,5 @@
 import {X} from 'lucide-react'
 
-import {Pagination} from '@/features/admin/users/Pagination'
 import {
     DR,
     ErrBox,
@@ -23,7 +22,7 @@ import * as adminApi from '@/shared/api/admin'
 import type {UserResponse} from '@/shared/types/auth'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {EmptyState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 
 export default function AdminUsersPage() {
     const [tab, setTab] = useState<Tab>('staff')
@@ -344,9 +343,6 @@ export default function AdminUsersPage() {
         }
     }
 
-    const startIdx = totalElements === 0 ? 0 : page * pageSize + 1
-    const endIdx = Math.min((page + 1) * pageSize, totalElements)
-
     return (
         <PageCard>
             {/* ── Header ── */}
@@ -618,8 +614,6 @@ export default function AdminUsersPage() {
                     totalPages={totalPages}
                     pageSize={pageSize}
                     totalItems={totalElements}
-                    startIdx={startIdx}
-                    endIdx={endIdx}
                     onPageChange={(p) => setPage(p - 1)}
                     onPageSizeChange={(size) => {
                         setPageSize(size)

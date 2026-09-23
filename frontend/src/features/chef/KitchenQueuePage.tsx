@@ -13,6 +13,7 @@ import {
     type DishDetailResponse,
     type KitchenOrderItemResponse,
 } from '@/shared/api/chef'
+import {Pagination} from '@/shared/components/ui'
 
 const ITEMS_PER_PAGE = 6
 const NEW_ORDER_MESSAGE_DURATION_MS = 6_000
@@ -560,10 +561,6 @@ export default function KitchenQueuePage() {
 
     const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
-    const firstVisibleItem = filteredItems.length === 0 ? 0 : startIndex + 1
-
-    const lastVisibleItem = Math.min(startIndex + ITEMS_PER_PAGE, filteredItems.length)
-
     if (isLoading) {
         return (
             <LoadingState
@@ -798,52 +795,13 @@ export default function KitchenQueuePage() {
                         ))}
                     </div>
 
-                    <div className="chef-pagination">
-                        <div className="pagination-result-info">
-                            Hiển thị {firstVisibleItem}–{lastVisibleItem} trong{' '}
-                            {filteredItems.length} món
-                        </div>
-
-                        <div className="pagination-controls">
-                            <button
-                                type="button"
-                                className="pagination-button"
-                                disabled={safeCurrentPage === 1}
-                                onClick={() => setCurrentPage(safeCurrentPage - 1)}
-                            >
-                                ← Trang trước
-                            </button>
-
-                            <div className="pagination-pages">
-                                {Array.from(
-                                    {length: totalPages},
-                                    (_, index) => index + 1,
-                                ).map((pageNumber) => (
-                                    <button
-                                        type="button"
-                                        key={pageNumber}
-                                        className={
-                                            pageNumber === safeCurrentPage
-                                                ? 'pagination-number active'
-                                                : 'pagination-number'
-                                        }
-                                        onClick={() => setCurrentPage(pageNumber)}
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <button
-                                type="button"
-                                className="pagination-button"
-                                disabled={safeCurrentPage === totalPages}
-                                onClick={() => setCurrentPage(safeCurrentPage + 1)}
-                            >
-                                Trang sau →
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination
+                        page={safeCurrentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredItems.length}
+                        pageSize={ITEMS_PER_PAGE}
+                        onPageChange={setCurrentPage}
+                    />
                 </>
             )}
 

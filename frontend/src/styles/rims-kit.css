@@ -706,3 +706,91 @@ textarea.rk-input {
     resize: vertical;
     line-height: var(--rims-leading-normal);
 }
+
+/* ---------- Phân trang ----------
+   Một bản duy nhất cho mọi màn. Trước đây có 8 bản dựng riêng. */
+
+.rk-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-5);
+    padding-top: var(--rims-space-4);
+    border-top: 1px solid var(--rims-line);
+}
+
+.rk-pager__info {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+.rk-pager__info strong {
+    color: var(--rims-ink-2);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-pager__size {
+    width: auto;
+    padding: var(--rims-space-1) var(--rims-space-3);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-pager__pages {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-1);
+}
+
+.rk-pager__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 var(--rims-space-2);
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink-2);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-medium);
+    cursor: pointer;
+    transition:
+        background-color var(--rims-dur-short) var(--rims-ease-out),
+        border-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-pager__btn:hover:not(:disabled) {
+    background: var(--rims-surface-2);
+    border-color: var(--rims-ink-3);
+}
+
+.rk-pager__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+.rk-pager__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rk-pager__btn--current {
+    background: var(--rims-brand);
+    border-color: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-pager__gap {
+    padding: 0 var(--rims-space-1);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+}

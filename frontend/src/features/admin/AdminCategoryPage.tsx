@@ -12,7 +12,7 @@ import React, {useCallback, useEffect, useState} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {CategoryResponse, DishResponse, CategoryFormData} from '@/shared/api/admin'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {getErrorMessage} from '@/shared/utils/error'
 
 type ViewMode = 'LIST' | 'CREATE' | 'EDIT' | 'DETAIL'
@@ -184,41 +184,6 @@ export default function AdminCategoryPage() {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page)
         }
-    }
-
-    const goToPreviousPage = () => goToPage(currentPage - 1)
-    const goToNextPage = () => goToPage(currentPage + 1)
-
-    const getPageNumbers = () => {
-        const pages: (number | string)[] = []
-        const maxVisible = 5
-
-        if (totalPages <= maxVisible) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i)
-            }
-        } else {
-            pages.push(1)
-
-            if (currentPage > 3) {
-                pages.push('...')
-            }
-
-            const start = Math.max(2, currentPage - 1)
-            const end = Math.min(totalPages - 1, currentPage + 1)
-
-            for (let i = start; i <= end; i++) {
-                pages.push(i)
-            }
-
-            if (currentPage < totalPages - 2) {
-                pages.push('...')
-            }
-
-            pages.push(totalPages)
-        }
-
-        return pages
     }
 
     // --- Pagination Logic for Dishes in Detail ---
@@ -562,41 +527,13 @@ export default function AdminCategoryPage() {
 
                         {/* Pagination for Categories */}
                         {filteredCategories.length > 0 && (
-                            <div className="admin-category-pagination">
-                                <div className="admin-category-pagination-info">
-                                    <span className="admin-category-pagination-current-page">
-                                        Trang {currentPage} / {totalPages}
-                                    </span>
-                                </div>
-                                <div className="admin-category-pagination-controls">
-                                    <button
-                                        onClick={goToPreviousPage}
-                                        disabled={currentPage === 1}
-                                        className="admin-category-pagination-btn"
-                                    >
-                                        ◀
-                                    </button>
-                                    {getPageNumbers().map((page, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() =>
-                                                typeof page === 'number' && goToPage(page)
-                                            }
-                                            className={`admin-category-pagination-btn ${currentPage === page ? 'active' : ''} ${typeof page === 'string' ? 'dots' : ''}`}
-                                            disabled={typeof page === 'string'}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-                                    <button
-                                        onClick={goToNextPage}
-                                        disabled={currentPage === totalPages}
-                                        className="admin-category-pagination-btn"
-                                    >
-                                        ▶
-                                    </button>
-                                </div>
-                            </div>
+                            <Pagination
+                                page={currentPage}
+                                totalPages={totalPages}
+                                totalItems={totalItems}
+                                pageSize={ITEMS_PER_PAGE}
+                                onPageChange={goToPage}
+                            />
                         )}
                     </div>
                 </div>

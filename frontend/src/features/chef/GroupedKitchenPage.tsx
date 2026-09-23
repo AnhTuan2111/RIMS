@@ -8,7 +8,7 @@ import {
 } from '@/shared/api/chef'
 import {useKitchenSocket} from '@/realtime'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 
 const ITEMS_PER_PAGE = 6
 
@@ -221,31 +221,6 @@ export default function GroupedKitchenPage() {
     const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE
 
     const paginatedGroups = filteredGroups.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-
-    const firstVisibleItem = filteredGroups.length === 0 ? 0 : startIndex + 1
-
-    const lastVisibleItem = Math.min(startIndex + ITEMS_PER_PAGE, filteredGroups.length)
-
-    const visiblePageNumbers = useMemo(() => {
-        const maximumVisiblePages = 5
-
-        if (totalPages <= maximumVisiblePages) {
-            return Array.from({length: totalPages}, (_, index) => index + 1)
-        }
-
-        let startPage = Math.max(1, safeCurrentPage - 2)
-
-        const endPage = Math.min(totalPages, startPage + maximumVisiblePages - 1)
-
-        if (endPage - startPage + 1 < maximumVisiblePages) {
-            startPage = Math.max(1, endPage - maximumVisiblePages + 1)
-        }
-
-        return Array.from(
-            {length: endPage - startPage + 1},
-            (_, index) => startPage + index,
-        )
-    }, [safeCurrentPage, totalPages])
 
     function handlePageChange(page: number) {
         const nextPage = Math.min(Math.max(page, 1), totalPages)
@@ -528,86 +503,13 @@ export default function GroupedKitchenPage() {
                         })}
                     </div>
 
-                    <div className="chef-pagination">
-                        <div className="pagination-result-info">
-                            Hiển thị <strong>{firstVisibleItem}</strong>–
-                            <strong>{lastVisibleItem}</strong> trong{' '}
-                            <strong>{filteredGroups.length}</strong> nhóm món
-                        </div>
-
-                        <div className="pagination-controls">
-                            <button
-                                type="button"
-                                className="pagination-button"
-                                disabled={safeCurrentPage === 1}
-                                onClick={() => handlePageChange(safeCurrentPage - 1)}
-                            >
-                                ← Trang trước
-                            </button>
-
-                            <div className="pagination-pages">
-                                {visiblePageNumbers[0] > 1 && (
-                                    <>
-                                        <button
-                                            type="button"
-                                            className="pagination-number"
-                                            onClick={() => handlePageChange(1)}
-                                        >
-                                            1
-                                        </button>
-
-                                        {visiblePageNumbers[0] > 2 && (
-                                            <span className="pagination-ellipsis">…</span>
-                                        )}
-                                    </>
-                                )}
-
-                                {visiblePageNumbers.map((pageNumber) => (
-                                    <button
-                                        type="button"
-                                        key={pageNumber}
-                                        className={
-                                            pageNumber === safeCurrentPage
-                                                ? 'pagination-number active'
-                                                : 'pagination-number'
-                                        }
-                                        onClick={() => handlePageChange(pageNumber)}
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                ))}
-
-                                {visiblePageNumbers[visiblePageNumbers.length - 1] <
-                                    totalPages && (
-                                    <>
-                                        {visiblePageNumbers[
-                                            visiblePageNumbers.length - 1
-                                        ] <
-                                            totalPages - 1 && (
-                                            <span className="pagination-ellipsis">…</span>
-                                        )}
-
-                                        <button
-                                            type="button"
-                                            className="pagination-number"
-                                            onClick={() => handlePageChange(totalPages)}
-                                        >
-                                            {totalPages}
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-
-                            <button
-                                type="button"
-                                className="pagination-button"
-                                disabled={safeCurrentPage === totalPages}
-                                onClick={() => handlePageChange(safeCurrentPage + 1)}
-                            >
-                                Trang sau →
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination
+                        page={safeCurrentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredGroups.length}
+                        pageSize={ITEMS_PER_PAGE}
+                        onPageChange={handlePageChange}
+                    />
                 </>
             )}
         </div>

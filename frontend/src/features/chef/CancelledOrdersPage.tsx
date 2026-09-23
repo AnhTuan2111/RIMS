@@ -1,6 +1,7 @@
 ﻿import {useEffect, useMemo, useState} from 'react'
 import {getCancelledOrders, type CancelledOrderResponse} from '@/shared/api/chef'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
+import {Pagination} from '@/shared/components/ui'
 
 const ITEMS_PER_PAGE = 20
 
@@ -97,57 +98,6 @@ export default function CancelledOrdersPage() {
     const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE
 
     const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-
-    const firstVisibleItem = filteredItems.length === 0 ? 0 : startIndex + 1
-
-    const lastVisibleItem = Math.min(startIndex + ITEMS_PER_PAGE, filteredItems.length)
-
-    const pageNumbersToShow = useMemo(() => {
-        const pages: (number | 'ellipsis')[] = []
-        const siblingCount = 1
-        const totalNumbersShown = siblingCount * 2 + 5
-
-        if (totalPages <= totalNumbersShown) {
-            for (let page = 1; page <= totalPages; page++) {
-                pages.push(page)
-            }
-            return pages
-        }
-
-        const leftSibling = Math.max(safeCurrentPage - siblingCount, 1)
-        const rightSibling = Math.min(safeCurrentPage + siblingCount, totalPages)
-
-        const showLeftEllipsis = leftSibling > 2
-        const showRightEllipsis = rightSibling < totalPages - 1
-
-        pages.push(1)
-
-        if (showLeftEllipsis) {
-            pages.push('ellipsis')
-        } else {
-            for (let page = 2; page < leftSibling; page++) {
-                pages.push(page)
-            }
-        }
-
-        for (let page = leftSibling; page <= rightSibling; page++) {
-            if (page !== 1 && page !== totalPages) {
-                pages.push(page)
-            }
-        }
-
-        if (showRightEllipsis) {
-            pages.push('ellipsis')
-        } else {
-            for (let page = rightSibling + 1; page < totalPages; page++) {
-                pages.push(page)
-            }
-        }
-
-        pages.push(totalPages)
-
-        return pages
-    }, [totalPages, safeCurrentPage])
 
     if (isLoading) {
         return <LoadingState title="Đang tải danh sách món đã hủy..." />
@@ -287,64 +237,13 @@ export default function CancelledOrdersPage() {
                 )}
             </section>
             {filteredItems.length > 0 && (
-                <div className="chef-pagination">
-                    <div className="pagination-result-info">
-                        Hiển thị {firstVisibleItem}–{lastVisibleItem} trong{' '}
-                        {filteredItems.length} món
-                    </div>
-
-                    <div className="pagination-controls">
-                        <button
-                            type="button"
-                            className="pagination-button"
-                            disabled={safeCurrentPage === 1}
-                            onClick={() => {
-                                setCurrentPage(safeCurrentPage - 1)
-                            }}
-                        >
-                            ← Trang trước
-                        </button>
-
-                        <div className="pagination-pages">
-                            {pageNumbersToShow.map((pageNumber, index) =>
-                                pageNumber === 'ellipsis' ? (
-                                    <span
-                                        key={`ellipsis-${index}`}
-                                        className="pagination-ellipsis"
-                                    >
-                                        …
-                                    </span>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        key={pageNumber}
-                                        className={
-                                            pageNumber === safeCurrentPage
-                                                ? 'pagination-number active'
-                                                : 'pagination-number'
-                                        }
-                                        onClick={() => {
-                                            setCurrentPage(pageNumber)
-                                        }}
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                ),
-                            )}
-                        </div>
-
-                        <button
-                            type="button"
-                            className="pagination-button"
-                            disabled={safeCurrentPage === totalPages}
-                            onClick={() => {
-                                setCurrentPage(safeCurrentPage + 1)
-                            }}
-                        >
-                            Trang sau →
-                        </button>
-                    </div>
-                </div>
+                <Pagination
+                    page={safeCurrentPage}
+                    totalPages={totalPages}
+                    totalItems={filteredItems.length}
+                    pageSize={ITEMS_PER_PAGE}
+                    onPageChange={setCurrentPage}
+                />
             )}
         </div>
     )
