@@ -513,7 +513,7 @@ function ProfileField({
             <span
                 style={{
                     ...profileFieldValueStyle,
-                    color: readOnly ? '#9ca3af' : '#111827',
+                    color: readOnly ? 'var(--rims-ink-3)' : 'var(--rims-ink)',
                 }}
             >
                 {value}
@@ -568,11 +568,12 @@ function EditField({
                         style={eyeButtonStyle}
                         onClick={() => setVisible((current) => !current)}
                         onMouseEnter={(event) => {
-                            event.currentTarget.style.color = '#4f46e5'
-                            event.currentTarget.style.backgroundColor = '#eef2ff'
+                            event.currentTarget.style.color = 'var(--rims-brand)'
+                            event.currentTarget.style.backgroundColor =
+                                'var(--rims-brand-soft)'
                         }}
                         onMouseLeave={(event) => {
-                            event.currentTarget.style.color = '#9ca3af'
+                            event.currentTarget.style.color = 'var(--rims-ink-3)'
                             event.currentTarget.style.backgroundColor = 'transparent'
                         }}
                     >
@@ -621,8 +622,8 @@ function EyeOffIcon() {
 }
 
 const cardStyle: CSSProperties = {
-    background: '#f9fafb',
-    border: '1px solid #e5e7eb',
+    background: 'var(--rims-surface-2)',
+    border: '1px solid var(--rims-line)',
     borderRadius: '12px',
     padding: '24px',
 }
@@ -636,8 +637,8 @@ const avatarStyle: CSSProperties = {
     width: '64px',
     height: '64px',
     borderRadius: '50%',
-    background: '#4f46e5',
-    color: '#fff',
+    background: 'var(--rims-brand)',
+    color: 'var(--rims-ink-on-brand)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -647,8 +648,8 @@ const avatarStyle: CSSProperties = {
 }
 
 const successStyle: CSSProperties = {
-    background: '#d1fae5',
-    color: '#065f46',
+    background: 'var(--rims-ok-soft)',
+    color: 'var(--rims-ok)',
     padding: '12px 16px',
     borderRadius: '8px',
     marginBottom: '16px',
@@ -669,8 +670,8 @@ const profileNameStyle: CSSProperties = {
 }
 
 const roleBadgeStyle: CSSProperties = {
-    background: '#e0e7ff',
-    color: '#4338ca',
+    background: 'var(--rims-brand-soft)',
+    color: 'var(--rims-brand)',
     padding: '3px 10px',
     borderRadius: '12px',
     fontSize: '12px',
@@ -707,7 +708,7 @@ const passwordTitleStyle: CSSProperties = {
 
 const passwordSubtitleStyle: CSSProperties = {
     margin: '4px 0 0',
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
     fontSize: '13px',
 }
 
@@ -725,13 +726,13 @@ const passwordActionStyle: CSSProperties = {
 const profileFieldStyle: CSSProperties = {
     display: 'flex',
     padding: '12px 0',
-    borderBottom: '1px solid #f3f4f6',
+    borderBottom: '1px solid var(--rims-line)',
     gap: '16px',
 }
 
 const profileFieldLabelStyle: CSSProperties = {
     width: '160px',
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
     fontSize: '13px',
     flexShrink: 0,
 }
@@ -747,7 +748,7 @@ const editFieldStyle: CSSProperties = {
     gap: '6px',
     fontSize: '14px',
     fontWeight: 500,
-    color: '#374151',
+    color: 'var(--rims-ink-2)',
 }
 
 const editInputWrapperStyle: CSSProperties = {
@@ -759,7 +760,7 @@ const editInputWrapperStyle: CSSProperties = {
 const editInputStyle: CSSProperties = {
     width: '100%',
     boxSizing: 'border-box',
-    border: '1px solid #d1d5db',
+    border: '1px solid var(--rims-line-strong)',
     borderRadius: '8px',
     fontSize: '14px',
 }
@@ -776,6 +777,6 @@ const eyeButtonStyle: CSSProperties = {
     border: 'none',
     borderRadius: 6,
     cursor: 'pointer',
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
     transition: 'color 0.15s ease, background-color 0.15s ease',
 }

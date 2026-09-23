@@ -379,8 +379,8 @@ export default function AdminUsersPage() {
             {successMsg && (
                 <div
                     style={{
-                        background: '#d1fae5',
-                        color: '#065f46',
+                        background: 'var(--rims-ok-soft)',
+                        color: 'var(--rims-ok)',
                         padding: '12px 16px',
                         borderRadius: 8,
                         marginBottom: 16,
@@ -395,7 +395,7 @@ export default function AdminUsersPage() {
             <div
                 style={{
                     display: 'flex',
-                    borderBottom: '2px solid #e5e7eb',
+                    borderBottom: '2px solid var(--rims-line)',
                     marginBottom: 20,
                 }}
             >
@@ -414,8 +414,10 @@ export default function AdminUsersPage() {
                             border: 'none',
                             cursor: 'pointer',
                             borderBottom:
-                                tab === t ? '2px solid #4f46e5' : '2px solid transparent',
-                            color: tab === t ? '#4f46e5' : '#6b7280',
+                                tab === t
+                                    ? '2px solid var(--rims-brand)'
+                                    : '2px solid transparent',
+                            color: tab === t ? 'var(--rims-brand)' : 'var(--rims-ink-3)',
                             fontWeight: tab === t ? 700 : 400,
                             marginBottom: -2,
                             fontSize: 14,
@@ -441,7 +443,7 @@ export default function AdminUsersPage() {
                         flex: 1,
                         minWidth: 200,
                         padding: '8px 12px',
-                        border: '1px solid #d1d5db',
+                        border: '1px solid var(--rims-line-strong)',
                         borderRadius: 8,
                         fontSize: 13,
                     }}
@@ -457,9 +459,18 @@ export default function AdminUsersPage() {
                             padding: '8px 14px',
                             borderRadius: 8,
                             border: '1px solid',
-                            borderColor: filterStatus === s ? '#4f46e5' : '#d1d5db',
-                            background: filterStatus === s ? '#eef2ff' : '#fff',
-                            color: filterStatus === s ? '#4f46e5' : '#6b7280',
+                            borderColor:
+                                filterStatus === s
+                                    ? 'var(--rims-brand)'
+                                    : 'var(--rims-line-strong)',
+                            background:
+                                filterStatus === s
+                                    ? 'var(--rims-brand-soft)'
+                                    : 'var(--rims-surface)',
+                            color:
+                                filterStatus === s
+                                    ? 'var(--rims-brand)'
+                                    : 'var(--rims-ink-3)',
                             fontWeight: filterStatus === s ? 600 : 400,
                             cursor: 'pointer',
                             fontSize: 13,
@@ -518,8 +529,8 @@ export default function AdminUsersPage() {
                     ) : (
                         items.map((user, idx) => {
                             const rc = ROLE_COLORS[user.role] ?? {
-                                bg: '#f3f4f6',
-                                text: '#374151',
+                                bg: 'var(--rims-surface-2)',
+                                text: 'var(--rims-ink-2)',
                             }
                             return (
                                 <div
@@ -527,14 +538,20 @@ export default function AdminUsersPage() {
                                     key={user.id}
                                     style={{...gridCols, alignItems: 'center'}}
                                 >
-                                    <span style={{color: '#9ca3af', fontSize: 12}}>
+                                    <span
+                                        style={{color: 'var(--rims-ink-3)', fontSize: 12}}
+                                    >
                                         {page * pageSize + idx + 1}
                                     </span>
                                     <span style={{fontWeight: 600}}>{user.fullName}</span>
-                                    <span style={{color: '#6b7280', fontSize: 13}}>
+                                    <span
+                                        style={{color: 'var(--rims-ink-3)', fontSize: 13}}
+                                    >
                                         {user.username}
                                     </span>
-                                    <span style={{color: '#6b7280', fontSize: 12}}>
+                                    <span
+                                        style={{color: 'var(--rims-ink-3)', fontSize: 12}}
+                                    >
                                         {user.email ?? '—'}
                                     </span>
                                     <span style={{fontSize: 13}}>{user.phone}</span>
@@ -579,13 +596,19 @@ export default function AdminUsersPage() {
                                     >
                                         <button
                                             onClick={() => void openDetail(user)}
-                                            style={btn('#f3f4f6', '#374151')}
+                                            style={btn(
+                                                'var(--rims-surface-2)',
+                                                'var(--rims-ink-2)',
+                                            )}
                                         >
                                             Chi tiết
                                         </button>
                                         <button
                                             onClick={() => openEdit(user)}
-                                            style={btn('#dbeafe', '#1d4ed8')}
+                                            style={btn(
+                                                'var(--rims-brand-soft)',
+                                                'var(--rims-brand)',
+                                            )}
                                         >
                                             Sửa
                                         </button>
@@ -824,7 +847,7 @@ export default function AdminUsersPage() {
                                 alignItems: 'center',
                                 gap: 14,
                                 padding: '16px 0',
-                                borderBottom: '1px solid #f3f4f6',
+                                borderBottom: '1px solid var(--rims-line)',
                             }}
                         >
                             <div
@@ -832,8 +855,8 @@ export default function AdminUsersPage() {
                                     width: 48,
                                     height: 48,
                                     borderRadius: '50%',
-                                    background: '#4f46e5',
-                                    color: '#fff',
+                                    background: 'var(--rims-brand)',
+                                    color: 'var(--rims-ink-on-brand)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -847,7 +870,7 @@ export default function AdminUsersPage() {
                                 <div style={{fontWeight: 700, fontSize: 16}}>
                                     {selectedUser.fullName}
                                 </div>
-                                <div style={{color: '#9ca3af', fontSize: 13}}>
+                                <div style={{color: 'var(--rims-ink-3)', fontSize: 13}}>
                                     @{selectedUser.username}
                                 </div>
                             </div>
@@ -865,13 +888,15 @@ export default function AdminUsersPage() {
                         <DR
                             label="Điểm tích lũy"
                             value={`${selectedUser.rewardPoints ?? 0} điểm`}
-                            color="#065f46"
+                            color="var(--rims-ok)"
                         />
                     )}
                     <DR
                         label="Trạng thái"
                         value={selectedUser.isActive ? 'Đang hoạt động' : 'Đã khóa'}
-                        color={selectedUser.isActive ? '#065f46' : '#991b1b'}
+                        color={
+                            selectedUser.isActive ? 'var(--rims-ok)' : 'var(--rims-alert)'
+                        }
                     />
                     <DR
                         label="Ngày tạo"
@@ -911,12 +936,12 @@ export default function AdminUsersPage() {
                 >
                     <div
                         style={{
-                            background: '#f8fafc',
+                            background: 'var(--rims-surface-2)',
                             borderRadius: 8,
                             padding: '10px 14px',
                             marginBottom: 16,
                             fontSize: 13,
-                            color: '#64748b',
+                            color: 'var(--rims-ink-3)',
                         }}
                     >
                         Vai trò: <strong>{ROLE_LABELS[selectedUser.role]}</strong> · ID:{' '}
@@ -976,10 +1001,10 @@ export default function AdminUsersPage() {
                                         }
                                         style={{
                                             padding: '9px 12px',
-                                            border: '1px solid #d1d5db',
+                                            border: '1px solid var(--rims-line-strong)',
                                             borderRadius: 8,
                                             fontSize: 14,
-                                            background: '#fff',
+                                            background: 'var(--rims-surface)',
                                         }}
                                     >
                                         <option value="CHEF">Đầu bếp</option>

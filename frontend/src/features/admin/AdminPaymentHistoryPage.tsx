@@ -407,7 +407,7 @@ export default function AdminPaymentHistoryPage() {
 }
 const filterInputStyle: CSSProperties = {
     padding: '8px 12px',
-    border: '1px solid #d1d5db',
+    border: '1px solid var(--rims-line-strong)',
     borderRadius: 8,
     fontSize: 13,
 }

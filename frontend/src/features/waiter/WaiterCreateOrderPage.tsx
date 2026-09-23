@@ -470,17 +470,17 @@ export default function WaiterCreateOrderPage() {
 const stateBoxStyle: React.CSSProperties = {
     padding: '2rem',
     textAlign: 'center',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const errorBoxStyle: React.CSSProperties = {
     padding: '2rem',
     textAlign: 'center',
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
 }
 
 const successSummaryStyle: React.CSSProperties = {
     marginTop: '1rem',
     whiteSpace: 'pre-wrap',
-    color: '#475569',
+    color: 'var(--rims-ink-2)',
 }

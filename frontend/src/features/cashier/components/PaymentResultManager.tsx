@@ -174,7 +174,7 @@ export default function PaymentResultManager({
                                 <SummaryRow
                                     label="Điểm đã dùng:"
                                     value={`- ${formatCurrency(pointsUsed * 1000)}`}
-                                    color="#16a34a"
+                                    color="var(--rims-ok)"
                                 />
                             )}
 
@@ -182,7 +182,7 @@ export default function PaymentResultManager({
                                 <SummaryRow
                                     label="Điểm tích lũy thêm:"
                                     value={`+${pointsEarned} điểm`}
-                                    color="#ea580c"
+                                    color="var(--rims-busy)"
                                     bold
                                 />
                             )}
@@ -193,7 +193,9 @@ export default function PaymentResultManager({
                         style={{
                             ...totalRowStyle,
                             paddingTop: customerName ? 0 : 12,
-                            borderTop: customerName ? 'none' : '1px dashed #cbd5e1',
+                            borderTop: customerName
+                                ? 'none'
+                                : '1px dashed var(--rims-line-strong)',
                         }}
                     >
                         <span>Tổng thanh toán:</span>
@@ -214,7 +216,7 @@ export default function PaymentResultManager({
                             <SummaryRow
                                 label="Tiền thừa:"
                                 value={formatCurrency(excessAmount)}
-                                color="#16a34a"
+                                color="var(--rims-ok)"
                             />
                         </>
                     )}
@@ -227,7 +229,7 @@ export default function PaymentResultManager({
 function SummaryRow({
     label,
     value,
-    color = '#475569',
+    color = 'var(--rims-ink-2)',
     bold = false,
     strongValue = false,
     marginBottom = 6,
@@ -263,7 +265,7 @@ const successScreenStyle: CSSProperties = {
     left: 0,
     width: '100vw',
     height: '100vh',
-    background: '#16a34a',
+    background: 'var(--rims-ok)',
     zIndex: 9999,
     display: 'flex',
     flexDirection: 'column',
@@ -293,7 +295,7 @@ const successInvoiceStyle: CSSProperties = {
 const successCustomerBoxStyle: CSSProperties = {
     marginTop: '1rem',
     padding: '10px 20px',
-    background: 'rgba(255,255,255,0.2)',
+    background: 'rgb(253 248 239 / 20%)',
     borderRadius: '8px',
 }
 
@@ -322,7 +324,7 @@ const tableHeaderStyle: CSSProperties = {
     gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
     display: 'grid',
     fontWeight: 'bold',
-    borderBottom: '1px solid #cbd5e1',
+    borderBottom: '1px solid var(--rims-line-strong)',
     paddingBottom: '8px',
     minWidth: 0,
 }
@@ -337,7 +339,7 @@ const tableRowStyle: CSSProperties = {
     gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
     display: 'grid',
     padding: '10px 0',
-    borderBottom: '1px dashed #f1f5f9',
+    borderBottom: '1px dashed var(--rims-line)',
     minWidth: 0,
 }
 
@@ -351,22 +353,22 @@ const rightTextStyle: CSSProperties = {
 
 const emptyItemsStyle: CSSProperties = {
     textAlign: 'center',
-    color: '#94a3b8',
+    color: 'var(--rims-ink-3)',
     margin: '1rem 0',
 }
 
 const summaryBoxStyle: CSSProperties = {
-    background: '#f8fafc',
+    background: 'var(--rims-surface-2)',
     padding: '1rem',
     borderRadius: '8px',
     marginBottom: '2rem',
-    border: '1px solid #e2e8f0',
+    border: '1px solid var(--rims-line)',
 }
 
 const customerBlockStyle: CSSProperties = {
     padding: '12px 0',
-    borderTop: '1px dashed #cbd5e1',
-    borderBottom: '1px dashed #cbd5e1',
+    borderTop: '1px dashed var(--rims-line-strong)',
+    borderBottom: '1px dashed var(--rims-line-strong)',
     marginBottom: '12px',
 }
 
@@ -375,7 +377,7 @@ const totalRowStyle: CSSProperties = {
     justifyContent: 'space-between',
     fontSize: '1.2rem',
     fontWeight: 'bold',
-    color: '#b91c1c',
+    color: 'var(--rims-alert)',
     marginBottom: '12px',
 }
 
@@ -383,7 +385,7 @@ const paymentMethodRowStyle: CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
     fontSize: '0.9rem',
-    color: '#16a34a',
+    color: 'var(--rims-ok)',
     fontWeight: 'bold',
 }
 

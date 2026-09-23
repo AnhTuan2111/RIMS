@@ -253,11 +253,11 @@ const cardStyle: CSSProperties = {
 }
 
 const stateTextStyle: CSSProperties = {
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const errorTextStyle: CSSProperties = {
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
 }
 
 const buttonTopStyle: CSSProperties = {

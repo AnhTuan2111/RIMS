@@ -22,8 +22,8 @@ body {
         -apple-system,
         BlinkMacSystemFont,
         sans-serif;
-    background: #f8fafc;
-    color: #0f172a;
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
 }
 
 button,
@@ -53,6 +53,6 @@ main {
     display: grid;
     place-items: center;
     min-height: 100vh;
-    color: #e2e8f0;
-    background: #0f172a;
+    color: var(--rims-ink-on-brand);
+    background: var(--rims-ink);
 }

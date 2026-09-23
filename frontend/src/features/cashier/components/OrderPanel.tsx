@@ -345,7 +345,7 @@ export default function OrderPanel({
                     {phoneError && (
                         <div
                             style={{
-                                color: '#dc2626',
+                                color: 'var(--rims-alert)',
                                 fontSize: '0.85rem',
                                 marginTop: '4px',
                             }}
@@ -412,7 +412,7 @@ export default function OrderPanel({
                                 có:{' '}
                                 <strong
                                     style={{
-                                        color: '#059669',
+                                        color: 'var(--rims-ok)',
                                     }}
                                 >
                                     {formatNumber(customer.rewardPoints)}
@@ -446,7 +446,7 @@ export default function OrderPanel({
             ) : !orderDetail ? (
                 <p
                     style={{
-                        color: '#64748b',
+                        color: 'var(--rims-ink-3)',
                     }}
                 >
                     Chưa có thông tin đơn hàng cho bàn này.
@@ -522,7 +522,7 @@ export default function OrderPanel({
                                 <div
                                     style={{
                                         ...summaryLineStyle,
-                                        color: '#059669',
+                                        color: 'var(--rims-ok)',
                                     }}
                                 >
                                     <span>Giảm giá ({pointsUsed} điểm):</span>
@@ -535,7 +535,7 @@ export default function OrderPanel({
                             <span>Tổng thanh toán:</span>
                             <strong
                                 style={{
-                                    color: '#b91c1c',
+                                    color: 'var(--rims-alert)',
                                 }}
                             >
                                 {formatCurrency(totalAmount - pointsUsed * 1000)}
@@ -574,22 +574,22 @@ const closeButtonStyle: CSSProperties = {
     border: 'none',
     fontSize: '1.4rem',
     cursor: 'pointer',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
     fontWeight: 'bold',
 }
 
 const headerInfoStyle: CSSProperties = {
     marginBottom: '1rem',
     paddingBottom: '0.5rem',
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid var(--rims-line)',
     marginTop: '0.5rem',
 }
 
 const statusBadgeStyle: CSSProperties = {
     marginLeft: '10px',
     float: 'right',
-    background: '#ffedd5',
-    color: '#ea580c',
+    background: 'var(--rims-busy-soft)',
+    color: 'var(--rims-busy)',
     padding: '2px 8px',
     borderRadius: '4px',
     fontSize: '0.85rem',
@@ -597,29 +597,29 @@ const statusBadgeStyle: CSSProperties = {
 }
 
 const customerBoxStyle: CSSProperties = {
-    background: '#f8fafc',
+    background: 'var(--rims-surface-2)',
     padding: '1rem',
     borderRadius: '8px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid var(--rims-line)',
     marginBottom: '1.5rem',
 }
 
 const customerTitleStyle: CSSProperties = {
     margin: '0 0 10px 0',
-    color: '#334155',
+    color: 'var(--rims-ink-2)',
 }
 
 const customerInputStyle: CSSProperties = {
     flex: 1,
     padding: '8px',
     borderRadius: '4px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid var(--rims-line-strong)',
 }
 
 const dangerButtonStyle: CSSProperties = {
     padding: '8px 16px',
-    background: '#ef4444',
-    color: '#fff',
+    background: 'var(--rims-alert)',
+    color: 'var(--rims-ink-on-brand)',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
@@ -627,8 +627,8 @@ const dangerButtonStyle: CSSProperties = {
 
 const searchButtonStyle: CSSProperties = {
     padding: '8px 16px',
-    background: '#3b82f6',
-    color: '#fff',
+    background: 'var(--rims-brand)',
+    color: 'var(--rims-ink-on-brand)',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
@@ -637,25 +637,25 @@ const searchButtonStyle: CSSProperties = {
 const createCustomerBoxStyle: CSSProperties = {
     marginTop: '10px',
     padding: '10px',
-    background: '#fff',
-    border: '1px dashed #cbd5e1',
+    background: 'var(--rims-surface)',
+    border: '1px dashed var(--rims-line-strong)',
     borderRadius: '6px',
 }
 
 const createCustomerTitleStyle: CSSProperties = {
     margin: '0 0 8px 0',
     fontSize: '0.9rem',
-    color: '#ef4444',
+    color: 'var(--rims-alert)',
     fontWeight: 'bold',
 }
 
 const phoneHintStyle: CSSProperties = {
     padding: '8px',
     marginBottom: '6px',
-    background: '#f1f5f9',
+    background: 'var(--rims-surface-2)',
     borderRadius: '4px',
     fontSize: '0.85rem',
-    color: '#475569',
+    color: 'var(--rims-ink-2)',
 }
 
 const stackedInputStyle: CSSProperties = {
@@ -663,14 +663,14 @@ const stackedInputStyle: CSSProperties = {
     boxSizing: 'border-box',
     padding: '6px',
     marginBottom: '6px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid var(--rims-line-strong)',
     borderRadius: '4px',
 }
 
 const createCustomerButtonStyle: CSSProperties = {
     width: '100%',
     padding: '8px',
-    background: '#10b981',
+    background: 'var(--rims-ok)',
     color: 'white',
     border: 'none',
     borderRadius: '4px',
@@ -680,8 +680,8 @@ const createCustomerButtonStyle: CSSProperties = {
 const customerFoundBoxStyle: CSSProperties = {
     marginTop: '10px',
     padding: '10px',
-    background: '#ecfdf5',
-    border: '1px solid #a7f3d0',
+    background: 'var(--rims-ok-soft)',
+    border: '1px solid var(--rims-ok-line)',
     borderRadius: '6px',
 }
 
@@ -702,7 +702,7 @@ const pointsLabelStyle: CSSProperties = {
 
 const pointsInputStyle: CSSProperties = {
     padding: '6px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid var(--rims-line-strong)',
     borderRadius: '4px',
     boxSizing: 'border-box',
 }
@@ -711,7 +711,7 @@ const orderHeaderStyle: CSSProperties = {
     gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
     display: 'grid',
     fontWeight: 'bold',
-    borderBottom: '1px solid #cbd5e1',
+    borderBottom: '1px solid var(--rims-line-strong)',
     paddingBottom: '4px',
     minWidth: 0,
 }
@@ -724,7 +724,7 @@ const orderListStyle: CSSProperties = {
 
 const emptyItemsStyle: CSSProperties = {
     textAlign: 'center',
-    color: '#94a3b8',
+    color: 'var(--rims-ink-3)',
     margin: '1rem 0',
 }
 
@@ -732,14 +732,14 @@ const orderRowStyle: CSSProperties = {
     gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
     display: 'grid',
     padding: '6px 0',
-    borderBottom: '1px dashed #f1f5f9',
+    borderBottom: '1px dashed var(--rims-line)',
     minWidth: 0,
 }
 
 const summaryBoxStyle: CSSProperties = {
     marginTop: '1rem',
     paddingTop: '0.75rem',
-    borderTop: '1px solid #e2e8f0',
+    borderTop: '1px solid var(--rims-line)',
 }
 
 const summaryLinesStyle: CSSProperties = {
@@ -747,7 +747,7 @@ const summaryLinesStyle: CSSProperties = {
     flexDirection: 'column',
     gap: '4px',
     fontSize: '0.9rem',
-    color: '#475569',
+    color: 'var(--rims-ink-2)',
     marginBottom: '8px',
 }
 
@@ -766,10 +766,10 @@ const totalLineStyle: CSSProperties = {
 const lockErrorBoxStyle: CSSProperties = {
     marginTop: '0.75rem',
     padding: '0.6rem 0.75rem',
-    background: '#fef2f2',
-    border: '1px solid #fecaca',
+    background: 'var(--rims-alert-soft)',
+    border: '1px solid var(--rims-alert-line)',
     borderRadius: '6px',
-    color: '#b91c1c',
+    color: 'var(--rims-alert)',
     fontSize: '0.9rem',
     lineHeight: 1.4,
 }

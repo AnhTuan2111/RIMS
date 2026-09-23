@@ -157,12 +157,14 @@ export default function ForgotPasswordPage() {
                                         ...stepCircleStyle,
                                         background:
                                             index < currentStepIdx
-                                                ? '#22c55e'
+                                                ? 'var(--rims-ok)'
                                                 : index === currentStepIdx
-                                                  ? '#7a1030'
-                                                  : '#e5e7eb',
+                                                  ? 'var(--rims-brand)'
+                                                  : 'var(--rims-line)',
                                         color:
-                                            index <= currentStepIdx ? '#fff' : '#9ca3af',
+                                            index <= currentStepIdx
+                                                ? 'var(--rims-ink-on-brand)'
+                                                : 'var(--rims-ink-3)',
                                     }}
                                 >
                                     {index < currentStepIdx ? '' : index + 1}
@@ -173,8 +175,8 @@ export default function ForgotPasswordPage() {
                                         ...stepLabelStyle,
                                         color:
                                             index === currentStepIdx
-                                                ? '#7a1030'
-                                                : '#9ca3af',
+                                                ? 'var(--rims-brand)'
+                                                : 'var(--rims-ink-3)',
                                         fontWeight: index === currentStepIdx ? 600 : 400,
                                     }}
                                 >
@@ -188,8 +190,8 @@ export default function ForgotPasswordPage() {
                                         ...stepLineStyle,
                                         background:
                                             index < currentStepIdx
-                                                ? '#22c55e'
-                                                : '#e5e7eb',
+                                                ? 'var(--rims-ok)'
+                                                : 'var(--rims-line)',
                                     }}
                                 />
                             )}
@@ -404,18 +406,18 @@ const errorCloseButtonStyle: CSSProperties = {
 
 const hintTextStyle: CSSProperties = {
     fontSize: 13,
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
     margin: '8px 0 20px',
 }
 
 const otpNoticeStyle: CSSProperties = {
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
+    background: 'var(--rims-ok-soft)',
+    border: '1px solid var(--rims-ok-line)',
     borderRadius: 8,
     padding: '12px 14px',
     marginBottom: 20,
     fontSize: 14,
-    color: '#166534',
+    color: 'var(--rims-ok)',
 }
 
 const otpInputStyle: CSSProperties = {
@@ -439,7 +441,7 @@ const backToEmailButtonStyle: CSSProperties = {
     padding: 10,
     background: 'none',
     border: 'none',
-    color: '#7a1030',
+    color: 'var(--rims-brand)',
     cursor: 'pointer',
     fontSize: 13,
 }
@@ -455,12 +457,12 @@ const doneIconStyle: CSSProperties = {
 }
 
 const doneTitleStyle: CSSProperties = {
-    color: '#065f46',
+    color: 'var(--rims-ok)',
     marginBottom: 8,
 }
 
 const doneTextStyle: CSSProperties = {
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
     marginBottom: 28,
     fontSize: 14,
 }

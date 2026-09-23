@@ -41,28 +41,28 @@ const shiftCatalog = [
         displayName: 'Ca sáng',
         startTime: '08:00',
         endTime: '10:59',
-        color: '#16a34a',
+        color: 'var(--rims-ok)',
     },
     {
         shiftName: 'NOON',
         displayName: 'Ca trưa',
         startTime: '11:00',
         endTime: '13:59',
-        color: '#22c55e',
+        color: 'var(--rims-ok)',
     },
     {
         shiftName: 'AFTERNOON',
         displayName: 'Ca chiều',
         startTime: '14:00',
         endTime: '16:59',
-        color: '#86efac',
+        color: 'var(--rims-ok)',
     },
     {
         shiftName: 'EVENING',
         displayName: 'Ca tối',
         startTime: '17:00',
         endTime: '22:00',
-        color: '#f97316',
+        color: 'var(--rims-busy)',
     },
 ]
 
@@ -272,7 +272,7 @@ function buildDonutGradient(rows: ShiftViewItem[]) {
     const totalOrders = rows.reduce((sum, row) => sum + row.orderCount, 0)
 
     if (totalOrders === 0) {
-        return '#e5e7eb'
+        return 'var(--rims-line)'
     }
 
     let cursor = 0
@@ -482,8 +482,16 @@ function WeeklyRevenueLineChart({
             >
                 <defs>
                     <linearGradient id="weekly-revenue-area" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="#f97316" stopOpacity="0.28" />
-                        <stop offset="100%" stopColor="#f97316" stopOpacity="0.03" />
+                        <stop
+                            offset="0%"
+                            stopColor="var(--rims-busy)"
+                            stopOpacity="0.28"
+                        />
+                        <stop
+                            offset="100%"
+                            stopColor="var(--rims-busy)"
+                            stopOpacity="0.03"
+                        />
                     </linearGradient>
                 </defs>
 

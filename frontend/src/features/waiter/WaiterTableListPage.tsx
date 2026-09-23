@@ -638,13 +638,13 @@ export default function WaiterTableListPage() {
 const stateBoxStyle: CSSProperties = {
     padding: '2rem',
     textAlign: 'center',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const errorBoxStyle: CSSProperties = {
     padding: '2rem',
     textAlign: 'center',
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
 }
 
 const reservationListStyle: CSSProperties = {
@@ -657,10 +657,10 @@ const reservationItemStyle: CSSProperties = {
 }
 
 const phoneStyle: CSSProperties = {
-    color: '#78350f',
+    color: 'var(--rims-busy)',
 }
 
 const noteStyle: CSSProperties = {
-    color: '#92400e',
+    color: 'var(--rims-busy)',
     fontSize: '0.82rem',
 }

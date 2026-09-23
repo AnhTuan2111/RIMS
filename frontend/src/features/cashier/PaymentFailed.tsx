@@ -36,35 +36,35 @@ const pageStyle: CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#fef2f2',
+    background: 'var(--rims-alert-soft)',
 }
 
 const cardStyle: CSSProperties = {
     textAlign: 'center',
     padding: '3rem',
     maxWidth: '500px',
-    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+    boxShadow: '0 10px 15px -3px rgb(36 21 18 / 10%)',
 }
 
 const iconStyle: CSSProperties = {
     fontSize: '5rem',
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
     marginBottom: '1rem',
 }
 
 const titleStyle: CSSProperties = {
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
     marginBottom: '1rem',
 }
 
 const descriptionStyle: CSSProperties = {
-    color: '#475569',
+    color: 'var(--rims-ink-2)',
     marginBottom: '2rem',
 }
 
 const backButtonStyle: CSSProperties = {
     padding: '0.8rem 1.5rem',
-    background: '#64748b',
+    background: 'var(--rims-ink-3)',
     color: 'white',
     border: 'none',
     borderRadius: '8px',

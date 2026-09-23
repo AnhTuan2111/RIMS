@@ -10,32 +10,32 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: #ffffff;
+    background: var(--rims-surface);
     border-radius: 0.5rem;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 10px 25px rgb(36 21 18 / 6%);
 }
 
 .waiter-header {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--rims-line);
     padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #f8fafc;
+    background: var(--rims-surface-2);
 }
 
 .waiter-clock {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #475569;
+    color: var(--rims-ink-2);
 }
 
 .waiter-main {
     flex: 1;
     overflow: auto;
     padding: 1.5rem;
-    background: #ffffff;
+    background: var(--rims-surface);
 }
 
 .waiter-legend {
@@ -43,7 +43,7 @@
     gap: 1.25rem;
     margin-bottom: 1.5rem;
     font-size: 0.85rem;
-    color: #475569;
+    color: var(--rims-ink-2);
     font-weight: 600;
 }
 
@@ -57,19 +57,19 @@
     width: 0.85rem;
     height: 0.85rem;
     border-radius: 0.25rem;
-    border: 0.1rem solid #ededed;
+    border: 0.1rem solid var(--rims-line);
 }
 
 .waiter-dot-available {
-    background: #16a34a;
+    background: var(--rims-ok);
 }
 
 .waiter-dot-serving {
-    background: #ea580c;
+    background: var(--rims-busy);
 }
 
 .waiter-dot-reserved {
-    background: #2563eb;
+    background: var(--rims-brand);
 }
 
 .waiter-table-grid {
@@ -80,14 +80,14 @@
 }
 
 .waiter-table-card {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--rims-line);
     border-radius: 12px;
     position: relative;
     text-align: left;
     transition: all 0.2s;
     cursor: pointer;
     width: 100%;
-    background: #ffffff;
+    background: var(--rims-surface);
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
@@ -102,23 +102,23 @@
     width: 0.75rem;
     height: 0.75rem;
     border-radius: 999px;
-    background: #dc2626;
-    border: 2px solid #ffffff;
-    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+    background: var(--rims-alert);
+    border: 2px solid var(--rims-surface);
+    box-shadow: 0 0 0 2px rgb(201 50 36 / 20%);
     z-index: 1;
 }
 
 .waiter-table-card:hover {
     box-shadow:
-        0 10px 15px -3px rgba(0, 0, 0, 0.1),
-        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        0 10px 15px -3px rgb(36 21 18 / 10%),
+        0 4px 6px -2px rgb(36 21 18 / 5%);
     transform: translateY(-2px);
 }
 
 .waiter-table-number {
     font-size: 1.2rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--rims-ink);
     margin-bottom: 8px;
 }
 
@@ -137,40 +137,40 @@
 
 .waiter-table-res-time {
     font-size: 0.8rem;
-    color: #475569;
+    color: var(--rims-ink-2);
     font-weight: 500;
 }
 
 /* Status variants — same look as the cashier table grid */
 .waiter-table-available {
-    background: #ffffff;
+    background: var(--rims-surface);
 }
 
 .waiter-table-available .waiter-table-status {
-    color: #16a34a;
+    color: var(--rims-ok);
 }
 
 .waiter-table-card.has-warning {
-    border: 1.5px dashed #f59e0b;
+    border: 1.5px dashed var(--rims-busy);
 }
 
 .waiter-table-warning-badge {
     display: inline-block;
     font-size: 0.75rem;
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
     padding: 0.2rem 0.6rem;
     border-radius: 9999px;
     font-weight: 600;
 }
 
 .waiter-warning-box {
-    background: #fffbeb;
-    border: 1px solid #fcd34d;
+    background: var(--rims-busy-soft);
+    border: 1px solid var(--rims-busy-line);
     padding: 1rem;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
-    color: #92400e;
+    color: var(--rims-busy);
     text-align: left;
     font-size: 0.9rem;
 }
@@ -184,24 +184,24 @@
 }
 
 .waiter-table-serving {
-    background: #fff7ed;
+    background: var(--rims-busy-soft);
 }
 
 .waiter-table-serving .waiter-table-status {
-    color: #ea580c;
+    color: var(--rims-busy);
 }
 
 .waiter-table-reserved {
-    background: #eff6ff;
+    background: var(--rims-brand-soft);
 }
 
 .waiter-table-reserved .waiter-table-status {
-    color: #2563eb;
+    color: var(--rims-brand);
 }
 
 /* Sub screen headers */
 .waiter-sub-header {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--rims-line);
     padding: 0 0 1rem 0;
     margin-bottom: 1.5rem;
     display: flex;
@@ -210,7 +210,7 @@
 }
 
 .waiter-back-btn {
-    color: #8b5cf6;
+    color: var(--rims-brand);
     transition: color 0.2s;
     background: transparent;
     border: none;
@@ -221,7 +221,7 @@
 }
 
 .waiter-back-btn:hover {
-    color: #6d28d9;
+    color: var(--rims-brand);
 }
 
 .waiter-back-btn svg {
@@ -232,23 +232,23 @@
 .waiter-title {
     font-size: 1.6rem;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--rims-ink);
     margin: 0;
 }
 
 .waiter-action-btn {
-    border: 1px solid #eab308;
-    background: #fef9c3;
+    border: 1px solid var(--rims-gold-deep);
+    background: var(--rims-busy-soft);
     border-radius: 0.35rem;
     padding: 0.5rem 1.5rem;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--rims-ink);
     transition: background-color 0.2s;
 }
 
 .waiter-action-btn:hover {
-    background: #fef08a;
+    background: var(--rims-busy-line);
 }
 
 /* Category Navbar */
@@ -257,16 +257,16 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.75rem 0 1rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--rims-line);
     margin-bottom: 1.25rem;
 }
 
 .waiter-category-tab {
     padding: 0.4rem 1.1rem;
     border-radius: 999px;
-    border: 1.5px solid #cbd5e1;
-    background: #f8fafc;
-    color: #475569;
+    border: 1.5px solid var(--rims-line-strong);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
@@ -277,20 +277,20 @@
 }
 
 .waiter-category-tab:hover {
-    background: #e2e8f0;
-    border-color: #94a3b8;
-    color: #1e293b;
+    background: var(--rims-surface-3);
+    border-color: var(--rims-line-strong);
+    color: var(--rims-ink);
 }
 
 .waiter-category-tab-active {
-    background: #0f172a;
-    border-color: #0f172a;
-    color: #ffffff;
+    background: var(--rims-ink);
+    border-color: var(--rims-ink);
+    color: var(--rims-ink-on-brand);
 }
 
 .waiter-category-tab-active:hover {
-    background: #1e293b;
-    border-color: #1e293b;
+    background: var(--rims-ink);
+    border-color: var(--rims-ink);
 }
 
 /* Menu Grid */
@@ -301,10 +301,10 @@
 }
 
 .waiter-menu-card {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--rims-line);
     border-radius: 0.5rem;
     padding: 1rem;
-    background: #f8fafc;
+    background: var(--rims-surface-2);
 }
 
 .waiter-menu-card-top {
@@ -321,7 +321,7 @@
     justify-content: center;
     width: 3.5rem;
     height: 3.5rem;
-    background: #e2e8f0;
+    background: var(--rims-surface-3);
     border-radius: 0.35rem;
 }
 
@@ -335,13 +335,13 @@
 .waiter-menu-info h4 {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--rims-ink);
     margin: 0 0 0.25rem 0;
 }
 
 .waiter-menu-info p {
     font-size: 0.9rem;
-    color: #dc2626;
+    color: var(--rims-alert);
     font-weight: 700;
     margin: 0;
 }
@@ -357,18 +357,18 @@
     width: 1.75rem;
     height: 1.75rem;
     border-radius: 9999px;
-    border: 1px solid #cbd5e1;
-    background: #ffffff;
+    border: 1px solid var(--rims-line-strong);
+    background: var(--rims-surface);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--rims-ink);
     font-size: 1.1rem;
 }
 
 .waiter-qty-btn:hover {
-    background: #f1f5f9;
+    background: var(--rims-surface-2);
 }
 
 .waiter-qty-btn:disabled {
@@ -385,7 +385,7 @@
 
 .waiter-note-input {
     width: 100%;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--rims-line-strong);
     border-radius: 0.35rem;
     padding: 0.4rem 0.6rem;
     font-size: 0.85rem;
@@ -394,27 +394,27 @@
 
 .waiter-note-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    border-color: var(--rims-brand);
+    box-shadow: 0 0 0 2px rgb(122 16 48 / 20%);
 }
 
 .waiter-btn-outline {
-    border: 1px solid #cbd5e1;
-    background: #ffffff;
+    border: 1px solid var(--rims-line-strong);
+    background: var(--rims-surface);
     padding: 0.6rem 1.25rem;
     border-radius: 0.35rem;
     font-weight: 700;
-    color: #475569;
+    color: var(--rims-ink-2);
     cursor: pointer;
 }
 
 .waiter-btn-outline:hover {
-    background: #f1f5f9;
+    background: var(--rims-surface-2);
 }
 
 .waiter-btn-primary {
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
     padding: 0.6rem 1.25rem;
     border-radius: 0.35rem;
     font-weight: 700;
@@ -423,7 +423,7 @@
 }
 
 .waiter-btn-primary:hover {
-    background: #1d4ed8;
+    background: var(--rims-brand);
 }
 
 /* Detail screens */
@@ -434,19 +434,19 @@
 }
 
 .waiter-card {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--rims-line);
     border-radius: 0.5rem;
-    background: #ffffff;
+    background: var(--rims-surface);
     overflow: hidden;
 }
 
 .waiter-card-header {
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--rims-surface-2);
+    border-bottom: 1px solid var(--rims-line);
     padding: 1.25rem;
     font-weight: 700;
     font-size: 1.1rem;
-    color: #0f172a;
+    color: var(--rims-ink);
 }
 
 .waiter-card-body {
@@ -462,19 +462,19 @@
 .waiter-table-custom th,
 .waiter-table-custom td {
     padding: 0.85rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--rims-line);
 }
 
 .waiter-table-custom th {
-    background: #f8fafc;
+    background: var(--rims-surface-2);
     font-size: 0.8rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--rims-ink-3);
 }
 
 .waiter-table-custom td {
     font-size: 0.95rem;
-    color: #0f172a;
+    color: var(--rims-ink);
     font-weight: 500;
 }
 
@@ -500,13 +500,13 @@
     display: block;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--rims-ink);
     margin-bottom: 0.35rem;
 }
 
 .waiter-form-input {
     width: 100%;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--rims-line-strong);
     border-radius: 0.35rem;
     padding: 0.6rem 0.85rem;
     font-size: 0.95rem;
@@ -515,45 +515,45 @@
 
 .waiter-form-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    border-color: var(--rims-brand);
+    box-shadow: 0 0 0 2px rgb(122 16 48 / 20%);
 }
 
 .waiter-form-error {
-    color: #ef4444;
+    color: var(--rims-alert);
     font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 1.25rem;
 }
 
 .waiter-res-card {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--rims-line);
     border-radius: 0.35rem;
     padding: 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.75rem;
-    background: #f8fafc;
+    background: var(--rims-surface-2);
 }
 
 .waiter-res-time {
     font-weight: 800;
     font-size: 1.25rem;
-    color: #0f172a;
+    color: var(--rims-ink);
 }
 
 .waiter-res-info h4 {
     margin: 0 0 0.25rem 0;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--rims-ink);
 }
 
 .waiter-res-info p {
     margin: 0;
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--rims-ink-3);
     font-weight: 500;
 }
 
@@ -577,14 +577,14 @@
     display: flex;
     flex-direction: column;
     padding: 0.5rem 0;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--rims-line);
     font-weight: 600;
-    color: #334155;
+    color: var(--rims-ink-2);
 }
 
 .waiter-confirm-list small {
     font-weight: 500;
-    color: #64748b;
+    color: var(--rims-ink-3);
     margin-top: 0.2rem;
 }
 
@@ -595,7 +595,7 @@
 .waiter-item-hint {
     margin: 0.5rem 0 0;
     font-size: 0.8rem;
-    color: #94a3b8;
+    color: var(--rims-ink-3);
     font-weight: 500;
 }
 
@@ -604,16 +604,16 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 0.75rem 0;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--rims-line);
 }
 
 .waiter-detail-row span {
-    color: #64748b;
+    color: var(--rims-ink-3);
     font-weight: 600;
 }
 
 .waiter-detail-row strong {
-    color: #0f172a;
+    color: var(--rims-ink);
     text-align: right;
 }
 
@@ -621,12 +621,12 @@
     width: 100%;
     padding: 0.6rem 0.9rem;
     margin: 0.75rem 0;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--rims-line-strong);
     border-radius: 8px;
     font-size: 0.95rem;
 }
 
 .waiter-search-input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--rims-brand);
 }

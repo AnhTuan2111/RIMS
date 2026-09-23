@@ -151,7 +151,7 @@ const forgotPasswordRowStyle: CSSProperties = {
 
 const forgotPasswordLinkStyle: CSSProperties = {
     fontSize: '13px',
-    color: '#7a1030',
+    color: 'var(--rims-brand)',
     textDecoration: 'none',
 }
 
@@ -159,11 +159,11 @@ const registerTextStyle: CSSProperties = {
     textAlign: 'center',
     marginTop: '16px',
     fontSize: '13px',
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
 }
 
 const registerLinkStyle: CSSProperties = {
-    color: '#7a1030',
+    color: 'var(--rims-brand)',
     textDecoration: 'none',
     fontWeight: 600,
 }

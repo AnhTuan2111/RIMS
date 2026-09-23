@@ -99,34 +99,34 @@ const pageStyle: CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#f0fdf4',
+    background: 'var(--rims-ok-soft)',
 }
 
 const cardStyle: CSSProperties = {
     textAlign: 'center',
     padding: '3rem',
     maxWidth: '500px',
-    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+    boxShadow: '0 10px 15px -3px rgb(36 21 18 / 10%)',
 }
 
 const iconStyle: CSSProperties = {
     fontSize: '5rem',
-    color: '#16a34a',
+    color: 'var(--rims-ok)',
     marginBottom: '1rem',
 }
 
 const titleStyle: CSSProperties = {
-    color: '#16a34a',
+    color: 'var(--rims-ok)',
     marginBottom: '1rem',
 }
 
 const descriptionStyle: CSSProperties = {
-    color: '#475569',
+    color: 'var(--rims-ink-2)',
     marginBottom: '2rem',
 }
 
 const invoiceBoxStyle: CSSProperties = {
-    background: '#e2e8f0',
+    background: 'var(--rims-surface-3)',
     padding: '1rem',
     borderRadius: '8px',
     marginBottom: '2rem',
@@ -141,7 +141,7 @@ const actionRowStyle: CSSProperties = {
 
 const downloadButtonStyle: CSSProperties = {
     padding: '0.8rem 1.5rem',
-    background: '#2563eb',
+    background: 'var(--rims-brand)',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
@@ -151,8 +151,8 @@ const downloadButtonStyle: CSSProperties = {
 
 const backButtonStyle: CSSProperties = {
     padding: '0.8rem 1.5rem',
-    background: '#cbd5e1',
-    color: '#1e293b',
+    background: 'var(--rims-surface-3)',
+    color: 'var(--rims-ink)',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',

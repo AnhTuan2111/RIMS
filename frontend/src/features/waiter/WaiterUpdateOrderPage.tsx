@@ -102,11 +102,15 @@ function getChefNoteBoxStyle(acknowledged: boolean): CSSProperties {
     return {
         margin: '0.85rem 0',
         padding: '0.85rem 0.95rem',
-        border: acknowledged ? '1px solid #cbd5e1' : '1px solid #f59e0b',
-        borderLeft: acknowledged ? '4px solid #94a3b8' : '4px solid #f59e0b',
+        border: acknowledged
+            ? '1px solid var(--rims-line)'
+            : '1px solid var(--rims-busy-line)',
+        borderLeft: acknowledged
+            ? '4px solid var(--rims-line-strong)'
+            : '4px solid var(--rims-busy)',
         borderRadius: '10px',
-        background: acknowledged ? '#f8fafc' : '#fffbeb',
-        color: acknowledged ? '#475569' : '#78350f',
+        background: acknowledged ? 'var(--rims-surface-2)' : 'var(--rims-busy-soft)',
+        color: acknowledged ? 'var(--rims-ink-2)' : 'var(--rims-busy)',
     }
 }
 
@@ -840,7 +844,7 @@ export default function WaiterUpdateOrderPage() {
 const stateBoxStyle: CSSProperties = {
     padding: '2rem',
     textAlign: 'center',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const errorBoxStyle: CSSProperties = {
@@ -861,7 +865,7 @@ const chefNoteHeaderStyle: CSSProperties = {
 
 const chefNoteTimeStyle: CSSProperties = {
     fontSize: '0.75rem',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const chefNoteContentStyle: CSSProperties = {
@@ -871,7 +875,7 @@ const chefNoteContentStyle: CSSProperties = {
 }
 
 const seenTextStyle: CSSProperties = {
-    color: '#15803d',
+    color: 'var(--rims-ok)',
     fontWeight: 700,
 }
 
@@ -882,7 +886,7 @@ const ackButtonStyle: CSSProperties = {
 
 const cancelReasonStyle: CSSProperties = {
     margin: '0.25rem 0 0',
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
     fontSize: '0.85rem',
     fontWeight: 600,
     lineHeight: 1.4,
@@ -891,5 +895,5 @@ const cancelReasonStyle: CSSProperties = {
 const successSummaryStyle: CSSProperties = {
     marginTop: '1rem',
     whiteSpace: 'pre-wrap',
-    color: '#475569',
+    color: 'var(--rims-ink-2)',
 }

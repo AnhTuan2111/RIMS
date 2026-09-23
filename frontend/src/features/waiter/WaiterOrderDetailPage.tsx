@@ -223,31 +223,31 @@ export default function WaiterOrderDetailPage() {
 const stateBoxStyle: CSSProperties = {
     padding: '2rem',
     textAlign: 'center',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const errorBoxStyle: CSSProperties = {
     padding: '2rem',
     textAlign: 'center',
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
 }
 
 const noteStyle: CSSProperties = {
     fontSize: '0.85rem',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
     marginTop: '0.25rem',
 }
 
 const chefNoteStyle: CSSProperties = {
     fontSize: '0.85rem',
-    color: '#ea580c',
+    color: 'var(--rims-busy)',
     marginTop: '0.25rem',
     fontWeight: 600,
 }
 
 const cancelReasonStyle: CSSProperties = {
     fontSize: '0.85rem',
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
     marginTop: '0.25rem',
     fontWeight: 600,
 }

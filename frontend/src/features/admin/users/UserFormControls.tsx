@@ -20,7 +20,7 @@ export function Field({label, children}: {label: string; children: ReactNode}) {
                 gap: 6,
                 fontSize: 14,
                 fontWeight: 500,
-                color: '#374151',
+                color: 'var(--rims-ink-2)',
             }}
         >
             {label}
@@ -43,14 +43,23 @@ export function DR({
             style={{
                 display: 'flex',
                 padding: '10px 0',
-                borderBottom: '1px solid #f3f4f6',
+                borderBottom: '1px solid var(--rims-line)',
                 gap: 16,
             }}
         >
-            <span style={{width: 140, color: '#9ca3af', fontSize: 13, flexShrink: 0}}>
+            <span
+                style={{
+                    width: 140,
+                    color: 'var(--rims-ink-3)',
+                    fontSize: 13,
+                    flexShrink: 0,
+                }}
+            >
                 {label}
             </span>
-            <span style={{fontWeight: 500, fontSize: 14, color: color ?? '#111827'}}>
+            <span
+                style={{fontWeight: 500, fontSize: 14, color: color ?? 'var(--rims-ink)'}}
+            >
                 {value}
             </span>
         </div>
@@ -86,7 +95,7 @@ export function PasswordInput({
                     width: '100%',
                     boxSizing: 'border-box',
                     padding: '9px 40px 9px 12px',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--rims-line-strong)',
                     borderRadius: 8,
                     fontSize: 14,
                 }}
@@ -108,15 +117,15 @@ export function PasswordInput({
                     border: 'none',
                     borderRadius: 6,
                     cursor: 'pointer',
-                    color: '#9ca3af',
+                    color: 'var(--rims-ink-3)',
                     transition: 'color 0.15s ease, background-color 0.15s ease',
                 }}
                 onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#4f46e5'
-                    e.currentTarget.style.backgroundColor = '#eef2ff'
+                    e.currentTarget.style.color = 'var(--rims-brand)'
+                    e.currentTarget.style.backgroundColor = 'var(--rims-brand-soft)'
                 }}
                 onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#9ca3af'
+                    e.currentTarget.style.color = 'var(--rims-ink-3)'
                     e.currentTarget.style.backgroundColor = 'transparent'
                 }}
             >

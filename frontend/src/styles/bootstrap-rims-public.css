@@ -8,8 +8,8 @@
 
 .restaurant-home {
     min-height: 100vh;
-    background: #14090b;
-    color: #ffffff;
+    background: var(--rims-ink);
+    color: var(--rims-ink-on-brand);
 }
 
 .restaurant-navbar {
@@ -37,9 +37,9 @@
     height: 52px;
     display: grid;
     place-items: center;
-    border: 2px solid #d4af37;
+    border: 2px solid var(--rims-gold);
     border-radius: 999px;
-    color: #d4af37;
+    color: var(--rims-gold-deep);
     font-size: 1.6rem;
     font-weight: 900;
 }
@@ -48,7 +48,7 @@
     margin: 0;
     font-size: 1.7rem;
     letter-spacing: 0.06em;
-    color: #f2e2b8;
+    color: var(--rims-ink-on-brand);
 }
 
 .restaurant-brand p {
@@ -64,7 +64,7 @@
 }
 
 .restaurant-nav a {
-    color: rgba(255, 255, 255, 0.86);
+    color: rgb(253 248 239 / 86%);
     text-decoration: none;
     font-size: 0.85rem;
     font-weight: 800;
@@ -72,19 +72,19 @@
 }
 
 .restaurant-nav a:hover {
-    color: #d4af37;
+    color: var(--rims-gold-deep);
 }
 
 .restaurant-login-btn {
     padding: 0.85rem 1.4rem;
-    background: #7a1030;
-    color: #ffffff !important;
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand) !important;
     border-radius: 2px;
-    border: 1px solid #d4af37;
+    border: 1px solid var(--rims-gold);
 }
 
 .restaurant-login-btn:hover {
-    background: #9a1a3f;
+    background: var(--rims-brand-hover);
 }
 
 .restaurant-hero {
@@ -105,7 +105,7 @@
     inset: 0;
     background:
         radial-gradient(circle at 18% 62%, rgba(122, 16, 48, 0.32), transparent 36%),
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.34));
+        linear-gradient(to bottom, rgb(36 21 18 / 5%), rgb(36 21 18 / 34%));
 }
 
 .restaurant-hero-content {
@@ -117,7 +117,7 @@
 .restaurant-subtitle,
 .restaurant-section-label {
     margin: 0 0 1rem;
-    color: #d4af37;
+    color: var(--rims-gold-deep);
     font-size: 0.8rem;
     font-weight: 900;
     letter-spacing: 0.18em;
@@ -128,7 +128,7 @@
     font-size: clamp(3.8rem, 8vw, 8rem);
     line-height: 0.92;
     letter-spacing: -0.06em;
-    color: #f5ecd8;
+    color: var(--rims-ink-on-brand);
 }
 
 .restaurant-hero-content h2 span {
@@ -143,7 +143,7 @@
 .restaurant-description {
     max-width: 620px;
     margin: 1.5rem 0 0;
-    color: rgba(255, 255, 255, 0.82);
+    color: rgb(253 248 239 / 82%);
     font-size: 1.05rem;
     line-height: 1.8;
 }
@@ -168,18 +168,18 @@
 }
 
 .restaurant-primary-btn {
-    background: #7a1030;
-    color: #f5ecd8;
-    border: 1px solid #d4af37;
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    border: 1px solid var(--rims-gold);
 }
 
 .restaurant-primary-btn:hover {
-    background: #9a1a3f;
+    background: var(--rims-brand-hover);
 }
 
 .restaurant-secondary-btn {
-    border: 1px solid #d4af37;
-    color: #f5ecd8;
+    border: 1px solid var(--rims-gold);
+    color: var(--rims-ink-on-brand);
     background: rgba(212, 175, 55, 0.08);
     backdrop-filter: blur(10px);
 }
@@ -190,8 +190,8 @@
 
 .restaurant-section {
     padding: 6rem 4rem;
-    background: #fbf3e3;
-    color: #241512;
+    background: var(--rims-gold-soft);
+    color: var(--rims-ink);
 }
 
 .restaurant-about {
@@ -213,7 +213,7 @@
 
 .restaurant-about p:last-child {
     margin: 0;
-    color: #5c4a3a;
+    color: var(--rims-ink-2);
     font-size: 1.05rem;
     line-height: 1.9;
 }
@@ -221,7 +221,7 @@
 .restaurant-section .restaurant-section-label,
 .restaurant-feature-section .restaurant-section-label,
 .restaurant-cta .restaurant-section-label {
-    color: #7a1030;
+    color: var(--rims-brand);
 }
 
 .restaurant-section-header {
@@ -239,28 +239,28 @@
     min-height: 240px;
     padding: 1.5rem;
     border-radius: 2px;
-    background: #ffffff;
-    border: 1px solid #ead9b3;
+    background: var(--rims-surface);
+    border: 1px solid var(--rims-gold-soft);
     box-shadow: 0 18px 40px rgba(122, 16, 48, 0.1);
 }
 
 .restaurant-role-grid span {
     display: block;
     margin-bottom: 2rem;
-    color: #d4af37;
+    color: var(--rims-gold-deep);
     font-weight: 900;
-    -webkit-text-stroke: 0.5px #7a1030;
+    -webkit-text-stroke: 0.5px var(--rims-brand);
 }
 
 .restaurant-role-grid h3 {
     margin: 0 0 0.75rem;
-    color: #241512;
+    color: var(--rims-ink);
     font-size: 1.35rem;
 }
 
 .restaurant-role-grid p {
     margin: 0;
-    color: #5c4a3a;
+    color: var(--rims-ink-2);
     line-height: 1.7;
 }
 
@@ -273,7 +273,7 @@
         linear-gradient(90deg, rgba(20, 9, 11, 0.9), rgba(20, 9, 11, 0.5)), url('../assets/restaurant-feature.jpg');
     background-size: cover;
     background-position: center;
-    color: #ffffff;
+    color: var(--rims-ink-on-brand);
 }
 
 .restaurant-feature-content {
@@ -288,7 +288,7 @@
 
 .restaurant-feature-list div {
     padding: 1.25rem 1.5rem;
-    border-left: 4px solid #d4af37;
+    border-left: 4px solid var(--rims-gold);
     background: rgba(212, 175, 55, 0.08);
     backdrop-filter: blur(12px);
 }
@@ -296,31 +296,31 @@
 .restaurant-feature-list strong {
     display: block;
     margin-bottom: 0.35rem;
-    color: #d4af37;
+    color: var(--rims-gold-deep);
     font-size: 1.1rem;
 }
 
 .restaurant-feature-list p {
     margin: 0;
-    color: rgba(255, 255, 255, 0.78);
+    color: rgb(253 248 239 / 78%);
     line-height: 1.7;
 }
 
 .restaurant-cta {
     padding: 6rem 1.5rem;
     text-align: center;
-    background: #fbf3e3;
-    color: #241512;
+    background: var(--rims-gold-soft);
+    color: var(--rims-ink);
 }
 
 .restaurant-cta p {
     margin: 1rem 0 2rem;
-    color: #5c4a3a;
+    color: var(--rims-ink-2);
 }
 
 .restaurant-footer {
     padding: 1.5rem 4rem;
-    background: #14090b;
+    background: var(--rims-ink);
     color: rgba(242, 226, 184, 0.65);
     text-align: center;
 }
@@ -401,8 +401,8 @@
     position: relative;
     padding: 1rem;
     border-radius: 2px;
-    background: #ffffff;
-    border: 1px solid #ead9b3;
+    background: var(--rims-surface);
+    border: 1px solid var(--rims-gold-soft);
     box-shadow: 0 18px 40px rgba(122, 16, 48, 0.1);
     text-align: center;
 }
@@ -417,8 +417,8 @@
     width: 28px;
     height: 28px;
     border-radius: 999px;
-    background: #7a1030;
-    color: #d4af37;
+    background: var(--rims-brand);
+    color: var(--rims-gold-deep);
     font-size: 0.8rem;
     font-weight: 900;
 }
@@ -434,7 +434,7 @@
 .restaurant-best-selling-card h3 {
     margin: 0;
     font-size: 1rem;
-    color: #241512;
+    color: var(--rims-ink);
 }
 
 @media (max-width: 1000px) {

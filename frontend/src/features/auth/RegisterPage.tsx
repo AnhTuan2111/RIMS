@@ -200,24 +200,24 @@ export default function RegisterPage() {
 }
 
 const defaultPasswordNoticeStyle: CSSProperties = {
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
+    background: 'var(--rims-ok-soft)',
+    border: '1px solid var(--rims-ok-line)',
     borderRadius: 8,
     padding: '12px 14px',
     marginBottom: 20,
     fontSize: 14,
-    color: '#166534',
+    color: 'var(--rims-ok)',
 }
 
 const loginTextStyle: CSSProperties = {
     textAlign: 'center',
     marginTop: '16px',
     fontSize: '13px',
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
 }
 
 const loginLinkStyle: CSSProperties = {
-    color: '#7a1030',
+    color: 'var(--rims-brand)',
     textDecoration: 'none',
     fontWeight: 600,
 }

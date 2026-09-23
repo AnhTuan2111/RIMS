@@ -37,8 +37,13 @@
     /* ---------- Chữ ---------- */
     --rims-ink: #241512;
     --rims-ink-2: #5c4a3a;
-    --rims-ink-3: #827362;
+    --rims-ink-3: #706354;
     --rims-ink-on-brand: #fdf8ef;
+
+    /* Thanh ben luon toi ke ca o che do sang, nen chu phu tren no khong dung
+       duoc --rims-ink-3 (mau do tinh cho nen sang, chi dat 3.02:1 o day). */
+    --rims-ink-on-dark: #fdf8ef;
+    --rims-ink-on-dark-2: #9c8d7c;
 
     /* ---------- Thương hiệu ---------- */
     /* Vang là màu hành động chính. Vàng chỉ dùng cho khoảnh khắc nhận diện
@@ -54,7 +59,7 @@
        Tương phản với nền sáng chỉ 2.07:1 nên KHÔNG BAO GIỜ dùng cho chữ hay
        viền cần nhìn rõ — chỗ đó dùng --rims-gold-deep. */
     --rims-gold: #d4af37;
-    --rims-gold-deep: #8f721a;
+    --rims-gold-deep: #836918;
     --rims-gold-soft: #fbf1d6;
 
     /* ---------- Màu ngữ nghĩa ---------- */
@@ -185,13 +190,13 @@
 
         --rims-ink: #f2ebe1;
         --rims-ink-2: #c3b6a6;
-        --rims-ink-3: #948878;
+        --rims-ink-3: #9d9283;
         /* Nền nhấn ở chủ đề tối đã được nâng sáng, nên chữ trên nút phải TỐI.
            Giữ chữ sáng thì tương phản chỉ còn 2.18:1 trên nút Xong món. */
         --rims-ink-on-brand: #1a1113;
 
         /* Vang nguyên bản quá tối trên nền tối — nâng độ sáng để giữ tương phản */
-        --rims-brand: #e0577a;
+        --rims-brand: #e46d8b;
         --rims-brand-hover: #ec7192;
         --rims-brand-active: #c84464;
         --rims-brand-soft: #38141f;
@@ -233,10 +238,10 @@
 
     --rims-ink: #f2ebe1;
     --rims-ink-2: #c3b6a6;
-    --rims-ink-3: #948878;
+    --rims-ink-3: #9d9283;
     --rims-ink-on-brand: #1a1113;
 
-    --rims-brand: #e0577a;
+    --rims-brand: #e46d8b;
     --rims-brand-hover: #ec7192;
     --rims-brand-active: #c84464;
     --rims-brand-soft: #38141f;

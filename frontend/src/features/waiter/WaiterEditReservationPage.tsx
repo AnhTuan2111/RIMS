@@ -659,7 +659,7 @@ export default function WaiterEditReservationPage() {
                                             className="waiter-res-card"
                                             style={{
                                                 borderColor: isCurrent
-                                                    ? '#3b82f6'
+                                                    ? 'var(--rims-brand)'
                                                     : undefined,
                                             }}
                                         >
@@ -704,7 +704,7 @@ export default function WaiterEditReservationPage() {
 const stateBoxStyle: CSSProperties = {
     padding: '2rem',
     textAlign: 'center',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const dateTimeRowStyle: CSSProperties = {
@@ -720,12 +720,12 @@ const actionRowStyle: CSSProperties = {
 }
 
 const cancelButtonStyle: CSSProperties = {
-    color: '#ef4444',
-    borderColor: '#fca5a5',
+    color: 'var(--rims-alert)',
+    borderColor: 'var(--rims-alert-line)',
 }
 
 const emptyTextStyle: CSSProperties = {
-    color: '#94a3b8',
+    color: 'var(--rims-ink-3)',
     fontWeight: 500,
 }
 

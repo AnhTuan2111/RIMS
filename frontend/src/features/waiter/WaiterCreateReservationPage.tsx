@@ -611,13 +611,13 @@ const actionRowStyle: CSSProperties = {
 }
 
 const emptyTextStyle: CSSProperties = {
-    color: '#94a3b8',
+    color: 'var(--rims-ink-3)',
     fontWeight: 500,
 }
 
 const noteStyle: CSSProperties = {
     fontSize: '0.85rem',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const editButtonStyle: CSSProperties = {

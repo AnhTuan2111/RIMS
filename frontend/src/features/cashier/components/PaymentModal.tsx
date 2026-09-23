@@ -29,6 +29,10 @@ function methodDisplay(method: string) {
     return {icon: '', label: method}
 }
 
+// Mau thuong hieu cua VNPay. Day la nhan dien cua ben thu ba nen khong
+// di qua bo token cua app.
+const VNPAY_BRAND = '#005baa'
+
 export default function PaymentModal({
     orderId,
     orderDetail,
@@ -184,7 +188,7 @@ export default function PaymentModal({
                         {pointsUsed > 0 && (
                             <span
                                 style={{
-                                    color: '#059669',
+                                    color: 'var(--rims-ok)',
                                 }}
                             >
                                 {' '}
@@ -198,7 +202,7 @@ export default function PaymentModal({
                     <span>Cần thu:</span>
                     <strong
                         style={{
-                            color: '#b91c1c',
+                            color: 'var(--rims-alert)',
                         }}
                     >
                         {formatCurrency(finalAmount)}
@@ -207,7 +211,7 @@ export default function PaymentModal({
 
                 {method === null &&
                     (loadingMethods ? (
-                        <p style={{textAlign: 'center', color: '#64748b'}}>
+                        <p style={{textAlign: 'center', color: 'var(--rims-ink-3)'}}>
                             Đang tải phương thức thanh toán...
                         </p>
                     ) : (
@@ -249,7 +253,7 @@ export default function PaymentModal({
                         <div style={changeBoxStyle}>
                             <span
                                 style={{
-                                    color: '#475569',
+                                    color: 'var(--rims-ink-2)',
                                 }}
                             >
                                 Tiền thừa trả khách:{' '}
@@ -334,8 +338,8 @@ export default function PaymentModal({
 }
 
 const customerSummaryStyle: CSSProperties = {
-    background: '#ecfdf5',
-    border: '1px solid #a7f3d0',
+    background: 'var(--rims-ok-soft)',
+    border: '1px solid var(--rims-ok-line)',
     borderRadius: '8px',
     padding: '10px',
     marginBottom: '1rem',
@@ -376,18 +380,18 @@ const fieldLabelStyle: CSSProperties = {
 const numberInputStyle: CSSProperties = {
     padding: '0.6rem',
     borderRadius: '6px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid var(--rims-line-strong)',
 }
 
 const changeBoxStyle: CSSProperties = {
     padding: '0.85rem',
-    background: '#f8fafc',
+    background: 'var(--rims-surface-2)',
     borderRadius: '8px',
 }
 
 const changeAmountStyle: CSSProperties = {
     fontSize: '1.15rem',
-    color: '#16a34a',
+    color: 'var(--rims-ok)',
 }
 
 const actionRowStyle: CSSProperties = {
@@ -398,18 +402,18 @@ const actionRowStyle: CSSProperties = {
 
 const confirmCashButtonStyle: CSSProperties = {
     flex: 2,
-    background: '#16a34a',
-    color: '#fff',
+    background: 'var(--rims-ok)',
+    color: 'var(--rims-ink-on-brand)',
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',
 }
 
 const vnpayBoxStyle: CSSProperties = {
-    background: '#f8fafc',
+    background: 'var(--rims-surface-2)',
     padding: '2rem',
     borderRadius: '8px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid var(--rims-line-strong)',
     marginBottom: '1rem',
 }
 
@@ -420,18 +424,18 @@ const vnpayIconStyle: CSSProperties = {
 
 const vnpayTitleStyle: CSSProperties = {
     margin: '0 0 10px 0',
-    color: '#1e293b',
+    color: 'var(--rims-ink)',
 }
 
 const vnpayDescriptionStyle: CSSProperties = {
     fontSize: '0.9rem',
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const vnpayButtonStyle: CSSProperties = {
     flex: 2,
-    background: '#005baa',
-    color: '#fff',
+    background: VNPAY_BRAND,
+    color: 'var(--rims-ink-on-brand)',
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',

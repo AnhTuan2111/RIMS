@@ -378,7 +378,7 @@ export default function CashierInvoicesPage() {
 
                             <span
                                 style={{
-                                    color: '#6b7280',
+                                    color: 'var(--rims-ink-3)',
                                     fontSize: 13,
                                 }}
                             >
@@ -388,7 +388,7 @@ export default function CashierInvoicesPage() {
                             <span
                                 style={{
                                     fontWeight: 600,
-                                    color: '#b91c1c',
+                                    color: 'var(--rims-alert)',
                                 }}
                             >
                                 {formatCurrency(invoice.finalAmount)}
@@ -399,12 +399,12 @@ export default function CashierInvoicesPage() {
                                     style={{
                                         background:
                                             invoice.paymentMethod === 'CASH'
-                                                ? '#d1fae5'
-                                                : '#dbeafe',
+                                                ? 'var(--rims-ok-soft)'
+                                                : 'var(--rims-brand-soft)',
                                         color:
                                             invoice.paymentMethod === 'CASH'
-                                                ? '#065f46'
-                                                : '#1e40af',
+                                                ? 'var(--rims-ok)'
+                                                : 'var(--rims-brand)',
                                         padding: '2px 8px',
                                         borderRadius: 12,
                                         fontSize: 11,
@@ -418,7 +418,10 @@ export default function CashierInvoicesPage() {
                             <span>
                                 <button
                                     type="button"
-                                    style={btn('#f3f4f6', '#374151')}
+                                    style={btn(
+                                        'var(--rims-surface-2)',
+                                        'var(--rims-ink-2)',
+                                    )}
                                     onClick={() => void openDetail(invoice.invoiceId)}
                                 >
                                     Xem chi tiết
@@ -442,7 +445,7 @@ export default function CashierInvoicesPage() {
                     <button
                         type="button"
                         disabled={page === 0}
-                        style={btn('#f3f4f6', '#374151')}
+                        style={btn('var(--rims-surface-2)', 'var(--rims-ink-2)')}
                         onClick={() => handlePageChange(page - 1)}
                     >
                         ← Trước
@@ -451,7 +454,7 @@ export default function CashierInvoicesPage() {
                     <span
                         style={{
                             fontSize: 13,
-                            color: '#6b7280',
+                            color: 'var(--rims-ink-3)',
                         }}
                     >
                         Trang {page + 1} / {safeTotalPages}
@@ -460,7 +463,7 @@ export default function CashierInvoicesPage() {
                     <button
                         type="button"
                         disabled={page >= totalPages - 1}
-                        style={btn('#f3f4f6', '#374151')}
+                        style={btn('var(--rims-surface-2)', 'var(--rims-ink-2)')}
                         onClick={() => handlePageChange(page + 1)}
                     >
                         Sau →
@@ -526,7 +529,7 @@ export default function CashierInvoicesPage() {
                                         'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
                                     display: 'grid',
                                     fontWeight: 'bold',
-                                    borderBottom: '1px solid #cbd5e1',
+                                    borderBottom: '1px solid var(--rims-line-strong)',
                                     paddingBottom: '8px',
                                     minWidth: 0,
                                 }}
@@ -549,7 +552,7 @@ export default function CashierInvoicesPage() {
                                         gridTemplateColumns: '2fr 1fr 1fr',
                                         display: 'grid',
                                         padding: '6px 0',
-                                        borderBottom: '1px dashed #f1f5f9',
+                                        borderBottom: '1px dashed var(--rims-line)',
                                     }}
                                 >
                                     <span>{item.dishName}</span>
@@ -567,7 +570,7 @@ export default function CashierInvoicesPage() {
 
                         <div
                             style={{
-                                background: '#f8fafc',
+                                background: 'var(--rims-surface-2)',
                                 padding: 12,
                                 borderRadius: 8,
                                 marginBottom: 16,
@@ -597,7 +600,7 @@ export default function CashierInvoicesPage() {
                                                 value={`-${
                                                     selectedInvoice.pointsUsed * 1000
                                                 }`}
-                                                color="#059669"
+                                                color="var(--rims-ok)"
                                             />
                                         )}
 
@@ -606,7 +609,7 @@ export default function CashierInvoicesPage() {
                                         value={`+${
                                             selectedInvoice.pointsEarned ?? 0
                                         } điểm`}
-                                        color="#059669"
+                                        color="var(--rims-ok)"
                                     />
                                 </>
                             )}
@@ -615,7 +618,7 @@ export default function CashierInvoicesPage() {
                                 bold
                                 label="Thành tiền:"
                                 value={`${formatCurrency(selectedInvoice.finalAmount)}`}
-                                color="#b91c1c"
+                                color="var(--rims-alert)"
                             />
 
                             <Row
@@ -649,7 +652,7 @@ const gridCols: CSSProperties = {
 
 const filterInputStyle: CSSProperties = {
     padding: '8px 12px',
-    border: '1px solid #d1d5db',
+    border: '1px solid var(--rims-line-strong)',
     borderRadius: 8,
     fontSize: 13,
 }
@@ -684,7 +687,7 @@ function Row({
                 display: 'flex',
                 justifyContent: 'space-between',
                 fontWeight: bold ? 700 : 400,
-                color: color ?? '#334155',
+                color: color ?? 'var(--rims-ink-2)',
                 fontSize: bold ? 15 : 13,
                 marginBottom: 4,
             }}

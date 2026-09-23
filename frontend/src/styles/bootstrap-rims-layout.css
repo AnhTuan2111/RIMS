@@ -9,22 +9,22 @@
 .app-layout {
     min-height: 100vh;
     display: flex;
-    background: #f8fafc;
-    color: #0f172a;
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
 }
 
 .app-sidebar {
     width: 270px;
     min-height: 100vh;
     padding: 1.5rem;
-    background: #0f172a;
-    color: #e2e8f0;
+    background: var(--rims-ink);
+    color: var(--rims-ink-on-dark);
     flex-shrink: 0;
 }
 
 .app-sidebar-link.active {
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-dark);
 }
 
 .app-main {
@@ -50,8 +50,8 @@
     justify-content: center;
     padding: 0.45rem 0.75rem;
     border-radius: 999px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
     font-weight: 800;
     font-size: 0.85rem;
     white-space: nowrap;
@@ -71,15 +71,15 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    color: #ffffff;
+    color: var(--rims-ink-on-dark);
 
     background:
-        radial-gradient(circle at 10% 0%, rgba(59, 130, 246, 0.38), transparent 34%),
-        radial-gradient(circle at 95% 85%, rgba(124, 58, 237, 0.26), transparent 38%),
-        linear-gradient(180deg, #091426 0%, #0b1930 55%, #07111f 100%);
+        radial-gradient(circle at 10% 0%, rgb(122 16 48 / 38%), transparent 34%),
+        radial-gradient(circle at 95% 85%, rgb(122 16 48 / 26%), transparent 38%),
+        linear-gradient(180deg, var(--rims-ink) 0%, var(--rims-ink) 55%, var(--rims-ink) 100%);
 
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 16px 0 45px rgba(7, 17, 31, 0.24);
+    border-right: 1px solid rgb(253 248 239 / 8%);
+    box-shadow: 16px 0 45px rgb(36 21 18 / 24%);
 }
 
 .rims-sidebar-brand {
@@ -87,7 +87,7 @@
     align-items: center;
     gap: 13px;
     padding: 4px 6px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    border-bottom: 1px solid rgb(253 248 239 / 9%);
 }
 
 .rims-sidebar-logo {
@@ -100,20 +100,20 @@
 
     border-radius: 17px;
 
-    background: linear-gradient(135deg, #60a5fa, #2563eb 48%, #7c3aed);
+    background: linear-gradient(135deg, var(--rims-brand), var(--rims-brand) 48%, var(--rims-brand));
 
-    color: #ffffff;
+    color: var(--rims-ink-on-dark);
     font-size: 22px;
     font-weight: 950;
 
     box-shadow:
-        0 12px 30px rgba(37, 99, 235, 0.36),
-        inset 0 1px 0 rgba(255, 255, 255, 0.38);
+        0 12px 30px rgb(36 21 18 / 0.36),
+        inset 0 1px 0 rgb(253 248 239 / 38%);
 }
 
 .rims-sidebar-brand h2 {
     margin: 0;
-    color: #ffffff;
+    color: var(--rims-ink-on-dark);
     font-size: 25px;
     font-weight: 900;
     letter-spacing: 0.1em;
@@ -121,7 +121,7 @@
 
 .rims-sidebar-brand p {
     margin: 3px 0 0;
-    color: #94a3b8;
+    color: var(--rims-ink-on-dark-2);
     font-size: 12px;
 }
 
@@ -133,12 +133,12 @@
     margin: 20px 0 14px;
     padding: 13px;
 
-    border: 1px solid rgba(147, 197, 253, 0.18);
+    border: 1px solid rgb(253 248 239 / 0.18);
     border-radius: 17px;
 
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.17), rgba(124, 58, 237, 0.11));
+    background: linear-gradient(135deg, rgb(122 16 48 / 17%), rgb(122 16 48 / 11%));
 
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 1px 0 rgb(253 248 239 / 5%);
 }
 
 .rims-role-icon {
@@ -150,9 +150,9 @@
     place-items: center;
 
     border-radius: 13px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(253 248 239 / 10%);
 
-    color: #93c5fd;
+    color: var(--rims-brand);
     font-size: 17px;
 }
 
@@ -162,13 +162,13 @@
 }
 
 .rims-sidebar-role small {
-    color: #94a3b8;
+    color: var(--rims-ink-on-dark-2);
     font-size: 11px;
 }
 
 .rims-sidebar-role strong {
     margin-top: 3px;
-    color: #ffffff;
+    color: var(--rims-ink-on-dark);
     font-size: 15px;
 }
 
@@ -186,7 +186,7 @@
     margin-right: -4px;
 
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+    scrollbar-color: rgb(253 248 239 / 18%) transparent;
 }
 
 .rims-sidebar-nav::-webkit-scrollbar {
@@ -198,19 +198,19 @@
 }
 
 .rims-sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.18);
+    background: rgb(253 248 239 / 18%);
     border-radius: 999px;
 }
 
 .rims-sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.32);
+    background: rgb(253 248 239 / 32%);
 }
 
 .rims-sidebar-title {
     margin: 5px 0 6px;
     padding: 0 12px;
 
-    color: #64748b;
+    color: var(--rims-ink-on-dark-2);
     font-size: 11px;
     font-weight: 900;
     letter-spacing: 0.16em;
@@ -228,7 +228,7 @@
     border: 1px solid transparent;
     border-radius: 16px;
 
-    color: #b8c5d8;
+    color: var(--rims-ink-on-dark-2);
     text-decoration: none;
     font-weight: 750;
 
@@ -242,21 +242,21 @@
 .rims-sidebar-link:hover {
     transform: translateX(4px);
 
-    border-color: rgba(147, 197, 253, 0.17);
+    border-color: rgb(253 248 239 / 0.17);
 
-    background: rgba(255, 255, 255, 0.055);
+    background: rgb(253 248 239 / 5.5%);
 
-    color: #ffffff;
+    color: var(--rims-ink-on-dark);
 }
 
 .rims-sidebar-link.active {
-    color: #ffffff;
+    color: var(--rims-ink-on-dark);
 
-    border-color: rgba(191, 219, 254, 0.28);
+    border-color: rgb(253 248 239 / 0.28);
 
-    background: linear-gradient(100deg, #2563eb, #4f46e5 55%, #7c3aed);
+    background: linear-gradient(100deg, var(--rims-brand), var(--rims-brand) 55%, var(--rims-brand));
 
-    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.32);
+    box-shadow: 0 14px 32px rgb(36 21 18 / 0.32);
 }
 
 .rims-menu-icon {
@@ -268,17 +268,17 @@
 
     border-radius: 12px;
 
-    background: rgba(255, 255, 255, 0.08);
+    background: rgb(253 248 239 / 8%);
 
-    color: #bfdbfe;
+    color: var(--rims-gold);
     font-size: 17px;
     font-weight: 950;
 }
 
 .rims-sidebar-link.active .rims-menu-icon {
-    background: rgba(255, 255, 255, 0.18);
+    background: rgb(253 248 239 / 18%);
 
-    color: #ffffff;
+    color: var(--rims-ink-on-dark);
 }
 
 .rims-menu-label {
@@ -287,12 +287,12 @@
 }
 
 .rims-menu-arrow {
-    color: #64748b;
+    color: var(--rims-ink-on-dark-2);
     font-size: 21px;
 }
 
 .rims-sidebar-link.active .rims-menu-arrow {
-    color: rgba(255, 255, 255, 0.88);
+    color: rgb(253 248 239 / 88%);
 }
 
 .rims-sidebar-status {
@@ -303,10 +303,10 @@
     margin-top: 16px;
     padding: 13px;
 
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    border: 1px solid rgb(253 248 239 / 7%);
     border-radius: 16px;
 
-    background: rgba(255, 255, 255, 0.045);
+    background: rgb(253 248 239 / 4.5%);
 }
 
 .rims-online-dot {
@@ -315,9 +315,9 @@
     flex-shrink: 0;
 
     border-radius: 999px;
-    background: #22c55e;
+    background: var(--rims-ok);
 
-    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+    box-shadow: 0 0 0 5px rgb(45 123 78 / 12%);
 }
 
 .rims-sidebar-status strong,
@@ -326,13 +326,13 @@
 }
 
 .rims-sidebar-status strong {
-    color: #e2e8f0;
+    color: var(--rims-ink-on-dark);
     font-size: 12px;
 }
 
 .rims-sidebar-status small {
     margin-top: 2px;
-    color: #64748b;
+    color: var(--rims-ink-on-dark-2);
     font-size: 10px;
 }
 
@@ -359,8 +359,8 @@
     min-height: 100vh;
 
     background:
-        radial-gradient(circle at 88% 5%, rgba(59, 130, 246, 0.14), transparent 28%),
-        radial-gradient(circle at 25% 95%, rgba(124, 58, 237, 0.09), transparent 30%), #eef3f9;
+        radial-gradient(circle at 88% 5%, rgb(122 16 48 / 14%), transparent 28%),
+        radial-gradient(circle at 25% 95%, rgb(122 16 48 / 9%), transparent 30%), var(--rims-brand-soft);
 }
 
 .rims-topbar {
@@ -376,14 +376,14 @@
     align-items: center;
     gap: 20px;
 
-    background: rgba(255, 255, 255, 0.86);
+    background: rgb(253 248 239 / 86%);
 
-    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    border-bottom: 1px solid rgb(166 144 113 / 18%);
 
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
 
-    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+    box-shadow: 0 8px 30px rgb(36 21 18 / 7%);
 }
 
 .rims-topbar-heading {
@@ -397,7 +397,7 @@
 
     margin-bottom: 6px;
 
-    color: #2563eb;
+    color: var(--rims-brand);
 
     font-size: 11px;
     font-weight: 950;
@@ -410,15 +410,15 @@
 
     border-radius: 999px;
 
-    background: #22c55e;
+    background: var(--rims-ok);
 
-    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+    box-shadow: 0 0 0 5px rgb(45 123 78 / 12%);
 }
 
 .rims-topbar-heading h1 {
     margin: 0;
 
-    color: #0f172a;
+    color: var(--rims-ink);
 
     font-size: 22px;
     font-weight: 900;
@@ -428,7 +428,7 @@
 .rims-topbar-heading p {
     margin: 5px 0 0;
 
-    color: #64748b;
+    color: var(--rims-ink-3);
 
     font-size: 14px;
     line-height: 1.5;
@@ -448,13 +448,13 @@
     align-items: center;
     gap: 11px;
 
-    border: 1px solid rgba(99, 102, 241, 0.15);
+    border: 1px solid rgb(122 16 48 / 15%);
 
     border-radius: 16px;
 
-    background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+    background: linear-gradient(135deg, var(--rims-brand-soft), var(--rims-brand-soft));
 
-    box-shadow: 0 7px 20px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 7px 20px rgb(36 21 18 / 6%);
 }
 
 .rims-current-role-icon {
@@ -467,7 +467,7 @@
 
     border-radius: 14px;
 
-    background: linear-gradient(135deg, #dbeafe, #ede9fe);
+    background: linear-gradient(135deg, var(--rims-brand-soft), var(--rims-brand-soft));
 
     font-size: 19px;
 }
@@ -478,14 +478,14 @@
 }
 
 .rims-current-role small {
-    color: #64748b;
+    color: var(--rims-ink-3);
     font-size: 11px;
 }
 
 .rims-current-role strong {
     margin-top: 3px;
 
-    color: #172554;
+    color: var(--rims-ink);
 
     font-size: 14px;
     font-weight: 900;
@@ -497,7 +497,7 @@
 }
 
 .rims-actor-switcher > span {
-    color: #64748b;
+    color: var(--rims-ink-3);
 
     font-size: 10px;
     font-weight: 850;
@@ -509,24 +509,24 @@
 
     padding: 0 13px;
 
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    border: 1px solid rgb(166 144 113 / 30%);
 
     border-radius: 13px;
 
-    background: #ffffff;
-    color: #0f172a;
+    background: var(--rims-surface);
+    color: var(--rims-ink);
 
     font-weight: 800;
 
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 6px 18px rgb(36 21 18 / 5%);
 }
 
 .rims-actor-switcher select:focus {
     outline: none;
 
-    border-color: #60a5fa;
+    border-color: var(--rims-brand-line);
 
-    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+    box-shadow: 0 0 0 4px rgb(253 248 239 / 0.15);
 }
 
 .rims-app-content {
@@ -547,8 +547,8 @@
     border-radius: 14px;
     outline: none;
 
-    background: linear-gradient(135deg, #fef2f2, #fff1f2);
-    color: #be123c;
+    background: linear-gradient(135deg, var(--rims-alert-soft), var(--rims-brand-soft));
+    color: var(--rims-brand);
 
     font-size: 13.5px;
     font-weight: 700;
@@ -556,8 +556,8 @@
     white-space: nowrap;
 
     box-shadow:
-        0 0 0 1.5px rgba(190, 18, 60, 0.18),
-        0 4px 14px rgba(190, 18, 60, 0.1);
+        0 0 0 1.5px rgb(122 16 48 / 18%),
+        0 4px 14px rgb(122 16 48 / 10%);
 
     cursor: pointer;
     transition:
@@ -568,25 +568,25 @@
 }
 
 .rims-logout-btn:hover {
-    background: linear-gradient(135deg, #be123c, #e11d48);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--rims-brand), var(--rims-brand));
+    color: var(--rims-ink-on-brand);
     box-shadow:
         0 0 0 1.5px transparent,
-        0 8px 24px rgba(190, 18, 60, 0.3);
+        0 8px 24px rgb(122 16 48 / 30%);
     transform: translateY(-1px);
 }
 
 .rims-logout-btn:active {
     transform: translateY(0);
     box-shadow:
-        0 0 0 1.5px rgba(190, 18, 60, 0.2),
-        0 2px 8px rgba(190, 18, 60, 0.18);
+        0 0 0 1.5px rgb(122 16 48 / 20%),
+        0 2px 8px rgb(122 16 48 / 18%);
 }
 
 .rims-logout-btn:focus-visible {
     box-shadow:
-        0 0 0 3px rgba(190, 18, 60, 0.35),
-        0 4px 14px rgba(190, 18, 60, 0.1);
+        0 0 0 3px rgb(122 16 48 / 35%),
+        0 4px 14px rgb(122 16 48 / 10%);
 }
 
 .rims-logout-icon {
@@ -668,7 +668,7 @@
     display: flex;
     width: 100%;
     min-height: 100vh;
-    background: #f1f5f9;
+    background: var(--rims-surface-2);
 }
 
 /* Sidebar bên trái */
@@ -678,8 +678,8 @@
     min-height: 100vh;
     flex-shrink: 0;
 
-    background: #0f172a;
-    color: #ffffff;
+    background: var(--rims-ink);
+    color: var(--rims-ink-on-dark);
 }
 
 /* Toàn bộ phần bên phải Sidebar */
@@ -705,8 +705,8 @@
     justify-content: space-between;
     gap: 24px;
 
-    background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--rims-surface);
+    border-bottom: 1px solid var(--rims-line);
 
     position: sticky;
     top: 0;
@@ -721,7 +721,7 @@
 .rims-topbar-heading h1 {
     margin: 4px 0 6px;
 
-    color: #0f172a;
+    color: var(--rims-ink);
     font-size: 24px;
     font-weight: 750;
     line-height: 1.25;
@@ -730,7 +730,7 @@
 .rims-topbar-heading p {
     margin: 0;
 
-    color: #64748b;
+    color: var(--rims-ink-3);
     font-size: 14px;
     line-height: 1.5;
 }
@@ -741,7 +741,7 @@
     align-items: center;
     gap: 8px;
 
-    color: #2563eb;
+    color: var(--rims-brand);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.1em;
@@ -755,8 +755,8 @@
     display: inline-block;
     border-radius: 50%;
 
-    background: #22c55e;
-    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.13);
+    background: var(--rims-ok);
+    box-shadow: 0 0 0 4px rgb(45 123 78 / 13%);
 }
 
 /* Các thành phần bên phải Topbar */
@@ -776,9 +776,9 @@
     align-items: center;
     gap: 11px;
 
-    border: 1px solid #dbe4f0;
+    border: 1px solid var(--rims-line);
     border-radius: 13px;
-    background: #f8fafc;
+    background: var(--rims-surface-2);
 }
 
 .rims-current-role-icon {
@@ -789,7 +789,7 @@
     place-items: center;
 
     border-radius: 10px;
-    background: #e8eef8;
+    background: var(--rims-brand-soft);
 
     font-size: 19px;
 }
@@ -800,12 +800,12 @@
 }
 
 .rims-current-role small {
-    color: #64748b;
+    color: var(--rims-ink-3);
     font-size: 11px;
 }
 
 .rims-current-role strong {
-    color: #0f172a;
+    color: var(--rims-ink);
     font-size: 14px;
     font-weight: 750;
 }
@@ -817,7 +817,7 @@
 }
 
 .rims-actor-switcher > span {
-    color: #64748b;
+    color: var(--rims-ink-3);
     font-size: 10px;
     font-weight: 700;
 }
@@ -827,11 +827,11 @@
     height: 46px;
     padding: 0 38px 0 14px;
 
-    border: 1px solid #dbe4f0;
+    border: 1px solid var(--rims-line);
     border-radius: 12px;
 
-    background: #ffffff;
-    color: #0f172a;
+    background: var(--rims-surface);
+    color: var(--rims-ink);
 
     font: inherit;
     font-size: 14px;
@@ -842,12 +842,12 @@
 }
 
 .rims-actor-switcher select:hover {
-    border-color: #94a3b8;
+    border-color: var(--rims-line-strong);
 }
 
 .rims-actor-switcher select:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    border-color: var(--rims-brand);
+    box-shadow: 0 0 0 3px rgb(36 21 18 / 0.12);
 }
 
 /* =========================================================
@@ -863,8 +863,8 @@
     padding: 26px;
 
     background:
-        radial-gradient(circle at 85% 5%, rgba(59, 130, 246, 0.1), transparent 32%),
-        radial-gradient(circle at 15% 90%, rgba(139, 92, 246, 0.06), transparent 30%), #f1f5f9;
+        radial-gradient(circle at 85% 5%, rgb(122 16 48 / 10%), transparent 32%),
+        radial-gradient(circle at 15% 90%, rgb(122 16 48 / 6%), transparent 30%), var(--rims-surface-2);
 }
 
 /*
@@ -881,11 +881,11 @@
 .rims-app-content .dashboard-card {
     padding: 24px;
 
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--rims-line);
     border-radius: 16px;
 
-    background: #ffffff;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    background: var(--rims-surface);
+    box-shadow: 0 8px 24px rgb(36 21 18 / 5%);
 }
 
 /* Khoảng cách giữa các phần trong trang */
@@ -967,23 +967,23 @@
 
 .stat-card {
     padding: 22px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--rims-line);
     border-radius: 14px;
-    background: #ffffff;
+    background: var(--rims-surface);
 }
 
 .dashboard-stat-link {
     display: grid;
     gap: 8px;
-    color: #0f172a;
+    color: var(--rims-ink);
     text-decoration: none;
     transition: 0.2s ease;
 }
 
 .dashboard-stat-link:hover {
-    border-color: #94a3b8;
+    border-color: var(--rims-line-strong);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 8px 20px rgb(36 21 18 / 8%);
 }
 
 .dashboard-stat-link strong {
@@ -997,7 +997,7 @@
 }
 
 .dashboard-stat-link small {
-    color: #64748b;
+    color: var(--rims-ink-3);
 }
 
 @media (max-width: 768px) {
@@ -1014,14 +1014,14 @@
     background:
         radial-gradient(circle at 10% 0%, rgba(212, 175, 55, 0.22), transparent 34%),
         radial-gradient(circle at 95% 85%, rgba(122, 16, 48, 0.3), transparent 38%),
-        linear-gradient(180deg, #1a0d0d 0%, #14090b 55%, #0d0607 100%);
+        linear-gradient(180deg, var(--rims-ink) 0%, var(--rims-ink) 55%, var(--rims-ink) 100%);
 }
 
 .theme-customer .rims-sidebar-logo {
-    background: linear-gradient(135deg, #d4af37, #b8942e 48%, #7a1030);
+    background: linear-gradient(135deg, var(--rims-gold), var(--rims-gold-deep) 48%, var(--rims-brand));
     box-shadow:
         0 12px 30px rgba(122, 16, 48, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.38);
+        inset 0 1px 0 rgb(253 248 239 / 38%);
 }
 
 .theme-customer .rims-sidebar-role {
@@ -1030,43 +1030,43 @@
 }
 
 .theme-customer .rims-role-icon {
-    color: #d4af37;
+    color: var(--rims-gold-deep);
 }
 
 .theme-customer .rims-sidebar-link:hover {
     border-color: rgba(212, 175, 55, 0.2);
-    color: #f5ecd8;
+    color: var(--rims-ink-on-dark);
 }
 
 .theme-customer .rims-sidebar-link.active {
     border-color: rgba(212, 175, 55, 0.32);
-    background: linear-gradient(100deg, #7a1030, #9a1a3f 55%, #b8942e);
+    background: linear-gradient(100deg, var(--rims-brand), var(--rims-brand-hover) 55%, var(--rims-gold-deep));
     box-shadow: 0 14px 32px rgba(122, 16, 48, 0.35);
 }
 
 .theme-customer .rims-menu-icon {
-    color: #f2e2b8;
+    color: var(--rims-ink-on-dark);
 }
 
 .theme-customer .rims-topbar-eyebrow {
-    color: #7a1030;
+    color: var(--rims-brand);
 }
 
 .theme-customer .rims-current-role {
     border-color: rgba(212, 175, 55, 0.25);
-    background: linear-gradient(135deg, #fbf3e3, #f5e9d0);
+    background: linear-gradient(135deg, var(--rims-gold-soft), var(--rims-gold-soft));
 }
 
 .theme-customer .rims-current-role-icon {
-    background: linear-gradient(135deg, #f2e2b8, #ead9b3);
+    background: linear-gradient(135deg, var(--rims-gold-soft), var(--rims-gold-soft));
 }
 
 .theme-customer .rims-current-role strong {
-    color: #241512;
+    color: var(--rims-ink);
 }
 
 .theme-customer .rims-actor-switcher select:focus {
-    border-color: #d4af37;
+    border-color: var(--rims-gold);
     box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
 }
 
@@ -1074,7 +1074,7 @@
 .theme-customer .rims-app-content {
     background:
         radial-gradient(circle at 85% 5%, rgba(212, 175, 55, 0.08), transparent 32%),
-        radial-gradient(circle at 15% 90%, rgba(122, 16, 48, 0.06), transparent 30%), #f8f3ea;
+        radial-gradient(circle at 15% 90%, rgba(122, 16, 48, 0.06), transparent 30%), var(--rims-gold-soft);
 }
 
 .theme-customer .rims-sidebar-brand h2 {
