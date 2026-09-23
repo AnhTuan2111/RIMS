@@ -5,8 +5,11 @@ import {useNavigate, useSearchParams} from 'react-router-dom'
 
 import * as cashierApi from '@/shared/api/cashier'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {useToast} from '@/app/providers/useToast'
 
 export default function PaymentSuccess() {
+    const {notify} = useToast()
+
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
 
@@ -43,7 +46,7 @@ export default function PaymentSuccess() {
 
             console.error('[PAYMENT_SUCCESS_DOWNLOAD_PDF_ERROR]', requestError)
 
-            alert('Không thể tải PDF! Vui lòng thử lại.')
+            notify('Không thể tải PDF! Vui lòng thử lại.', {tone: 'alert'})
         }
     }
 

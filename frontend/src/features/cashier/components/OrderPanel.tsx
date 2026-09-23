@@ -6,6 +6,7 @@ import * as cashierApi from '@/shared/api/cashier'
 import type {OrderDetailResponse, TableDashboardResponse} from '@/shared/types/cashier'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {formatCurrency, formatNumber} from '@/shared/utils/format'
+import {useToast} from '@/app/providers/useToast'
 
 export interface CustomerInfo {
     id: number
@@ -54,6 +55,8 @@ export default function OrderPanel({
     onCustomerChange,
     onPointsUsedChange,
 }: OrderPanelProps) {
+    const {notify} = useToast()
+
     const itemsList = orderDetail?.orderItems ?? []
 
     const totalAmount = orderDetail?.finalAmount ?? 0
@@ -148,7 +151,7 @@ export default function OrderPanel({
 
             console.error('[CASHIER_CUSTOMER_SEARCH_ERROR]', requestError)
 
-            alert('Lỗi tìm kiếm khách hàng!')
+            notify('Lỗi tìm kiếm khách hàng!', {tone: 'alert'})
         } finally {
             setIsSearching(false)
         }
@@ -160,17 +163,19 @@ export default function OrderPanel({
         const email = newCusEmail.trim()
 
         if (!fullName) {
-            alert('Vui lòng nhập tên khách hàng!')
+            notify('Vui lòng nhập tên khách hàng!', {tone: 'alert'})
             return
         }
 
         if (!phone || !/^0[0-9]{9}$/.test(phone)) {
-            alert('Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và đủ 10 số.')
+            notify('Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và đủ 10 số.', {
+                tone: 'alert',
+            })
             return
         }
 
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            alert('Vui lòng nhập email hợp lệ!')
+            notify('Vui lòng nhập email hợp lệ!', {tone: 'alert'})
             return
         }
 
@@ -188,7 +193,7 @@ export default function OrderPanel({
 
                 setShowCreate(false)
 
-                alert('Đăng ký thành viên thành công!')
+                notify('Đăng ký thành viên thành công')
             }
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
@@ -197,7 +202,9 @@ export default function OrderPanel({
 
             console.error('[CASHIER_CUSTOMER_CREATE_ERROR]', requestError)
 
-            alert('Lỗi tạo khách hàng. Có thể số điện thoại đã tồn tại!')
+            notify('Lỗi tạo khách hàng. Có thể số điện thoại đã tồn tại!', {
+                tone: 'alert',
+            })
         } finally {
             setProcessingCreate(false)
         }

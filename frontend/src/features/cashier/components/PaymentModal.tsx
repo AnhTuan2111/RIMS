@@ -11,6 +11,7 @@ import type {
 import type {CustomerInfo} from './OrderPanel'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {formatCurrency} from '@/shared/utils/format'
+import {useToast} from '@/app/providers/useToast'
 
 interface PaymentModalProps {
     orderId: number
@@ -35,6 +36,8 @@ export default function PaymentModal({
     onClose,
     onSuccess,
 }: PaymentModalProps) {
+    const {notify} = useToast()
+
     const [method, setMethod] = useState<PaymentMethodType | null>(null)
 
     const [amountReceived, setAmountReceived] = useState<number>(0)
@@ -93,7 +96,7 @@ export default function PaymentModal({
 
     async function handleConfirmCash() {
         if (amountReceived < finalAmount) {
-            alert('Tiền khách đưa chưa đủ!')
+            notify('Tiền khách đưa chưa đủ!', {tone: 'alert'})
             return
         }
 
@@ -114,7 +117,7 @@ export default function PaymentModal({
                 return
             }
 
-            alert(response?.data?.message ?? 'Có lỗi xảy ra từ server!')
+            notify(response?.data?.message ?? 'Có lỗi xảy ra từ server!', {tone: 'alert'})
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
                 return
@@ -122,7 +125,7 @@ export default function PaymentModal({
 
             console.error('[CASHIER_CASH_PAYMENT_ERROR]', requestError)
 
-            alert('Lỗi thanh toán: Kiểm tra lại mạng hoặc đơn hàng!')
+            notify('Lỗi thanh toán: Kiểm tra lại mạng hoặc đơn hàng!', {tone: 'alert'})
         } finally {
             setProcessing(false)
         }
@@ -144,7 +147,9 @@ export default function PaymentModal({
                 return
             }
 
-            alert(response?.data?.message ?? 'Không thể khởi tạo cổng VNPay.')
+            notify(response?.data?.message ?? 'Không thể khởi tạo cổng VNPay.', {
+                tone: 'alert',
+            })
 
             setProcessing(false)
         } catch (requestError: unknown) {
@@ -154,7 +159,9 @@ export default function PaymentModal({
 
             console.error('[CASHIER_VNPAY_CREATE_ERROR]', requestError)
 
-            alert('Lỗi tạo cổng VNPay! Kiểm tra lại mạng hoặc tải lại trang.')
+            notify('Lỗi tạo cổng VNPay! Kiểm tra lại mạng hoặc tải lại trang.', {
+                tone: 'alert',
+            })
 
             setMethod(null)
             setProcessing(false)

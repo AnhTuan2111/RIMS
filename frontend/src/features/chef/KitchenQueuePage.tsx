@@ -14,6 +14,8 @@ import {
     type KitchenOrderItemResponse,
 } from '@/shared/api/chef'
 import {Pagination} from '@/shared/components/ui'
+import {useToast} from '@/app/providers/useToast'
+import {ConfirmDialog} from '@/shared/components/ui'
 
 const ITEMS_PER_PAGE = 6
 const NEW_ORDER_MESSAGE_DURATION_MS = 6_000
@@ -49,6 +51,8 @@ function formatTime(value?: string) {
 }
 
 export default function KitchenQueuePage() {
+    const {notify} = useToast()
+
     const [items, setItems] = useState<KitchenOrderItemResponse[]>([])
 
     const [isLoading, setIsLoading] = useState(true)
@@ -64,6 +68,14 @@ export default function KitchenQueuePage() {
     const [detailError, setDetailError] = useState<string | null>(null)
 
     const [completingItemId, setCompletingItemId] = useState<number | null>(null)
+
+    // Món đang chờ người dùng xác nhận hoàn thành.
+    const [pendingComplete, setPendingComplete] = useState<{
+        orderItemId: number
+        dishName: string
+        tableNumber?: string
+        quantity?: number
+    } | null>(null)
 
     const [cancelReason, setCancelReason] = useState('')
     const [cancelError, setCancelError] = useState<string | null>(null)
@@ -290,7 +302,7 @@ export default function KitchenQueuePage() {
         const audioContext = audioContextRef.current ?? createAudioContext()
 
         if (!audioContext) {
-            alert('Trình duyệt này không hỗ trợ phát âm thanh.')
+            notify('Trình duyệt này không hỗ trợ phát âm thanh.', {tone: 'alert'})
 
             return
         }
@@ -367,16 +379,7 @@ export default function KitchenQueuePage() {
             return
         }
 
-        const confirmed = window.confirm(
-            normalizedNote
-                ? 'Gửi ghi chú nội bộ này cho Waiter?'
-                : 'Xóa ghi chú nội bộ hiện tại?',
-        )
-
-        if (!confirmed) {
-            return
-        }
-
+        // Ghi chú sửa lại được bất cứ lúc nào nên không chặn để hỏi.
         try {
             setIsInternalNoteSubmitting(true)
             setInternalNoteError(null)
@@ -389,10 +392,11 @@ export default function KitchenQueuePage() {
             setSelectedDish(updatedDetail)
             setChefInternalNote(updatedDetail.chefInternalNote ?? '')
 
-            alert(
+            notify(
                 normalizedNote
                     ? 'Đã gửi ghi chú nội bộ cho Waiter.'
                     : 'Đã xóa ghi chú nội bộ.',
+                {tone: 'alert'},
             )
         } catch (requestError) {
             console.error(requestError)
@@ -420,18 +424,22 @@ export default function KitchenQueuePage() {
                 ? selectedDish.quantity
                 : currentItem?.quantity
 
-        const confirmed = window.confirm(
-            `Xác nhận hoàn thành món "${dishName}"?\n\n` +
-                `${tableNumber ? `Bàn: ${tableNumber}\n` : ''}` +
-                `${quantity ? `Số lượng: x${quantity}\n` : ''}` +
-                'Sau khi xác nhận, món sẽ được chuyển ' +
-                'sang danh sách đã hoàn thành.',
-        )
+        // Hoàn thành món KHÔNG hoàn tác được: backend chặn mọi thay đổi trạng
+        // thái khi món không còn ở PREPARING. Nên vẫn hỏi lại, nhưng bằng hộp
+        // thoại trong trang thay vì window.confirm chặn cả trình duyệt.
+        setPendingComplete({orderItemId, dishName, tableNumber, quantity})
+    }
 
-        if (!confirmed) {
+    async function confirmComplete() {
+        const pending = pendingComplete
+
+        if (!pending) {
             return
         }
 
+        const orderItemId = pending.orderItemId
+
+        setPendingComplete(null)
         try {
             setCompletingItemId(orderItemId)
 
@@ -444,11 +452,9 @@ export default function KitchenQueuePage() {
             if (selectedDish?.orderItemId === orderItemId) {
                 closeDishDetail()
             }
-
-            alert('Đã hoàn thành món thành công.')
         } catch (requestError) {
             console.error(requestError)
-            alert('Không thể cập nhật trạng thái món.')
+            notify('Không thể cập nhật trạng thái món.', {tone: 'alert'})
         } finally {
             setCompletingItemId(null)
         }
@@ -471,15 +477,8 @@ export default function KitchenQueuePage() {
             return
         }
 
-        const confirmed = window.confirm(
-            `Bạn có chắc muốn hủy món "${selectedDish.dishName}"?\n\n` +
-                'Món sẽ bị hủy ngay và Waiter sẽ được thông báo.',
-        )
-
-        if (!confirmed) {
-            return
-        }
-
+        // Người dùng đã phải gõ lý do huỷ trong form ngay trên, đó chính là
+        // bước xác nhận — hỏi thêm một lần nữa là thừa.
         try {
             setIsCancelSubmitting(true)
             setCancelError(null)
@@ -497,8 +496,6 @@ export default function KitchenQueuePage() {
             )
 
             closeDishDetail()
-
-            alert('Đã hủy món thành công.')
         } catch (requestError) {
             console.error(requestError)
             setCancelError('Không thể hủy món.')
@@ -1050,6 +1047,24 @@ export default function KitchenQueuePage() {
                     </div>
                 </div>
             )}
+
+            <ConfirmDialog
+                open={pendingComplete !== null}
+                title={`Hoàn thành món "${pendingComplete?.dishName ?? ''}"?`}
+                description={[
+                    pendingComplete?.tableNumber
+                        ? `Bàn ${pendingComplete.tableNumber}`
+                        : null,
+                    pendingComplete?.quantity ? `${pendingComplete.quantity} phần` : null,
+                    'Món sẽ chuyển sang danh sách đã hoàn thành và không hoàn tác được.',
+                ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                confirmLabel="Hoàn thành"
+                busy={completingItemId !== null}
+                onConfirm={() => void confirmComplete()}
+                onCancel={() => setPendingComplete(null)}
+            />
         </div>
     )
 }

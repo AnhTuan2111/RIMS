@@ -15,6 +15,7 @@ import OrderPanel, {type CustomerInfo} from './components/OrderPanel'
 import PaymentModal from './components/PaymentModal'
 import PaymentResultManager from './components/PaymentResultManager'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {useToast} from '@/app/providers/useToast'
 
 // Nhãn viết thường theo câu, giống hệt màn Phục vụ. Chấm tròn do chip tự vẽ,
 // không gõ ký tự ● ○ vào chuỗi nữa.
@@ -32,6 +33,8 @@ function getTableStatusLabel(status: TableDashboardResponse['status']) {
 }
 
 export default function CashierPaymentsPage() {
+    const {notify} = useToast()
+
     const [tables, setTables] = useState<TableDashboardResponse[]>([])
 
     const [selectedTable, setSelectedTable] = useState<TableDashboardResponse | null>(
@@ -145,7 +148,7 @@ export default function CashierPaymentsPage() {
                 console.error('[CASHIER_ORDER_DETAIL_FETCH_ERROR]', requestError)
 
                 if (showErrorAlert) {
-                    alert('Không thể lấy chi tiết đơn hàng.')
+                    notify('Không thể lấy chi tiết đơn hàng.', {tone: 'alert'})
                 }
             } finally {
                 if (showLoading && !signal?.aborted) {
@@ -153,7 +156,7 @@ export default function CashierPaymentsPage() {
                 }
             }
         },
-        [],
+        [notify],
     )
 
     // Initial load on mount
@@ -238,7 +241,7 @@ export default function CashierPaymentsPage() {
             window.URL.revokeObjectURL(url)
         } catch (requestError: unknown) {
             console.error(requestError)
-            alert('Không thể tải PDF!')
+            notify('Không thể tải PDF!', {tone: 'alert'})
         }
     }
 

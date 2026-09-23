@@ -14,6 +14,7 @@ import type {CategoryResponse, DishResponse, CategoryFormData} from '@/shared/ap
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {getErrorMessage} from '@/shared/utils/error'
+import {useToast} from '@/app/providers/useToast'
 
 type ViewMode = 'LIST' | 'CREATE' | 'EDIT' | 'DETAIL'
 type FilterStatus = 'ALL' | 'ACTIVE' | 'HIDDEN'
@@ -23,6 +24,8 @@ const ITEMS_PER_PAGE = 5
 const DISH_ITEMS_PER_PAGE = 5 // THÊM: config cho số món hiển thị mỗi trang
 
 export default function AdminCategoryPage() {
+    const {notify} = useToast()
+
     // --- States ---
     const [categories, setCategories] = useState<CategoryResponse[]>([])
     const [dishes, setDishes] = useState<DishResponse[]>([])
@@ -127,14 +130,12 @@ export default function AdminCategoryPage() {
                     name: formData.name.trim(),
                     description: formData.description,
                 })
-                alert('Tạo danh mục mới thành công!')
             } else if (view === 'EDIT' && selectedCategory) {
                 await adminApi.updateCategory(selectedCategory.id, {
                     name: formData.name.trim(),
                     description: formData.description,
                     isAvailable: formData.isAvailable,
                 })
-                alert('Cập nhật danh mục thành công!')
             }
 
             setView('LIST')
@@ -142,7 +143,7 @@ export default function AdminCategoryPage() {
         } catch (err: unknown) {
             console.error('Lỗi API xử lý danh mục:', err)
             const errMsg = getErrorMessage(err, 'Đã xảy ra lỗi trong quá trình xử lý.')
-            alert(errMsg)
+            notify(errMsg, {tone: 'alert'})
         } finally {
             setIsSubmitting(false)
         }
@@ -152,13 +153,12 @@ export default function AdminCategoryPage() {
         if (deleteModal.id === null) return
         try {
             await adminApi.deleteCategory(deleteModal.id)
-            alert('Xóa danh mục thành công!')
             setDeleteModal({open: false, id: null})
             await loadCategories(true, true)
         } catch (err: unknown) {
             console.error('Lỗi khi xóa danh mục:', err)
             const errMsg = getErrorMessage(err, 'Không thể thực hiện xóa danh mục!')
-            alert(errMsg)
+            notify(errMsg, {tone: 'alert'})
             setDeleteModal({open: false, id: null})
         }
     }

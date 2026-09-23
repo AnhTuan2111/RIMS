@@ -794,3 +794,209 @@ textarea.rk-input {
     color: var(--rims-ink-3);
     font-size: var(--rims-text-sm);
 }
+
+/* ---------- Thông báo trong trang ----------
+   Xếp chồng ở góc, dùng position fixed nên không đẩy nội dung trang và thông
+   báo cũ không nhúc nhích khi có cái mới xuất hiện. */
+
+.rk-toasts {
+    position: fixed;
+    right: var(--rims-space-5);
+    bottom: var(--rims-space-5);
+    z-index: var(--rims-z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-3);
+    max-width: min(420px, calc(100% - var(--rims-space-10)));
+    pointer-events: none;
+}
+
+.rk-toast {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-overlay);
+    font-size: var(--rims-text-sm);
+    pointer-events: auto;
+    animation: rk-toast-in var(--rims-dur-medium) var(--rims-ease-out);
+}
+
+@keyframes rk-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+.rk-toast--ok {
+    border-color: var(--rims-ok-line);
+    color: var(--rims-ok);
+}
+
+.rk-toast--alert {
+    border-color: var(--rims-alert-line);
+    color: var(--rims-alert);
+}
+
+.rk-toast__msg {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--rims-ink);
+    line-height: var(--rims-leading-snug);
+}
+
+.rk-toast__action {
+    flex: none;
+    padding: var(--rims-space-1) var(--rims-space-3);
+    border: 1px solid currentcolor;
+    border-radius: var(--rims-radius-md);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: var(--rims-weight-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.rk-toast__action:focus-visible,
+.rk-toast__close:focus-visible {
+    outline: var(--rims-focus-ring) solid currentcolor;
+    outline-offset: 2px;
+}
+
+.rk-toast__close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: var(--rims-radius-sm);
+    background: transparent;
+    color: var(--rims-ink-3);
+    cursor: pointer;
+}
+
+.rk-toast__close:hover {
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
+}
+
+/* ---------- Hộp thoại ---------- */
+
+.rk-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--rims-z-overlay);
+    display: grid;
+    place-items: center;
+    padding: var(--rims-space-5);
+    background: rgb(36 21 18 / 45%);
+    overflow-y: auto;
+}
+
+.rk-modal__panel {
+    width: 100%;
+    background: var(--rims-surface);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    box-shadow: var(--rims-shadow-overlay);
+    animation: rk-modal-in var(--rims-dur-medium) var(--rims-ease-out);
+}
+
+@keyframes rk-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+.rk-modal__panel:focus-visible {
+    outline: none;
+}
+
+.rk-modal__panel--sm {
+    max-width: 420px;
+}
+
+.rk-modal__panel--md {
+    max-width: 640px;
+}
+
+.rk-modal__panel--lg {
+    max-width: 960px;
+}
+
+.rk-modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-5) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-modal__title {
+    margin: 0;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-tight);
+    text-wrap: balance;
+}
+
+.rk-modal__desc {
+    margin: var(--rims-space-2) 0 0;
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-2);
+    line-height: var(--rims-leading-normal);
+}
+
+.rk-modal__close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--rims-radius-md);
+    background: transparent;
+    color: var(--rims-ink-3);
+    cursor: pointer;
+}
+
+.rk-modal__close:hover {
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
+}
+
+.rk-modal__close:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+.rk-modal__body {
+    padding: var(--rims-space-6);
+}
+
+.rk-modal__foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    padding: var(--rims-space-4) var(--rims-space-6) var(--rims-space-5);
+    border-top: 1px solid var(--rims-line);
+}
+
+/* Nút phá huỷ dạng đặc, dùng trong hộp xác nhận. */
+.rk-btn--danger-solid {
+    background: var(--rims-alert);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-btn--danger-solid:hover:not(:disabled) {
+    filter: brightness(1.08);
+}

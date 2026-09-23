@@ -9,6 +9,7 @@ import {
 import {useKitchenSocket} from '@/realtime'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
+import {useToast} from '@/app/providers/useToast'
 
 const ITEMS_PER_PAGE = 6
 
@@ -49,6 +50,8 @@ function getWaitingClass(minutes: number) {
 }
 
 export default function GroupedKitchenPage() {
+    const {notify} = useToast()
+
     const [groups, setGroups] = useState<GroupedKitchenOrderResponse[]>([])
 
     const [searchText, setSearchText] = useState('')
@@ -112,19 +115,6 @@ export default function GroupedKitchenPage() {
     useKitchenSocket(() => void loadGroups(false, false))
 
     async function handleCompleteGroup(group: GroupedKitchenOrderResponse) {
-        const confirmed = window.confirm(
-            group.hasNote
-                ? `Xác nhận hoàn thành món ` + `"${group.dishName}"?`
-                : `Xác nhận hoàn thành cả nhóm ` +
-                      `"${group.dishName}" ` +
-                      `với tổng số lượng ` +
-                      `${group.totalQuantity}?`,
-        )
-
-        if (!confirmed) {
-            return
-        }
-
         try {
             setCompletingGroupKey(group.groupKey)
 
@@ -136,7 +126,7 @@ export default function GroupedKitchenPage() {
         } catch (requestError) {
             console.error(requestError)
 
-            alert('Không thể hoàn thành nhóm món.')
+            notify('Không thể hoàn thành nhóm món.', {tone: 'alert'})
         } finally {
             setCompletingGroupKey(null)
         }

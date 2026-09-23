@@ -7,6 +7,7 @@ import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback
 import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage} from '@/shared/utils/error'
+import {useToast} from '@/app/providers/useToast'
 
 type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE'
 
@@ -14,6 +15,8 @@ type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE'
 const ITEMS_PER_PAGE = 5
 
 export default function AdminDishesPage() {
+    const {notify} = useToast()
+
     // --- States ---
     const [dishes, setDishes] = useState<DishResponse[]>([])
     const [categories, setCategories] = useState<CategoryResponse[]>([])
@@ -100,20 +103,21 @@ export default function AdminDishesPage() {
 
         const catIdParsed = parseInt(formData.categoryId)
         if (isNaN(catIdParsed) || catIdParsed <= 0) {
-            alert('Lỗi: Vui lòng lựa chọn một Danh mục món ăn hợp lệ!')
+            notify('Lỗi: Vui lòng lựa chọn một Danh mục món ăn hợp lệ!', {tone: 'alert'})
             return
         }
 
         const targetCategory = categories.find((c) => c.id === catIdParsed)
         if (targetCategory && !targetCategory.isAvailable) {
-            alert(
+            notify(
                 `Lỗi: Danh mục "${targetCategory.name}" đang bị ẩn, không thể thêm món ăn mới vào đây!`,
+                {tone: 'alert'},
             )
             return
         }
 
         if (formData.imageUrl && formData.imageUrl.length > 500) {
-            alert('Lỗi: Đường dẫn hình ảnh quá dài (tối đa 500 ký tự)!')
+            notify('Lỗi: Đường dẫn hình ảnh quá dài (tối đa 500 ký tự)!', {tone: 'alert'})
             return
         }
 
@@ -129,10 +133,9 @@ export default function AdminDishesPage() {
             })
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
-            alert('Thêm món ăn thành công!')
         } catch (err: unknown) {
             const errMsg = getErrorMessage(err, 'Lỗi khi thêm món ăn mới!')
-            alert(errMsg)
+            notify(errMsg, {tone: 'alert'})
         } finally {
             setIsSubmitting(false)
         }
@@ -144,20 +147,21 @@ export default function AdminDishesPage() {
 
         const catIdParsed = parseInt(formData.categoryId)
         if (isNaN(catIdParsed) || catIdParsed <= 0) {
-            alert('Lỗi: Vui lòng lựa chọn một Danh mục món ăn hợp lệ!')
+            notify('Lỗi: Vui lòng lựa chọn một Danh mục món ăn hợp lệ!', {tone: 'alert'})
             return
         }
 
         const targetCategory = categories.find((c) => c.id === catIdParsed)
         if (targetCategory && !targetCategory.isAvailable) {
-            alert(
+            notify(
                 `Lỗi: Danh mục "${targetCategory.name}" đang bị ẩn, không thể lưu hoặc chuyển món ăn tới danh mục này!`,
+                {tone: 'alert'},
             )
             return
         }
 
         if (formData.imageUrl && formData.imageUrl.length > 500) {
-            alert('Lỗi: Đường dẫn hình ảnh quá dài (tối đa 500 ký tự)!')
+            notify('Lỗi: Đường dẫn hình ảnh quá dài (tối đa 500 ký tự)!', {tone: 'alert'})
             return
         }
         try {
@@ -173,10 +177,9 @@ export default function AdminDishesPage() {
             })
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
-            alert('Cập nhật món ăn thành công!')
         } catch (err: unknown) {
             const errMsg = getErrorMessage(err, 'Lỗi khi cập nhật món ăn!')
-            alert(errMsg)
+            notify(errMsg, {tone: 'alert'})
         } finally {
             setIsSubmitting(false)
         }
@@ -188,10 +191,9 @@ export default function AdminDishesPage() {
             await adminApi.deleteDish(selectedDish.id)
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
-            alert('Xóa món ăn thành công!')
         } catch (err: unknown) {
             const errMsg = getErrorMessage(err, 'Lỗi khi xóa món ăn!')
-            alert(errMsg)
+            notify(errMsg, {tone: 'alert'})
         }
     }
 

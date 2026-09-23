@@ -5,6 +5,8 @@ import {getChefDishes, updateMenuStatus, type DishListResponse} from '@/shared/a
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {useKitchenSocket} from '@/realtime'
+import {useToast} from '@/app/providers/useToast'
+import {ConfirmDialog} from '@/shared/components/ui'
 
 const ITEMS_PER_PAGE = 8
 
@@ -20,6 +22,8 @@ function formatCurrency(value: number) {
 }
 
 export default function DishListPage() {
+    const {notify} = useToast()
+
     const [searchParams] = useSearchParams()
 
     const routeStatus = searchParams.get('status')
@@ -44,6 +48,11 @@ export default function DishListPage() {
     const [currentPage, setCurrentPage] = useState(1)
 
     const [updatingDishId, setUpdatingDishId] = useState<number | null>(null)
+
+    // Món đang chờ xác nhận đặt tạm hết.
+    const [pendingUnavailable, setPendingUnavailable] = useState<DishListResponse | null>(
+        null,
+    )
 
     const loadDishes = useCallback(
         async (showFullLoading: boolean, resetPage: boolean, signal?: AbortSignal) => {
@@ -90,19 +99,18 @@ export default function DishListPage() {
     useKitchenSocket(() => void loadDishes(false, false))
 
     async function handleToggleDish(dish: DishListResponse) {
-        const nextAvailable = !dish.available
-
-        if (
-            dish.available &&
-            !window.confirm(
-                `Đặt "${dish.dishName}" thành tạm hết?\n` +
-                    'Các món này đang chờ trong bếp ' +
-                    'sẽ được chuyển sang CANCELLED.',
-            )
-        ) {
+        // Đặt món thành tạm hết sẽ HUỶ các món đang chờ trong bếp — việc phá
+        // huỷ và không hoàn tác được, nên vẫn hỏi lại. Bật lại bán thì không
+        // ảnh hưởng gì nên làm thẳng.
+        if (dish.available) {
+            setPendingUnavailable(dish)
             return
         }
 
+        await applyToggle(dish, true)
+    }
+
+    async function applyToggle(dish: DishListResponse, nextAvailable: boolean) {
         try {
             setUpdatingDishId(dish.dishId)
 
@@ -121,7 +129,7 @@ export default function DishListPage() {
         } catch (requestError) {
             console.error(requestError)
 
-            alert('Không thể cập nhật trạng thái món.')
+            notify('Không thể cập nhật trạng thái món.', {tone: 'alert'})
         } finally {
             setUpdatingDishId(null)
         }
@@ -424,6 +432,23 @@ export default function DishListPage() {
                     />
                 </>
             )}
+
+            <ConfirmDialog
+                open={pendingUnavailable !== null}
+                title={`Đặt "${pendingUnavailable?.dishName ?? ''}" thành tạm hết?`}
+                description="Các món này đang chờ trong bếp sẽ bị huỷ. Không hoàn tác được."
+                confirmLabel="Đặt tạm hết"
+                destructive
+                busy={updatingDishId !== null}
+                onConfirm={() => {
+                    const dish = pendingUnavailable
+                    setPendingUnavailable(null)
+                    if (dish) {
+                        void applyToggle(dish, false)
+                    }
+                }}
+                onCancel={() => setPendingUnavailable(null)}
+            />
         </div>
     )
 }

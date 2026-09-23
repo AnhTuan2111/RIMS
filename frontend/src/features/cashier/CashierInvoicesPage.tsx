@@ -10,6 +10,7 @@ import {PageCard, PageHeader} from '@/shared/components/ui'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {formatCurrency} from '@/shared/utils/format'
+import {useToast} from '@/app/providers/useToast'
 
 const PAGE_SIZE = 10
 
@@ -47,6 +48,8 @@ function methodLabel(method: string | null) {
 }
 
 export default function CashierInvoicesPage() {
+    const {notify} = useToast()
+
     const [invoices, setInvoices] = useState<InvoiceSummary[]>([])
 
     const [totalPages, setTotalPages] = useState(0)
@@ -225,7 +228,7 @@ export default function CashierInvoicesPage() {
 
             console.error('[CASHIER_INVOICE_DETAIL_ERROR]', requestError)
 
-            alert('Không thể tải chi tiết hóa đơn.')
+            notify('Không thể tải chi tiết hóa đơn.', {tone: 'alert'})
         } finally {
             setLoadingDetail(false)
         }
@@ -258,7 +261,7 @@ export default function CashierInvoicesPage() {
 
             console.error('[CASHIER_INVOICE_PDF_ERROR]', requestError)
 
-            alert('Không thể tải PDF!')
+            notify('Không thể tải PDF!', {tone: 'alert'})
         }
     }
 
