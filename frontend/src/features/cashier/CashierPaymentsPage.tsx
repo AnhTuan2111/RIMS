@@ -3,7 +3,7 @@ import {type CSSProperties, useCallback, useEffect, useState} from 'react'
 import * as cashierApi from '@/shared/api/cashier'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {PageCard, PageHeader, TableCard} from '@/shared/components/ui'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {useCashierSocket} from '@/realtime'
 import type {
@@ -16,13 +16,18 @@ import PaymentModal from './components/PaymentModal'
 import PaymentResultManager from './components/PaymentResultManager'
 import {isRequestCanceled} from '@/shared/utils/error'
 
+// Nhãn viết thường theo câu, giống hệt màn Phục vụ. Chấm tròn do chip tự vẽ,
+// không gõ ký tự ● ○ vào chuỗi nữa.
 function getTableStatusLabel(status: TableDashboardResponse['status']) {
     switch (status) {
         case 'SERVING':
-            return '● Đang Phục Vụ'
+            return 'Đang phục vụ'
+
+        case 'RESERVED':
+            return 'Đã đặt trước'
 
         default:
-            return '○ Bàn Trống'
+            return 'Bàn trống'
     }
 }
 
@@ -275,76 +280,24 @@ export default function CashierPaymentsPage() {
         <div className="dashboard-page" style={gridLayoutLayout}>
             <PageCard>
                 <PageHeader
-                    title="Sơ Đồ Quầy Thu Ngân"
-                    description="Danh sách bàn ăn tại nhà hàng. Dữ liệu được tự cập nhật theo thời gian thực."
+                    title="Sơ đồ bàn"
+                    description="Chọn bàn để xem đơn và thanh toán. Dữ liệu tự cập nhật theo thời gian thực."
                 />
 
-                <div
-                    className="table-grid"
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-                        gap: '1rem',
-                    }}
-                >
-                    {tables.map((table) => {
-                        const isSelected = selectedTable?.tableId === table.tableId
-
-                        const isServing = table.status === 'SERVING'
-
-                        return (
-                            <button
-                                key={table.tableId}
-                                type="button"
-                                onClick={() => {
-                                    void handleSelectTable(table)
-                                }}
-                                style={{
-                                    border: isSelected
-                                        ? '2px solid #2563eb'
-                                        : '1px solid #e2e8f0',
-                                    background: isServing ? '#fff7ed' : '#ffffff',
-                                    padding: '1.5rem',
-                                    borderRadius: '12px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-start',
-                                    cursor: 'pointer',
-                                    width: '100%',
-                                    textAlign: 'left',
-                                }}
-                            >
-                                <strong
-                                    style={{
-                                        fontSize: '1.2rem',
-                                    }}
-                                >
-                                    {table.tableNumber}
-                                </strong>
-
-                                <span
-                                    style={{
-                                        fontSize: '0.85rem',
-                                        color: '#64748b',
-                                        marginBottom: '8px',
-                                    }}
-                                >
-                                    ID Đơn:{' '}
-                                    {isServing ? table.orderId || 'Đang quét...' : 'null'}
-                                </span>
-
-                                <small
-                                    style={{
-                                        color: isServing ? '#ea580c' : '#16a34a',
-                                        marginTop: 'auto',
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    {getTableStatusLabel(table.status)}
-                                </small>
-                            </button>
-                        )
-                    })}
+                <div className="rk-tablegrid">
+                    {tables.map((table) => (
+                        <TableCard
+                            key={table.tableId}
+                            tableNumber={table.tableNumber}
+                            status={table.status}
+                            statusLabel={getTableStatusLabel(table.status)}
+                            amount={table.totalAmount}
+                            isSelected={selectedTable?.tableId === table.tableId}
+                            onClick={() => {
+                                void handleSelectTable(table)
+                            }}
+                        />
+                    ))}
                 </div>
             </PageCard>
 

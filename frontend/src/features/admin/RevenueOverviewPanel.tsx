@@ -178,7 +178,7 @@ function formatWeekRangeLabel(week: WeekOption) {
 }
 
 function formatRevenueCurrency(value?: number | null) {
-    return `${new Intl.NumberFormat('vi-VN').format(value ?? 0)} ₫`
+    return `${new Intl.NumberFormat('vi-VN').format(value ?? 0)} đ`
 }
 
 function formatNumber(value?: number | null) {
@@ -193,7 +193,7 @@ function formatDecimal(value?: number | null) {
 }
 
 function formatRevenueAxis(value: number) {
-    return `${formatNumber(value)} ₫`
+    return `${formatNumber(value)} đ`
 }
 
 function getDishInitial(dishName: string) {
@@ -614,7 +614,7 @@ function WeeklyRevenueOverviewDashboard({
             <section className="weekly-overview-kpi-grid">
                 <WeeklyOverviewKpiCard
                     icon={<MoneyIcon />}
-                    marker="₫"
+                    marker="đ"
                     title="Doanh thu tuần"
                     tone="orange"
                     value={formatRevenueCurrency(revenue)}

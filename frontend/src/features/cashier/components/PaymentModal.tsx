@@ -8,6 +8,7 @@ import type {
 } from '@/shared/types/cashier'
 import type {CustomerInfo} from './OrderPanel'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {formatCurrency} from '@/shared/utils/format'
 
 interface PaymentModalProps {
     orderId: number
@@ -16,10 +17,6 @@ interface PaymentModalProps {
     pointsUsed: number
     onClose: () => void
     onSuccess: (result: PaymentResponse) => void
-}
-
-function formatCurrency(value: number) {
-    return `${value.toLocaleString()} đ`
 }
 
 function methodDisplay(method: string) {

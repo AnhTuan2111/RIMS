@@ -11,7 +11,7 @@ import {
     vietnameseWeekdayLabels,
 } from './dateUtils'
 import {formatRevenueCurrency} from './format'
-import {CalendarIcon, DongIcon} from './icons'
+import {CalendarIcon} from './icons'
 import type {RangePreset, RevenueDashboardData, WeekOption} from './types'
 import {useEffect, useRef, useState, type KeyboardEvent} from 'react'
 export function RevenueCard({
@@ -23,14 +23,13 @@ export function RevenueCard({
     amount?: number | null
     className?: string
 }) {
+    // Bỏ icon "đ" ở góc thẻ: ký hiệu đơn vị đã nằm trong chính con số, để hai
+    // chỗ là thừa. Giá trị dùng chữ số đều bề ngang và không xuống dòng —
+    // trước đây "1.829.000 đ" bị vỡ làm hai dòng, chữ đ rơi xuống dưới.
     return (
-        <article className={`admin-revenue-card ${className}`.trim()}>
-            <div className="admin-revenue-card-header">
-                <span>{title}</span>
-                <DongIcon />
-            </div>
-
-            <strong>{formatRevenueCurrency(amount)}</strong>
+        <article className={`rk-stat ${className}`.trim()}>
+            <span className="rk-stat__label">{title}</span>
+            <strong className="rk-stat__value">{formatRevenueCurrency(amount)}</strong>
         </article>
     )
 }
@@ -424,7 +423,7 @@ export function RevenueDashboard({
                 </div>
             )}
 
-            <div aria-busy={isLoading} className="admin-revenue-card-row">
+            <div aria-busy={isLoading} className="rk-statrow">
                 <RevenueCard amount={data.totalRevenue?.revenue} title="Tổng doanh thu" />
                 <RevenueCard
                     amount={data.todayRevenue?.revenue}

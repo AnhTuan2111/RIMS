@@ -24,4 +24,6 @@ export interface TableDashboardResponse {
     tableNumber: string
     status: TableStatus
     orderId?: number | null
+    /** Tiền tạm tính của đơn đang mở tại bàn, null nếu bàn trống. */
+    totalAmount?: number | null
 }

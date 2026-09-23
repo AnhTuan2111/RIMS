@@ -1,6 +1,23 @@
-import {formatNumber, formatRevenueCurrency} from './format'
-import {StatIcon} from './icons'
+import {formatRevenueCurrency} from './format'
 import type {ReportKey} from './types'
+
+interface ReportTab {
+    key: ReportKey
+    label: string
+    /** Giá trị hiện ngay dưới nhãn, để admin liếc là thấy, khỏi mở từng báo cáo. */
+    value?: string
+    /** true khi giá trị là chữ (tên ca) chứ không phải số — dùng font chữ. */
+    isText?: boolean
+}
+
+/**
+ * Chọn báo cáo để xem.
+ *
+ * <p>Trước đây bốn nút này mang bốn ô màu xanh lá / xanh dương / tím / cam với
+ * chữ "VND", "DM", "Top", "Ca" — bốn màu không mang ý nghĩa gì, chỉ để trang
+ * trí. Bỏ hết: nhãn và con số tự nói lên nội dung, và cả hàng giờ dùng đúng
+ * một màu nhấn cho tab đang mở.
+ */
 export function StatisticsReportSelector({
     activeReport,
     totalRevenue,
@@ -14,74 +31,54 @@ export function StatisticsReportSelector({
     highestShiftName?: string | null
     onSelectReport: (report: ReportKey) => void
 }) {
+    const tabs: ReportTab[] = [
+        {
+            key: 'revenue',
+            label: 'Tổng doanh thu',
+            value: formatRevenueCurrency(totalRevenue),
+        },
+        {
+            key: 'categoryBestsellers',
+            label: 'Bán chạy theo danh mục',
+        },
+        {
+            key: 'bestsellers',
+            label: 'Món bán chạy',
+            value: bestSellerCount > 0 ? `${bestSellerCount} món` : '—',
+        },
+        {
+            key: 'orderShifts',
+            label: 'Đơn hàng theo ca',
+            value: highestShiftName ?? '—',
+            isText: true,
+        },
+    ]
+
     return (
-        <section className="rims-stats-cards-grid">
-            <button
-                className={
-                    activeReport === 'revenue'
-                        ? 'rims-stat-card active'
-                        : 'rims-stat-card'
-                }
-                type="button"
-                onClick={() => onSelectReport('revenue')}
-            >
-                <StatIcon className="icon-revenue">VND</StatIcon>
-                <div className="rims-stat-card-body">
-                    <h3>Báo cáo tổng doanh thu</h3>
-                    <p>{formatRevenueCurrency(totalRevenue)}</p>
-                </div>
-                <span className="rims-stat-card-action">›</span>
-            </button>
+        <section className="rk-statrow" aria-label="Chọn báo cáo">
+            {tabs.map((tab) => (
+                <button
+                    key={tab.key}
+                    type="button"
+                    className={`rk-stat rk-stat--tab${
+                        activeReport === tab.key ? ' rk-stat--active' : ''
+                    }`}
+                    aria-pressed={activeReport === tab.key}
+                    onClick={() => onSelectReport(tab.key)}
+                >
+                    <span className="rk-stat__label">{tab.label}</span>
 
-            <button
-                className={
-                    activeReport === 'categoryBestsellers'
-                        ? 'rims-stat-card active'
-                        : 'rims-stat-card'
-                }
-                type="button"
-                onClick={() => onSelectReport('categoryBestsellers')}
-            >
-                <StatIcon className="icon-category-bestsellers">DM</StatIcon>
-                <div className="rims-stat-card-body">
-                    <h3>Lọc món bán chạy theo danh mục</h3>
-                </div>
-                <span className="rims-stat-card-action">›</span>
-            </button>
-
-            <button
-                className={
-                    activeReport === 'bestsellers'
-                        ? 'rims-stat-card active'
-                        : 'rims-stat-card'
-                }
-                type="button"
-                onClick={() => onSelectReport('bestsellers')}
-            >
-                <StatIcon className="icon-bestsellers">Top</StatIcon>
-                <div className="rims-stat-card-body">
-                    <h3>Món bán chạy</h3>
-                    <p>{formatNumber(bestSellerCount)} món đang có dữ liệu</p>
-                </div>
-                <span className="rims-stat-card-action">›</span>
-            </button>
-
-            <button
-                className={
-                    activeReport === 'orderShifts'
-                        ? 'rims-stat-card highlighted active'
-                        : 'rims-stat-card highlighted'
-                }
-                type="button"
-                onClick={() => onSelectReport('orderShifts')}
-            >
-                <StatIcon className="icon-order-shifts">Ca</StatIcon>
-                <div className="rims-stat-card-body">
-                    <h3>Thống kê đơn hàng theo ca</h3>
-                    <p>{highestShiftName ?? 'Ca có nhiều đơn nhất'}</p>
-                </div>
-                <span className="rims-stat-card-action">›</span>
-            </button>
+                    {tab.value && (
+                        <span
+                            className={`rk-stat__value${
+                                tab.isText ? ' rk-stat__value--text' : ''
+                            }`}
+                        >
+                            {tab.value}
+                        </span>
+                    )}
+                </button>
+            ))}
         </section>
     )
 }

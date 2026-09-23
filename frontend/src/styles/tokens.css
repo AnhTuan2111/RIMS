@@ -77,7 +77,10 @@
 
     /* ---------- Chữ ---------- */
     --rims-font-sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --rims-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    /* Be Vietnam Pro đứng ngay sau JetBrains Mono để hứng ký hiệu ₫ (U+20AB)
+       và các dấu tiếng Việt mà subset mono đang nạp không có — nếu không, ký
+       hiệu tiền rơi sang font hệ thống và lệch hẳn cỡ so với chữ số. */
+    --rims-font-mono: 'JetBrains Mono', 'Be Vietnam Pro', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
     --rims-text-xs: 12px;
     --rims-text-sm: 13px;

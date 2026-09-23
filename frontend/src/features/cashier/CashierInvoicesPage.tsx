@@ -7,6 +7,7 @@ import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback
 import {PageCard, PageHeader} from '@/shared/components/ui'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {formatCurrency} from '@/shared/utils/format'
 
 const PAGE_SIZE = 10
 
@@ -384,7 +385,7 @@ export default function CashierInvoicesPage() {
                                     color: '#b91c1c',
                                 }}
                             >
-                                {invoice.finalAmount.toLocaleString()} đ
+                                {formatCurrency(invoice.finalAmount)}
                             </span>
 
                             <span>
@@ -589,7 +590,7 @@ export default function CashierInvoicesPage() {
                                                     textAlign: 'right',
                                                 }}
                                             >
-                                                {item.subTotal.toLocaleString()} đ
+                                                {formatCurrency(item.subTotal)}
                                             </span>
                                         </div>
                                     ))}
@@ -606,11 +607,11 @@ export default function CashierInvoicesPage() {
                                 >
                                     <Row
                                         label="Tạm tính:"
-                                        value={`${selectedInvoice.totalBeforeVat.toLocaleString()} đ`}
+                                        value={`${formatCurrency(selectedInvoice.totalBeforeVat)}`}
                                     />
                                     <Row
                                         label="VAT (10%):"
-                                        value={`${selectedInvoice.vatAmount.toLocaleString()} đ`}
+                                        value={`${formatCurrency(selectedInvoice.vatAmount)}`}
                                     />
 
                                     {selectedInvoice.customerName && (
@@ -624,10 +625,10 @@ export default function CashierInvoicesPage() {
                                                 selectedInvoice.pointsUsed > 0 && (
                                                     <Row
                                                         label="Điểm đã dùng:"
-                                                        value={`-${(
+                                                        value={`-${
                                                             selectedInvoice.pointsUsed *
                                                             1000
-                                                        ).toLocaleString()} đ`}
+                                                        }`}
                                                         color="#059669"
                                                     />
                                                 )}
@@ -645,7 +646,7 @@ export default function CashierInvoicesPage() {
                                     <Row
                                         bold
                                         label="THÀNH TIỀN:"
-                                        value={`${selectedInvoice.finalAmount.toLocaleString()} đ`}
+                                        value={`${formatCurrency(selectedInvoice.finalAmount)}`}
                                         color="#b91c1c"
                                     />
 
@@ -658,11 +659,11 @@ export default function CashierInvoicesPage() {
                                         <>
                                             <Row
                                                 label="Khách trả:"
-                                                value={`${selectedInvoice.amountPaid.toLocaleString()} đ`}
+                                                value={`${formatCurrency(selectedInvoice.amountPaid)}`}
                                             />
                                             <Row
                                                 label="Tiền thừa:"
-                                                value={`${selectedInvoice.excessAmount.toLocaleString()} đ`}
+                                                value={`${formatCurrency(selectedInvoice.excessAmount)}`}
                                             />
                                         </>
                                     )}

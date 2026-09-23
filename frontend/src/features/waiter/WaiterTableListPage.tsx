@@ -10,9 +10,10 @@ import {isRequestCanceled} from '@/shared/utils/error'
 type WaiterTableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED'
 
 const STATUS_META: Record<WaiterTableStatus, {label: string}> = {
-    AVAILABLE: {label: '○ Bàn trống'},
-    SERVING: {label: '● Đang phục vụ'},
-    RESERVED: {label: '● Đã đặt trước'},
+    // Chấm tròn do chip tự vẽ, không gõ ký tự ● ○ vào chuỗi.
+    AVAILABLE: {label: 'Bàn trống'},
+    SERVING: {label: 'Đang phục vụ'},
+    RESERVED: {label: 'Đã đặt trước'},
 }
 
 const NOTIFIABLE_ITEM_STATUSES = new Set<string>(['CANCELLED', 'COMPLETED'])
@@ -470,7 +471,7 @@ export default function WaiterTableListPage() {
                 ) : displayTables.length === 0 ? (
                     <div style={stateBoxStyle}>Chưa có bàn nào.</div>
                 ) : (
-                    <div className="waiter-table-grid">
+                    <div className="rk-tablegrid">
                         {displayTables.map((table) => {
                             const status =
                                 (table.status as WaiterTableStatus) in STATUS_META

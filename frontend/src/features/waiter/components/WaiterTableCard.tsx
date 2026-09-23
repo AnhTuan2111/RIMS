@@ -1,16 +1,22 @@
 import type {TableDetailResponse} from '@/shared/api/waiter'
-
-type WaiterTableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED'
+import {TableCard, type TableStatus} from '@/shared/components/ui'
 
 interface WaiterTableCardProps {
     table: TableDetailResponse
-    status: WaiterTableStatus
+    status: TableStatus
     statusLabel: string
     nextReservationTime?: string
     hasStatusNotification?: boolean
     onClick: (table: TableDetailResponse) => void
 }
 
+/**
+ * Lớp mỏng bọc quanh TableCard dùng chung.
+ *
+ * <p>Giữ nguyên chữ ký cũ để các màn của Phục vụ không phải sửa, nhưng phần
+ * hiển thị nay dùng đúng component mà màn Thu ngân dùng — trước đây hai màn
+ * vẽ cùng 12 cái bàn theo hai kiểu khác nhau.
+ */
 export function WaiterTableCard({
     table,
     status,
@@ -19,42 +25,23 @@ export function WaiterTableCard({
     hasStatusNotification = false,
     onClick,
 }: WaiterTableCardProps) {
-    const isAvailableButReserved =
-        status === 'AVAILABLE' && Boolean(table.upcomingReservationTime)
-
-    const cardClass = [
-        'waiter-table-card',
-        `waiter-table-${status.toLowerCase()}`,
-        isAvailableButReserved ? 'has-warning' : '',
-    ]
-        .filter(Boolean)
-        .join(' ')
+    // Bàn còn trống nhưng đã có người đặt trước: phục vụ cần biết để không
+    // xếp khách vãng lai vào.
+    const reservedSoon =
+        status === 'AVAILABLE' && table.upcomingReservationTime
+            ? table.upcomingReservationTime.split('T')[1]?.substring(0, 5)
+            : undefined
 
     return (
-        <button onClick={() => onClick(table)} className={cardClass}>
-            {hasStatusNotification && (
-                <span
-                    className="waiter-table-notification-dot"
-                    aria-label="Có cập nhật món"
-                />
-            )}
-
-            <strong className="waiter-table-number">
-                Bàn {table.tableNumber} - {table.capacity} chỗ
-            </strong>
-
-            <div className="waiter-table-footer">
-                <small className="waiter-table-status">{statusLabel}</small>
-                {status === 'RESERVED' && nextReservationTime && (
-                    <span className="waiter-table-res-time">{nextReservationTime}</span>
-                )}
-                {isAvailableButReserved && table.upcomingReservationTime && (
-                    <span className="waiter-table-warning-badge">
-                        Đã đặt lúc{' '}
-                        {table.upcomingReservationTime.split('T')[1].substring(0, 5)}
-                    </span>
-                )}
-            </div>
-        </button>
+        <TableCard
+            tableNumber={`Bàn ${table.tableNumber}`}
+            capacity={table.capacity}
+            status={status}
+            statusLabel={statusLabel}
+            upcomingTime={status === 'RESERVED' ? nextReservationTime : reservedSoon}
+            hasAlert={hasStatusNotification}
+            alertLabel="Có cập nhật món"
+            onClick={() => onClick(table)}
+        />
     )
 }

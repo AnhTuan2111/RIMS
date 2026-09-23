@@ -3,6 +3,7 @@
 import * as cashierApi from '@/shared/api/cashier'
 import type {OrderDetailResponse, TableDashboardResponse} from '@/shared/types/cashier'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {formatCurrency, formatNumber} from '@/shared/utils/format'
 
 export interface CustomerInfo {
     id: number
@@ -35,10 +36,6 @@ function getHttpStatus(error: unknown) {
     }
 
     return requestError.response?.status
-}
-
-function formatCurrency(value: number) {
-    return `${value.toLocaleString()} đ`
 }
 
 const PHONE_REGEX = /^0[0-9]{9}$/
@@ -406,14 +403,13 @@ export default function OrderPanel({
                                         color: '#059669',
                                     }}
                                 >
-                                    {customer.rewardPoints.toLocaleString()}
+                                    {formatNumber(customer.rewardPoints)}
                                 </strong>
                             </p>
 
                             {customer.rewardPoints > 0 && (
                                 <label style={pointsLabelStyle}>
-                                    Sử dụng điểm (Tối đa{' '}
-                                    {maxPointsCanUse.toLocaleString()}):
+                                    Sử dụng điểm (Tối đa {formatNumber(maxPointsCanUse)}):
                                     <input
                                         type="number"
                                         min="0"

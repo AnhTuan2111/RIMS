@@ -2,7 +2,7 @@ import {shiftCatalog} from './types'
 import type {ShiftViewItem} from './types'
 import type {OrderShiftReportResponse} from '@/shared/api/admin'
 export function formatRevenueCurrency(value?: number | null) {
-    return `${new Intl.NumberFormat('vi-VN').format(value ?? 0)} ₫`
+    return `${new Intl.NumberFormat('vi-VN').format(value ?? 0)} đ`
 }
 
 export function formatNumber(value?: number | null) {

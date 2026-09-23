@@ -1,6 +1,7 @@
 ﻿import {useState, type CSSProperties} from 'react'
 
 import type {OrderDetailResponse, PaymentResponse} from '@/shared/types/cashier'
+import {formatCurrency} from '@/shared/utils/format'
 
 interface Props {
     paymentResult: PaymentResponse
@@ -10,10 +11,6 @@ interface Props {
 }
 
 type ResultStep = 'SUCCESS' | 'BILL'
-
-function formatCurrency(value: number) {
-    return `${value.toLocaleString()} đ`
-}
 
 function getPaymentMethodLabel(method: string | null | undefined) {
     if (method === 'CASH') {

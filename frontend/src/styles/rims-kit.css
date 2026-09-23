@@ -578,3 +578,77 @@ table,
 .pagination-result-info {
     font-variant-numeric: tabular-nums;
 }
+
+/* Bổ sung cho thẻ bàn dùng chung */
+
+.rk-tablecard--selected {
+    border-color: var(--rims-brand);
+    box-shadow: inset 0 0 0 1px var(--rims-brand);
+}
+
+.rk-tablecard__hint {
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-2);
+}
+
+.rk-tablecard__alert {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    color: var(--rims-alert);
+}
+
+.rk-tablecard__alert-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-alert);
+    flex: none;
+}
+
+/* Đã đặt trước: dùng màu thương hiệu, không dùng màu cảnh báo.
+   Đặt bàn là trạng thái đã lên lịch, không phải sự cố — màu đỏ để dành cho
+   việc thật sự cần can thiệp (bàn quá giờ, món lỗi). */
+.rk-tablecard--brand {
+    background: var(--rims-brand-soft);
+    border-color: var(--rims-brand-line);
+}
+
+/* Ô số liệu khi dùng làm nút chọn báo cáo */
+
+.rk-stat--tab {
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: background-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-stat--tab:hover {
+    background: var(--rims-surface-2);
+}
+
+.rk-stat--tab:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: -2px;
+}
+
+/* Tab đang mở: một màu nhấn duy nhất, không phải bốn màu như trước. */
+.rk-stat--active {
+    background: var(--rims-brand-soft);
+    box-shadow: inset 3px 0 0 var(--rims-brand);
+}
+
+.rk-stat--active .rk-stat__label {
+    color: var(--rims-brand);
+}
+
+/* Giá trị là CHỮ chứ không phải số (tên ca, tên danh mục) thì dùng font chữ.
+   Ép font mono lên chữ làm khoảng cách giãn ra trông như lỗi. */
+.rk-stat__value--text {
+    font-family: var(--rims-font-sans);
+    letter-spacing: var(--rims-tracking-tight);
+}

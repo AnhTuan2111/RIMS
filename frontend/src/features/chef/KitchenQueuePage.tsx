@@ -769,7 +769,10 @@ export default function KitchenQueuePage() {
                                                 )
                                             }}
                                         >
-                                            <Check className="rk-icon" aria-hidden="true" />
+                                            <Check
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />
                                             {completingItemId === item.orderItemId
                                                 ? 'Đang cập nhật…'
                                                 : 'Xong món'}

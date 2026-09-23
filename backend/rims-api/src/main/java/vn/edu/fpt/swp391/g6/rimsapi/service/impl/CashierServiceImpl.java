@@ -61,22 +61,25 @@ public class CashierServiceImpl implements CashierService
         List<RestaurantTable> tables = tableRepository.findAll();
         List<Order> activeOrders = orderRepository.findByStatusIn(List.of(OrderStatus.SERVING, OrderStatus.LOCKED)); // ĐỔI: gộp cả LOCKED
 
-        Map<Integer, Long> tableOrderMap = activeOrders.stream()
+        // Giữ nguyên cả Order thay vì chỉ id, để lấy luôn totalAmount mà không phải
+        // gọi DB thêm lần nữa.
+        Map<Integer, Order> tableOrderMap = activeOrders.stream()
                 .filter(o -> o.getTable() != null)
                 .collect(Collectors.toMap(
                         o -> o.getTable().getId(),
-                        Order::getId,
+                        o -> o,
                         (existing, replacement) -> existing));
 
         return tables.stream()
                 .map(t -> {
-                    Long orderId = tableOrderMap.get(t.getId());
-                    TableStatus cashierStatus = (orderId != null) ? TableStatus.SERVING : TableStatus.AVAILABLE;
+                    Order order = tableOrderMap.get(t.getId());
+                    TableStatus cashierStatus = (order != null) ? TableStatus.SERVING : TableStatus.AVAILABLE;
                     return TableDashboardResponse.builder()
                             .tableId(t.getId())
                             .tableNumber(t.getTableNumber())
                             .status(cashierStatus)
-                            .orderId(orderId)
+                            .orderId(order != null ? order.getId() : null)
+                            .totalAmount(order != null ? order.getTotalAmount() : null)
                             .build();
                 })
                 .toList();
