@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Nationalized;
 
 /**
  * Thông tin nhận diện của nhà hàng, do quản trị viên tự cấu hình.
@@ -40,34 +41,43 @@ public class RestaurantProfile
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Nationalized
     @Column(nullable = false, length = 120)
     private String name;
 
     /** Câu mô tả ngắn hiện dưới tên, ví dụ "Ẩm thực Nhật Bản đương đại". */
+    @Nationalized
     @Column(length = 200)
     private String tagline;
 
+    @Nationalized
     @Column(length = 2000)
     private String description;
 
     /** Đường dẫn ảnh logo. Để trống thì giao diện hiện chữ cái đầu của tên. */
+    @Nationalized
     @Column(length = 500)
     private String logoUrl;
 
     /** Ảnh lớn dùng cho trang chủ. */
+    @Nationalized
     @Column(length = 500)
     private String heroImageUrl;
 
+    @Nationalized
     @Column(length = 200)
     private String address;
 
+    @Nationalized
     @Column(length = 30)
     private String phone;
 
+    @Nationalized
     @Column(length = 120)
     private String email;
 
     /** Giờ mở cửa dạng chữ cho người đọc, ví dụ "10:00 - 22:00 hằng ngày". */
+    @Nationalized
     @Column(length = 120)
     private String openingHours;
 

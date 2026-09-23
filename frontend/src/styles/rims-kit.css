@@ -54,6 +54,9 @@ body {
     font-size: var(--rims-text-base);
     font-weight: var(--rims-weight-semibold);
     line-height: 1;
+    /* Nút dựng bằng thẻ <a> hoặc <Link> vẫn bị trình duyệt gạch chân nếu
+       không tắt — nút thì không bao giờ gạch chân. */
+    text-decoration: none;
     /* Nhãn nút không bao giờ xuống hai dòng. */
     white-space: nowrap;
     cursor: pointer;

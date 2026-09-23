@@ -17,3 +17,4 @@
    Mỗi màn chuyển xong sang class .rk-* thì phần CSS cũ tương ứng có thể xoá,
    và file này sẽ dần trở thành lớp giao diện duy nhất. */
 @import './rims-kit.css';
+@import './rims-home.css';
