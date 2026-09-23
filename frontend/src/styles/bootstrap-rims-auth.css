@@ -66,9 +66,14 @@
     color: #241512;
 }
 
-.auth-field input:focus {
-    outline: 2px solid #d4af37;
-    border-color: #d4af37;
+/* Vòng focus phải đạt tối thiểu 3:1 với nền. Vàng #d4af37 trên nền sáng chỉ
+   được 2.07:1 — người dùng bàn phím gần như không thấy con trỏ đang ở đâu.
+   Dùng màu thương hiệu (10.6:1) và chỉ hiện với :focus-visible, để bấm chuột
+   không làm nháy vòng viền. */
+.auth-field input:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+    border-color: var(--rims-brand);
 }
 
 .auth-submit {

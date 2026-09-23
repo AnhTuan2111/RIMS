@@ -32,12 +32,12 @@
     --rims-surface-3: #ebe4d9;
 
     --rims-line: #e4dcd0;
-    --rims-line-strong: #cfc3b2;
+    --rims-line-strong: #a69071;
 
     /* ---------- Chữ ---------- */
     --rims-ink: #241512;
     --rims-ink-2: #5c4a3a;
-    --rims-ink-3: #8a7a68;
+    --rims-ink-3: #827362;
     --rims-ink-on-brand: #fdf8ef;
 
     /* ---------- Thương hiệu ---------- */
@@ -50,28 +50,31 @@
     --rims-brand-soft: #f9e9ed;
     --rims-brand-line: #e8c9d2;
 
+    /* Vàng CHỈ dùng cho nhận diện: logo, viền trang trí, nét nhấn trên nền tối.
+       Tương phản với nền sáng chỉ 2.07:1 nên KHÔNG BAO GIỜ dùng cho chữ hay
+       viền cần nhìn rõ — chỗ đó dùng --rims-gold-deep. */
     --rims-gold: #d4af37;
-    --rims-gold-deep: #a8861f;
+    --rims-gold-deep: #8f721a;
     --rims-gold-soft: #fbf1d6;
 
     /* ---------- Màu ngữ nghĩa ---------- */
     /* Bàn trống · món xong */
-    --rims-ok: #2e7d4f;
+    --rims-ok: #2d7b4e;
     --rims-ok-soft: #e6f2ea;
     --rims-ok-line: #bcdcc8;
 
     /* Đang phục vụ · đang nấu · đã đặt trước */
-    --rims-busy: #b9700a;
+    --rims-busy: #965b08;
     --rims-busy-soft: #fdf0dc;
     --rims-busy-line: #f0d5ab;
 
     /* Quá giờ · lỗi · huỷ — sáng hơn hẳn màu vang để không lẫn */
-    --rims-alert: #d93a2b;
+    --rims-alert: #c93224;
     --rims-alert-soft: #fce9e6;
     --rims-alert-line: #f5c4bd;
 
     /* Không hoạt động */
-    --rims-idle: #7a7268;
+    --rims-idle: #726b61;
     --rims-idle-soft: #f0ede7;
     --rims-idle-line: #ddd6cb;
 
@@ -178,12 +181,14 @@
         --rims-surface-3: #342a24;
 
         --rims-line: #3a2f28;
-        --rims-line-strong: #4e4037;
+        --rims-line-strong: #766153;
 
         --rims-ink: #f2ebe1;
         --rims-ink-2: #c3b6a6;
         --rims-ink-3: #948878;
-        --rims-ink-on-brand: #fdf8ef;
+        /* Nền nhấn ở chủ đề tối đã được nâng sáng, nên chữ trên nút phải TỐI.
+           Giữ chữ sáng thì tương phản chỉ còn 2.18:1 trên nút Xong món. */
+        --rims-ink-on-brand: #1a1113;
 
         /* Vang nguyên bản quá tối trên nền tối — nâng độ sáng để giữ tương phản */
         --rims-brand: #e0577a;
@@ -224,12 +229,12 @@
     --rims-surface-3: #342a24;
 
     --rims-line: #3a2f28;
-    --rims-line-strong: #4e4037;
+    --rims-line-strong: #766153;
 
     --rims-ink: #f2ebe1;
     --rims-ink-2: #c3b6a6;
     --rims-ink-3: #948878;
-    --rims-ink-on-brand: #fdf8ef;
+    --rims-ink-on-brand: #1a1113;
 
     --rims-brand: #e0577a;
     --rims-brand-hover: #ec7192;
