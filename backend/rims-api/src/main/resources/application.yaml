@@ -5,11 +5,19 @@ spring:
   application:
     name: rims-api
 
-  # File cấu hình riêng của từng máy, KHÔNG commit (đã nằm trong .gitignore).
-  # Copy application-local.yaml.example -> application-local.yaml rồi điền giá trị thật.
-  # Giá trị trong file đó ghi đè lên mọi giá trị bên dưới.
+  # Đọc file .env ở gốc repo (KHÔNG commit, đã nằm trong .gitignore).
+  # Copy .env.example -> .env rồi điền giá trị thật.
+  #
+  # Cú pháp KEY=VALUE của .env chính là cú pháp file .properties, nên chỉ cần
+  # gợi ý định dạng "[.properties]" là Spring đọc được thẳng, không cần thư viện.
+  #
+  # Khai báo hai đường dẫn vì thư mục làm việc khác nhau tuỳ cách chạy:
+  # mvn spring-boot:run chạy từ backend/rims-api, còn IDE có thể chạy từ gốc repo.
+  # "optional:" nên thiếu file cũng không làm app chết ngay khi khởi động.
   config:
-    import: optional:classpath:application-local.yaml
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../../.env[.properties]
 
   # Không có giá trị mặc định cho secret: thiếu là app không khởi động được,
   # tốt hơn là chạy bằng một mật khẩu mặc định nào đó mà không ai để ý.

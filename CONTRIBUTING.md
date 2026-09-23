@@ -55,4 +55,5 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 | **Commit** | `<type>: <mô tả>` với type ∈ `feat fix refactor style docs test chore`. Không đặt tên kiểu `inter1`, `img part 5`, `fixx`, `promax`. |
 | **Commit reformat** | **Không bao giờ trộn reformat với sửa logic.** Commit `style:` chỉ chứa thay đổi format, và hash phải ghi vào `.git-blame-ignore-revs`. Trộn lẫn sẽ gán nhầm công của người khác sang tên mình. |
 | **Di chuyển code** | Khi gộp hoặc tách file: commit riêng, **không đổi một ký tự nào** trong lúc di chuyển. Sửa logic ở commit sau. Ghi rõ file nguồn trong commit message. |
-| **Secret** | Không commit. Điền vào `application-local.yaml` (đã gitignore) hoặc biến môi trường. Xem `application-local.yaml.example`. |
+| **Secret** | Không commit. Điền vào `.env` ở gốc repo (đã gitignore) hoặc đặt biến môi trường cùng tên. Xem `.env.example`. Thêm biến mới thì phải thêm cả vào `.env.example` kèm giải thích lấy ở đâu. |
+| **Biến lộ ra trình duyệt** | Chỉ biến có tiền tố `VITE_` mới được Vite nạp vào bundle. **Không bao giờ** đặt tiền tố `VITE_` cho secret của backend. |

@@ -59,27 +59,42 @@ File này chỉ chứa placeholder, không chứa giá trị bí mật nào.
 
 ### 3.1. Điền secret cho máy của bạn
 
-Copy file mẫu rồi điền giá trị thật:
+Cả backend lẫn frontend dùng chung **một file `.env` duy nhất ở gốc repo**.
 
 ```bash
-cd backend/rims-api/src/main/resources
-cp application-local.yaml.example application-local.yaml
+cp .env.example .env
 ```
 
-`application-local.yaml` đã nằm trong `.gitignore` nên không bao giờ bị commit.
-Spring tự nạp file này và ghi đè lên `application.yaml`.
+Rồi mở `.env` điền giá trị thật. File này đã nằm trong `.gitignore` nên không bao giờ bị commit.
 
-Bốn giá trị bắt buộc phải điền — thiếu là app không khởi động được:
+Năm giá trị bắt buộc — thiếu là backend không khởi động được:
 
-| Khoá | Là gì | Lấy ở đâu |
+| Biến | Là gì | Lấy ở đâu |
 |---|---|---|
-| `spring.datasource.password` | Mật khẩu SQL Server | Bạn đặt khi cài SQL Server |
-| `spring.mail.username` / `password` | Tài khoản gửi OTP | App Password 16 ký tự của Gmail, tạo tại [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) (phải bật xác thực 2 bước trước) |
-| `jwt.signerKey` | Khoá ký JWT | Tự sinh: `openssl rand -base64 48` |
-| `vnpay.hash-secret` | Khoá ký giao dịch VNPay | Trong tài khoản sandbox VNPay |
+| `DB_PASSWORD` | Mật khẩu SQL Server | Bạn đặt khi cài SQL Server (username mặc định là `sa`) |
+| `MAIL_USERNAME` | Email gửi OTP | Tài khoản Gmail của bạn |
+| `MAIL_PASSWORD` | App Password 16 ký tự | [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) — phải bật xác thực 2 bước trước. Không dùng mật khẩu đăng nhập thường. |
+| `JWT_SIGNER_KEY` | Khoá ký JWT, tối thiểu 32 ký tự | Tự sinh: `openssl rand -base64 48` |
+| `VNPAY_HASH_SECRET` | Khoá ký giao dịch VNPay | Trong tài khoản sandbox VNPay |
 
-Cách khác nếu không muốn dùng file: đặt biến môi trường `DB_PASSWORD`, `MAIL_USERNAME`,
-`MAIL_PASSWORD`, `JWT_SIGNER_KEY`, `VNPAY_HASH_SECRET`.
+Ngoài ra `VITE_API_BASE_URL` cho frontend biết backend chạy ở đâu (mặc định
+`http://localhost:8080`). Các biến còn lại đều có giá trị mặc định trong
+`application.yaml`, xem phần cuối `.env.example`.
+
+**Cách hai bên đọc file này:**
+
+- **Backend** — `application.yaml` khai báo `spring.config.import` trỏ tới `.env`.
+  Cú pháp `KEY=VALUE` của `.env` chính là cú pháp file `.properties`, nên chỉ cần
+  gợi ý định dạng `[.properties]` là Spring đọc được thẳng, không cần thư viện nào.
+- **Frontend** — `vite.config.ts` đặt `envDir` trỏ về gốc repo. Vite **chỉ** nạp
+  biến có tiền tố `VITE_`, nên secret của backend nằm cùng file cũng không lọt
+  vào bundle của trình duyệt.
+
+> Vì Spring đọc `.env` như file `.properties`, dấu `\` là ký tự escape.
+> Nếu giá trị nào có dấu `\` thì phải viết thành `\\`.
+
+Nếu không muốn dùng file, đặt thẳng biến môi trường cùng tên cũng được —
+biến môi trường được ưu tiên hơn giá trị trong `.env`.
 
 ### 3.2. Database (SQL Server)
 
