@@ -25,6 +25,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TechnicalException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.PaymentCalculator;
 
 @Service
 @RequiredArgsConstructor
@@ -134,7 +135,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             document.add(lineSeparator);
 
             //Phần Tổng kết tài chính — ĐÃ SỬA: tự tính từ các món COMPLETED, không dùng order.getTotalAmount() nữa
-            BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
+            BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
             BigDecimal finalAmount = invoice.getFinalAmount();
 
             PaymentMethod method = PaymentMethod.CASH;

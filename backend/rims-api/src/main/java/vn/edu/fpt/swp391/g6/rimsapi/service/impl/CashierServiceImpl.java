@@ -37,6 +37,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TechnicalException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.PaymentCalculator;
 import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
 @Service
@@ -112,8 +113,8 @@ public class CashierServiceImpl implements CashierService
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
-        BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
+        BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
+        BigDecimal finalAmount = PaymentCalculator.totalAfterVat(totalBeforeVat);
 
         return OrderDetailResponse.builder()
                 .orderId(order.getId())
@@ -210,31 +211,22 @@ public class CashierServiceImpl implements CashierService
         }
 
         BigDecimal totalBeforeVat = calculateActualTotal(order);
-        BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
-        BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
+        BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
+        BigDecimal amountAfterVat = PaymentCalculator.totalAfterVat(totalBeforeVat);
 
-        // MỚI: tính trước số tiền phải trả SAU khi trừ điểm dự kiến (chưa apply thật) để validate sớm
         Integer customerId = request.getCustomerId();
         Integer pointsUsed = request.getPointsUsed();
-        BigDecimal previewDiscount = BigDecimal.ZERO;
-        if (customerId != null && pointsUsed != null && pointsUsed > 0)
-        {
-            previewDiscount = new BigDecimal(pointsUsed).multiply(new BigDecimal("1000"));
-        }
-        BigDecimal previewFinalAmount = finalAmount.subtract(previewDiscount);
-        if (previewFinalAmount.compareTo(BigDecimal.ZERO) < 0)
-            previewFinalAmount = BigDecimal.ZERO;
+        int safePointsUsed = customerId != null && pointsUsed != null ? pointsUsed : 0;
 
+        // Kiểm tra khách đưa đủ tiền TRƯỚC khi ghi bất cứ thứ gì. Dùng cùng một
+        // phép tính với bước áp điểm bên dưới, nên hai bước không thể lệch nhau.
+        BigDecimal amountDue = PaymentCalculator.amountDue(amountAfterVat, safePointsUsed);
         BigDecimal amountPaid = BigDecimal.valueOf(request.getAmountPaid());
-        if (amountPaid.compareTo(previewFinalAmount) < 0)
-        {
-            throw new BusinessRuleException("Khách đưa thiếu tiền!");
-        }
+        BigDecimal excessAmount = PaymentCalculator.changeDue(amountPaid, amountDue);
 
         Invoice invoice = new Invoice();
-        finalAmount = applyLoyaltyPoints(invoice, customerId, pointsUsed, finalAmount); // tính + trừ/cộng điểm THẬT ở đây
-
-        BigDecimal excessAmount = amountPaid.subtract(finalAmount);
+        BigDecimal finalAmount = applyLoyaltyPoints(invoice, customerId, pointsUsed,
+                amountAfterVat);
 
         invoice.setOrder(order);
         invoice.setFinalAmount(finalAmount);
@@ -341,11 +333,10 @@ public class CashierServiceImpl implements CashierService
             throw new ConflictException("Đơn hàng chưa có món ăn hoàn thành (Tổng tiền = 0đ)!");
         }
 
-        BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
-        BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
+        BigDecimal finalAmount = PaymentCalculator.totalAfterVat(totalBeforeVat);
 
-        // ĐÃ THÊM: Nếu khách chọn dùng điểm, trừ tạm vào số tiền phải trả qua VNPay
-        // (chưa trừ/cộng điểm thật vào tài khoản khách — việc đó chỉ làm khi callback thành công)
+        // Nếu khách chọn dùng điểm, trừ tạm vào số tiền phải trả qua VNPay. Chưa
+        // trừ/cộng điểm thật vào tài khoản khách — việc đó chỉ làm khi callback báo thành công.
         if (customerId != null)
         {
             User customer = userRepository.findById(customerId).orElse(null);
@@ -355,15 +346,8 @@ public class CashierServiceImpl implements CashierService
                 {
                     throw new BusinessRuleException("Khách hàng không đủ điểm!");
                 }
-                BigDecimal discount = new BigDecimal(pointsUsed).multiply(new BigDecimal("1000"));
-                BigDecimal maxDiscount = finalAmount.multiply(new BigDecimal("0.5"));
-                if (discount.compareTo(maxDiscount) > 0)
-                {
-                    throw new BusinessRuleException("Số điểm sử dụng vượt quá 50% hóa đơn cho phép!");
-                }
-                finalAmount = finalAmount.subtract(discount);
-                if (finalAmount.compareTo(BigDecimal.ZERO) < 0)
-                    finalAmount = BigDecimal.ZERO;
+
+                finalAmount = PaymentCalculator.amountDue(finalAmount, pointsUsed);
             }
         }
 
@@ -463,8 +447,8 @@ public class CashierServiceImpl implements CashierService
 
         // ĐÃ SỬA: Tính lại VAT dựa trên tổng tiền thực tế của các món COMPLETED
         BigDecimal totalBeforeVat = calculateActualTotal(order);
-        BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
-        BigDecimal finalAmount = totalBeforeVat.add(vatAmount);
+        BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
+        BigDecimal finalAmount = PaymentCalculator.totalAfterVat(totalBeforeVat);
 
         Invoice invoice = new Invoice();
 
@@ -618,7 +602,7 @@ public class CashierServiceImpl implements CashierService
                 .map(OrderItem::getSubTotal)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
+        BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
 
         List<CashierInvoiceItemResponse> items = completedItems.stream()
                 .map(oi -> CashierInvoiceItemResponse.builder()
@@ -720,9 +704,12 @@ public class CashierServiceImpl implements CashierService
         if (customerId == null)
             return finalAmount;
 
-        User customer = userRepository.findById(customerId).orElse(null);
-        if (customer == null)
-            return finalAmount;
+        // Nếu thu ngân đã chọn một khách mà không tìm thấy khách đó thì phải dừng.
+        // Trước đây chỗ này lặng lẽ bỏ qua, nên số tiền hiển thị cho thu ngân (đã
+        // trừ điểm) lệch với số ghi vào hoá đơn (chưa trừ), và khách mất điểm tích.
+        User customer = userRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy khách hàng đã chọn"));
 
         invoice.setCustomer(customer);
         int safePointsUsed = pointsUsed != null ? pointsUsed : 0;
@@ -733,22 +720,13 @@ public class CashierServiceImpl implements CashierService
             {
                 throw new BusinessRuleException("Khách hàng không đủ điểm!");
             }
-            BigDecimal discount = new BigDecimal(safePointsUsed).multiply(new BigDecimal("1000"));
-            BigDecimal maxDiscount = finalAmount.multiply(new BigDecimal("0.5"));
-            if (discount.compareTo(maxDiscount) > 0)
-            {
-                throw new BusinessRuleException("Số điểm sử dụng vượt quá 50% hóa đơn cho phép!");
-            }
+
+            finalAmount = PaymentCalculator.amountDue(finalAmount, safePointsUsed);
             customer.setRewardPoints(customer.getRewardPoints() - safePointsUsed);
-            finalAmount = finalAmount.subtract(discount);
-            if (finalAmount.compareTo(BigDecimal.ZERO) < 0)
-                finalAmount = BigDecimal.ZERO;
             invoice.setPointsUsedOnInvoice(safePointsUsed);
         }
 
-        int earnedPoints = finalAmount.multiply(new BigDecimal("0.01"))
-                .divide(new BigDecimal("1000"), 0, RoundingMode.DOWN)
-                .intValue();
+        int earnedPoints = PaymentCalculator.pointsEarned(finalAmount);
         customer.setRewardPoints(customer.getRewardPoints() + earnedPoints);
         userRepository.save(customer);
         invoice.setPointsEarnedOnInvoice(earnedPoints);
