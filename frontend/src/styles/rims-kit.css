@@ -1,0 +1,580 @@
+/* =========================================================================
+   RIMS Kit — lớp component dùng chung cho cả 30 màn hình.
+
+   Mọi giá trị ở đây đều đi qua var(--rims-*) từ tokens.css. Không có một mã
+   màu, cỡ chữ hay khoảng cách nào viết thẳng.
+
+   Quy ước đặt tên: .rk-<khối>__<thành-phần>--<biến-thể>
+   Tiền tố "rk-" để phân biệt rõ với 818 class cũ đang còn tồn tại, nên có
+   thể chuyển từng màn một mà không sợ đụng nhau.
+   ========================================================================= */
+
+/* ---------- Nền chung ---------- */
+
+body {
+    font-family: var(--rims-font-sans);
+    font-size: var(--rims-text-base);
+    line-height: var(--rims-leading-normal);
+    background: var(--rims-paper);
+    color: var(--rims-ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Mọi chỗ hiện số thẳng cột: tiền, số lượng, giờ, mã đơn. */
+.rk-num {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+/* ---------- Focus: hiện tức thì, không bao giờ animate ---------- */
+
+.rk-btn:focus-visible,
+.rk-input:focus-visible,
+.rk-chip:focus-visible,
+.rk-tablecard:focus-visible,
+.rk-ticket:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+/* ---------- Nút ---------- */
+
+.rk-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-3) var(--rims-space-5);
+    border: 1px solid transparent;
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-sans);
+    font-size: var(--rims-text-base);
+    font-weight: var(--rims-weight-semibold);
+    line-height: 1;
+    /* Nhãn nút không bao giờ xuống hai dòng. */
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background-color var(--rims-dur-short) var(--rims-ease-out),
+        border-color var(--rims-dur-short) var(--rims-ease-out),
+        color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-btn:hover:not(:disabled) {
+    background: var(--rims-surface-3);
+}
+
+.rk-btn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.rk-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.rk-btn--primary {
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-btn--primary:hover:not(:disabled) {
+    background: var(--rims-brand-hover);
+}
+
+.rk-btn--primary:active:not(:disabled) {
+    background: var(--rims-brand-active);
+}
+
+/* Hành động xác nhận tích cực: xong món, thanh toán. */
+.rk-btn--go {
+    background: var(--rims-ok);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-btn--go:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+.rk-btn--quiet {
+    background: transparent;
+    border-color: var(--rims-line-strong);
+    color: var(--rims-ink-2);
+}
+
+.rk-btn--quiet:hover:not(:disabled) {
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
+}
+
+.rk-btn--danger {
+    background: transparent;
+    border-color: var(--rims-alert-line);
+    color: var(--rims-alert);
+}
+
+.rk-btn--danger:hover:not(:disabled) {
+    background: var(--rims-alert-soft);
+}
+
+.rk-btn--lg {
+    padding: var(--rims-space-4) var(--rims-space-6);
+    font-size: var(--rims-text-lg);
+}
+
+.rk-btn--block {
+    width: 100%;
+}
+
+/* ---------- Ô nhập ---------- */
+
+.rk-input,
+.rk-select {
+    width: 100%;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-sans);
+    font-size: var(--rims-text-base);
+    transition: border-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-input::placeholder {
+    color: var(--rims-ink-3);
+}
+
+.rk-input:hover,
+.rk-select:hover {
+    border-color: var(--rims-ink-3);
+}
+
+/* ---------- Chip trạng thái ----------
+   Màu KHÔNG phải tín hiệu duy nhất: mỗi chip có chấm dẫn và nhãn chữ, nên
+   người mù màu vẫn đọc được trạng thái. */
+
+.rk-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-1) var(--rims-space-3);
+    border: 1px solid var(--rims-idle-line);
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-idle-soft);
+    color: var(--rims-idle);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.rk-chip::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rims-radius-pill);
+    background: currentcolor;
+    flex: none;
+}
+
+.rk-chip--ok {
+    background: var(--rims-ok-soft);
+    border-color: var(--rims-ok-line);
+    color: var(--rims-ok);
+}
+
+.rk-chip--busy {
+    background: var(--rims-busy-soft);
+    border-color: var(--rims-busy-line);
+    color: var(--rims-busy);
+}
+
+.rk-chip--alert {
+    background: var(--rims-alert-soft);
+    border-color: var(--rims-alert-line);
+    color: var(--rims-alert);
+}
+
+.rk-chip--brand {
+    background: var(--rims-brand-soft);
+    border-color: var(--rims-brand-line);
+    color: var(--rims-brand);
+}
+
+/* ---------- Bề mặt ----------
+   Một lớp bọc duy nhất. Không bọc thẻ trong thẻ. */
+
+.rk-panel {
+    background: var(--rims-surface);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+}
+
+.rk-panel__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+    padding: var(--rims-space-5) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-panel__title {
+    margin: 0;
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+.rk-panel__note {
+    margin: var(--rims-space-1) 0 0;
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+.rk-panel__body {
+    padding: var(--rims-space-6);
+}
+
+/* ---------- Phiếu món trong bếp ----------
+   Thành phần quan trọng nhất của app. Số lượng là thứ đọc được trước tiên,
+   trước cả tên món — đầu bếp nhìn từ xa phải thấy ngay "mấy phần". */
+
+.rk-ticket {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--rims-space-4);
+    align-items: start;
+    width: 100%;
+    padding: var(--rims-space-5);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    text-align: left;
+    transition: border-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-ticket:hover {
+    border-color: var(--rims-line-strong);
+}
+
+/* Khối số lượng: ô vuông đặc, chữ số cỡ 32px đậm nhất thang. */
+.rk-ticket__qty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    padding: var(--rims-space-3) var(--rims-space-2);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-ticket__qty-num {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-qty);
+    font-weight: var(--rims-weight-bold);
+    line-height: 1;
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+.rk-ticket__qty-unit {
+    margin-top: var(--rims-space-1);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.rk-ticket__main {
+    min-width: 0;
+}
+
+.rk-ticket__dish {
+    margin: 0;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    line-height: var(--rims-leading-snug);
+    letter-spacing: var(--rims-tracking-tight);
+    overflow-wrap: anywhere;
+}
+
+.rk-ticket__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-2);
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+.rk-ticket__note {
+    margin-top: var(--rims-space-3);
+    padding: var(--rims-space-2) var(--rims-space-3);
+    border-radius: var(--rims-radius-sm);
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-medium);
+}
+
+.rk-ticket__actions {
+    display: flex;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-4);
+}
+
+/* ---------- Thẻ bàn ----------
+   Dùng chung cho màn phục vụ VÀ màn thu ngân — trước đây hai màn vẽ cùng 12
+   cái bàn theo hai kiểu khác nhau. */
+
+.rk-tablegrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+    gap: var(--rims-space-4);
+}
+
+.rk-tablecard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-5);
+    border: 1px solid var(--rims-line);
+    border-left: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color var(--rims-dur-short) var(--rims-ease-out),
+        background-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-tablecard:hover {
+    border-color: var(--rims-ink-3);
+}
+
+.rk-tablecard__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--rims-space-2);
+}
+
+.rk-tablecard__no {
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+    letter-spacing: var(--rims-tracking-tight);
+    line-height: 1;
+}
+
+.rk-tablecard__seats {
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+.rk-tablecard__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+}
+
+.rk-tablecard__amount {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* Trạng thái tô bằng nền nhạt + viền, không dùng sọc dày một bên. */
+.rk-tablecard--ok {
+    background: var(--rims-ok-soft);
+    border-color: var(--rims-ok-line);
+}
+
+.rk-tablecard--busy {
+    background: var(--rims-busy-soft);
+    border-color: var(--rims-busy-line);
+}
+
+.rk-tablecard--alert {
+    background: var(--rims-alert-soft);
+    border-color: var(--rims-alert-line);
+}
+
+/* ---------- Ô số liệu ----------
+   Không có ô icon màu mè. Nhãn nhỏ ở trên, số to ở dưới, hết. */
+
+.rk-statrow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: 1px;
+    background: var(--rims-line);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    overflow: hidden;
+}
+
+.rk-stat {
+    padding: var(--rims-space-5);
+    background: var(--rims-surface);
+}
+
+.rk-stat__label {
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    color: var(--rims-ink-3);
+}
+
+.rk-stat__value {
+    display: block;
+    margin-top: var(--rims-space-2);
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-tight);
+    line-height: 1.1;
+    /* Tiền không bao giờ tách ký hiệu đ xuống dòng khác. */
+    white-space: nowrap;
+}
+
+.rk-stat__sub {
+    margin-top: var(--rims-space-1);
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+/* ---------- Nhãn nhóm ---------- */
+
+.rk-label {
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    color: var(--rims-ink-3);
+}
+
+/* ---------- Thanh công cụ ---------- */
+
+.rk-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+}
+
+.rk-toolbar__grow {
+    flex: 1 1 240px;
+    min-width: 0;
+}
+
+/* ---------- Lưới chung ---------- */
+
+.rk-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-5);
+}
+
+.rk-grid {
+    display: grid;
+    gap: var(--rims-space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+}
+
+/* ---------- Icon ----------
+   Toàn bộ icon lấy từ lucide-react, cùng một nét vẽ. Không dùng emoji. */
+
+.rk-icon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.75;
+}
+
+.rk-icon--lg {
+    width: 22px;
+    height: 22px;
+}
+
+/* ---------- Không chữ, chỉ cho trình đọc màn hình ---------- */
+
+.rk-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---------- Tôn trọng người tắt hiệu ứng ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* =========================================================================
+   Dọn tàn dư của giao diện cũ.
+
+   Những quy tắc dưới đây tắt các "tell" mà audit bắt được, ở cấp độ toàn app,
+   để không phải sửa rải rác 13 file CSS cũ. Khi một màn đã chuyển hẳn sang
+   class .rk-* thì phần CSS cũ của nó xoá được và các dòng ở đây cũng bớt đi.
+   ========================================================================= */
+
+/* Dải gradient tím→cam chạy ngang đỉnh mọi panel. */
+.rims-page-card::before,
+.chef-page > .page-card::before,
+.rims-app-content .chef-page > .page-card::before,
+.app-content .chef-page > .page-card::before {
+    display: none;
+}
+
+/* Thẻ sọc dày một bên — thay bằng viền mảnh đều bốn cạnh. */
+.kitchen-order-card,
+.chef-dashboard-card,
+.waiter-card {
+    border-left-width: 1px;
+}
+
+/* Bề mặt trắng tinh và bóng đổ trang trí. */
+.page-card,
+.dashboard-card,
+.rims-page-card {
+    background: var(--rims-surface);
+    border-color: var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+/* Mọi cột số phải thẳng hàng. */
+table,
+.rims-stat-card-value,
+.pagination-result-info {
+    font-variant-numeric: tabular-nums;
+}

@@ -1,3 +1,5 @@
+import {Check, MessageSquare} from 'lucide-react'
+
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useKitchenSocket} from '@/realtime'
@@ -714,69 +716,81 @@ export default function KitchenQueuePage() {
                 />
             ) : (
                 <>
-                    <div className="kitchen-board">
+                    <div className="rk-grid">
                         {paginatedItems.map((item) => (
-                            <section
-                                className="kitchen-order-card clickable-card"
-                                key={item.orderItemId}
-                                onClick={() => {
-                                    openDishDetail(item.orderItemId).catch(
-                                        (requestError) => {
-                                            console.error(requestError)
-                                        },
-                                    )
-                                }}
-                            >
-                                <div className="kitchen-order-header">
-                                    <div>
-                                        <h3>Bàn {item.tableNumber}</h3>
-
-                                        <p>
-                                            Order #{item.orderId} · Item #
-                                            {item.orderItemId} ·{' '}
-                                            {formatTime(item.createdAt)}
-                                        </p>
-                                    </div>
-
-                                    <span className="status-badge preparing">
-                                        Đang làm
+                            <article className="rk-ticket" key={item.orderItemId}>
+                                {/* Số lượng đứng trước tên món và to gấp đôi: đầu bếp
+                                    nhìn từ xa cần thấy "mấy phần" trước tiên. */}
+                                <div className="rk-ticket__qty">
+                                    <span className="rk-ticket__qty-num">
+                                        {item.quantity}
                                     </span>
+                                    <span className="rk-ticket__qty-unit">phần</span>
                                 </div>
 
-                                <div className="kitchen-item-list">
-                                    <div className="kitchen-item">
-                                        <div>
-                                            <strong>{item.dishName}</strong>
+                                <div className="rk-ticket__main">
+                                    <h3 className="rk-ticket__dish">{item.dishName}</h3>
 
-                                            <p>Số lượng: x{item.quantity}</p>
+                                    <div className="rk-ticket__meta">
+                                        <span className="rk-chip rk-chip--busy">
+                                            Đang làm
+                                        </span>
+                                        <span>
+                                            Bàn <strong>{item.tableNumber}</strong>
+                                        </span>
+                                        <span aria-hidden="true">·</span>
+                                        <span className="rk-num">
+                                            {formatTime(item.createdAt)}
+                                        </span>
+                                    </div>
 
-                                            <small>Chọn để xem chi tiết</small>
-                                        </div>
+                                    {item.note && (
+                                        <p className="rk-ticket__note">
+                                            <MessageSquare
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />{' '}
+                                            {item.note}
+                                        </p>
+                                    )}
 
-                                        <div className="kitchen-item-actions">
-                                            <button
-                                                type="button"
-                                                className="primary-button"
-                                                disabled={
-                                                    completingItemId === item.orderItemId
-                                                }
-                                                onClick={(event) => {
-                                                    event.stopPropagation()
-                                                    handleComplete(
-                                                        item.orderItemId,
-                                                    ).catch((requestError) => {
+                                    <div className="rk-ticket__actions">
+                                        <button
+                                            type="button"
+                                            className="rk-btn rk-btn--go"
+                                            disabled={
+                                                completingItemId === item.orderItemId
+                                            }
+                                            onClick={() => {
+                                                handleComplete(item.orderItemId).catch(
+                                                    (requestError) => {
                                                         console.error(requestError)
-                                                    })
-                                                }}
-                                            >
-                                                {completingItemId === item.orderItemId
-                                                    ? 'Đang cập nhật...'
-                                                    : 'Xong món'}
-                                            </button>
-                                        </div>
+                                                    },
+                                                )
+                                            }}
+                                        >
+                                            <Check className="rk-icon" aria-hidden="true" />
+                                            {completingItemId === item.orderItemId
+                                                ? 'Đang cập nhật…'
+                                                : 'Xong món'}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="rk-btn rk-btn--quiet"
+                                            onClick={() => {
+                                                openDishDetail(item.orderItemId).catch(
+                                                    (requestError) => {
+                                                        console.error(requestError)
+                                                    },
+                                                )
+                                            }}
+                                        >
+                                            Chi tiết
+                                        </button>
                                     </div>
                                 </div>
-                            </section>
+                            </article>
                         ))}
                     </div>
 

@@ -555,6 +555,9 @@ public class ChefServiceImpl implements ChefService
         response.setQuantity(
                 item.getQuantity());
 
+        response.setNote(
+                item.getNote());
+
         response.setStatus(
                 item.getStatus());
 

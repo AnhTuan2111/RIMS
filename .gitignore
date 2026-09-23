@@ -29,3 +29,8 @@ replay_pid*
 .env
 .env.*
 !.env.example
+
+# Công cụ AI (Claude Code): cấu hình, skill, ghi chú của riêng từng máy.
+# Không thuộc về mã nguồn dự án.
+.claude/
+CLAUDE.md

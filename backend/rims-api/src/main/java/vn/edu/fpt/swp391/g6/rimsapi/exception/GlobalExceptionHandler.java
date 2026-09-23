@@ -15,10 +15,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.ErrorResponse;
 
@@ -181,6 +183,25 @@ public class GlobalExceptionHandler
                 .build();
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * URL không khớp route nào. Spring ném NoResourceFoundException; nếu để nó rơi xuống
+     * handler chung thì mọi đường dẫn gõ sai đều trả 500 thay vì 404.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(
+            NoResourceFoundException ex, HttpServletRequest request)
+    {
+        return build(HttpStatus.NOT_FOUND, "Không tìm thấy đường dẫn yêu cầu", request);
+    }
+
+    /** Sai phương thức HTTP cho một route có tồn tại (ví dụ GET vào endpoint chỉ nhận POST). */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex, HttpServletRequest request)
+    {
+        return build(HttpStatus.METHOD_NOT_ALLOWED, "Phương thức HTTP không được hỗ trợ", request);
     }
 
     // ==================== Lỗi ngoài dự kiến ====================

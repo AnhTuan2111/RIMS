@@ -42,6 +42,8 @@ export interface KitchenOrderItemResponse {
     tableNumber: string
     dishName: string
     quantity: number
+    /** Ghi chú phục vụ nhập khi gọi món — hiện thẳng trên phiếu bếp. */
+    note?: string
     status: OrderItemStatus
     createdAt?: string
 }
