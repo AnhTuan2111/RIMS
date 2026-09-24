@@ -242,14 +242,14 @@ export default function WaiterCreateOrderPage() {
     }
 
     return (
-        <div className="waiter-container">
-            <WaiterHeader />
+        <div className="rk-stack">
+            <WaiterHeader title="Tạo đơn hàng" />
 
-            <main className="waiter-main">
-                <div className="waiter-sub-header">
+            <main className="rk-stack">
+                <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />
 
-                    <h2 className="waiter-title">
+                    <h2 className="rk-sectiontitle">
                         Tạo đơn hàng - Bàn {tableIdNumber || '—'}
                     </h2>
 
@@ -271,16 +271,12 @@ export default function WaiterCreateOrderPage() {
                     className="rk-input"
                 />
 
-                <div className="waiter-category-nav">
+                <div className="rk-segment">
                     {categories.map((category) => (
                         <button
                             key={category}
                             type="button"
-                            className={`waiter-category-tab${
-                                activeCategory === category
-                                    ? ' waiter-category-tab-active'
-                                    : ''
-                            }`}
+                            className={`rk-segment__btn${activeCategory === category ? ' is-active' : ''}`}
                             onClick={() => setActiveCategory(category)}
                         >
                             {category}
@@ -305,7 +301,7 @@ export default function WaiterCreateOrderPage() {
                 ) : visibleMenu.length === 0 ? (
                     <div style={stateBoxStyle}>Không có món nào trong danh mục này.</div>
                 ) : (
-                    <div className="waiter-menu-grid">
+                    <div className="rk-cardgrid">
                         {visibleMenu.map((dish) => {
                             const draft = orderDraft[dish.dishId] ?? {
                                 qty: 0,
@@ -317,10 +313,10 @@ export default function WaiterCreateOrderPage() {
                             return (
                                 <div
                                     key={dish.dishId}
-                                    className="waiter-menu-card"
+                                    className="rk-card rk-card--pad"
                                     style={isUnavailable ? {opacity: 0.5} : undefined}
                                 >
-                                    <div className="waiter-menu-card-top">
+                                    <div className="rk-media">
                                         {dish.imageUrl ? (
                                             <img
                                                 src={
@@ -329,14 +325,14 @@ export default function WaiterCreateOrderPage() {
                                                         : `/image/${dish.imageUrl}`
                                                 }
                                                 alt={dish.name}
-                                                className="waiter-menu-img"
+                                                className="rk-thumb"
                                                 onError={(e) => {
                                                     ;(e.target as HTMLImageElement).src =
                                                         'https://placehold.co/64x64?text='
                                                 }}
                                             />
                                         ) : (
-                                            <span className="waiter-menu-emoji">
+                                            <span className="rk-thumb">
                                                 <UtensilsCrossed
                                                     className="rk-icon"
                                                     aria-hidden="true"
@@ -344,21 +340,21 @@ export default function WaiterCreateOrderPage() {
                                             </span>
                                         )}
 
-                                        <div className="waiter-menu-info">
+                                        <div className="rk-rowlist__main">
                                             <h4>{dish.name}</h4>
                                             <p>{fmtPrice(dish.price)}</p>
                                             {isUnavailable && (
-                                                <span className="waiter-badge waiter-badge-cancelled">
+                                                <span className="rk-chip rk-chip--alert">
                                                     Hết hàng
                                                 </span>
                                             )}
                                         </div>
                                     </div>
 
-                                    <div className="waiter-qty-controls">
+                                    <div className="rk-stepper">
                                         <button
                                             type="button"
-                                            className="waiter-qty-btn"
+                                            className="rk-stepper__btn"
                                             disabled={draft.qty <= 0}
                                             onClick={() =>
                                                 changeDraftQty(dish.dishId, -1)
@@ -367,13 +363,13 @@ export default function WaiterCreateOrderPage() {
                                             -
                                         </button>
 
-                                        <span className="waiter-qty-val">
+                                        <span className="rk-stepper__value">
                                             {draft.qty}
                                         </span>
 
                                         <button
                                             type="button"
-                                            className="waiter-qty-btn"
+                                            className="rk-stepper__btn"
                                             disabled={isUnavailable}
                                             onClick={() => changeDraftQty(dish.dishId, 1)}
                                         >
@@ -385,7 +381,7 @@ export default function WaiterCreateOrderPage() {
                                         placeholder="Ghi chú"
                                         value={draft.note}
                                         disabled={isUnavailable}
-                                        className="waiter-note-input"
+                                        className="rk-input"
                                         onChange={(event) =>
                                             setDraftNote(dish.dishId, event.target.value)
                                         }
@@ -432,7 +428,7 @@ export default function WaiterCreateOrderPage() {
                     </>
                 }
             >
-                <ul className="waiter-confirm-list">
+                <ul className="rk-rowlist">
                     {selectedItems.map((item) => (
                         <li key={item.dishId}>
                             <span>

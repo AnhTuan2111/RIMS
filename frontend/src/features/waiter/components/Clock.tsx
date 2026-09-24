@@ -12,7 +12,7 @@ export function Clock() {
     const day = String(d.getDate()).padStart(2, '0')
     const mon = d.toLocaleString('en', {month: 'short'})
     return (
-        <span className="waiter-clock">
+        <span className="rk-num rk-pagehead__desc">
             {h}h{m} {day}-{mon}-{d.getFullYear()}
         </span>
     )

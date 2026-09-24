@@ -1,4 +1,5 @@
 import {AlertTriangle} from 'lucide-react'
+import {Modal} from '@/shared/components/ui'
 
 import {useCallback, useEffect, useRef, useState, type CSSProperties} from 'react'
 import {useNavigate} from 'react-router-dom'
@@ -437,23 +438,32 @@ export default function WaiterTableListPage() {
     const displayTables = tables
 
     return (
-        <div className="waiter-container">
+        <div className="rk-stack">
             <WaiterHeader />
 
-            <main className="waiter-main">
-                <div className="waiter-legend">
-                    <span className="waiter-legend-item">
-                        <span className="waiter-legend-dot waiter-dot-available" />
+            <main className="rk-stack">
+                <div className="rk-legend">
+                    <span className="rk-legend__item">
+                        <span
+                            className="rk-legend__dot"
+                            style={{background: 'var(--rims-ok)'}}
+                        />
                         Bàn trống
                     </span>
 
-                    <span className="waiter-legend-item">
-                        <span className="waiter-legend-dot waiter-dot-serving" />
+                    <span className="rk-legend__item">
+                        <span
+                            className="rk-legend__dot"
+                            style={{background: 'var(--rims-busy)'}}
+                        />
                         Đang phục vụ
                     </span>
 
-                    <span className="waiter-legend-item">
-                        <span className="waiter-legend-dot waiter-dot-reserved" />
+                    <span className="rk-legend__item">
+                        <span
+                            className="rk-legend__dot"
+                            style={{background: 'var(--rims-brand)'}}
+                        />
                         Đã đặt trước
                     </span>
                 </div>
@@ -504,18 +514,57 @@ export default function WaiterTableListPage() {
                 )}
             </main>
 
-            {tableModal && (
-                <div className="waiter-modal-overlay" onClick={() => setTableModal(null)}>
-                    <div
-                        className="waiter-modal"
-                        onClick={(event) => event.stopPropagation()}
-                    >
-                        <h3>Bàn {tableModal.tableNumber}</h3>
+            <Modal
+                open={Boolean(tableModal)}
+                title={`Bàn ${tableModal?.tableNumber ?? ''}`}
+                onClose={() => setTableModal(null)}
+                footer={
+                    tableModal ? (
+                        <>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet"
+                                onClick={() => setTableModal(null)}
+                            >
+                                {modalReservations.length > 0 ||
+                                tableModal.upcomingReservationTime
+                                    ? 'Chọn bàn khác'
+                                    : 'Huỷ'}
+                            </button>
 
+                            <button
+                                type="button"
+                                className="rk-btn"
+                                onClick={() =>
+                                    navigate(
+                                        `/waiter/reservations?tableId=${tableModal.tableId}`,
+                                    )
+                                }
+                            >
+                                Tạo đặt bàn
+                            </button>
+
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--primary"
+                                onClick={() =>
+                                    navigate(
+                                        `/waiter/tables/${tableModal.tableId}/order/new`,
+                                    )
+                                }
+                            >
+                                Tạo đơn hàng
+                            </button>
+                        </>
+                    ) : undefined
+                }
+            >
+                {tableModal && (
+                    <>
                         {isModalLoading ? (
                             <p>Đang kiểm tra lịch đặt...</p>
                         ) : modalReservations.length > 0 ? (
-                            <div className="waiter-warning-box">
+                            <div className="rk-note rk-note--busy">
                                 <p>
                                     <strong>
                                         <AlertTriangle
@@ -570,7 +619,7 @@ export default function WaiterTableListPage() {
                                 </p>
                             </div>
                         ) : tableModal.upcomingReservationTime ? (
-                            <div className="waiter-warning-box">
+                            <div className="rk-note rk-note--busy">
                                 <p>
                                     <strong> Cảnh báo:</strong> Bàn này đã được đặt trước
                                     bởi{' '}
@@ -593,46 +642,9 @@ export default function WaiterTableListPage() {
                         ) : (
                             <p>Bàn đang trống. Bạn muốn làm gì?</p>
                         )}
-
-                        <div className="waiter-modal-actions">
-                            <button
-                                type="button"
-                                className="rk-btn rk-btn--quiet"
-                                onClick={() => setTableModal(null)}
-                            >
-                                {modalReservations.length > 0 ||
-                                tableModal.upcomingReservationTime
-                                    ? 'Chọn Bàn Khác'
-                                    : 'Hủy'}
-                            </button>
-
-                            <button
-                                type="button"
-                                className="rk-btn rk-btn--quiet"
-                                onClick={() =>
-                                    navigate(
-                                        `/waiter/reservations?tableId=${tableModal.tableId}`,
-                                    )
-                                }
-                            >
-                                Tạo Đặt Bàn
-                            </button>
-
-                            <button
-                                type="button"
-                                className="rk-btn rk-btn--primary"
-                                onClick={() =>
-                                    navigate(
-                                        `/waiter/tables/${tableModal.tableId}/order/new`,
-                                    )
-                                }
-                            >
-                                Tạo đơn hàng
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </Modal>
         </div>
     )
 }

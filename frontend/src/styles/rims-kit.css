@@ -2685,3 +2685,64 @@ textarea.rk-input {
 .rk-chart__area {
     fill: url(#weekly-revenue-area);
 }
+
+/* ---------- Bộ tăng giảm số lượng ----------
+   Trừ · số · cộng. Dùng khi Phục vụ gọi món tại bàn. */
+
+.rk-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+}
+
+.rk-stepper__btn {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-lg);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.rk-stepper__btn:hover:not(:disabled) {
+    border-color: var(--rims-brand);
+    color: var(--rims-brand);
+}
+
+.rk-stepper__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+.rk-stepper__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rk-stepper__value {
+    min-width: 2ch;
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    text-align: center;
+}
+
+/* ---------- Lưới thẻ ----------
+   Thực đơn, sơ đồ bàn: các thẻ cùng cỡ, tự xuống dòng. */
+
+.rk-cardgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--rims-space-4);
+}
+
+.rk-cardgrid--sm {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}

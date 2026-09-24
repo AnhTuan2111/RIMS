@@ -108,10 +108,10 @@ export default function WaiterReservationDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="waiter-container">
-                <WaiterHeader />
+            <div className="rk-stack">
+                <WaiterHeader title="Chi tiết đặt bàn" />
 
-                <main className="waiter-main">
+                <main className="rk-stack">
                     <p style={stateTextStyle}>Đang tải thông tin đặt bàn...</p>
                 </main>
             </div>
@@ -120,18 +120,18 @@ export default function WaiterReservationDetailPage() {
 
     if (error) {
         return (
-            <div className="waiter-container">
-                <WaiterHeader />
+            <div className="rk-stack">
+                <WaiterHeader title="Chi tiết đặt bàn" />
 
-                <main className="waiter-main">
-                    <div className="waiter-sub-header">
+                <main className="rk-stack">
+                    <div className="rk-card__head-inline">
                         <BackArrow onClick={() => navigate('/waiter/tables')} />
 
-                        <h2 className="waiter-title">Chi tiết đặt bàn</h2>
+                        <h2 className="rk-sectiontitle">Chi tiết đặt bàn</h2>
                     </div>
 
-                    <div className="waiter-card" style={cardStyle}>
-                        <div className="waiter-card-body">
+                    <div className="rk-card rk-card--pad" style={cardStyle}>
+                        <div className="rk-stack">
                             <p style={errorTextStyle}>{error}</p>
 
                             <button
@@ -151,18 +151,18 @@ export default function WaiterReservationDetailPage() {
 
     if (!reservation) {
         return (
-            <div className="waiter-container">
-                <WaiterHeader />
+            <div className="rk-stack">
+                <WaiterHeader title="Chi tiết đặt bàn" />
 
-                <main className="waiter-main">
-                    <div className="waiter-sub-header">
+                <main className="rk-stack">
+                    <div className="rk-card__head-inline">
                         <BackArrow onClick={() => navigate('/waiter/tables')} />
 
-                        <h2 className="waiter-title">Chi tiết đặt bàn</h2>
+                        <h2 className="rk-sectiontitle">Chi tiết đặt bàn</h2>
                     </div>
 
-                    <div className="waiter-card" style={cardStyle}>
-                        <div className="waiter-card-body">
+                    <div className="rk-card rk-card--pad" style={cardStyle}>
+                        <div className="rk-stack">
                             <p style={stateTextStyle}>
                                 Không có đặt bàn đang hoạt động cho bàn này. Bàn có thể đã
                                 hết thời gian chờ hoặc đã được phục vụ.
@@ -184,14 +184,14 @@ export default function WaiterReservationDetailPage() {
     }
 
     return (
-        <div className="waiter-container">
-            <WaiterHeader />
+        <div className="rk-stack">
+            <WaiterHeader title="Chi tiết đặt bàn" />
 
-            <main className="waiter-main">
-                <div className="waiter-sub-header">
+            <main className="rk-stack">
+                <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />
 
-                    <h2 className="waiter-title">
+                    <h2 className="rk-sectiontitle">
                         Chi tiết đặt bàn — Bàn {tableIdNumber}
                     </h2>
 
@@ -209,34 +209,34 @@ export default function WaiterReservationDetailPage() {
                     </button>
                 </div>
 
-                <div className="waiter-card" style={cardStyle}>
-                    <div className="waiter-card-header">Thông tin đặt bàn</div>
+                <div className="rk-card rk-card--pad" style={cardStyle}>
+                    <div className="rk-card__head-inline">Thông tin đặt bàn</div>
 
-                    <div className="waiter-card-body">
-                        <div className="waiter-detail-row">
+                    <div className="rk-stack">
+                        <div className="rk-detailrow">
                             <span>Mã đặt bàn</span>
                             <strong>{reservationId ?? '—'}</strong>
                         </div>
 
-                        <div className="waiter-detail-row">
+                        <div className="rk-detailrow">
                             <span>Thời gian</span>
                             <strong>
                                 {date} — {time}
                             </strong>
                         </div>
 
-                        <div className="waiter-detail-row">
+                        <div className="rk-detailrow">
                             <span>Khách hàng</span>
                             <strong>{reservation.customerName}</strong>
                         </div>
 
-                        <div className="waiter-detail-row">
+                        <div className="rk-detailrow">
                             <span>Số điện thoại</span>
                             <strong>{reservation.phone}</strong>
                         </div>
 
                         {reservation.note && (
-                            <div className="waiter-detail-row">
+                            <div className="rk-detailrow">
                                 <span>Ghi chú</span>
                                 <strong>{reservation.note}</strong>
                             </div>

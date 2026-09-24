@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useState, type CSSProperties} from 'react'
+import {statusChipClass} from './statusChip'
 import {useNavigate, useParams} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
@@ -103,14 +104,14 @@ export default function WaiterOrderDetailPage() {
     const orderItems = servingOrders.flatMap((order) => order.orderItems)
 
     return (
-        <div className="waiter-container">
-            <WaiterHeader />
+        <div className="rk-stack">
+            <WaiterHeader title="Chi tiết đơn hàng" />
 
-            <main className="waiter-main">
-                <div className="waiter-sub-header">
+            <main className="rk-stack">
+                <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />
 
-                    <h2 className="waiter-title">Bàn: {tableIdNumber || '—'}</h2>
+                    <h2 className="rk-sectiontitle">Bàn: {tableIdNumber || '—'}</h2>
 
                     <button
                         type="button"
@@ -124,12 +125,12 @@ export default function WaiterOrderDetailPage() {
                     </button>
                 </div>
 
-                <div className="waiter-detail-layout">
-                    <div className="waiter-card">
-                        <div className="waiter-card-header">Danh sách món</div>
+                <div className="rk-two rk-two--wideleft">
+                    <div className="rk-card rk-card--pad">
+                        <div className="rk-card__head-inline">Danh sách món</div>
 
                         <div
-                            className="waiter-card-body"
+                            className="rk-stack"
                             style={{
                                 padding: 0,
                             }}
@@ -157,7 +158,7 @@ export default function WaiterOrderDetailPage() {
                                     Bàn này chưa có món đang phục vụ.
                                 </div>
                             ) : (
-                                <table className="waiter-table-custom">
+                                <table className="rk-table rk-table--compact">
                                     <thead>
                                         <tr>
                                             <th>Món</th>
@@ -202,7 +203,7 @@ export default function WaiterOrderDetailPage() {
 
                                                 <td>
                                                     <span
-                                                        className={`waiter-badge waiter-badge-${(item.status ?? '').toLowerCase()}`}
+                                                        className={`rk-chip ${statusChipClass(item.status)}`}
                                                     >
                                                         {item.status}
                                                     </span>

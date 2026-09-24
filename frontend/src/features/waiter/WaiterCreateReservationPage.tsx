@@ -368,28 +368,28 @@ export default function WaiterCreateReservationPage() {
         tables.find((table) => table.tableId === resForm.tableId)?.tableNumber ?? '...'
 
     return (
-        <div className="waiter-container">
-            <WaiterHeader />
+        <div className="rk-stack">
+            <WaiterHeader title="Đặt bàn" />
 
-            <main className="waiter-main">
-                <div className="waiter-sub-header">
-                    <h2 className="waiter-title">Đặt Bàn</h2>
+            <main className="rk-stack">
+                <div className="rk-card__head-inline">
+                    <h2 className="rk-sectiontitle">Thông tin đặt bàn</h2>
                 </div>
 
-                <div className="waiter-res-layout">
-                    <div className="waiter-card">
-                        <div className="waiter-card-header">Thông tin đặt bàn</div>
+                <div className="rk-two">
+                    <div className="rk-card rk-card--pad">
+                        <div className="rk-card__head-inline">Thông tin đặt bàn</div>
 
-                        <div className="waiter-card-body">
+                        <div className="rk-stack">
                             {resFormError && (
-                                <div className="waiter-form-error">{resFormError}</div>
+                                <div className="rk-formerror">{resFormError}</div>
                             )}
 
-                            <div className="waiter-form-group">
+                            <div className="rk-field">
                                 <label>Tên khách hàng</label>
                                 <input
                                     value={resForm.customerName}
-                                    className="waiter-form-input"
+                                    className="rk-input"
                                     maxLength={50}
                                     onChange={(event) =>
                                         updateForm({
@@ -399,11 +399,11 @@ export default function WaiterCreateReservationPage() {
                                 />
                             </div>
 
-                            <div className="waiter-form-group">
+                            <div className="rk-field">
                                 <label>Số điện thoại</label>
                                 <input
                                     value={resForm.phone}
-                                    className="waiter-form-input"
+                                    className="rk-input"
                                     pattern="0[0-9]{9}"
                                     onChange={(event) =>
                                         updateForm({
@@ -417,7 +417,7 @@ export default function WaiterCreateReservationPage() {
 
                             <div style={dateTimeRowStyle}>
                                 <div
-                                    className="waiter-form-group"
+                                    className="rk-field"
                                     style={{
                                         flex: 1,
                                     }}
@@ -426,7 +426,7 @@ export default function WaiterCreateReservationPage() {
                                     <input
                                         type="date"
                                         value={resForm.date}
-                                        className="waiter-form-input"
+                                        className="rk-input"
                                         onChange={(event) =>
                                             updateForm({
                                                 date: event.target.value,
@@ -436,7 +436,7 @@ export default function WaiterCreateReservationPage() {
                                 </div>
 
                                 <div
-                                    className="waiter-form-group"
+                                    className="rk-field"
                                     style={{
                                         flex: 1,
                                     }}
@@ -444,7 +444,7 @@ export default function WaiterCreateReservationPage() {
                                     <label>Giờ đặt bàn</label>
                                     <select
                                         value={resForm.time}
-                                        className="waiter-form-input"
+                                        className="rk-input"
                                         onChange={(event) =>
                                             updateForm({
                                                 time: event.target.value,
@@ -460,11 +460,11 @@ export default function WaiterCreateReservationPage() {
                                 </div>
                             </div>
 
-                            <div className="waiter-form-group">
+                            <div className="rk-field">
                                 <label>Bàn</label>
                                 <select
                                     value={resForm.tableId}
-                                    className="waiter-form-input"
+                                    className="rk-input"
                                     disabled={isTablesLoading}
                                     onChange={(event) =>
                                         updateForm({
@@ -487,11 +487,11 @@ export default function WaiterCreateReservationPage() {
                                 </select>
                             </div>
 
-                            <div className="waiter-form-group">
+                            <div className="rk-field">
                                 <label>Ghi chú</label>
                                 <textarea
                                     value={resForm.note}
-                                    className="waiter-form-input"
+                                    className="rk-input"
                                     rows={3}
                                     maxLength={100}
                                     onChange={(event) =>
@@ -527,12 +527,12 @@ export default function WaiterCreateReservationPage() {
                         </div>
                     </div>
 
-                    <div className="waiter-card">
-                        <div className="waiter-card-header">
+                    <div className="rk-card rk-card--pad">
+                        <div className="rk-card__head-inline">
                             Lịch đặt cùng ngày (Bàn {selectedTableNumber})
                         </div>
 
-                        <div className="waiter-card-body waiter-res-list">
+                        <div className="rk-rowlist">
                             {!resForm.tableId || !resForm.date ? (
                                 <p style={emptyTextStyle}>
                                     Chọn bàn và ngày để xem lịch đặt.
@@ -563,14 +563,14 @@ export default function WaiterCreateReservationPage() {
                                                 reservationId ??
                                                 `${reservation.phone}-${reservation.reservationTime}`
                                             }
-                                            className="waiter-res-card"
+                                            className="rk-rowlist__item"
                                         >
                                             <div>
-                                                <div className="waiter-res-time">
+                                                <div className="rk-num">
                                                     {date} — {time}
                                                 </div>
 
-                                                <div className="waiter-res-info">
+                                                <div className="rk-rowlist__main">
                                                     <h4>{reservation.customerName}</h4>
 
                                                     <p>

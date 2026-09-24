@@ -1,4 +1,5 @@
 import {Check, UtensilsCrossed} from 'lucide-react'
+import {statusChipClass} from './statusChip'
 
 import {
     useCallback,
@@ -506,18 +507,18 @@ export default function WaiterUpdateOrderPage() {
     }
 
     return (
-        <div className="waiter-container">
-            <WaiterHeader />
+        <div className="rk-stack">
+            <WaiterHeader title="Cập nhật đơn hàng" />
 
-            <main className="waiter-main">
-                <div className="waiter-sub-header">
+            <main className="rk-stack">
+                <div className="rk-card__head-inline">
                     <BackArrow
                         onClick={() =>
                             navigate(`/waiter/tables/${tableIdNumber}/order/detail`)
                         }
                     />
 
-                    <h2 className="waiter-title">
+                    <h2 className="rk-sectiontitle">
                         Cập nhật đơn hàng - Bàn {tableIdNumber || '—'}
                     </h2>
 
@@ -539,16 +540,12 @@ export default function WaiterUpdateOrderPage() {
                     className="rk-input"
                 />
 
-                <div className="waiter-category-nav">
+                <div className="rk-segment">
                     {categories.map((category) => (
                         <button
                             key={category}
                             type="button"
-                            className={`waiter-category-tab${
-                                activeCategory === category
-                                    ? ' waiter-category-tab-active'
-                                    : ''
-                            }`}
+                            className={`rk-segment__btn${activeCategory === category ? ' is-active' : ''}`}
                             onClick={() => setActiveCategory(category)}
                         >
                             {category}
@@ -557,7 +554,7 @@ export default function WaiterUpdateOrderPage() {
                 </div>
 
                 {pageError && (
-                    <div className="waiter-form-error" style={errorBoxStyle}>
+                    <div className="rk-formerror" style={errorBoxStyle}>
                         {pageError}
 
                         <button
@@ -576,7 +573,7 @@ export default function WaiterUpdateOrderPage() {
                 ) : visibleMenu.length === 0 ? (
                     <div style={stateBoxStyle}>Không có món nào trong danh mục này.</div>
                 ) : (
-                    <div className="waiter-menu-grid">
+                    <div className="rk-cardgrid">
                         {visibleMenu.map((dish) => {
                             const draft = orderDraft[dish.dishId] ?? {
                                 qty: 0,
@@ -596,10 +593,10 @@ export default function WaiterUpdateOrderPage() {
                             return (
                                 <div
                                     key={dish.dishId}
-                                    className="waiter-menu-card"
+                                    className="rk-card rk-card--pad"
                                     style={isUnavailable ? {opacity: 0.5} : undefined}
                                 >
-                                    <div className="waiter-menu-card-top">
+                                    <div className="rk-media">
                                         {dish.imageUrl ? (
                                             <img
                                                 src={
@@ -608,14 +605,14 @@ export default function WaiterUpdateOrderPage() {
                                                         : `/image/${dish.imageUrl}`
                                                 }
                                                 alt={dish.name}
-                                                className="waiter-menu-img"
+                                                className="rk-thumb"
                                                 onError={(e) => {
                                                     ;(e.target as HTMLImageElement).src =
                                                         'https://placehold.co/64x64?text='
                                                 }}
                                             />
                                         ) : (
-                                            <span className="waiter-menu-emoji">
+                                            <span className="rk-thumb">
                                                 <UtensilsCrossed
                                                     className="rk-icon"
                                                     aria-hidden="true"
@@ -623,20 +620,20 @@ export default function WaiterUpdateOrderPage() {
                                             </span>
                                         )}
 
-                                        <div className="waiter-menu-info">
+                                        <div className="rk-rowlist__main">
                                             <h4>{dish.name}</h4>
                                             <p>{fmtPrice(dish.price)}</p>
 
                                             {hasExisting && draft.status && (
                                                 <span
-                                                    className={`waiter-badge waiter-badge-${draft.status.toLowerCase()}`}
+                                                    className={`rk-chip ${statusChipClass(draft.status)}`}
                                                 >
                                                     {draft.status}
                                                 </span>
                                             )}
 
                                             {!hasExisting && isUnavailable && (
-                                                <span className="waiter-badge waiter-badge-cancelled">
+                                                <span className="rk-chip rk-chip--alert">
                                                     Hết hàng
                                                 </span>
                                             )}
@@ -698,10 +695,10 @@ export default function WaiterUpdateOrderPage() {
                                         </div>
                                     )}
 
-                                    <div className="waiter-qty-controls">
+                                    <div className="rk-stepper">
                                         <button
                                             type="button"
-                                            className="waiter-qty-btn"
+                                            className="rk-stepper__btn"
                                             disabled={draft.qty <= minQty}
                                             onClick={() =>
                                                 changeDraftQty(dish.dishId, -1)
@@ -710,13 +707,13 @@ export default function WaiterUpdateOrderPage() {
                                             -
                                         </button>
 
-                                        <span className="waiter-qty-val">
+                                        <span className="rk-stepper__value">
                                             {draft.qty}
                                         </span>
 
                                         <button
                                             type="button"
-                                            className="waiter-qty-btn"
+                                            className="rk-stepper__btn"
                                             disabled={isUnavailable}
                                             onClick={() => changeDraftQty(dish.dishId, 1)}
                                         >
@@ -727,20 +724,20 @@ export default function WaiterUpdateOrderPage() {
                                     <input
                                         placeholder="Ghi chú (ít cay, ...)"
                                         value={draft.note}
-                                        className="waiter-note-input"
+                                        className="rk-input"
                                         onChange={(event) =>
                                             setDraftNote(dish.dishId, event.target.value)
                                         }
                                     />
 
                                     {isUnavailable && (
-                                        <p className="waiter-item-hint">
+                                        <p className="rk-field__hint">
                                             Món hiện đang tạm hết — không thể gọi thêm.
                                         </p>
                                     )}
 
                                     {draft.status === 'COMPLETED' && (
-                                        <p className="waiter-item-hint">
+                                        <p className="rk-field__hint">
                                             Món đã hoàn thành — không thể giảm số lượng
                                             dưới {minQty}.
                                         </p>
@@ -748,7 +745,7 @@ export default function WaiterUpdateOrderPage() {
 
                                     {draft.status === 'CANCELLED' && (
                                         <>
-                                            <p className="waiter-item-hint">
+                                            <p className="rk-field__hint">
                                                 Món đã hủy — nhấn + để thêm mới từ đầu.
                                             </p>
 
@@ -801,7 +798,7 @@ export default function WaiterUpdateOrderPage() {
                     </>
                 }
             >
-                <ul className="waiter-confirm-list">
+                <ul className="rk-rowlist">
                     {changeSummary.map((item) => (
                         <li key={item.dishId}>
                             <span>
