@@ -1,12 +1,20 @@
+# Cấu hình cho test: H2 trong bộ nhớ, dựng lại schema mỗi lần chạy.
+#
+# Mọi giá trị ở đây đều là giá trị giả, cố ý ghi thẳng vào file và cố ý commit —
+# không có gì bí mật để giấu. Trước đây dòng signerKey lại là KHOÁ KÝ JWT THẬT
+# của môi trường phát triển, nên nó vừa nằm trong repo công khai vừa khiến token
+# do test sinh ra ký được bằng khoá thật.
 spring:
   datasource:
     url: jdbc:h2:mem:rims_test;MODE=MSSQLServer;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
-    password: REMOVED-DB-PASSWORD
+    password: test-only-not-a-secret
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+
 jwt:
-  signerKey: REMOVED-JWT-SIGNER-KEY
+  # Tối thiểu 32 ký tự, nếu không thư viện ký sẽ từ chối.
+  signerKey: test-signer-key-for-unit-tests-only-32chars
