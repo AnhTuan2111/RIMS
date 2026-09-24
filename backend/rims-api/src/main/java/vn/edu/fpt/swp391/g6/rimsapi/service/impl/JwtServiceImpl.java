@@ -1,15 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.exception.InvalidTokenException;
-import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
-
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -18,6 +8,17 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import vn.edu.fpt.swp391.g6.rimsapi.exception.InvalidTokenException;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.TechnicalException;
+import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
 
 @Service
 public class JwtServiceImpl implements JwtService
@@ -52,7 +53,7 @@ public class JwtServiceImpl implements JwtService
             return signClaims(claimsSet);
         } catch (JOSEException e)
         {
-            throw new RuntimeException("Không thể tạo access token", e);
+            throw new TechnicalException("Không thể tạo access token", e);
         }
     }
 
@@ -73,7 +74,7 @@ public class JwtServiceImpl implements JwtService
             return signClaims(claimsSet);
         } catch (JOSEException e)
         {
-            throw new RuntimeException("Không thể tạo refresh token", e);
+            throw new TechnicalException("Không thể tạo refresh token", e);
         }
     }
 
@@ -134,7 +135,8 @@ public class JwtServiceImpl implements JwtService
             return claims.getStringClaim(CLAIM_USERNAME);
         } catch (ParseException e)
         {
-            throw new RuntimeException(e);
+            // Token không parse được nghĩa là client gửi token hỏng -> 401, không phải 500.
+            throw new InvalidTokenException("Token không hợp lệ");
         }
     }
 
@@ -146,7 +148,7 @@ public class JwtServiceImpl implements JwtService
             return claims.getStringClaim(CLAIM_ROLE);
         } catch (ParseException e)
         {
-            throw new RuntimeException(e);
+            throw new InvalidTokenException("Token không hợp lệ");
         }
     }
 
@@ -174,7 +176,8 @@ public class JwtServiceImpl implements JwtService
     public LocalDateTime extractExpiry(String token)
     {
         Date exp = parseAndValidate(token).getExpirationTime();
-        if (exp == null) return null;
+        if (exp == null)
+            return null;
         return exp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 }

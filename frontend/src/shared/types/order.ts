@@ -6,10 +6,7 @@
  */
 
 /** Status of a single order item in the kitchen */
-export type OrderItemStatus =
-    | 'PREPARING'
-    | 'COMPLETED'
-    | 'CANCELLED'
+export type OrderItemStatus = 'PREPARING' | 'COMPLETED' | 'CANCELLED'
 
 /** A line item within an order (waiter/cashier view) */
 export interface OrderItemResponse {
@@ -30,7 +27,7 @@ export interface OrderItemResponse {
 export interface OrderDetailResponse {
     orderId: number
     tableNumber: string
-    tableName?: string  // alias used by cashier
+    tableName?: string // alias used by cashier
     createdAt: string
     orderItems: OrderItemResponse[]
     totalAmountBeforeVat: number
@@ -45,6 +42,20 @@ export interface KitchenOrderItemResponse {
     tableNumber: string
     dishName: string
     quantity: number
+    /** Ghi chú phục vụ nhập khi gọi món — hiện thẳng trên phiếu bếp. */
+    note?: string
     status: OrderItemStatus
     createdAt?: string
+}
+
+/**
+ * Nhãn tiếng Việt cho trạng thái món.
+ *
+ * <p>Trước đây một số màn in thẳng giá trị enum ra màn hình, nên bếp nhìn thấy
+ * "PREPARING" thay vì "Đang chế biến".
+ */
+export const ORDER_ITEM_STATUS_LABELS: Record<OrderItemStatus, string> = {
+    PREPARING: 'Đang chế biến',
+    COMPLETED: 'Đã hoàn thành',
+    CANCELLED: 'Đã huỷ',
 }

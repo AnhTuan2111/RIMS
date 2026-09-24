@@ -11,24 +11,24 @@
     display: grid;
     place-items: center;
     padding: 1.5rem;
-    background: radial-gradient(circle at top left, rgba(122, 16, 48, 0.22), transparent 35%),
-    radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.14), transparent 35%),
-    #14090b;
+    background:
+        radial-gradient(circle at top left, rgba(122, 16, 48, 0.22), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.14), transparent 35%), var(--rims-ink);
 }
 
 .login-card {
     width: min(460px, 100%);
     padding: 2.2rem;
     border-radius: 24px;
-    background: #fbf3e3;
-    border: 1px solid #ead9b3;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+    background: var(--rims-gold-soft);
+    border: 1px solid var(--rims-gold-soft);
+    box-shadow: 0 24px 70px rgb(36 21 18 / 40%);
 }
 
 .login-back-link {
     display: inline-block;
     margin-bottom: 1.5rem;
-    color: #7a1030;
+    color: var(--rims-brand);
     text-decoration: none;
     font-weight: 800;
 }
@@ -39,13 +39,13 @@
 
 .login-header h1 {
     margin: 0 0 0.5rem;
-    color: #241512;
+    color: var(--rims-ink);
     font-size: 2rem;
 }
 
 .login-header p {
     margin: 0 0 1.5rem;
-    color: #5c4a3a;
+    color: var(--rims-ink-2);
     line-height: 1.6;
 }
 
@@ -53,38 +53,43 @@
     display: grid;
     gap: 0.5rem;
     margin-bottom: 1rem;
-    color: #241512;
+    color: var(--rims-ink);
     font-weight: 700;
 }
 
 .auth-field input {
     width: 100%;
     padding: 0.85rem 1rem;
-    border: 1px solid #d9c39a;
+    border: 1px solid var(--rims-gold-soft);
     border-radius: 12px;
-    background: #ffffff;
-    color: #241512;
+    background: var(--rims-surface);
+    color: var(--rims-ink);
 }
 
-.auth-field input:focus {
-    outline: 2px solid #d4af37;
-    border-color: #d4af37;
+/* Vòng focus phải đạt tối thiểu 3:1 với nền. Vàng #d4af37 trên nền sáng chỉ
+   được 2.07:1 — người dùng bàn phím gần như không thấy con trỏ đang ở đâu.
+   Dùng màu thương hiệu (10.6:1) và chỉ hiện với :focus-visible, để bấm chuột
+   không làm nháy vòng viền. */
+.auth-field input:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+    border-color: var(--rims-brand);
 }
 
 .auth-submit {
     width: 100%;
     margin-top: 0.5rem;
     padding: 0.95rem 1rem;
-    border: 1px solid #d4af37;
+    border: 1px solid var(--rims-gold);
     border-radius: 12px;
-    background: #7a1030;
-    color: #f5ecd8;
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
     font-size: 1rem;
     font-weight: 900;
 }
 
 .auth-submit:hover {
-    background: #9a1a3f;
+    background: var(--rims-brand-hover);
 }
 
 .auth-submit:disabled {
@@ -96,45 +101,14 @@
     margin-bottom: 1rem;
     padding: 0.85rem 1rem;
     border-radius: 12px;
-    background: #fef2f2;
-    color: #b91c1c;
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
     font-weight: 700;
     font-size: 0.9rem;
 }
 
-.login-demo {
-    margin-top: 1.25rem;
-    padding: 1rem;
-    border-radius: 14px;
-    background: #fff8ea;
-    border: 1px solid #ead9b3;
-}
-
-.login-demo p {
-    margin: 0 0 0.5rem;
-    font-weight: 900;
-    color: #241512;
-}
-
-.login-demo span {
-    display: block;
-    color: #5c4a3a;
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-
-
-/* Old auth compatibility */
-
-/* =========================
-   OLD AUTH COMPATIBILITY
-========================= */
-
-.auth-layout {
-    display: grid;
-    place-items: center;
-    min-height: 100vh;
-    padding: 1.5rem;
-    background: #14090b;
+@media (max-width: 640px) {
+    .login-card {
+        padding: 1.5rem;
+    }
 }

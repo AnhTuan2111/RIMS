@@ -1,9 +1,26 @@
 import {Link} from 'react-router-dom'
 import {useEffect, useState} from 'react'
+import {CalendarClock, Clock, MapPin, Phone} from 'lucide-react'
+
+import {useRestaurant} from '@/app/providers/useRestaurant'
 import {getPublicBestSellingDishes, type PublicBestSellingDish} from '@/shared/api/public'
 
+/**
+ * Trang công khai của nhà hàng.
+ *
+ * <p>Toàn bộ nội dung nhận diện đọc từ cấu hình admin, không viết cứng. Bản cũ
+ * nhắc "Trung Hoa" 15 lần và có hai khối hoàn toàn bịa: bốn thẻ "Đặc sản" đánh
+ * số 01–04 và ba mục "Vì sao chọn chúng tôi" — đều là văn quảng cáo về một nền
+ * ẩm thực cụ thể, sẽ sai với bất kỳ quán nào khác dùng app này. Thay bằng dữ
+ * liệu thật: mô tả do chủ quán nhập, món bán chạy lấy từ API, và thông tin liên
+ * hệ — thứ người xem trang nhà hàng thật sự cần.
+ */
 export default function HomePage() {
-    const [bestSellingDishes, setBestSellingDishes] = useState<PublicBestSellingDish[]>([])
+    const {profile} = useRestaurant()
+
+    const [bestSellingDishes, setBestSellingDishes] = useState<PublicBestSellingDish[]>(
+        [],
+    )
 
     useEffect(() => {
         const controller = new AbortController()
@@ -11,176 +28,137 @@ export default function HomePage() {
         getPublicBestSellingDishes(controller.signal)
             .then(setBestSellingDishes)
             .catch(() => {
-                // Im lặng bỏ qua lỗi — nếu API lỗi, section này chỉ đơn giản không hiển thị
+                // Im lặng bỏ qua: mục này chỉ đơn giản không hiện nếu API lỗi.
             })
 
         return () => controller.abort()
     }, [])
 
-    return (
-        <main className="restaurant-home">
-            <header className="restaurant-navbar">
-                <div className="restaurant-brand">
-                    <div className="restaurant-logo-mark">满</div>
+    const name = profile?.name ?? 'Nhà hàng'
+    const tagline = profile?.tagline
+    const description = profile?.description
+    const initial = name.trim().charAt(0).toUpperCase()
 
-                    <div>
-                        <h1>MÃN VỊ LÂU</h1>
-                        <p>满味楼 · Ẩm thực Trung Hoa cao cấp</p>
-                        <p className="restaurant-slogan">BOUTIQUE CHINESE DINING</p>
-                    </div>
+    const contacts = [
+        profile?.address && {icon: MapPin, label: 'Địa chỉ', value: profile.address},
+        profile?.phone && {icon: Phone, label: 'Điện thoại', value: profile.phone},
+        profile?.openingHours && {
+            icon: Clock,
+            label: 'Giờ mở cửa',
+            value: profile.openingHours,
+        },
+        // Giờ mở cửa và giờ nhận đặt bàn là hai thứ khác nhau: quán có thể mở
+        // tới 22:30 nhưng hệ thống chỉ nhận đặt tới 20:00. Nói rõ cả hai để
+        // khách không chọn giờ rồi mới bị từ chối.
+        profile?.reservationHours && {
+            icon: CalendarClock,
+            label: 'Nhận đặt bàn',
+            value: profile.reservationHours,
+        },
+    ].filter(Boolean) as {icon: typeof MapPin; label: string; value: string}[]
+
+    return (
+        <main className="rk-home">
+            {/* Masthead: tên quán và một hành động duy nhất. Bản cũ là wordmark
+                trái + 5 link + nút phải — đúng khuôn nav mà mọi trang landing
+                do máy sinh đều dùng. */}
+            <header className="rk-home__masthead">
+                <div className="rk-home__brand">
+                    {profile?.logoUrl ? (
+                        <img
+                            className="rk-home__logo"
+                            src={profile.logoUrl}
+                            alt=""
+                            width={44}
+                            height={44}
+                        />
+                    ) : (
+                        <span className="rk-home__logo rk-home__logo--letter">
+                            {initial}
+                        </span>
+                    )}
+
+                    <span className="rk-home__brandtext">
+                        <strong>{name}</strong>
+                        {tagline && <span>{tagline}</span>}
+                    </span>
                 </div>
 
-                <nav className="restaurant-nav">
-                    <a href="#home">TRANG CHỦ</a>
-                    <a href="#about">VỀ CHÚNG TÔI</a>
-                    <a href="#roles">ĐẶC SẢN</a>
-                    <a href="#features">TRẢI NGHIỆM</a>
-                    <a href="#contact">LIÊN HỆ</a>
-
-                    <Link className="restaurant-login-btn" to="/login">
-                        Đăng nhập
-                    </Link>
-                </nav>
+                <Link className="rk-btn rk-btn--primary" to="/login">
+                    Đăng nhập
+                </Link>
             </header>
 
-            <section id="home" className="restaurant-hero">
-                <div className="restaurant-hero-overlay"></div>
+            {/* Hero cao bằng nội dung, lệch trái. Bản cũ dùng min-height:100vh
+                với hai lớp radial-gradient chồng sau chữ. */}
+            <section className="rk-home__hero">
+                <h1 className="rk-home__title">{name}</h1>
 
-                <div className="restaurant-hero-content">
-                    <p className="restaurant-subtitle">Ẩm thực Trung Hoa cao cấp</p>
+                {tagline && <p className="rk-home__lede">{tagline}</p>}
 
-                    <h2>
-                        MÃN VỊ LÂU
-                        <span>Tinh hoa hương vị Trung Hoa giữa lòng thành phố</span>
-                    </h2>
+                {description && <p className="rk-home__desc">{description}</p>}
 
-                    <p className="restaurant-description">
-                        Từ lẩu Tứ Xuyên cay tê, dimsum Quảng Đông tinh tế đến hải sản
-                        thượng hạng — Mãn Vị Lâu mang đến hành trình ẩm thực Trung Hoa
-                        đa vùng miền, được chế biến bởi đầu bếp giàu kinh nghiệm với
-                        nguyên liệu tuyển chọn mỗi ngày.
-                    </p>
+                <div className="rk-home__actions">
+                    <Link className="rk-btn rk-btn--primary rk-btn--lg" to="/login">
+                        Đặt bàn
+                    </Link>
 
-                    <div className="restaurant-hero-actions">
-                        <Link className="restaurant-primary-btn" to="/login">
-                            Đặt bàn ngay
-                        </Link>
-
-                        <a className="restaurant-secondary-btn" href="#roles">
-                            Khám phá thực đơn
+                    {bestSellingDishes.length > 0 && (
+                        <a className="rk-btn rk-btn--quiet rk-btn--lg" href="#thuc-don">
+                            Xem món nổi bật
                         </a>
-                    </div>
-                </div>
-            </section>
-
-            <section id="about" className="restaurant-section restaurant-about">
-                <div>
-                    <p className="restaurant-section-label">Về Mãn Vị Lâu</p>
-                    <h2>Nơi tinh hoa ẩm thực Trung Hoa hội tụ</h2>
-                </div>
-
-                <p>
-                    Mãn Vị Lâu ra đời với mong muốn mang trọn vẹn tinh hoa ẩm thực
-                    Trung Hoa — từ lẩu vùng miền, dimsum Quảng Đông đến các món
-                    Tứ Xuyên đậm đà — đến từng thực khách. Không gian riêng tư,
-                    giới hạn số bàn để đảm bảo trải nghiệm tinh tế, cùng đầu bếp
-                    tận tâm chế biến từ nguyên liệu tươi ngon mỗi ngày.
-                </p>
-            </section>
-
-            <section id="roles" className="restaurant-section">
-                <div className="restaurant-section-header">
-                    <p className="restaurant-section-label">Đặc sản nổi bật</p>
-                    <h2>Thực đơn được yêu thích nhất</h2>
-                </div>
-
-                <div className="restaurant-role-grid">
-                    <article>
-                        <span>01</span>
-                        <h3>Lẩu vùng miền</h3>
-                        <p>Từ Tứ Xuyên mala cay tê đến hải sản Quảng Đông, phục vụ theo nồi ấm cúng.</p>
-                    </article>
-
-                    <article>
-                        <span>02</span>
-                        <h3>Dimsum</h3>
-                        <p>Há cảo, xíu mại, bánh bao hấp nóng hổi theo phong cách điểm tâm Quảng Đông.</p>
-                    </article>
-
-                    <article>
-                        <span>03</span>
-                        <h3>Món Tứ Xuyên</h3>
-                        <p>Hương vị cay tê đặc trưng, đậm đà bản sắc ẩm thực Tây Nam Trung Hoa.</p>
-                    </article>
-
-                    <article>
-                        <span>04</span>
-                        <h3>Hải sản cao cấp</h3>
-                        <p>Tôm, cua, bào ngư tươi sống chế biến theo phong cách Trung Hoa thượng hạng.</p>
-                    </article>
+                    )}
                 </div>
             </section>
 
             {bestSellingDishes.length > 0 && (
-                <section id="best-selling" className="restaurant-section restaurant-best-selling">
-                    <div className="restaurant-section-header">
-                        <p className="restaurant-section-label">Tuần này</p>
-                        <h2>Top món bán chạy</h2>
-                    </div>
+                <section className="rk-home__section" id="thuc-don">
+                    <h2 className="rk-home__h2">Món được gọi nhiều nhất tuần này</h2>
 
-                    <div className="restaurant-best-selling-grid">
+                    <ol className="rk-home__dishes">
                         {bestSellingDishes.map((dish) => (
-                            <article key={dish.rank} className="restaurant-best-selling-card">
-                                <span className="restaurant-best-selling-rank">#{dish.rank}</span>
+                            <li className="rk-home__dish" key={dish.rank}>
                                 <img
+                                    className="rk-home__dishimg"
                                     src={`/image/${dish.imageUrl}`}
-                                    alt={dish.dishName}
-                                    className="restaurant-best-selling-image"
+                                    alt=""
+                                    loading="lazy"
                                 />
-                                <h3>{dish.dishName}</h3>
-                            </article>
+
+                                <span className="rk-home__dishrank rk-num">
+                                    {dish.rank}
+                                </span>
+
+                                <span className="rk-home__dishname">{dish.dishName}</span>
+                            </li>
                         ))}
-                    </div>
+                    </ol>
                 </section>
             )}
 
-            <section id="features" className="restaurant-feature-section">
-                <div className="restaurant-feature-content">
-                    <p className="restaurant-section-label">Vì sao chọn chúng tôi</p>
+            {contacts.length > 0 && (
+                <section className="rk-home__section" id="lien-he">
+                    <h2 className="rk-home__h2">Ghé quán</h2>
 
-                    <h2>Trải nghiệm ẩm thực trọn vẹn</h2>
+                    <dl className="rk-home__contacts">
+                        {contacts.map(({icon: Icon, label, value}) => (
+                            <div className="rk-home__contact" key={label}>
+                                <dt>
+                                    <Icon className="rk-icon" aria-hidden="true" />
+                                    {label}
+                                </dt>
+                                <dd>{value}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                </section>
+            )}
 
-                    <div className="restaurant-feature-list">
-                        <div>
-                            <strong>Nguyên liệu tươi mỗi ngày</strong>
-                            <p>Hải sản, rau củ và gia vị được tuyển chọn kỹ lưỡng hằng ngày.</p>
-                        </div>
-
-                        <div>
-                            <strong>Đầu bếp ẩm thực Trung Hoa</strong>
-                            <p>Đội ngũ đầu bếp giàu kinh nghiệm, am hiểu hương vị đa vùng miền Trung Hoa.</p>
-                        </div>
-
-                        <div>
-                            <strong>Không gian đậm chất Trung Hoa</strong>
-                            <p>Thiết kế tinh tế, riêng tư, lý tưởng cho gia đình, bạn bè và đối tác.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="contact" className="restaurant-cta">
-                <p className="restaurant-section-label">Đặt bàn ngay</p>
-                <h2>Sẵn sàng thưởng thức hương vị Trung Hoa?</h2>
-                <p>Đặt bàn ngay hôm nay để trải nghiệm ẩm thực Mãn Vị Lâu.</p>
-
-                <Link className="restaurant-primary-btn" to="/login">
-                    Đặt bàn ngay
-                </Link>
-            </section>
-
-            <footer className="restaurant-footer">
-                <p>© 2026 Mãn Vị Lâu. Ẩm thực Trung Hoa cao cấp.</p>
+            <footer className="rk-home__footer">
+                <p>
+                    © {new Date().getFullYear()} {name}
+                    {profile?.email && <> · {profile.email}</>}
+                </p>
             </footer>
         </main>
     )

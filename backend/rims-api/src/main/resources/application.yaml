@@ -1,22 +1,45 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
+
 spring:
   application:
     name: rims-api
+
+  # Đọc file .env ở gốc repo (KHÔNG commit, đã nằm trong .gitignore).
+  # Copy .env.example -> .env rồi điền giá trị thật.
+  #
+  # Cú pháp KEY=VALUE của .env chính là cú pháp file .properties, nên chỉ cần
+  # gợi ý định dạng "[.properties]" là Spring đọc được thẳng, không cần thư viện.
+  #
+  # Khai báo hai đường dẫn vì thư mục làm việc khác nhau tuỳ cách chạy:
+  # mvn spring-boot:run chạy từ backend/rims-api, còn IDE có thể chạy từ gốc repo.
+  # "optional:" nên thiếu file cũng không làm app chết ngay khi khởi động.
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../../.env[.properties]
+
+  # Không có giá trị mặc định cho secret: thiếu là app không khởi động được,
+  # tốt hơn là chạy bằng một mật khẩu mặc định nào đó mà không ai để ý.
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=RIMS_DB;encrypt=true;trustServerCertificate=true
-    username: sa
-    password: REMOVED-DB-PASSWORD
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=RIMS_DB;encrypt=true;trustServerCertificate=true}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD}
+
   jpa:
     hibernate:
-      ddl-auto: create
+      # update: giữ nguyên dữ liệu giữa các lần khởi động ứng dụng.
+      # Trước đây là "create" nên mỗi lần chạy lại là mất sạch dữ liệu nhập tay.
+      # Profile "dev" bên dưới ghi đè lại thành "create" khi cần schema sạch.
+      ddl-auto: ${DDL_AUTO:update}
     open-in-view: false
     show-sql: false
+
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: 
-    password: 
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -24,12 +47,33 @@ spring:
           starttls:
             enable: true
 
+app:
+  # Địa chỉ frontend. Dùng cho cả CORS allowed origin lẫn redirect sau khi VNPay
+  # trả kết quả về. Khi deploy thật chỉ cần đổi một chỗ này.
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+
 jwt:
-  signerKey: 
+  # Chuỗi ngẫu nhiên tối thiểu 32 ký tự. Sinh mới: openssl rand -base64 48
+  signerKey: ${JWT_SIGNER_KEY}
+
 vnpay:
   url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
-  tmn-code: "D90AVGT4"
-  hash-secret: "REMOVED-VNPAY-HASH-SECRET"
+  # tmn-code là mã định danh merchant, xuất hiện công khai trong URL thanh toán
+  # nên để mặc định được. hash-secret mới là thứ phải giữ kín.
+  tmn-code: ${VNPAY_TMN_CODE:D90AVGT4}
+  hash-secret: ${VNPAY_HASH_SECRET}
   version: "2.1.0"
   command: "pay"
-  return-url: "http://localhost:8080/rims/cashier/payments/vnpay-callback"
+  return-url: ${VNPAY_RETURN_URL:http://localhost:8080/rims/cashier/payments/vnpay-callback}
+
+---
+# Profile "dev": dựng lại schema sạch và nạp dữ liệu mẫu (DatabaseSeeder chỉ chạy ở đây).
+# Chạy: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true

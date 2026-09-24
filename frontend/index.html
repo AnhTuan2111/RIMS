@@ -1,15 +1,40 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <script>
-      window.global = window;
-    </script>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RIMS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <head>
+        <script>
+            window.global = window
+        </script>
+
+        <!-- Đặt chủ đề TRƯỚC khi vẽ gì ra màn hình. Nếu để React làm thì người
+             dùng chọn chế độ tối vẫn thấy một nháy sáng trắng mỗi lần tải lại. -->
+        <script>
+            try {
+                var saved = localStorage.getItem('rims.theme')
+                if (saved === 'light' || saved === 'dark') {
+                    document.documentElement.setAttribute('data-theme', saved)
+                    document.documentElement.style.colorScheme = saved
+                }
+            } catch (e) {
+                /* trình duyệt chặn lưu trữ thì cứ chạy theo cài đặt của máy */
+            }
+        </script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light dark" />
+        <title>RIMS</title>
+
+        <!-- Be Vietnam Pro: font hình học do người Việt thiết kế, có đủ dấu.
+             JetBrains Mono: dùng cho số tiền, số lượng, mã đơn và giờ — chữ số
+             đều bề ngang nên các cột số thẳng hàng. -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        />
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="/src/main.tsx"></script>
+    </body>
 </html>

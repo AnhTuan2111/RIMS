@@ -16,9 +16,14 @@ html {
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f8fafc;
-    color: #0f172a;
+    font-family:
+        'Segoe UI',
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
 }
 
 button,
@@ -30,6 +35,14 @@ select {
 
 button {
     cursor: pointer;
+
+    /* Nút không tự khai báo nền thì phải trong suốt. Trước đây chúng nhận nền
+       mặc định của trình duyệt — ở chế độ tối đó là xám đặc, nên chữ màu
+       thương hiệu trên nó chỉ còn 1.74:1. Class nào có đặt nền vẫn thắng luật
+       này vì độ ưu tiên cao hơn. */
+    background: transparent;
+    border: 0;
+    color: inherit;
 }
 
 a {
@@ -48,7 +61,6 @@ main {
     display: grid;
     place-items: center;
     min-height: 100vh;
-    color: #e2e8f0;
-    background: #0f172a;
+    color: var(--rims-ink-on-brand);
+    background: var(--rims-shell);
 }
-

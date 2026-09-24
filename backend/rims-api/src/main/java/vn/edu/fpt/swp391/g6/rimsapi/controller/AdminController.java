@@ -1,16 +1,22 @@
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.UpdateProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.restaurant.UpdateRestaurantProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateCustomerRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateStaffRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.SetAccountStatusRequest;
@@ -20,14 +26,12 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.restaurant.RestaurantProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.RestaurantProfileService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
-
-import java.time.LocalDate;
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/rims/admin")
@@ -37,6 +41,22 @@ public class AdminController
 
     private final UserService userService;
     private final AdminService adminService;
+    private final RestaurantProfileService restaurantProfileService;
+    // =================== CẤU HÌNH NHÀ HÀNG ===================
+
+    @GetMapping("/restaurant")
+    public RestaurantProfileResponse getRestaurantProfile()
+    {
+        return restaurantProfileService.getProfile();
+    }
+
+    @PutMapping("/restaurant")
+    public RestaurantProfileResponse updateRestaurantProfile(
+            @RequestBody @Valid UpdateRestaurantProfileRequest request)
+    {
+        return restaurantProfileService.updateProfile(request);
+    }
+
     // =================== USER / ACCOUNT ===================
 
     @GetMapping("/user/all")
@@ -96,7 +116,7 @@ public class AdminController
     @PatchMapping("/user/{id}/status")
     public ResponseEntity<Void> setAccountStatus(
             @PathVariable Integer id,
-            @RequestBody SetAccountStatusRequest request)
+            @Valid @RequestBody SetAccountStatusRequest request)
     {
         userService.setAccountStatus(id, request);
         return ResponseEntity.noContent().build();

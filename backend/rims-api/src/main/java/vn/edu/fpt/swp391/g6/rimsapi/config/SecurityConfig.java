@@ -10,86 +10,92 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // Filter mặc định xử lý login form (ta sẽ chèn JWT filter trước nó)
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAccessDeniedHandler;
 import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationEntryPoint;
-import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationFilter; // Dùng để xác thực user cho mỗi request, đọc file này sẽ rõ
+import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationFilter;
 
-
+/**
+ * Luật bảo mật cho toàn bộ API.
+ *
+ * <p>Phân quyền làm ở mức đường dẫn: mỗi vai trò có một tiền tố riêng. Quyền
+ * theo từng bản ghi (khách A không xem được đặt bàn của khách B) nằm trong
+ * service, vì chỉ ở đó mới biết bản ghi thuộc về ai.
+ */
 @Configuration
-@EnableWebSecurity // Kích hoạt toàn bộ cơ chế Spring Security cho ứng dụng web. Khi annotation này được bật, Spring sẽ tạo ra chuỗi Security Filter để xử lý mọi HTTP Request trước khi request đi vào Controller. Nói cách khác, mọi request từ client đều phải đi qua các lớp bảo mật trước rồi mới đến tầng nghiệp vụ.
-@EnableMethodSecurity // Hiện chưa cần cái này mấy nhưng tương lai nếu hệ thống mở rộng sẽ cần
+@EnableWebSecurity
+// Bật sẵn @PreAuthorize ở tầng phương thức cho khi cần quyền chi tiết hơn.
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig
 {
-    private final JwtAuthenticationFilter jwtAuthenticationFilter; // Filter kiểm tra + giải mã JWT trong mỗi request
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint; // Xử lý khi request KHÔNG có / token sai -> trả lỗi 401
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler; // Xử lý khi có token nhưng role không đủ quyền -> trả lỗi 403
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Bean // Bean quan trọng nhất: định nghĩa toàn bộ luật bảo mật cho ứng dụng, Spring sẽ áp dụng cho MỌI request
-    public SecurityFilterChain filterChain(HttpSecurity http) // SecurityFilterChain là tập hợp nhiều Security Filter được nối tiếp nhau thành một chuỗi.
-    // Mỗi request khi đi vào server sẽ lần lượt đi qua từng filter trong chuỗi này
-    // Mỗi filter đảm nhiệm một chức năng riêng như kiểm tra CORS, xử lý CSRF, xác thực JWT, phân quyền, quản lý Session...
-    // Chỉ khi tất cả các filter cho phép thì request mới được chuyển sang Controller
+    /** Không có token hoặc token sai: trả 401. */
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    /** Có token nhưng sai vai trò: trả 403. */
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http)
     {
         http
-                // Tắt CSRF (Cross-Site Request Forgery) protection vì đây là REST API dùng JWT (stateless, không dùng cookie/session) nên không cần CSRF token như web truyền thống
+                // API dùng JWT trong header, không dùng cookie phiên, nên không có
+                // bề mặt tấn công CSRF để mà phòng.
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Bật CORS và dùng cấu hình mặc định của Spring, thực chất Spring sẽ tự tìm Bean "CorsConfigurationSource" để áp dụng
+                // Đọc cấu hình từ bean CorsConfigurationSource trong CorsConfig.
                 .cors(Customizer.withDefaults())
 
-                // Quy định cách quản lý session: STATELESS nghĩa là server KHÔNG lưu session nào cho user
-                // Mỗi request gửi lên đều phải tự mang JWT. Spring sẽ xác thực lại token từ đầu ở từng request
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Không giữ phiên trên server: mỗi request tự mang JWT của nó.
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Khai báo cách xử lý lỗi liên quan xác thực/phân quyền, thay vì dùng trang lỗi mặc định của Spring
+                // Trả JSON lỗi thay vì trang đăng nhập mặc định của Spring.
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
 
-                // Khai báo luật phân quyền theo từng nhóm URL, xét THEO THỨ TỰ TỪ TRÊN XUỐNG
-                // Ngay khi một request khớp với một rule thì Spring sẽ dừng kiểm tra và áp dụng rule đó
+                // Xét theo thứ tự từ trên xuống, khớp luật nào thì dừng ở luật đó.
                 .authorizeHttpRequests(auth -> auth
 
-                        // vì VNPay server gọi thẳng vào, không thể đính kèm JWT của user được
+                        // VNPay gọi thẳng vào từ máy chủ của họ nên không thể đính
+                        // kèm JWT của khách. Tính toàn vẹn dựa vào chữ ký HMAC
+                        // trong tham số, kiểm ở VNPayConfig.
                         .requestMatchers("/rims/cashier/payments/vnpay-callback").permitAll()
 
-                        // Các endpoint thuộc luồng xác thực (đăng ký, đăng nhập, đăng xuất, refresh token, quên/đặt lại mật khẩu)
+                        // Người dùng chưa đăng nhập lúc gọi những đường dẫn này.
                         .requestMatchers(
                                 "/rims/auth/register",
                                 "/rims/auth/login",
                                 "/rims/auth/logout",
                                 "/rims/auth/refresh",
                                 "/rims/auth/forgot-password",
-                                "/rims/auth/reset-password").permitAll() // Đều KHÔNG cần token vì user chưa đăng nhập lúc gọi các API này
+                                "/rims/auth/reset-password")
+                        .permitAll()
 
-                        // Kết nối WebSocket có quá trình bắt tay (Handshake) riêng
-                        // Sau khi kết nối được thiết lập, việc xác thực người dùng được thực hiện ở tầng STOMP thông qua interceptor StompAuthChannelInterceptor, thay vì Security Filter của HTTP.
+                        // WebSocket xác thực ở tầng STOMP qua
+                        // StompAuthChannelInterceptor, không qua filter HTTP.
                         .requestMatchers("/ws-rims/**").permitAll()
 
-                        // Nhóm endpoint công khai (vd xem menu công khai, thông tin nhà hàng...) không cần đăng nhập
+                        // Trang chủ và thực đơn công khai: khách chưa có tài khoản
+                        // vẫn phải xem được.
                         .requestMatchers("/rims/public/**").permitAll()
 
-                        // Từ đây là các rule phân quyền theo ROLE — user phải có JWT hợp lệ VÀ đúng role tương ứng
                         .requestMatchers("/rims/admin/**").hasRole("ADMIN")
                         .requestMatchers("/rims/chef/**").hasRole("CHEF")
                         .requestMatchers("/rims/waiter/**").hasRole("WAITER")
                         .requestMatchers("/rims/cashier/**").hasRole("CASHIER")
                         .requestMatchers("/rims/customer/**").hasRole("CUSTOMER")
 
-                        // Mọi request không khớp bất kỳ rule nào phía trên đều phải đăng nhập.
-                        .anyRequest().authenticated()
-                )
+                        // Đường dẫn mới thêm mà quên khai báo thì mặc định là phải
+                        // đăng nhập, chứ không phải mở cho tất cả.
+                        .anyRequest().authenticated())
 
-                // Chèn "jwtAuthenticationFilter" chạy TRƯỚC filter mặc định "UsernamePasswordAuthenticationFilter" của Spring Security
-                // Điều này có nghĩa là ngay khi request đi vào hệ thống, JWT Filter sẽ chạy trước để:
-                // Đọc Authorization Header -> Lấy JWT -> Kiểm tra chữ ký -> Kiểm tra thời gian hết hạn ->Trích xuất thông tin người dùng -> Tạo đối tượng Authentication -> Đưa vào SecurityContextHolder
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-        // Tất cả các thiết lập như CSRF, CORS, Session Management, Exception Handling, Authorization Rules và JWT Filter được tổng hợp thành một đối tượng SecurityFilterChain
-        // Spring lưu đối tượng này vào ApplicationContext và sử dụng nó để xử lý mọi HTTP Request đi vào ứng dụng.
-        // Có thể xem SecurityFilterChain là cổng bảo vệ của toàn bộ hệ thống: mỗi request đều phải đi qua chuỗi filter này trước khi được phép đến Controller và các tầng nghiệp vụ phía sau
     }
 }

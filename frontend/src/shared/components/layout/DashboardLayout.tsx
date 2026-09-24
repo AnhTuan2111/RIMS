@@ -12,15 +12,15 @@ export default function DashboardLayout() {
         navigate('/login', {replace: true})
     }
 
-    const layoutClassName = 'app-layout theme-customer'
+    const layoutClassName = 'app-layout rims-shell-theme'
 
     return (
         <div className={layoutClassName}>
-            <Sidebar/>
+            <Sidebar />
             <div className="app-main">
-                <DashboardTopbar onLogout={handleLogout}/>
+                <DashboardTopbar onLogout={handleLogout} />
                 <main className="app-content rims-app-content">
-                    <Outlet/>
+                    <Outlet />
                 </main>
             </div>
         </div>

@@ -1,32 +1,15 @@
-﻿import {
-    type CSSProperties,
-} from 'react'
-import {
-    useNavigate,
-    useSearchParams,
-} from 'react-router-dom'
+import {Check, Download} from 'lucide-react'
 
-import {cashierApi} from '@/shared/api/cashier'
+import {type CSSProperties} from 'react'
+import {useNavigate, useSearchParams} from 'react-router-dom'
 
-function isRequestCanceled(error: unknown) {
-    if (typeof error !== 'object' || error === null) {
-        return false
-    }
-
-    const requestError = error as {
-        name?: string
-        code?: string
-        message?: string
-    }
-
-    return (
-        requestError.name === 'CanceledError'
-        || requestError.code === 'ERR_CANCELED'
-        || requestError.message === 'canceled'
-    )
-}
+import * as cashierApi from '@/shared/api/cashier'
+import {isRequestCanceled} from '@/shared/utils/error'
+import {useToast} from '@/app/providers/useToast'
 
 export default function PaymentSuccess() {
+    const {notify} = useToast()
+
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
 
@@ -38,30 +21,18 @@ export default function PaymentSuccess() {
         }
 
         try {
-            const response =
-                await cashierApi.downloadInvoicePdf(
-                    Number(invoiceId),
-                )
+            const response = await cashierApi.downloadInvoicePdf(Number(invoiceId))
 
-            const blob =
-                new Blob(
-                    [response.data as BlobPart],
-                    {
-                        type: 'application/pdf',
-                    },
-                )
+            const blob = new Blob([response.data as BlobPart], {
+                type: 'application/pdf',
+            })
 
-            const url =
-                window.URL.createObjectURL(blob)
+            const url = window.URL.createObjectURL(blob)
 
-            const link =
-                document.createElement('a')
+            const link = document.createElement('a')
 
             link.href = url
-            link.setAttribute(
-                'download',
-                `Invoice-${invoiceId}.pdf`,
-            )
+            link.setAttribute('download', `Invoice-${invoiceId}.pdf`)
 
             document.body.appendChild(link)
             link.click()
@@ -73,39 +44,29 @@ export default function PaymentSuccess() {
                 return
             }
 
-            console.error(
-                '[PAYMENT_SUCCESS_DOWNLOAD_PDF_ERROR]',
-                requestError,
-            )
+            console.error('[PAYMENT_SUCCESS_DOWNLOAD_PDF_ERROR]', requestError)
 
-            alert('Không thể tải PDF! Vui lòng thử lại.')
+            notify('Không thể tải PDF! Vui lòng thử lại.', {tone: 'alert'})
         }
     }
 
     return (
         <div style={pageStyle}>
-            <div
-                className="page-card"
-                style={cardStyle}
-            >
+            <div className="page-card" style={cardStyle}>
                 <div style={iconStyle}>
-                    ✔
+                    <Check className="rk-icon" aria-hidden="true" />
                 </div>
 
-                <h1 style={titleStyle}>
-                    Thanh Toán Thành Công!
-                </h1>
+                <h1 style={titleStyle}>Thanh Toán Thành Công!</h1>
 
                 <p style={descriptionStyle}>
-                    Giao dịch qua VNPay đã hoàn tất. Hóa đơn của
-                    quý khách đã được lưu lại hệ thống.
+                    Giao dịch qua VNPay đã hoàn tất. Hóa đơn của quý khách đã được lưu lại
+                    hệ thống.
                 </p>
 
                 {invoiceId && (
                     <div style={invoiceBoxStyle}>
-                        <strong>
-                            Mã hóa đơn: INV-{invoiceId}
-                        </strong>
+                        <strong>Mã hóa đơn: INV-{invoiceId}</strong>
                     </div>
                 )}
 
@@ -114,19 +75,16 @@ export default function PaymentSuccess() {
                         type="button"
                         style={downloadButtonStyle}
                         disabled={!invoiceId}
-                        onClick={() =>
-                            void handleDownloadPdf()
-                        }
+                        onClick={() => void handleDownloadPdf()}
                     >
-                        📥 Tải PDF Hóa Đơn
+                        <Download className="rk-icon" aria-hidden="true" /> Tải PDF Hóa
+                        Đơn
                     </button>
 
                     <button
                         type="button"
                         style={backButtonStyle}
-                        onClick={() =>
-                            navigate('/cashier/payments')
-                        }
+                        onClick={() => navigate('/cashier/payments')}
                     >
                         Về màn hình Thu Ngân
                     </button>
@@ -141,34 +99,34 @@ const pageStyle: CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#f0fdf4',
+    background: 'var(--rims-ok-soft)',
 }
 
 const cardStyle: CSSProperties = {
     textAlign: 'center',
     padding: '3rem',
     maxWidth: '500px',
-    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+    boxShadow: '0 10px 15px -3px rgb(36 21 18 / 10%)',
 }
 
 const iconStyle: CSSProperties = {
     fontSize: '5rem',
-    color: '#16a34a',
+    color: 'var(--rims-ok)',
     marginBottom: '1rem',
 }
 
 const titleStyle: CSSProperties = {
-    color: '#16a34a',
+    color: 'var(--rims-ok)',
     marginBottom: '1rem',
 }
 
 const descriptionStyle: CSSProperties = {
-    color: '#475569',
+    color: 'var(--rims-ink-2)',
     marginBottom: '2rem',
 }
 
 const invoiceBoxStyle: CSSProperties = {
-    background: '#e2e8f0',
+    background: 'var(--rims-surface-3)',
     padding: '1rem',
     borderRadius: '8px',
     marginBottom: '2rem',
@@ -183,7 +141,7 @@ const actionRowStyle: CSSProperties = {
 
 const downloadButtonStyle: CSSProperties = {
     padding: '0.8rem 1.5rem',
-    background: '#2563eb',
+    background: 'var(--rims-brand)',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
@@ -193,8 +151,8 @@ const downloadButtonStyle: CSSProperties = {
 
 const backButtonStyle: CSSProperties = {
     padding: '0.8rem 1.5rem',
-    background: '#cbd5e1',
-    color: '#1e293b',
+    background: 'var(--rims-surface-3)',
+    color: 'var(--rims-ink)',
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',

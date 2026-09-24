@@ -1,45 +1,14 @@
-﻿import {
-    useRef,
-    useState,
-    type CSSProperties,
-} from 'react'
-import {
-    useNavigate,
-    useParams,
-} from 'react-router-dom'
+﻿import {useRef, useState, type CSSProperties} from 'react'
+import {useNavigate, useParams} from 'react-router-dom'
 
-import {
-    type ReservationResponse,
-    waiterApi,
-} from '@/shared/api/waiter'
+import * as waiterApi from '@/shared/api/waiter'
+import type {ReservationResponse} from '@/shared/api/waiter'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {
-    BackArrow,
-    WaiterHeader,
-} from './components'
+import {BackArrow, WaiterHeader} from './components'
 import {usePolling} from '@/shared/hooks/usePolling'
+import {isRequestCanceled} from '@/shared/utils/error'
 
-function isRequestCanceled(error: unknown) {
-    if (typeof error !== 'object' || error === null) {
-        return false
-    }
-
-    const requestError = error as {
-        name?: string
-        code?: string
-        message?: string
-    }
-
-    return (
-        requestError.name === 'CanceledError'
-        || requestError.code === 'ERR_CANCELED'
-        || requestError.message === 'canceled'
-    )
-}
-
-function getReservationId(
-    reservation: ReservationResponse,
-) {
+function getReservationId(reservation: ReservationResponse) {
     return reservation.reservationId ?? reservation.id
 }
 
@@ -63,25 +32,17 @@ export default function WaiterReservationDetailPage() {
     const navigate = useNavigate()
     const {tableId} = useParams()
 
-    const tableIdNumber =
-        Number.parseInt(tableId ?? '0', 10)
+    const tableIdNumber = Number.parseInt(tableId ?? '0', 10)
 
-    const [reservation, setReservation] =
-        useState<ReservationResponse | null>(null)
+    const [reservation, setReservation] = useState<ReservationResponse | null>(null)
 
-    const [isLoading, setIsLoading] =
-        useState(true)
+    const [isLoading, setIsLoading] = useState(true)
 
-    const [error, setError] =
-        useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
-    const hasLoadedInitialReservationRef =
-        useRef(false)
+    const hasLoadedInitialReservationRef = useRef(false)
 
-    async function loadReservation(
-        signal?: AbortSignal,
-        showFullLoading = true,
-    ) {
+    async function loadReservation(signal?: AbortSignal, showFullLoading = true) {
         if (!tableIdNumber) {
             setReservation(null)
             setError('Không xác định được bàn.')
@@ -96,11 +57,10 @@ export default function WaiterReservationDetailPage() {
 
             setError(null)
 
-            const response =
-                await waiterApi.getCurrentReservationByTable(
-                    tableIdNumber,
-                    signal,
-                )
+            const response = await waiterApi.getCurrentReservationByTable(
+                tableIdNumber,
+                signal,
+            )
 
             if (signal?.aborted) {
                 return
@@ -108,26 +68,15 @@ export default function WaiterReservationDetailPage() {
 
             setReservation(response.data ?? null)
         } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
+            if (signal?.aborted || isRequestCanceled(requestError)) {
                 return
             }
 
-            console.error(
-                '[WAITER_RESERVATION_DETAIL_FETCH_ERROR]',
-                requestError,
-            )
+            console.error('[WAITER_RESERVATION_DETAIL_FETCH_ERROR]', requestError)
 
-            setError(
-                'Không thể tải thông tin đặt bàn.',
-            )
+            setError('Không thể tải thông tin đặt bàn.')
         } finally {
-            if (
-                showFullLoading
-                && !signal?.aborted
-            ) {
+            if (showFullLoading && !signal?.aborted) {
                 setIsLoading(false)
             }
         }
@@ -135,46 +84,27 @@ export default function WaiterReservationDetailPage() {
 
     usePolling(
         async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialReservationRef.current
+            const isInitialLoad = !hasLoadedInitialReservationRef.current
 
-            await loadReservation(
-                signal,
-                isInitialLoad,
-            )
+            await loadReservation(signal, isInitialLoad)
 
             hasLoadedInitialReservationRef.current = true
         },
         {
-            intervalMs:
-            REALTIME_CONFIG
-                .waiter
-                .orderDetailIntervalMs,
+            intervalMs: REALTIME_CONFIG.waiter.orderDetailIntervalMs,
 
             runImmediately: true,
             pauseWhenHidden: true,
 
             onError: (requestError) => {
-                console.error(
-                    '[WAITER_RESERVATION_DETAIL_POLL_ERROR]',
-                    requestError,
-                )
+                console.error('[WAITER_RESERVATION_DETAIL_POLL_ERROR]', requestError)
             },
         },
     )
 
-    const {
-        date,
-        time,
-    } =
-        splitReservationTime(
-            reservation?.reservationTime,
-        )
+    const {date, time} = splitReservationTime(reservation?.reservationTime)
 
-    const reservationId =
-        reservation
-            ? getReservationId(reservation)
-            : undefined
+    const reservationId = reservation ? getReservationId(reservation) : undefined
 
     if (isLoading) {
         return (
@@ -182,9 +112,7 @@ export default function WaiterReservationDetailPage() {
                 <WaiterHeader />
 
                 <main className="waiter-main">
-                    <p style={stateTextStyle}>
-                        Đang tải thông tin đặt bàn...
-                    </p>
+                    <p style={stateTextStyle}>Đang tải thông tin đặt bàn...</p>
                 </main>
             </div>
         )
@@ -197,36 +125,20 @@ export default function WaiterReservationDetailPage() {
 
                 <main className="waiter-main">
                     <div className="waiter-sub-header">
-                        <BackArrow
-                            onClick={() =>
-                                navigate('/waiter/tables')
-                            }
-                        />
+                        <BackArrow onClick={() => navigate('/waiter/tables')} />
 
-                        <h2 className="waiter-title">
-                            Chi tiết đặt bàn
-                        </h2>
+                        <h2 className="waiter-title">Chi tiết đặt bàn</h2>
                     </div>
 
-                    <div
-                        className="waiter-card"
-                        style={cardStyle}
-                    >
+                    <div className="waiter-card" style={cardStyle}>
                         <div className="waiter-card-body">
-                            <p style={errorTextStyle}>
-                                {error}
-                            </p>
+                            <p style={errorTextStyle}>{error}</p>
 
                             <button
                                 type="button"
-                                className="waiter-btn-primary"
+                                className="rk-btn rk-btn--primary"
                                 style={buttonTopStyle}
-                                onClick={() =>
-                                    void loadReservation(
-                                        undefined,
-                                        true,
-                                    )
-                                }
+                                onClick={() => void loadReservation(undefined, true)}
                             >
                                 Thử lại
                             </button>
@@ -244,35 +156,23 @@ export default function WaiterReservationDetailPage() {
 
                 <main className="waiter-main">
                     <div className="waiter-sub-header">
-                        <BackArrow
-                            onClick={() =>
-                                navigate('/waiter/tables')
-                            }
-                        />
+                        <BackArrow onClick={() => navigate('/waiter/tables')} />
 
-                        <h2 className="waiter-title">
-                            Chi tiết đặt bàn
-                        </h2>
+                        <h2 className="waiter-title">Chi tiết đặt bàn</h2>
                     </div>
 
-                    <div
-                        className="waiter-card"
-                        style={cardStyle}
-                    >
+                    <div className="waiter-card" style={cardStyle}>
                         <div className="waiter-card-body">
                             <p style={stateTextStyle}>
-                                Không có đặt bàn đang hoạt động cho
-                                bàn này. Bàn có thể đã hết thời gian
-                                chờ hoặc đã được phục vụ.
+                                Không có đặt bàn đang hoạt động cho bàn này. Bàn có thể đã
+                                hết thời gian chờ hoặc đã được phục vụ.
                             </p>
 
                             <button
                                 type="button"
-                                className="waiter-btn-primary"
+                                className="rk-btn rk-btn--primary"
                                 style={buttonTopStyle}
-                                onClick={() =>
-                                    navigate('/waiter/tables')
-                                }
+                                onClick={() => navigate('/waiter/tables')}
                             >
                                 Về danh sách bàn
                             </button>
@@ -289,11 +189,7 @@ export default function WaiterReservationDetailPage() {
 
             <main className="waiter-main">
                 <div className="waiter-sub-header">
-                    <BackArrow
-                        onClick={() =>
-                            navigate('/waiter/tables')
-                        }
-                    />
+                    <BackArrow onClick={() => navigate('/waiter/tables')} />
 
                     <h2 className="waiter-title">
                         Chi tiết đặt bàn — Bàn {tableIdNumber}
@@ -313,13 +209,8 @@ export default function WaiterReservationDetailPage() {
                     </button>
                 </div>
 
-                <div
-                    className="waiter-card"
-                    style={cardStyle}
-                >
-                    <div className="waiter-card-header">
-                        Thông tin đặt bàn
-                    </div>
+                <div className="waiter-card" style={cardStyle}>
+                    <div className="waiter-card-header">Thông tin đặt bàn</div>
 
                     <div className="waiter-card-body">
                         <div className="waiter-detail-row">
@@ -329,14 +220,14 @@ export default function WaiterReservationDetailPage() {
 
                         <div className="waiter-detail-row">
                             <span>Thời gian</span>
-                            <strong>{date} — {time}</strong>
+                            <strong>
+                                {date} — {time}
+                            </strong>
                         </div>
 
                         <div className="waiter-detail-row">
                             <span>Khách hàng</span>
-                            <strong>
-                                {reservation.customerName}
-                            </strong>
+                            <strong>{reservation.customerName}</strong>
                         </div>
 
                         <div className="waiter-detail-row">
@@ -362,11 +253,11 @@ const cardStyle: CSSProperties = {
 }
 
 const stateTextStyle: CSSProperties = {
-    color: '#64748b',
+    color: 'var(--rims-ink-3)',
 }
 
 const errorTextStyle: CSSProperties = {
-    color: '#dc2626',
+    color: 'var(--rims-alert)',
 }
 
 const buttonTopStyle: CSSProperties = {

@@ -1,52 +1,19 @@
-﻿import {
-    useState,
-    type CSSProperties,
-    type KeyboardEvent,
-} from 'react'
-import {
-    Link,
-    useNavigate,
-} from 'react-router-dom'
+import {ArrowLeft, Check, X} from 'lucide-react'
 
-import {
-    forgotPassword,
-    resetPassword,
-} from '@/shared/api/auth'
-import {getErrorMessage} from '@/shared/utils/error'
+import {useState, type CSSProperties, type KeyboardEvent} from 'react'
+import {Link, useNavigate} from 'react-router-dom'
 
-type Step =
-    | 'email'
-    | 'otp'
-    | 'done'
+import {forgotPassword, resetPassword} from '@/shared/api/auth'
+import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 
-const STEPS: Step[] = [
-    'email',
-    'otp',
-    'done',
-]
+type Step = 'email' | 'otp' | 'done'
+
+const STEPS: Step[] = ['email', 'otp', 'done']
 
 const STEP_LABELS: Record<Step, string> = {
     email: 'Nhập email',
     otp: 'Xác nhận OTP',
     done: 'Hoàn thành',
-}
-
-function isRequestCanceled(error: unknown) {
-    if (typeof error !== 'object' || error === null) {
-        return false
-    }
-
-    const requestError = error as {
-        name?: string
-        code?: string
-        message?: string
-    }
-
-    return (
-        requestError.name === 'CanceledError'
-        || requestError.code === 'ERR_CANCELED'
-        || requestError.message === 'canceled'
-    )
 }
 
 function isValidEmail(value: string) {
@@ -56,33 +23,24 @@ function isValidEmail(value: string) {
 export default function ForgotPasswordPage() {
     const navigate = useNavigate()
 
-    const [step, setStep] =
-        useState<Step>('email')
+    const [step, setStep] = useState<Step>('email')
 
-    const [email, setEmail] =
-        useState('')
+    const [email, setEmail] = useState('')
 
-    const [otp, setOtp] =
-        useState('')
+    const [otp, setOtp] = useState('')
 
-    const [newPassword, setNewPassword] =
-        useState('')
+    const [newPassword, setNewPassword] = useState('')
 
-    const [confirmPassword, setConfirmPassword] =
-        useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
 
-    const [isLoading, setIsLoading] =
-        useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
-    const [error, setError] =
-        useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
-    const currentStepIdx =
-        STEPS.indexOf(step)
+    const currentStepIdx = STEPS.indexOf(step)
 
     async function handleSendOtp() {
-        const normalizedEmail =
-            email.trim()
+        const normalizedEmail = email.trim()
 
         if (!normalizedEmail) {
             setError('Vui lòng nhập email')
@@ -106,14 +64,9 @@ export default function ForgotPasswordPage() {
                 return
             }
 
-            console.error(
-                '[FORGOT_PASSWORD_SEND_OTP_ERROR]',
-                requestError,
-            )
+            console.error('[FORGOT_PASSWORD_SEND_OTP_ERROR]', requestError)
 
-            setError(
-                getErrorMessage(requestError),
-            )
+            setError(getErrorMessage(requestError))
         } finally {
             setIsLoading(false)
         }
@@ -139,11 +92,7 @@ export default function ForgotPasswordPage() {
         setError(null)
 
         try {
-            await resetPassword(
-                email.trim(),
-                otp,
-                newPassword,
-            )
+            await resetPassword(email.trim(), otp, newPassword)
 
             setStep('done')
         } catch (requestError: unknown) {
@@ -151,31 +100,22 @@ export default function ForgotPasswordPage() {
                 return
             }
 
-            console.error(
-                '[FORGOT_PASSWORD_RESET_ERROR]',
-                requestError,
-            )
+            console.error('[FORGOT_PASSWORD_RESET_ERROR]', requestError)
 
-            setError(
-                getErrorMessage(requestError),
-            )
+            setError(getErrorMessage(requestError))
         } finally {
             setIsLoading(false)
         }
     }
 
-    function handleEmailKeyDown(
-        event: KeyboardEvent<HTMLInputElement>,
-    ) {
+    function handleEmailKeyDown(event: KeyboardEvent<HTMLInputElement>) {
         if (event.key === 'Enter') {
             event.preventDefault()
             void handleSendOtp()
         }
     }
 
-    function handleResetKeyDown(
-        event: KeyboardEvent<HTMLInputElement>,
-    ) {
+    function handleResetKeyDown(event: KeyboardEvent<HTMLInputElement>) {
         if (event.key === 'Enter') {
             event.preventDefault()
             void handleResetPassword()
@@ -193,11 +133,9 @@ export default function ForgotPasswordPage() {
     return (
         <main className="login-page">
             <section className="login-card">
-                <Link
-                    className="login-back-link"
-                    to="/login"
-                >
-                    ← Quay lại đăng nhập
+                <Link className="login-back-link" to="/login">
+                    <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại đăng
+                    nhập
                 </Link>
 
                 <div className="login-header">
@@ -211,10 +149,7 @@ export default function ForgotPasswordPage() {
                             key={stepItem}
                             style={{
                                 ...stepItemStyle,
-                                flex:
-                                    index < STEPS.length - 1
-                                        ? 1
-                                        : 'none',
+                                flex: index < STEPS.length - 1 ? 1 : 'none',
                             }}
                         >
                             <div style={stepInnerStyle}>
@@ -223,19 +158,17 @@ export default function ForgotPasswordPage() {
                                         ...stepCircleStyle,
                                         background:
                                             index < currentStepIdx
-                                                ? '#22c55e'
+                                                ? 'var(--rims-ok)'
                                                 : index === currentStepIdx
-                                                    ? '#7a1030'
-                                                    : '#e5e7eb',
+                                                  ? 'var(--rims-brand)'
+                                                  : 'var(--rims-line)',
                                         color:
                                             index <= currentStepIdx
-                                                ? '#fff'
-                                                : '#9ca3af',
+                                                ? 'var(--rims-ink-on-brand)'
+                                                : 'var(--rims-ink-3)',
                                     }}
                                 >
-                                    {index < currentStepIdx
-                                        ? '✓'
-                                        : index + 1}
+                                    {index < currentStepIdx ? '' : index + 1}
                                 </div>
 
                                 <span
@@ -243,12 +176,9 @@ export default function ForgotPasswordPage() {
                                         ...stepLabelStyle,
                                         color:
                                             index === currentStepIdx
-                                                ? '#7a1030'
-                                                : '#9ca3af',
-                                        fontWeight:
-                                            index === currentStepIdx
-                                                ? 600
-                                                : 400,
+                                                ? 'var(--rims-brand)'
+                                                : 'var(--rims-ink-3)',
+                                        fontWeight: index === currentStepIdx ? 600 : 400,
                                     }}
                                 >
                                     {STEP_LABELS[stepItem]}
@@ -261,8 +191,8 @@ export default function ForgotPasswordPage() {
                                         ...stepLineStyle,
                                         background:
                                             index < currentStepIdx
-                                                ? '#22c55e'
-                                                : '#e5e7eb',
+                                                ? 'var(--rims-ok)'
+                                                : 'var(--rims-line)',
                                     }}
                                 />
                             )}
@@ -271,10 +201,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 {error && (
-                    <div
-                        className="auth-error"
-                        style={errorBoxStyle}
-                    >
+                    <div className="auth-error" style={errorBoxStyle}>
                         <span>{error}</span>
 
                         <button
@@ -282,7 +209,7 @@ export default function ForgotPasswordPage() {
                             style={errorCloseButtonStyle}
                             onClick={() => setError(null)}
                         >
-                            ✕
+                            <X className="rk-icon" aria-hidden="true" />
                         </button>
                     </div>
                 )}
@@ -291,7 +218,6 @@ export default function ForgotPasswordPage() {
                     <>
                         <label className="auth-field">
                             Email tài khoản khách hàng
-
                             <input
                                 type="email"
                                 value={email}
@@ -306,21 +232,17 @@ export default function ForgotPasswordPage() {
                         </label>
 
                         <p style={hintTextStyle}>
-                            Nhập đúng email đã đăng ký. Chúng tôi sẽ
-                            gửi mã OTP 6 số — có hiệu lực trong 5 phút.
+                            Nhập đúng email đã đăng ký. Chúng tôi sẽ gửi mã OTP 6 số — có
+                            hiệu lực trong 5 phút.
                         </p>
 
                         <button
                             type="button"
                             className="auth-submit"
                             disabled={isLoading}
-                            onClick={() =>
-                                void handleSendOtp()
-                            }
+                            onClick={() => void handleSendOtp()}
                         >
-                            {isLoading
-                                ? 'Đang gửi...'
-                                : 'Gửi mã OTP →'}
+                            {isLoading ? 'Đang gửi…' : 'Gửi mã OTP'}
                         </button>
                     </>
                 )}
@@ -328,13 +250,12 @@ export default function ForgotPasswordPage() {
                 {step === 'otp' && (
                     <>
                         <div style={otpNoticeStyle}>
-                            ✓ Đã gửi mã OTP đến{' '}
-                            <strong>{email}</strong>
+                            <Check className="rk-icon" aria-hidden="true" /> Đã gửi mã OTP
+                            đến <strong>{email}</strong>
                         </div>
 
                         <label className="auth-field">
                             Mã OTP (6 chữ số)
-
                             <input
                                 value={otp}
                                 maxLength={6}
@@ -342,50 +263,35 @@ export default function ForgotPasswordPage() {
                                 style={otpInputStyle}
                                 autoFocus
                                 onChange={(event) => {
-                                    setOtp(
-                                        event.target.value
-                                            .replace(/\D/g, ''),
-                                    )
+                                    setOtp(event.target.value.replace(/\D/g, ''))
 
                                     setError(null)
                                 }}
                             />
                         </label>
 
-                        <label
-                            className="auth-field"
-                            style={fieldTopStyle}
-                        >
+                        <label className="auth-field" style={fieldTopStyle}>
                             Mật khẩu mới
-
                             <input
                                 type="password"
                                 value={newPassword}
                                 placeholder="Tối thiểu 6 ký tự"
                                 onChange={(event) => {
-                                    setNewPassword(
-                                        event.target.value,
-                                    )
+                                    setNewPassword(event.target.value)
 
                                     setError(null)
                                 }}
                             />
                         </label>
 
-                        <label
-                            className="auth-field"
-                            style={fieldTopStyle}
-                        >
+                        <label className="auth-field" style={fieldTopStyle}>
                             Xác nhận mật khẩu mới
-
                             <input
                                 type="password"
                                 value={confirmPassword}
                                 placeholder="Nhập lại mật khẩu mới"
                                 onChange={(event) => {
-                                    setConfirmPassword(
-                                        event.target.value,
-                                    )
+                                    setConfirmPassword(event.target.value)
 
                                     setError(null)
                                 }}
@@ -398,13 +304,9 @@ export default function ForgotPasswordPage() {
                             className="auth-submit"
                             disabled={isLoading}
                             style={resetButtonStyle}
-                            onClick={() =>
-                                void handleResetPassword()
-                            }
+                            onClick={() => void handleResetPassword()}
                         >
-                            {isLoading
-                                ? 'Đang xử lý...'
-                                : 'Đặt lại mật khẩu'}
+                            {isLoading ? 'Đang xử lý…' : 'Đặt lại mật khẩu'}
                         </button>
 
                         <button
@@ -412,31 +314,29 @@ export default function ForgotPasswordPage() {
                             style={backToEmailButtonStyle}
                             onClick={goBackToEmailStep}
                         >
-                            ← Quay lại / Gửi lại OTP
+                            <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại
+                            / Gửi lại OTP
                         </button>
                     </>
                 )}
 
                 {step === 'done' && (
                     <div style={doneBoxStyle}>
-                        <div style={doneIconStyle}>✅</div>
+                        <div style={doneIconStyle}>
+                            <Check className="rk-icon" aria-hidden="true" />
+                        </div>
 
-                        <h3 style={doneTitleStyle}>
-                            Đặt lại mật khẩu thành công!
-                        </h3>
+                        <h3 style={doneTitleStyle}>Đặt lại mật khẩu thành công!</h3>
 
                         <p style={doneTextStyle}>
-                            Mật khẩu đã được cập nhật. Vui lòng đăng
-                            nhập lại.
+                            Mật khẩu đã được cập nhật. Vui lòng đăng nhập lại.
                         </p>
 
                         <button
                             type="button"
-                            className="primary-button"
+                            className="rk-btn rk-btn--primary"
                             style={doneButtonStyle}
-                            onClick={() =>
-                                navigate('/login')
-                            }
+                            onClick={() => navigate('/login')}
                         >
                             Đăng nhập ngay
                         </button>
@@ -508,18 +408,18 @@ const errorCloseButtonStyle: CSSProperties = {
 
 const hintTextStyle: CSSProperties = {
     fontSize: 13,
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
     margin: '8px 0 20px',
 }
 
 const otpNoticeStyle: CSSProperties = {
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
+    background: 'var(--rims-ok-soft)',
+    border: '1px solid var(--rims-ok-line)',
     borderRadius: 8,
     padding: '12px 14px',
     marginBottom: 20,
     fontSize: 14,
-    color: '#166534',
+    color: 'var(--rims-ok)',
 }
 
 const otpInputStyle: CSSProperties = {
@@ -543,7 +443,7 @@ const backToEmailButtonStyle: CSSProperties = {
     padding: 10,
     background: 'none',
     border: 'none',
-    color: '#7a1030',
+    color: 'var(--rims-brand)',
     cursor: 'pointer',
     fontSize: 13,
 }
@@ -559,12 +459,12 @@ const doneIconStyle: CSSProperties = {
 }
 
 const doneTitleStyle: CSSProperties = {
-    color: '#065f46',
+    color: 'var(--rims-ok)',
     marginBottom: 8,
 }
 
 const doneTextStyle: CSSProperties = {
-    color: '#9ca3af',
+    color: 'var(--rims-ink-3)',
     marginBottom: 28,
     fontSize: 14,
 }

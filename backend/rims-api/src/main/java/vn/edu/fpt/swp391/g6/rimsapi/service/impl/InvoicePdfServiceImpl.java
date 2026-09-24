@@ -1,29 +1,31 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Payment;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.TechnicalException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
-
-import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
+import vn.edu.fpt.swp391.g6.rimsapi.util.PaymentCalculator;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +40,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
     {
         // Load fresh bên trong transaction hiện tại -> session còn sống
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hóa đơn: " + invoiceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn: " + invoiceId));
 
         Document document = new Document(PageSize.A6, 10, 10, 15, 15);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -63,7 +65,9 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             restaurantName.setAlignment(Element.ALIGN_CENTER);
             document.add(restaurantName);
 
-            Paragraph address = new Paragraph("Đại học FPT, Khu Công Nghệ Cao Hòa Lạc, Thạch Thất, Hà Nội\nĐT: 0987.654.321 - 0123.456.789\n", fontNormal);
+            Paragraph address = new Paragraph(
+                    "Đại học FPT, Khu Công Nghệ Cao Hòa Lạc, Thạch Thất, Hà Nội\nĐT: 0987.654.321 - 0123.456.789\n",
+                    fontNormal);
             address.setAlignment(Element.ALIGN_CENTER);
             document.add(address);
 
@@ -83,14 +87,17 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             infoTable.setWidthPercentage(100);
             infoTable.setWidths(new float[]{50, 50});
 
-            infoTable.addCell(createCell("Số HĐ: " + String.format("%04d", invoice.getId()), fontNormal, Element.ALIGN_LEFT, false));
+            infoTable.addCell(createCell("Số HĐ: " + String.format("%04d", invoice.getId()), fontNormal,
+                    Element.ALIGN_LEFT, false));
             infoTable.addCell(createCell("Bàn: " + tableName, fontBold, Element.ALIGN_RIGHT, false));
-            infoTable.addCell(createCell("Ngày in: " + invoice.getInvoiceDate().format(formatter), fontNormal, Element.ALIGN_LEFT, false));
+            infoTable.addCell(createCell("Ngày in: " + invoice.getInvoiceDate().format(formatter), fontNormal,
+                    Element.ALIGN_LEFT, false));
             infoTable.addCell(createCell("", fontNormal, Element.ALIGN_RIGHT, false));
 
             document.add(infoTable);
 
-            Paragraph lineSeparator = new Paragraph("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", fontNormal);
+            Paragraph lineSeparator = new Paragraph(
+                    "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", fontNormal);
             lineSeparator.setAlignment(Element.ALIGN_CENTER);
             document.add(lineSeparator);
 
@@ -119,14 +126,17 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
 
                 table.addCell(createCell(dishName, fontNormal, Element.ALIGN_LEFT, false));
                 table.addCell(createCell(String.valueOf(item.getQuantity()), fontNormal, Element.ALIGN_CENTER, false));
-                table.addCell(createCell(String.format("%,.0f", item.getUnitPrice()), fontNormal, Element.ALIGN_RIGHT, false));
-                table.addCell(createCell(String.format("%,.0f", item.getSubTotal()), fontNormal, Element.ALIGN_RIGHT, false));
+                table.addCell(createCell(String.format("%,.0f", item.getUnitPrice()), fontNormal, Element.ALIGN_RIGHT,
+                        false));
+                table.addCell(
+                        createCell(String.format("%,.0f", item.getSubTotal()), fontNormal, Element.ALIGN_RIGHT, false));
             }
             document.add(table);
             document.add(lineSeparator);
 
-            //Phần Tổng kết tài chính — ĐÃ SỬA: tự tính từ các món COMPLETED, không dùng order.getTotalAmount() nữa
-            BigDecimal vatAmount = totalBeforeVat.multiply(new BigDecimal("0.10"));
+            // Tổng kết tài chính: tự tính từ các món đã hoàn thành chứ không dùng
+            // order.getTotalAmount(), vì số đó bao gồm cả món đã bị huỷ.
+            BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
             BigDecimal finalAmount = invoice.getFinalAmount();
 
             PaymentMethod method = PaymentMethod.CASH;
@@ -148,31 +158,41 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             totalTable.setSpacingBefore(5);
 
             // Dòng Cộng tiền món
-            totalTable.addCell(createCell("Cộng tiền hàng (" + totalItems + " món):", fontNormal, Element.ALIGN_LEFT, false));
-            totalTable.addCell(createCell(String.format("%,.0f đ", totalBeforeVat), fontNormal, Element.ALIGN_RIGHT, false));
+            totalTable.addCell(
+                    createCell("Cộng tiền hàng (" + totalItems + " món):", fontNormal, Element.ALIGN_LEFT, false));
+            totalTable.addCell(
+                    createCell(String.format("%,.0f đ", totalBeforeVat), fontNormal, Element.ALIGN_RIGHT, false));
 
             // Dòng VAT
             totalTable.addCell(createCell("VAT (10%):", fontNormal, Element.ALIGN_LEFT, false));
             totalTable.addCell(createCell(String.format("%,.0f đ", vatAmount), fontNormal, Element.ALIGN_RIGHT, false));
 
-            if (invoice.getCustomer() != null) {
+            if (invoice.getCustomer() != null)
+            {
                 totalTable.addCell(createCell("Khách hàng:", fontNormal, Element.ALIGN_LEFT, false));
-                totalTable.addCell(createCell(invoice.getCustomer().getFullName(), fontNormal, Element.ALIGN_RIGHT, false));
+                totalTable.addCell(
+                        createCell(invoice.getCustomer().getFullName(), fontNormal, Element.ALIGN_RIGHT, false));
 
-                if (invoice.getPointsUsedOnInvoice() != null && invoice.getPointsUsedOnInvoice() > 0) {
+                if (invoice.getPointsUsedOnInvoice() != null && invoice.getPointsUsedOnInvoice() > 0)
+                {
                     totalTable.addCell(createCell("Điểm đã dùng:", fontNormal, Element.ALIGN_LEFT, false));
-                    totalTable.addCell(createCell("-" + String.format("%,.0f đ", (double)invoice.getPointsUsedOnInvoice() * 1000), fontNormal, Element.ALIGN_RIGHT, false));
+                    totalTable.addCell(
+                            createCell("-" + String.format("%,.0f đ", (double) invoice.getPointsUsedOnInvoice() * 1000),
+                                    fontNormal, Element.ALIGN_RIGHT, false));
                 }
 
-                if (invoice.getPointsEarnedOnInvoice() != null && invoice.getPointsEarnedOnInvoice() > 0) {
+                if (invoice.getPointsEarnedOnInvoice() != null && invoice.getPointsEarnedOnInvoice() > 0)
+                {
                     totalTable.addCell(createCell("Điểm tích thêm:", fontItalic, Element.ALIGN_LEFT, false));
-                    totalTable.addCell(createCell("+" + invoice.getPointsEarnedOnInvoice() + " điểm", fontItalic, Element.ALIGN_RIGHT, false));
+                    totalTable.addCell(createCell("+" + invoice.getPointsEarnedOnInvoice() + " điểm", fontItalic,
+                            Element.ALIGN_RIGHT, false));
                 }
             }
 
             // Dòng Thành tiền
             totalTable.addCell(createCell("THÀNH TIỀN:", fontHeader, Element.ALIGN_LEFT, false));
-            totalTable.addCell(createCell(String.format("%,.0f đ", finalAmount), fontHeader, Element.ALIGN_RIGHT, false));
+            totalTable
+                    .addCell(createCell(String.format("%,.0f đ", finalAmount), fontHeader, Element.ALIGN_RIGHT, false));
 
             // Phương thức thanh toán
             String methodStr = (method == PaymentMethod.CASH) ? "Tiền mặt" : "Chuyển khoản/QR";
@@ -183,13 +203,16 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             if (method == PaymentMethod.CASH)
             {
                 totalTable.addCell(createCell("Khách thanh toán:", fontNormal, Element.ALIGN_LEFT, false));
-                totalTable.addCell(createCell(String.format("%,.0f đ", amountPaid), fontNormal, Element.ALIGN_RIGHT, false));
+                totalTable.addCell(
+                        createCell(String.format("%,.0f đ", amountPaid), fontNormal, Element.ALIGN_RIGHT, false));
 
                 BigDecimal excessAmount = amountPaid.subtract(finalAmount);
-                if (excessAmount.compareTo(BigDecimal.ZERO) < 0) excessAmount = BigDecimal.ZERO; // An toàn
+                if (excessAmount.compareTo(BigDecimal.ZERO) < 0)
+                    excessAmount = BigDecimal.ZERO; // An toàn
 
                 totalTable.addCell(createCell("Tiền thừa trả khách:", fontNormal, Element.ALIGN_LEFT, false));
-                totalTable.addCell(createCell(String.format("%,.0f đ", excessAmount), fontNormal, Element.ALIGN_RIGHT, false));
+                totalTable.addCell(
+                        createCell(String.format("%,.0f đ", excessAmount), fontNormal, Element.ALIGN_RIGHT, false));
             }
 
             document.add(totalTable);
@@ -202,8 +225,7 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             document.close();
         } catch (Exception e)
         {
-            e.printStackTrace();
-            throw new RuntimeException("Lỗi khi tạo file PDF: " + e.getMessage());
+            throw new TechnicalException("Không dựng được file PDF hoá đơn", e);
         }
 
         return out.toByteArray();
@@ -214,7 +236,8 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
         cell.setHorizontalAlignment(alignment);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        if (!hasBorder) cell.setBorder(PdfPCell.NO_BORDER);
+        if (!hasBorder)
+            cell.setBorder(PdfPCell.NO_BORDER);
         cell.setPaddingTop(3);
         cell.setPaddingBottom(3);
         return cell;

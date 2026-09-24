@@ -1,36 +1,27 @@
 import {
-    useCallback,
-    useEffect,
-    useState,
-} from 'react'
+    AlertTriangle,
+    ArrowRight,
+    EyeOff,
+    FolderOpen,
+    PauseCircle,
+    Soup,
+    Utensils,
+} from 'lucide-react'
+
+import {useCallback, useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 
-import {
-    categoryApi,
-    dishApi,
-    menuApi,
-} from '@/shared/api/admin'
+import * as adminApi from '@/shared/api/admin'
 import type {MenuDashboardData} from '@/shared/api/admin'
-import {
-    ErrorState,
-    LoadingState,
-} from '@/shared/components/feedback'
-import {
-    PageCard,
-    PageHeader,
-} from '@/shared/components/ui'
+import {ErrorState, LoadingState} from '@/shared/components/feedback'
+import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
 
 export default function AdminMenuDashboardPage() {
-    const [data, setData] =
-        useState<MenuDashboardData | null>(null)
+    const [data, setData] = useState<MenuDashboardData | null>(null)
 
-    const [loading, setLoading] =
-        useState<boolean>(true)
+    const [loading, setLoading] = useState<boolean>(true)
 
-    const [error, setError] =
-        useState<string | null>(null)
-
-
+    const [error, setError] = useState<string | null>(null)
 
     const navigate = useNavigate()
 
@@ -49,55 +40,41 @@ export default function AdminMenuDashboardPage() {
                     setError(null)
                 }
 
-                const [
-                    menuRes,
-                    catRes,
-                    allDishesRes,
-                ] = await Promise.all([
-                    menuApi.getMenuDashboard(signal),
-                    categoryApi.getAllCategories(signal),
-                    dishApi.getAllDishes(signal),
+                const [menuRes, catRes, allDishesRes] = await Promise.all([
+                    adminApi.getMenuDashboard(signal),
+                    adminApi.getAllCategories(signal),
+                    adminApi.getAllDishes(signal),
                 ])
 
-                const finalCatStats =
-                    catRes.data.map((category) => {
-                        const statMatch =
-                            menuRes.data.categoryStats?.find(
-                                (stat) =>
-                                    stat.categoryName.toLowerCase()
-                                    === category.name.toLowerCase(),
-                            )
+                const finalCatStats = catRes.data.map((category) => {
+                    const statMatch = menuRes.data.categoryStats?.find(
+                        (stat) =>
+                            stat.categoryName.toLowerCase() ===
+                            category.name.toLowerCase(),
+                    )
 
-                        return {
-                            categoryName: category.name,
-                            status: (
-                                category.isAvailable
-                                    ? 'ACTIVE'
-                                    : 'HIDDEN'
-                            ) as 'ACTIVE' | 'HIDDEN',
-                            dishCount: statMatch
-                                ? statMatch.dishCount
-                                : 0,
-                        }
-                    })
+                    return {
+                        categoryName: category.name,
+                        status: (category.isAvailable ? 'ACTIVE' : 'HIDDEN') as
+                            'ACTIVE' | 'HIDDEN',
+                        dishCount: statMatch ? statMatch.dishCount : 0,
+                    }
+                })
 
-                const realHiddenCategoriesCount =
-                    finalCatStats.filter(
-                        (category) =>
-                            category.status === 'HIDDEN',
-                    ).length
+                const realHiddenCategoriesCount = finalCatStats.filter(
+                    (category) => category.status === 'HIDDEN',
+                ).length
 
-                const allPausedDishes =
-                    allDishesRes.data
-                        .filter((dish) => dish.isHidden)
-                        .map((dish) => ({
-                            id: dish.id,
-                            name: dish.name,
-                            categoryName: dish.categoryName,
-                            price: dish.price,
-                            imageUrl: dish.imageUrl,
-                            status: 'HIDDEN' as const,
-                        }))
+                const allPausedDishes = allDishesRes.data
+                    .filter((dish) => dish.isHidden)
+                    .map((dish) => ({
+                        id: dish.id,
+                        name: dish.name,
+                        categoryName: dish.categoryName,
+                        price: dish.price,
+                        imageUrl: dish.imageUrl,
+                        status: 'HIDDEN' as const,
+                    }))
 
                 setData({
                     ...menuRes.data,
@@ -110,18 +87,16 @@ export default function AdminMenuDashboardPage() {
 
                 setError(null)
             } catch (requestError) {
-                console.error(
-                    '[ADMIN_MENU_DASHBOARD_FETCH_ERROR]',
-                    requestError,
-                )
+                console.error('[ADMIN_MENU_DASHBOARD_FETCH_ERROR]', requestError)
 
-                setError(
-                    'Không thể tải dữ liệu thống kê từ hệ thống.',
-                )
+                setError('Không thể tải dữ liệu thống kê từ hệ thống.')
             } finally {
-                if (showFullLoading) {
-                    setLoading(false)
-                }
+                // setLoading(false) phải chạy trong MỌI trường hợp. Trước đây nó nằm
+                // trong if (showFullLoading), nên khi gọi với showFullLoading=false thì
+                // loading khởi tạo là true không bao giờ được tắt -> trang kẹt ở màn
+                // hình "đang tải" vĩnh viễn. Cờ này chỉ quyết định có BẬT spinner hay
+                // không, chứ không quyết định có TẮT hay không.
+                setLoading(false)
             }
         },
         [],
@@ -130,7 +105,10 @@ export default function AdminMenuDashboardPage() {
     useEffect(() => {
         const controller = new AbortController()
 
-        void loadDashboardData(controller.signal, true, true)
+        // showFullLoading=false vì loading đã khởi tạo là true -> bớt một lượt render.
+        // Rule không đọc được nhánh if (showFullLoading) bên trong loader nên vẫn cảnh báo.
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- xem ghi chú trên
+        void loadDashboardData(controller.signal, false, true)
 
         return () => controller.abort()
     }, [loadDashboardData])
@@ -138,7 +116,7 @@ export default function AdminMenuDashboardPage() {
     if (loading) {
         return (
             <LoadingState
-                title="Đang tải tổng quan thực đơn..."
+                title="Đang tải tổng quan thực đơn…"
                 description="Hệ thống đang cập nhật danh mục, món ăn và trạng thái kinh doanh."
             />
         )
@@ -149,11 +127,7 @@ export default function AdminMenuDashboardPage() {
             <ErrorState
                 message={error}
                 onRetry={() => {
-                    loadDashboardData(
-                        undefined,
-                        true,
-                        true,
-                    ).catch((requestError) => {
+                    loadDashboardData(undefined, true, true).catch((requestError) => {
                         console.error(requestError)
                     })
                 }}
@@ -167,11 +141,7 @@ export default function AdminMenuDashboardPage() {
                 title="Không có dữ liệu"
                 message="Tổng quan thực đơn chưa có dữ liệu để hiển thị."
                 onRetry={() => {
-                    loadDashboardData(
-                        undefined,
-                        true,
-                        true,
-                    ).catch((requestError) => {
+                    loadDashboardData(undefined, true, true).catch((requestError) => {
                         console.error(requestError)
                     })
                 }}
@@ -179,8 +149,7 @@ export default function AdminMenuDashboardPage() {
         )
     }
 
-    const allPausedDishesList =
-        data.allPausedDishesList ?? []
+    const allPausedDishesList = data.allPausedDishesList ?? []
 
     return (
         <div className="admin-menu-page">
@@ -191,78 +160,32 @@ export default function AdminMenuDashboardPage() {
                 />
             </PageCard>
 
-            <div className="admin-menu-stats-grid">
-                <div className="admin-menu-stat-card admin-menu-stat-total">
-                    <div className="admin-menu-stat-inner">
-                        <div>
-                            <span className="admin-menu-stat-label">
-                                TỔNG SỐ MÓN
-                            </span>
+            <div className="rk-statgrid">
+                <StatCard
+                    label="Tổng số món"
+                    value={data.totalDishes}
+                    icon={<Utensils className="rk-icon" aria-hidden="true" />}
+                />
 
-                            <h2 className="admin-menu-stat-number">
-                                {data.totalDishes}
-                            </h2>
-                        </div>
+                <StatCard
+                    label="Danh mục"
+                    value={data.totalCategories}
+                    icon={<FolderOpen className="rk-icon" aria-hidden="true" />}
+                />
 
-                        <span className="admin-menu-stat-icon">
-                            🍴
-                        </span>
-                    </div>
-                </div>
+                <StatCard
+                    label="Tạm dừng bán"
+                    value={data.totalPausedDishes}
+                    tone="busy"
+                    icon={<PauseCircle className="rk-icon" aria-hidden="true" />}
+                />
 
-                <div className="admin-menu-stat-card admin-menu-stat-categories">
-                    <div className="admin-menu-stat-inner">
-                        <div>
-                            <span className="admin-menu-stat-label">
-                                DANH MỤC
-                            </span>
-
-                            <h2 className="admin-menu-stat-number">
-                                {data.totalCategories}
-                            </h2>
-                        </div>
-
-                        <span className="admin-menu-stat-icon">
-                            🗂️
-                        </span>
-                    </div>
-                </div>
-
-                <div className="admin-menu-stat-card admin-menu-stat-paused">
-                    <div className="admin-menu-stat-inner">
-                        <div>
-                            <span className="admin-menu-stat-label">
-                                TẠM DỪNG BÁN
-                            </span>
-
-                            <h2 className="admin-menu-stat-number">
-                                {data.totalPausedDishes}
-                            </h2>
-                        </div>
-
-                        <span className="admin-menu-stat-icon">
-                            ⏸️
-                        </span>
-                    </div>
-                </div>
-
-                <div className="admin-menu-stat-card admin-menu-stat-hidden">
-                    <div className="admin-menu-stat-inner">
-                        <div>
-                            <span className="admin-menu-stat-label">
-                                DANH MỤC ẨN
-                            </span>
-
-                            <h2 className="admin-menu-stat-number">
-                                {data.totalHiddenDishes}
-                            </h2>
-                        </div>
-
-                        <span className="admin-menu-stat-icon">
-                            👁️‍🗨️
-                        </span>
-                    </div>
-                </div>
+                <StatCard
+                    label="Danh mục ẩn"
+                    value={data.totalHiddenDishes}
+                    tone="alert"
+                    icon={<EyeOff className="rk-icon" aria-hidden="true" />}
+                />
             </div>
 
             <div className="admin-menu-two-columns">
@@ -278,7 +201,8 @@ export default function AdminMenuDashboardPage() {
                                 onClick={() => navigate('/admin/categories')}
                                 className="admin-menu-manage-link"
                             >
-                                Quản lý danh mục →
+                                Quản lý danh mục{' '}
+                                <ArrowRight className="rk-icon" aria-hidden="true" />
                             </button>
                         </div>
 
@@ -299,17 +223,15 @@ export default function AdminMenuDashboardPage() {
                                     </div>
 
                                     <span
-                                        className={
-                                            `admin-menu-status-badge ${
-                                                category.status === 'ACTIVE'
-                                                    ? 'active'
-                                                    : 'hidden'
-                                            }`
-                                        }
+                                        className={`rk-chip ${
+                                            category.status === 'ACTIVE'
+                                                ? 'rk-chip--ok'
+                                                : 'rk-chip--idle'
+                                        }`}
                                     >
                                         {category.status === 'ACTIVE'
-                                            ? '● Hoạt động'
-                                            : '● Đang ẩn'}
+                                            ? 'Hoạt động'
+                                            : 'Đang ẩn'}
                                     </span>
                                 </div>
                             ))}
@@ -334,12 +256,11 @@ export default function AdminMenuDashboardPage() {
                                         className="admin-menu-progress-item"
                                     >
                                         <div className="admin-menu-progress-label">
-                                            <span>
-                                                {category.categoryName}
-                                            </span>
+                                            <span>{category.categoryName}</span>
 
                                             <span className="admin-menu-progress-percent">
-                                                {category.dishCount} ({percentage.toFixed(0)}%)
+                                                {category.dishCount} (
+                                                {percentage.toFixed(0)}%)
                                             </span>
                                         </div>
 
@@ -368,84 +289,86 @@ export default function AdminMenuDashboardPage() {
                                 onClick={() => navigate('/admin/dishes')}
                                 className="admin-menu-manage-link"
                             >
-                                Quản lý món →
+                                Quản lý món{' '}
+                                <ArrowRight className="rk-icon" aria-hidden="true" />
                             </button>
                         </div>
 
                         <div className="admin-menu-table-wrapper">
-                            <table className="admin-menu-table">
+                            <table className="rk-table rk-table--compact">
                                 <thead>
-                                <tr className="admin-menu-table-header">
-                                    <th>MÓN ĂN</th>
-                                    <th>DANH MỤC</th>
-                                    <th>GIÁ NIÊM YẾT</th>
-                                    <th className="admin-menu-text-center">
-                                        TRẠNG THÁI
-                                    </th>
-                                </tr>
+                                    <tr>
+                                        <th>Món ăn</th>
+                                        <th>Danh mục</th>
+                                        <th>Giá niêm yết</th>
+                                        <th className="admin-menu-text-center">
+                                            Trạng thái
+                                        </th>
+                                    </tr>
                                 </thead>
 
                                 <tbody>
-                                {data.latestDishes.map((dish) => (
-                                    <tr
-                                        key={dish.id}
-                                        className="admin-menu-table-row"
-                                    >
-                                        <td className="admin-menu-dish-cell">
-                                            <div className="admin-menu-dish-image-wrapper">
-                                                {dish.imageUrl ? (
-                                                    <img
-                                                        src={
-                                                            dish.imageUrl.startsWith('http')
-                                                                ? dish.imageUrl
-                                                                : `/image/${dish.imageUrl}`
-                                                        }
-                                                        alt={dish.name}
-                                                        onError={(event) => {
-                                                            event.currentTarget.onerror = null
-                                                            event.currentTarget.src =
-                                                                'https://placehold.co/36x36?text=🍲'
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <span className="admin-menu-dish-emoji">
-                                                        🍲
-                                                    </span>
-                                                )}
-                                            </div>
+                                    {data.latestDishes.map((dish) => (
+                                        <tr key={dish.id}>
+                                            <td className="admin-menu-dish-cell">
+                                                <div className="admin-menu-dish-image-wrapper">
+                                                    {dish.imageUrl ? (
+                                                        <img
+                                                            src={
+                                                                dish.imageUrl.startsWith(
+                                                                    'http',
+                                                                )
+                                                                    ? dish.imageUrl
+                                                                    : `/image/${dish.imageUrl}`
+                                                            }
+                                                            alt={dish.name}
+                                                            onError={(event) => {
+                                                                event.currentTarget.onerror =
+                                                                    null
+                                                                event.currentTarget.src =
+                                                                    'https://placehold.co/36x36?text='
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <span className="admin-menu-dish-emoji">
+                                                            <Soup
+                                                                className="rk-icon"
+                                                                aria-hidden="true"
+                                                            />
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                                            <span className="admin-menu-dish-name">
-                                                {dish.name}
-                                            </span>
-                                        </td>
+                                                <span className="admin-menu-dish-name">
+                                                    {dish.name}
+                                                </span>
+                                            </td>
 
-                                        <td>
-                                            <span className="admin-menu-category-tag">
-                                                {dish.categoryName}
-                                            </span>
-                                        </td>
+                                            <td>
+                                                <span className="rk-tag">
+                                                    {dish.categoryName}
+                                                </span>
+                                            </td>
 
-                                        <td className="admin-menu-dish-price">
-                                            {dish.price.toLocaleString('vi-VN')}đ
-                                        </td>
+                                            <td className="admin-menu-dish-price">
+                                                {dish.price.toLocaleString('vi-VN')}đ
+                                            </td>
 
-                                        <td className="admin-menu-text-center">
-                                            <span
-                                                className={
-                                                    `admin-menu-dish-status ${
+                                            <td className="admin-menu-text-center">
+                                                <span
+                                                    className={`rk-chip ${
                                                         dish.status === 'AVAILABLE'
-                                                            ? 'available'
-                                                            : 'paused'
-                                                    }`
-                                                }
-                                            >
-                                                {dish.status === 'AVAILABLE'
-                                                    ? 'Đang bán'
-                                                    : 'Tạm dừng'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
+                                                            ? 'rk-chip--ok'
+                                                            : 'rk-chip--idle'
+                                                    }`}
+                                                >
+                                                    {dish.status === 'AVAILABLE'
+                                                        ? 'Đang bán'
+                                                        : 'Tạm dừng'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
@@ -453,13 +376,15 @@ export default function AdminMenuDashboardPage() {
 
                     <div className="admin-menu-card admin-menu-warning">
                         <h3 className="admin-menu-section-title admin-menu-warning-title">
-                            ⚠️ Cần chú ý (Món đang tạm dừng bán)
+                            <AlertTriangle className="rk-icon" aria-hidden="true" /> Cần
+                            chú ý (Món đang tạm dừng bán)
                         </h3>
 
                         <div className="admin-menu-scroll-container admin-menu-warning-scroll">
                             {allPausedDishesList.length === 0 ? (
                                 <div className="admin-menu-empty-warning">
-                                    Tuyệt vời! Hiện tại không có món ăn nào bị gián đoạn kinh doanh.
+                                    Tuyệt vời! Hiện tại không có món ăn nào bị gián đoạn
+                                    kinh doanh.
                                 </div>
                             ) : (
                                 allPausedDishesList.map((dish) => (
@@ -472,20 +397,26 @@ export default function AdminMenuDashboardPage() {
                                                 {dish.imageUrl ? (
                                                     <img
                                                         src={
-                                                            dish.imageUrl.startsWith('http')
+                                                            dish.imageUrl.startsWith(
+                                                                'http',
+                                                            )
                                                                 ? dish.imageUrl
                                                                 : `/image/${dish.imageUrl}`
                                                         }
                                                         alt={dish.name}
                                                         onError={(event) => {
-                                                            event.currentTarget.onerror = null
+                                                            event.currentTarget.onerror =
+                                                                null
                                                             event.currentTarget.src =
-                                                                'https://placehold.co/36x36?text=🍲'
+                                                                'https://placehold.co/36x36?text='
                                                         }}
                                                     />
                                                 ) : (
                                                     <span className="admin-menu-dish-emoji">
-                                                        🍲
+                                                        <Soup
+                                                            className="rk-icon"
+                                                            aria-hidden="true"
+                                                        />
                                                     </span>
                                                 )}
                                             </div>
@@ -502,7 +433,7 @@ export default function AdminMenuDashboardPage() {
                                         </div>
 
                                         <span className="admin-menu-paused-label">
-                                            TẠM NGƯNG
+                                            Tạm ngưng
                                         </span>
                                     </div>
                                 ))
