@@ -274,9 +274,9 @@ export default function AdminDishesPage() {
     }
 
     return (
-        <div className="admin-dish-page">
+        <div className="rk-stack">
             {/* Header */}
-            <PageCard className="admin-dish-header-card">
+            <PageCard>
                 <PageHeader
                     title="Quản lý món ăn"
                     description="Tìm kiếm, thêm, chỉnh sửa và quản lý trạng thái món ăn trong thực đơn."
@@ -303,8 +303,8 @@ export default function AdminDishesPage() {
             </PageCard>
 
             {/* Filters */}
-            <div className="admin-dish-filter-grid">
-                <div className="admin-dish-card">
+            <div className="rk-filterrow">
+                <PageCard>
                     <div className="rk-filterbar">
                         <input
                             type="text"
@@ -351,7 +351,8 @@ export default function AdminDishesPage() {
                             <option value="HIDDEN">Đã ẩn</option>
                         </select>
                     </div>
-                </div>
+                </PageCard>
+
                 <StatCard
                     label="Món tìm thấy"
                     value={filteredDishes.length}
@@ -365,13 +366,15 @@ export default function AdminDishesPage() {
                 <table className="rk-table">
                     <thead>
                         <tr>
-                            <th className="admin-dish-col-image">Hình ảnh</th>
-                            <th className="admin-dish-col-name">Tên món ăn</th>
-                            <th className="admin-dish-col-category">Danh mục</th>
-                            <th className="admin-dish-col-price">Giá niêm yết</th>
-                            <th className="admin-dish-col-status">Trạng thái</th>
-                            <th className="admin-dish-col-date">Ngày tạo</th>
-                            <th className="admin-dish-col-actions">Thao tác</th>
+                            <th scope="col">Hình ảnh</th>
+                            <th scope="col">Tên món ăn</th>
+                            <th scope="col">Danh mục</th>
+                            <th scope="col" className="rk-th--num">
+                                Giá niêm yết
+                            </th>
+                            <th scope="col">Trạng thái</th>
+                            <th scope="col">Ngày tạo</th>
+                            <th scope="col">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -382,8 +385,8 @@ export default function AdminDishesPage() {
 
                             return (
                                 <tr key={dish.id}>
-                                    <td className="admin-dish-cell-image">
-                                        <div className="admin-dish-image-container">
+                                    <td>
+                                        <span className="rk-thumb">
                                             <img
                                                 src={
                                                     dish.imageUrl.startsWith('http')
@@ -396,26 +399,28 @@ export default function AdminDishesPage() {
                                                         'https://placehold.co/48x48?text='
                                                 }}
                                             />
-                                        </div>
+                                        </span>
                                     </td>
-                                    <td className="admin-dish-cell-name">
-                                        <div className="admin-dish-name">{dish.name}</div>
-                                        <small className="admin-dish-sku">
+                                    <td>
+                                        <div className="rk-rowlist__title">
+                                            {dish.name}
+                                        </div>
+                                        <small className="rk-rowlist__meta">
                                             ID-{String(dish.id).padStart(2, '0')}
                                         </small>
                                     </td>
-                                    <td className="admin-dish-cell-category">
+                                    <td>
                                         <span
-                                            className={`admin-dish-category-badge ${isParentCategoryHidden ? 'hidden' : ''}`}
+                                            className={`rk-tag${isParentCategoryHidden ? ' rk-tag--muted' : ''}`}
                                         >
                                             {dish.categoryName}{' '}
                                             {isParentCategoryHidden ? '(Ẩn)' : ''}
                                         </span>
                                     </td>
-                                    <td className="admin-dish-cell-price">
+                                    <td className="rk-td--num">
                                         {dish.price.toLocaleString('vi-VN')}đ
                                     </td>
-                                    <td className="admin-dish-cell-status">
+                                    <td>
                                         <span
                                             className={`rk-chip ${dish.isHidden ? 'rk-chip--idle' : 'rk-chip--ok'}`}
                                         >
@@ -424,12 +429,12 @@ export default function AdminDishesPage() {
                                                 : 'Đang hiển thị'}
                                         </span>
                                     </td>
-                                    <td className="admin-dish-cell-date">
+                                    <td>
                                         {new Date(dish.createdAt).toLocaleDateString(
                                             'vi-VN',
                                         )}
                                     </td>
-                                    <td className="admin-dish-cell-actions">
+                                    <td>
                                         <button
                                             onClick={() => openFormWithDish(dish, 'VIEW')}
                                             className="rk-iconbtn"
@@ -511,9 +516,9 @@ export default function AdminDishesPage() {
                 >
                     <form onSubmit={handleCreateDish} className="rk-modal__split">
                         <div>
-                            <div className="admin-dish-form-group">
+                            <div className="rk-fieldgroup">
                                 <div>
-                                    <label className="admin-dish-input-label">
+                                    <label className="rk-field__label">
                                         Tên món ăn *
                                     </label>
                                     <input
@@ -532,9 +537,9 @@ export default function AdminDishesPage() {
                                     />
                                 </div>
 
-                                <div className="admin-dish-form-row">
+                                <div className="rk-formgrid">
                                     <div>
-                                        <label className="admin-dish-input-label">
+                                        <label className="rk-field__label">
                                             Danh mục thực đơn
                                         </label>
                                         <select
@@ -554,13 +559,13 @@ export default function AdminDishesPage() {
                                             ))}
                                         </select>
                                         {activeCategories.length === 0 && (
-                                            <small className="admin-dish-error-text">
+                                            <small className="rk-formerror">
                                                 Không có danh mục khả dụng!
                                             </small>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="admin-dish-input-label">
+                                        <label className="rk-field__label">
                                             Giá bán (VNĐ) *
                                         </label>
                                         <input
@@ -580,7 +585,7 @@ export default function AdminDishesPage() {
                                 </div>
 
                                 <div>
-                                    <label className="admin-dish-input-label">
+                                    <label className="rk-field__label">
                                         Mô tả món ăn
                                     </label>
                                     <textarea
@@ -598,12 +603,12 @@ export default function AdminDishesPage() {
                                     />
                                 </div>
 
-                                <div className="admin-dish-toggle-row">
+                                <div className="rk-switchrow">
                                     <div>
-                                        <strong className="admin-dish-toggle-label">
+                                        <strong className="rk-switchrow__label">
                                             Hiển thị trên menu
                                         </strong>
-                                        <small className="admin-dish-toggle-description">
+                                        <small className="rk-switchrow__desc">
                                             Cho phép Bếp và Phục vụ nhìn thấy món này
                                         </small>
                                     </div>
@@ -616,7 +621,6 @@ export default function AdminDishesPage() {
                                                 isHidden: !e.target.checked,
                                             })
                                         }
-                                        className="admin-dish-toggle-checkbox"
                                     />
                                 </div>
                             </div>
@@ -624,14 +628,14 @@ export default function AdminDishesPage() {
 
                         <div>
                             <div>
-                                <label className="admin-dish-input-label">
+                                <label className="rk-field__label">
                                     Hình ảnh minh hoạ
                                 </label>
-                                <div className="admin-dish-image-preview">
+                                <div className="rk-thumb rk-thumb--lg">
                                     {formData.imageUrl ? (
                                         <img src={formData.imageUrl} alt="Preview" />
                                     ) : (
-                                        <div className="admin-dish-image-placeholder">
+                                        <div className="rk-thumb rk-thumb--lg">
                                             <span>
                                                 <Image
                                                     className="rk-icon"
@@ -656,7 +660,7 @@ export default function AdminDishesPage() {
                                 />
                             </div>
 
-                            <div className="admin-dish-modal-actions">
+                            <div className="rk-actions rk-actions--end">
                                 <button
                                     type="submit"
                                     disabled={
@@ -722,7 +726,7 @@ export default function AdminDishesPage() {
                                     ? 'Đã ẩn khỏi thực đơn'
                                     : 'Đang bán'}
                             </span>
-                            <div className="admin-dish-view-image">
+                            <div className="rk-thumb rk-thumb--lg">
                                 <img
                                     src={
                                         selectedDish.imageUrl.startsWith('http')
@@ -732,8 +736,8 @@ export default function AdminDishesPage() {
                                     alt={selectedDish.name}
                                 />
                             </div>
-                            <div className="admin-dish-view-sku">
-                                <span className="admin-dish-view-sku-label">Mã món</span>
+                            <div className="rk-detailrow">
+                                <span className="rk-detailrow__label">Mã món</span>
                                 <strong>
                                     {String(selectedDish.id).padStart(2, '0')}
                                 </strong>
@@ -742,14 +746,12 @@ export default function AdminDishesPage() {
 
                         <div>
                             <div>
-                                <h3 className="admin-dish-view-price">
+                                <h3 className="rk-num rk-price">
                                     {selectedDish.price.toLocaleString('vi-VN')}đ
                                 </h3>
-                                <hr className="admin-dish-divider" />
-                                <h4 className="admin-dish-view-desc-label">
-                                    Mô tả chi tiết
-                                </h4>
-                                <div className="admin-dish-view-description">
+                                <hr />
+                                <h4 className="rk-sectiontitle">Mô tả chi tiết</h4>
+                                <div className="rk-prose">
                                     {selectedDish.description ||
                                         'Không có mô tả thông tin cụ thể cho món ăn này.'}
                                 </div>
@@ -772,10 +774,10 @@ export default function AdminDishesPage() {
                 >
                     <form onSubmit={handleUpdateDish} className="rk-modal__split">
                         <div>
-                            <div className="admin-dish-form-group">
-                                <div className="admin-dish-form-row">
+                            <div className="rk-fieldgroup">
+                                <div className="rk-formgrid">
                                     <div>
-                                        <label className="admin-dish-input-label">
+                                        <label className="rk-field__label">
                                             Tên món ăn
                                         </label>
                                         <input
@@ -792,7 +794,7 @@ export default function AdminDishesPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="admin-dish-input-label">
+                                        <label className="rk-field__label">
                                             Danh mục
                                         </label>
                                         <select
@@ -815,9 +817,9 @@ export default function AdminDishesPage() {
                                     </div>
                                 </div>
 
-                                <div className="admin-dish-form-row">
+                                <div className="rk-formgrid">
                                     <div>
-                                        <label className="admin-dish-input-label">
+                                        <label className="rk-field__label">
                                             Giá bán (VNĐ)
                                         </label>
                                         <input
@@ -833,11 +835,11 @@ export default function AdminDishesPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="admin-dish-input-label">
+                                        <label className="rk-field__label">
                                             Trạng thái HIỂN THỊ
                                         </label>
-                                        <div className="admin-dish-radio-group">
-                                            <label className="admin-dish-radio-label">
+                                        <div className="rk-radiorow">
+                                            <label>
                                                 <input
                                                     type="radio"
                                                     name="visibility"
@@ -851,7 +853,7 @@ export default function AdminDishesPage() {
                                                 />{' '}
                                                 Hiển thị
                                             </label>
-                                            <label className="admin-dish-radio-label">
+                                            <label>
                                                 <input
                                                     type="radio"
                                                     name="visibility"
@@ -870,7 +872,7 @@ export default function AdminDishesPage() {
                                 </div>
 
                                 <div>
-                                    <label className="admin-dish-input-label">
+                                    <label className="rk-field__label">
                                         Mô tả chi tiết
                                     </label>
                                     <textarea
@@ -888,10 +890,10 @@ export default function AdminDishesPage() {
                                 </div>
 
                                 <div>
-                                    <label className="admin-dish-input-label">
+                                    <label className="rk-field__label">
                                         ĐƯỜNG DẪN HÌNH ANH (URL)
                                     </label>
-                                    <div className="admin-dish-url-group">
+                                    <div className="rk-actions">
                                         <input
                                             type="text"
                                             value={formData.imageUrl}
@@ -903,17 +905,14 @@ export default function AdminDishesPage() {
                                             }
                                             className="rk-input"
                                         />
-                                        <button
-                                            type="button"
-                                            className="admin-dish-upload-btn"
-                                        >
+                                        <button type="button" className="rk-btn">
                                             Tải lên
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="admin-dish-form-actions">
+                            <div className="rk-actions rk-actions--end">
                                 <button
                                     type="button"
                                     onClick={() => setActiveModal('NONE')}
@@ -933,12 +932,12 @@ export default function AdminDishesPage() {
 
                         <div>
                             <div>
-                                <div className="admin-dish-preview-header">
+                                <div className="rk-sectiontitle">
                                     Xem trước trên thực đơn
                                 </div>
-                                <div className="admin-dish-preview-body">
+                                <div className="rk-media">
                                     {/* Thay thế phần này */}
-                                    <div className="admin-dish-preview-image">
+                                    <div className="rk-thumb rk-thumb--lg">
                                         <img
                                             src={
                                                 formData.imageUrl
@@ -954,13 +953,11 @@ export default function AdminDishesPage() {
                                             }}
                                         />
                                     </div>
-                                    <div className="admin-dish-preview-info">
-                                        <span className="admin-dish-preview-status"></span>
-                                    </div>
+                                    <div className="rk-rowlist__main"></div>
                                 </div>
                             </div>
 
-                            <div className="admin-dish-danger-zone">
+                            <div className="rk-dangerzone">
                                 <h5> Khu vực nguy hiểm</h5>
                                 <button
                                     type="button"

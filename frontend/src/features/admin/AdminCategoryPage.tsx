@@ -1,4 +1,12 @@
-import {ChefHat, Eye, FolderOpen, Pencil, Trash2, UtensilsCrossed} from 'lucide-react'
+import {
+    ArrowLeft,
+    ChefHat,
+    Eye,
+    FolderOpen,
+    Pencil,
+    Trash2,
+    UtensilsCrossed,
+} from 'lucide-react'
 
 import React, {useCallback, useEffect, useState} from 'react'
 import * as adminApi from '@/shared/api/admin'
@@ -224,11 +232,11 @@ export default function AdminCategoryPage() {
     }
 
     return (
-        <div className="admin-category-page">
+        <div className="rk-stack">
             {view === 'LIST' && (
                 <div>
                     {/* Header */}
-                    <PageCard className="admin-category-header-card">
+                    <PageCard>
                         <PageHeader
                             title="Quản lý danh mục"
                             description="Quản lý nhóm món ăn, trạng thái hiển thị và số món thuộc từng danh mục."
@@ -252,20 +260,18 @@ export default function AdminCategoryPage() {
                     </PageCard>
 
                     {/* Stats & Filters */}
-                    <div className="admin-category-top-grid">
-                        <div className="admin-category-card">
-                            <div className="admin-category-filter-container">
-                                <div className="admin-category-filter-section">
-                                    <span className="admin-category-filter-label">
-                                        Trạng thái
-                                    </span>
-                                    <div className="admin-category-filter-group">
+                    <div className="rk-filterrow">
+                        <PageCard>
+                            <div className="rk-filterbar">
+                                <div className="rk-field">
+                                    <span className="rk-field__label">Trạng thái</span>
+                                    <div className="rk-segment">
                                         <button
                                             onClick={() => {
                                                 setFilterStatus('ALL')
                                                 setCurrentPage(1)
                                             }}
-                                            className={`admin-category-filter-btn ${filterStatus === 'ALL' ? 'active' : ''}`}
+                                            className={`rk-segment__btn${filterStatus === 'ALL' ? ' is-active' : ''}`}
                                         >
                                             Tất cả
                                         </button>
@@ -274,7 +280,7 @@ export default function AdminCategoryPage() {
                                                 setFilterStatus('ACTIVE')
                                                 setCurrentPage(1)
                                             }}
-                                            className={`admin-category-filter-btn ${filterStatus === 'ACTIVE' ? 'active' : ''}`}
+                                            className={`rk-segment__btn${filterStatus === 'ACTIVE' ? ' is-active' : ''}`}
                                         >
                                             Hoạt động
                                         </button>
@@ -283,14 +289,14 @@ export default function AdminCategoryPage() {
                                                 setFilterStatus('HIDDEN')
                                                 setCurrentPage(1)
                                             }}
-                                            className={`admin-category-filter-btn ${filterStatus === 'HIDDEN' ? 'active' : ''}`}
+                                            className={`rk-segment__btn${filterStatus === 'HIDDEN' ? ' is-active' : ''}`}
                                         >
                                             Đã ẩn
                                         </button>
                                     </div>
                                 </div>
-                                <div className="admin-category-search-section">
-                                    <span className="admin-category-filter-label">
+                                <div className="rk-field">
+                                    <span className="rk-field__label">
                                         Tìm kiếm nhanh
                                     </span>
                                     <input
@@ -305,7 +311,7 @@ export default function AdminCategoryPage() {
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </PageCard>
 
                         <StatCard
                             label="Tổng danh mục"
@@ -327,63 +333,59 @@ export default function AdminCategoryPage() {
                         <table className="rk-table">
                             <thead>
                                 <tr>
-                                    <th className="admin-category-col-id">ID</th>
-                                    <th className="admin-category-col-name">Danh mục</th>
-                                    <th className="admin-category-col-count">Số món</th>
-                                    <th className="admin-category-col-status">
-                                        Trạng thái
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Danh mục</th>
+                                    <th scope="col" className="rk-th--num">
+                                        Số món
                                     </th>
-                                    <th className="admin-category-col-date">Ngày tạo</th>
-                                    <th className="admin-category-col-actions">
-                                        Thao tác
-                                    </th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col">Ngày tạo</th>
+                                    <th scope="col">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {currentItems.map((item) => (
                                     <tr key={item.id}>
-                                        <td className="admin-category-cell-id">
-                                            {String(item.id).padStart(2, '0')}
-                                        </td>
-                                        <td className="admin-category-cell-name">
-                                            <div className="admin-category-info">
-                                                <div className="admin-category-icon">
+                                        <td>{String(item.id).padStart(2, '0')}</td>
+                                        <td>
+                                            <div className="rk-media">
+                                                <span className="rk-thumb">
                                                     <FolderOpen
                                                         className="rk-icon"
                                                         aria-hidden="true"
                                                     />
-                                                </div>
+                                                </span>
                                                 <div>
-                                                    <strong className="admin-category-name">
+                                                    <strong className="rk-rowlist__title">
                                                         {item.name}
                                                     </strong>
-                                                    <div className="admin-category-description">
+                                                    <div className="rk-rowlist__meta">
                                                         {item.description ||
                                                             'Không có mô tả'}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="admin-category-cell-count">
+                                        <td>
                                             <span className="rk-tag">
                                                 {item.dishCount || 0} món
                                             </span>
                                         </td>
-                                        <td className="admin-category-cell-status">
+                                        <td>
                                             <span
                                                 className={`rk-chip ${item.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
                                             >
                                                 {item.isAvailable ? 'Hoạt động' : 'Đã ẩn'}
                                             </span>
                                         </td>
-                                        <td className="admin-category-cell-date">
+                                        <td>
                                             {item.createdAt
                                                 ? new Date(
                                                       item.createdAt,
                                                   ).toLocaleDateString('vi-VN')
                                                 : '---'}
                                         </td>
-                                        <td className="admin-category-cell-actions">
+                                        <td>
                                             <button
                                                 onClick={() => {
                                                     setSelectedCategory(item)
@@ -472,20 +474,20 @@ export default function AdminCategoryPage() {
             )}
 
             {view === 'DETAIL' && selectedCategory && (
-                <div className="admin-category-detail-view">
-                    <div className="admin-category-detail-header">
-                        <div className="admin-category-detail-header-left">
+                <div className="rk-stack">
+                    <div className="rk-card__head-inline">
+                        <div className="rk-media">
                             <button
+                                type="button"
+                                className="rk-iconbtn"
+                                title="Quay lại danh sách"
                                 onClick={() => setView('LIST')}
-                                className="admin-category-back-btn"
                             >
-                                &larr;
+                                <ArrowLeft className="rk-icon" aria-hidden="true" />
                             </button>
-                            <h3 className="admin-category-detail-title">
-                                CHI TIẾT Danh mục
-                            </h3>
+                            <h3 className="rk-sectiontitle">Chi tiết danh mục</h3>
                         </div>
-                        <div className="admin-category-detail-header-right">
+                        <div className="rk-actions">
                             <button
                                 onClick={() => {
                                     setFormData({
@@ -516,112 +518,95 @@ export default function AdminCategoryPage() {
                         </div>
                     </div>
 
-                    <div className="admin-category-detail-grid">
-                        <div className="admin-category-card">
-                            <span className="admin-category-input-label">
-                                Tên danh mục
-                            </span>
-                            <p className="admin-category-detail-name">
-                                {selectedCategory.name}
-                            </p>
+                    <PageCard>
+                        <dl className="rk-details">
+                            <div className="rk-detailrow">
+                                <dt className="rk-detailrow__label">Tên danh mục</dt>
+                                <dd className="rk-detailrow__value">
+                                    {selectedCategory.name}
+                                </dd>
+                            </div>
 
-                            <span className="admin-category-input-label">
-                                Mô tả danh mục
-                            </span>
-                            <p className="admin-category-detail-description">
-                                {selectedCategory.description ||
-                                    'Không có mô tả chi tiết cho danh mục này.'}
-                            </p>
+                            <div className="rk-detailrow">
+                                <dt className="rk-detailrow__label">Mô tả</dt>
+                                <dd className="rk-detailrow__value">
+                                    {selectedCategory.description ||
+                                        'Không có mô tả chi tiết cho danh mục này.'}
+                                </dd>
+                            </div>
 
-                            <div className="admin-category-detail-metrics">
-                                <div>
-                                    <span className="admin-category-input-label">
-                                        Trạng thái HIỂN THỊ
-                                    </span>
+                            <div className="rk-detailrow">
+                                <dt className="rk-detailrow__label">Trạng thái</dt>
+                                <dd className="rk-detailrow__value">
                                     <span
-                                        className={`admin-category-detail-status ${selectedCategory.isAvailable ? 'active' : 'hidden'}`}
+                                        className={`rk-chip ${selectedCategory.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
                                     >
                                         {selectedCategory.isAvailable
                                             ? 'Đang hoạt động'
                                             : 'Đang tạm ẩn'}
                                     </span>
-                                </div>
-                                <div>
-                                    <span className="admin-category-input-label">
-                                        Số món liên kết
-                                    </span>
-                                    <span className="admin-category-detail-dish-count">
-                                        {categoryDishes.length} món ăn
-                                    </span>
-                                </div>
+                                </dd>
                             </div>
-                        </div>
 
-                        <div className="admin-category-detail-meta">
-                            <div className="admin-category-card admin-category-meta-card">
-                                <span className="admin-category-input-label">
-                                    NGÀY KHỞI TẠO
-                                </span>
-                                <p className="admin-category-meta-value">
+                            <div className="rk-detailrow">
+                                <dt className="rk-detailrow__label">Số món liên kết</dt>
+                                <dd className="rk-detailrow__value rk-num">
+                                    {categoryDishes.length} món
+                                </dd>
+                            </div>
+
+                            <div className="rk-detailrow">
+                                <dt className="rk-detailrow__label">Ngày khởi tạo</dt>
+                                <dd className="rk-detailrow__value">
                                     {selectedCategory.createdAt
                                         ? new Date(
                                               selectedCategory.createdAt,
                                           ).toLocaleString('vi-VN')
-                                        : '---'}
-                                </p>
+                                        : '—'}
+                                </dd>
                             </div>
-                            <div className="admin-category-card admin-category-meta-card">
-                                <span className="admin-category-input-label">
-                                    Cập nhật cuối
-                                </span>
-                                <p className="admin-category-meta-value">
+
+                            <div className="rk-detailrow">
+                                <dt className="rk-detailrow__label">Cập nhật cuối</dt>
+                                <dd className="rk-detailrow__value">
                                     {selectedCategory.updatedAt
                                         ? new Date(
                                               selectedCategory.updatedAt,
                                           ).toLocaleString('vi-VN')
-                                        : '---'}
-                                </p>
+                                        : '—'}
+                                </dd>
                             </div>
-                        </div>
-                    </div>
+                        </dl>
+                    </PageCard>
 
-                    <div className="admin-category-card">
-                        <div className="admin-category-dish-list-header">
-                            <h4 className="admin-category-dish-list-title">
+                    <PageCard>
+                        <div className="rk-card__head-inline">
+                            <h4 className="rk-sectiontitle">
                                 <UtensilsCrossed className="rk-icon" aria-hidden="true" />{' '}
-                                DANH SÁCH MÓN TRONG Danh mục ({categoryDishes.length} món)
+                                Món trong danh mục ({categoryDishes.length})
                             </h4>
                         </div>
 
                         {categoryDishes.length > 0 ? (
                             <>
-                                <div className="admin-category-dish-table-wrapper">
+                                <div className="rk-tablewrap">
                                     <table className="rk-table rk-table--compact">
                                         <thead>
                                             <tr>
-                                                <th className="admin-category-dish-col-name">
-                                                    Tên món
+                                                <th scope="col">Tên món</th>
+                                                <th scope="col" className="rk-th--num">
+                                                    Giá
                                                 </th>
-                                                <th className="admin-category-dish-col-price">
-                                                    Giá (VNĐ)
-                                                </th>
-                                                <th className="admin-category-dish-col-status">
-                                                    Trạng thái
-                                                </th>
-                                                <th className="admin-category-dish-col-date">
-                                                    Ngày tạo
-                                                </th>
+                                                <th scope="col">Trạng thái</th>
+                                                <th scope="col">Ngày tạo</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {currentDishItems.map((dish) => (
-                                                <tr
-                                                    key={dish.id}
-                                                    className="admin-category-dish-row"
-                                                >
-                                                    <td className="admin-category-dish-cell-name">
-                                                        <div className="admin-category-dish-info">
-                                                            <div className="admin-category-dish-image">
+                                                <tr key={dish.id}>
+                                                    <td>
+                                                        <div className="rk-media">
+                                                            <span className="rk-thumb">
                                                                 <img
                                                                     src={
                                                                         dish.imageUrl &&
@@ -642,26 +627,26 @@ export default function AdminCategoryPage() {
                                                                         ).onerror = null
                                                                     }}
                                                                 />
-                                                            </div>
+                                                            </span>
                                                             <div>
-                                                                <strong className="admin-category-dish-name">
+                                                                <strong className="rk-rowlist__title">
                                                                     {dish.name}
                                                                 </strong>
                                                                 {dish.description && (
-                                                                    <div className="admin-category-dish-description-short">
+                                                                    <div className="rk-rowlist__meta">
                                                                         {dish.description}
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="admin-category-dish-cell-price">
+                                                    <td className="rk-td--num">
                                                         {dish.price.toLocaleString(
                                                             'vi-VN',
                                                         )}
                                                         đ
                                                     </td>
-                                                    <td className="admin-category-dish-cell-status">
+                                                    <td>
                                                         <span
                                                             className={`rk-chip ${dish.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
                                                         >
@@ -670,7 +655,7 @@ export default function AdminCategoryPage() {
                                                                 : 'Tạm dừng'}
                                                         </span>
                                                     </td>
-                                                    <td className="admin-category-dish-cell-date">
+                                                    <td>
                                                         {dish.createdAt
                                                             ? new Date(
                                                                   dish.createdAt,
@@ -699,31 +684,35 @@ export default function AdminCategoryPage() {
                                 description="Danh mục hiện chưa liên kết với món ăn nào."
                             />
                         )}
-                    </div>
+                    </PageCard>
                 </div>
             )}
 
             {(view === 'CREATE' || view === 'EDIT') && (
-                <div className="admin-category-form-view">
-                    <div className="admin-category-form-header">
-                        <button
-                            onClick={() => setView('LIST')}
-                            className="admin-category-back-btn"
-                        >
-                            &larr;
-                        </button>
-                        <h3 className="admin-category-form-title">
-                            {view === 'CREATE'
-                                ? 'Thêm danh mục mới'
-                                : 'Chỉnh sửa danh mục'}
-                        </h3>
+                <PageCard>
+                    <div className="rk-card__head-inline">
+                        <div className="rk-media">
+                            <button
+                                type="button"
+                                className="rk-iconbtn"
+                                title="Quay lại danh sách"
+                                onClick={() => setView('LIST')}
+                            >
+                                <ArrowLeft className="rk-icon" aria-hidden="true" />
+                            </button>
+
+                            <h3 className="rk-sectiontitle">
+                                {view === 'CREATE'
+                                    ? 'Thêm danh mục mới'
+                                    : 'Chỉnh sửa danh mục'}
+                            </h3>
+                        </div>
                     </div>
 
-                    <form onSubmit={handleSave} className="admin-category-form-card">
-                        <div className="admin-category-form-group">
-                            <label className="admin-category-input-label">
-                                Tên danh mục{' '}
-                                <span className="admin-category-required">*</span>
+                    <form className="rk-fieldgroup" onSubmit={handleSave}>
+                        <div className="rk-field">
+                            <label className="rk-field__label">
+                                Tên danh mục <span className="rk-field__required">*</span>
                             </label>
                             <input
                                 type="text"
@@ -738,12 +727,10 @@ export default function AdminCategoryPage() {
                             />
                         </div>
 
-                        <div className="admin-category-form-group">
-                            <div className="admin-category-textarea-header">
-                                <label className="admin-category-input-label">
-                                    Mô tả chi tiết
-                                </label>
-                                <span className="admin-category-char-count">
+                        <div className="rk-field">
+                            <div className="rk-barrow__head">
+                                <label className="rk-field__label">Mô tả chi tiết</label>
+                                <span className="rk-field__hint">
                                     {formData.description.length}/100
                                 </span>
                             </div>
@@ -763,12 +750,12 @@ export default function AdminCategoryPage() {
                         </div>
 
                         {view === 'EDIT' && (
-                            <div className="admin-category-toggle-row">
+                            <div className="rk-switchrow">
                                 <div>
-                                    <strong className="admin-category-toggle-label">
+                                    <strong className="rk-switchrow__label">
                                         Kích hoạt công khai
                                     </strong>
-                                    <small className="admin-category-toggle-description">
+                                    <small className="rk-switchrow__desc">
                                         Hiển thị danh mục này trên menu trực tuyến hệ
                                         thống công khai
                                     </small>
@@ -782,12 +769,11 @@ export default function AdminCategoryPage() {
                                             isAvailable: e.target.checked,
                                         })
                                     }
-                                    className="admin-category-toggle-checkbox"
                                 />
                             </div>
                         )}
 
-                        <div className="admin-category-form-actions">
+                        <div className="rk-actions rk-actions--end">
                             <button
                                 type="button"
                                 onClick={() => setView('LIST')}
@@ -804,7 +790,7 @@ export default function AdminCategoryPage() {
                             </button>
                         </div>
                     </form>
-                </div>
+                </PageCard>
             )}
 
             {/*

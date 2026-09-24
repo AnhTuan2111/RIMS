@@ -318,6 +318,16 @@ a {
     flex: 0 1 220px;
 }
 
+/* Ô nhập nằm trong .rk-field (có nhãn riêng) cũng phải ăn phần rộng. */
+.rk-filterbar > .rk-field {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.rk-filterbar > .rk-field:has(.rk-segment) {
+    flex: 0 0 auto;
+}
+
 @media (max-width: 768px) {
     .rk-filterbar {
         flex-direction: column;
@@ -2231,4 +2241,87 @@ textarea.rk-input {
     align-items: center;
     gap: var(--rims-space-3);
     min-width: 0;
+}
+
+/* Hàng bộ lọc kèm một thẻ số ở cuối: ô lọc ăn phần rộng, thẻ số vừa đủ. */
+.rk-filterrow {
+    display: flex;
+    gap: var(--rims-space-4);
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+/* Khối lọc ăn phần rộng còn lại; các thẻ số chỉ lấy vừa đủ. */
+.rk-filterrow > :first-child {
+    flex: 1 1 320px;
+}
+
+/* Nhãn mờ: dùng cho danh mục đang ẩn. */
+.rk-tag--muted {
+    opacity: 0.55;
+}
+
+/* Giá trong màn xem chi tiết món. */
+.rk-price {
+    margin: 0;
+    color: var(--rims-brand);
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+}
+
+/* Đoạn văn mô tả dài. */
+.rk-prose {
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+    line-height: var(--rims-leading-normal);
+    white-space: pre-wrap;
+}
+
+/* ---------- Phân đoạn ----------
+   Nhóm hai đến bốn lựa chọn loại trừ nhau, dính liền nhau thành một khối.
+   Dùng cho bộ lọc trạng thái: Tất cả / Hoạt động / Đã ẩn. */
+
+.rk-segment {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+}
+
+.rk-segment__btn {
+    padding: var(--rims-space-2) var(--rims-space-4);
+    border-radius: calc(var(--rims-radius-md) - 3px);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-segment__btn:hover:not(.is-active) {
+    color: var(--rims-ink);
+}
+
+.rk-segment__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+.rk-segment__btn.is-active {
+    background: var(--rims-surface);
+    color: var(--rims-brand);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+/* Bảng thuộc tính: dùng <dl> để nhãn và giá trị gắn với nhau về mặt ngữ
+   nghĩa, không chỉ nằm cạnh nhau trên màn hình. */
+.rk-details {
+    margin: 0;
+}
+
+.rk-details .rk-detailrow__label,
+.rk-details .rk-detailrow__value {
+    margin: 0;
 }
