@@ -2,7 +2,7 @@ import {Eye, KeyRound, Pencil, X} from 'lucide-react'
 
 import {DR, ErrBox, Field, FieldGroup} from '@/features/admin/users/UserFormControls'
 import {ConfirmDialog, Modal, PasswordInput} from '@/shared/components/ui'
-import {ROLE_COLORS, ROLE_LABELS, STAFF_ROLES} from '@/features/admin/users/constants'
+import {ROLE_LABELS, ROLE_TAG_CLASS, STAFF_ROLES} from '@/features/admin/users/constants'
 import type {ModalType, Tab} from '@/features/admin/users/constants'
 import {
     isValidEmail,
@@ -484,11 +484,6 @@ export default function AdminUsersPage() {
 
                         <tbody>
                             {items.map((user, idx) => {
-                                const rc = ROLE_COLORS[user.role] ?? {
-                                    bg: 'var(--rims-surface-2)',
-                                    text: 'var(--rims-ink-2)',
-                                }
-
                                 return (
                                     <tr key={user.id}>
                                         <td className="rk-td--num">
@@ -507,11 +502,10 @@ export default function AdminUsersPage() {
 
                                         <td>
                                             <span
-                                                className="rk-tag"
-                                                style={{
-                                                    background: rc.bg,
-                                                    color: rc.text,
-                                                }}
+                                                className={`rk-tag ${
+                                                    ROLE_TAG_CLASS[user.role] ??
+                                                    'rk-tag--idle'
+                                                }`}
                                             >
                                                 {ROLE_LABELS[user.role] ?? user.role}
                                             </span>

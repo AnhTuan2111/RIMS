@@ -3162,3 +3162,118 @@ textarea.rk-input {
 .rk-summary__row--credit .rk-summary__label {
     color: var(--rims-ok);
 }
+
+/* ---------- Lưới chọn phương thức ----------
+   Hai ô lớn, dễ bấm: Thu ngân bấm bằng ngón tay trên máy tính bảng. */
+
+.rk-choicegrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--rims-space-4);
+}
+
+.rk-choicegrid .rk-btn {
+    min-height: 72px;
+    font-size: var(--rims-text-lg);
+}
+
+/* ---------- Khối thông tin giữa luồng ----------
+   Hộp xám nhạt bao một con số hoặc một câu, không phải cảnh báo. */
+
+.rk-panel {
+    padding: var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+}
+
+.rk-panel--center {
+    text-align: center;
+}
+
+/* Màu theo ngữ nghĩa cho một đoạn chữ ngắn. */
+.rk-text--ok {
+    color: var(--rims-ok);
+}
+
+.rk-text--alert {
+    color: var(--rims-alert);
+}
+
+.rk-text--muted {
+    color: var(--rims-ink-3);
+}
+
+/* Nút lấy phần rộng còn lại trong hàng nút. */
+.rk-btn--grow {
+    flex: 1;
+}
+
+/* Dòng tổng kết mang sắc thái ngữ nghĩa. */
+.rk-summary__row--ok .rk-summary__value {
+    color: var(--rims-ok);
+}
+
+.rk-summary__row--alert .rk-summary__value {
+    color: var(--rims-alert);
+}
+
+/* Chấm chú giải theo trạng thái bàn: khỏi phải tô màu trong JSX. */
+.rk-legend__dot--ok {
+    background: var(--rims-ok);
+}
+
+.rk-legend__dot--busy {
+    background: var(--rims-busy);
+}
+
+.rk-legend__dot--brand {
+    background: var(--rims-brand);
+}
+
+/* Giá trị chỉ đọc trong hồ sơ: nhạt hơn để phân biệt với ô nhập được. */
+.rk-detailrow__value--readonly {
+    color: var(--rims-ink-3);
+}
+
+/* Ô nhập ăn phần rộng còn lại trong một hàng. */
+.rk-field--grow {
+    flex: 1;
+    min-width: 0;
+}
+
+.rk-summary__row--busy .rk-summary__value {
+    color: var(--rims-busy);
+}
+
+/* ---------- Biến thể nhãn theo ngữ nghĩa ---------- */
+
+.rk-tag--brand {
+    border-color: var(--rims-brand-line);
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-tag--ok {
+    border-color: var(--rims-ok-line);
+    background: var(--rims-ok-soft);
+    color: var(--rims-ok);
+}
+
+.rk-tag--busy {
+    border-color: var(--rims-busy-line);
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
+}
+
+.rk-tag--gold {
+    border-color: var(--rims-gold);
+    background: var(--rims-gold-soft);
+    color: var(--rims-gold-deep);
+}
+
+.rk-tag--idle {
+    border-color: var(--rims-idle-line);
+    background: var(--rims-idle-soft);
+    color: var(--rims-idle);
+}

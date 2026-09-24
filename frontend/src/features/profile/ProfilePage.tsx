@@ -523,10 +523,9 @@ function ProfileField({
             <span style={profileFieldLabelStyle}>{label}</span>
 
             <span
-                style={{
-                    ...profileFieldValueStyle,
-                    color: readOnly ? 'var(--rims-ink-3)' : 'var(--rims-ink)',
-                }}
+                className={`rk-detailrow__value${
+                    readOnly ? ' rk-detailrow__value--readonly' : ''
+                }`}
             >
                 {value}
             </span>
@@ -687,9 +686,4 @@ const profileFieldLabelStyle: CSSProperties = {
     color: 'var(--rims-ink-3)',
     fontSize: '13px',
     flexShrink: 0,
-}
-
-const profileFieldValueStyle: CSSProperties = {
-    fontWeight: 500,
-    fontSize: '14px',
 }

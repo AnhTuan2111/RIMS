@@ -127,14 +127,9 @@ export default function WaiterOrderDetailPage() {
 
                 <div className="rk-two rk-two--wideleft">
                     <div className="rk-card rk-card--pad">
-                        <div className="rk-card__head-inline">Danh sách món</div>
+                        <h3 className="rk-sectiontitle">Danh sách món</h3>
 
-                        <div
-                            className="rk-stack"
-                            style={{
-                                padding: 0,
-                            }}
-                        >
+                        <div className="rk-stack">
                             {isLoading ? (
                                 <div style={stateBoxStyle}>
                                     Đang tải chi tiết đơn hàng...

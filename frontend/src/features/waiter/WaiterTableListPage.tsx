@@ -444,26 +444,17 @@ export default function WaiterTableListPage() {
             <main className="rk-stack">
                 <div className="rk-legend">
                     <span className="rk-legend__item">
-                        <span
-                            className="rk-legend__dot"
-                            style={{background: 'var(--rims-ok)'}}
-                        />
+                        <span className="rk-legend__dot rk-legend__dot--ok" />
                         Bàn trống
                     </span>
 
                     <span className="rk-legend__item">
-                        <span
-                            className="rk-legend__dot"
-                            style={{background: 'var(--rims-busy)'}}
-                        />
+                        <span className="rk-legend__dot rk-legend__dot--busy" />
                         Đang phục vụ
                     </span>
 
                     <span className="rk-legend__item">
-                        <span
-                            className="rk-legend__dot"
-                            style={{background: 'var(--rims-brand)'}}
-                        />
+                        <span className="rk-legend__dot rk-legend__dot--brand" />
                         Đã đặt trước
                     </span>
                 </div>
@@ -612,7 +603,7 @@ export default function WaiterTableListPage() {
                                     })}
                                 </ul>
 
-                                <p style={{margin: 0}}>
+                                <p>
                                     Vui lòng xác nhận với khách walk-in rằng họ có thể
                                     hoàn thành bữa ăn trước các khung giờ trên không. Nếu
                                     không, hãy <strong>chọn bàn khác</strong>.

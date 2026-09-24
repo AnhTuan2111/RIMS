@@ -386,7 +386,7 @@ export default function WaiterCreateReservationPage() {
                             )}
 
                             <div className="rk-field">
-                                <label>Tên khách hàng</label>
+                                <label className="rk-field__label">Tên khách hàng</label>
                                 <input
                                     value={resForm.customerName}
                                     className="rk-input"
@@ -400,7 +400,7 @@ export default function WaiterCreateReservationPage() {
                             </div>
 
                             <div className="rk-field">
-                                <label>Số điện thoại</label>
+                                <label className="rk-field__label">Số điện thoại</label>
                                 <input
                                     value={resForm.phone}
                                     className="rk-input"
@@ -415,14 +415,9 @@ export default function WaiterCreateReservationPage() {
                                 />
                             </div>
 
-                            <div style={dateTimeRowStyle}>
-                                <div
-                                    className="rk-field"
-                                    style={{
-                                        flex: 1,
-                                    }}
-                                >
-                                    <label>Ngày đặt</label>
+                            <div className="rk-formgrid">
+                                <div className="rk-field rk-field--grow">
+                                    <label className="rk-field__label">Ngày đặt</label>
                                     <input
                                         type="date"
                                         value={resForm.date}
@@ -435,16 +430,11 @@ export default function WaiterCreateReservationPage() {
                                     />
                                 </div>
 
-                                <div
-                                    className="rk-field"
-                                    style={{
-                                        flex: 1,
-                                    }}
-                                >
-                                    <label>Giờ đặt bàn</label>
+                                <div className="rk-field rk-field--grow">
+                                    <label className="rk-field__label">Giờ đặt bàn</label>
                                     <select
                                         value={resForm.time}
-                                        className="rk-input"
+                                        className="rk-select"
                                         onChange={(event) =>
                                             updateForm({
                                                 time: event.target.value,
@@ -461,10 +451,10 @@ export default function WaiterCreateReservationPage() {
                             </div>
 
                             <div className="rk-field">
-                                <label>Bàn</label>
+                                <label className="rk-field__label">Bàn</label>
                                 <select
                                     value={resForm.tableId}
-                                    className="rk-input"
+                                    className="rk-select"
                                     disabled={isTablesLoading}
                                     onChange={(event) =>
                                         updateForm({
@@ -488,7 +478,7 @@ export default function WaiterCreateReservationPage() {
                             </div>
 
                             <div className="rk-field">
-                                <label>Ghi chú</label>
+                                <label className="rk-field__label">Ghi chú</label>
                                 <textarea
                                     value={resForm.note}
                                     className="rk-input"
@@ -502,13 +492,10 @@ export default function WaiterCreateReservationPage() {
                                 />
                             </div>
 
-                            <div style={actionRowStyle}>
+                            <div className="rk-actions">
                                 <button
                                     type="button"
-                                    className="rk-btn rk-btn--primary"
-                                    style={{
-                                        flex: 1,
-                                    }}
+                                    className="rk-btn rk-btn--primary rk-btn--grow"
                                     disabled={submitting}
                                     onClick={() => void submitReservation()}
                                 >
@@ -611,17 +598,6 @@ export default function WaiterCreateReservationPage() {
             </main>
         </div>
     )
-}
-
-const dateTimeRowStyle: CSSProperties = {
-    display: 'flex',
-    gap: '1.25rem',
-}
-
-const actionRowStyle: CSSProperties = {
-    display: 'flex',
-    gap: '1rem',
-    marginTop: '1.75rem',
 }
 
 const emptyTextStyle: CSSProperties = {

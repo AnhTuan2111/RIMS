@@ -148,28 +148,23 @@ export default function PaymentResultManager({
                     </div>
                 )}
 
-                <div style={summaryBoxStyle}>
+                <div className="rk-summary rk-panel">
                     <SummaryRow label="Tạm tính:" value={formatCurrency(beforeVat)} />
 
                     <SummaryRow
                         label="Thuế VAT (10%):"
                         value={formatCurrency(vatAmount)}
-                        marginBottom={customerName ? 12 : 0}
                     />
 
                     {customerName && (
-                        <div style={customerBlockStyle}>
-                            <SummaryRow
-                                label="Khách hàng:"
-                                value={customerName}
-                                strongValue
-                            />
+                        <div className="rk-summary">
+                            <SummaryRow label="Khách hàng:" value={customerName} />
 
                             {pointsUsed > 0 && (
                                 <SummaryRow
                                     label="Điểm đã dùng:"
                                     value={`- ${formatCurrency(pointsUsed * 1000)}`}
-                                    color="var(--rims-ok)"
+                                    tone="ok"
                                 />
                             )}
 
@@ -177,30 +172,23 @@ export default function PaymentResultManager({
                                 <SummaryRow
                                     label="Điểm tích lũy thêm:"
                                     value={`+${pointsEarned} điểm`}
-                                    color="var(--rims-busy)"
+                                    tone="busy"
                                     bold
                                 />
                             )}
                         </div>
                     )}
 
-                    <div
-                        style={{
-                            ...totalRowStyle,
-                            paddingTop: customerName ? 0 : 12,
-                            borderTop: customerName
-                                ? 'none'
-                                : '1px dashed var(--rims-line-strong)',
-                        }}
-                    >
-                        <span>Tổng thanh toán:</span>
-                        <span>{formatCurrency(finalAmount)}</span>
-                    </div>
+                    <SummaryRow
+                        bold
+                        label="Tổng thanh toán:"
+                        value={formatCurrency(finalAmount)}
+                    />
 
-                    <div style={paymentMethodRowStyle}>
-                        <span>Phương thức thanh toán:</span>
-                        <span>{paymentMethodLabel}</span>
-                    </div>
+                    <SummaryRow
+                        label="Phương thức thanh toán:"
+                        value={paymentMethodLabel}
+                    />
 
                     {paymentResult.paymentMethod === 'CASH' && (
                         <>
@@ -211,7 +199,7 @@ export default function PaymentResultManager({
                             <SummaryRow
                                 label="Tiền thừa:"
                                 value={formatCurrency(excessAmount)}
-                                color="var(--rims-ok)"
+                                tone="ok"
                             />
                         </>
                     )}
@@ -221,35 +209,32 @@ export default function PaymentResultManager({
     )
 }
 
+/**
+ * Một dòng trong bảng tổng kết.
+ *
+ * <p>Tham số trước đây là `color` nhận chuỗi màu bất kỳ và `marginBottom`
+ * nhận số pixel. Hai thứ đó khiến mỗi nơi gọi tự quyết định khoảng cách, nên
+ * các dòng trong cùng một bảng không thẳng nhau.
+ */
 function SummaryRow({
     label,
     value,
-    color = 'var(--rims-ink-2)',
-    bold = false,
-    strongValue = false,
-    marginBottom = 6,
+    bold,
+    tone,
 }: {
     label: string
     value: string
-    color?: string
     bold?: boolean
-    strongValue?: boolean
-    marginBottom?: number
+    tone?: 'ok' | 'busy'
 }) {
     return (
         <div
-            style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '0.95rem',
-                color,
-                marginBottom,
-                fontWeight: bold ? 'bold' : 'normal',
-            }}
+            className={`rk-summary__row${bold ? ' rk-summary__row--total' : ''}${
+                tone ? ` rk-summary__row--${tone}` : ''
+            }`}
         >
-            <span>{label}</span>
-
-            {strongValue ? <strong>{value}</strong> : <span>{value}</span>}
+            <span className="rk-summary__label">{label}</span>
+            <span className="rk-summary__value">{value}</span>
         </div>
     )
 }
@@ -308,36 +293,4 @@ const successHintStyle: CSSProperties = {
     marginTop: '3rem',
     fontSize: '1.1rem',
     fontStyle: 'italic',
-}
-
-const summaryBoxStyle: CSSProperties = {
-    background: 'var(--rims-surface-2)',
-    padding: '1rem',
-    borderRadius: '8px',
-    marginBottom: '2rem',
-    border: '1px solid var(--rims-line)',
-}
-
-const customerBlockStyle: CSSProperties = {
-    padding: '12px 0',
-    borderTop: '1px dashed var(--rims-line-strong)',
-    borderBottom: '1px dashed var(--rims-line-strong)',
-    marginBottom: '12px',
-}
-
-const totalRowStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    color: 'var(--rims-alert)',
-    marginBottom: '12px',
-}
-
-const paymentMethodRowStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '0.9rem',
-    color: 'var(--rims-ok)',
-    fontWeight: 'bold',
 }

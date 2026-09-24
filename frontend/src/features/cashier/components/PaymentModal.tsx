@@ -1,6 +1,6 @@
 import {Globe, User} from 'lucide-react'
 
-import {useEffect, useState, type CSSProperties} from 'react'
+import {useEffect, useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
 import type {
@@ -182,15 +182,11 @@ export default function PaymentModal({
         >
             <div>
                 {customer && (
-                    <div style={customerSummaryStyle}>
+                    <div className="rk-note rk-note--ok">
                         <User className="rk-icon" aria-hidden="true" /> Khách:{' '}
                         <strong>{customer.fullName}</strong>
                         {pointsUsed > 0 && (
-                            <span
-                                style={{
-                                    color: 'var(--rims-ok)',
-                                }}
-                            >
+                            <span className="rk-text--ok">
                                 {' '}
                                 — Đã dùng {pointsUsed} điểm giảm giá
                             </span>
@@ -198,24 +194,18 @@ export default function PaymentModal({
                     </div>
                 )}
 
-                <div style={amountSummaryStyle}>
+                <div className="rk-summary__row rk-summary__row--total">
                     <span>Cần thu:</span>
-                    <strong
-                        style={{
-                            color: 'var(--rims-alert)',
-                        }}
-                    >
-                        {formatCurrency(finalAmount)}
-                    </strong>
+                    <strong className="rk-num">{formatCurrency(finalAmount)}</strong>
                 </div>
 
                 {method === null &&
                     (loadingMethods ? (
-                        <p style={{textAlign: 'center', color: 'var(--rims-ink-3)'}}>
+                        <p className="rk-panel rk-panel--center rk-text--muted">
                             Đang tải phương thức thanh toán...
                         </p>
                     ) : (
-                        <div style={methodGridStyle}>
+                        <div className="rk-choicegrid">
                             {paymentMethods.map((m) => {
                                 const {icon, label} = methodDisplay(m)
                                 return (
@@ -223,7 +213,6 @@ export default function PaymentModal({
                                         key={m}
                                         type="button"
                                         className="rk-btn rk-btn--quiet"
-                                        style={methodButtonStyle}
                                         onClick={() => setMethod(m as PaymentMethodType)}
                                     >
                                         {icon} {label}
@@ -234,13 +223,13 @@ export default function PaymentModal({
                     ))}
 
                 {method === 'CASH' && (
-                    <div style={cashFormStyle}>
-                        <label style={fieldLabelStyle}>
-                            Khách đưa (VND):
+                    <div className="rk-fieldgroup">
+                        <label className="rk-field">
+                            <span className="rk-field__label">Khách đưa (VND)</span>
                             <input
+                                className="rk-input"
                                 type="number"
                                 min={0}
-                                style={numberInputStyle}
                                 value={amountReceived || ''}
                                 onChange={(event) =>
                                     setAmountReceived(
@@ -250,27 +239,18 @@ export default function PaymentModal({
                             />
                         </label>
 
-                        <div style={changeBoxStyle}>
-                            <span
-                                style={{
-                                    color: 'var(--rims-ink-2)',
-                                }}
-                            >
-                                Tiền thừa trả khách:{' '}
-                            </span>
+                        <div className="rk-panel">
+                            <span>Tiền thừa trả khách: </span>
 
-                            <strong style={changeAmountStyle}>
+                            <strong className="rk-num rk-text--ok">
                                 {formatCurrency(changeReturned)}
                             </strong>
                         </div>
 
-                        <div style={actionRowStyle}>
+                        <div className="rk-actions">
                             <button
                                 type="button"
-                                className="rk-btn rk-btn--quiet"
-                                style={{
-                                    flex: 1,
-                                }}
+                                className="rk-btn rk-btn--quiet rk-btn--grow"
                                 disabled={processing}
                                 onClick={() => setMethod(null)}
                             >
@@ -279,7 +259,7 @@ export default function PaymentModal({
 
                             <button
                                 type="button"
-                                style={confirmCashButtonStyle}
+                                className="rk-btn rk-btn--go rk-btn--grow"
                                 disabled={amountReceived < finalAmount || processing}
                                 onClick={() => void handleConfirmCash()}
                             >
@@ -290,31 +270,24 @@ export default function PaymentModal({
                 )}
 
                 {method === 'QRCODE' && (
-                    <div
-                        style={{
-                            textAlign: 'center',
-                        }}
-                    >
-                        <div style={vnpayBoxStyle}>
-                            <div style={vnpayIconStyle}>
+                    <div>
+                        <div className="rk-panel rk-panel--center">
+                            <span className="rk-feedback__icon">
                                 <Globe className="rk-icon" aria-hidden="true" />
-                            </div>
+                            </span>
 
-                            <h3 style={vnpayTitleStyle}>Cổng thanh toán VNPay</h3>
+                            <h3 className="rk-sectiontitle">Cổng thanh toán VNPay</h3>
 
-                            <p style={vnpayDescriptionStyle}>
+                            <p className="rk-text--muted">
                                 Hệ thống sẽ chuyển hướng sang VNPay để nhập thông tin thẻ.
                                 Hóa đơn sẽ được in sau khi thanh toán thành công.
                             </p>
                         </div>
 
-                        <div style={actionRowStyle}>
+                        <div className="rk-actions">
                             <button
                                 type="button"
-                                className="rk-btn rk-btn--quiet"
-                                style={{
-                                    flex: 1,
-                                }}
+                                className="rk-btn rk-btn--quiet rk-btn--grow"
                                 disabled={processing}
                                 onClick={() => setMethod(null)}
                             >
@@ -323,7 +296,12 @@ export default function PaymentModal({
 
                             <button
                                 type="button"
-                                style={vnpayButtonStyle}
+                                className="rk-btn rk-btn--grow"
+                                style={{
+                                    background: VNPAY_BRAND,
+                                    color: 'var(--rims-ink-on-brand)',
+                                    borderColor: VNPAY_BRAND,
+                                }}
                                 disabled={processing}
                                 onClick={() => void handleRedirectToVNPay()}
                             >
@@ -335,109 +313,4 @@ export default function PaymentModal({
             </div>
         </Modal>
     )
-}
-
-const customerSummaryStyle: CSSProperties = {
-    background: 'var(--rims-ok-soft)',
-    border: '1px solid var(--rims-ok-line)',
-    borderRadius: '8px',
-    padding: '10px',
-    marginBottom: '1rem',
-    fontSize: '0.9rem',
-}
-
-const amountSummaryStyle: CSSProperties = {
-    fontSize: '1.1rem',
-    marginBottom: '1rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-}
-
-const methodGridStyle: CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '1rem',
-}
-
-const methodButtonStyle: CSSProperties = {
-    height: '70px',
-    fontSize: '1.05rem',
-    cursor: 'pointer',
-}
-
-const cashFormStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-}
-
-const fieldLabelStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-}
-
-const numberInputStyle: CSSProperties = {
-    padding: '0.6rem',
-    borderRadius: '6px',
-    border: '1px solid var(--rims-line-strong)',
-}
-
-const changeBoxStyle: CSSProperties = {
-    padding: '0.85rem',
-    background: 'var(--rims-surface-2)',
-    borderRadius: '8px',
-}
-
-const changeAmountStyle: CSSProperties = {
-    fontSize: '1.15rem',
-    color: 'var(--rims-ok)',
-}
-
-const actionRowStyle: CSSProperties = {
-    display: 'flex',
-    gap: '0.5rem',
-    marginTop: '0.5rem',
-}
-
-const confirmCashButtonStyle: CSSProperties = {
-    flex: 2,
-    background: 'var(--rims-ok)',
-    color: 'var(--rims-ink-on-brand)',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-}
-
-const vnpayBoxStyle: CSSProperties = {
-    background: 'var(--rims-surface-2)',
-    padding: '2rem',
-    borderRadius: '8px',
-    border: '1px solid var(--rims-line-strong)',
-    marginBottom: '1rem',
-}
-
-const vnpayIconStyle: CSSProperties = {
-    fontSize: '3rem',
-    marginBottom: '1rem',
-}
-
-const vnpayTitleStyle: CSSProperties = {
-    margin: '0 0 10px 0',
-    color: 'var(--rims-ink)',
-}
-
-const vnpayDescriptionStyle: CSSProperties = {
-    fontSize: '0.9rem',
-    color: 'var(--rims-ink-3)',
-}
-
-const vnpayButtonStyle: CSSProperties = {
-    flex: 2,
-    background: VNPAY_BRAND,
-    color: 'var(--rims-ink-on-brand)',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
 }

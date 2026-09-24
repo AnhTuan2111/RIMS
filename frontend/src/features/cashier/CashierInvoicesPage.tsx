@@ -1,6 +1,6 @@
 import {Download} from 'lucide-react'
 
-import {useCallback, useRef, useState, type CSSProperties} from 'react'
+import {useCallback, useRef, useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
 import type {InvoiceDetail, InvoiceSummary} from '@/shared/types/cashier'
@@ -272,17 +272,10 @@ export default function CashierInvoicesPage() {
                 description={`Danh sách hóa đơn đã thanh toán trong ngày (${totalElements} hóa đơn)`}
             />
 
-            <div
-                style={{
-                    display: 'flex',
-                    gap: 10,
-                    marginBottom: 16,
-                    flexWrap: 'wrap',
-                }}
-            >
+            <div className="rk-filterbar">
                 <select
                     value={tableNumber}
-                    style={filterInputStyle}
+                    className="rk-select"
                     onChange={(event) => handleTableNumberChange(event.target.value)}
                 >
                     <option value="">Tất cả bàn</option>
@@ -297,17 +290,13 @@ export default function CashierInvoicesPage() {
                 <input
                     value={keyword}
                     placeholder="Tìm theo tên hoặc số điện thoại khách…"
-                    style={{
-                        ...filterInputStyle,
-                        flex: 1,
-                        minWidth: 200,
-                    }}
+                    className="rk-input"
                     onChange={(event) => handleKeywordChange(event.target.value)}
                 />
 
                 <select
                     value={paymentMethod}
-                    style={filterInputStyle}
+                    className="rk-select"
                     onChange={(event) => handlePaymentMethodChange(event.target.value)}
                 >
                     <option value="">Tất cả phương thức</option>
@@ -318,10 +307,7 @@ export default function CashierInvoicesPage() {
                 <input
                     value={invoiceCode}
                     placeholder="Mã hóa đơn…"
-                    style={{
-                        ...filterInputStyle,
-                        width: 140,
-                    }}
+                    className="rk-input"
                     onChange={(event) => handleInvoiceCodeChange(event.target.value)}
                 />
             </div>
@@ -487,15 +473,7 @@ export default function CashierInvoicesPage() {
                             </table>
                         </div>
 
-                        <div
-                            style={{
-                                background: 'var(--rims-surface-2)',
-                                padding: 12,
-                                borderRadius: 8,
-                                marginBottom: 16,
-                                fontSize: 14,
-                            }}
-                        >
+                        <div className="rk-summary rk-panel">
                             <Row
                                 label="Tạm tính:"
                                 value={`${formatCurrency(selectedInvoice.totalBeforeVat)}`}
@@ -519,7 +497,7 @@ export default function CashierInvoicesPage() {
                                                 value={`-${
                                                     selectedInvoice.pointsUsed * 1000
                                                 }`}
-                                                color="var(--rims-ok)"
+                                                tone="ok"
                                             />
                                         )}
 
@@ -528,7 +506,7 @@ export default function CashierInvoicesPage() {
                                         value={`+${
                                             selectedInvoice.pointsEarned ?? 0
                                         } điểm`}
-                                        color="var(--rims-ok)"
+                                        tone="ok"
                                     />
                                 </>
                             )}
@@ -537,7 +515,7 @@ export default function CashierInvoicesPage() {
                                 bold
                                 label="Thành tiền:"
                                 value={`${formatCurrency(selectedInvoice.finalAmount)}`}
-                                color="var(--rims-alert)"
+                                tone="alert"
                             />
 
                             <Row
@@ -565,37 +543,31 @@ export default function CashierInvoicesPage() {
     )
 }
 
-const filterInputStyle: CSSProperties = {
-    padding: '8px 12px',
-    border: '1px solid var(--rims-line-strong)',
-    borderRadius: 8,
-    fontSize: 13,
-}
-
+/**
+ * Một dòng trong bảng tổng kết hoá đơn.
+ *
+ * <p>Tham số trước đây là `color` nhận một chuỗi màu bất kỳ — gõ sai tên biến
+ * thì dòng đó lặng lẽ mất màu. Nay là `tone` với ba giá trị có sẵn.
+ */
 function Row({
     label,
     value,
     bold,
-    color,
+    tone,
 }: {
     label: string
     value: string
     bold?: boolean
-    color?: string
+    tone?: 'ok' | 'credit' | 'alert'
 }) {
     return (
         <div
-            style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontWeight: bold ? 700 : 400,
-                color: color ?? 'var(--rims-ink-2)',
-                fontSize: bold ? 15 : 13,
-                marginBottom: 4,
-            }}
+            className={`rk-summary__row${bold ? ' rk-summary__row--total' : ''}${
+                tone ? ` rk-summary__row--${tone}` : ''
+            }`}
         >
-            <span>{label}</span>
-            <span>{value}</span>
+            <span className="rk-summary__label">{label}</span>
+            <span className="rk-summary__value">{value}</span>
         </div>
     )
 }
