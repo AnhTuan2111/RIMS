@@ -13,7 +13,7 @@ import {
     StatCard,
 } from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
-import {getErrorMessage} from '@/shared/utils/error'
+import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 
 type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE'
@@ -75,6 +75,11 @@ export default function AdminDishesPage() {
                     setCurrentPage(1)
                 }
             } catch (requestError: unknown) {
+                // Rời màn giữa chừng thì request đang bay bị huỷ — không phải lỗi.
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
+
                 console.error('[ADMIN_DISHES_FETCH_ERROR]', requestError)
                 setError('Không thể tải danh sách món ăn từ hệ thống.')
             } finally {

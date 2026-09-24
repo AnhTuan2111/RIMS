@@ -19,7 +19,7 @@ import {
     Pagination,
     StatCard,
 } from '@/shared/components/ui'
-import {getErrorMessage} from '@/shared/utils/error'
+import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 
 type ViewMode = 'LIST' | 'CREATE' | 'EDIT' | 'DETAIL'
@@ -95,6 +95,11 @@ export default function AdminCategoryPage() {
                     setDishPage(1) // Reset trang món khi load lại
                 }
             } catch (err: unknown) {
+                // Rời màn giữa chừng thì request đang bay bị huỷ — không phải lỗi.
+                if (isRequestCanceled(err)) {
+                    return
+                }
+
                 console.error('Lỗi khi tải dữ liệu:', err)
                 setError('Không thể tải danh sách danh mục từ máy chủ.')
             } finally {

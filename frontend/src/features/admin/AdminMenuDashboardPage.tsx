@@ -15,6 +15,7 @@ import * as adminApi from '@/shared/api/admin'
 import type {MenuDashboardData} from '@/shared/api/admin'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
+import {isRequestCanceled} from '@/shared/utils/error'
 
 /**
  * Ảnh thu nhỏ của món.
@@ -116,6 +117,13 @@ export default function AdminMenuDashboardPage() {
 
                 setError(null)
             } catch (requestError) {
+                // Rời màn giữa chừng thì AbortController huỷ request đang bay.
+                // Đó không phải lỗi, nhưng bản cũ vẫn bật thông báo đỏ lên — quay
+                // lại màn là thấy "Không thể tải dữ liệu" dù chẳng có gì hỏng.
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
+
                 console.error('[ADMIN_MENU_DASHBOARD_FETCH_ERROR]', requestError)
 
                 setError('Không thể tải dữ liệu thống kê từ hệ thống.')

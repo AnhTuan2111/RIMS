@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
+import {isRequestCanceled} from '@/shared/utils/error'
 import {useNavigate} from 'react-router-dom'
 import {Eye, QrCode, ReceiptText, Wallet} from 'lucide-react'
 
@@ -141,6 +142,11 @@ export default function AdminPaymentHistoryPage() {
                     setPage(effectivePage)
                 }
             } catch (requestError: unknown) {
+                // Rời màn giữa chừng thì request đang bay bị huỷ — không phải lỗi.
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
+
                 console.error('[ADMIN_PAYMENT_HISTORY_FETCH_ERROR]', requestError)
 
                 setError('Không thể tải lịch sử thanh toán.')
