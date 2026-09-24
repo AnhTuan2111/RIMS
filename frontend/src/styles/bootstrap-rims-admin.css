@@ -263,13 +263,6 @@
     box-shadow: 0 8px 24px rgb(36 21 18 / 6%);
 }
 
-.admin-invoice-detail-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 22px 24px 18px;
-}
-
 .admin-invoice-detail-back-button {
     width: 38px;
     height: 38px;
@@ -288,11 +281,6 @@
     font-weight: 900;
     line-height: 1;
     cursor: pointer;
-}
-
-.admin-invoice-detail-back-button:hover {
-    background: var(--rims-surface-2);
-    border-color: var(--rims-line-strong);
 }
 
 .admin-invoice-detail-header h1 {
@@ -337,15 +325,6 @@
     letter-spacing: 0.06em;
 }
 
-.admin-invoice-detail-table-head span:nth-child(2) {
-    text-align: center;
-}
-
-.admin-invoice-detail-table-head span:nth-child(3),
-.admin-invoice-detail-table-head span:nth-child(4) {
-    text-align: right;
-}
-
 .admin-invoice-detail-row {
     border-bottom: 1px solid var(--rims-line);
 
@@ -371,11 +350,6 @@
 .admin-invoice-line-total {
     text-align: right;
     font-variant-numeric: tabular-nums;
-}
-
-.admin-invoice-line-total {
-    color: var(--rims-ink);
-    font-weight: 800;
 }
 
 .admin-invoice-detail-empty {
@@ -424,12 +398,6 @@
     color: var(--rims-ink);
 }
 
-.admin-invoice-summary-highlight {
-    color: var(--rims-alert) !important;
-    font-size: 22px;
-    font-weight: 900;
-}
-
 .admin-invoice-detail-state {
     min-height: 220px;
     padding: 32px 24px;
@@ -441,15 +409,6 @@
 
     color: var(--rims-ink-3);
     text-align: center;
-}
-
-.admin-invoice-detail-state h2 {
-    margin: 0;
-    color: var(--rims-ink);
-}
-
-.admin-invoice-detail-state p {
-    margin: 0;
 }
 
 .table-grid {
@@ -728,16 +687,6 @@
 .admin-bestseller-category-filter select:disabled {
     cursor: not-allowed;
     opacity: 0.7;
-}
-
-.bestseller-item-card {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 1.25rem;
-    background: var(--rims-surface-2);
-    border: 1px solid var(--rims-line);
-    border-radius: 16px;
 }
 
 .item-rank-badge {
@@ -1072,12 +1021,6 @@
     opacity: 0.7;
 }
 
-.weekly-overview-kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 14px;
-}
-
 .weekly-overview-kpi-card {
     min-width: 0;
     min-height: 132px;
@@ -1090,11 +1033,6 @@
     border-radius: 12px;
     background: var(--rims-surface);
     box-shadow: 0 14px 28px -24px rgb(36 21 18 / 35%);
-}
-
-.weekly-overview-kpi-card.featured {
-    border-color: var(--rims-busy-line);
-    background: var(--rims-busy-soft);
 }
 
 .weekly-overview-kpi-top {
@@ -1142,21 +1080,6 @@
     color: var(--rims-busy);
 }
 
-.weekly-overview-kpi-card.tone-green .weekly-overview-kpi-icon {
-    background: var(--rims-ok-soft);
-    color: var(--rims-ok);
-}
-
-.weekly-overview-kpi-card.tone-red .weekly-overview-kpi-icon {
-    background: var(--rims-alert-soft);
-    color: var(--rims-alert);
-}
-
-.weekly-overview-kpi-card.tone-blue .weekly-overview-kpi-icon {
-    background: var(--rims-brand-soft);
-    color: var(--rims-brand);
-}
-
 .weekly-overview-kpi-marker {
     color: var(--rims-ink-3);
     font-size: 18px;
@@ -1168,21 +1091,6 @@
     min-width: 0;
     display: grid;
     gap: 6px;
-}
-
-.weekly-overview-kpi-content > span {
-    color: var(--rims-ink-3);
-    font-size: 13px;
-    font-weight: 850;
-    line-height: 1.25;
-}
-
-.weekly-overview-kpi-content strong {
-    color: var(--rims-ink);
-    font-size: 23px;
-    font-weight: 950;
-    line-height: 1.12;
-    overflow-wrap: anywhere;
 }
 
 .weekly-overview-kpi-card.tone-green .weekly-overview-kpi-content strong {
@@ -3160,12 +3068,6 @@
     border: 1px solid var(--rims-line);
 }
 
-.admin-dish-image-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 /* Dish Name */
 .admin-dish-name {
     font-weight: 700;
@@ -3368,12 +3270,6 @@
     overflow: hidden;
 }
 
-.admin-dish-image-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .admin-dish-image-placeholder {
     text-align: center;
     color: var(--rims-ink-3);
@@ -3465,12 +3361,6 @@
     overflow: hidden;
     border: 1px solid var(--rims-line-strong);
     box-shadow: 0 4px 6px -1px rgb(36 21 18 / 5%);
-}
-
-.admin-dish-view-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
 }
 
 .admin-dish-view-sku {

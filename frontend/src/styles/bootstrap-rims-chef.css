@@ -32,18 +32,7 @@
     --chef-radius-lg: var(--rims-radius-lg);
 }
 
-/* =========================
-   PAGE SHELL
-========================= */
-
-.rims-app-content .chef-page {
-    width: 100%;
-    display: grid;
-    gap: 20px;
-    color: var(--chef-text);
-}
-
-.rims-app-content .chef-page > .page-card {
+.chef-page > .page-card {
     position: relative;
     overflow: hidden;
     padding: 24px;
@@ -53,7 +42,7 @@
     box-shadow: var(--chef-shadow-sm);
 }
 
-.rims-app-content .chef-page > .page-card::before {
+.chef-page > .page-card::before {
     content: '';
     position: absolute;
     inset: 0 0 auto;
@@ -61,14 +50,14 @@
     background: linear-gradient(90deg, var(--chef-primary), var(--rims-brand), transparent 72%);
 }
 
-.rims-app-content .chef-page .page-header {
+.chef-page .page-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 20px;
 }
 
-.rims-app-content .chef-page .page-header h2 {
+.chef-page .page-header h2 {
     margin: 0;
     color: var(--chef-text);
     font-size: clamp(1.45rem, 2vw, 1.85rem);
@@ -76,7 +65,7 @@
     letter-spacing: -0.025em;
 }
 
-.rims-app-content .chef-page .page-header p {
+.chef-page .page-header p {
     max-width: 720px;
     margin: 7px 0 0;
     color: var(--chef-muted);
@@ -88,9 +77,9 @@
    COMMON BUTTONS
 ========================= */
 
-.rims-app-content .chef-page .primary-button,
-.rims-app-content .chef-page .secondary-button,
-.rims-app-content .chef-page .danger-button,
+.chef-page .primary-button,
+.chef-page .secondary-button,
+.chef-page .danger-button,
 .app-content .chef-page .primary-button,
 .app-content .chef-page .secondary-button,
 .app-content .chef-page .danger-button {
@@ -113,44 +102,44 @@
         box-shadow 0.18s ease;
 }
 
-.rims-app-content .chef-page .primary-button {
+.chef-page .primary-button {
     border: 1px solid var(--chef-primary);
     background: var(--chef-primary);
     color: var(--rims-ink-on-brand);
     box-shadow: 0 7px 18px rgb(122 16 48 / 18%);
 }
 
-.rims-app-content .chef-page .primary-button:hover:not(:disabled) {
+.chef-page .primary-button:hover:not(:disabled) {
     border-color: var(--chef-primary-hover);
     background: var(--chef-primary-hover);
     transform: translateY(-1px);
     box-shadow: 0 9px 22px rgb(122 16 48 / 24%);
 }
 
-.rims-app-content .chef-page .secondary-button {
+.chef-page .secondary-button {
     border: 1px solid var(--chef-border-strong);
     background: var(--rims-surface);
     color: var(--rims-ink-2);
 }
 
-.rims-app-content .chef-page .secondary-button:hover:not(:disabled) {
+.chef-page .secondary-button:hover:not(:disabled) {
     border-color: var(--rims-line-strong);
     background: var(--chef-surface-soft);
     color: var(--chef-text);
 }
 
-.rims-app-content .chef-page .danger-button {
+.chef-page .danger-button {
     border: 1px solid var(--chef-danger);
     background: var(--chef-danger);
     color: var(--rims-ink-on-brand);
 }
 
-.rims-app-content .chef-page .danger-button:hover:not(:disabled) {
+.chef-page .danger-button:hover:not(:disabled) {
     background: var(--rims-alert);
     border-color: var(--rims-alert);
 }
 
-.rims-app-content .chef-page button:disabled {
+.chef-page button:disabled {
     opacity: 0.55;
     cursor: not-allowed;
     transform: none !important;
@@ -172,14 +161,14 @@
    CHEF DASHBOARD
 ========================= */
 
-.rims-app-content .chef-page .stat-grid {
+.chef-page .stat-grid {
     margin-top: 22px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
 }
 
-.rims-app-content .chef-page .stat-card {
+.chef-page .stat-card {
     position: relative;
     min-height: 176px;
     padding: 22px;
@@ -198,7 +187,7 @@
         box-shadow 0.2s ease;
 }
 
-.rims-app-content .chef-page .stat-card::before {
+.chef-page .stat-card::before {
     content: '';
     position: absolute;
     width: 110px;
@@ -210,7 +199,7 @@
     opacity: 0.08;
 }
 
-.rims-app-content .chef-page .stat-card::after {
+.chef-page .stat-card::after {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -223,46 +212,46 @@
     font-weight: 900;
 }
 
-.rims-app-content .chef-page .stat-card:nth-child(1) {
+.chef-page .stat-card:nth-child(1) {
     color: var(--chef-warning);
     background: linear-gradient(145deg, var(--rims-surface), var(--chef-warning-soft));
 }
 
-.rims-app-content .chef-page .stat-card:nth-child(1)::after {
+.chef-page .stat-card:nth-child(1)::after {
     content: '⌁';
     background: var(--rims-busy-soft);
     color: var(--rims-busy);
 }
 
-.rims-app-content .chef-page .stat-card:nth-child(2) {
+.chef-page .stat-card:nth-child(2) {
     color: var(--chef-success);
     background: linear-gradient(145deg, var(--rims-surface), var(--chef-success-soft));
 }
 
-.rims-app-content .chef-page .stat-card:nth-child(2)::after {
+.chef-page .stat-card:nth-child(2)::after {
     content: '✓';
     background: var(--rims-ok-soft);
     color: var(--chef-success);
 }
 
-.rims-app-content .chef-page .stat-card:nth-child(3) {
+.chef-page .stat-card:nth-child(3) {
     color: var(--chef-danger);
     background: linear-gradient(145deg, var(--rims-surface), var(--chef-danger-soft));
 }
 
-.rims-app-content .chef-page .stat-card:nth-child(3)::after {
+.chef-page .stat-card:nth-child(3)::after {
     content: '!';
     background: var(--rims-alert-soft);
     color: var(--chef-danger);
 }
 
-.rims-app-content .chef-page .stat-card:hover {
+.chef-page .stat-card:hover {
     transform: translateY(-4px);
     border-color: currentColor;
     box-shadow: var(--chef-shadow-md);
 }
 
-.rims-app-content .chef-page .stat-card strong {
+.chef-page .stat-card strong {
     color: var(--chef-text);
     font-size: clamp(2.1rem, 4vw, 3rem);
     font-weight: 850;
@@ -270,13 +259,13 @@
     letter-spacing: -0.04em;
 }
 
-.rims-app-content .chef-page .stat-card span {
+.chef-page .stat-card span {
     color: var(--chef-text);
     font-size: 15px;
     font-weight: 750;
 }
 
-.rims-app-content .chef-page .stat-card small {
+.chef-page .stat-card small {
     color: var(--chef-muted);
     font-size: 12px;
     font-weight: 650;
@@ -286,14 +275,14 @@
    SUMMARY CHIPS
 ========================= */
 
-.rims-app-content .chef-page .chef-summary {
+.chef-page .chef-summary {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.rims-app-content .chef-page .chef-summary > div {
+.chef-page .chef-summary > div {
     min-width: 104px;
     padding: 10px 14px;
     display: grid;
@@ -303,13 +292,13 @@
     background: var(--chef-surface-soft);
 }
 
-.rims-app-content .chef-page .chef-summary strong {
+.chef-page .chef-summary strong {
     color: var(--chef-text);
     font-size: 20px;
     line-height: 1;
 }
 
-.rims-app-content .chef-page .chef-summary span {
+.chef-page .chef-summary span {
     color: var(--chef-muted);
     font-size: 11px;
     font-weight: 650;
@@ -319,15 +308,15 @@
    FILTER BAR
 ========================= */
 
-.rims-app-content .chef-page .chef-filter-bar {
+.chef-page .chef-filter-bar {
     display: grid;
     grid-template-columns: minmax(260px, 1fr) 190px 190px auto;
     gap: 12px;
     align-items: center;
 }
 
-.rims-app-content .chef-page .chef-filter-bar input,
-.rims-app-content .chef-page .chef-filter-bar select,
+.chef-page .chef-filter-bar input,
+.chef-page .chef-filter-bar select,
 .app-content .chef-page .chef-filter-bar input,
 .app-content .chef-page .chef-filter-bar select {
     width: 100%;
@@ -344,19 +333,19 @@
         box-shadow 0.18s ease;
 }
 
-.rims-app-content .chef-page .chef-filter-bar input::placeholder {
+.chef-page .chef-filter-bar input::placeholder {
     color: var(--rims-ink-3);
 }
 
-.rims-app-content .chef-page .chef-filter-bar input:focus,
-.rims-app-content .chef-page .chef-filter-bar select:focus,
+.chef-page .chef-filter-bar input:focus,
+.chef-page .chef-filter-bar select:focus,
 .app-content .chef-page .chef-filter-bar input:focus,
 .app-content .chef-page .chef-filter-bar select:focus {
     border-color: var(--chef-primary);
     box-shadow: 0 0 0 3px rgb(122 16 48 / 12%);
 }
 
-.rims-app-content .chef-page .chef-filter-bar .secondary-button {
+.chef-page .chef-filter-bar .secondary-button {
     min-height: 46px;
     white-space: nowrap;
 }
@@ -365,13 +354,13 @@
    KITCHEN QUEUE
 ========================= */
 
-.rims-app-content .chef-page .kitchen-board {
+.chef-page .kitchen-board {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
 
-.rims-app-content .chef-page .kitchen-order-card {
+.chef-page .kitchen-order-card {
     position: relative;
     min-width: 0;
     padding: 20px;
@@ -386,7 +375,7 @@
         box-shadow 0.2s ease;
 }
 
-.rims-app-content .chef-page .kitchen-order-card::before {
+.chef-page .kitchen-order-card::before {
     content: '';
     position: absolute;
     inset: 0 auto 0 0;
@@ -394,17 +383,17 @@
     background: var(--rims-busy);
 }
 
-.rims-app-content .chef-page .clickable-card {
+.chef-page .clickable-card {
     cursor: pointer;
 }
 
-.rims-app-content .chef-page .kitchen-order-card:hover {
+.chef-page .kitchen-order-card:hover {
     transform: translateY(-3px);
     border-color: var(--rims-brand-line);
     box-shadow: var(--chef-shadow-md);
 }
 
-.rims-app-content .chef-page .kitchen-order-header {
+.chef-page .kitchen-order-header {
     padding-bottom: 14px;
     display: flex;
     align-items: flex-start;
@@ -413,36 +402,36 @@
     border-bottom: 1px solid var(--rims-line);
 }
 
-.rims-app-content .chef-page .kitchen-order-header h3 {
+.chef-page .kitchen-order-header h3 {
     margin: 0 0 5px;
     color: var(--chef-text);
     font-size: 18px;
     font-weight: 800;
 }
 
-.rims-app-content .chef-page .kitchen-order-header p {
+.chef-page .kitchen-order-header p {
     margin: 0;
     color: var(--chef-muted);
     font-size: 12px;
     line-height: 1.5;
 }
 
-.rims-app-content .chef-page .kitchen-item-list {
+.chef-page .kitchen-item-list {
     margin-top: 15px;
 }
 
-.rims-app-content .chef-page .kitchen-item {
+.chef-page .kitchen-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 18px;
 }
 
-.rims-app-content .chef-page .kitchen-item > div:first-child {
+.chef-page .kitchen-item > div:first-child {
     min-width: 0;
 }
 
-.rims-app-content .chef-page .kitchen-item strong {
+.chef-page .kitchen-item strong {
     display: block;
     overflow-wrap: anywhere;
     color: var(--chef-text);
@@ -450,18 +439,18 @@
     font-weight: 800;
 }
 
-.rims-app-content .chef-page .kitchen-item p {
+.chef-page .kitchen-item p {
     margin: 7px 0 4px;
     color: var(--rims-ink-2);
     font-size: 14px;
 }
 
-.rims-app-content .chef-page .kitchen-item small {
+.chef-page .kitchen-item small {
     color: var(--rims-ink-3);
     font-size: 12px;
 }
 
-.rims-app-content .chef-page .kitchen-item-actions {
+.chef-page .kitchen-item-actions {
     flex-shrink: 0;
 }
 
@@ -469,7 +458,7 @@
    STATUS BADGES
 ========================= */
 
-.rims-app-content .chef-page .status-badge {
+.chef-page .status-badge {
     min-height: 28px;
     padding: 0 11px;
     display: inline-flex;
@@ -482,19 +471,19 @@
     white-space: nowrap;
 }
 
-.rims-app-content .chef-page .status-badge.preparing {
+.chef-page .status-badge.preparing {
     border-color: var(--rims-busy-line);
     background: var(--rims-busy-soft);
     color: var(--rims-busy);
 }
 
-.rims-app-content .chef-page .status-badge.completed {
+.chef-page .status-badge.completed {
     border-color: var(--rims-ok-line);
     background: var(--rims-ok-soft);
     color: var(--rims-ok);
 }
 
-.rims-app-content .chef-page .status-badge.danger {
+.chef-page .status-badge.danger {
     border-color: var(--rims-alert-line);
     background: var(--rims-alert-soft);
     color: var(--rims-alert);
@@ -504,7 +493,7 @@
    PAGINATION
 ========================= */
 
-.rims-app-content .chef-page .chef-pagination {
+.chef-page .chef-pagination {
     padding: 15px 17px;
     display: flex;
     align-items: center;
@@ -517,14 +506,14 @@
     box-shadow: var(--chef-shadow-sm);
 }
 
-.rims-app-content .chef-page .pagination-result-info {
+.chef-page .pagination-result-info {
     color: var(--chef-muted);
     font-size: 12px;
     font-weight: 650;
 }
 
-.rims-app-content .chef-page .pagination-controls,
-.rims-app-content .chef-page .pagination-pages,
+.chef-page .pagination-controls,
+.chef-page .pagination-pages,
 .app-content .chef-page .pagination-controls,
 .app-content .chef-page .pagination-pages {
     display: flex;
@@ -532,8 +521,8 @@
     gap: 7px;
 }
 
-.rims-app-content .chef-page .pagination-button,
-.rims-app-content .chef-page .pagination-number,
+.chef-page .pagination-button,
+.chef-page .pagination-number,
 .app-content .chef-page .pagination-button,
 .app-content .chef-page .pagination-number {
     min-height: 38px;
@@ -546,23 +535,23 @@
     cursor: pointer;
 }
 
-.rims-app-content .chef-page .pagination-button {
+.chef-page .pagination-button {
     padding: 0 13px;
 }
 
-.rims-app-content .chef-page .pagination-number {
+.chef-page .pagination-number {
     width: 38px;
     padding: 0;
 }
 
-.rims-app-content .chef-page .pagination-number.active {
+.chef-page .pagination-number.active {
     border-color: var(--chef-primary);
     background: var(--chef-primary);
     color: var(--rims-ink-on-brand);
 }
 
-.rims-app-content .chef-page .pagination-button:hover:not(:disabled),
-.rims-app-content .chef-page .pagination-number:hover:not(.active),
+.chef-page .pagination-button:hover:not(:disabled),
+.chef-page .pagination-number:hover:not(.active),
 .app-content .chef-page .pagination-button:hover:not(:disabled),
 .app-content .chef-page .pagination-number:hover:not(.active) {
     border-color: var(--chef-primary);
@@ -574,18 +563,18 @@
    DISH TABLE
 ========================= */
 
-.rims-app-content .chef-page .simple-table {
+.chef-page .simple-table {
     width: 100%;
     display: grid;
     gap: 8px;
 }
 
-.rims-app-content .chef-page .chef-dish-table {
+.chef-page .chef-dish-table {
     overflow-x: auto;
 }
 
-.rims-app-content .chef-page .chef-dish-table .simple-table-header,
-.rims-app-content .chef-page .chef-dish-table .simple-table-row,
+.chef-page .chef-dish-table .simple-table-header,
+.chef-page .chef-dish-table .simple-table-row,
 .app-content .chef-page .chef-dish-table .simple-table-header,
 .app-content .chef-page .chef-dish-table .simple-table-row {
     min-width: 760px;
@@ -595,7 +584,7 @@
     align-items: center;
 }
 
-.rims-app-content .chef-page .chef-dish-table .simple-table-header {
+.chef-page .chef-dish-table .simple-table-header {
     padding: 0 16px 10px;
     color: var(--chef-muted);
     font-size: 11px;
@@ -603,7 +592,7 @@
     letter-spacing: 0.04em;
 }
 
-.rims-app-content .chef-page .chef-dish-table .simple-table-row {
+.chef-page .chef-dish-table .simple-table-row {
     padding: 15px 16px;
     border: 1px solid var(--chef-border);
     border-radius: 13px;
@@ -616,18 +605,18 @@
         transform 0.18s ease;
 }
 
-.rims-app-content .chef-page .chef-dish-table .simple-table-row:hover {
+.chef-page .chef-dish-table .simple-table-row:hover {
     border-color: var(--rims-brand-line);
     background: var(--rims-brand-soft);
     transform: translateY(-1px);
 }
 
-.rims-app-content .chef-page .chef-dish-table .simple-table-row > span:first-child {
+.chef-page .chef-dish-table .simple-table-row > span:first-child {
     color: var(--chef-text);
     font-weight: 800;
 }
 
-.rims-app-content .chef-page .chef-dish-table .simple-table-row > span:last-child {
+.chef-page .chef-dish-table .simple-table-row > span:last-child {
     display: flex;
     justify-content: flex-end;
 }
@@ -636,13 +625,13 @@
    COMPLETED ORDERS
 ========================= */
 
-.rims-app-content .chef-page .completed-page-actions {
+.chef-page .completed-page-actions {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.rims-app-content .chef-page .completed-summary {
+.chef-page .completed-summary {
     margin-top: 18px;
     padding: 12px 15px;
     display: flex;
@@ -655,18 +644,18 @@
     font-size: 13px;
 }
 
-.rims-app-content .chef-page .completed-summary strong {
+.chef-page .completed-summary strong {
     color: var(--chef-text);
     font-size: 17px;
 }
 
-.rims-app-content .chef-page .completed-orders-list {
+.chef-page .completed-orders-list {
     margin-top: 16px;
     display: grid;
     gap: 12px;
 }
 
-.rims-app-content .chef-page .completed-order-card {
+.chef-page .completed-order-card {
     padding: 18px;
     border: 1px solid var(--chef-border);
     border-radius: 14px;
@@ -678,39 +667,39 @@
         box-shadow 0.18s ease;
 }
 
-.rims-app-content .chef-page .completed-order-card:hover {
+.chef-page .completed-order-card:hover {
     border-color: var(--rims-ok-line);
     transform: translateY(-2px);
     box-shadow: var(--chef-shadow-md);
 }
 
-.rims-app-content .chef-page .completed-order-main {
+.chef-page .completed-order-main {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
 }
 
-.rims-app-content .chef-page .completed-order-main h3 {
+.chef-page .completed-order-main h3 {
     margin: 5px 0 0;
     color: var(--chef-text);
     font-size: 17px;
 }
 
-.rims-app-content .chef-page .completed-order-id {
+.chef-page .completed-order-id {
     color: var(--chef-muted);
     font-size: 11px;
     font-weight: 750;
 }
 
-.rims-app-content .chef-page .completed-order-info {
+.chef-page .completed-order-info {
     margin-top: 15px;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
 }
 
-.rims-app-content .chef-page .completed-order-info > div {
+.chef-page .completed-order-info > div {
     padding: 10px 12px;
     display: grid;
     gap: 4px;
@@ -718,13 +707,13 @@
     background: var(--chef-surface-soft);
 }
 
-.rims-app-content .chef-page .completed-order-info small {
+.chef-page .completed-order-info small {
     color: var(--chef-muted);
     font-size: 10px;
     font-weight: 650;
 }
 
-.rims-app-content .chef-page .completed-order-info strong {
+.chef-page .completed-order-info strong {
     color: var(--chef-text);
     font-size: 13px;
 }
@@ -733,7 +722,7 @@
    EMPTY STATE
 ========================= */
 
-.rims-app-content .chef-page .empty-state {
+.chef-page .empty-state {
     padding: 48px 22px;
     text-align: center;
     border: 1px dashed var(--chef-border-strong);
@@ -741,7 +730,7 @@
     background: var(--chef-surface-soft);
 }
 
-.rims-app-content .chef-page .empty-state::before {
+.chef-page .empty-state::before {
     content: '✓';
     width: 48px;
     height: 48px;
@@ -755,31 +744,16 @@
     font-weight: 900;
 }
 
-.rims-app-content .chef-page .empty-state h3 {
+.chef-page .empty-state h3 {
     margin: 0 0 6px;
     color: var(--chef-text);
     font-size: 17px;
 }
 
-.rims-app-content .chef-page .empty-state p {
+.chef-page .empty-state p {
     margin: 0;
     color: var(--chef-muted);
     font-size: 13px;
-}
-
-.detail-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.detail-grid > div {
-    padding: 12px 14px;
-    display: grid;
-    gap: 4px;
-    border: 1px solid var(--chef-border);
-    border-radius: 11px;
-    background: var(--chef-surface-soft);
 }
 
 .detail-grid span {
@@ -838,11 +812,6 @@
     background: var(--rims-surface);
     color: var(--chef-text);
     outline: none;
-}
-
-.cancel-request-box textarea:focus {
-    border-color: var(--chef-danger);
-    box-shadow: 0 0 0 3px rgb(201 50 36 / 10%);
 }
 
 .cancel-reason-count {
@@ -958,14 +927,6 @@
     background: var(--rims-brand-soft);
 }
 
-/* Phần tiêu đề và trạng thái */
-.chef-internal-note-heading {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 14px;
-}
-
 .chef-internal-note-heading h3 {
     margin: 0 0 6px;
     color: var(--rims-brand);
@@ -977,33 +938,6 @@
     color: var(--rims-ink-2);
     font-size: 13px;
     line-height: 1.5;
-}
-
-/* Badge chờ xem / đã xem */
-.internal-note-status {
-    flex-shrink: 0;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.internal-note-status.waiting {
-    background: var(--rims-busy-soft);
-    color: var(--rims-busy);
-}
-
-.internal-note-status.acknowledged {
-    background: var(--rims-ok-soft);
-    color: var(--rims-ok);
-}
-
-/* Các nút ghi chú nhanh */
-.internal-note-quick-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
 }
 
 .internal-note-quick-actions button {
@@ -1018,11 +952,6 @@
     transition:
         background-color 0.2s ease,
         border-color 0.2s ease;
-}
-
-.internal-note-quick-actions button:hover {
-    border-color: var(--rims-brand);
-    background: var(--rims-brand-soft);
 }
 
 /* Ô nhập ghi chú */
@@ -1046,21 +975,9 @@
     border-color: var(--rims-brand);
 }
 
-/* Hàng đếm ký tự và nút gửi */
-.internal-note-bottom-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
 .internal-note-bottom-row > span {
     color: var(--rims-ink-3);
     font-size: 12px;
-}
-
-.internal-note-save-button {
-    min-width: 145px;
 }
 
 /* Responsive */
@@ -1083,28 +1000,6 @@
         width: 100%;
     }
 }
-/* CSS cho trang Gom món để nấu */
-
-.grouped-kitchen-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-}
-
-.grouped-kitchen-card {
-    padding: 19px;
-    display: grid;
-    gap: 14px;
-    border: 1px solid var(--chef-danger, var(--rims-line));
-    border-left: 4px solid var(--rims-brand);
-    border-radius: 17px;
-    background: var(--rims-surface);
-    box-shadow: var(--rims-shadow-raised);
-}
-
-.grouped-kitchen-card.has-note {
-    border-left-color: var(--rims-alert);
-}
 
 .grouped-card-head {
     display: flex;
@@ -1113,133 +1008,10 @@
     gap: 16px;
 }
 
-.grouped-card-head h3 {
-    margin: 6px 0 0;
-    color: var(--rims-ink);
-    font-size: 1.2rem;
-    font-weight: 850;
-}
-
-.grouped-card-head p {
-    margin: 5px 0 0;
-    color: var(--rims-ink-3);
-    font-size: 11px;
-}
-
-.group-type {
-    display: inline-flex;
-    min-height: 25px;
-    padding: 0 9px;
-    align-items: center;
-    border-radius: 999px;
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: 0.06em;
-}
-
-.group-type.batch {
-    background: var(--rims-brand-soft);
-    color: var(--rims-brand);
-}
-
-.group-type.note {
-    background: var(--rims-alert-soft);
-    color: var(--rims-alert);
-}
-
-.group-total {
-    min-width: 72px;
-    padding: 10px 12px;
-    border-radius: 13px;
-    background: var(--rims-surface-2);
-    text-align: center;
-}
-
-.group-total small,
-.group-total strong {
-    display: block;
-}
-
-.group-total small {
-    color: var(--rims-ink-3);
-    font-size: 9px;
-    font-weight: 850;
-}
-
 .group-total strong {
     margin-top: 4px;
     color: var(--rims-brand);
     font-size: 1.45rem;
-}
-
-.waiting-badge {
-    width: fit-content;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 850;
-}
-
-.waiting-badge.normal {
-    background: var(--rims-brand-soft);
-    color: var(--rims-brand);
-}
-
-.waiting-badge.warning {
-    background: var(--rims-busy-soft);
-    color: var(--rims-busy);
-}
-
-.waiting-badge.danger {
-    background: var(--rims-alert-soft);
-    color: var(--rims-alert);
-}
-
-.group-note {
-    padding: 11px 13px;
-    border: 1px solid var(--rims-alert-line);
-    border-radius: 11px;
-    background: var(--rims-alert-soft);
-    color: var(--rims-alert);
-    font-size: 12px;
-    line-height: 1.55;
-}
-
-.group-item-list {
-    display: grid;
-    gap: 7px;
-}
-
-.group-item-row {
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    border: 1px solid var(--rims-line);
-    border-radius: 11px;
-    background: var(--rims-surface-2);
-}
-
-.group-item-row.highlighted {
-    border-color: var(--rims-brand-line);
-    background: var(--rims-brand-soft);
-}
-
-.group-item-row span,
-.group-item-row strong,
-.group-item-row small {
-    display: block;
-}
-
-.group-item-row small {
-    margin-top: 3px;
-    color: var(--rims-ink-3);
-    font-size: 10px;
-}
-
-.group-item-row b {
-    color: var(--rims-brand);
 }
 
 .group-card-footer {
@@ -1249,13 +1021,6 @@
     justify-content: space-between;
     gap: 12px;
     border-top: 1px solid var(--rims-line);
-}
-
-.group-detail-link {
-    color: var(--rims-brand);
-    font-size: 11px;
-    font-weight: 800;
-    text-decoration: none;
 }
 
 @media (max-width: 920px) {
@@ -1756,7 +1521,7 @@
 }
 
 .chef-page > .page-card,
-.rims-app-content .chef-page > .page-card {
+.chef-page > .page-card {
     position: relative;
     overflow: hidden;
     padding: 26px 28px;
@@ -1769,7 +1534,7 @@
 }
 
 .chef-page > .page-card::before,
-.rims-app-content .chef-page > .page-card::before {
+.chef-page > .page-card::before {
     content: '';
     position: absolute;
     inset: 0 0 auto;
@@ -1778,7 +1543,7 @@
 }
 
 .chef-page .page-header,
-.rims-app-content .chef-page .page-header {
+.chef-page .page-header {
     position: relative;
     z-index: 1;
     display: flex;
@@ -1788,7 +1553,7 @@
 }
 
 .chef-page .page-header h2,
-.rims-app-content .chef-page .page-header h2 {
+.chef-page .page-header h2 {
     margin: 0;
     color: var(--chef-text, var(--rims-ink));
     font-size: clamp(1.55rem, 2.2vw, 2rem);
@@ -1797,7 +1562,7 @@
 }
 
 .chef-page .page-header p,
-.rims-app-content .chef-page .page-header p {
+.chef-page .page-header p {
     max-width: 780px;
     margin: 8px 0 0;
     color: var(--chef-muted, var(--rims-ink-3));
@@ -1809,7 +1574,7 @@
 
 .chef-page .stat-grid,
 .chef-dashboard-stat-grid,
-.rims-app-content .chef-page .stat-grid {
+.chef-page .stat-grid {
     position: relative;
     z-index: 1;
     display: grid !important;

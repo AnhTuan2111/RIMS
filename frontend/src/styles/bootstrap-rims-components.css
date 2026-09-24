@@ -241,11 +241,6 @@
     font-weight: 750;
 }
 
-.status-badge.completed {
-    color: var(--rims-ok);
-    background: var(--rims-ok-soft);
-}
-
 .status-badge.warning {
     color: var(--rims-busy);
     background: var(--rims-busy-soft);

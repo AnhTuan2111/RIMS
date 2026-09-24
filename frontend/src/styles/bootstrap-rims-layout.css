@@ -27,12 +27,6 @@
     color: var(--rims-ink-on-dark);
 }
 
-.app-main {
-    flex: 1;
-    min-width: 0;
-    min-height: 100vh;
-}
-
 .app-content {
     padding: 1.5rem;
     min-height: calc(100vh - 84px);
@@ -361,10 +355,6 @@
     box-shadow: 0 8px 30px rgb(36 21 18 / 7%);
 }
 
-.rims-topbar-heading {
-    min-width: 0;
-}
-
 .rims-topbar-eyebrow {
     display: flex;
     align-items: center;
@@ -379,17 +369,6 @@
     letter-spacing: 0.16em;
 }
 
-.rims-topbar-live-dot {
-    width: 8px;
-    height: 8px;
-
-    border-radius: 999px;
-
-    background: var(--rims-ok);
-
-    box-shadow: 0 0 0 5px rgb(45 123 78 / 12%);
-}
-
 .rims-topbar-heading h1 {
     margin: 0;
 
@@ -398,21 +377,6 @@
     font-size: 22px;
     font-weight: 900;
     letter-spacing: -0.035em;
-}
-
-.rims-topbar-heading p {
-    margin: 5px 0 0;
-
-    color: var(--rims-ink-3);
-
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.rims-topbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 14px;
 }
 
 .rims-app-content {
