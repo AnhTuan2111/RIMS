@@ -3156,3 +3156,9 @@ textarea.rk-input {
     color: var(--rims-ink-3);
     font-size: var(--rims-text-sm);
 }
+
+/* Dòng giảm trừ trong bảng tổng kết: số âm, màu xanh lá. */
+.rk-summary__row--credit .rk-summary__value,
+.rk-summary__row--credit .rk-summary__label {
+    color: var(--rims-ok);
+}

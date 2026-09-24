@@ -283,7 +283,7 @@ export default function PaymentModal({
                                 disabled={amountReceived < finalAmount || processing}
                                 onClick={() => void handleConfirmCash()}
                             >
-                                {processing ? 'Đang xử lý…' : 'Xác nhận & In Hóa Đơn'}
+                                {processing ? 'Đang xử lý…' : 'Xác nhận và in hoá đơn'}
                             </button>
                         </div>
                     </div>

@@ -253,7 +253,7 @@ export default function AdminCategoryPage() {
                                     }}
                                     className="rk-btn rk-btn--primary"
                                 >
-                                    <span>+</span> Thêm Danh Mục
+                                    Thêm danh mục
                                 </button>
                             }
                         />

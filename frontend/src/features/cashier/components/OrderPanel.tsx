@@ -1,6 +1,6 @@
 import {Coins, User, X} from 'lucide-react'
 
-import {useState, type CSSProperties} from 'react'
+import {useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
 import type {OrderDetailResponse, TableDashboardResponse} from '@/shared/types/cashier'
@@ -96,7 +96,7 @@ export default function OrderPanel({
         : 0
 
     const displayStatus =
-        selectedTable.status === 'SERVING' ? 'Đang Phục Vụ' : 'Bàn Trống'
+        selectedTable.status === 'SERVING' ? 'Đang phục vụ' : 'Bàn trống'
 
     const isCreateFormValid =
         newCusName.trim().length > 0 &&
@@ -265,45 +265,29 @@ export default function OrderPanel({
     }
 
     return (
-        <div
-            className="rk-card rk-card--pad"
-            style={{
-                position: 'relative',
-                width: 'min(400px, 50vw)',
-                maxWidth: '100%',
-                boxSizing: 'border-box',
-                // swap the line above for the two below instead.
-                // transform: 'scale(0.55)',
-                // transformOrigin: 'top left',
-            }}
-        >
-            <button type="button" style={closeButtonStyle} onClick={onClose}>
+        <div className="rk-card rk-card--pad">
+            <button type="button" className="rk-iconbtn" onClick={onClose}>
                 <X className="rk-icon" aria-hidden="true" />
             </button>
 
             <h2>Chi tiết đơn hàng</h2>
 
-            <div style={headerInfoStyle}>
+            <div className="rk-pagehead__desc">
                 <strong>Vị trí: {selectedTable.tableNumber}</strong>
 
-                <span style={statusBadgeStyle}>{displayStatus}</span>
+                <span className="rk-chip rk-chip--busy">{displayStatus}</span>
             </div>
 
             {selectedTable.status === 'SERVING' && (
-                <div style={customerBoxStyle}>
-                    <h4 style={customerTitleStyle}> Tích Điểm Thành Viên</h4>
+                <div className="rk-card rk-card--soft rk-card--pad">
+                    <h4 className="rk-sectiontitle">Tích điểm thành viên</h4>
 
-                    <div
-                        style={{
-                            display: 'flex',
-                            gap: '8px',
-                        }}
-                    >
+                    <div className="rk-actions">
                         <input
                             type="text"
                             inputMode="numeric"
                             placeholder="Nhập Số điện thoại khách hàng…"
-                            style={customerInputStyle}
+                            className="rk-input"
                             value={phoneSearch}
                             disabled={!!customer}
                             pattern="0[0-9]{9}"
@@ -315,7 +299,7 @@ export default function OrderPanel({
                         {customer ? (
                             <button
                                 type="button"
-                                style={dangerButtonStyle}
+                                className="rk-btn rk-btn--danger"
                                 onClick={handleClearCustomer}
                             >
                                 Bỏ chọn
@@ -323,17 +307,7 @@ export default function OrderPanel({
                         ) : (
                             <button
                                 type="button"
-                                style={{
-                                    ...searchButtonStyle,
-                                    opacity:
-                                        !PHONE_REGEX.test(phoneSearch) || isSearching
-                                            ? 0.6
-                                            : 1,
-                                    cursor:
-                                        !PHONE_REGEX.test(phoneSearch) || isSearching
-                                            ? 'not-allowed'
-                                            : 'pointer',
-                                }}
+                                className="rk-btn rk-btn--primary"
                                 disabled={!PHONE_REGEX.test(phoneSearch) || isSearching}
                                 onClick={() => void handleSearchCustomer()}
                             >
@@ -342,25 +316,15 @@ export default function OrderPanel({
                         )}
                     </div>
 
-                    {phoneError && (
-                        <div
-                            style={{
-                                color: 'var(--rims-alert)',
-                                fontSize: '0.85rem',
-                                marginTop: '4px',
-                            }}
-                        >
-                            {phoneError}
-                        </div>
-                    )}
+                    {phoneError && <div className="rk-formerror">{phoneError}</div>}
 
                     {showCreate && !customer && (
-                        <div style={createCustomerBoxStyle}>
-                            <p style={createCustomerTitleStyle}>
+                        <div className="rk-card rk-card--soft rk-card--pad">
+                            <p className="rk-sectiontitle">
                                 Chưa có tài khoản! Đăng ký nhanh:
                             </p>
 
-                            <div style={phoneHintStyle}>
+                            <div className="rk-field__hint">
                                 Số điện thoại dùng để đăng ký:{' '}
                                 <strong>{phoneSearch}</strong>
                             </div>
@@ -368,7 +332,7 @@ export default function OrderPanel({
                             <input
                                 type="text"
                                 placeholder="Tên khách hàng (*)"
-                                style={stackedInputStyle}
+                                className="rk-input"
                                 value={newCusName}
                                 onChange={(event) => setNewCusName(event.target.value)}
                             />
@@ -376,57 +340,45 @@ export default function OrderPanel({
                             <input
                                 type="email"
                                 placeholder="Email (*)"
-                                style={stackedInputStyle}
+                                className="rk-input"
                                 value={newCusEmail}
                                 onChange={(event) => setNewCusEmail(event.target.value)}
                             />
 
                             <button
                                 type="button"
-                                style={{
-                                    ...createCustomerButtonStyle,
-                                    opacity:
-                                        !isCreateFormValid || processingCreate ? 0.6 : 1,
-                                    cursor:
-                                        !isCreateFormValid || processingCreate
-                                            ? 'not-allowed'
-                                            : 'pointer',
-                                }}
+                                className="rk-btn rk-btn--primary"
                                 disabled={!isCreateFormValid || processingCreate}
                                 onClick={() => void handleCreateCustomer()}
                             >
-                                {processingCreate ? 'Đang tạo…' : 'Tạo Tài Khoản'}
+                                {processingCreate ? 'Đang tạo…' : 'Tạo tài khoản'}
                             </button>
                         </div>
                     )}
 
                     {customer && (
-                        <div style={customerFoundBoxStyle}>
-                            <p style={compactParagraphStyle}>
+                        <div className="rk-note rk-note--ok">
+                            <p className="rk-rowlist__meta">
                                 <User className="rk-icon" aria-hidden="true" /> Khách:{' '}
                                 <strong>{customer.fullName}</strong>
                             </p>
 
-                            <p style={pointsParagraphStyle}>
+                            <p className="rk-rowlist__meta">
                                 <Coins className="rk-icon" aria-hidden="true" /> Điểm hiện
                                 có:{' '}
-                                <strong
-                                    style={{
-                                        color: 'var(--rims-ok)',
-                                    }}
-                                >
+                                <strong className="rk-num">
                                     {formatNumber(customer.rewardPoints)}
                                 </strong>
                             </p>
 
                             {customer.rewardPoints > 0 && (
-                                <label style={pointsLabelStyle}>
+                                <label className="rk-field__label">
                                     Sử dụng điểm (Tối đa {formatNumber(maxPointsCanUse)}):
                                     <input
                                         type="number"
                                         min="0"
                                         max={maxPointsCanUse}
-                                        style={pointsInputStyle}
+                                        className="rk-input"
                                         value={pointsUsed || ''}
                                         onChange={(event) =>
                                             handlePointsInputChange(
@@ -444,13 +396,7 @@ export default function OrderPanel({
             {loading ? (
                 <p>Đang tải thông tin đơn hàng...</p>
             ) : !orderDetail ? (
-                <p
-                    style={{
-                        color: 'var(--rims-ink-3)',
-                    }}
-                >
-                    Chưa có thông tin đơn hàng cho bàn này.
-                </p>
+                <p className="rk-note">Chưa có thông tin đơn hàng cho bàn này.</p>
             ) : (
                 <div>
                     {itemsList.length === 0 ? (
@@ -489,9 +435,9 @@ export default function OrderPanel({
                         </div>
                     )}
 
-                    <div style={summaryBoxStyle}>
-                        <div style={summaryLinesStyle}>
-                            <div style={summaryLineStyle}>
+                    <div className="rk-card rk-card--soft rk-card--pad">
+                        <div className="rk-summary">
+                            <div className="rk-summary__row">
                                 <span>Tạm tính trước thuế:</span>
                                 <span>
                                     {formatCurrency(
@@ -500,50 +446,38 @@ export default function OrderPanel({
                                 </span>
                             </div>
 
-                            <div style={summaryLineStyle}>
+                            <div className="rk-summary__row">
                                 <span>Thuế VAT (10%):</span>
                                 <span>{formatCurrency(orderDetail.vatAmount ?? 0)}</span>
                             </div>
 
                             {pointsUsed > 0 && (
-                                <div
-                                    style={{
-                                        ...summaryLineStyle,
-                                        color: 'var(--rims-ok)',
-                                    }}
-                                >
+                                <div className="rk-summary__row rk-summary__row--credit">
                                     <span>Giảm giá ({pointsUsed} điểm):</span>
                                     <span>-{formatCurrency(pointsUsed * 1000)}</span>
                                 </div>
                             )}
                         </div>
 
-                        <div style={totalLineStyle}>
+                        <div className="rk-summary__row rk-summary__row--total">
                             <span>Tổng thanh toán:</span>
-                            <strong
-                                style={{
-                                    color: 'var(--rims-alert)',
-                                }}
-                            >
+                            <strong>
                                 {formatCurrency(totalAmount - pointsUsed * 1000)}
                             </strong>
                         </div>
 
-                        {lockError && <div style={lockErrorBoxStyle}> {lockError}</div>}
+                        {lockError && (
+                            <div className="rk-note rk-note--alert"> {lockError}</div>
+                        )}
 
                         {selectedTable.status === 'SERVING' && (
                             <button
                                 type="button"
                                 className="rk-btn rk-btn--primary"
-                                style={{
-                                    marginTop: '1rem',
-                                    width: '100%',
-                                    opacity: isLocking ? 0.7 : 1,
-                                }}
                                 disabled={isLocking}
                                 onClick={() => void handleCheckoutClick()}
                             >
-                                {isLocking ? 'Đang khóa đơn…' : 'CheckOut'}
+                                {isLocking ? 'Đang khóa đơn…' : 'Thanh toán'}
                             </button>
                         )}
                     </div>
@@ -551,183 +485,4 @@ export default function OrderPanel({
             )}
         </div>
     )
-}
-
-const closeButtonStyle: CSSProperties = {
-    position: 'absolute',
-    top: '1rem',
-    right: '1rem',
-    background: 'none',
-    border: 'none',
-    fontSize: '1.4rem',
-    cursor: 'pointer',
-    color: 'var(--rims-ink-3)',
-    fontWeight: 'bold',
-}
-
-const headerInfoStyle: CSSProperties = {
-    marginBottom: '1rem',
-    paddingBottom: '0.5rem',
-    borderBottom: '1px solid var(--rims-line)',
-    marginTop: '0.5rem',
-}
-
-const statusBadgeStyle: CSSProperties = {
-    marginLeft: '10px',
-    float: 'right',
-    background: 'var(--rims-busy-soft)',
-    color: 'var(--rims-busy)',
-    padding: '2px 8px',
-    borderRadius: '4px',
-    fontSize: '0.85rem',
-    fontWeight: 'bold',
-}
-
-const customerBoxStyle: CSSProperties = {
-    background: 'var(--rims-surface-2)',
-    padding: '1rem',
-    borderRadius: '8px',
-    border: '1px solid var(--rims-line)',
-    marginBottom: '1.5rem',
-}
-
-const customerTitleStyle: CSSProperties = {
-    margin: '0 0 10px 0',
-    color: 'var(--rims-ink-2)',
-}
-
-const customerInputStyle: CSSProperties = {
-    flex: 1,
-    padding: '8px',
-    borderRadius: '4px',
-    border: '1px solid var(--rims-line-strong)',
-}
-
-const dangerButtonStyle: CSSProperties = {
-    padding: '8px 16px',
-    background: 'var(--rims-alert)',
-    color: 'var(--rims-ink-on-brand)',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-}
-
-const searchButtonStyle: CSSProperties = {
-    padding: '8px 16px',
-    background: 'var(--rims-brand)',
-    color: 'var(--rims-ink-on-brand)',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-}
-
-const createCustomerBoxStyle: CSSProperties = {
-    marginTop: '10px',
-    padding: '10px',
-    background: 'var(--rims-surface)',
-    border: '1px dashed var(--rims-line-strong)',
-    borderRadius: '6px',
-}
-
-const createCustomerTitleStyle: CSSProperties = {
-    margin: '0 0 8px 0',
-    fontSize: '0.9rem',
-    color: 'var(--rims-alert)',
-    fontWeight: 'bold',
-}
-
-const phoneHintStyle: CSSProperties = {
-    padding: '8px',
-    marginBottom: '6px',
-    background: 'var(--rims-surface-2)',
-    borderRadius: '4px',
-    fontSize: '0.85rem',
-    color: 'var(--rims-ink-2)',
-}
-
-const stackedInputStyle: CSSProperties = {
-    width: '100%',
-    boxSizing: 'border-box',
-    padding: '6px',
-    marginBottom: '6px',
-    border: '1px solid var(--rims-line-strong)',
-    borderRadius: '4px',
-}
-
-const createCustomerButtonStyle: CSSProperties = {
-    width: '100%',
-    padding: '8px',
-    background: 'var(--rims-ok)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-}
-
-const customerFoundBoxStyle: CSSProperties = {
-    marginTop: '10px',
-    padding: '10px',
-    background: 'var(--rims-ok-soft)',
-    border: '1px solid var(--rims-ok-line)',
-    borderRadius: '6px',
-}
-
-const compactParagraphStyle: CSSProperties = {
-    margin: '0 0 5px 0',
-}
-
-const pointsParagraphStyle: CSSProperties = {
-    margin: '0 0 10px 0',
-}
-
-const pointsLabelStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    fontSize: '0.9rem',
-}
-
-const pointsInputStyle: CSSProperties = {
-    padding: '6px',
-    border: '1px solid var(--rims-line-strong)',
-    borderRadius: '4px',
-    boxSizing: 'border-box',
-}
-
-const summaryBoxStyle: CSSProperties = {
-    marginTop: '1rem',
-    paddingTop: '0.75rem',
-    borderTop: '1px solid var(--rims-line)',
-}
-
-const summaryLinesStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    fontSize: '0.9rem',
-    color: 'var(--rims-ink-2)',
-    marginBottom: '8px',
-}
-
-const summaryLineStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-}
-
-const totalLineStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '1.05rem',
-    fontWeight: 'bold',
-}
-
-const lockErrorBoxStyle: CSSProperties = {
-    marginTop: '0.75rem',
-    padding: '0.6rem 0.75rem',
-    background: 'var(--rims-alert-soft)',
-    border: '1px solid var(--rims-alert-line)',
-    borderRadius: '6px',
-    color: 'var(--rims-alert)',
-    fontSize: '0.9rem',
-    lineHeight: 1.4,
 }

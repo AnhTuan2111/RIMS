@@ -296,7 +296,7 @@ export default function AdminDishesPage() {
                             }}
                             className="rk-btn rk-btn--primary"
                         >
-                            <span>+</span> Thêm Món Ăn
+                            Thêm món ăn
                         </button>
                     }
                 />

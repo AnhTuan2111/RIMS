@@ -57,7 +57,7 @@ export default function PaymentSuccess() {
                     <Check className="rk-icon" aria-hidden="true" />
                 </div>
 
-                <h1 style={titleStyle}>Thanh Toán Thành Công!</h1>
+                <h1 style={titleStyle}>Thanh toán thành công</h1>
 
                 <p style={descriptionStyle}>
                     Giao dịch qua VNPay đã hoàn tất. Hóa đơn của quý khách đã được lưu lại
