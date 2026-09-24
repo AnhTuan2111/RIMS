@@ -1,18 +1,21 @@
-/* Hallmark · macrostructure: Workbench · genre: modern-minimal · tone: utilitarian
- * theme: custom (vibe: "warm wine, gold, working daylight"
- *   paper oklch(97% 0.012 75) · accent oklch(35% 0.13 12) wine · Be Vietnam Pro + JetBrains Mono)
- * axes: paper-band light · display-style geometric-sans · accent-hue warm
- * contrast: pass · derived from the app's own public pages, not invented
- */
-
 /* =========================================================================
    RIMS — token nền của toàn bộ giao diện
    =========================================================================
 
-   Bảng màu không phải do nghĩ ra mà rút từ chính bản sắc đang chạy của app:
-   rượu vang #7a1030, vàng #d4af37, kem #f5ecd8, nâu đen #241512 — vốn đã dùng
-   ở trang chủ, trang đăng nhập và logo sidebar, nhưng chưa từng được hệ thống
-   hoá nên 27 màn còn lại không hề biết tới.
+   BẢNG MÀU: trung tính ấm + một điểm nhấn lạnh.
+
+   Nền là đá ấm — xám ngả be, không phải kem vàng và cũng không phải xám lạnh.
+   Nhấn là xanh dầu sâu. Đây là cấu trúc mà các nguồn về thiết kế nhà hàng
+   đương đại mô tả: khoảng 55% trung tính ấm, 30% màu nhấn, 15% tương phản.
+
+   VÌ SAO KHÔNG PHẢI MỘT SẮC ẤM: ba màu trạng thái của app đã chiếm sẵn xanh
+   lá (bàn trống), hổ phách (đang phục vụ) và đỏ (quá giờ, huỷ). Bản cũ lấy
+   vang #7a1030 làm màu thương hiệu — nằm ngay cạnh đỏ cảnh báo, đến mức file
+   này từng phải ghi chú "sáng hơn hẳn màu vang để không lẫn". Xanh dầu cách
+   xa cả ba, nên nút bấm không bao giờ bị đọc nhầm thành một trạng thái.
+
+   Đồng thau chỉ dành cho nhận diện: logo, nét nhấn trên nền tối. Nó giữ hơi
+   ấm cho app, nhưng không bao giờ làm màu chữ hay màu nút.
 
    LUẬT DUY NHẤT: file component KHÔNG được viết mã màu, cỡ chữ, khoảng cách
    hay bo góc trực tiếp. Mọi giá trị đi qua var(--rims-*). Muốn một giá trị
@@ -24,70 +27,96 @@
 
 :root {
     /* ---------- Nền và bề mặt ---------- */
-    /* Không dùng trắng tinh: nền ngả ấm theo sắc thương hiệu, đỡ chói khi
-       nhân viên nhìn màn hình suốt ca. */
-    --rims-paper: #fbf8f3;
-    --rims-surface: #fffdfa;
-    --rims-surface-2: #f4efe7;
-    --rims-surface-3: #ebe4d9;
+    /* Đá ấm: xám ngả be. Không dùng trắng tinh (chói khi nhìn suốt ca) và
+       cũng không dùng kem vàng như bản cũ (làm ảnh món ăn bị ám vàng). */
+    --rims-paper: #f5f4f1;
+    --rims-surface: #fdfdfc;
+    --rims-surface-2: #eeece7;
+    --rims-surface-3: #e3e0d9;
 
-    --rims-line: #e4dcd0;
-    --rims-line-strong: #a69071;
+    --rims-line: #e3e0da;
+    /* Viền ô nhập phải đạt 3:1 với mặt thẻ mới nhìn ra được cạnh ô. */
+    --rims-line-strong: #8e8b83;
 
     /* ---------- Chữ ---------- */
-    --rims-ink: #241512;
-    --rims-ink-2: #5c4a3a;
-    --rims-ink-3: #706354;
-    --rims-ink-on-brand: #fdf8ef;
+    --rims-ink: #1c1e1f;
+    --rims-ink-2: #4e5356;
+    /* Phải đạt 4.5:1 cả trên --rims-surface-2 (nền dòng tiêu đề bảng) chứ
+       không chỉ trên --rims-paper — nền bảng tối hơn nền trang. */
+    --rims-ink-3: #656a6e;
+    --rims-ink-on-brand: #f4fbfc;
 
-    /* Thanh ben luon toi ke ca o che do sang, nen chu phu tren no khong dung
-       duoc --rims-ink-3 (mau do tinh cho nen sang, chi dat 3.02:1 o day). */
-    --rims-ink-on-dark: #fdf8ef;
-    --rims-ink-on-dark-2: #9c8d7c;
+    /* Thanh bên luôn tối kể cả ở chế độ sáng, nên chữ phụ trên nó không dùng
+       được --rims-ink-3 (màu đó tính cho nền sáng). */
+    --rims-ink-on-dark: #f2f4f4;
+    --rims-ink-on-dark-2: #9aa3a6;
 
     /* Nền của phần khung luôn tối: thanh bên, màn đăng nhập, trang công khai.
        KHÔNG đảo theo chủ đề — dùng --rims-ink thì ở chế độ tối nó lật thành
-       nền sáng, và chữ kem trên đó không đọc được. */
-    --rims-shell: #241512;
-    --rims-shell-2: #3a2119;
+       nền sáng, và chữ sáng trên đó không đọc được. */
+    --rims-shell: #191c1d;
+    --rims-shell-2: #24292b;
 
     /* ---------- Thương hiệu ---------- */
-    /* Vang là màu hành động chính. Vàng chỉ dùng cho khoảnh khắc nhận diện
-       (logo, viền nhấn), không dùng cho nút — vàng trên nền sáng không đủ
-       tương phản cho chữ. */
-    --rims-brand: #7a1030;
-    --rims-brand-hover: #9a1a3f;
-    --rims-brand-active: #5e0b24;
-    --rims-brand-soft: #f9e9ed;
-    --rims-brand-line: #e8c9d2;
+    /* Xanh dầu là màu hành động chính: nút, điều hướng đang chọn, vòng tiêu
+       điểm, liên kết. Đạt 7.4:1 trên nền đá và 7.8:1 khi làm nền nút. */
+    --rims-brand: #10566b;
+    --rims-brand-hover: #15697f;
+    --rims-brand-active: #0b4253;
+    --rims-brand-soft: #e4f1f5;
+    --rims-brand-line: #bcdbe4;
 
-    /* Vàng CHỈ dùng cho nhận diện: logo, viền trang trí, nét nhấn trên nền tối.
-       Tương phản với nền sáng chỉ 2.07:1 nên KHÔNG BAO GIỜ dùng cho chữ hay
-       viền cần nhìn rõ — chỗ đó dùng --rims-gold-deep. */
-    --rims-gold: #d4af37;
-    --rims-gold-deep: #836918;
-    --rims-gold-soft: #fbf1d6;
+    /* Đồng thau CHỈ dùng cho nhận diện: logo, viền trang trí, nét nhấn trên
+       nền tối. Tương phản với nền sáng quá thấp nên KHÔNG BAO GIỜ dùng cho
+       chữ hay viền cần nhìn rõ — chỗ đó dùng --rims-gold-deep. */
+    --rims-gold: #b08d4e;
+    --rims-gold-deep: #7d6330;
+    --rims-gold-soft: #f3ece0;
 
     /* ---------- Màu ngữ nghĩa ---------- */
     /* Bàn trống · món xong */
-    --rims-ok: #2d7b4e;
-    --rims-ok-soft: #e6f2ea;
-    --rims-ok-line: #bcdcc8;
+    --rims-ok: #2b7a52;
+    --rims-ok-soft: #e4f1e9;
+    --rims-ok-line: #b9d8c6;
 
     /* Đang phục vụ · đang nấu · đã đặt trước */
     --rims-busy: #965b08;
-    --rims-busy-soft: #fdf0dc;
-    --rims-busy-line: #f0d5ab;
+    --rims-busy-soft: #f8efdd;
+    --rims-busy-line: #efd6ab;
 
-    /* Quá giờ · lỗi · huỷ — sáng hơn hẳn màu vang để không lẫn */
+    /* Quá giờ · lỗi · huỷ */
     --rims-alert: #c93224;
-    --rims-alert-soft: #fce9e6;
-    --rims-alert-line: #f5c4bd;
+    --rims-alert-soft: #fbe9e6;
+    --rims-alert-line: #f4c5bd;
 
     /* Không hoạt động */
-    --rims-idle: #726b61;
-    --rims-idle-soft: #f0ede7;
-    --rims-idle-line: #ddd6cb;
+    --rims-idle: #6f7478;
+    --rims-idle-soft: #eceae5;
+    --rims-idle-line: #dad7d0;
+
+    /* ---------- Sắc nền của lớp phủ mờ ----------
+       Bóng, quầng tiêu điểm và các mảng sáng nền đều là màu trong suốt. Trước
+       đây chúng là mã màu gõ thẳng ở hơn 100 chỗ, nên đổi màu thương hiệu là
+       phải đi sửa từng chỗ, và ở chế độ tối chúng vẫn giữ sắc của chế độ sáng.
+
+       Ghi dưới dạng ba số "R G B" để dùng được rgb(var(--x) / 12%). */
+    --rims-tint-ink: 20 24 26;
+    --rims-tint-brand: 16 86 107;
+    --rims-tint-hi: 247 250 251;
+    --rims-tint-gold: 176 141 78;
+    --rims-tint-busy: 150 91 8;
+    --rims-tint-ok: 43 122 82;
+    --rims-tint-alert: 201 50 36;
+
+    /* ---------- Màu biểu đồ ----------
+       Bốn ca trong ngày là bốn mốc NỐI TIẾP nhau, nên dùng thang một sắc nhạt
+       dần chứ không phải bốn màu rời. Bản cũ lấy ba sắc xanh lá của Tailwind
+       cộng một màu cam — nhìn như bốn nhóm không liên quan gì đến nhau. */
+    --rims-chart-1: #bcdbe4;
+    --rims-chart-2: #6fa9bd;
+    --rims-chart-3: #2d7a93;
+    --rims-chart-4: #10566b;
+    --rims-chart-empty: #e3e0da;
 
     /* ---------- Chữ ---------- */
     --rims-font-sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -147,10 +176,10 @@
     --rims-radius-pill: 999px;
 
     /* ---------- Đổ bóng ---------- */
-    /* Chỉ hai mức, ngả ấm theo nền. Không dùng bóng để trang trí — chỉ để
-       tách lớp nổi thật sự (dropdown, modal). */
-    --rims-shadow-raised: 0 1px 2px rgb(36 21 18 / 6%);
-    --rims-shadow-overlay: 0 12px 32px -8px rgb(36 21 18 / 18%);
+    /* Chỉ hai mức, sắc trung tính theo nền. Không dùng bóng để trang trí —
+       chỉ để tách lớp nổi thật sự (dropdown, modal). */
+    --rims-shadow-raised: 0 1px 2px rgb(var(--rims-tint-ink) / 7%);
+    --rims-shadow-overlay: 0 12px 32px -8px rgb(var(--rims-tint-ink) / 20%);
 
     /* ---------- Chuyển động ---------- */
     --rims-ease-out: cubic-bezier(0.2, 0.6, 0.2, 1);
@@ -186,93 +215,121 @@
    ========================================================================= */
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
-        --rims-paper: #17120f;
-        --rims-surface: #1f1815;
-        --rims-surface-2: #29211c;
-        --rims-surface-3: #342a24;
+        --rims-paper: #101315;
+        --rims-surface: #171b1d;
+        --rims-surface-2: #1f2427;
+        --rims-surface-3: #282e31;
 
-        --rims-line: #3a2f28;
-        --rims-line-strong: #766153;
+        --rims-line: #2c3336;
+        --rims-line-strong: #68747a;
 
-        --rims-ink: #f2ebe1;
-        --rims-ink-2: #c3b6a6;
-        --rims-ink-3: #9d9283;
-        /* Nền nhấn ở chủ đề tối đã được nâng sáng, nên chữ trên nút phải TỐI.
-           Giữ chữ sáng thì tương phản chỉ còn 2.18:1 trên nút Xong món. */
-        --rims-ink-on-brand: #1a1113;
+        --rims-ink: #e9edee;
+        --rims-ink-2: #b3bcbf;
+        --rims-ink-3: #8b9599;
+        /* Nền nhấn ở chủ đề tối đã được nâng sáng, nên chữ trên nút phải TỐI. */
+        --rims-ink-on-brand: #06222c;
 
-        /* Vang nguyên bản quá tối trên nền tối — nâng độ sáng để giữ tương phản */
-        --rims-brand: #e46d8b;
-        --rims-brand-hover: #ec7192;
-        --rims-brand-active: #c84464;
-        --rims-brand-soft: #38141f;
-        --rims-brand-line: #5a2333;
+        /* Xanh dầu nguyên bản quá tối trên nền tối — nâng độ sáng để giữ tương phản */
+        --rims-brand: #4fb8d4;
+        --rims-brand-hover: #63c4dd;
+        --rims-brand-active: #3a9db8;
+        --rims-brand-soft: #0d2c37;
+        --rims-brand-line: #17475a;
 
-        --rims-gold: #e6c65c;
-        --rims-gold-deep: #c9a63f;
-        --rims-gold-soft: #33290f;
+        --rims-gold: #d4b26a;
+        --rims-gold-deep: #b99a55;
+        --rims-gold-soft: #2b2415;
 
         --rims-ok: #5fbd83;
-        --rims-ok-soft: #14291d;
-        --rims-ok-line: #2a4a36;
+        --rims-ok-soft: #13291e;
+        --rims-ok-line: #274734;
 
         --rims-busy: #e0a446;
-        --rims-busy-soft: #2e2314;
-        --rims-busy-line: #4d3c1f;
+        --rims-busy-soft: #2c2415;
+        --rims-busy-line: #4a3c20;
 
         --rims-alert: #f07a6b;
-        --rims-alert-soft: #331a16;
-        --rims-alert-line: #5b2f28;
+        --rims-alert-soft: #311b18;
+        --rims-alert-line: #58302a;
 
-        --rims-idle: #9a9084;
-        --rims-idle-soft: #262019;
-        --rims-idle-line: #3d352c;
+        --rims-idle: #8b9599;
+        --rims-idle-soft: #1f2426;
+        --rims-idle-line: #343b3e;
 
-        --rims-shadow-raised: 0 1px 2px rgb(0 0 0 / 40%);
-        --rims-shadow-overlay: 0 12px 32px -8px rgb(0 0 0 / 60%);
+        /* Bóng trên nền tối phải là đen thuần, không phải sắc nền pha loãng */
+        --rims-tint-ink: 0 0 0;
+        --rims-tint-brand: 79 184 212;
+        --rims-tint-hi: 233 237 238;
+        --rims-tint-gold: 212 178 106;
+        --rims-tint-busy: 224 164 70;
+        --rims-tint-ok: 95 189 131;
+        --rims-tint-alert: 240 122 107;
+
+        --rims-chart-1: #17475a;
+        --rims-chart-2: #2d7a93;
+        --rims-chart-3: #4fb8d4;
+        --rims-chart-4: #8fd6e6;
+        --rims-chart-empty: #2c3336;
+
+        --rims-shadow-raised: 0 1px 2px rgb(var(--rims-tint-ink) / 40%);
+        --rims-shadow-overlay: 0 12px 32px -8px rgb(var(--rims-tint-ink) / 60%);
     }
 }
 
 :root[data-theme='dark'] {
-    --rims-paper: #17120f;
-    --rims-surface: #1f1815;
-    --rims-surface-2: #29211c;
-    --rims-surface-3: #342a24;
+    --rims-paper: #101315;
+    --rims-surface: #171b1d;
+    --rims-surface-2: #1f2427;
+    --rims-surface-3: #282e31;
 
-    --rims-line: #3a2f28;
-    --rims-line-strong: #766153;
+    --rims-line: #2c3336;
+    --rims-line-strong: #68747a;
 
-    --rims-ink: #f2ebe1;
-    --rims-ink-2: #c3b6a6;
-    --rims-ink-3: #9d9283;
-    --rims-ink-on-brand: #1a1113;
+    --rims-ink: #e9edee;
+    --rims-ink-2: #b3bcbf;
+    --rims-ink-3: #8b9599;
+    --rims-ink-on-brand: #06222c;
 
-    --rims-brand: #e46d8b;
-    --rims-brand-hover: #ec7192;
-    --rims-brand-active: #c84464;
-    --rims-brand-soft: #38141f;
-    --rims-brand-line: #5a2333;
+    --rims-brand: #4fb8d4;
+    --rims-brand-hover: #63c4dd;
+    --rims-brand-active: #3a9db8;
+    --rims-brand-soft: #0d2c37;
+    --rims-brand-line: #17475a;
 
-    --rims-gold: #e6c65c;
-    --rims-gold-deep: #c9a63f;
-    --rims-gold-soft: #33290f;
+    --rims-gold: #d4b26a;
+    --rims-gold-deep: #b99a55;
+    --rims-gold-soft: #2b2415;
 
     --rims-ok: #5fbd83;
-    --rims-ok-soft: #14291d;
-    --rims-ok-line: #2a4a36;
+    --rims-ok-soft: #13291e;
+    --rims-ok-line: #274734;
 
     --rims-busy: #e0a446;
-    --rims-busy-soft: #2e2314;
-    --rims-busy-line: #4d3c1f;
+    --rims-busy-soft: #2c2415;
+    --rims-busy-line: #4a3c20;
 
     --rims-alert: #f07a6b;
-    --rims-alert-soft: #331a16;
-    --rims-alert-line: #5b2f28;
+    --rims-alert-soft: #311b18;
+    --rims-alert-line: #58302a;
 
-    --rims-idle: #9a9084;
-    --rims-idle-soft: #262019;
-    --rims-idle-line: #3d352c;
+    --rims-idle: #8b9599;
+    --rims-idle-soft: #1f2426;
+    --rims-idle-line: #343b3e;
 
-    --rims-shadow-raised: 0 1px 2px rgb(0 0 0 / 40%);
-    --rims-shadow-overlay: 0 12px 32px -8px rgb(0 0 0 / 60%);
+    --rims-tint-ink: 0 0 0;
+    --rims-tint-brand: 79 184 212;
+    --rims-tint-hi: 233 237 238;
+    --rims-tint-gold: 212 178 106;
+    --rims-tint-busy: 224 164 70;
+    --rims-tint-ok: 95 189 131;
+    --rims-tint-alert: 240 122 107;
+
+    --rims-chart-1: #17475a;
+    --rims-chart-2: #2d7a93;
+    --rims-chart-3: #4fb8d4;
+    --rims-chart-4: #8fd6e6;
+    --rims-chart-empty: #2c3336;
+
+    --rims-shadow-raised: 0 1px 2px rgb(var(--rims-tint-ink) / 40%);
+    --rims-shadow-overlay: 0 12px 32px -8px rgb(var(--rims-tint-ink) / 60%);
 }

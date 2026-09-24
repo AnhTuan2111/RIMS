@@ -58,13 +58,13 @@
 
 .customer-tab:hover {
     color: var(--rims-ink);
-    background: rgb(253 248 239 / 50%);
+    background: rgb(var(--rims-tint-hi) / 50%);
 }
 
 .customer-tab.active {
     background: var(--rims-surface);
     color: var(--rims-ink);
-    box-shadow: 0 4px 12px rgb(36 21 18 / 8%);
+    box-shadow: 0 4px 12px rgb(var(--rims-tint-ink) / 8%);
 }
 
 /* ===== Card ===== */
@@ -73,7 +73,7 @@
     border: 1px solid var(--rims-line);
     border-radius: 16px;
     padding: 28px;
-    box-shadow: 0 4px 20px rgb(36 21 18 / 4%);
+    box-shadow: 0 4px 20px rgb(var(--rims-tint-ink) / 4%);
 }
 
 .customer-reservation-card h2 {
@@ -144,7 +144,7 @@
 .customer-form-group textarea:focus {
     border-color: var(--rims-brand);
     background: var(--rims-surface);
-    box-shadow: 0 0 0 3px rgb(122 16 48 / 10%);
+    box-shadow: 0 0 0 3px rgb(var(--rims-tint-brand) / 10%);
 }
 
 .customer-form-group input::placeholder,

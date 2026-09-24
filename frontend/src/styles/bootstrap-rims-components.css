@@ -47,12 +47,13 @@
     margin-bottom: 1.25rem;
     padding: 1.35rem;
     overflow: hidden;
-    border: 1px solid rgb(228 220 208 / 90%) !important;
+    border: 1px solid rgb(var(--rims-tint-ink) / 90%) !important;
     border-radius: 24px !important;
-    background: linear-gradient(180deg, rgb(253 248 239 / 96%), rgb(253 248 239 / 90%)), var(--rims-surface);
+    background:
+        linear-gradient(180deg, rgb(var(--rims-tint-hi) / 96%), rgb(var(--rims-tint-hi) / 90%)), var(--rims-surface);
     box-shadow:
-        0 16px 45px rgb(36 21 18 / 8%),
-        inset 0 1px 0 rgb(253 248 239 / 90%);
+        0 16px 45px rgb(var(--rims-tint-ink) / 8%),
+        inset 0 1px 0 rgb(var(--rims-tint-hi) / 90%);
 }
 
 .rims-page-card::before {
@@ -64,7 +65,8 @@
 }
 
 .rims-page-card-soft {
-    background: linear-gradient(180deg, rgb(253 248 239 / 98%), rgb(253 248 239 / 94%)), var(--rims-surface);
+    background:
+        linear-gradient(180deg, rgb(var(--rims-tint-hi) / 98%), rgb(var(--rims-tint-hi) / 94%)), var(--rims-surface);
 }
 
 .rims-page-card-flush {
@@ -86,7 +88,7 @@
     border-radius: 18px;
     color: var(--rims-ink-on-brand);
     background: linear-gradient(135deg, var(--rims-brand), var(--rims-brand));
-    box-shadow: 0 14px 34px rgb(122 16 48 / 24%);
+    box-shadow: 0 14px 34px rgb(var(--rims-tint-brand) / 24%);
 }
 
 .rims-page-eyebrow {
@@ -205,7 +207,7 @@
     border: 1px solid var(--rims-line);
     border-radius: 18px;
     background: linear-gradient(180deg, var(--rims-surface), var(--rims-surface-2));
-    box-shadow: 0 10px 28px rgb(36 21 18 / 5%);
+    box-shadow: 0 10px 28px rgb(var(--rims-tint-ink) / 5%);
 }
 
 .table-card span {
@@ -296,7 +298,7 @@
     border-radius: 14px;
     background: var(--rims-surface);
     border: 1px solid var(--rims-line);
-    box-shadow: 0 10px 25px rgb(36 21 18 / 6%);
+    box-shadow: 0 10px 25px rgb(var(--rims-tint-ink) / 6%);
 }
 
 .page-card h2 {

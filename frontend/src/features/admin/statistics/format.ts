@@ -61,7 +61,7 @@ export function buildDonutGradient(rows: ShiftViewItem[]) {
     const totalOrders = rows.reduce((sum, row) => sum + row.orderCount, 0)
 
     if (totalOrders === 0) {
-        return '#e5e7eb'
+        return 'var(--rims-chart-empty)'
     }
 
     let cursor = 0

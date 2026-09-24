@@ -13,7 +13,7 @@
     background: var(--rims-surface);
     border-radius: 0.5rem;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgb(36 21 18 / 6%);
+    box-shadow: 0 10px 25px rgb(var(--rims-tint-ink) / 6%);
 }
 
 .waiter-header {
@@ -272,7 +272,7 @@
 .waiter-note-input:focus {
     outline: none;
     border-color: var(--rims-brand);
-    box-shadow: 0 0 0 2px rgb(122 16 48 / 20%);
+    box-shadow: 0 0 0 2px rgb(var(--rims-tint-brand) / 20%);
 }
 
 /* Detail screens */
@@ -365,7 +365,7 @@
 .waiter-form-input:focus {
     outline: none;
     border-color: var(--rims-brand);
-    box-shadow: 0 0 0 2px rgb(122 16 48 / 20%);
+    box-shadow: 0 0 0 2px rgb(var(--rims-tint-brand) / 20%);
 }
 
 .waiter-form-error {

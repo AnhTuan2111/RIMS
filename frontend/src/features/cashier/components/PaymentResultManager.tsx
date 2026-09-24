@@ -295,7 +295,7 @@ const successInvoiceStyle: CSSProperties = {
 const successCustomerBoxStyle: CSSProperties = {
     marginTop: '1rem',
     padding: '10px 20px',
-    background: 'rgb(253 248 239 / 20%)',
+    background: 'rgb(var(--rims-tint-hi) / 20%)',
     borderRadius: '8px',
 }
 

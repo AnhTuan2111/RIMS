@@ -12,8 +12,8 @@
     place-items: center;
     padding: 1.5rem;
     background:
-        radial-gradient(circle at top left, rgba(122, 16, 48, 0.22), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.14), transparent 35%), var(--rims-ink);
+        radial-gradient(circle at top left, rgb(var(--rims-tint-brand) / 22%), transparent 35%),
+        radial-gradient(circle at bottom right, rgb(var(--rims-tint-brand) / 30%), transparent 35%), var(--rims-shell);
 }
 
 .login-card {
@@ -22,7 +22,7 @@
     border-radius: 24px;
     background: var(--rims-gold-soft);
     border: 1px solid var(--rims-gold-soft);
-    box-shadow: 0 24px 70px rgb(36 21 18 / 40%);
+    box-shadow: 0 24px 70px rgb(var(--rims-tint-ink) / 40%);
 }
 
 .login-back-link {
@@ -66,10 +66,10 @@
     color: var(--rims-ink);
 }
 
-/* Vòng focus phải đạt tối thiểu 3:1 với nền. Vàng #d4af37 trên nền sáng chỉ
-   được 2.07:1 — người dùng bàn phím gần như không thấy con trỏ đang ở đâu.
-   Dùng màu thương hiệu (10.6:1) và chỉ hiện với :focus-visible, để bấm chuột
-   không làm nháy vòng viền. */
+/* Vòng focus phải đạt tối thiểu 3:1 với nền. Đồng thau nhận diện quá nhạt
+   trên nền sáng — người dùng bàn phím gần như không thấy con trỏ đang ở đâu.
+   Dùng màu thương hiệu và chỉ hiện với :focus-visible, để bấm chuột không
+   làm nháy vòng viền. */
 .auth-field input:focus-visible {
     outline: var(--rims-focus-ring) solid var(--rims-brand);
     outline-offset: 2px;

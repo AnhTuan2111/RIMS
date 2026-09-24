@@ -44,12 +44,12 @@
     color: var(--rims-ink-on-dark);
 
     background:
-        radial-gradient(circle at 10% 0%, rgb(122 16 48 / 38%), transparent 34%),
-        radial-gradient(circle at 95% 85%, rgb(122 16 48 / 26%), transparent 38%),
+        radial-gradient(circle at 10% 0%, rgb(var(--rims-tint-brand) / 38%), transparent 34%),
+        radial-gradient(circle at 95% 85%, rgb(var(--rims-tint-brand) / 26%), transparent 38%),
         linear-gradient(180deg, var(--rims-shell-2) 0%, var(--rims-shell) 55%, var(--rims-shell) 100%);
 
-    border-right: 1px solid rgb(253 248 239 / 8%);
-    box-shadow: 16px 0 45px rgb(36 21 18 / 24%);
+    border-right: 1px solid rgb(var(--rims-tint-hi) / 8%);
+    box-shadow: 16px 0 45px rgb(var(--rims-tint-ink) / 24%);
 }
 
 .rims-sidebar-brand {
@@ -57,7 +57,7 @@
     align-items: center;
     gap: 13px;
     padding: 4px 6px 20px;
-    border-bottom: 1px solid rgb(253 248 239 / 9%);
+    border-bottom: 1px solid rgb(var(--rims-tint-hi) / 9%);
 }
 
 .rims-sidebar-logo {
@@ -77,8 +77,8 @@
     font-weight: 950;
 
     box-shadow:
-        0 12px 30px rgb(36 21 18 / 0.36),
-        inset 0 1px 0 rgb(253 248 239 / 38%);
+        0 12px 30px rgb(var(--rims-tint-ink) / 36%),
+        inset 0 1px 0 rgb(var(--rims-tint-hi) / 38%);
 }
 
 .rims-sidebar-brand h2 {
@@ -103,12 +103,12 @@
     margin: 20px 0 14px;
     padding: 13px;
 
-    border: 1px solid rgb(253 248 239 / 0.18);
+    border: 1px solid rgb(var(--rims-tint-hi) / 18%);
     border-radius: 17px;
 
-    background: linear-gradient(135deg, rgb(122 16 48 / 17%), rgb(122 16 48 / 11%));
+    background: linear-gradient(135deg, rgb(var(--rims-tint-brand) / 17%), rgb(var(--rims-tint-brand) / 11%));
 
-    box-shadow: inset 0 1px 0 rgb(253 248 239 / 5%);
+    box-shadow: inset 0 1px 0 rgb(var(--rims-tint-hi) / 5%);
 }
 
 .rims-role-icon {
@@ -120,7 +120,7 @@
     place-items: center;
 
     border-radius: 13px;
-    background: rgb(253 248 239 / 10%);
+    background: rgb(var(--rims-tint-hi) / 10%);
 
     color: var(--rims-brand);
     font-size: 17px;
@@ -159,7 +159,7 @@
     margin-right: -4px;
 
     scrollbar-width: thin;
-    scrollbar-color: rgb(253 248 239 / 18%) transparent;
+    scrollbar-color: rgb(var(--rims-tint-hi) / 18%) transparent;
 }
 
 .rims-sidebar-nav::-webkit-scrollbar {
@@ -171,12 +171,12 @@
 }
 
 .rims-sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgb(253 248 239 / 18%);
+    background: rgb(var(--rims-tint-hi) / 18%);
     border-radius: 999px;
 }
 
 .rims-sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgb(253 248 239 / 32%);
+    background: rgb(var(--rims-tint-hi) / 32%);
 }
 
 .rims-sidebar-link {
@@ -205,9 +205,9 @@
 .rims-sidebar-link:hover {
     transform: translateX(4px);
 
-    border-color: rgb(253 248 239 / 0.17);
+    border-color: rgb(var(--rims-tint-hi) / 17%);
 
-    background: rgb(253 248 239 / 5.5%);
+    background: rgb(var(--rims-tint-hi) / 5.5%);
 
     color: var(--rims-ink-on-dark);
 }
@@ -215,11 +215,11 @@
 .rims-sidebar-link.active {
     color: var(--rims-ink-on-brand);
 
-    border-color: rgb(253 248 239 / 0.28);
+    border-color: rgb(var(--rims-tint-hi) / 28%);
 
     background: linear-gradient(100deg, var(--rims-brand), var(--rims-brand) 55%, var(--rims-brand));
 
-    box-shadow: 0 14px 32px rgb(36 21 18 / 0.32);
+    box-shadow: 0 14px 32px rgb(var(--rims-tint-ink) / 32%);
 }
 
 .rims-menu-icon {
@@ -231,7 +231,7 @@
 
     border-radius: 12px;
 
-    background: rgb(253 248 239 / 8%);
+    background: rgb(var(--rims-tint-hi) / 8%);
 
     color: var(--rims-gold);
     font-size: 17px;
@@ -239,7 +239,7 @@
 }
 
 .rims-sidebar-link.active .rims-menu-icon {
-    background: rgb(36 21 18 / 14%);
+    background: rgb(var(--rims-tint-ink) / 14%);
 
     color: var(--rims-ink-on-brand);
 }
@@ -267,10 +267,10 @@
     margin-top: 16px;
     padding: 13px;
 
-    border: 1px solid rgb(253 248 239 / 7%);
+    border: 1px solid rgb(var(--rims-tint-hi) / 7%);
     border-radius: 16px;
 
-    background: rgb(253 248 239 / 4.5%);
+    background: rgb(var(--rims-tint-hi) / 4.5%);
 }
 
 .rims-online-dot {
@@ -281,7 +281,7 @@
     border-radius: 999px;
     background: var(--rims-ok);
 
-    box-shadow: 0 0 0 5px rgb(45 123 78 / 12%);
+    box-shadow: 0 0 0 5px rgb(var(--rims-tint-ok) / 12%);
 }
 
 .rims-sidebar-status strong,
@@ -323,8 +323,8 @@
     min-height: 100vh;
 
     background:
-        radial-gradient(circle at 88% 5%, rgb(122 16 48 / 14%), transparent 28%),
-        radial-gradient(circle at 25% 95%, rgb(122 16 48 / 9%), transparent 30%), var(--rims-brand-soft);
+        radial-gradient(circle at 88% 5%, rgb(var(--rims-tint-brand) / 14%), transparent 28%),
+        radial-gradient(circle at 25% 95%, rgb(var(--rims-tint-brand) / 9%), transparent 30%), var(--rims-brand-soft);
 }
 
 .rims-topbar {
@@ -340,14 +340,14 @@
     align-items: center;
     gap: 20px;
 
-    background: rgb(253 248 239 / 86%);
+    background: rgb(var(--rims-tint-hi) / 86%);
 
-    border-bottom: 1px solid rgb(166 144 113 / 18%);
+    border-bottom: 1px solid rgb(var(--rims-tint-ink) / 18%);
 
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
 
-    box-shadow: 0 8px 30px rgb(36 21 18 / 7%);
+    box-shadow: 0 8px 30px rgb(var(--rims-tint-ink) / 7%);
 }
 
 .rims-topbar-eyebrow {
@@ -401,8 +401,8 @@
     white-space: nowrap;
 
     box-shadow:
-        0 0 0 1.5px rgb(122 16 48 / 18%),
-        0 4px 14px rgb(122 16 48 / 10%);
+        0 0 0 1.5px rgb(var(--rims-tint-brand) / 18%),
+        0 4px 14px rgb(var(--rims-tint-brand) / 10%);
 
     cursor: pointer;
     transition:
@@ -417,21 +417,21 @@
     color: var(--rims-ink-on-brand);
     box-shadow:
         0 0 0 1.5px transparent,
-        0 8px 24px rgb(122 16 48 / 30%);
+        0 8px 24px rgb(var(--rims-tint-brand) / 30%);
     transform: translateY(-1px);
 }
 
 .rims-logout-btn:active {
     transform: translateY(0);
     box-shadow:
-        0 0 0 1.5px rgb(122 16 48 / 20%),
-        0 2px 8px rgb(122 16 48 / 18%);
+        0 0 0 1.5px rgb(var(--rims-tint-brand) / 20%),
+        0 2px 8px rgb(var(--rims-tint-brand) / 18%);
 }
 
 .rims-logout-btn:focus-visible {
     box-shadow:
-        0 0 0 3px rgb(122 16 48 / 35%),
-        0 4px 14px rgb(122 16 48 / 10%);
+        0 0 0 3px rgb(var(--rims-tint-brand) / 35%),
+        0 4px 14px rgb(var(--rims-tint-brand) / 10%);
 }
 
 .rims-logout-icon {
@@ -588,7 +588,7 @@
     border-radius: 50%;
 
     background: var(--rims-ok);
-    box-shadow: 0 0 0 4px rgb(45 123 78 / 13%);
+    box-shadow: 0 0 0 4px rgb(var(--rims-tint-ok) / 13%);
 }
 
 /* Các thành phần bên phải Topbar */
@@ -612,8 +612,8 @@
     padding: 26px;
 
     background:
-        radial-gradient(circle at 85% 5%, rgb(122 16 48 / 10%), transparent 32%),
-        radial-gradient(circle at 15% 90%, rgb(122 16 48 / 6%), transparent 30%), var(--rims-surface-2);
+        radial-gradient(circle at 85% 5%, rgb(var(--rims-tint-brand) / 10%), transparent 32%),
+        radial-gradient(circle at 15% 90%, rgb(var(--rims-tint-brand) / 6%), transparent 30%), var(--rims-surface-2);
 }
 
 /*
@@ -633,7 +633,7 @@
     border-radius: 16px;
 
     background: var(--rims-surface);
-    box-shadow: 0 8px 24px rgb(36 21 18 / 5%);
+    box-shadow: 0 8px 24px rgb(var(--rims-tint-ink) / 5%);
 }
 
 /* Khoảng cách giữa các phần trong trang */
@@ -704,7 +704,7 @@
 }
 
 /* =========================================================
-   LỚP KHUNG DÙNG CHUNG (vang / vàng kim, đồng bộ trang công khai)
+   LỚP KHUNG DÙNG CHUNG (than chì / xanh dầu, đồng bộ trang công khai)
 
    Trước đây khối này tên là .theme-customer, nhưng DashboardLayout gắn nó
    cho MỌI vai trò chứ không riêng khách hàng — tên cũ nói sai việc nó làm.
@@ -712,36 +712,35 @@
 
 .rims-shell-theme .rims-sidebar {
     background:
-        radial-gradient(circle at 10% 0%, rgba(212, 175, 55, 0.22), transparent 34%),
-        radial-gradient(circle at 95% 85%, rgba(122, 16, 48, 0.3), transparent 38%),
+        radial-gradient(circle at 95% 85%, rgb(var(--rims-tint-brand) / 26%), transparent 40%),
         linear-gradient(180deg, var(--rims-shell-2) 0%, var(--rims-shell) 55%, var(--rims-shell) 100%);
 }
 
 .rims-shell-theme .rims-sidebar-logo {
-    background: linear-gradient(135deg, var(--rims-gold), var(--rims-gold-deep) 48%, var(--rims-brand));
+    background: linear-gradient(135deg, var(--rims-gold), var(--rims-brand-hover) 45%, var(--rims-brand-active));
     box-shadow:
-        0 12px 30px rgba(122, 16, 48, 0.4),
-        inset 0 1px 0 rgb(253 248 239 / 38%);
+        0 12px 30px rgb(var(--rims-tint-brand) / 40%),
+        inset 0 1px 0 rgb(var(--rims-tint-hi) / 38%);
 }
 
 .rims-shell-theme .rims-sidebar-role {
-    border-color: rgba(212, 175, 55, 0.22);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.16), rgba(122, 16, 48, 0.14));
+    border-color: rgb(var(--rims-tint-hi) / 12%);
+    background: linear-gradient(135deg, rgb(var(--rims-tint-brand) / 26%), rgb(var(--rims-tint-hi) / 5%));
 }
 
 .rims-shell-theme .rims-role-icon {
-    color: var(--rims-gold-deep);
+    color: var(--rims-gold);
 }
 
 .rims-shell-theme .rims-sidebar-link:hover {
-    border-color: rgba(212, 175, 55, 0.2);
+    border-color: rgb(var(--rims-tint-hi) / 14%);
     color: var(--rims-ink-on-dark);
 }
 
 .rims-shell-theme .rims-sidebar-link.active {
-    border-color: rgb(212 175 55 / 32%);
+    border-color: rgb(var(--rims-tint-brand) / 55%);
     background: linear-gradient(100deg, var(--rims-brand-active), var(--rims-brand) 55%, var(--rims-brand-hover));
-    box-shadow: 0 14px 32px rgb(122 16 48 / 35%);
+    box-shadow: 0 14px 32px rgb(var(--rims-tint-brand) / 35%);
 }
 
 .rims-shell-theme .rims-sidebar-link.active .rims-menu-icon {
@@ -755,8 +754,9 @@
 .rims-shell-theme .app-content,
 .rims-shell-theme .rims-app-content {
     background:
-        radial-gradient(circle at 85% 5%, rgba(212, 175, 55, 0.08), transparent 32%),
-        radial-gradient(circle at 15% 90%, rgba(122, 16, 48, 0.06), transparent 30%), var(--rims-gold-soft);
+        radial-gradient(circle at 85% 5%, rgb(var(--rims-tint-brand) / 5%), transparent 32%),
+        radial-gradient(circle at 15% 90%, rgb(var(--rims-tint-brand) / 4%), transparent 30%),
+        var(--rims-paper);
 }
 
 .rims-shell-theme .rims-sidebar-brand h2 {

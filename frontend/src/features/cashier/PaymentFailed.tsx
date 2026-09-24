@@ -43,7 +43,7 @@ const cardStyle: CSSProperties = {
     textAlign: 'center',
     padding: '3rem',
     maxWidth: '500px',
-    boxShadow: '0 10px 15px -3px rgb(36 21 18 / 10%)',
+    boxShadow: '0 10px 15px -3px rgb(var(--rims-tint-ink) / 10%)',
 }
 
 const iconStyle: CSSProperties = {

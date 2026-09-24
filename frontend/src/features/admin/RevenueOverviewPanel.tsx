@@ -42,28 +42,28 @@ const shiftCatalog = [
         displayName: 'Ca sáng',
         startTime: '08:00',
         endTime: '10:59',
-        color: 'var(--rims-ok)',
+        color: 'var(--rims-chart-1)',
     },
     {
         shiftName: 'NOON',
         displayName: 'Ca trưa',
         startTime: '11:00',
         endTime: '13:59',
-        color: 'var(--rims-ok)',
+        color: 'var(--rims-chart-2)',
     },
     {
         shiftName: 'AFTERNOON',
         displayName: 'Ca chiều',
         startTime: '14:00',
         endTime: '16:59',
-        color: 'var(--rims-ok)',
+        color: 'var(--rims-chart-3)',
     },
     {
         shiftName: 'EVENING',
         displayName: 'Ca tối',
         startTime: '17:00',
         endTime: '22:00',
-        color: 'var(--rims-busy)',
+        color: 'var(--rims-chart-4)',
     },
 ]
 
@@ -438,12 +438,12 @@ function WeeklyRevenueLineChart({
                     <linearGradient id="weekly-revenue-area" x1="0" x2="0" y1="0" y2="1">
                         <stop
                             offset="0%"
-                            stopColor="var(--rims-busy)"
+                            stopColor="var(--rims-brand)"
                             stopOpacity="0.28"
                         />
                         <stop
                             offset="100%"
-                            stopColor="var(--rims-busy)"
+                            stopColor="var(--rims-brand)"
                             stopOpacity="0.03"
                         />
                     </linearGradient>
@@ -581,7 +581,7 @@ function WeeklyRevenueOverviewDashboard({
                     icon={<MoneyIcon />}
                     marker="đ"
                     title="Doanh thu tuần"
-                    tone="orange"
+                    tone="blue"
                     value={formatRevenueCurrency(revenue)}
                 />
                 <WeeklyOverviewKpiCard
