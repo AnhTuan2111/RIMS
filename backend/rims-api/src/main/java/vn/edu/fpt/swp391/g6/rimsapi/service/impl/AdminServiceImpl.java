@@ -24,16 +24,22 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.CreateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.UpdateTableRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.AdminTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderShift;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.BusinessRuleException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
@@ -911,6 +917,178 @@ public class AdminServiceImpl implements AdminService
             case SUNDAY -> "CN";
         };
     }
+    // =================== QUẢN LÝ BÀN ===================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminTableResponse> getAllTables()
+    {
+        // Đếm một lần cho cả bảng rồi tra theo id, không đếm riêng từng bàn.
+        Map<Integer, long[]> usage = restaurantTableRepository.countUsagePerTable().stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0],
+                        row -> new long[]{(Long) row[1], (Long) row[2]}));
+
+        return restaurantTableRepository.findAllByOrderByTableNumberAsc().stream()
+                .map(table -> {
+                    long[] counts = usage.getOrDefault(table.getId(), new long[]{0L, 0L});
+                    return toAdminResponse(table, counts[0], counts[1]);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public AdminTableResponse createTable(CreateTableRequest request)
+    {
+        String tableNumber = normalizeTableNumber(request.getTableNumber());
+
+        if (restaurantTableRepository.existsByTableNumber(tableNumber))
+        {
+            throw new BusinessRuleException("Số bàn “" + tableNumber + "” đã có rồi.");
+        }
+
+        RestaurantTable table = new RestaurantTable();
+        table.setTableNumber(tableNumber);
+        table.setCapacity(request.getCapacity());
+        table.setStatus(TableStatus.AVAILABLE);
+        table.setActive(true);
+
+        RestaurantTable saved = restaurantTableRepository.save(table);
+        broadcastTablesChanged();
+
+        return toAdminResponse(saved, 0L, 0L);
+    }
+
+    @Override
+    @Transactional
+    public AdminTableResponse updateTable(Integer id, UpdateTableRequest request)
+    {
+        RestaurantTable table = restaurantTableRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bàn với ID: " + id));
+
+        String tableNumber = normalizeTableNumber(request.getTableNumber());
+
+        if (restaurantTableRepository.existsByTableNumberAndIdNot(tableNumber, id))
+        {
+            throw new BusinessRuleException("Số bàn “" + tableNumber + "” đã có rồi.");
+        }
+
+        // Cất bàn đang có khách ngồi hoặc đã có người đặt thì bàn biến mất khỏi
+        // sơ đồ của Phục vụ giữa chừng, đơn trên bàn thành đơn không ai nhìn thấy.
+        if (!request.getActive() && table.isActive())
+        {
+            requireIdleTable(table, "cất bàn");
+        }
+
+        table.setTableNumber(tableNumber);
+        table.setCapacity(request.getCapacity());
+        table.setActive(request.getActive());
+
+        RestaurantTable saved = restaurantTableRepository.save(table);
+        broadcastTablesChanged();
+
+        return toAdminResponse(saved,
+                restaurantTableRepository.countOrdersByTableId(id),
+                restaurantTableRepository.countReservationsByTableId(id));
+    }
+
+    @Override
+    @Transactional
+    public TableRemovalResponse deleteTable(Integer id)
+    {
+        RestaurantTable table = restaurantTableRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bàn với ID: " + id));
+
+        requireIdleTable(table, "bỏ bàn");
+
+        boolean used = restaurantTableRepository.countOrdersByTableId(id) > 0
+                || restaurantTableRepository.countReservationsByTableId(id) > 0;
+
+        // Đã từng có đơn hoặc lần đặt thì chỉ cất đi. Đơn cũ trỏ về bàn này và
+        // còn nằm trong hoá đơn lẫn báo cáo doanh thu; xoá bàn là thủng số liệu
+        // của những ngày đã qua — cùng lý do với danh mục món.
+        if (used)
+        {
+            table.setActive(false);
+            restaurantTableRepository.save(table);
+            broadcastTablesChanged();
+
+            return TableRemovalResponse.builder()
+                    .deleted(false)
+                    .message("Đã cất bàn “" + table.getTableNumber() + "” khỏi sơ đồ. "
+                            + "Lịch sử đơn và hoá đơn của bàn vẫn giữ nguyên cho báo cáo.")
+                    .build();
+        }
+
+        // Bàn chưa dùng bao giờ thì không có gì để mất.
+        restaurantTableRepository.delete(table);
+        broadcastTablesChanged();
+
+        return TableRemovalResponse.builder()
+                .deleted(true)
+                .message("Đã xoá bàn “" + table.getTableNumber() + "”.")
+                .build();
+    }
+
+    /**
+     * Chặn mọi thao tác đụng vào bàn đang bận.
+     *
+     * @param action động từ để ghép vào câu báo lỗi
+     */
+    private void requireIdleTable(RestaurantTable table, String action)
+    {
+        if (table.getStatus() == TableStatus.SERVING)
+        {
+            throw new BusinessRuleException("Bàn “" + table.getTableNumber()
+                    + "” đang phục vụ khách, không " + action + " lúc này được. "
+                    + "Thanh toán xong rồi làm lại.");
+        }
+
+        if (table.getStatus() == TableStatus.RESERVED)
+        {
+            throw new BusinessRuleException("Bàn “" + table.getTableNumber()
+                    + "” đã có người đặt, không " + action + " lúc này được. "
+                    + "Huỷ hoặc chuyển lần đặt đó sang bàn khác trước.");
+        }
+    }
+
+    /**
+     * Bỏ khoảng trắng thừa quanh số bàn.
+     *
+     * <p>"T05 " và "T05" là cùng một bàn với người nhìn, nhưng với ràng buộc
+     * duy nhất trong cơ sở dữ liệu thì là hai.
+     */
+    private String normalizeTableNumber(String raw)
+    {
+        return raw.trim();
+    }
+
+    private AdminTableResponse toAdminResponse(RestaurantTable table, long orderCount, long reservationCount)
+    {
+        return AdminTableResponse.builder()
+                .id(table.getId())
+                .tableNumber(table.getTableNumber())
+                .capacity(table.getCapacity())
+                .status(table.getStatus() == null ? null : table.getStatus().name())
+                .active(table.isActive())
+                .orderCount(orderCount)
+                .reservationCount(reservationCount)
+                .deletable(orderCount == 0 && reservationCount == 0)
+                .build();
+    }
+
+    /**
+     * Báo cho sơ đồ bàn của Phục vụ và Thu ngân là danh sách bàn đã đổi.
+     *
+     * <p>Thêm hay cất một bàn mà màn đang mở không biết thì Phục vụ vẫn bấm vào
+     * một bàn không còn tồn tại.
+     */
+    private void broadcastTablesChanged()
+    {
+        messagingTemplate.convertAndSend("/topic/tables", "TABLE_UPDATED");
+    }
+
     private void broadcastMenuVisibilityChanged(Dish dish)
     {
         String payload = String.format(

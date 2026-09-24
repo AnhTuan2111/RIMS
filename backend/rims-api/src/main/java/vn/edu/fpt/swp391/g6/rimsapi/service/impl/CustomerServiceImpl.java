@@ -246,7 +246,8 @@ public class CustomerServiceImpl implements CustomerService
     @Transactional(readOnly = true)
     public List<RestaurantTableResponse> getAvailableTables()
     {
-        return tableRepository.findAll().stream()
+        // Khách chỉ được chọn bàn còn dùng
+        return tableRepository.findByActiveTrueOrderByTableNumberAsc().stream()
                 .map(t -> RestaurantTableResponse.builder()
                         .id(t.getId())
                         .tableNumber(t.getTableNumber())

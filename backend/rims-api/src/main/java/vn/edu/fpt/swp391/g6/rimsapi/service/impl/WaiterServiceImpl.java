@@ -55,7 +55,9 @@ public class WaiterServiceImpl implements WaiterService
     @Transactional(readOnly = true)
     public List<TableDetailResponse> getAllTables()
     {
-        List<RestaurantTable> tables = restaurantTableRepository.findAll();
+        // Chỉ bàn còn trong sơ đồ. Bàn đã cất vẫn nằm trong cơ sở dữ liệu để
+        // giữ lịch sử đơn, nhưng không được hiện ra cho Phục vụ bấm vào nữa.
+        List<RestaurantTable> tables = restaurantTableRepository.findByActiveTrueOrderByTableNumberAsc();
 
         //tự động lọc ra các Reservation đang ở trạng thái QUEUED(chỉ lọc trong 1 ngày tới)
         List<Reservation> queuedReservations = reservationRepository.findByStatusAndReservationTimeBetween(
@@ -651,7 +653,8 @@ public class WaiterServiceImpl implements WaiterService
                 int requiredCapacity = currentTable.getCapacity() != null ? currentTable.getCapacity() : 0;
 
                 List<RestaurantTable> alternatives = restaurantTableRepository
-                        .findByStatusAndCapacityGreaterThanEqual(TableStatus.AVAILABLE, requiredCapacity);
+                        .findByActiveTrueAndStatusAndCapacityGreaterThanEqual(
+                                TableStatus.AVAILABLE, requiredCapacity);
 
                 alternatives.removeIf(t -> Objects.equals(t.getId(), currentTable.getId()));
 

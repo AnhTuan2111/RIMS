@@ -9,6 +9,7 @@ import AdminMenuDashboardPage from '../../features/admin/AdminMenuDashboardPage'
 import AdminCategoryPage from '../../features/admin/AdminCategoryPage'
 import AdminRevenueOverviewDashboard from '@/features/admin/RevenueOverviewPanel.tsx'
 import AdminRestaurantPage from '@/features/admin/AdminRestaurantPage'
+import AdminTablesPage from '@/features/admin/AdminTablesPage'
 
 export function renderAdminRoutes() {
     return (
@@ -24,6 +25,7 @@ export function renderAdminRoutes() {
             />
             <Route path="/admin/menu" element={<AdminMenuDashboardPage />} />
             <Route path="/admin/categories" element={<AdminCategoryPage />} />
+            <Route path="/admin/tables" element={<AdminTablesPage />} />
             <Route path="/admin/restaurant" element={<AdminRestaurantPage />} />
         </>
     )

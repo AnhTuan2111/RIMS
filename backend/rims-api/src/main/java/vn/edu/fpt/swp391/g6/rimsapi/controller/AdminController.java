@@ -16,6 +16,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.restaurant.UpdateRestaurantProfileRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.CreateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.UpdateTableRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateCustomerRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateStaffRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.SetAccountStatusRequest;
@@ -27,6 +29,8 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.restaurant.RestaurantProfileResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.AdminTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.RestaurantProfileService;
@@ -280,6 +284,35 @@ public class AdminController
     public CategoryRemovalResponse deleteCategory(@PathVariable Integer id)
     {
         return adminService.deleteCategory(id);
+    }
+
+    // =================== BÀN ===================
+
+    @GetMapping("/table/all")
+    public List<AdminTableResponse> getAllTables()
+    {
+        return adminService.getAllTables();
+    }
+
+    @PostMapping("/table/new")
+    public ResponseEntity<AdminTableResponse> createTable(
+            @RequestBody @Valid CreateTableRequest request)
+    {
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createTable(request));
+    }
+
+    @PutMapping("/table/{id}")
+    public AdminTableResponse updateTable(
+            @PathVariable Integer id,
+            @RequestBody @Valid UpdateTableRequest request)
+    {
+        return adminService.updateTable(id, request);
+    }
+
+    @DeleteMapping("/table/{id}")
+    public TableRemovalResponse deleteTable(@PathVariable Integer id)
+    {
+        return adminService.deleteTable(id);
     }
 
     // =================== DISH ===================

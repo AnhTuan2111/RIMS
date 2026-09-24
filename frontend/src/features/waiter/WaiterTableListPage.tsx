@@ -432,7 +432,9 @@ export default function WaiterTableListPage() {
         }
     }
 
-    const displayTables = tables.slice(0, 12)
+    // Trước đây cắt cứng 12 bàn đầu: nhà hàng kê thêm bàn thứ 13 thì Phục vụ
+    // không bao giờ thấy nó. Backend đã lọc sẵn bàn còn trong sơ đồ.
+    const displayTables = tables
 
     return (
         <div className="waiter-container">

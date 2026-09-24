@@ -62,7 +62,8 @@ public class CashierServiceImpl implements CashierService
     @Transactional(readOnly = true)
     public List<TableDashboardResponse> getTablesDashboard()
     {
-        List<RestaurantTable> tables = tableRepository.findAll();
+        // Bàn đã cất khỏi sơ đồ thì Thu ngân cũng không thấy
+        List<RestaurantTable> tables = tableRepository.findByActiveTrueOrderByTableNumberAsc();
         List<Order> activeOrders = orderRepository.findByStatusIn(List.of(OrderStatus.SERVING, OrderStatus.LOCKED));
 
         // Giữ nguyên cả Order thay vì chỉ id, để lấy luôn totalAmount mà không phải
