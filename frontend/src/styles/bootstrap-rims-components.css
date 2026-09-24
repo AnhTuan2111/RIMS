@@ -22,9 +22,6 @@
         box-shadow 0.18s ease,
         background 0.18s ease,
         border-color 0.18s ease;
-}
-
-.secondary-button {
     color: var(--rims-brand);
     border-color: var(--rims-brand-line);
     background: var(--rims-brand-soft);
@@ -200,9 +197,6 @@
 .table-grid {
     display: grid;
     gap: 1rem;
-}
-
-.table-grid {
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
 }
 

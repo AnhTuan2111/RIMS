@@ -113,8 +113,8 @@
 .chef-page button:disabled {
     opacity: 0.55;
     cursor: not-allowed;
-    transform: none !important;
-    box-shadow: none !important;
+    transform: none;
+    box-shadow: none;
 }
 
 /* =========================
@@ -1024,7 +1024,7 @@
 /* ---------- Chef summary / filters ---------- */
 
 .chef-summary {
-    display: flex !important;
+    display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
@@ -1053,7 +1053,7 @@
 }
 
 .chef-filter-bar {
-    display: grid !important;
+    display: grid;
     grid-template-columns: minmax(260px, 1fr) 190px 190px auto;
     gap: 12px;
     align-items: center;
@@ -1080,7 +1080,7 @@
 /* ---------- Grouped kitchen page ---------- */
 
 .grouped-kitchen-grid {
-    display: grid !important;
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
     margin-top: 18px;
@@ -1092,20 +1092,20 @@
     gap: 15px;
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--rims-line) !important;
-    border-left: 5px solid var(--rims-brand) !important;
-    border-radius: 20px !important;
-    background: var(--rims-surface) !important;
+    border: 1px solid var(--rims-line);
+    border-left: 5px solid var(--rims-brand);
+    border-radius: 20px;
+    background: var(--rims-surface);
     box-shadow: 0 14px 34px rgb(36 21 18 / 7.5%);
 }
 
 .grouped-kitchen-card.has-note {
-    border-left-color: var(--rims-alert) !important;
+    border-left-color: var(--rims-alert);
 }
 
 .grouped-card-head,
 .group-card-footer {
-    display: flex !important;
+    display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 14px;
@@ -1214,7 +1214,7 @@
 
 .group-item-row {
     padding: 11px 13px;
-    display: flex !important;
+    display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
@@ -1345,7 +1345,7 @@
 }
 
 .internal-note-quick-actions {
-    display: flex !important;
+    display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
@@ -1427,24 +1427,21 @@
     font-size: 13px;
     font-weight: 800;
     line-height: 1;
-    text-decoration: none !important;
+    text-decoration: none;
     cursor: pointer;
     transition:
         transform 0.18s ease,
         box-shadow 0.18s ease,
         background 0.18s ease;
-}
-
-.secondary-button {
     border: 1px solid var(--rims-line-strong);
     background: var(--rims-surface);
-    color: var(--rims-ink-2) !important;
+    color: var(--rims-ink-2);
 }
 
 .secondary-button:hover:not(:disabled) {
     border-color: var(--rims-line-strong);
     background: var(--rims-surface-2);
-    color: var(--rims-ink) !important;
+    color: var(--rims-ink);
 }
 
 /* ---------- Responsive ---------- */

@@ -1679,9 +1679,6 @@
     .order-shift-filter-area {
         width: 100%;
         justify-content: flex-start;
-    }
-
-    .order-shift-filter-area {
         justify-items: stretch;
     }
 
