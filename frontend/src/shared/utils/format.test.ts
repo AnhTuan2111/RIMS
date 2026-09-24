@@ -30,6 +30,21 @@ describe('Định dạng hiển thị', () => {
             expect(formatDateForApi(new Date(2026, 0, 5))).toBe('2026-01-05')
             expect(formatDateForApi(new Date(2026, 11, 31))).toBe('2026-12-31')
         })
+
+        /*
+         * Màn Đặt bàn của Khách từng lấy ngày mặc định bằng
+         * new Date().toISOString().split('T')[0]. Hàm đó quy về UTC, nên ở
+         * UTC+7 mọi thời điểm trước 7h sáng đều trả về ngày hôm qua: ô ngày
+         * mặc định thành quá khứ và danh sách giờ đặt rỗng trơn.
+         */
+        it('giữ đúng ngày theo giờ máy lúc nửa đêm, không lệch sang hôm qua', () => {
+            const nuaDem = new Date(2026, 8, 25, 0, 30)
+
+            expect(formatDateForApi(nuaDem)).toBe('2026-09-25')
+            expect(formatDateForApi(nuaDem)).toBe(
+                `${nuaDem.getFullYear()}-09-${String(nuaDem.getDate()).padStart(2, '0')}`,
+            )
+        })
     })
 
     describe('Tuần bắt đầu từ thứ Hai', () => {

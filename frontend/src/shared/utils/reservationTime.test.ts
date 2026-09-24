@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest'
+import {formatDateForApi} from './format'
 
 import {
     generateAllTimeSlots,
@@ -95,7 +96,10 @@ describe('Khung giờ đặt bàn', () => {
         })
 
         it('bỏ các giờ đã trôi qua', () => {
-            const homNay = new Date().toISOString().slice(0, 10)
+            // formatDateForApi chứ không phải toISOString: hàm kia quy về UTC,
+            // nên ở UTC+7 chạy test trước 7h sáng thì "hôm nay" thành hôm qua
+            // và phép kiểm bên dưới thành vô nghĩa vì danh sách luôn rỗng.
+            const homNay = formatDateForApi(new Date())
             const slots = getAvailableTimeSlots(homNay, [])
 
             for (const time of slots) {

@@ -14,6 +14,8 @@ import {
     parseReservationWindow,
 } from '@/shared/utils/reservationTime'
 import {useRestaurant} from '@/app/providers/useRestaurant'
+import {PageCard, PageHeader} from '@/shared/components/ui'
+import {EmptyState, LoadingState} from '@/shared/components/feedback'
 
 import type {
     CustomerCreateReservationRequest,
@@ -23,9 +25,23 @@ import type {
 import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
+import {formatDateForApi} from '@/shared/utils/format'
 
-const today = new Date()
-const todayStr = today.toISOString().split('T')[0]
+/**
+ * Ngày hôm nay theo giờ máy, dạng YYYY-MM-DD.
+ *
+ * <p>Bản cũ là một hằng số cấp module tính bằng
+ * {@code new Date().toISOString()}. Hàm đó quy về UTC, nên ở múi giờ Việt
+ * Nam (UTC+7) từ 0h đến 7h sáng nó trả về NGÀY HÔM QUA: ô "Ngày đặt" mặc
+ * định thành quá khứ, danh sách giờ đặt rỗng, và min của ô ngày cho chọn
+ * cả ngày đã qua.
+ *
+ * <p>Tính lại mỗi lần gọi chứ không giữ làm hằng số, để tab mở qua nửa đêm
+ * không kẹt lại ở ngày cũ.
+ */
+function getTodayStr(): string {
+    return formatDateForApi(new Date())
+}
 
 type ReservationTab = 'book' | 'cancel'
 
@@ -97,7 +113,7 @@ export default function CustomerReservations() {
     const [bookForm, setBookForm] = useState<CustomerCreateReservationRequest>({
         customerName: '',
         phone: '',
-        reservationTime: `${todayStr}T08:00:00`,
+        reservationTime: `${getTodayStr()}T08:00:00`,
         note: '',
         tableId: 0,
     })
@@ -135,7 +151,7 @@ export default function CustomerReservations() {
 
     const hasLoadedInitialReservationRef = useRef(false)
 
-    const selectedDate = bookForm.reservationTime.split('T')[0] || todayStr
+    const selectedDate = bookForm.reservationTime.split('T')[0] || getTodayStr()
 
     const selectedTime = bookForm.reservationTime.split('T')[1]?.slice(0, 5) || '08:00'
 
@@ -333,7 +349,7 @@ export default function CustomerReservations() {
                 customerName: '',
                 phone: '',
                 note: '',
-                reservationTime: `${todayStr}T08:00:00`,
+                reservationTime: `${getTodayStr()}T08:00:00`,
             }))
 
             await loadAvailableTables(undefined, false)
@@ -386,11 +402,12 @@ export default function CustomerReservations() {
 
     return (
         <div className="rk-stack">
-            <div className="rk-card__head-inline">
-                <h1 className="rk-sectiontitle">Đặt bàn</h1>
-
-                <p>Quản lý đặt bàn của bạn tại nhà hàng</p>
-            </div>
+            <PageCard>
+                <PageHeader
+                    title="Đặt bàn"
+                    description="Quản lý đặt bàn của bạn tại nhà hàng."
+                />
+            </PageCard>
 
             <div className="rk-segment">
                 <button
@@ -420,12 +437,14 @@ export default function CustomerReservations() {
             </div>
 
             {activeTab === 'book' && (
-                <div className="rk-rowlist__item">
-                    <h2>Đặt bàn mới</h2>
+                <div className="rk-card rk-card--pad">
+                    <div>
+                        <h2 className="rk-sectiontitle">Đặt bàn mới</h2>
 
-                    <p className="rk-rowlist__meta">
-                        Mỗi khách hàng chỉ được đặt <strong>1 bàn/ngày</strong>
-                    </p>
+                        <p className="rk-field__hint">
+                            Mỗi khách hàng chỉ được đặt <strong>1 bàn/ngày</strong>
+                        </p>
+                    </div>
 
                     {bookSuccess && (
                         <div className="rk-note rk-note--ok">
@@ -450,7 +469,7 @@ export default function CustomerReservations() {
                     )}
 
                     {bookError && (
-                        <div className="rk-note rk-note--alert"> {bookError}</div>
+                        <div className="rk-note rk-note--alert">{bookError}</div>
                     )}
 
                     <form
@@ -459,12 +478,13 @@ export default function CustomerReservations() {
                     >
                         <div className="rk-formgrid">
                             <div className="rk-field">
-                                <label>
+                                <label className="rk-field__label">
                                     Tên khách hàng{' '}
                                     <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    className="rk-input"
                                     type="text"
                                     value={bookForm.customerName}
                                     placeholder="Nhập họ và tên"
@@ -480,12 +500,13 @@ export default function CustomerReservations() {
                             </div>
 
                             <div className="rk-field">
-                                <label>
+                                <label className="rk-field__label">
                                     Số điện thoại{' '}
                                     <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    className="rk-input"
                                     type="tel"
                                     value={bookForm.phone}
                                     placeholder="0123456789"
@@ -505,14 +526,15 @@ export default function CustomerReservations() {
 
                         <div className="rk-formgrid">
                             <div className="rk-field">
-                                <label>
+                                <label className="rk-field__label">
                                     Ngày đặt <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    className="rk-input"
                                     type="date"
                                     value={bookForm.reservationTime.split('T')[0]}
-                                    min={todayStr}
+                                    min={getTodayStr()}
                                     required
                                     onChange={(event) => {
                                         const time =
@@ -533,11 +555,12 @@ export default function CustomerReservations() {
                             </div>
 
                             <div className="rk-field">
-                                <label>
+                                <label className="rk-field__label">
                                     Giờ đặt <span className="rk-field__required">*</span>
                                 </label>
 
                                 <select
+                                    className="rk-select"
                                     value={selectedTime}
                                     required
                                     onChange={(event) => {
@@ -558,11 +581,12 @@ export default function CustomerReservations() {
 
                         <div className="rk-formgrid">
                             <div className="rk-field">
-                                <label>
+                                <label className="rk-field__label">
                                     Chọn bàn <span className="rk-field__required">*</span>
                                 </label>
 
                                 <select
+                                    className="rk-select"
                                     value={bookForm.tableId}
                                     required
                                     disabled={loadingTables}
@@ -615,9 +639,10 @@ export default function CustomerReservations() {
                             </div>
 
                             <div className="rk-field">
-                                <label>Ghi chú</label>
+                                <label className="rk-field__label">Ghi chú</label>
 
                                 <input
+                                    className="rk-input"
                                     type="text"
                                     value={bookForm.note}
                                     placeholder="Yêu cầu đặc biệt…"
@@ -652,7 +677,7 @@ export default function CustomerReservations() {
                                     setBookForm({
                                         customerName: '',
                                         phone: '',
-                                        reservationTime: `${todayStr}T08:00:00`,
+                                        reservationTime: `${getTodayStr()}T08:00:00`,
                                         note: '',
                                         tableId: availableTables[0]?.id ?? 0,
                                     })
@@ -669,13 +694,15 @@ export default function CustomerReservations() {
             )}
 
             {activeTab === 'cancel' && (
-                <div className="rk-rowlist__item">
-                    <h2> Hủy đặt bàn</h2>
+                <div className="rk-card rk-card--pad">
+                    <div>
+                        <h2 className="rk-sectiontitle">Huỷ đặt bàn</h2>
 
-                    <p className="rk-rowlist__meta">
-                        Danh sách các đặt bàn đang hoạt động của bạn (có thể ở nhiều ngày
-                        khác nhau)
-                    </p>
+                        <p className="rk-field__hint">
+                            Danh sách đặt bàn đang hoạt động của bạn, có thể ở nhiều ngày
+                            khác nhau.
+                        </p>
+                    </div>
 
                     {cancelSuccess && (
                         <div className="rk-note rk-note--ok">
@@ -693,15 +720,20 @@ export default function CustomerReservations() {
                     )}
 
                     {cancelError && (
-                        <div className="rk-note rk-note--alert"> {cancelError}</div>
+                        <div className="rk-note rk-note--alert">{cancelError}</div>
                     )}
 
                     {loadingCurrent ? (
-                        <div className="rk-note">Đang tải thông tin...</div>
+                        <LoadingState
+                            title="Đang tải đặt bàn của bạn"
+                            description=""
+                            size="sm"
+                        />
                     ) : currentReservations.length === 0 ? (
-                        <div className="rk-note">
-                            <p>Bạn không có đơn đặt bàn nào đang hoạt động</p>
-                        </div>
+                        <EmptyState
+                            title="Chưa có đặt bàn nào"
+                            description="Bạn không có đơn đặt bàn nào đang hoạt động."
+                        />
                     ) : (
                         <div className="rk-rowlist">
                             {currentReservations.map((reservation) => (
