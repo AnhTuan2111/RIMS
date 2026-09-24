@@ -1,12 +1,14 @@
-import {LogOut} from 'lucide-react'
+import {LogOut, Menu} from 'lucide-react'
 import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
 
 type DashboardTopbarProps = {
     onLogout: () => void
+    /** Mở ngăn kéo menu. Chỉ hiện dưới 60rem, trên đó thanh bên luôn ở đó. */
+    onOpenMenu: () => void
 }
 
-export function DashboardTopbar({onLogout}: DashboardTopbarProps) {
+export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
     const {actor} = useActor()
     const isCustomer = actor === RoleType.CUSTOMER
 
@@ -17,6 +19,15 @@ export function DashboardTopbar({onLogout}: DashboardTopbarProps) {
 
     return (
         <header className="rk-shell__top">
+            <button
+                type="button"
+                className="rk-shell__menubtn"
+                aria-label="Mở menu điều hướng"
+                onClick={onOpenMenu}
+            >
+                <Menu className="rk-icon" aria-hidden="true" />
+            </button>
+
             <div className="rk-shell__topheading">
                 {isCustomer ? (
                     <>
@@ -55,10 +66,13 @@ export function DashboardTopbar({onLogout}: DashboardTopbarProps) {
                     id="btn-logout"
                     type="button"
                     className="rk-btn rk-btn--quiet"
+                    aria-label="Đăng xuất"
                     onClick={onLogout}
                 >
                     <LogOut className="rk-icon" aria-hidden="true" />
-                    Đăng xuất
+                    {/* Bọc trong span để CSS ẩn được nhãn chữ trên di động mà vẫn giữ
+                        biểu tượng. aria-label ở trên vẫn gọi tên đủ cho trình đọc màn hình. */}
+                    <span>Đăng xuất</span>
                 </button>
             </div>
         </header>

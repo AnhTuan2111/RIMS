@@ -1,3 +1,11 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (vận hành) ·
+ * Catalogue (quản trị) · Marquee Hero (công khai) · nav: N3 Side-rail + ngăn kéo ·
+ * footer: Ft2 · theme: custom "Phiếu bếp" (light / rounded-sans / warm) ·
+ * enrichment: none · design-system: design.md · designed-as-app
+ *
+ * Bảng màu, bộ chữ, hình khối và luật responsive KHOÁ trong design.md ở gốc
+ * repo. Lần chạy Hallmark sau đọc file đó, không tự chọn hệ mới.
+ */
 /* =========================================================================
    RIMS Kit — lớp component dùng chung cho cả 30 màn hình.
 
@@ -22,6 +30,13 @@
     box-sizing: border-box;
 }
 
+/* Gate 34: cat tran ngang o goc, bang clip chu khong phai hidden —
+   hidden bien phan tu thanh vung cuon va pha vo position: sticky ben trong. */
+html,
+body {
+    overflow-x: clip;
+}
+
 html {
     min-height: 100%;
     scroll-behavior: smooth;
@@ -29,7 +44,7 @@ html {
 
 body {
     margin: 0;
-    min-height: 100vh;
+    min-height: 100dvh;
     font-family: var(--rims-font-sans);
     font-size: var(--rims-text-base);
     line-height: var(--rims-leading-normal);
@@ -39,7 +54,7 @@ body {
 }
 
 main {
-    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 h1,
@@ -303,11 +318,15 @@ a {
    Ô tìm kiếm ăn phần rộng còn lại, ô chọn giữ bề ngang vừa đủ. Màn hẹp thì
    xếp dọc, vì ba ô nằm ngang trên điện thoại thì ô nào cũng quá hẹp để đọc. */
 
+/* Mobile-first: xếp dọc, mỗi ô một dòng.
+   Từ 48rem mới xếp ngang, và khi xếp ngang thì PHẢI wrap — bản cũ không
+   wrap nên nút "Xóa bộ lọc" bị đẩy ra ngoài khung 146px ở màn Danh sách
+   món ăn của Bếp. */
 .rk-filterbar {
     display: flex;
-    gap: var(--rims-space-4);
-    align-items: center;
-    height: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--rims-space-3);
 }
 
 .rk-filterbar > .rk-input {
@@ -328,14 +347,13 @@ a {
     flex: 0 0 auto;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 48rem) {
     .rk-filterbar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .rk-filterbar > .rk-select {
-        flex: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--rims-space-4);
+        height: 100%;
     }
 }
 
@@ -391,13 +409,6 @@ a {
 }
 
 /* Màn hẹp: ba nút icon trên một hàng của bảng cần chỗ, nên thu nhỏ lại. */
-@media (max-width: 480px) {
-    .rk-iconbtn {
-        width: 28px;
-        height: 28px;
-    }
-}
-
 /* ---------- Chip trạng thái ----------
    Màu KHÔNG phải tín hiệu duy nhất: mỗi chip có chấm dẫn và nhãn chữ, nên
    người mù màu vẫn đọc được trạng thái. */
@@ -410,7 +421,8 @@ a {
     gap: var(--rims-space-2);
     padding: var(--rims-space-1) var(--rims-space-3);
     border: 1px solid var(--rims-idle-line);
-    border-radius: var(--rims-radius-pill);
+    /* Vuong, khong bo tron: chip la mot o tren phieu chu khong phai vien thuoc. */
+    border-radius: var(--rims-radius-md);
     background: var(--rims-idle-soft);
     color: var(--rims-idle);
     font-size: var(--rims-text-xs);
@@ -898,6 +910,10 @@ table {
 }
 
 .rk-detailrow__value {
+    /* Email va URL dai khong co khoang trang de xuong dong — khong cho ngat
+       trong tu thi chung day ca hang ra ngoai khung. */
+    min-width: 0;
+    overflow-wrap: anywhere;
     color: var(--rims-ink);
     font-size: var(--rims-text-sm);
     font-weight: var(--rims-weight-medium);
@@ -1241,7 +1257,7 @@ textarea.rk-input {
     padding: var(--rims-space-6);
 
     /* Biểu mẫu dài phải cuộn trong hộp, không đẩy hộp dài quá màn hình. */
-    max-height: calc(100vh - 14rem);
+    max-height: calc(100dvh - 14rem);
     overflow-y: auto;
 }
 
@@ -1251,7 +1267,7 @@ textarea.rk-input {
  */
 .rk-modal__split {
     display: grid;
-    grid-template-columns: 1.6fr 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--rims-space-6);
 }
 
@@ -1267,16 +1283,9 @@ textarea.rk-input {
     border-left: 1px solid var(--rims-line);
 }
 
-@media (max-width: 860px) {
+@media (min-width: 60rem) {
     .rk-modal__split {
-        grid-template-columns: 1fr;
-    }
-
-    .rk-modal__split > * + * {
-        padding-left: 0;
-        padding-top: var(--rims-space-5);
-        border-left: 0;
-        border-top: 1px solid var(--rims-line);
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
     }
 }
 
@@ -1368,9 +1377,36 @@ textarea.rk-input {
 .rk-tablewrap {
     width: 100%;
     overflow-x: auto;
+    /* Cuon ngang trong hop thi phai co diem tua cho ngon tay va cho ban phim. */
+    overscroll-behavior-x: contain;
     border: 1px solid var(--rims-line);
     border-radius: var(--rims-radius-lg);
     background: var(--rims-surface);
+}
+
+/*
+ * Bang trong hop cuon GIU BE RONG TU NHIEN, khong co lai vua khung.
+ *
+ * Mac dinh width: 100% lam bang nen vao be rong hop, nen o man hep moi cot
+ * bi bop lai va noi dung xuong ba bon dong — mot hang cao 250px tren dien
+ * thoai, doc kho hon han so voi viec vuot ngang. Gio hang giu mot dong va
+ * nguoi dung vuot de xem cot ben phai.
+ */
+.rk-tablewrap > .rk-table {
+    width: auto;
+    min-width: 100%;
+}
+
+.rk-tablewrap > .rk-table th,
+.rk-tablewrap > .rk-table td {
+    white-space: nowrap;
+}
+
+/* Cot co the xuong dong: ten mon va ghi chu dai that. Chung mang lop rieng
+   de khong bi luat nowrap o tren ap vao. */
+.rk-tablewrap > .rk-table .rk-cell--wrap {
+    white-space: normal;
+    min-width: 14rem;
 }
 
 .rk-table {
@@ -1431,10 +1467,17 @@ textarea.rk-input {
     align-items: center;
     justify-content: space-between;
     gap: var(--rims-space-4);
+    /* Khoi chu phai co rut duoc, neu khong no day icon ra ngoai khung —
+       18px o man Tong quan quan tri tai 768px va 1024px. */
+    min-width: 0;
     padding: var(--rims-space-5);
     border: 1px solid var(--rims-line);
     border-radius: var(--rims-radius-lg);
     background: var(--rims-surface);
+}
+
+.rk-statcard > div {
+    min-width: 0;
 }
 
 .rk-statcard__icon {
@@ -1450,8 +1493,19 @@ textarea.rk-input {
 
 /* Sắc nền cho ô cần nổi hơn phần còn lại. Chữ vẫn là màu mực thường để
    không phải tính lại tương phản cho từng sắc. */
+/* Vạch trái 3px đặc — dấu hiệu trạng thái của hệ, đọc được cả khi không
+   phân biệt được sắc màu vì nó là HÌNH DẠNG chứ không chỉ là màu. */
+.rk-statcard--brand,
+.rk-statcard--ok,
+.rk-statcard--busy,
+.rk-statcard--alert {
+    border-inline-start-width: 3px;
+    border-inline-start-style: solid;
+}
+
 .rk-statcard--brand {
     border-color: var(--rims-brand-line);
+    border-inline-start-color: var(--rims-brand);
     background: var(--rims-brand-soft);
 }
 
@@ -1462,6 +1516,7 @@ textarea.rk-input {
 
 .rk-statcard--ok {
     border-color: var(--rims-ok-line);
+    border-inline-start-color: var(--rims-ok);
     background: var(--rims-ok-soft);
 }
 
@@ -1472,6 +1527,7 @@ textarea.rk-input {
 
 .rk-statcard--busy {
     border-color: var(--rims-busy-line);
+    border-inline-start-color: var(--rims-busy);
     background: var(--rims-busy-soft);
 }
 
@@ -1482,6 +1538,7 @@ textarea.rk-input {
 
 .rk-statcard--alert {
     border-color: var(--rims-alert-line);
+    border-inline-start-color: var(--rims-alert);
     background: var(--rims-alert-soft);
 }
 
@@ -1496,12 +1553,12 @@ textarea.rk-input {
    min-w-0, mb-1, mb-0...) rải trong JSX, nên muốn đổi bố cục là phải sửa
    trong file component chứ không phải trong CSS. */
 
+/* Đầu màn — mobile-first: xếp dọc, hàng nút chiếm hết bề ngang. */
 .rk-pagehead {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
     gap: var(--rims-space-4);
-    flex-wrap: wrap;
 }
 
 .rk-pagehead__lead {
@@ -1559,13 +1616,12 @@ textarea.rk-input {
     flex-wrap: wrap;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 48rem) {
     .rk-pagehead {
-        align-items: stretch;
-    }
-
-    .rk-pagehead__actions {
-        width: 100%;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
     }
 }
 
@@ -1681,13 +1737,12 @@ textarea.rk-input {
    riêng. PageCard dựng ra dạng này. */
 .rk-card--pad {
     gap: var(--rims-space-4);
-    padding: var(--rims-space-6);
-    box-shadow: var(--rims-shadow-raised);
+    padding: var(--rims-space-4);
 }
 
-@media (max-width: 576px) {
+@media (min-width: 36rem) {
     .rk-card--pad {
-        padding: var(--rims-space-4);
+        padding: var(--rims-space-6);
     }
 }
 
@@ -1861,7 +1916,7 @@ textarea.rk-input {
    đó, và thẻ dùng nền kem của bảng màu cũ. */
 
 .rk-auth {
-    min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     place-items: center;
     padding: var(--rims-space-6);
@@ -1872,11 +1927,16 @@ textarea.rk-input {
 
 .rk-auth__card {
     width: min(460px, 100%);
-    padding: var(--rims-space-8);
-    border: 1px solid var(--rims-line);
+    padding: var(--rims-space-5);
+    border: 1px solid var(--rims-line-strong);
     border-radius: var(--rims-radius-lg);
     background: var(--rims-surface);
-    box-shadow: var(--rims-shadow-overlay);
+}
+
+@media (min-width: 36rem) {
+    .rk-auth__card {
+        padding: var(--rims-space-8);
+    }
 }
 
 .rk-auth__card--wide {
@@ -1903,12 +1963,6 @@ textarea.rk-input {
     color: var(--rims-ink-2);
     font-size: var(--rims-text-sm);
     text-align: center;
-}
-
-@media (max-width: 640px) {
-    .rk-auth__card {
-        padding: var(--rims-space-5);
-    }
 }
 
 /* ---------- Liên kết quay lại ---------- */
@@ -1983,20 +2037,21 @@ textarea.rk-input {
 }
 
 .rk-steps__label {
+    display: none;
     color: var(--rims-ink-3);
     font-size: var(--rims-text-xs);
     white-space: nowrap;
 }
 
+@media (min-width: 36rem) {
+    .rk-steps__label {
+        display: inline;
+    }
+}
+
 .rk-steps__item--active .rk-steps__label {
     color: var(--rims-brand);
     font-weight: var(--rims-weight-semibold);
-}
-
-@media (max-width: 480px) {
-    .rk-steps__label {
-        display: none;
-    }
 }
 
 /* Biến thể xanh lá của biểu tượng trạng thái: việc đã xong. */
@@ -2178,21 +2233,21 @@ textarea.rk-input {
 /* ---------- Hai cột ----------
    Cột trái rộng hơn cột phải. Màn hẹp thì xếp dọc. */
 
+/* Hai cột — mobile-first: một cột, tách ra từ 60rem. */
 .rk-two {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--rims-space-5);
     align-items: start;
 }
 
-.rk-two--wideleft {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-}
+@media (min-width: 60rem) {
+    .rk-two {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
 
-@media (max-width: 1024px) {
-    .rk-two,
     .rk-two--wideleft {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     }
 }
 
@@ -2211,13 +2266,16 @@ textarea.rk-input {
     display: grid;
 }
 
+/* Kẻ ĐỨT ĐOẠN giữa các mục — chữ ký của hệ. Kẻ liền dành cho khung ngoài
+   và cho bảng; kẻ đứt dành cho ranh giới giữa các dòng trong một danh sách,
+   đúng như đường xé trên tờ phiếu. */
 .rk-rowlist__item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--rims-space-3);
     padding: var(--rims-space-3) 0;
-    border-bottom: 1px solid var(--rims-line);
+    border-bottom: 1px dashed var(--rims-line);
 }
 
 .rk-rowlist__item:last-child {
@@ -2300,15 +2358,39 @@ textarea.rk-input {
    Nhóm hai đến bốn lựa chọn loại trừ nhau, dính liền nhau thành một khối.
    Dùng cho bộ lọc trạng thái: Tất cả / Hoạt động / Đã ẩn. */
 
+/* Thanh phân đoạn — bộ lọc danh mục. Màn Tạo đơn có 14 danh mục.
+   Bản cũ là inline-flex không wrap, nên hàng đó rộng ~1900px và tràn ở MỌI
+   bề rộng kể cả desktop — 872px quá khung ở 1024px.
+
+   Trên di động: MỘT HÀNG cuộn ngang có điểm neo. Cho wrap ở màn hẹp thì 14
+   danh mục xếp thành tám dòng, ăn hết màn hình trước khi thấy món nào.
+   Từ 48rem: wrap, vì khi đó hai ba dòng là vừa. */
 .rk-segment {
-    display: inline-flex;
+    display: flex;
+    gap: 2px;
     padding: 3px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
     border: 1px solid var(--rims-line);
     border-radius: var(--rims-radius-md);
     background: var(--rims-surface-2);
 }
 
+.rk-segment::-webkit-scrollbar {
+    display: none;
+}
+
+@media (min-width: 48rem) {
+    .rk-segment {
+        flex-wrap: wrap;
+        overflow-x: visible;
+    }
+}
+
 .rk-segment__btn {
+    flex: none;
+    scroll-snap-align: start;
     padding: var(--rims-space-2) var(--rims-space-4);
     border-radius: calc(var(--rims-radius-md) - 3px);
     color: var(--rims-ink-2);
@@ -2745,7 +2827,7 @@ textarea.rk-input {
 
 .rk-cardgrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
     gap: var(--rims-space-4);
 }
 
@@ -2800,26 +2882,136 @@ textarea.rk-input {
    định nghĩa hai lần ở hai chỗ khác nhau trong cùng một file.
    ========================================================================= */
 
+/* ---------- Khung ứng dụng ----------
+   Mobile-first. Dưới 60rem thanh bên là NGĂN KÉO trượt từ mép trái, mở bằng
+   nút trên thanh đầu trang. Bản cũ chỉ xếp thanh bên LÊN TRÊN nội dung, nên
+   trên điện thoại mỗi trang đều bắt người dùng cuộn qua toàn bộ menu mới tới
+   việc cần làm. */
+
 .rk-shell {
     display: flex;
-    min-height: 100vh;
+    flex-direction: column;
+    min-height: 100dvh;
 }
 
 .rk-shell__side {
-    position: sticky;
-    top: 0;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: var(--rims-z-drawer);
     display: flex;
     flex-direction: column;
     gap: var(--rims-space-4);
-    width: var(--rims-sidebar-width);
-    height: 100vh;
-    flex: none;
+    width: min(var(--rims-sidebar-width), 84vw);
     padding: var(--rims-space-5) var(--rims-space-4);
-    overflow: hidden;
+    padding-inline-start: max(var(--rims-space-4), env(safe-area-inset-left));
+    overflow-y: auto;
+    overscroll-behavior: contain;
     color: var(--rims-ink-on-dark);
-    background:
-        radial-gradient(circle at 95% 85%, rgb(var(--rims-shell-accent-rgb) / 26%), transparent 40%),
-        linear-gradient(180deg, var(--rims-shell-2) 0%, var(--rims-shell) 55%);
+    background: var(--rims-shell);
+    border-inline-end: 1px solid var(--rims-shell-2);
+    transform: translateX(-100%);
+    /* visibility chứ không phải chỉ transform: ngăn kéo đóng mà vẫn "nhìn thấy"
+       thì bàn phím vẫn tab được vào từng mục menu nằm ngoài màn hình, và trình
+       đọc màn hình vẫn đọc chúng. Đổi trễ để chờ trượt xong mới ẩn. */
+    visibility: hidden;
+    transition:
+        transform var(--rims-dur-drawer) var(--rims-ease-out),
+        visibility 0s linear var(--rims-dur-drawer);
+}
+
+.rk-shell__side.is-open {
+    transform: none;
+    visibility: visible;
+    transition:
+        transform var(--rims-dur-drawer) var(--rims-ease-out),
+        visibility 0s;
+}
+
+/* Nền mờ sau ngăn kéo. Là <button> để bấm ra ngoài đóng được và để trình đọc
+   màn hình gọi tên được hành động. */
+.rk-shell__scrim {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--rims-z-drawer) - 1);
+    border: 0;
+    padding: 0;
+    background: rgb(var(--rims-tint-ink) / 55%);
+    cursor: pointer;
+}
+
+/* Nút đóng nằm trong ngăn kéo; ở bố cục thanh bên cố định thì không cần. */
+.rk-shell__close {
+    position: absolute;
+    top: var(--rims-space-4);
+    inset-inline-end: var(--rims-space-4);
+    display: grid;
+    place-items: center;
+    width: var(--rims-touch-min);
+    height: var(--rims-touch-min);
+    border: 1px solid var(--rims-shell-2);
+    border-radius: var(--rims-radius-md);
+    background: transparent;
+    color: var(--rims-ink-on-dark);
+    cursor: pointer;
+}
+
+/* Nút mở ngăn kéo, nằm ở thanh đầu trang. */
+.rk-shell__menubtn {
+    display: grid;
+    place-items: center;
+    width: var(--rims-touch-min);
+    height: var(--rims-touch-min);
+    flex: none;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    cursor: pointer;
+}
+
+.rk-shell__menubtn:hover {
+    border-color: var(--rims-line-strong);
+}
+
+/* Khoá cuộn nền khi ngăn kéo đang mở. */
+body.rk-drawer-open {
+    overflow: hidden;
+}
+
+@media (min-width: 60rem) {
+    .rk-shell {
+        flex-direction: row;
+    }
+
+    .rk-shell__side {
+        position: sticky;
+        top: 0;
+        z-index: var(--rims-z-sticky);
+        height: 100dvh;
+        width: var(--rims-sidebar-width);
+        flex: none;
+        transform: none;
+        visibility: visible;
+        transition: none;
+        border-inline-end: 1px solid var(--rims-shell-2);
+    }
+
+    .rk-shell__scrim,
+    .rk-shell__close,
+    .rk-shell__menubtn {
+        display: none;
+    }
+
+    body.rk-drawer-open {
+        overflow: visible;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rk-shell__side {
+        transition: none;
+    }
 }
 
 .rk-shell__main {
@@ -2831,8 +3023,16 @@ textarea.rk-input {
 
 .rk-shell__content {
     flex: 1;
-    padding: var(--rims-space-6);
+    min-width: 0;
+    padding: var(--rims-space-4) var(--rims-gutter);
+    padding-bottom: max(var(--rims-space-6), env(safe-area-inset-bottom));
     background: var(--rims-paper);
+}
+
+@media (min-width: 60rem) {
+    .rk-shell__content {
+        padding-block: var(--rims-space-6);
+    }
 }
 
 /* ---------- Nhận diện ---------- */
@@ -3017,18 +3217,87 @@ textarea.rk-input {
 
 /* ---------- Thanh trên ---------- */
 
+/* Thanh đầu trang — măng sét của tờ phiếu.
+   Trên di động chỉ còn một hàng: nút menu, tiêu đề rút gọn, nút đăng xuất.
+   Khối tiêu đề ba dòng của bản cũ chiếm gần một phần ba màn hình điện thoại
+   trước khi tới việc cần làm. */
 .rk-shell__top {
     position: sticky;
     top: 0;
     z-index: var(--rims-z-sticky);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--rims-space-5);
-    flex-wrap: wrap;
-    padding: var(--rims-space-4) var(--rims-space-6);
-    border-bottom: 1px solid var(--rims-line);
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) var(--rims-gutter);
+    padding-top: max(var(--rims-space-3), env(safe-area-inset-top));
+    border-bottom: 1px dashed var(--rims-line-strong);
     background: var(--rims-surface);
+}
+
+.rk-shell__topheading {
+    min-width: 0;
+    flex: 1;
+}
+
+/* Dưới 48rem chỉ giữ dòng tiêu đề; con mắt cần biết mình đang ở đâu, không
+   cần đọc lại khẩu hiệu hệ thống ở mọi màn. */
+.rk-shell__topheading > .rk-shell__eyebrow,
+.rk-shell__topheading > p {
+    display: none;
+}
+
+.rk-shell__topheading h1 {
+    margin: 0;
+    font-size: var(--rims-text-base);
+    line-height: var(--rims-leading-snug);
+    /* Một dòng, cắt bằng dấu ba chấm. Cho nó xuống dòng thì tiêu đề dài như
+       "Hệ thống quản lý nhà hàng" thành ba dòng và đẩy nội dung xuống. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Nút Đăng xuất trên di động chỉ còn biểu tượng — nhãn chữ chiếm gần một
+   phần ba hàng măng sét. aria-label trong markup vẫn gọi tên đủ. */
+.rk-shell__top .rk-actions .rk-btn {
+    gap: 0;
+    padding-inline: var(--rims-space-3);
+}
+
+.rk-shell__top .rk-actions .rk-btn > span {
+    display: none;
+}
+
+@media (min-width: 48rem) {
+    .rk-shell__top {
+        gap: var(--rims-space-5);
+        flex-wrap: wrap;
+        padding-block: var(--rims-space-4);
+    }
+
+    .rk-shell__topheading > .rk-shell__eyebrow,
+    .rk-shell__topheading > p {
+        display: block;
+    }
+
+    .rk-shell__topheading > .rk-shell__eyebrow {
+        display: inline-flex;
+    }
+
+    .rk-shell__topheading h1 {
+        font-size: var(--rims-text-2xl);
+        white-space: normal;
+        overflow: visible;
+    }
+
+    .rk-shell__top .rk-actions .rk-btn {
+        gap: var(--rims-space-2);
+        padding-inline: var(--rims-space-5);
+    }
+
+    .rk-shell__top .rk-actions .rk-btn > span {
+        display: inline;
+    }
 }
 
 .rk-shell__eyebrow {
@@ -3061,28 +3330,6 @@ textarea.rk-input {
     margin: 0;
     color: var(--rims-ink-2);
     font-size: var(--rims-text-sm);
-}
-
-@media (max-width: 900px) {
-    .rk-shell {
-        flex-direction: column;
-    }
-
-    .rk-shell__side {
-        position: static;
-        width: 100%;
-        height: auto;
-    }
-
-    .rk-shell__nav {
-        flex-direction: row;
-        flex-wrap: wrap;
-        overflow: visible;
-    }
-
-    .rk-shell__content {
-        padding: var(--rims-space-4);
-    }
 }
 
 /* ---------- Tab gạch chân ----------
@@ -3170,7 +3417,7 @@ textarea.rk-input {
 
 .rk-choicegrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
     gap: var(--rims-space-4);
 }
 
@@ -3401,7 +3648,7 @@ textarea.rk-input {
 .rk-result {
     display: grid;
     place-items: center;
-    min-height: 100vh;
+    min-height: 100dvh;
     padding: var(--rims-space-6);
     background: var(--rims-paper);
 }
@@ -3534,4 +3781,70 @@ a.rk-statcard:focus-visible {
     color: var(--rims-ink);
     font-size: var(--rims-text-sm);
     font-weight: var(--rims-weight-semibold);
+}
+
+/* =========================================================================
+   Thiết bị cảm ứng
+   =========================================================================
+
+   Đo bằng pointer chứ không bằng bề rộng: máy tính bảng cắm chuột thì con trỏ
+   vẫn mịn, còn điện thoại xoay ngang vẫn là ngón tay. Bản cũ không có một luật
+   pointer nào, nên mọi nút đều nhỏ hơn ngưỡng chạm trên điện thoại — và còn có
+   một khối thu nút icon xuống 28px ở màn hẹp, đi ngược hẳn hướng.
+   ========================================================================= */
+
+@media (pointer: coarse) {
+    .rk-btn,
+    .rk-iconbtn,
+    .rk-segment__btn,
+    .rk-tabs__btn,
+    .rk-themetoggle__btn,
+    .rk-pager__btn,
+    .rk-qty__btn,
+    .rk-stepper__btn,
+    .rk-datefield__trigger,
+    .rk-backlink,
+    button.rk-chip {
+        min-height: var(--rims-touch-min);
+    }
+
+    /* Nút chỉ chứa một ký tự — số trang, dấu + và dấu −. Chúng hẹp theo chiều
+       NGANG chứ không phải chiều dọc, nên min-height không đủ. */
+    .rk-pager__btn,
+    .rk-qty__btn,
+    .rk-stepper__btn,
+    .rk-datefield__trigger {
+        min-width: var(--rims-touch-min);
+    }
+
+    /*
+     * Liên kết ĐỨNG RIÊNG một dòng phải đủ lớn để chạm; liên kết NẰM TRONG
+     * CÂU thì không.
+     *
+     * WCAG 2.5.8 miễn trừ rõ trường hợp thứ hai: kích thước của nó bị chiều
+     * cao dòng của chữ xung quanh quy định, nới ra sẽ đè lên dòng khác. Ba
+     * liên kết còn lại trong app ("Đăng ký ngay", "Đăng nhập") đều nằm giữa
+     * câu nên thuộc diện miễn trừ và để nguyên.
+     */
+    .rk-actions > .rk-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: var(--rims-touch-min);
+    }
+
+    .rk-iconbtn {
+        width: var(--rims-touch-min);
+        height: var(--rims-touch-min);
+    }
+
+    .rk-input,
+    .rk-select,
+    .rk-textarea {
+        min-height: var(--rims-touch-min);
+    }
+
+    /* Hàng nút trong ô bảng dễ bấm nhầm nhất vì chúng sát nhau. */
+    .rk-table .rk-actions {
+        gap: var(--rims-space-3);
+    }
 }

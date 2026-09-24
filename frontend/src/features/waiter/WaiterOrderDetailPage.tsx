@@ -147,57 +147,62 @@ export default function WaiterOrderDetailPage() {
                                 description="Bàn này chưa gọi món nào, hoặc các món đã phục vụ xong."
                             />
                         ) : (
-                            <table className="rk-table rk-table--compact">
-                                <thead>
-                                    <tr>
-                                        <th>Món</th>
-                                        <th>SL</th>
-                                        <th>Đơn giá</th>
-                                        <th>Trạng thái</th>
-                                    </tr>
-                                </thead>
+                            <div className="rk-tablewrap" tabIndex={0}>
+                                {/* Hop cuon: o 320px bang rong hon khung.
+                                    tabIndex de ban phim cuon ngang duoc. */}
+                                <table className="rk-table rk-table--compact">
+                                    <thead>
+                                        <tr>
+                                            <th>Món</th>
+                                            <th>SL</th>
+                                            <th>Đơn giá</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
 
-                                <tbody>
-                                    {orderItems.map((item) => (
-                                        <tr key={item.orderItemId}>
-                                            <td>
-                                                {item.dishName}
+                                    <tbody>
+                                        {orderItems.map((item) => (
+                                            <tr key={item.orderItemId}>
+                                                <td>
+                                                    {item.dishName}
 
-                                                {item.note && (
-                                                    <div className="rk-subnote">
-                                                        {item.note}
-                                                    </div>
-                                                )}
-
-                                                {item.status === 'CANCELLED' &&
-                                                    item.cancelReason && (
-                                                        <div className="rk-subnote rk-subnote--alert">
-                                                            Lý do hủy: {item.cancelReason}
+                                                    {item.note && (
+                                                        <div className="rk-subnote">
+                                                            {item.note}
                                                         </div>
                                                     )}
 
-                                                {item.chefInternalNote && (
-                                                    <div className="rk-subnote rk-subnote--busy">
-                                                        Chef: {item.chefInternalNote}
-                                                    </div>
-                                                )}
-                                            </td>
+                                                    {item.status === 'CANCELLED' &&
+                                                        item.cancelReason && (
+                                                            <div className="rk-subnote rk-subnote--alert">
+                                                                Lý do hủy:{' '}
+                                                                {item.cancelReason}
+                                                            </div>
+                                                        )}
 
-                                            <td>{item.quantity}</td>
+                                                    {item.chefInternalNote && (
+                                                        <div className="rk-subnote rk-subnote--busy">
+                                                            Chef: {item.chefInternalNote}
+                                                        </div>
+                                                    )}
+                                                </td>
 
-                                            <td>{fmtPrice(item.unitPrice)}</td>
+                                                <td>{item.quantity}</td>
 
-                                            <td>
-                                                <span
-                                                    className={`rk-chip ${statusChipClass(item.status)}`}
-                                                >
-                                                    {statusLabel(item.status)}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                <td>{fmtPrice(item.unitPrice)}</td>
+
+                                                <td>
+                                                    <span
+                                                        className={`rk-chip ${statusChipClass(item.status)}`}
+                                                    >
+                                                        {statusLabel(item.status)}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </div>
                 </div>

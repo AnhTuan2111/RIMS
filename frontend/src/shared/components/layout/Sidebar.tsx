@@ -17,6 +17,7 @@ import {
     Users,
     Utensils,
     Wallet,
+    X,
 } from 'lucide-react'
 
 import {Fragment} from 'react'
@@ -57,7 +58,13 @@ function MenuIcon({path}: {path: string}) {
     return <Dot {...props} />
 }
 
-export function Sidebar() {
+type SidebarProps = {
+    /** Dưới 60rem thanh bên là ngăn kéo; cờ này quyết định nó đang trượt ra hay ẩn. */
+    open: boolean
+    onClose: () => void
+}
+
+export function Sidebar({open, onClose}: SidebarProps) {
     const {actor} = useActor()
     const {profile} = useRestaurant()
     const menus = roleMenus[actor] ?? []
@@ -73,7 +80,16 @@ export function Sidebar() {
         : null
 
     return (
-        <aside className="rk-shell__side">
+        <aside className={`rk-shell__side${open ? ' is-open' : ''}`}>
+            <button
+                type="button"
+                className="rk-shell__close"
+                aria-label="Đóng menu"
+                onClick={onClose}
+            >
+                <X className="rk-icon" aria-hidden="true" />
+            </button>
+
             <div className="rk-shell__brand">
                 <div className="rk-shell__logo">
                     {actor === RoleType.CUSTOMER ? brandInitial : 'R'}
