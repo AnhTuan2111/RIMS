@@ -402,8 +402,8 @@ export default function DishListPage() {
                                             disabled={updatingDishId === dishItem.dishId}
                                             className={
                                                 dishItem.available
-                                                    ? 'secondary-button'
-                                                    : 'primary-button'
+                                                    ? 'rk-btn rk-btn--quiet'
+                                                    : 'rk-btn rk-btn--primary'
                                             }
                                             onClick={() => {
                                                 handleToggleDish(dishItem).catch(

@@ -1,10 +1,10 @@
 import {useCallback, useEffect, useRef, useState, type CSSProperties} from 'react'
 
-import * as adminApi from '@/shared/api/admin'
-import * as customerApi from '@/shared/api/customer'
+import * as meApi from '@/shared/api/me'
 import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
+import {PasswordInput} from '@/shared/components/ui'
 
 type StoredUser = {
     userId: number
@@ -140,7 +140,7 @@ export default function ProfilePage() {
             }
 
             try {
-                const profile = await customerApi.getMyProfile(signal)
+                const profile = await meApi.getMyProfile(signal)
 
                 if (signal?.aborted) {
                     return
@@ -211,17 +211,9 @@ export default function ProfilePage() {
                 phone,
             }
 
-            let updated
-            if (isCustomer) {
-                updated = await customerApi.updateMyProfile({
-                    fullName,
-                    username,
-                    email,
-                    phone,
-                })
-            } else {
-                updated = await adminApi.updateProfile(userId, data)
-            }
+            // Một đường duy nhất cho mọi vai trò. Trước đây nhân viên đi qua
+            // endpoint của Quản trị, nên Bếp, Phục vụ và Thu ngân nhận 403.
+            const updated = await meApi.updateMyProfile(data)
             const nextUser: StoredUser = {
                 ...currentUser,
                 userId:
@@ -272,7 +264,7 @@ export default function ProfilePage() {
         setPwError(null)
 
         try {
-            await customerApi.changePassword({
+            await meApi.changePassword({
                 currentPassword: currentPw,
                 newPassword: newPw,
             })
@@ -429,73 +421,74 @@ export default function ProfilePage() {
                 )}
             </div>
 
-            {isCustomer && (
-                <div style={passwordCardStyle}>
-                    <div style={passwordHeaderStyle}>
-                        <div>
-                            <h3 style={passwordTitleStyle}>Đổi mật khẩu</h3>
+            {/* Mọi vai trò đều phải tự đổi được mật khẩu của mình. Trước đây
+                khối này chỉ hiện cho khách hàng, nên nhân viên muốn đổi phải
+                nhờ quản trị viên sửa thẳng trong cơ sở dữ liệu. */}
+            <div style={passwordCardStyle}>
+                <div style={passwordHeaderStyle}>
+                    <div>
+                        <h3 style={passwordTitleStyle}>Đổi mật khẩu</h3>
 
-                            <p style={passwordSubtitleStyle}>
-                                Cập nhật mật khẩu để bảo mật tài khoản
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            className={
-                                showChangePw ? 'secondary-button' : 'primary-button'
-                            }
-                            onClick={() => {
-                                setShowChangePw(!showChangePw)
-                                setPwError(null)
-                            }}
-                        >
-                            {showChangePw ? 'Hủy' : 'Đổi mật khẩu'}
-                        </button>
+                        <p style={passwordSubtitleStyle}>
+                            Cập nhật mật khẩu để bảo mật tài khoản
+                        </p>
                     </div>
 
-                    {showChangePw && (
-                        <div style={passwordFormStyle}>
-                            <EditField
-                                label="Mật khẩu hiện tại *"
-                                type="password"
-                                value={currentPw}
-                                placeholder="••••••"
-                                onChange={setCurrentPw}
-                            />
-
-                            <EditField
-                                label="Mật khẩu mới *"
-                                type="password"
-                                value={newPw}
-                                placeholder="Tối thiểu 6 ký tự"
-                                onChange={setNewPw}
-                            />
-
-                            <EditField
-                                label="Xác nhận mật khẩu mới *"
-                                type="password"
-                                value={confirmPw}
-                                placeholder="Nhập lại mật khẩu mới"
-                                onChange={setConfirmPw}
-                            />
-
-                            {pwError && <div className="auth-error">{pwError}</div>}
-
-                            <div style={passwordActionStyle}>
-                                <button
-                                    type="button"
-                                    className="rk-btn rk-btn--primary"
-                                    disabled={pwLoading}
-                                    onClick={() => void handleChangePassword()}
-                                >
-                                    {pwLoading ? 'Đang xử lý…' : 'Xác nhận đổi mật khẩu'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    <button
+                        type="button"
+                        className={`rk-btn ${
+                            showChangePw ? 'rk-btn--quiet' : 'rk-btn--primary'
+                        }`}
+                        onClick={() => {
+                            setShowChangePw(!showChangePw)
+                            setPwError(null)
+                        }}
+                    >
+                        {showChangePw ? 'Hủy' : 'Đổi mật khẩu'}
+                    </button>
                 </div>
-            )}
+
+                {showChangePw && (
+                    <div style={passwordFormStyle}>
+                        <EditField
+                            label="Mật khẩu hiện tại *"
+                            type="password"
+                            value={currentPw}
+                            placeholder="••••••"
+                            onChange={setCurrentPw}
+                        />
+
+                        <EditField
+                            label="Mật khẩu mới *"
+                            type="password"
+                            value={newPw}
+                            placeholder="Tối thiểu 6 ký tự"
+                            onChange={setNewPw}
+                        />
+
+                        <EditField
+                            label="Xác nhận mật khẩu mới *"
+                            type="password"
+                            value={confirmPw}
+                            placeholder="Nhập lại mật khẩu mới"
+                            onChange={setConfirmPw}
+                        />
+
+                        {pwError && <div className="auth-error">{pwError}</div>}
+
+                        <div style={passwordActionStyle}>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--primary"
+                                disabled={pwLoading}
+                                onClick={() => void handleChangePassword()}
+                            >
+                                {pwLoading ? 'Đang xử lý…' : 'Xác nhận đổi mật khẩu'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
@@ -540,87 +533,27 @@ function EditField({
     pattern?: string
     type?: string
 }) {
-    const [visible, setVisible] = useState(false)
-
-    const isPassword = type === 'password'
-
-    const inputType = isPassword ? (visible ? 'text' : 'password') : type
-
     return (
-        <label style={editFieldStyle}>
-            {label}
+        <label className="rk-field">
+            <span className="rk-field__label">{label}</span>
 
-            <div style={editInputWrapperStyle}>
+            {type === 'password' ? (
+                <PasswordInput
+                    value={value}
+                    placeholder={placeholder}
+                    onChange={onChange}
+                />
+            ) : (
                 <input
-                    type={inputType}
+                    className="rk-input"
+                    type={type}
                     value={value}
                     placeholder={placeholder}
                     pattern={pattern}
-                    style={{
-                        ...editInputStyle,
-                        padding: isPassword ? '10px 40px 10px 12px' : '10px 12px',
-                    }}
                     onChange={(event) => onChange(event.target.value)}
                 />
-
-                {isPassword && (
-                    <button
-                        type="button"
-                        aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                        title={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                        style={eyeButtonStyle}
-                        onClick={() => setVisible((current) => !current)}
-                        onMouseEnter={(event) => {
-                            event.currentTarget.style.color = 'var(--rims-brand)'
-                            event.currentTarget.style.backgroundColor =
-                                'var(--rims-brand-soft)'
-                        }}
-                        onMouseLeave={(event) => {
-                            event.currentTarget.style.color = 'var(--rims-ink-3)'
-                            event.currentTarget.style.backgroundColor = 'transparent'
-                        }}
-                    >
-                        {visible ? <EyeOffIcon /> : <EyeIcon />}
-                    </button>
-                )}
-            </div>
+            )}
         </label>
-    )
-}
-
-function EyeIcon() {
-    return (
-        <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-        </svg>
-    )
-}
-
-function EyeOffIcon() {
-    return (
-        <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.62 21.62 0 0 1 5.06-6.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.36M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-            <line x1="1" y1="1" x2="23" y2="23" />
-        </svg>
     )
 }
 
@@ -743,43 +676,4 @@ const profileFieldLabelStyle: CSSProperties = {
 const profileFieldValueStyle: CSSProperties = {
     fontWeight: 500,
     fontSize: '14px',
-}
-
-const editFieldStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: 'var(--rims-ink-2)',
-}
-
-const editInputWrapperStyle: CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-}
-
-const editInputStyle: CSSProperties = {
-    width: '100%',
-    boxSizing: 'border-box',
-    border: '1px solid var(--rims-line-strong)',
-    borderRadius: '8px',
-    fontSize: '14px',
-}
-
-const eyeButtonStyle: CSSProperties = {
-    position: 'absolute',
-    right: 6,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 28,
-    height: 28,
-    background: 'transparent',
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-    color: 'var(--rims-ink-3)',
-    transition: 'color 0.15s ease, background-color 0.15s ease',
 }

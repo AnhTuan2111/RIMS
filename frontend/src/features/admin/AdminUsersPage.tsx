@@ -1,13 +1,7 @@
 import {X} from 'lucide-react'
 
-import {
-    DR,
-    ErrBox,
-    Field,
-    FieldGroup,
-    PasswordInput,
-} from '@/features/admin/users/UserFormControls'
-import {Modal} from '@/shared/components/ui'
+import {DR, ErrBox, Field, FieldGroup} from '@/features/admin/users/UserFormControls'
+import {Modal, PasswordInput} from '@/shared/components/ui'
 import {ROLE_COLORS, ROLE_LABELS, STAFF_ROLES} from '@/features/admin/users/constants'
 import type {ModalType, Tab} from '@/features/admin/users/constants'
 import {btn, ghostBtn, gridCols} from '@/features/admin/users/styles'

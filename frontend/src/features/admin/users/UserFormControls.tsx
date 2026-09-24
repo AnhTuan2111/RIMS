@@ -1,34 +1,28 @@
-import {useState} from 'react'
 import type {ReactNode} from 'react'
 
+/**
+ * Các mảnh biểu mẫu của màn Quản lý tài khoản.
+ *
+ * <p>Trước đây mỗi mảnh tự dựng bằng inline style với cỡ chữ và khoảng đệm
+ * riêng, nên cùng một loại trường mà mỗi hộp thoại trông một kiểu. Nay chỉ còn
+ * là lớp bọc mỏng quanh các class của bộ kit.
+ */
 export function FieldGroup({children}: {children: ReactNode}) {
-    return (
-        <div
-            style={{display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 16}}
-        >
-            {children}
-        </div>
-    )
+    return <div className="rk-fieldgroup">{children}</div>
 }
 
 export function Field({label, children}: {label: string; children: ReactNode}) {
     return (
-        <label
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-                fontSize: 14,
-                fontWeight: 500,
-                color: 'var(--rims-ink-2)',
-            }}
-        >
-            {label}
+        <label className="rk-field">
+            <span className="rk-field__label">{label}</span>
             {children}
         </label>
     )
 }
 
+/**
+ * Một dòng trong bảng "chi tiết tài khoản": nhãn bên trái, giá trị bên phải.
+ */
 export function DR({
     label,
     value,
@@ -36,30 +30,14 @@ export function DR({
 }: {
     label: string
     value: string
+    /** Token màu cho giá trị, ví dụ khi muốn tô trạng thái. */
     color?: string
 }) {
     return (
-        <div
-            style={{
-                display: 'flex',
-                padding: '10px 0',
-                borderBottom: '1px solid var(--rims-line)',
-                gap: 16,
-            }}
-        >
-            <span
-                style={{
-                    width: 140,
-                    color: 'var(--rims-ink-3)',
-                    fontSize: 13,
-                    flexShrink: 0,
-                }}
-            >
-                {label}
-            </span>
-            <span
-                style={{fontWeight: 500, fontSize: 14, color: color ?? 'var(--rims-ink)'}}
-            >
+        <div className="rk-detailrow">
+            <span className="rk-detailrow__label">{label}</span>
+
+            <span className="rk-detailrow__value" style={color ? {color} : undefined}>
                 {value}
             </span>
         </div>
@@ -67,106 +45,5 @@ export function DR({
 }
 
 export function ErrBox({msg}: {msg: string}) {
-    return (
-        <div className="auth-error" style={{margin: '0 0 4px'}}>
-            {msg}
-        </div>
-    )
-}
-
-export function PasswordInput({
-    value,
-    onChange,
-    placeholder,
-}: {
-    value: string
-    onChange: (v: string) => void
-    placeholder?: string
-}) {
-    const [visible, setVisible] = useState(false)
-    return (
-        <div style={{position: 'relative', display: 'flex', alignItems: 'center'}}>
-            <input
-                type={visible ? 'text' : 'password'}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                style={{
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    padding: '9px 40px 9px 12px',
-                    border: '1px solid var(--rims-line-strong)',
-                    borderRadius: 8,
-                    fontSize: 14,
-                }}
-            />
-            <button
-                type="button"
-                onClick={() => setVisible((v) => !v)}
-                aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                title={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                style={{
-                    position: 'absolute',
-                    right: 6,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 28,
-                    height: 28,
-                    background: 'transparent',
-                    border: 'none',
-                    borderRadius: 6,
-                    cursor: 'pointer',
-                    color: 'var(--rims-ink-3)',
-                    transition: 'color 0.15s ease, background-color 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.color = 'var(--rims-brand)'
-                    e.currentTarget.style.backgroundColor = 'var(--rims-brand-soft)'
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'var(--rims-ink-3)'
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-            >
-                {visible ? <EyeOffIcon /> : <EyeIcon />}
-            </button>
-        </div>
-    )
-}
-
-export function EyeIcon() {
-    return (
-        <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-        </svg>
-    )
-}
-
-export function EyeOffIcon() {
-    return (
-        <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.62 21.62 0 0 1 5.06-6.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.36M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-            <line x1="1" y1="1" x2="23" y2="23" />
-        </svg>
-    )
+    return <p className="rk-formerror">{msg}</p>
 }

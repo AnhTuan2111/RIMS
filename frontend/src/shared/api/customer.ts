@@ -1,17 +1,4 @@
 ﻿import {apiClient} from './client'
-import type {UserResponse} from '@/shared/types/auth'
-
-export interface UpdateProfileRequest {
-    username: string
-    fullName: string
-    email: string
-    phone: string
-}
-
-export interface ChangePasswordRequest {
-    currentPassword: string
-    newPassword: string
-}
 
 // ===== Reservation Types =====
 export interface CustomerCreateReservationRequest {
@@ -46,25 +33,6 @@ export interface RestaurantTable {
 export interface TimeRangeResponse {
     start: string
     end: string
-}
-
-// ===== Profile APIs =====
-export async function getMyProfile(signal?: AbortSignal): Promise<UserResponse> {
-    const response = await apiClient.get<UserResponse>('/customer/profile', {
-        signal,
-    })
-
-    return response.data
-}
-
-export async function updateMyProfile(data: UpdateProfileRequest): Promise<UserResponse> {
-    const response = await apiClient.put<UserResponse>('/customer/profile', data)
-
-    return response.data
-}
-
-export async function changePassword(data: ChangePasswordRequest): Promise<void> {
-    await apiClient.post('/customer/change-password', data)
 }
 
 // ===== Reservation APIs =====

@@ -13,12 +13,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.reservation.CustomerCreateReservationRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.ChangePasswordRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.CustomerReservationResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.RestaurantTableResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.reservation.TimeRangeResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CustomerService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
@@ -32,29 +29,9 @@ public class CustomerController
     private final UserService userService;
     private final CustomerService customerService;
 
-    // ========== Profile Management ==========
-    @GetMapping("/profile")
-    public UserResponse getMyProfile(@AuthenticationPrincipal UserPrincipal principal)
-    {
-        return userService.getAccountDetail(principal.getId());
-    }
-
-    @PutMapping("/profile")
-    public UserResponse updateMyProfile(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody @Valid UpdateAccountRequest request)
-    {
-        return userService.updateAccount(principal.getId(), request);
-    }
-
-    @PostMapping("/change-password")
-    public ResponseEntity<Void> changePassword(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody @Valid ChangePasswordRequest request)
-    {
-        userService.changePassword(principal, request);
-        return ResponseEntity.noContent().build();
-    }
+    // Hồ sơ cá nhân đã chuyển sang MeController (/rims/me): ba thao tác đó
+    // không có gì riêng của khách hàng, mà để ở đây thì bốn vai trò còn lại
+    // không dùng được.
 
     // ========== Table Management for Customer ==========
     @GetMapping("/tables/available")

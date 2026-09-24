@@ -663,6 +663,76 @@ table,
     color: var(--rims-ink-3);
 }
 
+/* Nhóm trường trong một hộp thoại. */
+.rk-fieldgroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+}
+
+/* Dòng "nhãn — giá trị" trong bảng chi tiết. */
+.rk-detailrow {
+    display: flex;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-3) 0;
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-detailrow:last-child {
+    border-bottom: 0;
+}
+
+.rk-detailrow__label {
+    flex: none;
+    width: 140px;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-detailrow__value {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-medium);
+}
+
+/* Ô mật khẩu: nút hiện/ẩn nằm đè lên mép phải của ô nhập. */
+.rk-passwordfield {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.rk-passwordfield .rk-input {
+    padding-right: calc(var(--rims-space-8) + var(--rims-space-2));
+}
+
+.rk-passwordfield__toggle {
+    position: absolute;
+    right: var(--rims-space-2);
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--rims-radius-md);
+    background: transparent;
+    color: var(--rims-ink-3);
+    cursor: pointer;
+    transition:
+        color var(--rims-dur-short) var(--rims-ease-out),
+        background-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-passwordfield__toggle:hover {
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-passwordfield__toggle:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
 .rk-formerror {
     margin: 0;
     padding: var(--rims-space-3) var(--rims-space-4);
