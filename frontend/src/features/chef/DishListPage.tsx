@@ -359,69 +359,83 @@ export default function DishListPage() {
             ) : (
                 <>
                     <PageCard>
-                        <div className="simple-table chef-dish-table">
-                            <div className="simple-table-header">
-                                <span>Tên món</span>
-                                <span>Danh mục</span>
-                                <span>Giá bán</span>
-                                <span>Trạng thái</span>
-                                <span>Thao tác</span>
-                            </div>
+                        <div className="rk-tablewrap">
+                            <table className="rk-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Tên món</th>
+                                        <th scope="col">Danh mục</th>
+                                        <th scope="col" className="rk-th--num">
+                                            Giá bán
+                                        </th>
+                                        <th scope="col">Trạng thái</th>
+                                        <th scope="col">Thao tác</th>
+                                    </tr>
+                                </thead>
 
-                            {paginatedDishes.map((dishItem) => (
-                                <div className="simple-table-row" key={dishItem.dishId}>
-                                    <span className="dish-name-cell">
-                                        <strong>{dishItem.dishName}</strong>
-                                    </span>
+                                <tbody>
+                                    {paginatedDishes.map((dishItem) => (
+                                        <tr key={dishItem.dishId}>
+                                            <td>
+                                                <strong>{dishItem.dishName}</strong>
+                                            </td>
 
-                                    <span>
-                                        <span className="rk-tag">
-                                            {dishItem.category}
-                                        </span>
-                                    </span>
+                                            <td>
+                                                <span className="rk-tag">
+                                                    {dishItem.category}
+                                                </span>
+                                            </td>
 
-                                    <span className="dish-price">
-                                        {formatCurrency(dishItem.price)}
-                                    </span>
+                                            <td className="rk-td--num">
+                                                {formatCurrency(dishItem.price)}
+                                            </td>
 
-                                    <span>
-                                        <span
-                                            className={
-                                                dishItem.available
-                                                    ? 'rk-chip rk-chip--ok'
-                                                    : 'rk-chip rk-chip--alert'
-                                            }
-                                        >
-                                            {dishItem.available ? 'Đang bán' : 'Tạm hết'}
-                                        </span>
-                                    </span>
+                                            <td>
+                                                <span
+                                                    className={
+                                                        dishItem.available
+                                                            ? 'rk-chip rk-chip--ok'
+                                                            : 'rk-chip rk-chip--alert'
+                                                    }
+                                                >
+                                                    {dishItem.available
+                                                        ? 'Đang bán'
+                                                        : 'Tạm hết'}
+                                                </span>
+                                            </td>
 
-                                    <span>
-                                        <button
-                                            type="button"
-                                            disabled={updatingDishId === dishItem.dishId}
-                                            className={
-                                                dishItem.available
-                                                    ? 'rk-btn rk-btn--quiet'
-                                                    : 'rk-btn rk-btn--primary'
-                                            }
-                                            onClick={() => {
-                                                handleToggleDish(dishItem).catch(
-                                                    (requestError) => {
-                                                        console.error(requestError)
-                                                    },
-                                                )
-                                            }}
-                                        >
-                                            {updatingDishId === dishItem.dishId
-                                                ? 'Đang cập nhật…'
-                                                : dishItem.available
-                                                  ? 'Tạm hết'
-                                                  : 'Mở bán'}
-                                        </button>
-                                    </span>
-                                </div>
-                            ))}
+                                            <td>
+                                                <button
+                                                    type="button"
+                                                    disabled={
+                                                        updatingDishId === dishItem.dishId
+                                                    }
+                                                    className={
+                                                        dishItem.available
+                                                            ? 'rk-btn rk-btn--quiet'
+                                                            : 'rk-btn rk-btn--primary'
+                                                    }
+                                                    onClick={() => {
+                                                        handleToggleDish(dishItem).catch(
+                                                            (requestError) => {
+                                                                console.error(
+                                                                    requestError,
+                                                                )
+                                                            },
+                                                        )
+                                                    }}
+                                                >
+                                                    {updatingDishId === dishItem.dishId
+                                                        ? 'Đang cập nhật…'
+                                                        : dishItem.available
+                                                          ? 'Tạm hết'
+                                                          : 'Mở bán'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </PageCard>
 

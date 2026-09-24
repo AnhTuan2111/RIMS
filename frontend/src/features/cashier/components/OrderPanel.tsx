@@ -453,54 +453,41 @@ export default function OrderPanel({
                 </p>
             ) : (
                 <div>
-                    <div
-                        className="simple-table"
-                        style={{
-                            display: 'grid',
-                            minWidth: 0,
-                            width: '100%',
-                        }}
-                    >
-                        <div className="simple-table-header" style={orderHeaderStyle}>
-                            <span style={cellStyle}>Món ăn</span>
-                            <span style={cellStyle}>SL</span>
-                            <span
-                                style={{
-                                    ...cellStyle,
-                                    textAlign: 'right',
-                                }}
-                            >
-                                Thành tiền
-                            </span>
-                        </div>
+                    {itemsList.length === 0 ? (
+                        <p className="rk-note">
+                            Bàn hiện tại chưa có món nào hoàn thành.
+                        </p>
+                    ) : (
+                        <div className="rk-tablewrap rk-tablewrap--scroll">
+                            <table className="rk-table rk-table--compact">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Món ăn</th>
+                                        <th scope="col" className="rk-th--num">
+                                            SL
+                                        </th>
+                                        <th scope="col" className="rk-th--num">
+                                            Thành tiền
+                                        </th>
+                                    </tr>
+                                </thead>
 
-                        <div style={orderListStyle}>
-                            {itemsList.length === 0 ? (
-                                <p style={emptyItemsStyle}>
-                                    Bàn hiện tại chưa có món nào hoàn thành.
-                                </p>
-                            ) : (
-                                itemsList.map((item, index) => (
-                                    <div
-                                        key={`${item.dishName}-${index}`}
-                                        className="simple-table-row"
-                                        style={orderRowStyle}
-                                    >
-                                        <span style={cellStyle}>{item.dishName}</span>
-                                        <span style={cellStyle}>x{item.quantity}</span>
-                                        <span
-                                            style={{
-                                                ...cellStyle,
-                                                textAlign: 'right',
-                                            }}
-                                        >
-                                            {formatCurrency(item.subTotal)}
-                                        </span>
-                                    </div>
-                                ))
-                            )}
+                                <tbody>
+                                    {itemsList.map((item, index) => (
+                                        <tr key={`${item.dishName}-${index}`}>
+                                            <td>{item.dishName}</td>
+                                            <td className="rk-td--num">
+                                                x{item.quantity}
+                                            </td>
+                                            <td className="rk-td--num">
+                                                {formatCurrency(item.subTotal)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
+                    )}
 
                     <div style={summaryBoxStyle}>
                         <div style={summaryLinesStyle}>
@@ -707,35 +694,6 @@ const pointsInputStyle: CSSProperties = {
     boxSizing: 'border-box',
 }
 
-const orderHeaderStyle: CSSProperties = {
-    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
-    display: 'grid',
-    fontWeight: 'bold',
-    borderBottom: '1px solid var(--rims-line-strong)',
-    paddingBottom: '4px',
-    minWidth: 0,
-}
-
-const orderListStyle: CSSProperties = {
-    maxHeight: '220px',
-    overflowY: 'auto',
-    margin: '0.5rem 0',
-}
-
-const emptyItemsStyle: CSSProperties = {
-    textAlign: 'center',
-    color: 'var(--rims-ink-3)',
-    margin: '1rem 0',
-}
-
-const orderRowStyle: CSSProperties = {
-    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
-    display: 'grid',
-    padding: '6px 0',
-    borderBottom: '1px dashed var(--rims-line)',
-    minWidth: 0,
-}
-
 const summaryBoxStyle: CSSProperties = {
     marginTop: '1rem',
     paddingTop: '0.75rem',
@@ -772,11 +730,4 @@ const lockErrorBoxStyle: CSSProperties = {
     color: 'var(--rims-alert)',
     fontSize: '0.9rem',
     lineHeight: 1.4,
-}
-
-const cellStyle: CSSProperties = {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    minWidth: 0,
 }

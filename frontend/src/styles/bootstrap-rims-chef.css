@@ -208,68 +208,6 @@
 }
 
 /* =========================
-   DISH TABLE
-========================= */
-
-.chef-page .simple-table {
-    width: 100%;
-    display: grid;
-    gap: 8px;
-}
-
-.chef-page .chef-dish-table {
-    overflow-x: auto;
-}
-
-.chef-page .chef-dish-table .simple-table-header,
-.chef-page .chef-dish-table .simple-table-row,
-.app-content .chef-page .chef-dish-table .simple-table-header,
-.app-content .chef-page .chef-dish-table .simple-table-row {
-    min-width: 760px;
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 0.9fr 0.9fr;
-    gap: 14px;
-    align-items: center;
-}
-
-.chef-page .chef-dish-table .simple-table-header {
-    padding: 0 16px 10px;
-    color: var(--chef-muted);
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-}
-
-.chef-page .chef-dish-table .simple-table-row {
-    padding: 15px 16px;
-    border: 1px solid var(--chef-border);
-    border-radius: 13px;
-    background: var(--rims-surface);
-    color: var(--rims-ink-2);
-    font-size: 14px;
-    transition:
-        border-color 0.18s ease,
-        background 0.18s ease,
-        transform 0.18s ease;
-}
-
-.chef-page .chef-dish-table .simple-table-row:hover {
-    border-color: var(--rims-brand-line);
-    background: var(--rims-brand-soft);
-    transform: translateY(-1px);
-}
-
-.chef-page .chef-dish-table .simple-table-row > span:first-child {
-    color: var(--chef-text);
-    font-weight: 800;
-}
-
-.chef-page .chef-dish-table .simple-table-row > span:last-child {
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* =========================
    COMPLETED ORDERS
 ========================= */
 
@@ -662,22 +600,6 @@
 
 /* Mobile */
 @media (max-width: 650px) {
-}
-.dish-name-cell {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-}
-
-.dish-name-cell strong {
-    color: var(--rims-ink);
-    font-size: 14px;
-    font-weight: 800;
-    line-height: 1.4;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 /* =========================================================
    NEW KITCHEN ORDER SOUND

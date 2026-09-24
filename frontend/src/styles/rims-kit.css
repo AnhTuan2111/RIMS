@@ -1989,3 +1989,22 @@ textarea.rk-input {
     margin-left: auto;
     background: transparent;
 }
+
+/* Cột số trong bảng: căn phải và chữ thẳng cột để so sánh được theo chiều dọc. */
+.rk-table .rk-td--num,
+.rk-table .rk-th--num {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.rk-table .rk-th--num {
+    font-family: var(--rims-font-sans);
+}
+
+/* Vùng cuộn dọc cho bảng dài nằm trong hộp thoại. */
+.rk-tablewrap--scroll {
+    max-height: 250px;
+    overflow-y: auto;
+}

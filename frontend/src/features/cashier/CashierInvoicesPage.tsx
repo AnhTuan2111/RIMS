@@ -341,91 +341,68 @@ export default function CashierInvoicesPage() {
                     description="Không có hóa đơn nào khớp bộ lọc hiện tại."
                 />
             ) : (
-                <div className="simple-table">
-                    <div className="simple-table-header" style={gridCols}>
-                        <span>Mã HĐ</span>
-                        <span>Bàn</span>
-                        <span>Giờ</span>
-                        <span>Khách hàng</span>
-                        <span>Tổng tiền</span>
-                        <span>Phương thức</span>
-                        <span>Thao tác</span>
-                    </div>
+                <div className="rk-tablewrap">
+                    <table className="rk-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Mã HĐ</th>
+                                <th scope="col">Bàn</th>
+                                <th scope="col">Giờ</th>
+                                <th scope="col">Khách hàng</th>
+                                <th scope="col" className="rk-th--num">
+                                    Tổng tiền
+                                </th>
+                                <th scope="col">Phương thức</th>
+                                <th scope="col">Thao tác</th>
+                            </tr>
+                        </thead>
 
-                    {invoices.map((invoice) => (
-                        <div
-                            className="simple-table-row"
-                            key={invoice.invoiceId}
-                            style={{
-                                ...gridCols,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <span
-                                style={{
-                                    fontWeight: 600,
-                                }}
-                            >
-                                INV-{invoice.invoiceId}
-                            </span>
+                        <tbody>
+                            {invoices.map((invoice) => (
+                                <tr key={invoice.invoiceId}>
+                                    <td>
+                                        <strong>INV-{invoice.invoiceId}</strong>
+                                    </td>
 
-                            <span>{invoice.tableNumber}</span>
+                                    <td>{invoice.tableNumber}</td>
 
-                            <span>{formatTime(invoice.invoiceDate)}</span>
+                                    <td>{formatTime(invoice.invoiceDate)}</td>
 
-                            <span
-                                style={{
-                                    color: 'var(--rims-ink-3)',
-                                    fontSize: 13,
-                                }}
-                            >
-                                {invoice.customerName ?? '—'}
-                            </span>
+                                    <td>{invoice.customerName ?? '—'}</td>
 
-                            <span
-                                style={{
-                                    fontWeight: 600,
-                                    color: 'var(--rims-alert)',
-                                }}
-                            >
-                                {formatCurrency(invoice.finalAmount)}
-                            </span>
+                                    <td className="rk-td--num">
+                                        <strong>
+                                            {formatCurrency(invoice.finalAmount)}
+                                        </strong>
+                                    </td>
 
-                            <span>
-                                <span
-                                    style={{
-                                        background:
-                                            invoice.paymentMethod === 'CASH'
-                                                ? 'var(--rims-ok-soft)'
-                                                : 'var(--rims-brand-soft)',
-                                        color:
-                                            invoice.paymentMethod === 'CASH'
-                                                ? 'var(--rims-ok)'
-                                                : 'var(--rims-brand)',
-                                        padding: '2px 8px',
-                                        borderRadius: 12,
-                                        fontSize: 11,
-                                        fontWeight: 600,
-                                    }}
-                                >
-                                    {methodLabel(invoice.paymentMethod)}
-                                </span>
-                            </span>
+                                    <td>
+                                        <span
+                                            className={
+                                                invoice.paymentMethod === 'CASH'
+                                                    ? 'rk-chip rk-chip--ok'
+                                                    : 'rk-chip rk-chip--brand'
+                                            }
+                                        >
+                                            {methodLabel(invoice.paymentMethod)}
+                                        </span>
+                                    </td>
 
-                            <span>
-                                <button
-                                    type="button"
-                                    style={btn(
-                                        'var(--rims-surface-2)',
-                                        'var(--rims-ink-2)',
-                                    )}
-                                    onClick={() => void openDetail(invoice.invoiceId)}
-                                >
-                                    Xem chi tiết
-                                </button>
-                            </span>
-                        </div>
-                    ))}
+                                    <td>
+                                        <button
+                                            type="button"
+                                            className="rk-btn"
+                                            onClick={() =>
+                                                void openDetail(invoice.invoiceId)
+                                            }
+                                        >
+                                            Xem chi tiết
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 
@@ -480,57 +457,34 @@ export default function CashierInvoicesPage() {
                     <p className="rk-modal__loading">Đang tải chi tiết…</p>
                 ) : (
                     <>
-                        <div
-                            className="simple-table"
-                            style={{
-                                marginBottom: 16,
-                                minWidth: 0,
-                            }}
-                        >
-                            <div
-                                className="simple-table-header"
-                                style={{
-                                    gridTemplateColumns:
-                                        'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
-                                    display: 'grid',
-                                    fontWeight: 'bold',
-                                    borderBottom: '1px solid var(--rims-line-strong)',
-                                    paddingBottom: '8px',
-                                    minWidth: 0,
-                                }}
-                            >
-                                <span>Món ăn</span>
-                                <span>SL</span>
-                                <span
-                                    style={{
-                                        textAlign: 'right',
-                                    }}
-                                >
-                                    Thành tiền
-                                </span>
-                            </div>
+                        <div className="rk-tablewrap rk-tablewrap--scroll">
+                            <table className="rk-table rk-table--compact">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Món ăn</th>
+                                        <th scope="col" className="rk-th--num">
+                                            SL
+                                        </th>
+                                        <th scope="col" className="rk-th--num">
+                                            Thành tiền
+                                        </th>
+                                    </tr>
+                                </thead>
 
-                            {selectedInvoice.items.map((item, index) => (
-                                <div
-                                    key={`${item.dishName}-${index}`}
-                                    style={{
-                                        gridTemplateColumns: '2fr 1fr 1fr',
-                                        display: 'grid',
-                                        padding: '6px 0',
-                                        borderBottom: '1px dashed var(--rims-line)',
-                                    }}
-                                >
-                                    <span>{item.dishName}</span>
-                                    <span>x{item.quantity}</span>
-                                    <span
-                                        style={{
-                                            textAlign: 'right',
-                                        }}
-                                    >
-                                        {formatCurrency(item.subTotal)}
-                                    </span>
-                                </div>
-                            ))}
+                                <tbody>
+                                    {selectedInvoice.items.map((item, index) => (
+                                        <tr key={`${item.dishName}-${index}`}>
+                                            <td>{item.dishName}</td>
+                                            <td className="rk-td--num">
+                                                x{item.quantity}
+                                            </td>
+                                            <td className="rk-td--num">
+                                                {formatCurrency(item.subTotal)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
 
                         <div
@@ -611,28 +565,11 @@ export default function CashierInvoicesPage() {
     )
 }
 
-const gridCols: CSSProperties = {
-    gridTemplateColumns: '1fr 0.7fr 0.7fr 1.3fr 1fr 1fr 1fr',
-}
-
 const filterInputStyle: CSSProperties = {
     padding: '8px 12px',
     border: '1px solid var(--rims-line-strong)',
     borderRadius: 8,
     fontSize: 13,
-}
-
-function btn(background: string, color: string): CSSProperties {
-    return {
-        background,
-        color,
-        border: 'none',
-        padding: '6px 12px',
-        borderRadius: 6,
-        cursor: 'pointer',
-        fontSize: 12,
-        fontWeight: 500,
-    }
 }
 
 function Row({

@@ -116,42 +116,37 @@ export default function PaymentResultManager({
             }
         >
             <div>
-                <div style={tableWrapperStyle}>
-                    <div className="simple-table" style={{minWidth: 0}}>
-                        <div className="simple-table-header" style={tableHeaderStyle}>
-                            <span style={cellStyle}>Món ăn</span>
-                            <span style={{...centerTextStyle, ...cellStyle}}>SL</span>
-                            <span style={{...rightTextStyle, ...cellStyle}}>
-                                Thành tiền
-                            </span>
-                        </div>
+                {itemsList.length === 0 ? (
+                    <p className="rk-note">Không có món ăn trong hóa đơn.</p>
+                ) : (
+                    <div className="rk-tablewrap rk-tablewrap--scroll">
+                        <table className="rk-table rk-table--compact">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Món ăn</th>
+                                    <th scope="col" className="rk-th--num">
+                                        SL
+                                    </th>
+                                    <th scope="col" className="rk-th--num">
+                                        Thành tiền
+                                    </th>
+                                </tr>
+                            </thead>
 
-                        <div style={itemsListStyle}>
-                            {itemsList.length === 0 ? (
-                                <p style={emptyItemsStyle}>
-                                    Không có món ăn trong hóa đơn.
-                                </p>
-                            ) : (
-                                itemsList.map((item, index) => (
-                                    <div
-                                        key={`${item.dishName}-${index}`}
-                                        style={tableRowStyle}
-                                    >
-                                        <span style={cellStyle}>{item.dishName}</span>
-
-                                        <span style={{...rightTextStyle, ...cellStyle}}>
-                                            {item.quantity}
-                                        </span>
-
-                                        <span style={{...rightTextStyle, ...cellStyle}}>
+                            <tbody>
+                                {itemsList.map((item, index) => (
+                                    <tr key={`${item.dishName}-${index}`}>
+                                        <td>{item.dishName}</td>
+                                        <td className="rk-td--num">{item.quantity}</td>
+                                        <td className="rk-td--num">
                                             {formatCurrency(item.subTotal)}
-                                        </span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                </div>
+                )}
 
                 <div style={summaryBoxStyle}>
                     <SummaryRow label="Tạm tính:" value={formatCurrency(beforeVat)} />
@@ -315,48 +310,6 @@ const successHintStyle: CSSProperties = {
     fontStyle: 'italic',
 }
 
-const tableWrapperStyle: CSSProperties = {
-    margin: '1.5rem 0',
-    minWidth: 0,
-}
-
-const tableHeaderStyle: CSSProperties = {
-    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
-    display: 'grid',
-    fontWeight: 'bold',
-    borderBottom: '1px solid var(--rims-line-strong)',
-    paddingBottom: '8px',
-    minWidth: 0,
-}
-
-const itemsListStyle: CSSProperties = {
-    maxHeight: '250px',
-    overflowY: 'auto',
-    paddingTop: '8px',
-}
-
-const tableRowStyle: CSSProperties = {
-    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr)',
-    display: 'grid',
-    padding: '10px 0',
-    borderBottom: '1px dashed var(--rims-line)',
-    minWidth: 0,
-}
-
-const centerTextStyle: CSSProperties = {
-    textAlign: 'center',
-}
-
-const rightTextStyle: CSSProperties = {
-    textAlign: 'right',
-}
-
-const emptyItemsStyle: CSSProperties = {
-    textAlign: 'center',
-    color: 'var(--rims-ink-3)',
-    margin: '1rem 0',
-}
-
 const summaryBoxStyle: CSSProperties = {
     background: 'var(--rims-surface-2)',
     padding: '1rem',
@@ -387,11 +340,4 @@ const paymentMethodRowStyle: CSSProperties = {
     fontSize: '0.9rem',
     color: 'var(--rims-ok)',
     fontWeight: 'bold',
-}
-
-const cellStyle: CSSProperties = {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    minWidth: 0,
 }

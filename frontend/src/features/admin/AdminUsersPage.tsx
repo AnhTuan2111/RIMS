@@ -1,10 +1,9 @@
-import {X} from 'lucide-react'
+import {Eye, KeyRound, Pencil, X} from 'lucide-react'
 
 import {DR, ErrBox, Field, FieldGroup} from '@/features/admin/users/UserFormControls'
 import {ConfirmDialog, Modal, PasswordInput} from '@/shared/components/ui'
 import {ROLE_COLORS, ROLE_LABELS, STAFF_ROLES} from '@/features/admin/users/constants'
 import type {ModalType, Tab} from '@/features/admin/users/constants'
-import {btn, ghostBtn, gridCols} from '@/features/admin/users/styles'
 import {
     isValidEmail,
     isValidPhone,
@@ -383,7 +382,11 @@ export default function AdminUsersPage() {
                     }}
                 >
                     <span>{error}</span>
-                    <button onClick={() => setError(null)} style={ghostBtn}>
+                    <button
+                        type="button"
+                        className="rk-iconbtn"
+                        onClick={() => setError(null)}
+                    >
                         <X className="rk-icon" aria-hidden="true" />
                     </button>
                 </div>
@@ -503,147 +506,151 @@ export default function AdminUsersPage() {
                     title="Đang tải danh sách tài khoản…"
                     description="Hệ thống đang lấy dữ liệu tài khoản mới nhất."
                 />
+            ) : items.length === 0 ? (
+                <EmptyState
+                    title={
+                        search || filterStatus !== 'all'
+                            ? 'Không tìm thấy tài khoản phù hợp'
+                            : 'Chưa có tài khoản nào'
+                    }
+                    description={
+                        search || filterStatus !== 'all'
+                            ? 'Hãy đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái.'
+                            : 'Tạo tài khoản mới để bắt đầu quản lý người dùng.'
+                    }
+                    action={
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--primary"
+                            onClick={() => openCreate(tab)}
+                        >
+                            + Thêm {tab === 'staff' ? 'nhân viên' : 'khách hàng'}
+                        </button>
+                    }
+                />
             ) : (
-                <div className="simple-table">
-                    <div className="simple-table-header" style={gridCols}>
-                        <span>#</span>
-                        <span>Họ tên</span>
-                        <span>Tài khoản</span>
-                        <span>Email</span>
-                        <span>Số điện thoại</span>
-                        <span>Vai trò</span>
-                        <span>Trạng thái</span>
-                        <span>Thao tác</span>
-                    </div>
+                <div className="rk-tablewrap">
+                    <table className="rk-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Họ tên</th>
+                                <th scope="col">Tài khoản</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Số điện thoại</th>
+                                <th scope="col">Vai trò</th>
+                                <th scope="col">Trạng thái</th>
+                                <th scope="col">Thao tác</th>
+                            </tr>
+                        </thead>
 
-                    {items.length === 0 ? (
-                        <EmptyState
-                            title={
-                                search || filterStatus !== 'all'
-                                    ? 'Không tìm thấy tài khoản phù hợp'
-                                    : 'Chưa có tài khoản nào'
-                            }
-                            description={
-                                search || filterStatus !== 'all'
-                                    ? 'Hãy đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái.'
-                                    : 'Tạo tài khoản mới để bắt đầu quản lý người dùng.'
-                            }
-                            action={
-                                <button
-                                    type="button"
-                                    className="rk-btn rk-btn--primary"
-                                    onClick={() => openCreate(tab)}
-                                >
-                                    + Thêm {tab === 'staff' ? 'nhân viên' : 'khách hàng'}
-                                </button>
-                            }
-                        />
-                    ) : (
-                        items.map((user, idx) => {
-                            const rc = ROLE_COLORS[user.role] ?? {
-                                bg: 'var(--rims-surface-2)',
-                                text: 'var(--rims-ink-2)',
-                            }
-                            return (
-                                <div
-                                    className="simple-table-row"
-                                    key={user.id}
-                                    style={{...gridCols, alignItems: 'center'}}
-                                >
-                                    <span
-                                        style={{color: 'var(--rims-ink-3)', fontSize: 12}}
-                                    >
-                                        {page * pageSize + idx + 1}
-                                    </span>
-                                    <span style={{fontWeight: 600}}>{user.fullName}</span>
-                                    <span
-                                        style={{color: 'var(--rims-ink-3)', fontSize: 13}}
-                                    >
-                                        {user.username}
-                                    </span>
-                                    <span
-                                        style={{color: 'var(--rims-ink-3)', fontSize: 12}}
-                                    >
-                                        {user.email ?? '—'}
-                                    </span>
-                                    <span style={{fontSize: 13}}>{user.phone}</span>
-                                    <span>
-                                        <span
-                                            style={{
-                                                background: rc.bg,
-                                                color: rc.text,
-                                                padding: '2px 8px',
-                                                borderRadius: 12,
-                                                fontSize: 11,
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            {ROLE_LABELS[user.role] ?? user.role}
-                                        </span>
-                                    </span>
-                                    <span>
-                                        <button
-                                            type="button"
-                                            className={`rk-chip ${
-                                                user.isActive
-                                                    ? 'rk-chip--ok'
-                                                    : 'rk-chip--alert'
-                                            }`}
-                                            onClick={() => void handleStatusToggle(user)}
-                                            title={
-                                                user.isActive
-                                                    ? 'Nhấn để khoá tài khoản'
-                                                    : 'Nhấn để kích hoạt tài khoản'
-                                            }
-                                        >
-                                            {user.isActive ? 'Hoạt động' : 'Đã khoá'}
-                                        </button>
-                                    </span>
-                                    <span
-                                        style={{
-                                            display: 'flex',
-                                            gap: 4,
-                                            flexWrap: 'wrap',
-                                        }}
-                                    >
-                                        <button
-                                            onClick={() => void openDetail(user)}
-                                            style={btn(
-                                                'var(--rims-surface-2)',
-                                                'var(--rims-ink-2)',
-                                            )}
-                                        >
-                                            Chi tiết
-                                        </button>
-                                        <button
-                                            onClick={() => openEdit(user)}
-                                            style={btn(
-                                                'var(--rims-brand-soft)',
-                                                'var(--rims-brand)',
-                                            )}
-                                        >
-                                            Sửa
-                                        </button>
+                        <tbody>
+                            {items.map((user, idx) => {
+                                const rc = ROLE_COLORS[user.role] ?? {
+                                    bg: 'var(--rims-surface-2)',
+                                    text: 'var(--rims-ink-2)',
+                                }
 
-                                        {/* Nhân viên không tự đổi được mật khẩu
-                                            nên quên thì phải nhờ đường này. Tài
-                                            khoản Quản trị viên không đặt lại được. */}
-                                        {user.role !== 'ADMIN' && (
-                                            <button
-                                                onClick={() => setResetTarget(user)}
-                                                style={btn(
-                                                    'var(--rims-busy-soft)',
-                                                    'var(--rims-busy)',
-                                                )}
+                                return (
+                                    <tr key={user.id}>
+                                        <td className="rk-td--num">
+                                            {page * pageSize + idx + 1}
+                                        </td>
+
+                                        <td>
+                                            <strong>{user.fullName}</strong>
+                                        </td>
+
+                                        <td>{user.username}</td>
+
+                                        <td>{user.email ?? '—'}</td>
+
+                                        <td className="rk-td--num">{user.phone}</td>
+
+                                        <td>
+                                            <span
+                                                className="rk-tag"
+                                                style={{
+                                                    background: rc.bg,
+                                                    color: rc.text,
+                                                }}
                                             >
-                                                Đặt lại mật khẩu
+                                                {ROLE_LABELS[user.role] ?? user.role}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className={`rk-chip ${
+                                                    user.isActive
+                                                        ? 'rk-chip--ok'
+                                                        : 'rk-chip--alert'
+                                                }`}
+                                                onClick={() =>
+                                                    void handleStatusToggle(user)
+                                                }
+                                                title={
+                                                    user.isActive
+                                                        ? 'Nhấn để khoá tài khoản'
+                                                        : 'Nhấn để kích hoạt tài khoản'
+                                                }
+                                            >
+                                                {user.isActive ? 'Hoạt động' : 'Đã khoá'}
                                             </button>
-                                        )}
-                                    </span>
-                                </div>
-                            )
-                        })
-                    )}
+                                        </td>
+
+                                        <td>
+                                            <div className="rk-actions">
+                                                <button
+                                                    type="button"
+                                                    className="rk-iconbtn"
+                                                    title="Xem chi tiết"
+                                                    onClick={() => void openDetail(user)}
+                                                >
+                                                    <Eye
+                                                        className="rk-icon"
+                                                        aria-hidden="true"
+                                                    />
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="rk-iconbtn rk-iconbtn--brand"
+                                                    title="Chỉnh sửa"
+                                                    onClick={() => openEdit(user)}
+                                                >
+                                                    <Pencil
+                                                        className="rk-icon"
+                                                        aria-hidden="true"
+                                                    />
+                                                </button>
+
+                                                {/* Nhân viên không tự đổi được mật khẩu
+                                                    nên quên thì phải nhờ đường này. Tài
+                                                    khoản Quản trị viên không đặt lại được. */}
+                                                {user.role !== 'ADMIN' && (
+                                                    <button
+                                                        type="button"
+                                                        className="rk-iconbtn"
+                                                        title="Đặt lại mật khẩu"
+                                                        onClick={() =>
+                                                            setResetTarget(user)
+                                                        }
+                                                    >
+                                                        <KeyRound
+                                                            className="rk-icon"
+                                                            aria-hidden="true"
+                                                        />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             )}
 
