@@ -535,8 +535,7 @@ button.rk-chip:hover {
 /* Dải gradient tím→cam chạy ngang đỉnh mọi panel. */
 .rims-page-card::before,
 .chef-page > .page-card::before,
-.rims-app-content .chef-page > .page-card::before,
-.app-content .chef-page > .page-card::before {
+.rims-app-content .chef-page > .page-card::before {
     display: none;
 }
 

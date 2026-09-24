@@ -1,5 +1,39 @@
-# Auto detect text files and perform LF normalization
+# Git lưu mọi file văn bản bằng LF trong kho.
 * text=auto
 
-backend/rms-api/mvnw text eol=lf
-backend/rms-api/*.cmd text eol=crlf
+# Kết xuất ra thư mục làm việc CŨNG bằng LF cho mã nguồn.
+#
+# Trước đây chỉ có "text=auto": trên Windows git đổi sang CRLF khi checkout,
+# trong khi Prettier cấu hình endOfLine "lf", nên vừa đổi nhánh là 110 file
+# báo sai định dạng dù nội dung không đổi.
+*.java    text eol=lf
+*.ts      text eol=lf
+*.tsx     text eol=lf
+*.js      text eol=lf
+*.jsx     text eol=lf
+*.css     text eol=lf
+*.html    text eol=lf
+*.json    text eol=lf
+*.md      text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.xml     text eol=lf
+*.sql     text eol=lf
+*.sh      text eol=lf
+
+# Script Maven: mvnw chạy bằng sh nên bắt buộc LF, còn .cmd chạy bằng
+# cmd.exe nên bắt buộc CRLF. Đường dẫn cũ ghi nhầm là "rms-api" nên hai
+# luật này chưa từng có tác dụng.
+backend/rims-api/mvnw       text eol=lf
+backend/rims-api/mvnw.cmd   text eol=crlf
+*.bat                       text eol=crlf
+
+# Ảnh và font: không đụng vào.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.woff  binary
+*.woff2 binary
