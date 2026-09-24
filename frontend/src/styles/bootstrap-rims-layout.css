@@ -755,8 +755,7 @@
 .rims-shell-theme .rims-app-content {
     background:
         radial-gradient(circle at 85% 5%, rgb(var(--rims-tint-brand) / 5%), transparent 32%),
-        radial-gradient(circle at 15% 90%, rgb(var(--rims-tint-brand) / 4%), transparent 30%),
-        var(--rims-paper);
+        radial-gradient(circle at 15% 90%, rgb(var(--rims-tint-brand) / 4%), transparent 30%), var(--rims-paper);
 }
 
 .rims-shell-theme .rims-sidebar-brand h2 {
