@@ -174,7 +174,8 @@ export interface CategoryResponse {
     isAvailable: boolean
     createdAt: string
     updatedAt: string
-    dishCount?: number
+    /** Số món thuộc danh mục, kể cả món đang ẩn. Backend tính. */
+    dishCount: number
 }
 
 export interface DishResponse {

@@ -1,0 +1,3537 @@
+/* =========================================================================
+   RIMS Kit — lớp component dùng chung cho cả 30 màn hình.
+
+   Mọi giá trị ở đây đều đi qua var(--rims-*) từ tokens.css. Không có một mã
+   màu, cỡ chữ hay khoảng cách nào viết thẳng.
+
+   Quy ước đặt tên: .rk-<khối>__<thành-phần>--<biến-thể>
+   Tiền tố "rk-" để phân biệt rõ với 818 class cũ đang còn tồn tại, nên có
+   thể chuyển từng màn một mà không sợ đụng nhau.
+   ========================================================================= */
+
+/* ---------- Nền chung và reset ----------
+
+   Trước đây phần này do reboot của Bootstrap lo, cộng một file
+   bootstrap-rims-base.css nhỏ chồng lên. Bootstrap tốn 232 KB cho đúng 20
+   lượt dùng class, và bảng biến --bs-* của nó phải được trỏ thủ công về
+   token thì chế độ tối mới không vỡ. Nay gộp vào đây, một lớp duy nhất. */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--rims-font-sans);
+    font-size: var(--rims-text-base);
+    line-height: var(--rims-leading-normal);
+    background: var(--rims-paper);
+    color: var(--rims-ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+main {
+    min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    margin-bottom: var(--rims-space-2);
+    line-height: var(--rims-leading-snug);
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: var(--rims-space-4);
+}
+
+ul,
+ol {
+    margin-top: 0;
+    margin-bottom: var(--rims-space-4);
+    padding-left: var(--rims-space-6);
+}
+
+hr {
+    margin: var(--rims-space-4) 0;
+    border: 0;
+    border-top: 1px solid var(--rims-line);
+}
+
+img,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* KHÔNG gộp svg vào luật trên: biểu tượng có width/height riêng, ép
+   height:auto là chúng bẹp xuống còn 0. */
+svg {
+    vertical-align: middle;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+legend {
+    padding: 0;
+}
+
+label {
+    display: inline-block;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+    margin: 0;
+}
+
+button {
+    cursor: pointer;
+
+    /* Nút không tự khai báo nền thì phải trong suốt. Trước đây chúng nhận nền
+       mặc định của trình duyệt — ở chế độ tối đó là xám đặc, nên chữ màu
+       thương hiệu trên nó chỉ còn 1.74:1. Class nào có đặt nền vẫn thắng luật
+       này vì độ ưu tiên cao hơn. */
+    background: transparent;
+    border: 0;
+    color: inherit;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+a {
+    color: inherit;
+}
+
+::placeholder {
+    color: var(--rims-ink-3);
+    opacity: 1;
+}
+
+/* Mọi chỗ hiện số thẳng cột: tiền, số lượng, giờ, mã đơn. */
+.rk-num {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+/* ---------- Focus: hiện tức thì, không bao giờ animate ---------- */
+
+.rk-btn:focus-visible,
+.rk-input:focus-visible,
+.rk-chip:focus-visible,
+.rk-tablecard:focus-visible,
+.rk-ticket:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+/* ---------- Nút ---------- */
+
+.rk-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-3) var(--rims-space-5);
+    border: 1px solid transparent;
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-sans);
+    font-size: var(--rims-text-base);
+    font-weight: var(--rims-weight-semibold);
+    line-height: 1;
+    /* Nút dựng bằng thẻ <a> hoặc <Link> vẫn bị trình duyệt gạch chân nếu
+       không tắt — nút thì không bao giờ gạch chân. */
+    text-decoration: none;
+    /* Nhãn nút không bao giờ xuống hai dòng. */
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background-color var(--rims-dur-short) var(--rims-ease-out),
+        border-color var(--rims-dur-short) var(--rims-ease-out),
+        color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-btn:hover:not(:disabled) {
+    background: var(--rims-surface-3);
+}
+
+.rk-btn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.rk-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.rk-btn--primary {
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-btn--primary:hover:not(:disabled) {
+    background: var(--rims-brand-hover);
+}
+
+.rk-btn--primary:active:not(:disabled) {
+    background: var(--rims-brand-active);
+}
+
+/* Hành động xác nhận tích cực: xong món, thanh toán. */
+.rk-btn--go {
+    background: var(--rims-ok);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-btn--go:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+.rk-btn--quiet {
+    background: transparent;
+    border-color: var(--rims-line-strong);
+    color: var(--rims-ink-2);
+}
+
+.rk-btn--quiet:hover:not(:disabled) {
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
+}
+
+.rk-btn--danger {
+    background: transparent;
+    border-color: var(--rims-alert-line);
+    color: var(--rims-alert);
+}
+
+.rk-btn--danger:hover:not(:disabled) {
+    background: var(--rims-alert-soft);
+}
+
+.rk-btn--lg {
+    padding: var(--rims-space-4) var(--rims-space-6);
+    font-size: var(--rims-text-lg);
+}
+
+.rk-btn--block {
+    width: 100%;
+}
+
+/* ---------- Ô nhập ---------- */
+
+.rk-input,
+.rk-select {
+    width: 100%;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-sans);
+    font-size: var(--rims-text-base);
+    transition: border-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-input::placeholder {
+    color: var(--rims-ink-3);
+}
+
+.rk-input:hover,
+.rk-select:hover {
+    border-color: var(--rims-ink-3);
+}
+
+.rk-textarea {
+    width: 100%;
+    min-height: 96px;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-sans);
+    font-size: var(--rims-text-base);
+    line-height: var(--rims-leading-normal);
+    resize: vertical;
+    transition: border-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-textarea::placeholder {
+    color: var(--rims-ink-3);
+}
+
+.rk-textarea:hover {
+    border-color: var(--rims-ink-3);
+}
+
+.rk-textarea:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+/* ---------- Hàng bộ lọc ----------
+   Ô tìm kiếm ăn phần rộng còn lại, ô chọn giữ bề ngang vừa đủ. Màn hẹp thì
+   xếp dọc, vì ba ô nằm ngang trên điện thoại thì ô nào cũng quá hẹp để đọc. */
+
+.rk-filterbar {
+    display: flex;
+    gap: var(--rims-space-4);
+    align-items: center;
+    height: 100%;
+}
+
+.rk-filterbar > .rk-input {
+    flex: 1.5 1 0;
+}
+
+.rk-filterbar > .rk-select {
+    flex: 0 1 220px;
+}
+
+/* Ô nhập nằm trong .rk-field (có nhãn riêng) cũng phải ăn phần rộng. */
+.rk-filterbar > .rk-field {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.rk-filterbar > .rk-field:has(.rk-segment) {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 768px) {
+    .rk-filterbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .rk-filterbar > .rk-select {
+        flex: none;
+    }
+}
+
+/* ---------- Nút chỉ có icon ----------
+   Dùng trong hàng của bảng: xem, sửa, xoá. Quản lý danh mục và Quản lý món
+   từng có hai bộ tên riêng cho cùng một nút. */
+
+.rk-iconbtn {
+    /* inline-grid, không phải grid: ba nút thao tác phải nằm cùng một hàng
+       trong ô của bảng, grid thường đẩy mỗi nút xuống một dòng. */
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border: 1px solid transparent;
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+    cursor: pointer;
+    transition:
+        background-color var(--rims-dur-short) var(--rims-ease-out),
+        color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-iconbtn:hover:not(:disabled) {
+    background: var(--rims-surface-3);
+    color: var(--rims-ink);
+}
+
+.rk-iconbtn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+.rk-iconbtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rk-iconbtn--brand:hover:not(:disabled) {
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-iconbtn--danger {
+    color: var(--rims-alert);
+}
+
+.rk-iconbtn--danger:hover:not(:disabled) {
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
+/* Màn hẹp: ba nút icon trên một hàng của bảng cần chỗ, nên thu nhỏ lại. */
+@media (max-width: 480px) {
+    .rk-iconbtn {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* ---------- Chip trạng thái ----------
+   Màu KHÔNG phải tín hiệu duy nhất: mỗi chip có chấm dẫn và nhãn chữ, nên
+   người mù màu vẫn đọc được trạng thái. */
+
+.rk-chip {
+    /* Trong cột flex, chip phải bó sát nội dung chứ không kéo hết chiều ngang. */
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-1) var(--rims-space-3);
+    border: 1px solid var(--rims-idle-line);
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-idle-soft);
+    color: var(--rims-idle);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.rk-chip::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--rims-radius-pill);
+    background: currentcolor;
+    flex: none;
+}
+
+.rk-chip--ok {
+    background: var(--rims-ok-soft);
+    border-color: var(--rims-ok-line);
+    color: var(--rims-ok);
+}
+
+.rk-chip--busy {
+    background: var(--rims-busy-soft);
+    border-color: var(--rims-busy-line);
+    color: var(--rims-busy);
+}
+
+.rk-chip--alert {
+    background: var(--rims-alert-soft);
+    border-color: var(--rims-alert-line);
+    color: var(--rims-alert);
+}
+
+/* Chip bấm được (bật/tắt trạng thái) phải cho thấy là bấm được. */
+button.rk-chip {
+    cursor: pointer;
+}
+
+button.rk-chip:hover {
+    filter: brightness(0.96);
+}
+
+/*
+ * Nhãn phân loại: tên danh mục, nhóm món. Không có chấm tròn vì đây không
+ * phải trạng thái — chấm tròn chỉ dành cho thứ đang thay đổi theo thời gian.
+ */
+.rk-tag {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    padding: var(--rims-space-1) var(--rims-space-3);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-medium);
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.rk-chip--idle {
+    background: var(--rims-idle-soft);
+    border-color: var(--rims-idle-line);
+    color: var(--rims-idle);
+}
+
+.rk-chip--brand {
+    background: var(--rims-brand-soft);
+    border-color: var(--rims-brand-line);
+    color: var(--rims-brand);
+}
+
+/* ---------- Phiếu món trong bếp ----------
+   Thành phần quan trọng nhất của app. Số lượng là thứ đọc được trước tiên,
+   trước cả tên món — đầu bếp nhìn từ xa phải thấy ngay "mấy phần". */
+
+.rk-ticket {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--rims-space-4);
+    align-items: start;
+    width: 100%;
+    padding: var(--rims-space-5);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    text-align: left;
+    transition: border-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-ticket:hover {
+    border-color: var(--rims-line-strong);
+}
+
+/* Khối số lượng: ô vuông đặc, chữ số cỡ 32px đậm nhất thang. */
+.rk-ticket__qty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    padding: var(--rims-space-3) var(--rims-space-2);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-ticket__qty-num {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-qty);
+    font-weight: var(--rims-weight-bold);
+    line-height: 1;
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+.rk-ticket__qty-unit {
+    margin-top: var(--rims-space-1);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    letter-spacing: var(--rims-tracking-label);
+    opacity: 0.85;
+}
+
+.rk-ticket__main {
+    min-width: 0;
+}
+
+.rk-ticket__dish {
+    margin: 0;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    line-height: var(--rims-leading-snug);
+    letter-spacing: var(--rims-tracking-tight);
+    overflow-wrap: anywhere;
+}
+
+.rk-ticket__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-2);
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+.rk-ticket__note {
+    margin-top: var(--rims-space-3);
+    padding: var(--rims-space-2) var(--rims-space-3);
+    border-radius: var(--rims-radius-sm);
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-medium);
+}
+
+.rk-ticket__actions {
+    display: flex;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-4);
+}
+
+/* ---------- Thẻ bàn ----------
+   Dùng chung cho màn phục vụ VÀ màn thu ngân — trước đây hai màn vẽ cùng 12
+   cái bàn theo hai kiểu khác nhau. */
+
+.rk-tablegrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+    gap: var(--rims-space-4);
+}
+
+.rk-tablecard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-5);
+    border: 1px solid var(--rims-line);
+    border-left: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color var(--rims-dur-short) var(--rims-ease-out),
+        background-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-tablecard:hover {
+    border-color: var(--rims-ink-3);
+}
+
+.rk-tablecard__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--rims-space-2);
+}
+
+.rk-tablecard__no {
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+    letter-spacing: var(--rims-tracking-tight);
+    line-height: 1;
+}
+
+.rk-tablecard__seats {
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+.rk-tablecard__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+}
+
+.rk-tablecard__amount {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* Trạng thái tô bằng nền nhạt + viền, không dùng sọc dày một bên. */
+.rk-tablecard--ok {
+    background: var(--rims-ok-soft);
+    border-color: var(--rims-ok-line);
+}
+
+.rk-tablecard--busy {
+    background: var(--rims-busy-soft);
+    border-color: var(--rims-busy-line);
+}
+
+/* ---------- Ô số liệu ----------
+   Không có ô icon màu mè. Nhãn nhỏ ở trên, số to ở dưới, hết. */
+
+.rk-statrow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: 1px;
+    background: var(--rims-line);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    overflow: hidden;
+}
+
+.rk-stat {
+    padding: var(--rims-space-5);
+    background: var(--rims-surface);
+}
+
+.rk-stat__label {
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    letter-spacing: var(--rims-tracking-label);
+    color: var(--rims-ink-3);
+}
+
+.rk-stat__value {
+    display: block;
+    margin-top: var(--rims-space-2);
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-tight);
+    line-height: 1.1;
+    /* Tiền không bao giờ tách ký hiệu đ xuống dòng khác. */
+    white-space: nowrap;
+}
+
+/* ---------- Thanh công cụ ---------- */
+
+.rk-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+}
+
+/* ---------- Lưới chung ---------- */
+
+.rk-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-5);
+}
+
+.rk-grid {
+    display: grid;
+    gap: var(--rims-space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+}
+
+/* ---------- Icon ----------
+   Toàn bộ icon lấy từ lucide-react, cùng một nét vẽ. Không dùng emoji. */
+
+.rk-icon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.75;
+}
+
+/* ---------- Tôn trọng người tắt hiệu ứng ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* =========================================================================
+   Dọn tàn dư của giao diện cũ.
+
+   Những quy tắc dưới đây tắt các "tell" mà audit bắt được, ở cấp độ toàn app,
+   để không phải sửa rải rác 13 file CSS cũ. Khi một màn đã chuyển hẳn sang
+   class .rk-* thì phần CSS cũ của nó xoá được và các dòng ở đây cũng bớt đi.
+   ========================================================================= */
+
+/* Dải gradient chạy ngang đỉnh mọi panel — một nét trang trí không mang
+   thông tin gì, và nó buộc thẻ phải overflow:hidden nên cắt mất lịch bật ra. */
+.chef-page > .page-card::before,
+.rims-app-content .chef-page > .page-card::before {
+    display: none;
+}
+
+/* Thẻ sọc dày một bên — thay bằng viền mảnh đều bốn cạnh. */
+.chef-dashboard-card,
+.waiter-card {
+    border-left-width: 1px;
+}
+
+/* Bề mặt trắng tinh và bóng đổ trang trí. */
+.page-card {
+    background: var(--rims-surface);
+    border-color: var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+/* Mọi cột số phải thẳng hàng. */
+table {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Bổ sung cho thẻ bàn dùng chung */
+
+.rk-tablecard--selected {
+    border-color: var(--rims-brand);
+    box-shadow: inset 0 0 0 1px var(--rims-brand);
+}
+
+.rk-tablecard__hint {
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-2);
+}
+
+.rk-tablecard__alert {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    color: var(--rims-alert);
+}
+
+.rk-tablecard__alert-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-alert);
+    flex: none;
+}
+
+/* Đã đặt trước: dùng màu thương hiệu, không dùng màu cảnh báo.
+   Đặt bàn là trạng thái đã lên lịch, không phải sự cố — màu đỏ để dành cho
+   việc thật sự cần can thiệp (bàn quá giờ, món lỗi). */
+.rk-tablecard--brand {
+    background: var(--rims-brand-soft);
+    border-color: var(--rims-brand-line);
+}
+
+/* Ô số liệu khi dùng làm nút chọn báo cáo */
+
+.rk-stat--tab {
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: background-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-stat--tab:hover {
+    background: var(--rims-surface-2);
+}
+
+.rk-stat--tab:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: -2px;
+}
+
+/* Tab đang mở: một màu nhấn duy nhất, không phải bốn màu như trước. */
+.rk-stat--active {
+    background: var(--rims-brand-soft);
+    box-shadow: inset 3px 0 0 var(--rims-brand);
+}
+
+.rk-stat--active .rk-stat__label {
+    color: var(--rims-brand);
+}
+
+/* Giá trị là CHỮ chứ không phải số (tên ca, tên danh mục) thì dùng font chữ.
+   Ép font mono lên chữ làm khoảng cách giãn ra trông như lỗi. */
+.rk-stat__value--text {
+    font-family: var(--rims-font-sans);
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+/* ---------- Biểu mẫu ---------- */
+
+.rk-formgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: var(--rims-space-5);
+}
+
+.rk-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-2);
+}
+
+.rk-field__label {
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    color: var(--rims-ink-2);
+}
+
+.rk-field__hint {
+    margin: 0;
+    font-size: var(--rims-text-xs);
+    color: var(--rims-ink-3);
+}
+
+/* Nhóm trường trong một hộp thoại. */
+.rk-fieldgroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+}
+
+/* Dòng "nhãn — giá trị" trong bảng chi tiết. */
+.rk-detailrow {
+    display: flex;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-3) 0;
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-detailrow:last-child {
+    border-bottom: 0;
+}
+
+.rk-detailrow__label {
+    flex: none;
+    width: 140px;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-detailrow__value {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-medium);
+}
+
+/* Ô mật khẩu: nút hiện/ẩn nằm đè lên mép phải của ô nhập. */
+.rk-passwordfield {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.rk-passwordfield .rk-input {
+    padding-right: calc(var(--rims-space-8) + var(--rims-space-2));
+}
+
+.rk-passwordfield__toggle {
+    position: absolute;
+    right: var(--rims-space-2);
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--rims-radius-md);
+    background: transparent;
+    color: var(--rims-ink-3);
+    cursor: pointer;
+    transition:
+        color var(--rims-dur-short) var(--rims-ease-out),
+        background-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-passwordfield__toggle:hover {
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-passwordfield__toggle:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+.rk-formerror {
+    margin: 0;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-alert-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+    font-size: var(--rims-text-sm);
+}
+
+/* Báo lưu thành công lặng lẽ, không dùng toast ăn mừng. */
+.rk-savedhint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    color: var(--rims-ok);
+}
+
+textarea.rk-input {
+    resize: vertical;
+    line-height: var(--rims-leading-normal);
+}
+
+/* ---------- Phân trang ----------
+   Một bản duy nhất cho mọi màn. Trước đây có 8 bản dựng riêng. */
+
+.rk-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-5);
+    padding-top: var(--rims-space-4);
+    border-top: 1px solid var(--rims-line);
+}
+
+.rk-pager__info {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+.rk-pager__info strong {
+    color: var(--rims-ink-2);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-pager__size {
+    width: auto;
+    padding: var(--rims-space-1) var(--rims-space-3);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-pager__pages {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-1);
+}
+
+.rk-pager__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 var(--rims-space-2);
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink-2);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-medium);
+    cursor: pointer;
+    transition:
+        background-color var(--rims-dur-short) var(--rims-ease-out),
+        border-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-pager__btn:hover:not(:disabled) {
+    background: var(--rims-surface-2);
+    border-color: var(--rims-ink-3);
+}
+
+.rk-pager__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+.rk-pager__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rk-pager__btn--current {
+    background: var(--rims-brand);
+    border-color: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-pager__gap {
+    padding: 0 var(--rims-space-1);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+}
+
+/* ---------- Thông báo trong trang ----------
+   Xếp chồng ở góc, dùng position fixed nên không đẩy nội dung trang và thông
+   báo cũ không nhúc nhích khi có cái mới xuất hiện. */
+
+.rk-toasts {
+    position: fixed;
+    right: var(--rims-space-5);
+    bottom: var(--rims-space-5);
+    z-index: var(--rims-z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-3);
+    max-width: min(420px, calc(100% - var(--rims-space-10)));
+    pointer-events: none;
+}
+
+.rk-toast {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-overlay);
+    font-size: var(--rims-text-sm);
+    pointer-events: auto;
+    animation: rk-toast-in var(--rims-dur-medium) var(--rims-ease-out);
+}
+
+@keyframes rk-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+.rk-toast--ok {
+    border-color: var(--rims-ok-line);
+    color: var(--rims-ok);
+}
+
+.rk-toast--alert {
+    border-color: var(--rims-alert-line);
+    color: var(--rims-alert);
+}
+
+.rk-toast__msg {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--rims-ink);
+    line-height: var(--rims-leading-snug);
+}
+
+.rk-toast__action {
+    flex: none;
+    padding: var(--rims-space-1) var(--rims-space-3);
+    border: 1px solid currentcolor;
+    border-radius: var(--rims-radius-md);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: var(--rims-weight-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.rk-toast__action:focus-visible,
+.rk-toast__close:focus-visible {
+    outline: var(--rims-focus-ring) solid currentcolor;
+    outline-offset: 2px;
+}
+
+.rk-toast__close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: var(--rims-radius-sm);
+    background: transparent;
+    color: var(--rims-ink-3);
+    cursor: pointer;
+}
+
+.rk-toast__close:hover {
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
+}
+
+/* ---------- Hộp thoại ---------- */
+
+.rk-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--rims-z-overlay);
+    display: grid;
+    place-items: center;
+    padding: var(--rims-space-5);
+    background: rgb(var(--rims-tint-ink) / 45%);
+    overflow-y: auto;
+}
+
+.rk-modal__panel {
+    width: 100%;
+    background: var(--rims-surface);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    box-shadow: var(--rims-shadow-overlay);
+    animation: rk-modal-in var(--rims-dur-medium) var(--rims-ease-out);
+}
+
+@keyframes rk-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+.rk-modal__panel:focus-visible {
+    outline: none;
+}
+
+.rk-modal__panel--sm {
+    max-width: 420px;
+}
+
+.rk-modal__panel--md {
+    max-width: 640px;
+}
+
+.rk-modal__panel--lg {
+    max-width: 960px;
+}
+
+.rk-modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-5) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-modal__title {
+    margin: 0;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-tight);
+    text-wrap: balance;
+}
+
+.rk-modal__desc {
+    margin: var(--rims-space-2) 0 0;
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-2);
+    line-height: var(--rims-leading-normal);
+}
+
+.rk-modal__close {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--rims-radius-md);
+    background: transparent;
+    color: var(--rims-ink-3);
+    cursor: pointer;
+}
+
+.rk-modal__close:hover {
+    background: var(--rims-surface-2);
+    color: var(--rims-ink);
+}
+
+.rk-modal__close:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+.rk-modal__body {
+    padding: var(--rims-space-6);
+
+    /* Biểu mẫu dài phải cuộn trong hộp, không đẩy hộp dài quá màn hình. */
+    max-height: calc(100vh - 14rem);
+    overflow-y: auto;
+}
+
+/*
+ * Thân hộp chia hai cột: bên trái là các trường nhập, bên phải là phần phụ
+ * trợ (ảnh minh hoạ, tóm tắt). Thu về một cột khi màn hẹp.
+ */
+.rk-modal__split {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: var(--rims-space-6);
+}
+
+.rk-modal__split > * {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+    min-width: 0;
+}
+
+.rk-modal__split > * + * {
+    padding-left: var(--rims-space-6);
+    border-left: 1px solid var(--rims-line);
+}
+
+@media (max-width: 860px) {
+    .rk-modal__split {
+        grid-template-columns: 1fr;
+    }
+
+    .rk-modal__split > * + * {
+        padding-left: 0;
+        padding-top: var(--rims-space-5);
+        border-left: 0;
+        border-top: 1px solid var(--rims-line);
+    }
+}
+
+.rk-modal__loading {
+    margin: 0;
+    padding: var(--rims-space-8) 0;
+    text-align: center;
+    color: var(--rims-ink-2);
+}
+
+.rk-modal__foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    padding: var(--rims-space-4) var(--rims-space-6) var(--rims-space-5);
+    border-top: 1px solid var(--rims-line);
+}
+
+/* Nút phá huỷ dạng đặc, dùng trong hộp xác nhận. */
+.rk-btn--danger-solid {
+    background: var(--rims-alert);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-btn--danger-solid:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+/* ---------- Nút chuyển chế độ hiển thị ----------
+   Nằm trong thanh bên, vốn luôn tối, nên dùng bộ màu trên nền tối. */
+
+.rk-themetoggle {
+    /* Nằm dưới vùng menu cuộn được. Không co lại, để mục menu cuối không bị
+       trông như bị cắt cụt. */
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: var(--rims-space-4);
+    padding: 3px;
+    border: 1px solid rgb(var(--rims-tint-hi) / 12%);
+    border-radius: var(--rims-radius-md);
+    background: rgb(var(--rims-tint-hi) / 5%);
+}
+
+.rk-themetoggle__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: var(--rims-space-2) 2px;
+    border: 0;
+    border-radius: var(--rims-radius-sm);
+    background: transparent;
+    color: var(--rims-ink-on-dark-2);
+    font: inherit;
+    font-size: var(--rims-text-xs);
+    cursor: pointer;
+    transition: background var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-themetoggle__btn:hover {
+    background: rgb(var(--rims-tint-hi) / 8%);
+    color: var(--rims-ink-on-dark);
+}
+
+.rk-themetoggle__btn[aria-pressed='true'] {
+    background: rgb(var(--rims-tint-hi) / 14%);
+    color: var(--rims-ink-on-dark);
+}
+
+.rk-themetoggle__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-gold);
+    outline-offset: 1px;
+}
+
+.rk-themetoggle__label {
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* ---------- Bảng dữ liệu ----------
+
+   Bốn màn Quản trị từng dựng bảng riêng với gần như cùng một bộ quy tắc, chỉ
+   khác vài pixel đệm. Một định nghĩa duy nhất cho thẻ <table> thật; biến thể
+   dựng bằng lưới div vẫn nằm ở .simple-table. */
+
+.rk-tablewrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+}
+
+.rk-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: var(--rims-text-sm);
+}
+
+.rk-table thead th {
+    padding: var(--rims-space-4);
+    border-bottom: 1px solid var(--rims-line);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    letter-spacing: var(--rims-tracking-label);
+    white-space: nowrap;
+}
+
+.rk-table tbody tr {
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-table tbody tr:last-child {
+    border-bottom: 0;
+}
+
+.rk-table tbody tr:hover {
+    background: var(--rims-surface-2);
+}
+
+.rk-table td {
+    padding: var(--rims-space-4);
+    color: var(--rims-ink-2);
+    vertical-align: middle;
+}
+
+/* Bảng lồng trong hộp thoại hoặc trong thẻ, chỗ hẹp hơn. */
+.rk-table--compact thead th,
+.rk-table--compact td {
+    padding: var(--rims-space-3);
+}
+
+/* ---------- Ô số liệu ----------
+
+   Trước đây mỗi màn Quản trị tự dựng một bộ (admin-menu-stat-*,
+   admin-category-stats-*, admin-dish-stats-*) nhưng cùng một bố cục. */
+
+.rk-statgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: var(--rims-space-4);
+}
+
+.rk-statcard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-5);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+}
+
+.rk-statcard__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+}
+
+/* Sắc nền cho ô cần nổi hơn phần còn lại. Chữ vẫn là màu mực thường để
+   không phải tính lại tương phản cho từng sắc. */
+.rk-statcard--brand {
+    border-color: var(--rims-brand-line);
+    background: var(--rims-brand-soft);
+}
+
+.rk-statcard--brand .rk-statcard__icon {
+    background: var(--rims-surface);
+    color: var(--rims-brand);
+}
+
+.rk-statcard--ok {
+    border-color: var(--rims-ok-line);
+    background: var(--rims-ok-soft);
+}
+
+.rk-statcard--ok .rk-statcard__icon {
+    background: var(--rims-surface);
+    color: var(--rims-ok);
+}
+
+.rk-statcard--busy {
+    border-color: var(--rims-busy-line);
+    background: var(--rims-busy-soft);
+}
+
+.rk-statcard--busy .rk-statcard__icon {
+    background: var(--rims-surface);
+    color: var(--rims-busy);
+}
+
+.rk-statcard--alert {
+    border-color: var(--rims-alert-line);
+    background: var(--rims-alert-soft);
+}
+
+.rk-statcard--alert .rk-statcard__icon {
+    background: var(--rims-surface);
+    color: var(--rims-alert);
+}
+
+/* ---------- Tiêu đề trang ----------
+   Trước đây khối này dựng bằng 11 class tiện ích của Bootstrap
+   (d-flex, align-items-start, justify-content-between, gap-3, flex-wrap,
+   min-w-0, mb-1, mb-0...) rải trong JSX, nên muốn đổi bố cục là phải sửa
+   trong file component chứ không phải trong CSS. */
+
+.rk-pagehead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+}
+
+.rk-pagehead__lead {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rims-space-4);
+
+    /* Không có min-width:0 thì tên dài đẩy hàng nút bật ra khỏi thẻ. */
+    min-width: 0;
+}
+
+.rk-pagehead__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-pagehead__body {
+    min-width: 0;
+}
+
+.rk-pagehead__eyebrow {
+    margin-bottom: var(--rims-space-1);
+    color: var(--rims-brand);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+}
+
+.rk-pagehead__title {
+    margin: 0 0 var(--rims-space-1);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+    letter-spacing: var(--rims-tracking-tight);
+    line-height: var(--rims-leading-tight);
+}
+
+.rk-pagehead__desc {
+    margin: 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-pagehead__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .rk-pagehead {
+        align-items: stretch;
+    }
+
+    .rk-pagehead__actions {
+        width: 100%;
+    }
+}
+
+/* ---------- Trạng thái rỗng · đang tải · lỗi ----------
+   Ba trạng thái dùng chung một khung: biểu tượng tròn, tiêu đề, một dòng
+   giải thích, rồi mới tới nút. Chỉ khác nhau ở màu của biểu tượng. */
+
+.rk-feedback {
+    display: grid;
+    justify-items: center;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-10) var(--rims-space-6);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    text-align: center;
+}
+
+.rk-feedback--sm {
+    padding: var(--rims-space-6) var(--rims-space-4);
+}
+
+.rk-feedback--lg {
+    padding: var(--rims-space-16) var(--rims-space-6);
+}
+
+.rk-feedback__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+}
+
+.rk-feedback__icon--alert {
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
+.rk-feedback__icon .rk-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.rk-feedback__title {
+    margin: 0 0 var(--rims-space-2);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-feedback__text {
+    margin: 0;
+    max-width: 46ch;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+/* Hai dòng giải thích liền nhau — ví dụ lời dẫn rồi mã hoá đơn — thì phải
+   tách ra, không thì dính thành một khối chữ. */
+.rk-feedback__text + .rk-feedback__text {
+    margin-top: var(--rims-space-2);
+}
+
+.rk-feedback__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-3);
+}
+
+/* ---------- Con quay ----------
+   Thay cho .spinner-border của Bootstrap. */
+
+.rk-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--rims-brand-line);
+    border-top-color: var(--rims-brand);
+    border-radius: var(--rims-radius-pill);
+    animation: rk-spin 720ms linear infinite;
+}
+
+@keyframes rk-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---------- Thẻ ----------
+   Khuôn lặp nhiều nhất trong repo: 28 tên class khác nhau cho cùng một cái
+   thẻ có tiêu đề và thân. Mỗi màn tự đặt bo góc riêng — 18px, 20px, 22px,
+   24px — nên nhìn cả app như ghép từ nhiều bản thiết kế. */
+
+.rk-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+}
+
+.rk-card--soft {
+    background: var(--rims-surface-2);
+}
+
+/* Thẻ dùng trực tiếp làm khung của một mục, không có phần đầu và thân
+   riêng. PageCard dựng ra dạng này. */
+.rk-card--pad {
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-6);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+@media (max-width: 576px) {
+    .rk-card--pad {
+        padding: var(--rims-space-4);
+    }
+}
+
+.rk-card--flush .rk-card__body {
+    padding: 0;
+}
+
+.rk-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+    padding: var(--rims-space-5) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-card__title {
+    margin: 0;
+    color: var(--rims-ink);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-card__desc {
+    margin: var(--rims-space-1) 0 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-card__body {
+    padding: var(--rims-space-6);
+}
+
+.rk-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-4) var(--rims-space-6);
+    border-top: 1px solid var(--rims-line);
+}
+
+/* ---------- Tiêu đề một mục bên trong thẻ ---------- */
+
+.rk-sectiontitle {
+    margin: 0 0 var(--rims-space-4);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-base);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* ---------- Hàng nút ---------- */
+
+.rk-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+}
+
+.rk-actions--end {
+    justify-content: flex-end;
+}
+
+/* ---------- Bảng tổng kết ----------
+   Hoá đơn, đơn hàng, chi tiết thanh toán: nhãn bên trái, số bên phải, dòng
+   cuối là tổng và được nhấn mạnh. */
+
+.rk-summary {
+    display: grid;
+    gap: var(--rims-space-2);
+}
+
+.rk-summary__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+}
+
+.rk-summary__label {
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-summary__value {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-summary__row--total {
+    margin-top: var(--rims-space-2);
+    padding-top: var(--rims-space-3);
+    border-top: 1px solid var(--rims-line);
+}
+
+.rk-summary__row--total .rk-summary__label {
+    color: var(--rims-ink);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-summary__row--total .rk-summary__value {
+    color: var(--rims-brand);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-black);
+}
+
+/* ---------- Khối ghi chú ----------
+   Một dòng giải thích hoặc cảnh báo ngay trong luồng, không phải hộp thoại. */
+
+.rk-note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-note--alert {
+    border-color: var(--rims-alert-line);
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
+.rk-note--ok {
+    border-color: var(--rims-ok-line);
+    background: var(--rims-ok-soft);
+    color: var(--rims-ok);
+}
+
+.rk-note--busy {
+    border-color: var(--rims-busy-line);
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
+}
+
+/* ---------- Thanh tỉ lệ ----------
+   Dùng trong báo cáo: món bán chạy, tỉ trọng đơn theo ca. */
+
+.rk-bar {
+    height: 8px;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface-3);
+    overflow: hidden;
+}
+
+.rk-bar__fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--rims-brand);
+}
+
+/* ---------- Dấu bắt buộc trong biểu mẫu ---------- */
+
+.rk-field__required {
+    margin-left: 2px;
+    color: var(--rims-alert);
+}
+
+/* ---------- Khung màn đăng nhập ----------
+   Ba màn (đăng nhập, đăng ký, quên mật khẩu) dựng chung một khung: nền tối
+   toàn trang, một thẻ sáng ở giữa. Trước đây mỗi màn tự lặp lại đoạn markup
+   đó, và thẻ dùng nền kem của bảng màu cũ. */
+
+.rk-auth {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: var(--rims-space-6);
+    background:
+        radial-gradient(circle at top left, rgb(var(--rims-tint-brand) / 26%), transparent 38%),
+        radial-gradient(circle at bottom right, rgb(var(--rims-tint-brand) / 22%), transparent 36%), var(--rims-shell);
+}
+
+.rk-auth__card {
+    width: min(460px, 100%);
+    padding: var(--rims-space-8);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-overlay);
+}
+
+.rk-auth__card--wide {
+    width: min(560px, 100%);
+}
+
+.rk-auth__title {
+    margin: 0 0 var(--rims-space-2);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-3xl);
+    font-weight: var(--rims-weight-black);
+    letter-spacing: var(--rims-tracking-tight);
+    line-height: var(--rims-leading-tight);
+}
+
+.rk-auth__desc {
+    margin: 0 0 var(--rims-space-6);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-auth__foot {
+    margin-top: var(--rims-space-5);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+    .rk-auth__card {
+        padding: var(--rims-space-5);
+    }
+}
+
+/* ---------- Liên kết quay lại ---------- */
+
+.rk-backlink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    margin-bottom: var(--rims-space-5);
+    color: var(--rims-brand);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    text-decoration: none;
+}
+
+.rk-backlink:hover {
+    text-decoration: underline;
+}
+
+.rk-link {
+    color: var(--rims-brand);
+    font-weight: var(--rims-weight-semibold);
+    text-decoration: none;
+}
+
+.rk-link:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Dãy bước ----------
+   Quên mật khẩu đi qua ba bước. Trước đây dãy này dựng bằng bảy đối tượng
+   style nội dòng, mỗi đối tượng tự chọn màu theo bước hiện tại. */
+
+.rk-steps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    margin: 0 0 var(--rims-space-6);
+    padding: 0;
+    list-style: none;
+}
+
+.rk-steps__item {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+}
+
+.rk-steps__mark {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-line);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-steps__item--active .rk-steps__mark {
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-steps__item--done .rk-steps__mark {
+    background: var(--rims-ok);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-steps__label {
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+    white-space: nowrap;
+}
+
+.rk-steps__item--active .rk-steps__label {
+    color: var(--rims-brand);
+    font-weight: var(--rims-weight-semibold);
+}
+
+@media (max-width: 480px) {
+    .rk-steps__label {
+        display: none;
+    }
+}
+
+/* Biến thể xanh lá của biểu tượng trạng thái: việc đã xong. */
+.rk-feedback__icon--ok {
+    background: var(--rims-ok-soft);
+    color: var(--rims-ok);
+}
+
+/* Ô nhập mã: chữ giãn và căn giữa để đọc từng ký tự một. */
+.rk-input--code {
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xl);
+    letter-spacing: 0.4em;
+    text-align: center;
+}
+
+/* Ghi chú có nút đóng ở cuối dòng. */
+.rk-note .rk-iconbtn {
+    margin-left: auto;
+    background: transparent;
+}
+
+/* Cột số trong bảng: căn phải và chữ thẳng cột để so sánh được theo chiều dọc. */
+.rk-table .rk-td--num,
+.rk-table .rk-th--num {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.rk-table .rk-th--num {
+    font-family: var(--rims-font-sans);
+}
+
+/* Vùng cuộn dọc cho bảng dài nằm trong hộp thoại. */
+.rk-tablewrap--scroll {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* ---------- Hàng công tắc ----------
+   Một lựa chọn bật/tắt kèm câu giải thích. Trước đây mỗi màn tự dựng lại:
+   admin-category-toggle-row, admin-dish-toggle-row. */
+
+.rk-switchrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+}
+
+.rk-switchrow__label {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-switchrow__desc {
+    margin: var(--rims-space-1) 0 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-switchrow input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    accent-color: var(--rims-brand);
+    cursor: pointer;
+}
+
+/* ---------- Hàng lựa chọn tròn ---------- */
+
+.rk-radiorow {
+    display: flex;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+}
+
+.rk-radiorow label {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    cursor: pointer;
+}
+
+.rk-radiorow input[type='radio'] {
+    accent-color: var(--rims-brand);
+    cursor: pointer;
+}
+
+/* ---------- Ảnh thu nhỏ ----------
+   Ảnh món trong bảng và trong hộp xem trước. */
+
+.rk-thumb {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    flex: none;
+    overflow: hidden;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+}
+
+.rk-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rk-thumb--lg {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--rims-radius-lg);
+}
+
+/* ---------- Vùng nguy hiểm ----------
+   Nhóm riêng các thao tác không hoàn tác được, tách khỏi phần còn lại của
+   biểu mẫu để không bấm nhầm. */
+
+.rk-dangerzone {
+    padding: var(--rims-space-4);
+    border: 1px solid var(--rims-alert-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-alert-soft);
+}
+
+.rk-dangerzone__title {
+    margin: 0 0 var(--rims-space-1);
+    color: var(--rims-alert);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-dangerzone__desc {
+    margin: 0 0 var(--rims-space-3);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-xs);
+}
+
+/* ---------- Hàng tỉ lệ có nhãn ----------
+   Dùng ở Tổng quan thực đơn và các báo cáo: tên bên trái, phần trăm bên
+   phải, thanh nằm dưới. */
+
+.rk-barrow {
+    display: grid;
+    gap: var(--rims-space-2);
+}
+
+.rk-barrow__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+}
+
+.rk-barrow__label {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-barrow__value {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+/* ---------- Hai cột ----------
+   Cột trái rộng hơn cột phải. Màn hẹp thì xếp dọc. */
+
+.rk-two {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--rims-space-5);
+    align-items: start;
+}
+
+.rk-two--wideleft {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+}
+
+@media (max-width: 1024px) {
+    .rk-two,
+    .rk-two--wideleft {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ---------- Hộp cuộn ----------
+   Danh sách dài nằm trong một thẻ có chiều cao cố định. */
+
+.rk-scrollbox {
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+/* ---------- Danh sách gọn ----------
+   Danh mục, món mới cập nhật: từng dòng có gạch ngăn, không phải bảng. */
+
+.rk-rowlist {
+    display: grid;
+}
+
+.rk-rowlist__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) 0;
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-rowlist__item:last-child {
+    border-bottom: 0;
+}
+
+.rk-rowlist__main {
+    min-width: 0;
+}
+
+.rk-rowlist__title {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-rowlist__meta {
+    margin: 2px 0 0;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
+
+/* Tiêu đề mục có nút ở cuối dòng. */
+.rk-card__head-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--rims-space-4);
+}
+
+.rk-card__head-inline .rk-sectiontitle {
+    margin: 0;
+}
+
+/* Ảnh nhỏ đi kèm một dòng chữ: ô món trong bảng, dòng trong danh sách. */
+.rk-media {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    min-width: 0;
+}
+
+/* Hàng bộ lọc kèm một thẻ số ở cuối: ô lọc ăn phần rộng, thẻ số vừa đủ. */
+.rk-filterrow {
+    display: flex;
+    gap: var(--rims-space-4);
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+/* Khối lọc ăn phần rộng còn lại; các thẻ số chỉ lấy vừa đủ. */
+.rk-filterrow > :first-child {
+    flex: 1 1 320px;
+}
+
+/* Nhãn mờ: dùng cho danh mục đang ẩn. */
+.rk-tag--muted {
+    opacity: 0.55;
+}
+
+/* Giá trong màn xem chi tiết món. */
+.rk-price {
+    margin: 0;
+    color: var(--rims-brand);
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+}
+
+/* Đoạn văn mô tả dài. */
+.rk-prose {
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+    line-height: var(--rims-leading-normal);
+    white-space: pre-wrap;
+}
+
+/* ---------- Phân đoạn ----------
+   Nhóm hai đến bốn lựa chọn loại trừ nhau, dính liền nhau thành một khối.
+   Dùng cho bộ lọc trạng thái: Tất cả / Hoạt động / Đã ẩn. */
+
+.rk-segment {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+}
+
+.rk-segment__btn {
+    padding: var(--rims-space-2) var(--rims-space-4);
+    border-radius: calc(var(--rims-radius-md) - 3px);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-segment__btn:hover:not(.is-active) {
+    color: var(--rims-ink);
+}
+
+.rk-segment__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+.rk-segment__btn.is-active {
+    background: var(--rims-surface);
+    color: var(--rims-brand);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+/* Bảng thuộc tính: dùng <dl> để nhãn và giá trị gắn với nhau về mặt ngữ
+   nghĩa, không chỉ nằm cạnh nhau trên màn hình. */
+.rk-details {
+    margin: 0;
+}
+
+.rk-details .rk-detailrow__label,
+.rk-details .rk-detailrow__value {
+    margin: 0;
+}
+
+/* ---------- Bảng xếp hạng ----------
+   Món bán chạy: số thứ hạng, ảnh, tên, thanh tỉ lệ, con số. Ba hạng đầu
+   được nhấn bằng ĐỘ ĐẬM của nền chứ không chỉ bằng màu, để người mù màu
+   vẫn thấy thứ tự. */
+
+.rk-rank {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface-3);
+    color: var(--rims-ink-2);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-rank--1 {
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-rank--2 {
+    background: var(--rims-brand-line);
+    color: var(--rims-brand);
+}
+
+.rk-rank--3 {
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-rank .rk-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* ---------- Chú giải biểu đồ ---------- */
+
+.rk-legend {
+    display: flex;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+}
+
+.rk-legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-legend__dot {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+}
+
+/* ---------- Biểu đồ tròn ----------
+   Vẽ bằng conic-gradient, lỗ giữa là một lớp phủ tròn cùng màu mặt thẻ. */
+
+.rk-donut {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 180px;
+    height: 180px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+}
+
+.rk-donut__hole {
+    display: grid;
+    place-items: center;
+    width: 58%;
+    height: 58%;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface);
+    text-align: center;
+}
+
+.rk-donut__value {
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-black);
+    color: var(--rims-ink);
+}
+
+.rk-donut__label {
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
+
+/* ---------- Khung biểu đồ đường ---------- */
+
+.rk-chart {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.rk-chart__grid {
+    stroke: var(--rims-line);
+    stroke-width: 1;
+}
+
+.rk-chart__axis {
+    fill: var(--rims-ink-3);
+    font-family: var(--rims-font-mono);
+    font-size: 11px;
+}
+
+.rk-chart__line {
+    fill: none;
+    stroke: var(--rims-brand);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 3;
+}
+
+.rk-chart__point {
+    fill: var(--rims-surface);
+    stroke: var(--rims-brand);
+    stroke-width: 3;
+}
+
+/* Biểu đồ tròn cạnh chú giải. Màn hẹp thì chú giải xuống dưới. */
+.rk-donutrow {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-6);
+    flex-wrap: wrap;
+}
+
+.rk-legend--stack {
+    flex-direction: column;
+    gap: var(--rims-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rk-legend--stack .rk-legend__item {
+    align-items: flex-start;
+}
+
+.rk-legend--stack .rk-legend__dot {
+    margin-top: 5px;
+}
+
+/* Hàng được nhấn trong bảng số liệu: nền nhạt màu nhấn, kèm một vạch bên
+   trái để người mù màu cũng thấy. */
+.rk-table tbody tr.is-highlighted {
+    background: var(--rims-brand-soft);
+    box-shadow: inset 3px 0 0 var(--rims-brand);
+}
+
+.rk-table tfoot td {
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border-top: 1px solid var(--rims-line-strong);
+    color: var(--rims-ink);
+}
+
+/* ---------- Ô chọn ngày ----------
+   Ô nhập kèm lịch bật ra. Trước đây mỗi thứ trong đây có một tên riêng của
+   màn Doanh thu, dù không có gì gắn với doanh thu cả. */
+
+.rk-datefield {
+    position: relative;
+    display: grid;
+    gap: var(--rims-space-2);
+}
+
+.rk-datefield__shell {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    padding-right: var(--rims-space-3);
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+}
+
+.rk-datefield__shell:focus-within {
+    border-color: var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+.rk-datefield__shell .rk-input {
+    border: 0;
+    background: transparent;
+}
+
+.rk-datefield__shell .rk-input:focus-visible {
+    outline: none;
+}
+
+.rk-datefield__trigger {
+    display: grid;
+    place-items: center;
+    flex: none;
+    color: var(--rims-ink-3);
+    cursor: pointer;
+}
+
+.rk-datefield__trigger:hover {
+    color: var(--rims-brand);
+}
+
+/* ---------- Lịch ---------- */
+
+.rk-calendar {
+    position: absolute;
+    top: calc(100% + var(--rims-space-2));
+    left: 0;
+    z-index: var(--rims-z-drawer);
+    width: 280px;
+    padding: var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-overlay);
+}
+
+.rk-calendar__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-2);
+    margin-bottom: var(--rims-space-3);
+}
+
+.rk-calendar__title {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-calendar__title select {
+    padding: 2px var(--rims-space-2);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-sm);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-calendar__navbtn {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+    cursor: pointer;
+}
+
+.rk-calendar__navbtn:hover {
+    background: var(--rims-surface-3);
+    color: var(--rims-ink);
+}
+
+.rk-calendar__weekdays,
+.rk-calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.rk-calendar__weekdays {
+    margin-bottom: var(--rims-space-1);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+    text-align: center;
+}
+
+.rk-calendar__day {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: var(--rims-radius-sm);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-sm);
+    cursor: pointer;
+}
+
+.rk-calendar__day:hover {
+    background: var(--rims-surface-2);
+}
+
+.rk-calendar__day.is-outside {
+    color: var(--rims-ink-3);
+    opacity: 0.5;
+}
+
+/* Hôm nay: viền. Ngày đang chọn: nền đặc. Hai dấu hiệu khác hẳn nhau, không
+   chỉ khác sắc, nên nhìn là phân biệt được ngay. */
+.rk-calendar__day.is-today {
+    box-shadow: inset 0 0 0 1px var(--rims-brand);
+}
+
+.rk-calendar__day.is-selected {
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-calendar__foot {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--rims-space-2);
+    margin-top: var(--rims-space-3);
+    padding-top: var(--rims-space-3);
+    border-top: 1px solid var(--rims-line);
+}
+
+.rk-calendar__foot button {
+    color: var(--rims-brand);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    cursor: pointer;
+}
+
+.rk-calendar__foot button:hover {
+    text-decoration: underline;
+}
+
+/* Vùng vẽ của biểu đồ đường: cho tràn ngang trên màn hẹp thay vì bóp méo. */
+.rk-chart__shell {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.rk-chart__area {
+    fill: url(#weekly-revenue-area);
+}
+
+/* ---------- Bộ tăng giảm số lượng ----------
+   Trừ · số · cộng. Dùng khi Phục vụ gọi món tại bàn. */
+
+.rk-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+}
+
+.rk-stepper__btn {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-lg);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.rk-stepper__btn:hover:not(:disabled) {
+    border-color: var(--rims-brand);
+    color: var(--rims-brand);
+}
+
+.rk-stepper__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+.rk-stepper__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rk-stepper__value {
+    min-width: 2ch;
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    text-align: center;
+}
+
+/* ---------- Lưới thẻ ----------
+   Thực đơn, sơ đồ bàn: các thẻ cùng cỡ, tự xuống dòng. */
+
+.rk-cardgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--rims-space-4);
+}
+
+/* Thẻ có cờ: vạch đậm bên trái. Dùng cho nhóm món có ghi chú riêng —
+   dấu hiệu là HÌNH DẠNG chứ không chỉ là màu. */
+.rk-card--flagged {
+    box-shadow: inset 3px 0 0 var(--rims-alert);
+}
+
+/* Nhãn cảnh báo. */
+.rk-tag--alert {
+    border-color: var(--rims-alert-line);
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
+/* Dòng được nhấn trong danh sách. */
+.rk-rowlist__item.is-highlighted {
+    background: var(--rims-brand-soft);
+    box-shadow: inset 3px 0 0 var(--rims-brand);
+}
+
+/* ---------- Số lượng lớn ----------
+   Chữ ký của app: đầu bếp đọc con số này từ cách màn hình một sải tay. */
+
+.rk-qty {
+    display: grid;
+    justify-items: center;
+    flex: none;
+    line-height: 1;
+}
+
+.rk-qty__num {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+    color: var(--rims-ink);
+}
+
+.rk-qty__unit {
+    margin-top: 2px;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
+
+/* =========================================================================
+   KHUNG APP — thanh bên, thanh trên, vùng nội dung
+
+   Viết lại từ bootstrap-rims-layout.css, vốn 758 dòng và có ba lớp chồng
+   nhau: .app-layout, .rims-topbar và .rims-topbar-heading h1 mỗi cái được
+   định nghĩa hai lần ở hai chỗ khác nhau trong cùng một file.
+   ========================================================================= */
+
+.rk-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.rk-shell__side {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+    width: var(--rims-sidebar-width);
+    height: 100vh;
+    flex: none;
+    padding: var(--rims-space-5) var(--rims-space-4);
+    overflow: hidden;
+    color: var(--rims-ink-on-dark);
+    background:
+        radial-gradient(circle at 95% 85%, rgb(var(--rims-shell-accent-rgb) / 26%), transparent 40%),
+        linear-gradient(180deg, var(--rims-shell-2) 0%, var(--rims-shell) 55%);
+}
+
+.rk-shell__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.rk-shell__content {
+    flex: 1;
+    padding: var(--rims-space-6);
+    background: var(--rims-paper);
+}
+
+/* ---------- Nhận diện ---------- */
+
+.rk-shell__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+}
+
+.rk-shell__logo {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex: none;
+    border-radius: var(--rims-radius-lg);
+    background: linear-gradient(135deg, var(--rims-gold), var(--rims-shell-accent-2) 45%, var(--rims-shell-accent-3));
+    color: var(--rims-ink-on-dark);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-black);
+}
+
+.rk-shell__brand h2 {
+    margin: 0;
+    color: var(--rims-ink-on-dark);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-black);
+}
+
+.rk-shell__brand p {
+    margin: 0;
+    color: var(--rims-ink-on-dark-2);
+    font-size: var(--rims-text-xs);
+}
+
+/* ---------- Thẻ vai trò ---------- */
+
+.rk-shell__role {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3);
+    border: 1px solid rgb(var(--rims-tint-hi) / 12%);
+    border-radius: var(--rims-radius-lg);
+    background: linear-gradient(135deg, rgb(var(--rims-shell-accent-rgb) / 30%), rgb(var(--rims-tint-hi) / 5%));
+}
+
+.rk-shell__role-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border-radius: var(--rims-radius-md);
+    background: rgb(var(--rims-tint-hi) / 10%);
+    color: var(--rims-gold);
+}
+
+.rk-shell__role small {
+    display: block;
+    color: var(--rims-ink-on-dark-2);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-shell__role strong {
+    display: block;
+    color: var(--rims-ink-on-dark);
+    font-size: var(--rims-text-sm);
+}
+
+/* ---------- Điều hướng ---------- */
+
+.rk-shell__nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-1);
+    flex: 1;
+
+    /* Danh sách menu cuộn riêng khi nhiều mục hơn chiều cao màn hình. */
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--rims-tint-hi) / 18%) transparent;
+}
+
+.rk-shell__link {
+    display: grid;
+    grid-template-columns: 36px 1fr 16px;
+    align-items: center;
+    gap: var(--rims-space-3);
+    min-height: 48px;
+    padding: var(--rims-space-2) var(--rims-space-3);
+    border: 1px solid transparent;
+    border-radius: var(--rims-radius-lg);
+    color: var(--rims-ink-on-dark-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    text-decoration: none;
+    transition:
+        background-color var(--rims-dur-short) var(--rims-ease-out),
+        color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-shell__link:hover {
+    border-color: rgb(var(--rims-tint-hi) / 14%);
+    color: var(--rims-ink-on-dark);
+}
+
+.rk-shell__link:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-gold);
+    outline-offset: 1px;
+}
+
+.rk-shell__link.active {
+    border-color: var(--rims-shell-accent-2);
+    background: linear-gradient(
+        100deg,
+        var(--rims-shell-accent-3),
+        var(--rims-shell-accent) 55%,
+        var(--rims-shell-accent-2)
+    );
+    color: var(--rims-ink-on-dark);
+}
+
+.rk-shell__linkicon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--rims-radius-md);
+    background: rgb(var(--rims-tint-hi) / 8%);
+    color: inherit;
+}
+
+.rk-shell__link.active .rk-shell__linkicon {
+    background: rgb(var(--rims-tint-hi) / 18%);
+}
+
+.rk-shell__linklabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rk-shell__linkarrow {
+    color: currentcolor;
+    opacity: 0.55;
+}
+
+/* ---------- Người dùng đang đăng nhập ---------- */
+
+.rk-shell__user {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3);
+    border-radius: var(--rims-radius-lg);
+    background: rgb(var(--rims-tint-hi) / 8%);
+}
+
+.rk-shell__dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-ok);
+}
+
+.rk-shell__user strong {
+    display: block;
+    color: var(--rims-ink-on-dark);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-shell__user small {
+    display: block;
+    color: var(--rims-ink-on-dark-2);
+    font-size: var(--rims-text-xs);
+}
+
+/* ---------- Thanh trên ---------- */
+
+.rk-shell__top {
+    position: sticky;
+    top: 0;
+    z-index: var(--rims-z-sticky);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-5);
+    flex-wrap: wrap;
+    padding: var(--rims-space-4) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+    background: var(--rims-surface);
+}
+
+.rk-shell__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    color: var(--rims-brand);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+}
+
+.rk-shell__livedot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-ok);
+}
+
+.rk-shell__top h1 {
+    margin: var(--rims-space-1) 0 2px;
+    color: var(--rims-ink);
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+.rk-shell__top p {
+    margin: 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+@media (max-width: 900px) {
+    .rk-shell {
+        flex-direction: column;
+    }
+
+    .rk-shell__side {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
+
+    .rk-shell__nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow: visible;
+    }
+
+    .rk-shell__content {
+        padding: var(--rims-space-4);
+    }
+}
+
+/* ---------- Tab gạch chân ----------
+   Khác rk-segment ở chỗ: segment dùng cho bộ lọc phụ, tab dùng khi chuyển
+   giữa hai tập dữ liệu khác hẳn nhau. */
+
+.rk-tabs {
+    display: flex;
+    gap: var(--rims-space-1);
+    border-bottom: 2px solid var(--rims-line);
+}
+
+.rk-tabs__btn {
+    padding: var(--rims-space-3) var(--rims-space-5);
+    margin-bottom: -2px;
+    border-bottom: 2px solid transparent;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.rk-tabs__btn:hover:not(.is-active) {
+    color: var(--rims-ink);
+}
+
+.rk-tabs__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: -2px;
+}
+
+.rk-tabs__btn.is-active {
+    border-bottom-color: var(--rims-brand);
+    color: var(--rims-brand);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* ---------- Ảnh đại diện chữ cái ----------
+   Dùng khi người dùng chưa có ảnh. */
+
+.rk-avatar {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* Đầu hộp thoại chi tiết: ảnh đại diện, tên, tên đăng nhập. */
+.rk-idcard {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-4);
+    padding-bottom: var(--rims-space-4);
+    margin-bottom: var(--rims-space-4);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-idcard__name {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-idcard__meta {
+    margin: 2px 0 0;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+}
+
+/* Dòng giảm trừ trong bảng tổng kết: số âm, màu xanh lá. */
+.rk-summary__row--credit .rk-summary__value,
+.rk-summary__row--credit .rk-summary__label {
+    color: var(--rims-ok);
+}
+
+/* ---------- Lưới chọn phương thức ----------
+   Hai ô lớn, dễ bấm: Thu ngân bấm bằng ngón tay trên máy tính bảng. */
+
+.rk-choicegrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--rims-space-4);
+}
+
+.rk-choicegrid .rk-btn {
+    min-height: 72px;
+    font-size: var(--rims-text-lg);
+}
+
+/* ---------- Khối thông tin giữa luồng ----------
+   Hộp xám nhạt bao một con số hoặc một câu, không phải cảnh báo. */
+
+.rk-panel {
+    padding: var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+}
+
+.rk-panel--center {
+    text-align: center;
+}
+
+/* Màu theo ngữ nghĩa cho một đoạn chữ ngắn. */
+.rk-text--ok {
+    color: var(--rims-ok);
+}
+
+.rk-text--alert {
+    color: var(--rims-alert);
+}
+
+.rk-text--muted {
+    color: var(--rims-ink-3);
+}
+
+/* Nút lấy phần rộng còn lại trong hàng nút. */
+.rk-btn--grow {
+    flex: 1;
+}
+
+/* Dòng tổng kết mang sắc thái ngữ nghĩa. */
+.rk-summary__row--ok .rk-summary__value {
+    color: var(--rims-ok);
+}
+
+.rk-summary__row--alert .rk-summary__value {
+    color: var(--rims-alert);
+}
+
+/* Chấm chú giải theo trạng thái bàn: khỏi phải tô màu trong JSX. */
+.rk-legend__dot--ok {
+    background: var(--rims-ok);
+}
+
+.rk-legend__dot--busy {
+    background: var(--rims-busy);
+}
+
+.rk-legend__dot--brand {
+    background: var(--rims-brand);
+}
+
+/* Giá trị chỉ đọc trong hồ sơ: nhạt hơn để phân biệt với ô nhập được. */
+.rk-detailrow__value--readonly {
+    color: var(--rims-ink-3);
+}
+
+/* Ô nhập ăn phần rộng còn lại trong một hàng. */
+.rk-field--grow {
+    flex: 1;
+    min-width: 0;
+}
+
+.rk-summary__row--busy .rk-summary__value {
+    color: var(--rims-busy);
+}
+
+/* ---------- Biến thể nhãn theo ngữ nghĩa ---------- */
+
+.rk-tag--brand {
+    border-color: var(--rims-brand-line);
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-tag--ok {
+    border-color: var(--rims-ok-line);
+    background: var(--rims-ok-soft);
+    color: var(--rims-ok);
+}
+
+.rk-tag--busy {
+    border-color: var(--rims-busy-line);
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
+}
+
+.rk-tag--gold {
+    border-color: var(--rims-gold);
+    background: var(--rims-gold-soft);
+    color: var(--rims-gold-deep);
+}
+
+.rk-tag--idle {
+    border-color: var(--rims-idle-line);
+    background: var(--rims-idle-soft);
+    color: var(--rims-idle);
+}
+
+/* ---------- Dòng phụ dưới một hàng ----------
+   Ghi chú của khách, lý do huỷ, lời nhắn của bếp: chữ nhỏ nằm ngay dưới
+   tên món hoặc tên người. Bảy màn Phục vụ trước đây mỗi màn tự khai một
+   đối tượng style riêng cho đúng ba thứ này — sửa cỡ chữ là phải mở bảy
+   file. */
+
+.rk-subnote {
+    margin: var(--rims-space-1) 0 0;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    line-height: var(--rims-leading-normal);
+}
+
+.rk-subnote--busy {
+    color: var(--rims-busy);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-subnote--alert {
+    color: var(--rims-alert);
+    font-weight: var(--rims-weight-semibold);
+}
+
+/* Nằm cùng dòng với nội dung chính chứ không xuống dòng riêng. */
+.rk-subnote--inline {
+    margin: 0;
+}
+
+/* ---------- Lời nhắn của bếp ----------
+   Bếp nhắn lên màn Cập nhật đơn. Chưa xác nhận thì viền trái cam và nền
+   cam nhạt cho nổi; xác nhận rồi thì lui về xám để khỏi tranh chú ý. */
+
+.rk-chefnote {
+    margin: var(--rims-space-3) 0;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-busy-line);
+    border-left: 4px solid var(--rims-busy);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
+}
+
+.rk-chefnote.is-acknowledged {
+    border-color: var(--rims-line);
+    border-left-color: var(--rims-line-strong);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+}
+
+.rk-chefnote__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+}
+
+.rk-chefnote__time {
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-chefnote__body {
+    margin: var(--rims-space-2) 0;
+    white-space: pre-wrap;
+    line-height: var(--rims-leading-normal);
+}
+
+.rk-chefnote__seen {
+    color: var(--rims-ok);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* ---------- Danh sách lịch đặt trong hộp thoại ----------
+   Hộp thoại bàn của Phục vụ liệt kê các lịch đặt trong hôm nay. */
+
+.rk-reslist {
+    margin: var(--rims-space-2) 0 var(--rims-space-3) var(--rims-space-5);
+    padding: 0;
+}
+
+.rk-reslist li + li {
+    margin-top: var(--rims-space-1);
+}
+
+/* Nút nhỏ: nằm trong hàng, trong ô bảng, hoặc cạnh một dòng chữ. */
+.rk-btn--sm {
+    padding: var(--rims-space-2) var(--rims-space-3);
+    font-size: var(--rims-text-sm);
+}
+
+/* Thẻ hẹp cho màn chỉ có một khối nội dung, khỏi kéo dài hết bề ngang. */
+.rk-card--narrow {
+    max-width: 600px;
+}
+
+/* Món hết hàng: thẻ mờ đi nhưng vẫn bấm được để xem. */
+.rk-card.is-unavailable {
+    opacity: 0.5;
+}
+
+/* Nút "Thử lại" đứng ngay sau dòng báo lỗi, không xuống dòng riêng. */
+.rk-formerror .rk-btn {
+    margin-left: var(--rims-space-3);
+}
+
+/* Ảnh đại diện lớn: dùng ở đầu màn Hồ sơ cá nhân, nơi nó là chủ thể của
+   cả trang chứ không phải một dòng trong danh sách. */
+.rk-avatar--lg {
+    width: 64px;
+    height: 64px;
+    font-size: var(--rims-text-2xl);
+}
+
+/* ---------- Trang kết quả thanh toán ----------
+   VNPay trả người dùng về hai trang này sau khi thanh toán. Không thanh bên,
+   không thanh trên: một thẻ ở giữa màn hình. */
+
+.rk-result {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: var(--rims-space-6);
+    background: var(--rims-paper);
+}
+
+.rk-result .rk-feedback {
+    max-width: 520px;
+    box-shadow: var(--rims-shadow-overlay);
+}
+
+/* ---------- Màn báo thanh toán xong ----------
+   Phủ kín màn hình, chạm vào đâu cũng chuyển sang hoá đơn. Thu ngân đứng
+   cách máy một quãng nên chữ ở đây to hơn mọi chỗ khác trong hệ thống. */
+
+.rk-paid {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rims-space-2);
+    width: 100%;
+    border: 0;
+    padding: var(--rims-space-6);
+    background: var(--rims-paid);
+    color: var(--rims-ink-on-paid);
+    font-family: var(--rims-font-sans);
+    text-align: center;
+    cursor: pointer;
+}
+
+.rk-paid__icon .rk-icon {
+    width: 88px;
+    height: 88px;
+    stroke-width: 2.5;
+}
+
+.rk-paid__title {
+    margin: var(--rims-space-4) 0 0;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: var(--rims-weight-bold);
+    line-height: 1.1;
+}
+
+.rk-paid__code {
+    margin: 0;
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xl);
+    opacity: 0.9;
+}
+
+.rk-paid__customer {
+    margin-top: var(--rims-space-4);
+    padding: var(--rims-space-3) var(--rims-space-5);
+    border-radius: var(--rims-radius-md);
+    background: rgb(var(--rims-tint-hi) / 18%);
+}
+
+.rk-paid__customer p {
+    margin: 0;
+    font-size: var(--rims-text-lg);
+}
+
+.rk-paid__hint {
+    margin-top: var(--rims-space-10);
+    font-size: var(--rims-text-base);
+    opacity: 0.85;
+}
+
+/* Nút chuyển sang VNPay mang màu thương hiệu của họ, không phải của mình. */
+.rk-btn--vnpay {
+    background: #005baa;
+    border-color: #005baa;
+    color: #f2f7fb;
+}
+
+.rk-btn--vnpay:hover:not(:disabled) {
+    background: #00498a;
+    border-color: #00498a;
+}
+
+/* Ô số liệu có thể là một liên kết — màn Tổng quan bếp bấm vào ô là sang
+   màn tương ứng. Không gạch chân, vì cả ô đã là vùng bấm. */
+a.rk-statcard {
+    text-decoration: none;
+    transition: border-color 120ms ease;
+}
+
+a.rk-statcard:hover {
+    border-color: var(--rims-line-strong);
+}
+
+a.rk-statcard:focus-visible {
+    outline: 2px solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+/* Dòng giải thích con số nói lên điều gì. */
+.rk-statcard__hint {
+    margin: var(--rims-space-2) 0 0;
+    max-width: 34ch;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    line-height: var(--rims-leading-normal);
+}
+
+/* ---------- Dải thông tin phụ của một hàng ----------
+   Vài cặp nhãn–giá trị nằm ngang, mỗi cặp xếp dọc. Màn Món đã huỷ trước
+   đây nhét các cặp này vào rk-rowlist__main — lớp đó không có bố cục cho
+   cặp small/strong, nên nhãn dính liền giá trị: "BànT12", "Số lượngx1". */
+
+.rk-metarow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rims-space-3) var(--rims-space-6);
+}
+
+.rk-metarow > div {
+    display: grid;
+    gap: 2px;
+}
+
+.rk-metarow small {
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-metarow strong {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}

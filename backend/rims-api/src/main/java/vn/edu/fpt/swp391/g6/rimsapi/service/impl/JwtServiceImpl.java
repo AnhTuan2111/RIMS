@@ -1,15 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import vn.edu.fpt.swp391.g6.rimsapi.exception.InvalidTokenException;
-import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
-
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -18,6 +8,17 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import vn.edu.fpt.swp391.g6.rimsapi.exception.InvalidTokenException;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.TechnicalException;
+import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
 
 @Service
 public class JwtServiceImpl implements JwtService
@@ -26,6 +27,7 @@ public class JwtServiceImpl implements JwtService
     private static final String CLAIM_TYPE = "type";
     private static final String CLAIM_USERNAME = "username";
     private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_MUST_CHANGE_PASSWORD = "mustChangePassword";
     private static final String TOKEN_TYPE_ACCESS = "ACCESS";
     private static final String TOKEN_TYPE_REFRESH = "REFRESH";
 
@@ -34,7 +36,7 @@ public class JwtServiceImpl implements JwtService
     protected String signerKey;
 
     @Override
-    public String generateAccessToken(int id, String username, String role)
+    public String generateAccessToken(int id, String username, String role, boolean mustChangePassword)
     {
         try
         {
@@ -42,6 +44,7 @@ public class JwtServiceImpl implements JwtService
                     .subject(String.valueOf(id))
                     .claim(CLAIM_USERNAME, username)
                     .claim(CLAIM_ROLE, role)
+                    .claim(CLAIM_MUST_CHANGE_PASSWORD, mustChangePassword)
                     .claim(CLAIM_TYPE, TOKEN_TYPE_ACCESS)
                     .jwtID(UUID.randomUUID().toString())
                     .issuer(ISSUER)
@@ -52,7 +55,7 @@ public class JwtServiceImpl implements JwtService
             return signClaims(claimsSet);
         } catch (JOSEException e)
         {
-            throw new RuntimeException("Không thể tạo access token", e);
+            throw new TechnicalException("Không thể tạo access token", e);
         }
     }
 
@@ -73,7 +76,7 @@ public class JwtServiceImpl implements JwtService
             return signClaims(claimsSet);
         } catch (JOSEException e)
         {
-            throw new RuntimeException("Không thể tạo refresh token", e);
+            throw new TechnicalException("Không thể tạo refresh token", e);
         }
     }
 
@@ -134,7 +137,8 @@ public class JwtServiceImpl implements JwtService
             return claims.getStringClaim(CLAIM_USERNAME);
         } catch (ParseException e)
         {
-            throw new RuntimeException(e);
+            // Token không parse được nghĩa là client gửi token hỏng -> 401, không phải 500.
+            throw new InvalidTokenException("Token không hợp lệ");
         }
     }
 
@@ -146,8 +150,21 @@ public class JwtServiceImpl implements JwtService
             return claims.getStringClaim(CLAIM_ROLE);
         } catch (ParseException e)
         {
-            throw new RuntimeException(e);
+            throw new InvalidTokenException("Token không hợp lệ");
         }
+    }
+
+    /**
+     * Cờ "phải đổi mật khẩu" nằm trong access token.
+     *
+     * <p>Token cấp trước khi thêm claim này không có trường đó. Thiếu thì coi
+     * như false — người đang cầm token cũ vẫn dùng được cho đến khi nó hết hạn,
+     * thay vì bị đá ra giữa chừng sau khi triển khai.
+     */
+    @Override
+    public boolean extractMustChangePassword(JWTClaimsSet claims)
+    {
+        return Boolean.TRUE.equals(claims.getClaim(CLAIM_MUST_CHANGE_PASSWORD));
     }
 
     private String signClaims(JWTClaimsSet claimsSet) throws JOSEException
@@ -174,7 +191,8 @@ public class JwtServiceImpl implements JwtService
     public LocalDateTime extractExpiry(String token)
     {
         Date exp = parseAndValidate(token).getExpirationTime();
-        if (exp == null) return null;
+        if (exp == null)
+            return null;
         return exp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 }

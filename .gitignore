@@ -23,6 +23,14 @@ Thumbs.db
 hs_err_pid*
 replay_pid*
 
-# Env secrets (local overrides)
+# Secret dùng chung cho cả backend và frontend: mật khẩu DB, app password Gmail,
+# JWT signer key, VNPay hash secret. Xem .env.example để biết cần điền gì.
+# Lưu ý: .env.example KHÔNG bị che, nó là file mẫu và phải được commit.
 .env
-.env.local
+.env.*
+!.env.example
+
+# Công cụ AI (Claude Code): cấu hình, skill, ghi chú của riêng từng máy.
+# Không thuộc về mã nguồn dự án.
+.claude/
+CLAUDE.md

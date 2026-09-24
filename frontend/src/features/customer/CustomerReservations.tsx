@@ -1,10 +1,6 @@
-﻿import {
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    type FormEvent,
-} from 'react'
+import {AlertTriangle} from 'lucide-react'
+
+import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react'
 
 import {
     cancelReservation,
@@ -13,7 +9,13 @@ import {
     getBlockedTimeSlots,
     getCurrentReservation,
 } from '@/shared/api/customer'
-import {getAvailableTimeSlots} from '@/shared/utils/reservationTime'
+import {
+    getAvailableTimeSlots,
+    parseReservationWindow,
+} from '@/shared/utils/reservationTime'
+import {useRestaurant} from '@/app/providers/useRestaurant'
+import {PageCard, PageHeader} from '@/shared/components/ui'
+import {EmptyState, LoadingState} from '@/shared/components/feedback'
 
 import type {
     CustomerCreateReservationRequest,
@@ -22,61 +24,26 @@ import type {
 } from '@/shared/api/customer'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {usePolling} from '@/shared/hooks/usePolling'
+import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
+import {formatDateForApi} from '@/shared/utils/format'
 
-const today = new Date()
-const todayStr = today.toISOString().split('T')[0]
-
-type ReservationTab =
-    | 'book'
-    | 'cancel'
-
-function isRequestCanceled(error: unknown) {
-    if (typeof error !== 'object' || error === null) {
-        return false
-    }
-
-    const requestError = error as {
-        name?: string
-        code?: string
-        message?: string
-    }
-
-    return (
-        requestError.name === 'CanceledError'
-        || requestError.code === 'ERR_CANCELED'
-        || requestError.message === 'canceled'
-    )
+/**
+ * Ngày hôm nay theo giờ máy, dạng YYYY-MM-DD.
+ *
+ * <p>Bản cũ là một hằng số cấp module tính bằng
+ * {@code new Date().toISOString()}. Hàm đó quy về UTC, nên ở múi giờ Việt
+ * Nam (UTC+7) từ 0h đến 7h sáng nó trả về NGÀY HÔM QUA: ô "Ngày đặt" mặc
+ * định thành quá khứ, danh sách giờ đặt rỗng, và min của ô ngày cho chọn
+ * cả ngày đã qua.
+ *
+ * <p>Tính lại mỗi lần gọi chứ không giữ làm hằng số, để tab mở qua nửa đêm
+ * không kẹt lại ở ngày cũ.
+ */
+function getTodayStr(): string {
+    return formatDateForApi(new Date())
 }
 
-function getRequestErrorMessage(
-    error: unknown,
-    fallback: string,
-) {
-    if (typeof error !== 'object' || error === null) {
-        return fallback
-    }
-
-    const requestError = error as {
-        response?: {
-            data?: string | {
-                message?: string
-            }
-        }
-        message?: string
-    }
-
-    const responseData = requestError.response?.data
-
-    if (typeof responseData === 'string') {
-        return responseData
-    }
-
-    if (responseData?.message) {
-        return responseData.message
-    }
-
-    return requestError.message || fallback
-}
+type ReservationTab = 'book' | 'cancel'
 
 function isNotFoundError(error: unknown) {
     if (typeof error !== 'object' || error === null) {
@@ -116,70 +83,89 @@ const statusLabels: Record<string, string> = {
     CANCELLED: 'Đã hủy',
 }
 
+/**
+ * Lớp chip theo trạng thái lần đặt bàn.
+ *
+ * <p>Trước đây ghép chuỗi thẳng trong JSX:
+ * `customer-status-badge-${status.toLowerCase()}`. Thêm một trạng thái mới
+ * thì chip rơi về không có màu mà không ai biết.
+ */
+function reservationChipClass(status: string): string {
+    switch (status.toUpperCase()) {
+        case 'WAITING':
+            return 'rk-chip--busy'
+        case 'QUEUED':
+            return 'rk-chip--brand'
+        case 'COMPLETED':
+            return 'rk-chip--ok'
+        case 'CANCELLED':
+            return 'rk-chip--alert'
+        default:
+            return 'rk-chip--idle'
+    }
+}
+
 export default function CustomerReservations() {
-    const [activeTab, setActiveTab] =
-        useState<ReservationTab>('book')
+    const {profile} = useRestaurant()
 
-    const [bookForm, setBookForm] =
-        useState<CustomerCreateReservationRequest>({
-            customerName: '',
-            phone: '',
-            reservationTime: `${todayStr}T08:00:00`,
-            note: '',
-            tableId: 0,
-        })
+    const [activeTab, setActiveTab] = useState<ReservationTab>('book')
 
-    const [availableTables, setAvailableTables] =
-        useState<RestaurantTable[]>([])
+    const [bookForm, setBookForm] = useState<CustomerCreateReservationRequest>({
+        customerName: '',
+        phone: '',
+        reservationTime: `${getTodayStr()}T08:00:00`,
+        note: '',
+        tableId: 0,
+    })
 
-    const [bookLoading, setBookLoading] =
-        useState(false)
+    const [availableTables, setAvailableTables] = useState<RestaurantTable[]>([])
 
-    const [bookError, setBookError] =
-        useState('')
+    const [bookLoading, setBookLoading] = useState(false)
 
-    const [bookSuccess, setBookSuccess] =
-        useState<CustomerReservationResponse | null>(null)
+    const [bookError, setBookError] = useState('')
 
-    const [loadingTables, setLoadingTables] =
-        useState(true)
+    const [bookSuccess, setBookSuccess] = useState<CustomerReservationResponse | null>(
+        null,
+    )
 
-    const [blockedRanges, setBlockedRanges] =
-        useState<{ start: string; end: string }[]>([])
+    const [loadingTables, setLoadingTables] = useState(true)
 
-    const [tableError, setTableError] =
-        useState<string | null>(null)
+    const [blockedRanges, setBlockedRanges] = useState<{start: string; end: string}[]>([])
 
-    const [cancelingId, setCancelingId] =
-        useState<number | null>(null)
+    const [tableError, setTableError] = useState<string | null>(null)
 
-    const [cancelError, setCancelError] =
-        useState('')
+    const [cancelingId, setCancelingId] = useState<number | null>(null)
+
+    const [cancelError, setCancelError] = useState('')
 
     const [cancelSuccess, setCancelSuccess] =
         useState<CustomerReservationResponse | null>(null)
 
-    const [currentReservations, setCurrentReservations] =
-        useState<CustomerReservationResponse[]>([])
+    const [currentReservations, setCurrentReservations] = useState<
+        CustomerReservationResponse[]
+    >([])
 
-    const [loadingCurrent, setLoadingCurrent] =
-        useState(false)
+    const [loadingCurrent, setLoadingCurrent] = useState(false)
 
-    const hasLoadedInitialTablesRef =
-        useRef(false)
+    const hasLoadedInitialTablesRef = useRef(false)
 
-    const hasLoadedInitialReservationRef =
-        useRef(false)
+    const hasLoadedInitialReservationRef = useRef(false)
 
-    const selectedDate =
-        bookForm.reservationTime.split('T')[0] || todayStr
+    const selectedDate = bookForm.reservationTime.split('T')[0] || getTodayStr()
 
-    const selectedTime =
-        bookForm.reservationTime.split('T')[1]?.slice(0, 5) || '08:00'
+    const selectedTime = bookForm.reservationTime.split('T')[1]?.slice(0, 5) || '08:00'
+
+    // Khung gio nhan dat ban do backend quyet dinh. Tu go cung o day thi
+    // doi quy tac ben backend ma quen sua se sinh ra o gio khach chon duoc
+    // nhung gui len lai bi tu choi.
+    const reservationWindow = useMemo(
+        () => parseReservationWindow(profile?.reservationHours),
+        [profile?.reservationHours],
+    )
 
     const availableTimeSlots = useMemo(
-        () => getAvailableTimeSlots(selectedDate, blockedRanges),
-        [selectedDate, blockedRanges],
+        () => getAvailableTimeSlots(selectedDate, blockedRanges, reservationWindow),
+        [selectedDate, blockedRanges, reservationWindow],
     )
 
     // Tự chuyển sang slot khả dụng đầu tiên nếu giờ đang chọn không còn
@@ -193,18 +179,13 @@ export default function CustomerReservations() {
             queueMicrotask(() => {
                 setBookForm((previous) => ({
                     ...previous,
-                    reservationTime:
-                        `${selectedDate}T${availableTimeSlots[0]}:00`,
+                    reservationTime: `${selectedDate}T${availableTimeSlots[0]}:00`,
                 }))
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [availableTimeSlots, selectedTime, selectedDate])
 
-    async function loadAvailableTables(
-        signal?: AbortSignal,
-        showFullLoading = true,
-    ) {
+    async function loadAvailableTables(signal?: AbortSignal, showFullLoading = true) {
         try {
             if (showFullLoading) {
                 setLoadingTables(true)
@@ -212,8 +193,7 @@ export default function CustomerReservations() {
 
             setTableError(null)
 
-            const tables =
-                await getAvailableTables(signal)
+            const tables = await getAvailableTables(signal)
 
             if (signal?.aborted) {
                 return
@@ -241,49 +221,30 @@ export default function CustomerReservations() {
                 )
             }
         } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
+            if (signal?.aborted || isRequestCanceled(requestError)) {
                 return
             }
 
-            console.error(
-                '[CUSTOMER_RESERVATIONS_TABLES_ERROR]',
-                requestError,
-            )
+            console.error('[CUSTOMER_RESERVATIONS_TABLES_ERROR]', requestError)
 
-            setTableError(
-                getRequestErrorMessage(
-                    requestError,
-                    'Không thể tải danh sách bàn',
-                ),
-            )
+            setTableError(getErrorMessage(requestError, 'Không thể tải danh sách bàn'))
 
             setAvailableTables([])
         } finally {
-            if (
-                showFullLoading
-                && !signal?.aborted
-            ) {
+            if (showFullLoading && !signal?.aborted) {
                 setLoadingTables(false)
             }
         }
     }
 
-    async function loadBlockedSlots(
-        tableId: number,
-        date: string,
-        signal?: AbortSignal,
-    ) {
+    async function loadBlockedSlots(tableId: number, date: string, signal?: AbortSignal) {
         if (!tableId || !date) {
             setBlockedRanges([])
             return
         }
 
         try {
-            const ranges =
-                await getBlockedTimeSlots(tableId, date, signal)
+            const ranges = await getBlockedTimeSlots(tableId, date, signal)
 
             if (signal?.aborted) {
                 return
@@ -291,33 +252,23 @@ export default function CustomerReservations() {
 
             setBlockedRanges(ranges ?? [])
         } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
+            if (signal?.aborted || isRequestCanceled(requestError)) {
                 return
             }
 
-            console.error(
-                '[CUSTOMER_BLOCKED_SLOTS_ERROR]',
-                requestError,
-            )
+            console.error('[CUSTOMER_BLOCKED_SLOTS_ERROR]', requestError)
 
             setBlockedRanges([])
         }
     }
 
-    async function loadCurrentReservation(
-        signal?: AbortSignal,
-        showFullLoading = true,
-    ) {
+    async function loadCurrentReservation(signal?: AbortSignal, showFullLoading = true) {
         try {
             if (showFullLoading) {
                 setLoadingCurrent(true)
             }
 
-            const reservations =
-                await getCurrentReservation(signal)
+            const reservations = await getCurrentReservation(signal)
 
             if (signal?.aborted) {
                 return
@@ -325,26 +276,17 @@ export default function CustomerReservations() {
 
             setCurrentReservations(reservations ?? [])
         } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
+            if (signal?.aborted || isRequestCanceled(requestError)) {
                 return
             }
 
             if (isNotFoundError(requestError)) {
                 setCurrentReservations([])
             } else {
-                console.error(
-                    '[CUSTOMER_CURRENT_RESERVATION_ERROR]',
-                    requestError,
-                )
+                console.error('[CUSTOMER_CURRENT_RESERVATION_ERROR]', requestError)
             }
         } finally {
-            if (
-                showFullLoading
-                && !signal?.aborted
-            ) {
+            if (showFullLoading && !signal?.aborted) {
                 setLoadingCurrent(false)
             }
         }
@@ -352,67 +294,45 @@ export default function CustomerReservations() {
 
     usePolling(
         async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialTablesRef.current
+            const isInitialLoad = !hasLoadedInitialTablesRef.current
 
-            await loadAvailableTables(
-                signal,
-                isInitialLoad,
-            )
+            await loadAvailableTables(signal, isInitialLoad)
 
             hasLoadedInitialTablesRef.current = true
         },
         {
-            intervalMs:
-            REALTIME_CONFIG
-                .customer
-                .reservationIntervalMs,
+            intervalMs: REALTIME_CONFIG.customer.reservationIntervalMs,
 
             runImmediately: true,
             pauseWhenHidden: true,
 
             onError: (requestError) => {
-                console.error(
-                    '[CUSTOMER_TABLES_POLL_ERROR]',
-                    requestError,
-                )
+                console.error('[CUSTOMER_TABLES_POLL_ERROR]', requestError)
             },
         },
     )
 
     usePolling(
         async (signal) => {
-            const isInitialLoad =
-                !hasLoadedInitialReservationRef.current
+            const isInitialLoad = !hasLoadedInitialReservationRef.current
 
-            await loadCurrentReservation(
-                signal,
-                isInitialLoad,
-            )
+            await loadCurrentReservation(signal, isInitialLoad)
 
             hasLoadedInitialReservationRef.current = true
         },
         {
-            intervalMs:
-            REALTIME_CONFIG
-                .customer
-                .reservationIntervalMs,
+            intervalMs: REALTIME_CONFIG.customer.reservationIntervalMs,
 
             runImmediately: true,
             pauseWhenHidden: true,
 
             onError: (requestError) => {
-                console.error(
-                    '[CUSTOMER_RESERVATION_POLL_ERROR]',
-                    requestError,
-                )
+                console.error('[CUSTOMER_RESERVATION_POLL_ERROR]', requestError)
             },
         },
     )
 
-    async function handleBookSubmit(
-        event: FormEvent,
-    ) {
+    async function handleBookSubmit(event: FormEvent) {
         event.preventDefault()
 
         setBookError('')
@@ -420,8 +340,7 @@ export default function CustomerReservations() {
         setBookLoading(true)
 
         try {
-            const result =
-                await createReservation(bookForm)
+            const result = await createReservation(bookForm)
 
             setBookSuccess(result)
 
@@ -430,18 +349,12 @@ export default function CustomerReservations() {
                 customerName: '',
                 phone: '',
                 note: '',
-                reservationTime: `${todayStr}T08:00:00`,
+                reservationTime: `${getTodayStr()}T08:00:00`,
             }))
 
-            await loadAvailableTables(
-                undefined,
-                false,
-            )
+            await loadAvailableTables(undefined, false)
 
-            await loadCurrentReservation(
-                undefined,
-                false,
-            )
+            await loadCurrentReservation(undefined, false)
 
             setActiveTab('cancel')
         } catch (requestError: unknown) {
@@ -449,91 +362,57 @@ export default function CustomerReservations() {
                 return
             }
 
-            console.error(
-                '[CUSTOMER_BOOK_RESERVATION_ERROR]',
-                requestError,
-            )
+            console.error('[CUSTOMER_BOOK_RESERVATION_ERROR]', requestError)
 
-            setBookError(
-                getRequestErrorMessage(
-                    requestError,
-                    'Đặt bàn thất bại',
-                ),
-            )
+            setBookError(getErrorMessage(requestError, 'Đặt bàn thất bại'))
         } finally {
             setBookLoading(false)
         }
     }
 
-    async function handleCancelReservation(
-        reservationId: number,
-    ) {
+    async function handleCancelReservation(reservationId: number) {
         setCancelError('')
         setCancelSuccess(null)
         setCancelingId(reservationId)
 
         try {
-            const result =
-                await cancelReservation(reservationId)
+            const result = await cancelReservation(reservationId)
 
             setCancelSuccess(result)
 
             setCurrentReservations((previous) =>
-                previous.filter(
-                    (item) => item.id !== reservationId,
-                ),
+                previous.filter((item) => item.id !== reservationId),
             )
 
-            await loadAvailableTables(
-                undefined,
-                false,
-            )
+            await loadAvailableTables(undefined, false)
 
-            await loadCurrentReservation(
-                undefined,
-                false,
-            )
+            await loadCurrentReservation(undefined, false)
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
                 return
             }
 
-            console.error(
-                '[CUSTOMER_CANCEL_RESERVATION_ERROR]',
-                requestError,
-            )
+            console.error('[CUSTOMER_CANCEL_RESERVATION_ERROR]', requestError)
 
-            setCancelError(
-                getRequestErrorMessage(
-                    requestError,
-                    'Hủy đặt bàn thất bại',
-                ),
-            )
+            setCancelError(getErrorMessage(requestError, 'Hủy đặt bàn thất bại'))
         } finally {
             setCancelingId(null)
         }
     }
 
     return (
-        <div className="customer-reservations-page">
-            <div className="customer-reservations-header">
-                <h1 className="customer-reservations-title">
-                    Đặt bàn
-                </h1>
+        <div className="rk-stack">
+            <PageCard>
+                <PageHeader
+                    title="Đặt bàn"
+                    description="Quản lý đặt bàn của bạn tại nhà hàng."
+                />
+            </PageCard>
 
-                <p>
-                    Quản lý đặt bàn của bạn tại nhà hàng
-                </p>
-            </div>
-
-            <div className="customer-reservations-tabs">
+            <div className="rk-segment">
                 <button
                     type="button"
-                    className={`customer-tab ${
-                        activeTab === 'book'
-                            ? 'active'
-                            : ''
-                    }`}
+                    className={`rk-segment__btn${activeTab === 'book' ? ' is-active' : ''}`}
                     onClick={() => {
                         setActiveTab('book')
                         setBookSuccess(null)
@@ -545,19 +424,12 @@ export default function CustomerReservations() {
 
                 <button
                     type="button"
-                    className={`customer-tab ${
-                        activeTab === 'cancel'
-                            ? 'active'
-                            : ''
-                    }`}
+                    className={`rk-segment__btn${activeTab === 'cancel' ? ' is-active' : ''}`}
                     onClick={() => {
                         setActiveTab('cancel')
                         setCancelSuccess(null)
                         setCancelError('')
-                        void loadCurrentReservation(
-                            undefined,
-                            true,
-                        )
+                        void loadCurrentReservation(undefined, true)
                     }}
                 >
                     Hủy đặt bàn
@@ -565,38 +437,31 @@ export default function CustomerReservations() {
             </div>
 
             {activeTab === 'book' && (
-                <div className="customer-reservation-card">
-                    <h2>Đặt bàn mới</h2>
+                <div className="rk-card rk-card--pad">
+                    <div>
+                        <h2 className="rk-sectiontitle">Đặt bàn mới</h2>
 
-                    <p className="customer-reservation-sub">
-                        Mỗi khách hàng chỉ được đặt{' '}
-                        <strong>1 bàn/ngày</strong>
-                    </p>
+                        <p className="rk-field__hint">
+                            Mỗi khách hàng chỉ được đặt <strong>1 bàn/ngày</strong>
+                        </p>
+                    </div>
 
                     {bookSuccess && (
-                        <div className="customer-success-box">
-                            <strong>
-                                Đặt bàn thành công!
-                            </strong>
+                        <div className="rk-note rk-note--ok">
+                            <strong>Đặt bàn thành công!</strong>
 
-                            <div className="customer-success-detail">
+                            <div className="rk-rowlist__meta">
                                 <span>
-                                    Bàn{' '}
-                                    <strong>
-                                        {bookSuccess.tableNumber}
-                                    </strong>
+                                    Bàn <strong>{bookSuccess.tableNumber}</strong>
                                     {' - '}
-                                    {formatDateTime(
-                                        bookSuccess.reservationTime,
-                                    )}
+                                    {formatDateTime(bookSuccess.reservationTime)}
                                 </span>
 
                                 <span>
                                     Trạng thái:{' '}
                                     <strong>
-                                        {statusLabels[
-                                            bookSuccess.status
-                                            ] ?? bookSuccess.status}
+                                        {statusLabels[bookSuccess.status] ??
+                                            bookSuccess.status}
                                     </strong>
                                 </span>
                             </div>
@@ -604,25 +469,22 @@ export default function CustomerReservations() {
                     )}
 
                     {bookError && (
-                        <div className="customer-error-box">
-                            ❌ {bookError}
-                        </div>
+                        <div className="rk-note rk-note--alert">{bookError}</div>
                     )}
 
                     <form
-                        className="customer-reservation-form"
-                        onSubmit={(event) =>
-                            void handleBookSubmit(event)
-                        }
+                        className="rk-fieldgroup"
+                        onSubmit={(event) => void handleBookSubmit(event)}
                     >
-                        <div className="customer-form-row">
-                            <div className="customer-form-group">
-                                <label>
+                        <div className="rk-formgrid">
+                            <div className="rk-field">
+                                <label className="rk-field__label">
                                     Tên khách hàng{' '}
-                                    <span className="required">*</span>
+                                    <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    className="rk-input"
                                     type="text"
                                     value={bookForm.customerName}
                                     placeholder="Nhập họ và tên"
@@ -631,20 +493,20 @@ export default function CustomerReservations() {
                                     onChange={(event) =>
                                         setBookForm((previous) => ({
                                             ...previous,
-                                            customerName:
-                                            event.target.value,
+                                            customerName: event.target.value,
                                         }))
                                     }
                                 />
                             </div>
 
-                            <div className="customer-form-group">
-                                <label>
+                            <div className="rk-field">
+                                <label className="rk-field__label">
                                     Số điện thoại{' '}
-                                    <span className="required">*</span>
+                                    <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    className="rk-input"
                                     type="tel"
                                     value={bookForm.phone}
                                     placeholder="0123456789"
@@ -653,41 +515,35 @@ export default function CustomerReservations() {
                                     onChange={(event) =>
                                         setBookForm((previous) => ({
                                             ...previous,
-                                            phone:
-                                                event.target.value
-                                                    .replace(/\D/g, '')
-                                                    .slice(0, 10),
+                                            phone: event.target.value
+                                                .replace(/\D/g, '')
+                                                .slice(0, 10),
                                         }))
                                     }
                                 />
                             </div>
                         </div>
 
-                        <div className="customer-form-row">
-                            <div className="customer-form-group">
-                                <label>
-                                    Ngày đặt{' '}
-                                    <span className="required">*</span>
+                        <div className="rk-formgrid">
+                            <div className="rk-field">
+                                <label className="rk-field__label">
+                                    Ngày đặt <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    className="rk-input"
                                     type="date"
-                                    value={
-                                        bookForm.reservationTime
-                                            .split('T')[0]
-                                    }
-                                    min={todayStr}
+                                    value={bookForm.reservationTime.split('T')[0]}
+                                    min={getTodayStr()}
                                     required
                                     onChange={(event) => {
                                         const time =
-                                            bookForm.reservationTime
-                                                .split('T')[1]
-                                            || '08:00:00'
+                                            bookForm.reservationTime.split('T')[1] ||
+                                            '08:00:00'
 
                                         setBookForm((previous) => ({
                                             ...previous,
-                                            reservationTime:
-                                                `${event.target.value}T${time}`,
+                                            reservationTime: `${event.target.value}T${time}`,
                                         }))
 
                                         void loadBlockedSlots(
@@ -698,28 +554,24 @@ export default function CustomerReservations() {
                                 />
                             </div>
 
-                            <div className="customer-form-group">
-                                <label>
-                                    Giờ đặt{' '}
-                                    <span className="required">*</span>
+                            <div className="rk-field">
+                                <label className="rk-field__label">
+                                    Giờ đặt <span className="rk-field__required">*</span>
                                 </label>
 
                                 <select
+                                    className="rk-select"
                                     value={selectedTime}
                                     required
                                     onChange={(event) => {
                                         setBookForm((previous) => ({
                                             ...previous,
-                                            reservationTime:
-                                                `${selectedDate}T${event.target.value}:00`,
+                                            reservationTime: `${selectedDate}T${event.target.value}:00`,
                                         }))
                                     }}
                                 >
                                     {availableTimeSlots.map((value) => (
-                                        <option
-                                            key={value}
-                                            value={value}
-                                        >
+                                        <option key={value} value={value}>
                                             {value}
                                         </option>
                                     ))}
@@ -727,20 +579,19 @@ export default function CustomerReservations() {
                             </div>
                         </div>
 
-                        <div className="customer-form-row">
-                            <div className="customer-form-group">
-                                <label>
-                                    Chọn bàn{' '}
-                                    <span className="required">*</span>
+                        <div className="rk-formgrid">
+                            <div className="rk-field">
+                                <label className="rk-field__label">
+                                    Chọn bàn <span className="rk-field__required">*</span>
                                 </label>
 
                                 <select
+                                    className="rk-select"
                                     value={bookForm.tableId}
                                     required
                                     disabled={loadingTables}
                                     onChange={(event) => {
-                                        const nextTableId =
-                                            Number(event.target.value)
+                                        const nextTableId = Number(event.target.value)
 
                                         setBookForm((previous) => ({
                                             ...previous,
@@ -754,23 +605,14 @@ export default function CustomerReservations() {
                                     }}
                                 >
                                     {loadingTables ? (
-                                        <option value={0}>
-                                            Đang tải bàn...
-                                        </option>
+                                        <option value={0}>Đang tải bàn...</option>
                                     ) : tableError ? (
-                                        <option value={0}>
-                                            Lỗi tải bàn
-                                        </option>
+                                        <option value={0}>Lỗi tải bàn</option>
                                     ) : availableTables.length === 0 ? (
-                                        <option value={0}>
-                                            Không có bàn trống
-                                        </option>
+                                        <option value={0}>Không có bàn trống</option>
                                     ) : (
                                         availableTables.map((table) => (
-                                            <option
-                                                key={table.id}
-                                                value={table.id}
-                                            >
+                                            <option key={table.id} value={table.id}>
                                                 Bàn {table.tableNumber}
                                                 {' - '}
                                                 {table.capacity} chỗ
@@ -780,65 +622,64 @@ export default function CustomerReservations() {
                                 </select>
 
                                 {tableError && (
-                                    <span className="customer-error-text">
-                                        ⚠️ {tableError}
-                                    </span>
+                                    <span className="rk-formerror">{tableError}</span>
                                 )}
 
-                                {!loadingTables
-                                    && !tableError
-                                    && availableTables.length === 0 && (
-                                        <span className="customer-warning-text">
-                                        ⚠️ Hiện không có bàn trống
-                                    </span>
+                                {!loadingTables &&
+                                    !tableError &&
+                                    availableTables.length === 0 && (
+                                        <span className="rk-field__hint">
+                                            <AlertTriangle
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />{' '}
+                                            Hiện không có bàn trống
+                                        </span>
                                     )}
                             </div>
 
-                            <div className="customer-form-group">
-                                <label>Ghi chú</label>
+                            <div className="rk-field">
+                                <label className="rk-field__label">Ghi chú</label>
 
                                 <input
+                                    className="rk-input"
                                     type="text"
                                     value={bookForm.note}
-                                    placeholder="Yêu cầu đặc biệt..."
+                                    placeholder="Yêu cầu đặc biệt…"
                                     maxLength={100}
                                     onChange={(event) =>
                                         setBookForm((previous) => ({
                                             ...previous,
-                                             note: event.target.value,
+                                            note: event.target.value,
                                         }))
                                     }
                                 />
                             </div>
                         </div>
 
-                        <div className="customer-form-actions">
+                        <div className="rk-actions rk-actions--end">
                             <button
                                 type="submit"
-                                className="customer-btn-primary"
+                                className="rk-btn rk-btn--primary"
                                 disabled={
-                                    bookLoading
-                                    || availableTables.length === 0
-                                    || Boolean(tableError)
+                                    bookLoading ||
+                                    availableTables.length === 0 ||
+                                    Boolean(tableError)
                                 }
                             >
-                                {bookLoading
-                                    ? 'Đang xử lý...'
-                                    : '📌 Lưu đặt bàn'}
+                                {bookLoading ? 'Đang xử lý…' : 'Lưu đặt bàn'}
                             </button>
 
                             <button
                                 type="button"
-                                className="customer-btn-secondary"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => {
                                     setBookForm({
                                         customerName: '',
                                         phone: '',
-                                        reservationTime:
-                                            `${todayStr}T08:00:00`,
+                                        reservationTime: `${getTodayStr()}T08:00:00`,
                                         note: '',
-                                        tableId:
-                                            availableTables[0]?.id ?? 0,
+                                        tableId: availableTables[0]?.id ?? 0,
                                     })
 
                                     setBookError('')
@@ -853,123 +694,103 @@ export default function CustomerReservations() {
             )}
 
             {activeTab === 'cancel' && (
-                <div className="customer-reservation-card">
-                    <h2>❌ Hủy đặt bàn</h2>
+                <div className="rk-card rk-card--pad">
+                    <div>
+                        <h2 className="rk-sectiontitle">Huỷ đặt bàn</h2>
 
-                    <p className="customer-reservation-sub">
-                        Danh sách các đặt bàn đang hoạt động của bạn
-                        {' '}
-                        (có thể ở nhiều ngày khác nhau)
-                    </p>
+                        <p className="rk-field__hint">
+                            Danh sách đặt bàn đang hoạt động của bạn, có thể ở nhiều ngày
+                            khác nhau.
+                        </p>
+                    </div>
 
                     {cancelSuccess && (
-                        <div className="customer-success-box">
-                            <strong>
-                                Hủy đặt bàn thành công!
-                            </strong>
+                        <div className="rk-note rk-note--ok">
+                            <strong>Hủy đặt bàn thành công!</strong>
 
-                            <div className="customer-success-detail">
+                            <div className="rk-rowlist__meta">
                                 <span>
                                     Đã hủy bàn{' '}
-                                    <strong>
-                                        {cancelSuccess.tableNumber}
-                                    </strong>
+                                    <strong>{cancelSuccess.tableNumber}</strong>
                                     {' - '}
-                                    {formatDateTime(
-                                        cancelSuccess.reservationTime,
-                                    )}
+                                    {formatDateTime(cancelSuccess.reservationTime)}
                                 </span>
                             </div>
                         </div>
                     )}
 
                     {cancelError && (
-                        <div className="customer-error-box">
-                            ❌ {cancelError}
-                        </div>
+                        <div className="rk-note rk-note--alert">{cancelError}</div>
                     )}
 
                     {loadingCurrent ? (
-                        <div className="customer-loading">
-                            Đang tải thông tin...
-                        </div>
+                        <LoadingState
+                            title="Đang tải đặt bàn của bạn"
+                            description=""
+                            size="sm"
+                        />
                     ) : currentReservations.length === 0 ? (
-                        <div className="customer-empty-state">
-                            <p>
-                                Bạn không có đơn đặt bàn nào đang hoạt động
-                            </p>
-                        </div>
+                        <EmptyState
+                            title="Chưa có đặt bàn nào"
+                            description="Bạn không có đơn đặt bàn nào đang hoạt động."
+                        />
                     ) : (
-                        <div className="customer-reservation-list">
+                        <div className="rk-rowlist">
                             {currentReservations.map((reservation) => (
                                 <div
                                     key={reservation.id}
-                                    className="customer-current-reservation"
+                                    className="rk-note rk-note--busy"
                                 >
-                                    <div className="customer-current-info">
-                                        <span className="customer-current-label">
+                                    <div className="rk-rowlist__main">
+                                        <span className="rk-rowlist__title">
                                             Đặt bàn:
                                         </span>
 
                                         <span>
-                                            Bàn{' '}
-                                            <strong>
-                                                {reservation.tableNumber}
-                                            </strong>
+                                            Bàn <strong>{reservation.tableNumber}</strong>
                                             {' - '}
-                                            {formatDateTime(
-                                                reservation.reservationTime,
-                                            )}
+                                            {formatDateTime(reservation.reservationTime)}
                                         </span>
 
                                         <span
-                                            className={`customer-status-badge-${reservation.status.toLowerCase()}`}
+                                            className={`rk-chip ${reservationChipClass(reservation.status)}`}
                                         >
-                                            {statusLabels[
-                                                reservation.status
-                                                ] ?? reservation.status}
+                                            {statusLabels[reservation.status] ??
+                                                reservation.status}
                                         </span>
 
                                         {reservation.note && (
-                                            <span className="customer-current-note">
-                                                Ghi chú:{' '}
-                                                {reservation.note}
+                                            <span className="rk-rowlist__meta">
+                                                Ghi chú: {reservation.note}
                                             </span>
                                         )}
                                     </div>
 
                                     <button
                                         type="button"
-                                        className="customer-btn-danger"
-                                        disabled={
-                                            cancelingId !== null
-                                        }
+                                        className="rk-btn rk-btn--danger"
+                                        disabled={cancelingId !== null}
                                         onClick={() =>
-                                            void handleCancelReservation(
-                                                reservation.id,
-                                            )
+                                            void handleCancelReservation(reservation.id)
                                         }
                                     >
                                         {cancelingId === reservation.id
-                                            ? 'Đang xử lý...'
-                                            : '🗑️ Hủy đặt bàn'}
+                                            ? 'Đang xử lý…'
+                                            : 'Hủy đặt bàn'}
                                     </button>
                                 </div>
                             ))}
                         </div>
                     )}
 
-                    <div className="customer-form-actions">
+                    <div className="rk-actions rk-actions--end">
                         <button
                             type="button"
-                            className="customer-btn-secondary"
+                            className="rk-btn rk-btn--quiet"
                             onClick={() => {
                                 setCancelError('')
                                 setCancelSuccess(null)
-                                void loadCurrentReservation(
-                                    undefined,
-                                    true,
-                                )
+                                void loadCurrentReservation(undefined, true)
                             }}
                         >
                             Làm mới

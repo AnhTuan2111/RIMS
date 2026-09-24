@@ -22,71 +22,75 @@ export type {
     MenuDashboardData,
 }
 
-export const categoryApi = {
-    /** Returns all categories */
-    getAllCategories: (signal?: AbortSignal) =>
-        apiClient.get<CategoryResponse[]>('/admin/category/all', {signal}),
+/** Returns all categories */
+export const getAllCategories = (signal?: AbortSignal) =>
+    apiClient.get<CategoryResponse[]>('/admin/category/all', {signal})
 
+/** Creates a new category */
 
+export const createCategory = (data: Pick<CategoryFormData, 'name' | 'description'>) =>
+    apiClient.post<CategoryResponse>('/admin/category/new', data)
 
-    /** Creates a new category */
-    createCategory: (data: Pick<CategoryFormData, 'name' | 'description'>) =>
-        apiClient.post<CategoryResponse>('/admin/category/new', data),
+/** Updates an existing category */
 
-    /** Updates an existing category */
-    updateCategory: (
-        id: number,
-        data: CategoryFormData,
-    ) =>
-        apiClient.put<CategoryResponse>(`/admin/category/${id}`, data),
+export const updateCategory = (id: number, data: CategoryFormData) =>
+    apiClient.put<CategoryResponse>(`/admin/category/${id}`, data)
 
-    /** Soft-deletes a category */
-    deleteCategory: (id: number) =>
-        apiClient.delete(`/admin/category/${id}`),
+/** Soft-deletes a category */
+
+export interface CategoryRemovalResponse {
+    /** true: đã xoá khỏi cơ sở dữ liệu. false: chỉ ẩn khỏi thực đơn. */
+    deleted: boolean
+    /** Số món bị ẩn theo. Bằng 0 khi danh mục bị xoá hẳn. */
+    hiddenDishCount: number
+    message: string
 }
 
-export const dishApi = {
-    /** Returns all dishes */
-    getAllDishes: (signal?: AbortSignal) =>
-        apiClient.get<DishResponse[]>('/admin/dish/all', {signal}),
+/**
+ * Xoá danh mục rỗng, hoặc ẩn danh mục còn món.
+ *
+ * <p>Món đã bán còn nằm trong hoá đơn và các báo cáo doanh thu, nên danh mục
+ * còn món thì chỉ ẩn. Kết quả trả về nói rõ việc nào đã xảy ra.
+ */
+export const deleteCategory = (id: number) =>
+    apiClient.delete<CategoryRemovalResponse>(`/admin/category/${id}`)
 
+/** Returns all dishes */
+export const getAllDishes = (signal?: AbortSignal) =>
+    apiClient.get<DishResponse[]>('/admin/dish/all', {signal})
 
+/** Creates a new dish. isAvailable is omitted — backend defaults it to true;
+ *  chỉ Chef mới đổi field này qua trang riêng của Chef. */
 
-    /** Creates a new dish. isAvailable is omitted — backend defaults it to true;
-     *  chỉ Chef mới đổi field này qua trang riêng của Chef. */
-    createDish: (data: {
+export const createDish = (data: {
+    name: string
+    description: string
+    price: number
+    imageUrl: string
+    categoryId: number
+    isHidden: boolean
+}) => apiClient.post<DishResponse>('/admin/dish/new', data)
+
+/** Updates an existing dish. isAvailable phải gửi kèm (backend @NotNull)
+ *  nhưng luôn là giá trị hiện tại, không cho Admin sửa — field này do Chef sở hữu. */
+
+export const updateDish = (
+    id: number,
+    data: {
         name: string
         description: string
         price: number
         imageUrl: string
         categoryId: number
+        isAvailable: boolean
         isHidden: boolean
-    }) =>
-        apiClient.post<DishResponse>('/admin/dish/new', data),
+    },
+) => apiClient.put<DishResponse>(`/admin/dish/update/${id}`, data)
 
-    /** Updates an existing dish. isAvailable phải gửi kèm (backend @NotNull)
-     *  nhưng luôn là giá trị hiện tại, không cho Admin sửa — field này do Chef sở hữu. */
-    updateDish: (
-        id: number,
-        data: {
-            name: string
-            description: string
-            price: number
-            imageUrl: string
-            categoryId: number
-            isAvailable: boolean
-            isHidden: boolean
-        },
-    ) =>
-        apiClient.put<DishResponse>(`/admin/dish/update/${id}`, data),
+/** Deletes a dish */
 
-    /** Deletes a dish */
-    deleteDish: (id: number) =>
-        apiClient.delete(`/admin/dish/delete/${id}`),
-}
+export const deleteDish = (id: number) => apiClient.delete(`/admin/dish/delete/${id}`)
 
-export const menuApi = {
-    /** Returns the menu dashboard overview */
-    getMenuDashboard: (signal?: AbortSignal) =>
-        apiClient.get<MenuDashboardData>('/admin/menu', {signal}),
-}
+/** Returns the menu dashboard overview */
+export const getMenuDashboard = (signal?: AbortSignal) =>
+    apiClient.get<MenuDashboardData>('/admin/menu', {signal})

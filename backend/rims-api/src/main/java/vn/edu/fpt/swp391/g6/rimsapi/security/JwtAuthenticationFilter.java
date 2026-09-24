@@ -1,10 +1,14 @@
 package vn.edu.fpt.swp391.g6.rimsapi.security;
 
-import com.nimbusds.jwt.JWTClaimsSet;
+import java.io.IOException;
+import java.util.List;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,13 +16,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.RevokedTokenRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.JwtService;
-
-import java.io.IOException;
-import java.util.List;
-
 
 @Component
 @RequiredArgsConstructor
@@ -44,7 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
                 JWTClaimsSet claims = jwtService.parseAndValidate(token);
 
                 String jti = jwtService.extractJti(claims);
-                if (jti != null && revokedTokenRepository.existsByJti(jti)) {
+                if (jti != null && revokedTokenRepository.existsByJti(jti))
+                {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token đã bị thu hồi");
                     return;
                 }
@@ -56,7 +58,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
                     String username = jwtService.extractUsername(claims);
                     String role = jwtService.extractRole(claims);
 
-                    UserPrincipal principal = new UserPrincipal(userId, username, RoleType.valueOf(role));
+                    boolean mustChangePassword = jwtService.extractMustChangePassword(claims);
+                    UserPrincipal principal = new UserPrincipal(
+                            userId, username, RoleType.valueOf(role), mustChangePassword);
                     List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

@@ -1,17 +1,21 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.CreateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.UpdateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
-
-import java.time.LocalDate;
-import java.util.List;
-
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.AdminTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableRemovalResponse;
 
 public interface AdminService
 {
@@ -35,7 +39,7 @@ public interface AdminService
     // category service
     List<CategoryResponse> getAllCategories();
 
-    List<CategoryResponse> getAvailableCategories();  // Chỉ lấy category đang hoạt động
+    List<CategoryResponse> getAvailableCategories(); // Chỉ lấy category đang hoạt động
 
     CategoryResponse getCategoryById(Integer id);
 
@@ -43,10 +47,31 @@ public interface AdminService
 
     CategoryResponse updateCategory(Integer id, UpdateCategoryRequest updateCategoryRequest);
 
-    void deleteCategory(Integer id);
+    /**
+     * Xoá danh mục rỗng, hoặc ẩn danh mục còn món.
+     *
+     * <p>Kết quả nói rõ việc nào đã xảy ra, vì cùng một nút bấm mà hệ thống
+     * làm hai việc khác nhau.
+     */
+    CategoryRemovalResponse deleteCategory(Integer id);
 
     // menu dash board
     MenuDashboardResponse getMenuDashboardData();
+
+    // table service
+    List<AdminTableResponse> getAllTables();
+
+    AdminTableResponse createTable(CreateTableRequest request);
+
+    AdminTableResponse updateTable(Integer id, UpdateTableRequest request);
+
+    /**
+     * Xoá bàn chưa dùng bao giờ, hoặc cất đi bàn đã có lịch sử.
+     *
+     * <p>Kết quả nói rõ việc nào đã xảy ra, vì cùng một nút bấm mà hệ thống
+     * làm hai việc khác nhau.
+     */
+    TableRemovalResponse deleteTable(Integer id);
 
     // invoice service
     InvoiceHistoryPageResponse getInvoiceHistory(

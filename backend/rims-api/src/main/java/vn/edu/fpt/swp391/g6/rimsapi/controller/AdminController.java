@@ -1,33 +1,40 @@
 package vn.edu.fpt.swp391.g6.rimsapi.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.UpdateProfileRequest;
+
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.restaurant.UpdateRestaurantProfileRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.CreateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.UpdateTableRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateCustomerRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateStaffRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.SetAccountStatusRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.PageResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.restaurant.RestaurantProfileResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.AdminTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.RestaurantProfileService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
-
-import java.time.LocalDate;
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/rims/admin")
@@ -37,6 +44,22 @@ public class AdminController
 
     private final UserService userService;
     private final AdminService adminService;
+    private final RestaurantProfileService restaurantProfileService;
+    // =================== CẤU HÌNH NHÀ HÀNG ===================
+
+    @GetMapping("/restaurant")
+    public RestaurantProfileResponse getRestaurantProfile()
+    {
+        return restaurantProfileService.getProfile();
+    }
+
+    @PutMapping("/restaurant")
+    public RestaurantProfileResponse updateRestaurantProfile(
+            @RequestBody @Valid UpdateRestaurantProfileRequest request)
+    {
+        return restaurantProfileService.updateProfile(request);
+    }
+
     // =================== USER / ACCOUNT ===================
 
     @GetMapping("/user/all")
@@ -93,29 +116,32 @@ public class AdminController
         return userService.updateAccount(id, request);
     }
 
+    /**
+     * Đặt lại mật khẩu của một tài khoản về mặc định.
+     *
+     * <p>Nhân viên không tự đổi được mật khẩu (SRS UC-AU-04 chỉ dành cho Khách
+     * hàng, dự án mở thêm cho Quản trị viên), nên quên mật khẩu thì cần đường
+     * này — không thì phải sửa thẳng cơ sở dữ liệu.
+     */
+    @PostMapping("/user/{id}/reset-password")
+    public ResponseEntity<Void> resetPassword(@PathVariable Integer id)
+    {
+        userService.resetPassword(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/user/{id}/status")
     public ResponseEntity<Void> setAccountStatus(
             @PathVariable Integer id,
-            @RequestBody SetAccountStatusRequest request)
+            @Valid @RequestBody SetAccountStatusRequest request)
     {
         userService.setAccountStatus(id, request);
         return ResponseEntity.noContent().build();
     }
 
-    // Legacy profile endpoints
-    @GetMapping("/user/profile/{id}")
-    public UserProfileResponse getProfile(@PathVariable Integer id)
-    {
-        return userService.getProfile(id);
-    }
-
-    @PutMapping("/user/profile/update/{id}")
-    public UserProfileResponse updateProfile(
-            @PathVariable Integer id,
-            @RequestBody @Valid UpdateProfileRequest request)
-    {
-        return userService.updateProfile(id, request);
-    }
+    // Hồ sơ cá nhân đã chuyển sang MeController (/rims/me). Hai endpoint cũ ở đây
+    // từng được màn Hồ sơ gọi để lách, nay không còn ai dùng.
 
     // =================== INVOICE ===================
 
@@ -255,10 +281,38 @@ public class AdminController
     }
 
     @DeleteMapping("/category/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Integer id)
+    public CategoryRemovalResponse deleteCategory(@PathVariable Integer id)
     {
-        adminService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
+        return adminService.deleteCategory(id);
+    }
+
+    // =================== BÀN ===================
+
+    @GetMapping("/table/all")
+    public List<AdminTableResponse> getAllTables()
+    {
+        return adminService.getAllTables();
+    }
+
+    @PostMapping("/table/new")
+    public ResponseEntity<AdminTableResponse> createTable(
+            @RequestBody @Valid CreateTableRequest request)
+    {
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createTable(request));
+    }
+
+    @PutMapping("/table/{id}")
+    public AdminTableResponse updateTable(
+            @PathVariable Integer id,
+            @RequestBody @Valid UpdateTableRequest request)
+    {
+        return adminService.updateTable(id, request);
+    }
+
+    @DeleteMapping("/table/{id}")
+    public TableRemovalResponse deleteTable(@PathVariable Integer id)
+    {
+        return adminService.deleteTable(id);
     }
 
     // =================== DISH ===================

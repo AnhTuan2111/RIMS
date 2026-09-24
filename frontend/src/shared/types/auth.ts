@@ -6,8 +6,7 @@ export const RoleType = {
     CUSTOMER: 'CUSTOMER',
 } as const
 
-export type RoleType =
-    (typeof RoleType)[keyof typeof RoleType]
+export type RoleType = (typeof RoleType)[keyof typeof RoleType]
 
 export interface LoginRequest {
     username: string
@@ -28,8 +27,9 @@ export interface LoginResponse {
     email: string | null
     role: RoleType
     rewardPoints?: number
+    /** Còn bật thì tài khoản vẫn dùng mật khẩu do người khác đặt. */
+    mustChangePassword?: boolean
 }
-
 
 export interface UserProfile {
     userId: number
@@ -40,8 +40,8 @@ export interface UserProfile {
     email: string | null
     role: RoleType
     rewardPoints?: number
+    mustChangePassword?: boolean
 }
-
 
 export interface AuthUser {
     userId: number
@@ -52,6 +52,7 @@ export interface AuthUser {
     email: string | null
     role: RoleType
     rewardPoints?: number
+    mustChangePassword?: boolean
 }
 
 export interface UserResponse {

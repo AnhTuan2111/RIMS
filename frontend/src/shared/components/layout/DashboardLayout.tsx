@@ -12,15 +12,13 @@ export default function DashboardLayout() {
         navigate('/login', {replace: true})
     }
 
-    const layoutClassName = 'app-layout theme-customer'
-
     return (
-        <div className={layoutClassName}>
-            <Sidebar/>
-            <div className="app-main">
-                <DashboardTopbar onLogout={handleLogout}/>
-                <main className="app-content rims-app-content">
-                    <Outlet/>
+        <div className="rk-shell">
+            <Sidebar />
+            <div className="rk-shell__main">
+                <DashboardTopbar onLogout={handleLogout} />
+                <main className="rk-shell__content">
+                    <Outlet />
                 </main>
             </div>
         </div>

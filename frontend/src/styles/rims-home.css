@@ -1,0 +1,223 @@
+/* =========================================================================
+   Trang công khai của nhà hàng.
+
+   Dùng chung token và lớp component với phần app bên trong — trước đây trang
+   chủ và app là hai sản phẩm không liên quan về mặt hình thức.
+   ========================================================================= */
+
+.rk-home {
+    min-height: 100%;
+    background: var(--rims-paper);
+    color: var(--rims-ink);
+}
+
+/* ---------- Masthead ---------- */
+
+.rk-home__masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-5);
+    flex-wrap: wrap;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--rims-space-5) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-home__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    min-width: 0;
+}
+
+.rk-home__logo {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--rims-radius-md);
+    object-fit: cover;
+    flex: none;
+}
+
+.rk-home__logo--letter {
+    display: grid;
+    place-items: center;
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-black);
+    /* Chữ cái đầu thay cho logo khi chủ quán chưa tải ảnh lên. */
+}
+
+.rk-home__brandtext {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.rk-home__brandtext strong {
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+.rk-home__brandtext span {
+    font-size: var(--rims-text-sm);
+    color: var(--rims-ink-3);
+}
+
+/* ---------- Hero ---------- */
+
+.rk-home__hero {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--rims-space-16) var(--rims-space-6) var(--rims-space-12);
+}
+
+.rk-home__title {
+    margin: 0;
+    max-width: 16ch;
+    font-size: clamp(38px, 7vw, var(--rims-text-display));
+    font-weight: var(--rims-weight-black);
+    line-height: var(--rims-leading-tight);
+    letter-spacing: var(--rims-tracking-tight);
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.rk-home__lede {
+    margin: var(--rims-space-4) 0 0;
+    max-width: 44ch;
+    font-size: var(--rims-text-xl);
+    color: var(--rims-brand);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-home__desc {
+    margin: var(--rims-space-5) 0 0;
+    max-width: 62ch;
+    font-size: var(--rims-text-lg);
+    line-height: var(--rims-leading-normal);
+    color: var(--rims-ink-2);
+}
+
+.rk-home__actions {
+    display: flex;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-8);
+}
+
+/* ---------- Khối nội dung ----------
+   Mỗi khối có nhịp khác nhau, không lặp đúng một mức đệm như trước. */
+
+.rk-home__section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--rims-space-12) var(--rims-space-6);
+    border-top: 1px solid var(--rims-line);
+}
+
+.rk-home__h2 {
+    margin: 0 0 var(--rims-space-6);
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-tight);
+    text-wrap: balance;
+}
+
+/* ---------- Món bán chạy ---------- */
+
+.rk-home__dishes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+    gap: var(--rims-space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rk-home__dish {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-3);
+}
+
+.rk-home__dishimg {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface-2);
+}
+
+/* Thứ hạng nằm đè lên góc ảnh, không chiếm thêm một dòng riêng. */
+.rk-home__dishrank {
+    position: absolute;
+    top: var(--rims-space-3);
+    left: var(--rims-space-3);
+    display: grid;
+    place-items: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 var(--rims-space-2);
+    border-radius: var(--rims-radius-sm);
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-home__dishname {
+    font-size: var(--rims-text-base);
+    font-weight: var(--rims-weight-semibold);
+    line-height: var(--rims-leading-snug);
+}
+
+/* ---------- Liên hệ ---------- */
+
+.rk-home__contacts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    gap: var(--rims-space-6);
+    margin: 0;
+}
+
+.rk-home__contact dt {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-semibold);
+    letter-spacing: var(--rims-tracking-label);
+    color: var(--rims-ink-3);
+}
+
+.rk-home__contact dd {
+    margin: var(--rims-space-2) 0 0;
+    font-size: var(--rims-text-lg);
+    line-height: var(--rims-leading-snug);
+}
+
+/* ---------- Chân trang ---------- */
+
+.rk-home__footer {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--rims-space-8) var(--rims-space-6) var(--rims-space-12);
+    border-top: 1px solid var(--rims-line);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-home__footer p {
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .rk-home__hero {
+        padding-top: var(--rims-space-10);
+    }
+}

@@ -1,14 +1,10 @@
-import {
-    useState,
-    type CSSProperties,
-} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 
-import {REALTIME_CONFIG} from '@/app/config/realtime'
-import * as adminApi from '@/shared/api/admin'
-import * as customerApi from '@/shared/api/customer'
+import * as meApi from '@/shared/api/me'
 import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
-import {getErrorMessage} from '@/shared/utils/error'
+import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
+import {PasswordInput} from '@/shared/components/ui'
 
 type StoredUser = {
     userId: number
@@ -30,8 +26,7 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 function readStoredUser() {
-    const stored =
-        localStorage.getItem('currentUser')
+    const stored = localStorage.getItem('currentUser')
 
     if (!stored) {
         return null
@@ -49,10 +44,7 @@ function getUserId(user: StoredUser) {
 }
 
 function persistUser(user: StoredUser) {
-    localStorage.setItem(
-        'currentUser',
-        JSON.stringify(user),
-    )
+    localStorage.setItem('currentUser', JSON.stringify(user))
 }
 
 function normalizeCustomerProfile(
@@ -69,162 +61,144 @@ function normalizeCustomerProfile(
     fallback: StoredUser | null,
 ): StoredUser {
     return {
-        userId:
-            profile.userId
-            ?? profile.id
-            ?? fallback?.userId
-            ?? fallback?.id
-            ?? 0,
+        userId: profile.userId ?? profile.id ?? fallback?.userId ?? fallback?.id ?? 0,
 
-        id:
-            profile.id
-            ?? fallback?.id,
+        id: profile.id ?? fallback?.id,
 
         username: profile.username,
         fullName: profile.fullName,
         phone: profile.phone,
         email: profile.email,
         role: profile.role,
-        rewardPoints:
-            profile.rewardPoints
-            ?? fallback?.rewardPoints
-            ?? 0,
+        rewardPoints: profile.rewardPoints ?? fallback?.rewardPoints ?? 0,
     }
-}
-
-function isRequestCanceled(error: unknown) {
-    if (typeof error !== 'object' || error === null) {
-        return false
-    }
-
-    const requestError = error as {
-        name?: string
-        code?: string
-        message?: string
-    }
-
-    return (
-        requestError.name === 'CanceledError'
-        || requestError.code === 'ERR_CANCELED'
-        || requestError.message === 'canceled'
-    )
 }
 
 export default function ProfilePage() {
     const {actor} = useActor()
 
-    const [savedUser, setSavedUser] =
-        useState<StoredUser | null>(() => readStoredUser())
+    const [savedUser, setSavedUser] = useState<StoredUser | null>(() => readStoredUser())
 
-    const [isEditing, setIsEditing] =
-        useState(false)
+    const [isEditing, setIsEditing] = useState(false)
 
-    const [fullName, setFullName] =
-        useState(savedUser?.fullName ?? '')
+    const [fullName, setFullName] = useState(savedUser?.fullName ?? '')
 
-    const [username, setUsername] =
-        useState(savedUser?.username ?? '')
+    const [username, setUsername] = useState(savedUser?.username ?? '')
 
-    const [email, setEmail] =
-        useState(savedUser?.email ?? '')
+    const [email, setEmail] = useState(savedUser?.email ?? '')
 
-    const [phone, setPhone] =
-        useState(savedUser?.phone ?? '')
+    const [phone, setPhone] = useState(savedUser?.phone ?? '')
 
-    const [updateLoading, setUpdateLoading] =
-        useState(false)
+    const [updateLoading, setUpdateLoading] = useState(false)
 
-    const [updateError, setUpdateError] =
-        useState<string | null>(null)
+    const [updateError, setUpdateError] = useState<string | null>(null)
 
-    const [updateSuccess, setUpdateSuccess] =
-        useState(false)
+    const [updateSuccess, setUpdateSuccess] = useState(false)
 
-    const [showChangePw, setShowChangePw] =
-        useState(false)
+    const [showChangePw, setShowChangePw] = useState(false)
 
-    const [currentPw, setCurrentPw] =
-        useState('')
+    const [currentPw, setCurrentPw] = useState('')
 
-    const [newPw, setNewPw] =
-        useState('')
+    const [newPw, setNewPw] = useState('')
 
-    const [confirmPw, setConfirmPw] =
-        useState('')
+    const [confirmPw, setConfirmPw] = useState('')
 
-    const [pwLoading, setPwLoading] =
-        useState(false)
+    const [pwLoading, setPwLoading] = useState(false)
 
-    const [pwError, setPwError] =
-        useState<string | null>(null)
+    const [pwError, setPwError] = useState<string | null>(null)
 
-    const [pwSuccess, setPwSuccess] =
-        useState(false)
+    const [pwSuccess, setPwSuccess] = useState(false)
 
     const isCustomer =
-        actor === RoleType.CUSTOMER
-        || savedUser?.role === RoleType.CUSTOMER
+        actor === RoleType.CUSTOMER || savedUser?.role === RoleType.CUSTOMER
 
-    const isAdmin =
-        actor === RoleType.ADMIN
-        || savedUser?.role === RoleType.ADMIN
+    const isAdmin = actor === RoleType.ADMIN || savedUser?.role === RoleType.ADMIN
 
+    /*
+     * SRS UC-PR-02 (sửa hồ sơ) và UC-AU-04 (đổi mật khẩu) chỉ dành cho Quản trị
+     * viên và Khách hàng. Nhân viên chỉ xem được hồ sơ; muốn đổi thì nhờ Quản
+     * trị viên. Backend chặn bằng @PreAuthorize, đây chỉ là để không hiện ra
+     * nút bấm vào sẽ báo lỗi.
+     */
     const canEditProfile = isCustomer || isAdmin
 
-    function syncFormFromUser(user: StoredUser) {
+    /*
+     * Đổi mật khẩu của chính mình: vai trò nào cũng được.
+     *
+     * Trước đây khối này dùng chung điều kiện với sửa hồ sơ — chỉ Quản trị
+     * viên và Khách hàng. Bếp, Phục vụ và Thu ngân muốn đổi thì phải nhờ Quản
+     * trị viên đặt lại, mà đặt lại chỉ đưa về đúng chuỗi mặc định — nên họ
+     * không có cách nào thoát khỏi mật khẩu mặc định. Backend đã mở
+     * /me/change-password cho mọi vai trò.
+     */
+    const canChangePassword = true
+
+    // Các setter của useState vốn ổn định, nên deps rỗng là đủ.
+    const syncFormFromUser = useCallback((user: StoredUser) => {
         setUsername(user.username)
         setFullName(user.fullName)
         setEmail(user.email ?? '')
         setPhone(user.phone)
-    }
+    }, [])
 
-    async function loadCustomerProfile(
-        signal?: AbortSignal,
-    ) {
-        if (!isCustomer) {
-            return
-        }
+    // loadCustomerProfile ghi lại savedUser. Nếu đưa savedUser/isEditing vào deps thì
+    // effect bên dưới sẽ chạy lại sau mỗi lần fetch -> vòng lặp vô hạn. Giữ chúng
+    // trong ref để đọc được giá trị mới nhất mà không tạo phụ thuộc.
+    const latestProfileRef = useRef({savedUser, isEditing})
 
-        try {
-            const profile =
-                await customerApi.getMyProfile(signal)
+    useEffect(() => {
+        latestProfileRef.current = {savedUser, isEditing}
+    })
 
-            if (signal?.aborted) {
+    const loadCustomerProfile = useCallback(
+        async (signal?: AbortSignal) => {
+            if (!isCustomer) {
                 return
             }
 
-            const nextUser =
-                normalizeCustomerProfile(
-                    profile,
-                    savedUser,
-                )
+            try {
+                const profile = await meApi.getMyProfile(signal)
 
-            setSavedUser(nextUser)
-            persistUser(nextUser)
+                if (signal?.aborted) {
+                    return
+                }
 
-            if (!isEditing) {
-                syncFormFromUser(nextUser)
+                const {savedUser: latestUser, isEditing: isEditingNow} =
+                    latestProfileRef.current
+
+                const nextUser = normalizeCustomerProfile(profile, latestUser)
+
+                setSavedUser(nextUser)
+                persistUser(nextUser)
+
+                // Đang sửa dở thì không ghi đè những gì người dùng vừa gõ.
+                if (!isEditingNow) {
+                    syncFormFromUser(nextUser)
+                }
+            } catch (requestError: unknown) {
+                if (signal?.aborted || isRequestCanceled(requestError)) {
+                    return
+                }
+
+                console.error('[PROFILE_CUSTOMER_FETCH_ERROR]', requestError)
             }
-        } catch (requestError: unknown) {
-            if (
-                signal?.aborted
-                || isRequestCanceled(requestError)
-            ) {
-                return
-            }
+        },
+        [isCustomer, syncFormFromUser],
+    )
 
-            console.error(
-                '[PROFILE_CUSTOMER_FETCH_ERROR]',
-                requestError,
-            )
-        }
-    }
+    // Điểm thưởng thay đổi mỗi lần khách thanh toán, nhưng savedUser chỉ được ghi lúc
+    // đăng nhập. Không đọc lại từ server thì màn hình sẽ hiển thị điểm cũ mãi.
+    useEffect(() => {
+        const controller = new AbortController()
 
+        void loadCustomerProfile(controller.signal)
 
+        return () => controller.abort()
+    }, [loadCustomerProfile])
 
     if (!savedUser) {
         return (
-            <div className="page-card">
+            <div className="rk-card rk-card--pad">
                 <p>Không tìm thấy thông tin người dùng.</p>
             </div>
         )
@@ -241,13 +215,10 @@ export default function ProfilePage() {
         setUpdateError(null)
 
         try {
-            const userId =
-                getUserId(currentUser)
+            const userId = getUserId(currentUser)
 
             if (!userId) {
-                throw new Error(
-                    'Không xác định được tài khoản cần cập nhật.',
-                )
+                throw new Error('Không xác định được tài khoản cần cập nhật.')
             }
 
             const data = {
@@ -257,31 +228,21 @@ export default function ProfilePage() {
                 phone,
             }
 
-            let updated
-            if (isCustomer) {
-                updated = await customerApi.updateMyProfile({
-                    fullName,
-                    username,
-                    email,
-                    phone,
-                })
-            } else {
-                updated = await adminApi.updateProfile(
-                    userId,
-                    data,
-                )
-            }
+            // Một đường duy nhất cho mọi vai trò. Trước đây nhân viên đi qua
+            // endpoint của Quản trị, nên Bếp, Phục vụ và Thu ngân nhận 403.
+            const updated = await meApi.updateMyProfile(data)
             const nextUser: StoredUser = {
                 ...currentUser,
-                userId: (updated as unknown as Record<string, unknown>).userId as number ?? (updated as unknown as Record<string, unknown>).id as number ?? currentUser.userId,
+                userId:
+                    ((updated as unknown as Record<string, unknown>).userId as number) ??
+                    ((updated as unknown as Record<string, unknown>).id as number) ??
+                    currentUser.userId,
                 username: updated.username,
                 fullName: updated.fullName,
                 email: updated.email,
                 phone: updated.phone,
                 role: updated.role,
-                rewardPoints:
-                    updated.rewardPoints
-                    ?? currentUser.rewardPoints,
+                rewardPoints: updated.rewardPoints ?? currentUser.rewardPoints,
             }
 
             persistUser(nextUser)
@@ -291,23 +252,15 @@ export default function ProfilePage() {
             setIsEditing(false)
             setUpdateSuccess(true)
 
-            window.setTimeout(
-                () => setUpdateSuccess(false),
-                3000,
-            )
+            window.setTimeout(() => setUpdateSuccess(false), 3000)
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
                 return
             }
 
-            console.error(
-                '[PROFILE_UPDATE_ERROR]',
-                requestError,
-            )
+            console.error('[PROFILE_UPDATE_ERROR]', requestError)
 
-            setUpdateError(
-                getErrorMessage(requestError),
-            )
+            setUpdateError(getErrorMessage(requestError))
         } finally {
             setUpdateLoading(false)
         }
@@ -328,7 +281,7 @@ export default function ProfilePage() {
         setPwError(null)
 
         try {
-            await customerApi.changePassword({
+            await meApi.changePassword({
                 currentPassword: currentPw,
                 newPassword: newPw,
             })
@@ -339,42 +292,36 @@ export default function ProfilePage() {
             setShowChangePw(false)
             setPwSuccess(true)
 
-            window.setTimeout(
-                () => setPwSuccess(false),
-                3000,
-            )
+            window.setTimeout(() => setPwSuccess(false), 3000)
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
                 return
             }
 
-            console.error(
-                '[PROFILE_CHANGE_PASSWORD_ERROR]',
-                requestError,
-            )
+            console.error('[PROFILE_CHANGE_PASSWORD_ERROR]', requestError)
 
-            setPwError(
-                getErrorMessage(requestError),
-            )
+            setPwError(getErrorMessage(requestError))
         } finally {
             setPwLoading(false)
         }
     }
 
     return (
-        <div className="page-card">
-            <div className="page-header">
+        <div className="rk-card rk-card--pad">
+            <div className="rk-card__head-inline">
                 <div>
                     <h2>Hồ sơ cá nhân</h2>
                     <p>
-                        Xem và cập nhật thông tin tài khoản của bạn.
+                        {canEditProfile
+                            ? 'Xem và cập nhật thông tin tài khoản của bạn.'
+                            : 'Thông tin tài khoản của bạn. Cần sửa thì báo Quản trị viên.'}
                     </p>
                 </div>
 
                 {!isEditing && canEditProfile && (
                     <button
                         type="button"
-                        className="primary-button"
+                        className="rk-btn rk-btn--primary"
                         onClick={() => setIsEditing(true)}
                     >
                         Chỉnh sửa
@@ -383,38 +330,29 @@ export default function ProfilePage() {
             </div>
 
             {updateSuccess && (
-                <div style={successStyle}>
-                    ✓ Cập nhật hồ sơ thành công!
-                </div>
+                <div className="rk-note rk-note--ok">Cập nhật hồ sơ thành công!</div>
             )}
 
             {pwSuccess && (
-                <div style={successStyle}>
-                    ✓ Đổi mật khẩu thành công!
-                </div>
+                <div className="rk-note rk-note--ok">Đổi mật khẩu thành công!</div>
             )}
 
-            <div style={cardStyle}>
-                <div style={profileHeaderStyle}>
-                    <div style={avatarStyle}>
-                        {currentUser.fullName
-                            .charAt(0)
-                            .toUpperCase()}
+            <div className="rk-card rk-card--soft rk-card--pad">
+                <div className="rk-idcard">
+                    <div className="rk-avatar rk-avatar--lg">
+                        {currentUser.fullName.charAt(0).toUpperCase()}
                     </div>
 
                     <div>
-                        <h3 style={profileNameStyle}>
-                            {currentUser.fullName}
-                        </h3>
+                        <h3 className="rk-idcard__name">{currentUser.fullName}</h3>
 
-                        <span style={roleBadgeStyle}>
-                            {ROLE_LABELS[currentUser.role]
-                                ?? currentUser.role}
+                        <span className="rk-tag rk-tag--brand">
+                            {ROLE_LABELS[currentUser.role] ?? currentUser.role}
                         </span>
                     </div>
                 </div>
 
-                <div style={fieldGridStyle}>
+                <div className="rk-formgrid">
                     {isEditing ? (
                         <>
                             <EditField
@@ -425,9 +363,9 @@ export default function ProfilePage() {
                             />
 
                             <EditField
-                                label="Username *"
+                                label="Tên đăng nhập *"
                                 value={username}
-                                placeholder="abc"
+                                placeholder="Ví dụ: nguyenvana"
                                 onChange={setUsername}
                             />
 
@@ -441,20 +379,18 @@ export default function ProfilePage() {
 
                             <EditField
                                 label="Số điện thoại *"
-                                value={phone} pattern="0[0-9]{9}"
+                                value={phone}
+                                pattern="0[0-9]{9}"
                                 placeholder="0xxxxxxxxx"
                                 onChange={setPhone}
                             />
                         </>
                     ) : (
                         <>
-                            <ProfileField
-                                label="Họ tên"
-                                value={currentUser.fullName}
-                            />
+                            <ProfileField label="Họ tên" value={currentUser.fullName} />
 
                             <ProfileField
-                                label="Username"
+                                label="Tên đăng nhập"
                                 value={currentUser.username}
                             />
 
@@ -479,19 +415,14 @@ export default function ProfilePage() {
                 </div>
 
                 {updateError && (
-                    <div
-                        className="auth-error"
-                        style={profileErrorStyle}
-                    >
-                        {updateError}
-                    </div>
+                    <div className="rk-note rk-note--alert">{updateError}</div>
                 )}
 
                 {isEditing && (
-                    <div style={profileActionStyle}>
+                    <div className="rk-actions rk-actions--end">
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={() => {
                                 setIsEditing(false)
                                 syncFormFromUser(currentUser)
@@ -503,53 +434,43 @@ export default function ProfilePage() {
 
                         <button
                             type="button"
-                            className="primary-button"
+                            className="rk-btn rk-btn--primary"
                             disabled={updateLoading}
-                            onClick={() =>
-                                void handleSaveProfile()
-                            }
+                            onClick={() => void handleSaveProfile()}
                         >
-                            {updateLoading
-                                ? 'Đang lưu...'
-                                : 'Lưu thay đổi'}
+                            {updateLoading ? 'Đang lưu…' : 'Lưu thay đổi'}
                         </button>
                     </div>
                 )}
             </div>
 
-            {isCustomer && (
-                <div style={passwordCardStyle}>
-                    <div style={passwordHeaderStyle}>
+            {canChangePassword && (
+                <div className="rk-card rk-card--soft rk-card--pad">
+                    <div className="rk-card__head-inline">
                         <div>
-                            <h3 style={passwordTitleStyle}>
-                                Đổi mật khẩu
-                            </h3>
+                            <h3 className="rk-sectiontitle">Đổi mật khẩu</h3>
 
-                            <p style={passwordSubtitleStyle}>
+                            <p className="rk-field__hint">
                                 Cập nhật mật khẩu để bảo mật tài khoản
                             </p>
                         </div>
 
                         <button
                             type="button"
-                            className={
-                                showChangePw
-                                    ? 'secondary-button'
-                                    : 'primary-button'
-                            }
+                            className={`rk-btn ${
+                                showChangePw ? 'rk-btn--quiet' : 'rk-btn--primary'
+                            }`}
                             onClick={() => {
                                 setShowChangePw(!showChangePw)
                                 setPwError(null)
                             }}
                         >
-                            {showChangePw
-                                ? 'Hủy'
-                                : 'Đổi mật khẩu'}
+                            {showChangePw ? 'Hủy' : 'Đổi mật khẩu'}
                         </button>
                     </div>
 
                     {showChangePw && (
-                        <div style={passwordFormStyle}>
+                        <div className="rk-formgrid">
                             <EditField
                                 label="Mật khẩu hiện tại *"
                                 type="password"
@@ -575,23 +496,17 @@ export default function ProfilePage() {
                             />
 
                             {pwError && (
-                                <div className="auth-error">
-                                    {pwError}
-                                </div>
+                                <div className="rk-note rk-note--alert">{pwError}</div>
                             )}
 
-                            <div style={passwordActionStyle}>
+                            <div className="rk-actions rk-actions--end">
                                 <button
                                     type="button"
-                                    className="primary-button"
+                                    className="rk-btn rk-btn--primary"
                                     disabled={pwLoading}
-                                    onClick={() =>
-                                        void handleChangePassword()
-                                    }
+                                    onClick={() => void handleChangePassword()}
                                 >
-                                    {pwLoading
-                                        ? 'Đang xử lý...'
-                                        : 'Xác nhận đổi mật khẩu'}
+                                    {pwLoading ? 'Đang xử lý…' : 'Xác nhận đổi mật khẩu'}
                                 </button>
                             </div>
                         </div>
@@ -603,27 +518,22 @@ export default function ProfilePage() {
 }
 
 function ProfileField({
-                          label,
-                          value,
-                          readOnly,
-                      }: {
+    label,
+    value,
+    readOnly,
+}: {
     label: string
     value: string
     readOnly?: boolean
 }) {
     return (
-        <div style={profileFieldStyle}>
-            <span style={profileFieldLabelStyle}>
-                {label}
-            </span>
+        <div className="rk-detailrow">
+            <span className="rk-detailrow__label">{label}</span>
 
             <span
-                style={{
-                    ...profileFieldValueStyle,
-                    color: readOnly
-                        ? '#9ca3af'
-                        : '#111827',
-                }}
+                className={`rk-detailrow__value${
+                    readOnly ? ' rk-detailrow__value--readonly' : ''
+                }`}
             >
                 {value}
             </span>
@@ -632,292 +542,40 @@ function ProfileField({
 }
 
 function EditField({
-                       label,
-                       value,
-                       onChange,
-                       placeholder,
-                       type = 'text',
-                   }: {
+    label,
+    value,
+    onChange,
+    placeholder,
+    pattern,
+    type = 'text',
+}: {
     label: string
     value: string
     onChange: (value: string) => void
     placeholder?: string
+    pattern?: string
     type?: string
 }) {
-    const [visible, setVisible] =
-        useState(false)
-
-    const isPassword =
-        type === 'password'
-
-    const inputType =
-        isPassword
-            ? visible
-                ? 'text'
-                : 'password'
-            : type
-
     return (
-        <label style={editFieldStyle}>
-            {label}
+        <label className="rk-field">
+            <span className="rk-field__label">{label}</span>
 
-            <div style={editInputWrapperStyle}>
-                <input
-                    type={inputType}
+            {type === 'password' ? (
+                <PasswordInput
                     value={value}
                     placeholder={placeholder}
-                    style={{
-                        ...editInputStyle,
-                        padding: isPassword
-                            ? '10px 40px 10px 12px'
-                            : '10px 12px',
-                    }}
-                    onChange={(event) =>
-                        onChange(event.target.value)
-                    }
+                    onChange={onChange}
                 />
-
-                {isPassword && (
-                    <button
-                        type="button"
-                        aria-label={
-                            visible
-                                ? 'Ẩn mật khẩu'
-                                : 'Hiện mật khẩu'
-                        }
-                        title={
-                            visible
-                                ? 'Ẩn mật khẩu'
-                                : 'Hiện mật khẩu'
-                        }
-                        style={eyeButtonStyle}
-                        onClick={() =>
-                            setVisible((current) => !current)
-                        }
-                        onMouseEnter={(event) => {
-                            event.currentTarget.style.color =
-                                '#4f46e5'
-                            event.currentTarget.style.backgroundColor =
-                                '#eef2ff'
-                        }}
-                        onMouseLeave={(event) => {
-                            event.currentTarget.style.color =
-                                '#9ca3af'
-                            event.currentTarget.style.backgroundColor =
-                                'transparent'
-                        }}
-                    >
-                        {visible
-                            ? <EyeOffIcon />
-                            : <EyeIcon />}
-                    </button>
-                )}
-            </div>
+            ) : (
+                <input
+                    className="rk-input"
+                    type={type}
+                    value={value}
+                    placeholder={placeholder}
+                    pattern={pattern}
+                    onChange={(event) => onChange(event.target.value)}
+                />
+            )}
         </label>
     )
-}
-
-function EyeIcon() {
-    return (
-        <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle
-                cx="12"
-                cy="12"
-                r="3"
-            />
-        </svg>
-    )
-}
-
-function EyeOffIcon() {
-    return (
-        <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.62 21.62 0 0 1 5.06-6.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.36M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-            <line
-                x1="1"
-                y1="1"
-                x2="23"
-                y2="23"
-            />
-        </svg>
-    )
-}
-
-const cardStyle: CSSProperties = {
-    background: '#f9fafb',
-    border: '1px solid #e5e7eb',
-    borderRadius: '12px',
-    padding: '24px',
-}
-
-const passwordCardStyle: CSSProperties = {
-    ...cardStyle,
-    marginTop: '16px',
-}
-
-const avatarStyle: CSSProperties = {
-    width: '64px',
-    height: '64px',
-    borderRadius: '50%',
-    background: '#4f46e5',
-    color: '#fff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '24px',
-    fontWeight: 700,
-    flexShrink: 0,
-}
-
-const successStyle: CSSProperties = {
-    background: '#d1fae5',
-    color: '#065f46',
-    padding: '12px 16px',
-    borderRadius: '8px',
-    marginBottom: '16px',
-    fontWeight: 500,
-}
-
-const profileHeaderStyle: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    marginBottom: '28px',
-}
-
-const profileNameStyle: CSSProperties = {
-    margin: 0,
-    fontSize: '20px',
-    fontWeight: 700,
-}
-
-const roleBadgeStyle: CSSProperties = {
-    background: '#e0e7ff',
-    color: '#4338ca',
-    padding: '3px 10px',
-    borderRadius: '12px',
-    fontSize: '12px',
-    fontWeight: 600,
-}
-
-const fieldGridStyle: CSSProperties = {
-    display: 'grid',
-    gap: '16px',
-}
-
-const profileErrorStyle: CSSProperties = {
-    marginTop: '12px',
-}
-
-const profileActionStyle: CSSProperties = {
-    display: 'flex',
-    gap: '8px',
-    marginTop: '20px',
-    justifyContent: 'flex-end',
-}
-
-const passwordHeaderStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-}
-
-const passwordTitleStyle: CSSProperties = {
-    margin: 0,
-    fontSize: '16px',
-    fontWeight: 600,
-}
-
-const passwordSubtitleStyle: CSSProperties = {
-    margin: '4px 0 0',
-    color: '#9ca3af',
-    fontSize: '13px',
-}
-
-const passwordFormStyle: CSSProperties = {
-    display: 'grid',
-    gap: '16px',
-    marginTop: '20px',
-}
-
-const passwordActionStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-}
-
-const profileFieldStyle: CSSProperties = {
-    display: 'flex',
-    padding: '12px 0',
-    borderBottom: '1px solid #f3f4f6',
-    gap: '16px',
-}
-
-const profileFieldLabelStyle: CSSProperties = {
-    width: '160px',
-    color: '#9ca3af',
-    fontSize: '13px',
-    flexShrink: 0,
-}
-
-const profileFieldValueStyle: CSSProperties = {
-    fontWeight: 500,
-    fontSize: '14px',
-}
-
-const editFieldStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: '#374151',
-}
-
-const editInputWrapperStyle: CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-}
-
-const editInputStyle: CSSProperties = {
-    width: '100%',
-    boxSizing: 'border-box',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    fontSize: '14px',
-}
-
-const eyeButtonStyle: CSSProperties = {
-    position: 'absolute',
-    right: 6,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 28,
-    height: 28,
-    background: 'transparent',
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-    color: '#9ca3af',
-    transition: 'color 0.15s ease, background-color 0.15s ease',
 }

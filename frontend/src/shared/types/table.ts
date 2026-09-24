@@ -6,10 +6,7 @@
  */
 
 /** Status of a restaurant table */
-export type TableStatus =
-    | 'AVAILABLE'
-    | 'SERVING'
-    | 'RESERVED'
+export type TableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED'
 
 /** Full table detail response (waiter + admin view) */
 export interface TableDetailResponse {
@@ -27,4 +24,6 @@ export interface TableDashboardResponse {
     tableNumber: string
     status: TableStatus
     orderId?: number | null
+    /** Tiền tạm tính của đơn đang mở tại bàn, null nếu bàn trống. */
+    totalAmount?: number | null
 }

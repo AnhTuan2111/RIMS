@@ -10,61 +10,28 @@ type PageHeaderProps = {
 }
 
 export function PageHeader({
-                               title,
-                               description,
-                               eyebrow,
-                               actions,
-                               icon,
-                               className,
-                           }: PageHeaderProps) {
+    title,
+    description,
+    eyebrow,
+    actions,
+    icon,
+    className,
+}: PageHeaderProps) {
     return (
-        <header
-            className={
-                [
-                    'page-header',
-                    'rims-page-header',
-                    'd-flex',
-                    'align-items-start',
-                    'justify-content-between',
-                    'gap-3',
-                    'flex-wrap',
-                    className,
-                ]
-                    .filter(Boolean)
-                    .join(' ')
-            }
-        >
-            <div className="d-flex align-items-start gap-3 min-w-0">
-                {icon && (
-                    <div className="rims-page-header-icon">
-                        {icon}
-                    </div>
-                )}
+        <header className={className ? `rk-pagehead ${className}` : 'rk-pagehead'}>
+            <div className="rk-pagehead__lead">
+                {icon && <div className="rk-pagehead__icon">{icon}</div>}
 
-                <div className="min-w-0">
-                    {eyebrow && (
-                        <div className="rims-page-eyebrow">
-                            {eyebrow}
-                        </div>
-                    )}
+                <div className="rk-pagehead__body">
+                    {eyebrow && <div className="rk-pagehead__eyebrow">{eyebrow}</div>}
 
-                    <h2 className="rims-page-title mb-1">
-                        {title}
-                    </h2>
+                    <h2 className="rk-pagehead__title">{title}</h2>
 
-                    {description && (
-                        <p className="rims-page-description mb-0">
-                            {description}
-                        </p>
-                    )}
+                    {description && <p className="rk-pagehead__desc">{description}</p>}
                 </div>
             </div>
 
-            {actions && (
-                <div className="rims-page-actions d-flex align-items-center gap-2 flex-wrap">
-                    {actions}
-                </div>
-            )}
+            {actions && <div className="rk-pagehead__actions">{actions}</div>}
         </header>
     )
 }

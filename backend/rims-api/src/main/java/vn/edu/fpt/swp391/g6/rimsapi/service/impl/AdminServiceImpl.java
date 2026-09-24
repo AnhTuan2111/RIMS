@@ -1,36 +1,5 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableDetailResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
-import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderShift;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
-import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
-import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
@@ -40,8 +9,47 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.CreateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.UpdateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.AdminTableResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.table.TableRemovalResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
+import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderShift;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.BusinessRuleException;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.CategoryRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.DishRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.RestaurantTableRepository;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.BestSellingDishProjection;
+import vn.edu.fpt.swp391.g6.rimsapi.repository.projection.DailyRevenueProjection;
+import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
 
 @Service
 @RequiredArgsConstructor
@@ -56,422 +64,368 @@ public class AdminServiceImpl implements AdminService
     // DISH SERVICE
 
     @Override
+    @Transactional(readOnly = true)
     public List<DishResponse> getAllDishes()
     {
-        try
-        {
-            return dishRepository.findAll().stream()
-                    .map(this::convertToResponse)
-                    .collect(Collectors.toList());
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể lấy danh sách món ăn: " + e.getMessage());
-        }
+        return dishRepository.findAll().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DishResponse> getDishesByCategory(Integer categoryId)
     {
-        try
+        // Kiểm tra category tồn tại
+        if (!categoryRepository.existsById(categoryId))
         {
-            // Kiểm tra category tồn tại
-            if (!categoryRepository.existsById(categoryId))
-            {
-                throw new EntityNotFoundException("Không tìm thấy danh mục với ID: " + categoryId);
-            }
-            return dishRepository.findByCategoryId(categoryId).stream()
-                    .map(this::convertToResponse)
-                    .collect(Collectors.toList());
-        } catch (EntityNotFoundException e)
-        {
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể lấy danh sách món ăn theo danh mục: " + e.getMessage());
+            throw new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + categoryId);
         }
+        return dishRepository.findByCategoryId(categoryId).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DishResponse> getAvailableDishes()
     {
-        try
-        {
-            return dishRepository.findByIsAvailableTrue().stream()
-                    .map(this::convertToResponse)
-                    .collect(Collectors.toList());
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể lấy danh sách món ăn đang có sẵn: " + e.getMessage());
-        }
+        return dishRepository.findByIsAvailableTrue().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DishResponse getDishById(Integer id)
     {
-        try
-        {
-            Dish dish = dishRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy món ăn với ID: " + id));
-            return convertToResponse(dish);
-        } catch (EntityNotFoundException e)
-        {
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể lấy thông tin món ăn: " + e.getMessage());
-        }
+        Dish dish = dishRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy món ăn với ID: " + id));
+        return convertToResponse(dish);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DishResponse> searchDishes(String keyword)
     {
-        try
+        if (keyword == null || keyword.trim().isEmpty())
         {
-            if (keyword == null || keyword.trim().isEmpty())
-            {
-                return getAllDishes();
-            }
-            return dishRepository.searchByName(keyword).stream()
-                    .map(this::convertToResponse)
-                    .collect(Collectors.toList());
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể tìm kiếm món ăn: " + e.getMessage());
+            return getAllDishes();
         }
+        return dishRepository.searchByName(keyword).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public DishResponse createDish(CreateDishRequest createDishRequest)
     {
-        try
+        // Kiểm tra tên món ăn đã tồn tại chưa
+        if (dishRepository.existsByName(createDishRequest.getName()))
         {
-            // Kiểm tra tên món ăn đã tồn tại chưa
-            if (dishRepository.existsByName(createDishRequest.getName()))
-            {
-                throw new IllegalArgumentException("Tên món ăn '" + createDishRequest.getName() + "' đã tồn tại");
-            }
-
-            // Tìm category theo ID
-            Category category = categoryRepository.findById(createDishRequest.getCategoryId())
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy danh mục với ID: " + createDishRequest.getCategoryId()));
-
-            // Tạo mới món ăn
-            Dish dish = new Dish();
-            dish.setName(createDishRequest.getName());
-            dish.setDescription(createDishRequest.getDescription());
-            dish.setPrice(createDishRequest.getPrice());
-            dish.setImageUrl(createDishRequest.getImageUrl());
-            dish.setAvailable(createDishRequest.getIsAvailable() != null ? createDishRequest.getIsAvailable() : true);
-            dish.setHidden(createDishRequest.getIsHidden() != null ? createDishRequest.getIsHidden() : false);
-            dish.setCategory(category);
-
-            Dish savedDish = dishRepository.save(dish);
-            return convertToResponse(savedDish);
-
-        } catch (IllegalArgumentException | EntityNotFoundException e)
-        {
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể tạo món ăn mới: " + e.getMessage());
+            throw new IllegalArgumentException("Tên món ăn '" + createDishRequest.getName() + "' đã tồn tại");
         }
+
+        // Tìm category theo ID
+        Category category = categoryRepository.findById(createDishRequest.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy danh mục với ID: " + createDishRequest.getCategoryId()));
+
+        // Tạo mới món ăn
+        Dish dish = new Dish();
+        dish.setName(createDishRequest.getName());
+        dish.setDescription(createDishRequest.getDescription());
+        dish.setPrice(createDishRequest.getPrice());
+        dish.setImageUrl(createDishRequest.getImageUrl());
+        dish.setAvailable(createDishRequest.getIsAvailable() != null ? createDishRequest.getIsAvailable() : true);
+        dish.setHidden(createDishRequest.getIsHidden() != null ? createDishRequest.getIsHidden() : false);
+        dish.setCategory(category);
+
+        Dish savedDish = dishRepository.save(dish);
+        return convertToResponse(savedDish);
+
     }
 
     @Override
+    @Transactional
     public DishResponse updateDish(Integer id, UpdateDishRequest updateDishRequest)
     {
-        try
+        // Tìm món ăn cần update
+        Dish dish = dishRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy món ăn với ID: " + id));
+
+        // Kiểm tra tên mới có bị trùng không (bỏ qua chính nó)
+        if (!dish.getName().equals(updateDishRequest.getName())
+                && dishRepository.existsByNameAndIdNot(updateDishRequest.getName(), id))
         {
-            // Tìm món ăn cần update
-            Dish dish = dishRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy món ăn với ID: " + id));
-
-            // Kiểm tra tên mới có bị trùng không (bỏ qua chính nó)
-            if (!dish.getName().equals(updateDishRequest.getName())
-                    && dishRepository.existsByNameAndIdNot(updateDishRequest.getName(), id))
-            {
-                throw new IllegalArgumentException("Tên món ăn '" + updateDishRequest.getName() + "' đã tồn tại!");
-            }
-
-            // Cập nhật thông tin
-            dish.setName(updateDishRequest.getName());
-            dish.setDescription(updateDishRequest.getDescription());
-
-            if (updateDishRequest.getPrice() != null)
-            {
-                dish.setPrice(updateDishRequest.getPrice());
-            }
-
-            dish.setImageUrl(updateDishRequest.getImageUrl());
-
-            // Cập nhật trạng thái nếu có
-            if (updateDishRequest.getIsAvailable() != null)
-            {
-                dish.setAvailable(updateDishRequest.getIsAvailable());
-            }
-
-            boolean hiddenChanged = false;
-            if (updateDishRequest.getIsHidden() != null
-                    && !updateDishRequest.getIsHidden().equals(dish.isHidden()))
-            {
-                dish.setHidden(updateDishRequest.getIsHidden());
-                hiddenChanged = true;
-            }
-
-            // Cập nhật category nếu có thay đổi
-            if (updateDishRequest.getCategoryId() != null)
-            {
-                Category category = categoryRepository.findById(updateDishRequest.getCategoryId())
-                        .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy danh mục với ID: " + updateDishRequest.getCategoryId()));
-                dish.setCategory(category);
-            }
-
-            Dish updatedDish = dishRepository.save(dish);
-
-            if (hiddenChanged)
-            {
-                broadcastMenuVisibilityChanged(updatedDish);
-            }
-
-            return convertToResponse(updatedDish);
-
-        } catch (EntityNotFoundException | IllegalArgumentException e)
-        {
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể cập nhật món ăn: " + e.getMessage());
+            throw new IllegalArgumentException("Tên món ăn '" + updateDishRequest.getName() + "' đã tồn tại!");
         }
+
+        // Cập nhật thông tin
+        dish.setName(updateDishRequest.getName());
+        dish.setDescription(updateDishRequest.getDescription());
+
+        if (updateDishRequest.getPrice() != null)
+        {
+            dish.setPrice(updateDishRequest.getPrice());
+        }
+
+        dish.setImageUrl(updateDishRequest.getImageUrl());
+
+        // Cập nhật trạng thái nếu có
+        if (updateDishRequest.getIsAvailable() != null)
+        {
+            dish.setAvailable(updateDishRequest.getIsAvailable());
+        }
+
+        boolean hiddenChanged = false;
+        if (updateDishRequest.getIsHidden() != null
+                && !updateDishRequest.getIsHidden().equals(dish.isHidden()))
+        {
+            dish.setHidden(updateDishRequest.getIsHidden());
+            hiddenChanged = true;
+        }
+
+        // Cập nhật category nếu có thay đổi
+        if (updateDishRequest.getCategoryId() != null)
+        {
+            Category category = categoryRepository.findById(updateDishRequest.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Không tìm thấy danh mục với ID: " + updateDishRequest.getCategoryId()));
+            dish.setCategory(category);
+        }
+
+        Dish updatedDish = dishRepository.save(dish);
+
+        if (hiddenChanged)
+        {
+            broadcastMenuVisibilityChanged(updatedDish);
+        }
+
+        return convertToResponse(updatedDish);
+
     }
 
     @Override
+    @Transactional
     public void deleteDish(Integer id)
     {
-        try
-        {
-            // 1. Kiểm tra món ăn có tồn tại trong hệ thống không
-            Dish dish = dishRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy món ăn với ID: " + id));
+        // 1. Kiểm tra món ăn có tồn tại trong hệ thống không
+        Dish dish = dishRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy món ăn với ID: " + id));
 
-            // 2. Kiểm tra xem món ăn đã từng phát sinh trong bất kỳ đơn hàng nào chưa (kể cả đơn đã hủy)
-            long orderCount = dishRepository.countOrderItemsByDishId(id);
+        // 2. Kiểm tra xem món ăn đã từng phát sinh trong bất kỳ đơn hàng nào chưa (kể cả đơn đã hủy)
+        long orderCount = dishRepository.countOrderItemsByDishId(id);
 
-            if (orderCount == 0)
-            {
-                // Món mới tạo, chưa từng nằm trong order_items -> Cho phép xóa hẳn khỏi DB
-                dishRepository.delete(dish);
-            } else
-            {
-                // Món đã từng được đặt -> Không cho xóa, bắt dùng "Tạm dừng" thay thế
-                throw new IllegalStateException(
-                        "Món ăn đã phát sinh đơn hàng, không thể xóa. Vui lòng dùng chức năng \"Tạm dừng\" để ẩn món khỏi menu."
-                );
-            }
-
-        } catch (EntityNotFoundException | IllegalStateException e)
+        if (orderCount == 0)
         {
-            throw e;  // Ném lại để GlobalExceptionHandler xử lý
-        } catch (Exception e)
+            // Món mới tạo, chưa từng nằm trong order_items -> Cho phép xóa hẳn khỏi DB
+            dishRepository.delete(dish);
+        } else
         {
-            throw new RuntimeException("Không thể thực hiện xóa món ăn: " + e.getMessage());
+            // Món đã từng được đặt -> Không cho xóa, bắt dùng "Tạm dừng" thay thế
+            throw new IllegalStateException(
+                    "Món ăn đã phát sinh đơn hàng, không thể xóa. Vui lòng dùng chức năng \"Tạm dừng\" để ẩn món khỏi menu.");
         }
+
     }
 
     // CATEGORY SERVICE
 
     @Override
+    @Transactional(readOnly = true)
     public List<CategoryResponse> getAllCategories()
     {
-        try
-        {
-            return categoryRepository.findAll().stream()
-                    .map(this::convertToResponse)
-                    .collect(Collectors.toList());
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể lấy danh sách danh mục: " + e.getMessage());
-        }
+        return withDishCount(categoryRepository.findAll());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CategoryResponse> getAvailableCategories()
     {
-        try
-        {
-            return categoryRepository.findByIsAvailableTrue().stream()
-                    .map(this::convertToResponse)
-                    .collect(Collectors.toList());
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể lấy danh sách danh mục đang hoạt động: " + e.getMessage());
-        }
+        return withDishCount(categoryRepository.findByIsAvailableTrue());
+    }
+
+    /**
+     * Gắn số món vào từng danh mục.
+     *
+     * <p>Đếm một lần cho cả bảng rồi tra theo id, không đếm riêng từng danh mục.
+     */
+    private List<CategoryResponse> withDishCount(List<Category> categories)
+    {
+        Map<Integer, Long> counts = dishRepository.countDishesByCategory().stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0],
+                        row -> (Long) row[1]));
+
+        return categories.stream()
+                .map(category -> {
+                    CategoryResponse response = convertToResponse(category);
+                    response.setDishCount(counts.getOrDefault(category.getId(), 0L));
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(Integer id)
     {
-        try
-        {
-            Category category = categoryRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy category với ID: " + id));
-            return convertToResponse(category);
-        } catch (EntityNotFoundException e)
-        {
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể lấy thông tin danh mục: " + e.getMessage());
-        }
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy category với ID: " + id));
+
+        CategoryResponse detail = convertToResponse(category);
+        detail.setDishCount(dishRepository.countByCategoryId(id));
+
+        return detail;
     }
 
     @Override
+    @Transactional
     public CategoryResponse createCategory(CreateCategoryRequest createCategoryRequest)
     {
-        try
+        if (categoryRepository.existsByName(createCategoryRequest.getName()))
         {
-            if (categoryRepository.existsByName(createCategoryRequest.getName()))
-            {
-                throw new IllegalArgumentException("Tên danh mục '" + createCategoryRequest.getName() + "' đã tồn tại!");
-            }
-
-            Category category = new Category();
-            category.setName(createCategoryRequest.getName());
-            category.setDescription(createCategoryRequest.getDescription());
-            category.setAvailable(true);
-
-            Category savedCategory = categoryRepository.save(category);
-            return convertToResponse(savedCategory);
-
-        } catch (IllegalArgumentException e)
-        {
-            throw e;  // Ném lại để GlobalExceptionHandler bắt
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể tạo danh mục mới: " + e.getMessage());
+            throw new IllegalArgumentException(
+                    "Tên danh mục '" + createCategoryRequest.getName() + "' đã tồn tại!");
         }
+
+        Category category = new Category();
+        category.setName(createCategoryRequest.getName());
+        category.setDescription(createCategoryRequest.getDescription());
+        category.setAvailable(true);
+
+        Category savedCategory = categoryRepository.save(category);
+        return convertToResponse(savedCategory);
+
     }
 
     @Override
     @Transactional
     public CategoryResponse updateCategory(Integer id, UpdateCategoryRequest updateCategoryRequest)
     {
-        try
+        // 1. Tìm category cần update
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy category với ID: " + id));
+
+        // 2. Kiểm tra tên mới có bị trùng không (bỏ qua chính nó)
+        if (!category.getName().equals(updateCategoryRequest.getName())
+                && categoryRepository.existsByName(updateCategoryRequest.getName()))
         {
-            // 1. Tìm category cần update
-            Category category = categoryRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy category với ID: " + id));
+            throw new IllegalArgumentException(
+                    "Tên danh mục '" + updateCategoryRequest.getName() + "' đã tồn tại!");
+        }
 
-            // 2. Kiểm tra tên mới có bị trùng không (bỏ qua chính nó)
-            if (!category.getName().equals(updateCategoryRequest.getName())
-                    && categoryRepository.existsByName(updateCategoryRequest.getName()))
+        // 3. Cập nhật thông tin cơ bản
+        category.setName(updateCategoryRequest.getName());
+        category.setDescription(updateCategoryRequest.getDescription());
+
+        // 4. Xử lý cập nhật trạng thái
+        if (updateCategoryRequest.getIsAvailable() != null)
+        {
+            boolean newStatus = updateCategoryRequest.getIsAvailable();
+            boolean oldStatus = category.isAvailable();
+
+            // Ẩn danh mục thì ẩn luôn mọi món thuộc nó, và bật lại thì hiện lại
+            // cả món. Trước đây chỉ làm chiều ẩn: bật lại một danh mục vẫn để
+            // toàn bộ món của nó biến mất khỏi thực đơn, và phải vào bật tay từng món
+            // mới thấy lại — không ai đoán được điều đó.
+            //
+            // Đánh đổi: món bị ẩn riêng lẻ từ trước cũng được hiện lại theo. Hệ
+            // thống không ghi lại món nào bị ẩn vì lý do gì, nên không phân biệt được.
+            if (oldStatus != newStatus)
             {
-                throw new IllegalArgumentException("Tên danh mục '" + updateCategoryRequest.getName() + "' đã tồn tại!");
-            }
+                List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
 
-            // 3. Cập nhật thông tin cơ bản
-            category.setName(updateCategoryRequest.getName());
-            category.setDescription(updateCategoryRequest.getDescription());
-
-            // 4. Xử lý cập nhật trạng thái
-            if (updateCategoryRequest.getIsAvailable() != null)
-            {
-                boolean newStatus = updateCategoryRequest.getIsAvailable();
-                boolean oldStatus = category.isAvailable();
-
-                // ✅ LOGIC 1: Khi ẩn category -> tự động ẩn tất cả dishes trong category đó
-                if (oldStatus && !newStatus)
+                if (!dishesInCategory.isEmpty())
                 {
-                    List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
-
-                    if (!dishesInCategory.isEmpty())
+                    for (Dish dish : dishesInCategory)
                     {
-                        // Ẩn tất cả dishes trong category
-                        for (Dish dish : dishesInCategory)
-                        {
-                            dish.setAvailable(false);
-                            dish.setHidden(true);
-                        }
-                        dishRepository.saveAll(dishesInCategory);
+                        dish.setAvailable(newStatus);
+                        dish.setHidden(!newStatus);
+                    }
 
-                        // Broadcast cho từng dish bị ẩn
-                        for (Dish dish : dishesInCategory)
-                        {
-                            broadcastMenuVisibilityChanged(dish);
-                        }
+                    dishRepository.saveAll(dishesInCategory);
+
+                    for (Dish dish : dishesInCategory)
+                    {
+                        broadcastMenuVisibilityChanged(dish);
                     }
                 }
-
-                // Cập nhật trạng thái category
-                category.setAvailable(newStatus);
             }
 
-            // 5. Lưu category
-            Category updatedCategory = categoryRepository.save(category);
-
-            return convertToResponse(updatedCategory);
-
-        } catch (EntityNotFoundException | IllegalArgumentException e)
-        {
-            throw e;
-        } catch (Exception e)
-        {
-            throw new RuntimeException("Không thể cập nhật danh mục: " + e.getMessage());
+            category.setAvailable(newStatus);
         }
+
+        // 5. Lưu category
+        Category updatedCategory = categoryRepository.save(category);
+
+        return convertToResponse(updatedCategory);
+
     }
     @Override
     @Transactional
-    public void deleteCategory(Integer id)
+    public CategoryRemovalResponse deleteCategory(Integer id)
     {
-        try
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
+
+        List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
+
+        // Còn món thì chỉ ẩn, không xoá. Món đã bán còn nằm trong hoá đơn và các
+        // báo cáo doanh thu; xoá đi là thủng số liệu của những ngày đã qua.
+        if (!dishesInCategory.isEmpty())
         {
-            Category category = categoryRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy danh mục với ID: " + id));
+            hideCategoryWithDishes(category, dishesInCategory);
 
-            // Lấy tất cả dishes thuộc category này
-            List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
+            return CategoryRemovalResponse.builder()
+                    .deleted(false)
+                    .hiddenDishCount(dishesInCategory.size())
+                    .message("Đã ẩn danh mục “" + category.getName() + "” cùng "
+                            + dishesInCategory.size() + " món thuộc nó. "
+                            + "Dữ liệu vẫn giữ để báo cáo doanh thu không bị thiếu.")
+                    .build();
+        }
 
-            // ✅ SỬA PHẦN NÀY: Kiểm tra xem có dish nào đã có order không
-            boolean hasDishWithOrders = false;
-            for (Dish dish : dishesInCategory)
-            {
-                long orderCount = dishRepository.countOrderItemsByDishId(dish.getId());
-                if (orderCount > 0)
-                {
-                    hasDishWithOrders = true;
-                    break;
-                }
-            }
+        // Danh mục rỗng thì không có gì để mất: xoá hẳn.
+        categoryRepository.delete(category);
 
-            // ✅ LOGIC MỚI: Nếu có bất kỳ dish nào đã có order -> KHÔNG cho xóa
-            if (hasDishWithOrders)
-            {
-                throw new IllegalStateException(
-                        "Không thể xóa danh mục này vì có món ăn đã phát sinh đơn hàng. " +
-                                "Vui lòng dùng chức năng \"Tạm dừng\" để ẩn danh mục."
-                );
-            }
+        return CategoryRemovalResponse.builder()
+                .deleted(true)
+                .hiddenDishCount(0)
+                .message("Đã xoá danh mục “" + category.getName() + "”.")
+                .build();
+    }
 
-            // ✅ LOGIC MỚI: Nếu không có dish nào có order -> Xóa cứng (xóa cả category và dishes)
-            // Xóa tất cả dishes trong category trước (do FK constraint)
-            if (!dishesInCategory.isEmpty())
-            {
-                dishRepository.deleteAll(dishesInCategory);
-            }
+    /**
+     * Ẩn danh mục và mọi món thuộc nó.
+     *
+     * <p>Để sót một món còn hiện trong danh mục đã ẩn thì bếp vẫn nhận đơn cho
+     * món đó, nên hai thứ phải đi cùng nhau.
+     */
+    private void hideCategoryWithDishes(Category category, List<Dish> dishesInCategory)
+    {
+        category.setAvailable(false);
+        categoryRepository.save(category);
 
-            // Sau đó xóa category
-            categoryRepository.delete(category);
-
-        } catch (EntityNotFoundException | IllegalStateException e)
+        for (Dish dish : dishesInCategory)
         {
-            throw e;
-        } catch (Exception e)
+            dish.setAvailable(false);
+            dish.setHidden(true);
+        }
+
+        dishRepository.saveAll(dishesInCategory);
+
+        for (Dish dish : dishesInCategory)
         {
-            throw new RuntimeException("Không thể xóa danh mục: " + e.getMessage());
+            broadcastMenuVisibilityChanged(dish);
         }
     }
 
     // MENU DASHBOARD
     @Override
+    @Transactional(readOnly = true)
     public MenuDashboardResponse getMenuDashboardData()
     {
         long totalDishes = dishRepository.count();
@@ -493,8 +447,7 @@ public class AdminServiceImpl implements AdminService
                 .collect(Collectors.toList());
 
         var categoryStats = dishRepository.getCategoryStatistics().stream()
-                .map(result ->
-                {
+                .map(result -> {
                     Boolean isCategoryAvailable = (Boolean) result[1];
                     return MenuDashboardResponse.CategoryStatResponse.builder()
                             .categoryName((String) result[0])
@@ -514,10 +467,10 @@ public class AdminServiceImpl implements AdminService
                 .build();
     }
 
-
     // INVOICE SERVICE
 
     @Override
+    @Transactional(readOnly = true)
     public InvoiceHistoryPageResponse getInvoiceHistory(
             int page, int pageSize,
             String tableNumber, String paymentMethod,
@@ -538,8 +491,7 @@ public class AdminServiceImpl implements AdminService
             try
             {
                 normalizedPaymentMethod = PaymentMethod.valueOf(trimmedMethod.toUpperCase(Locale.ROOT));
-            }
-            catch (IllegalArgumentException ex)
+            } catch (IllegalArgumentException ex)
             {
                 throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ: " + paymentMethod);
             }
@@ -558,16 +510,14 @@ public class AdminServiceImpl implements AdminService
                         row.getTableNumber(),
                         row.getPaymentMethod(),
                         row.getAmount(),
-                        row.getPaymentDate()
-                ));
+                        row.getPaymentDate()));
 
         return new InvoiceHistoryPageResponse(
                 historyPage.getContent(),
                 requestedPage,
                 requestedPageSize,
                 historyPage.getTotalElements(),
-                historyPage.getTotalPages()
-        );
+                historyPage.getTotalPages());
     }
 
     private String normalizeFilter(String value)
@@ -587,10 +537,9 @@ public class AdminServiceImpl implements AdminService
     {
 
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn"));
 
-        InvoiceDetailResponse response =
-                new InvoiceDetailResponse();
+        InvoiceDetailResponse response = new InvoiceDetailResponse();
 
         response.setInvoiceId(invoice.getId());
         response.setOrderId(invoice.getOrder().getId());
@@ -599,11 +548,15 @@ public class AdminServiceImpl implements AdminService
         response.setInvoiceDate(invoice.getInvoiceDate());
 
         response.setPaymentMethod(invoice.getPayments().isEmpty()
-                ? "Không xác định" : invoice.getPayments().getFirst().getPaymentMethod().name());
+                ? "Không xác định"
+                : invoice.getPayments().getFirst().getPaymentMethod().name());
 
-        List<InvoiceItemResponse> items =
-                invoice.getOrder().getOrderItems().stream().map(orderItem ->
-                {
+        // Món bị huỷ không được tính tiền, nên cũng không được nằm trong hoá đơn.
+        // Trước đây lấy toàn bộ order item, nên khách nhìn thấy món mình không hề
+        // trả tiền — và tổng các dòng không khớp với số phải trả.
+        List<InvoiceItemResponse> items = invoice.getOrder().getOrderItems().stream()
+                .filter(orderItem -> orderItem.getStatus() != OrderItemStatus.CANCELLED)
+                .map(orderItem -> {
                     InvoiceItemResponse item = new InvoiceItemResponse();
 
                     item.setDishName(orderItem.getDish().getName());
@@ -612,19 +565,31 @@ public class AdminServiceImpl implements AdminService
                     item.setAmount(orderItem.getSubTotal());
 
                     return item;
-                }).toList();
+                })
+                .toList();
 
         response.setItems(items);
 
-        // Tính tạm tính = tổng subTotal các món
-        BigDecimal totalBeforeVat = invoice.getOrder().getOrderItems().stream()
-                .map(oi -> oi.getSubTotal() != null ? oi.getSubTotal() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        response.setTotalBeforeVat(totalBeforeVat);
+        // Tạm tính lấy từ chính hoá đơn, không cộng lại các dòng món.
+        //
+        // <p>Bản cũ cộng subTotal của MỌI order item, kể cả món đã huỷ. Do VAT
+        // được suy ra bằng phép trừ, mọi sai lệch ở tạm tính đều dồn hết vào dòng VAT:
+        // một hoá đơn có món bị huỷ hiện ra VAT ÂM và thành tiền nhỏ hơn tạm tính.
+        //
+        // <p>restaurantRevenueAmount là số đã chốt lúc thanh toán: finalAmount trừ VAT.
+        // Lấy nó thì tạm tính và VAT luôn khớp với nhau dù khách có dùng điểm hay không.
+        BigDecimal totalBeforeVat = invoice.getRestaurantRevenueAmount();
 
-        // Tính VAT = finalAmount - totalBeforeVat
-        BigDecimal vatAmount = invoice.getFinalAmount().subtract(totalBeforeVat);
-        response.setVatAmount(vatAmount);
+        if (totalBeforeVat == null)
+        {
+            // Hoá đơn cũ chưa có cột này: cộng lại từ các dòng còn hiệu lực.
+            totalBeforeVat = items.stream()
+                    .map(item -> item.getAmount() != null ? item.getAmount() : BigDecimal.ZERO)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        response.setTotalBeforeVat(totalBeforeVat);
+        response.setVatAmount(invoice.getFinalAmount().subtract(totalBeforeVat));
 
         // Số tiền khách trả (lấy từ payment đầu tiên)
         BigDecimal amountPaid = invoice.getPayments().isEmpty()
@@ -646,6 +611,7 @@ public class AdminServiceImpl implements AdminService
     // REVENUE SERVICE
 
     @Override
+    @Transactional(readOnly = true)
     public RevenueReportResponse getTotalRevenue()
     {
         BigDecimal revenue = invoiceRepository.getTotalRevenue();
@@ -653,6 +619,7 @@ public class AdminServiceImpl implements AdminService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RevenueReportResponse getTodayRevenue()
     {
         LocalDate today = LocalDate.now();
@@ -660,6 +627,7 @@ public class AdminServiceImpl implements AdminService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RevenueReportResponse getWeeklyRevenue()
     {
         LocalDate now = LocalDate.now();
@@ -668,6 +636,7 @@ public class AdminServiceImpl implements AdminService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RevenueReportResponse getMonthlyRevenue()
     {
         LocalDate now = LocalDate.now();
@@ -677,6 +646,7 @@ public class AdminServiceImpl implements AdminService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RevenueReportResponse getYearlyRevenue()
     {
         LocalDate now = LocalDate.now();
@@ -686,6 +656,7 @@ public class AdminServiceImpl implements AdminService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RevenueReportResponse getRevenueBetween(LocalDate fromDate, LocalDate toDate)
     {
         LocalDate today = LocalDate.now();
@@ -699,7 +670,7 @@ public class AdminServiceImpl implements AdminService
         // Validate date range
         if (fromDate.isAfter(toDate))
         {
-            throw new RuntimeException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
+            throw new BusinessRuleException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
         }
 
         LocalDateTime start = fromDate.atStartOfDay();
@@ -709,6 +680,7 @@ public class AdminServiceImpl implements AdminService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public WeeklyRevenueChartResponse getDailyRevenue(LocalDate fromDate, LocalDate toDate)
     {
         LocalDate today = LocalDate.now();
@@ -720,7 +692,7 @@ public class AdminServiceImpl implements AdminService
 
         if (fromDate.isAfter(toDate))
         {
-            throw new RuntimeException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
+            throw new BusinessRuleException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
         }
 
         LocalDateTime start = fromDate.atStartOfDay();
@@ -746,8 +718,7 @@ public class AdminServiceImpl implements AdminService
             items.add(new DailyRevenueItemResponse(
                     getDayLabel(currentDate.getDayOfWeek()),
                     currentDate,
-                    revenueByDate.getOrDefault(currentDate, BigDecimal.ZERO))
-            );
+                    revenueByDate.getOrDefault(currentDate, BigDecimal.ZERO)));
 
             currentDate = currentDate.plusDays(1);
         }
@@ -756,6 +727,7 @@ public class AdminServiceImpl implements AdminService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BestSellingReportResponse getBestSellingReport(LocalDate fromDate, LocalDate toDate, Integer categoryId)
     {
         LocalDate today = LocalDate.now();
@@ -767,7 +739,7 @@ public class AdminServiceImpl implements AdminService
 
         if (fromDate.isAfter(toDate))
         {
-            throw new RuntimeException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
+            throw new BusinessRuleException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
         }
 
         LocalDateTime start = fromDate.atStartOfDay();
@@ -788,15 +760,14 @@ public class AdminServiceImpl implements AdminService
                             row.getDishName(),
                             row.getImageUrl(),
                             row.getTotalQuantity(),
-                            row.getTotalRevenue()
-                    )
-            );
+                            row.getTotalRevenue()));
         }
 
         return new BestSellingReportResponse(fromDate, toDate, "Khoảng thời gian đã chọn", items);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderShiftReportResponse getOrderShiftReport(LocalDate fromDate, LocalDate toDate)
     {
         LocalDateTime now = LocalDateTime.now();
@@ -809,7 +780,7 @@ public class AdminServiceImpl implements AdminService
 
         if (fromDate.isAfter(toDate))
         {
-            throw new RuntimeException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
+            throw new BusinessRuleException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
         }
 
         LocalDateTime start = fromDate.atStartOfDay();
@@ -852,8 +823,8 @@ public class AdminServiceImpl implements AdminService
                         highestShift.getStartTime(),
                         highestShift.getEndTime(),
                         highestShiftOrderCount,
-                        calculatePercentage(highestShiftOrderCount, totalPaidOrders)
-                ), shifts);
+                        calculatePercentage(highestShiftOrderCount, totalPaidOrders)),
+                shifts);
     }
 
     // Helper
@@ -905,7 +876,8 @@ public class AdminServiceImpl implements AdminService
         return null;
     }
 
-    private List<OrderShiftItemResponse> buildOrderShiftItems(Map<OrderShift, Long> orderCountByShift, long totalPaidOrders)
+    private List<OrderShiftItemResponse> buildOrderShiftItems(Map<OrderShift, Long> orderCountByShift,
+            long totalPaidOrders)
     {
         List<OrderShiftItemResponse> shifts = new ArrayList<>();
 
@@ -919,8 +891,7 @@ public class AdminServiceImpl implements AdminService
                     shift.getStartTime(),
                     shift.getEndTime(),
                     orderCount,
-                    calculatePercentage(orderCount, totalPaidOrders))
-            );
+                    calculatePercentage(orderCount, totalPaidOrders)));
         }
         return shifts;
     }
@@ -964,16 +935,185 @@ public class AdminServiceImpl implements AdminService
             case SUNDAY -> "CN";
         };
     }
+    // =================== QUẢN LÝ BÀN ===================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminTableResponse> getAllTables()
+    {
+        // Đếm một lần cho cả bảng rồi tra theo id, không đếm riêng từng bàn.
+        Map<Integer, long[]> usage = restaurantTableRepository.countUsagePerTable().stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0],
+                        row -> new long[]{(Long) row[1], (Long) row[2]}));
+
+        return restaurantTableRepository.findAllByOrderByTableNumberAsc().stream()
+                .map(table -> {
+                    long[] counts = usage.getOrDefault(table.getId(), new long[]{0L, 0L});
+                    return toAdminResponse(table, counts[0], counts[1]);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public AdminTableResponse createTable(CreateTableRequest request)
+    {
+        String tableNumber = normalizeTableNumber(request.getTableNumber());
+
+        if (restaurantTableRepository.existsByTableNumber(tableNumber))
+        {
+            throw new BusinessRuleException("Số bàn “" + tableNumber + "” đã có rồi.");
+        }
+
+        RestaurantTable table = new RestaurantTable();
+        table.setTableNumber(tableNumber);
+        table.setCapacity(request.getCapacity());
+        table.setStatus(TableStatus.AVAILABLE);
+        table.setActive(true);
+
+        RestaurantTable saved = restaurantTableRepository.save(table);
+        broadcastTablesChanged();
+
+        return toAdminResponse(saved, 0L, 0L);
+    }
+
+    @Override
+    @Transactional
+    public AdminTableResponse updateTable(Integer id, UpdateTableRequest request)
+    {
+        RestaurantTable table = restaurantTableRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bàn với ID: " + id));
+
+        String tableNumber = normalizeTableNumber(request.getTableNumber());
+
+        if (restaurantTableRepository.existsByTableNumberAndIdNot(tableNumber, id))
+        {
+            throw new BusinessRuleException("Số bàn “" + tableNumber + "” đã có rồi.");
+        }
+
+        // Cất bàn đang có khách ngồi hoặc đã có người đặt thì bàn biến mất khỏi
+        // sơ đồ của Phục vụ giữa chừng, đơn trên bàn thành đơn không ai nhìn thấy.
+        if (!request.getActive() && table.isActive())
+        {
+            requireIdleTable(table, "cất bàn");
+        }
+
+        table.setTableNumber(tableNumber);
+        table.setCapacity(request.getCapacity());
+        table.setActive(request.getActive());
+
+        RestaurantTable saved = restaurantTableRepository.save(table);
+        broadcastTablesChanged();
+
+        return toAdminResponse(saved,
+                restaurantTableRepository.countOrdersByTableId(id),
+                restaurantTableRepository.countReservationsByTableId(id));
+    }
+
+    @Override
+    @Transactional
+    public TableRemovalResponse deleteTable(Integer id)
+    {
+        RestaurantTable table = restaurantTableRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bàn với ID: " + id));
+
+        requireIdleTable(table, "bỏ bàn");
+
+        boolean used = restaurantTableRepository.countOrdersByTableId(id) > 0
+                || restaurantTableRepository.countReservationsByTableId(id) > 0;
+
+        // Đã từng có đơn hoặc lần đặt thì chỉ cất đi. Đơn cũ trỏ về bàn này và
+        // còn nằm trong hoá đơn lẫn báo cáo doanh thu; xoá bàn là thủng số liệu
+        // của những ngày đã qua — cùng lý do với danh mục món.
+        if (used)
+        {
+            table.setActive(false);
+            restaurantTableRepository.save(table);
+            broadcastTablesChanged();
+
+            return TableRemovalResponse.builder()
+                    .deleted(false)
+                    .message("Đã cất bàn “" + table.getTableNumber() + "” khỏi sơ đồ. "
+                            + "Lịch sử đơn và hoá đơn của bàn vẫn giữ nguyên cho báo cáo.")
+                    .build();
+        }
+
+        // Bàn chưa dùng bao giờ thì không có gì để mất.
+        restaurantTableRepository.delete(table);
+        broadcastTablesChanged();
+
+        return TableRemovalResponse.builder()
+                .deleted(true)
+                .message("Đã xoá bàn “" + table.getTableNumber() + "”.")
+                .build();
+    }
+
+    /**
+     * Chặn mọi thao tác đụng vào bàn đang bận.
+     *
+     * @param action động từ để ghép vào câu báo lỗi
+     */
+    private void requireIdleTable(RestaurantTable table, String action)
+    {
+        if (table.getStatus() == TableStatus.SERVING)
+        {
+            throw new BusinessRuleException("Bàn “" + table.getTableNumber()
+                    + "” đang phục vụ khách, không " + action + " lúc này được. "
+                    + "Thanh toán xong rồi làm lại.");
+        }
+
+        if (table.getStatus() == TableStatus.RESERVED)
+        {
+            throw new BusinessRuleException("Bàn “" + table.getTableNumber()
+                    + "” đã có người đặt, không " + action + " lúc này được. "
+                    + "Huỷ hoặc chuyển lần đặt đó sang bàn khác trước.");
+        }
+    }
+
+    /**
+     * Bỏ khoảng trắng thừa quanh số bàn.
+     *
+     * <p>"T05 " và "T05" là cùng một bàn với người nhìn, nhưng với ràng buộc
+     * duy nhất trong cơ sở dữ liệu thì là hai.
+     */
+    private String normalizeTableNumber(String raw)
+    {
+        return raw.trim();
+    }
+
+    private AdminTableResponse toAdminResponse(RestaurantTable table, long orderCount, long reservationCount)
+    {
+        return AdminTableResponse.builder()
+                .id(table.getId())
+                .tableNumber(table.getTableNumber())
+                .capacity(table.getCapacity())
+                .status(table.getStatus() == null ? null : table.getStatus().name())
+                .active(table.isActive())
+                .orderCount(orderCount)
+                .reservationCount(reservationCount)
+                .deletable(orderCount == 0 && reservationCount == 0)
+                .build();
+    }
+
+    /**
+     * Báo cho sơ đồ bàn của Phục vụ và Thu ngân là danh sách bàn đã đổi.
+     *
+     * <p>Thêm hay cất một bàn mà màn đang mở không biết thì Phục vụ vẫn bấm vào
+     * một bàn không còn tồn tại.
+     */
+    private void broadcastTablesChanged()
+    {
+        messagingTemplate.convertAndSend("/topic/tables", "TABLE_UPDATED");
+    }
+
     private void broadcastMenuVisibilityChanged(Dish dish)
     {
         String payload = String.format(
                 "{\"type\":\"MENU_VISIBILITY_CHANGED\",\"dishId\":%d,\"hidden\":%b}",
-                dish.getId(), dish.isHidden()
-        );
+                dish.getId(), dish.isHidden());
         messagingTemplate.convertAndSend("/topic/waiter", payload);
         messagingTemplate.convertAndSend("/topic/kitchen", payload);
     }
 
 }
-
-

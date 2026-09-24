@@ -1,26 +1,12 @@
-import {
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-    type CSSProperties,
-} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
+import {isRequestCanceled} from '@/shared/utils/error'
 import {useNavigate} from 'react-router-dom'
+import {Eye, QrCode, ReceiptText, Wallet} from 'lucide-react'
 
-import {
-    adminApi,
-    type AdminPaymentHistoryItem,
-    type AdminPaymentMethod,
-} from '@/shared/api/admin'
-import {
-    EmptyState,
-    ErrorState,
-    LoadingState,
-} from '@/shared/components/feedback'
-import {
-    PageCard,
-    PageHeader,
-} from '@/shared/components/ui'
+import * as adminApi from '@/shared/api/admin'
+import type {AdminPaymentHistoryItem, AdminPaymentMethod} from '@/shared/api/admin'
+import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
+import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 
 const PAYMENT_HISTORY_PAGE_SIZE = 10
 const PAYMENT_HISTORY_FILTER_DELAY_MS = 350
@@ -57,61 +43,18 @@ function formatTableName(tableNumber: string) {
     return `Bàn ${tableNumber}`
 }
 
-function WalletIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            className="admin-payment-method-svg"
-            focusable="false"
-            viewBox="0 0 24 24"
-        >
-            <path d="M4.5 7.5h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"/>
-            <path d="M16.5 12h4v3h-4a1.5 1.5 0 0 1 0-3z"/>
-            <path d="M5.5 7.5 15 4.8a1.8 1.8 0 0 1 2.2 1.3l.4 1.4"/>
-        </svg>
-    )
-}
-
-function QrIcon() {
-    return (
-        <svg
-            aria-hidden="true"
-            className="admin-payment-method-svg"
-            focusable="false"
-            viewBox="0 0 24 24"
-        >
-            <path d="M4 4h6v6H4z"/>
-            <path d="M14 4h6v6h-6z"/>
-            <path d="M4 14h6v6H4z"/>
-            <path d="M14 14h2.5"/>
-            <path d="M19 14h1"/>
-            <path d="M14 17h6"/>
-            <path d="M14 20h1.5"/>
-            <path d="M18 20h2"/>
-        </svg>
-    )
-}
-
-function PaymentMethodBadge({
-                                method,
-                            }: {
-    method: AdminPaymentMethod
-}) {
+function PaymentMethodBadge({method}: {method: AdminPaymentMethod}) {
     const isCash = method === 'CASH'
 
     return (
-        <span
-            className={
-                isCash
-                    ? 'admin-payment-method method-cash'
-                    : 'admin-payment-method method-qrcode'
-            }
-        >
-            <span className="admin-payment-method-icon">
-                {isCash ? <WalletIcon/> : <QrIcon/>}
-            </span>
+        <span className={`rk-chip ${isCash ? 'rk-chip--ok' : 'rk-chip--brand'}`}>
+            {isCash ? (
+                <Wallet className="rk-icon" aria-hidden="true" />
+            ) : (
+                <QrCode className="rk-icon" aria-hidden="true" />
+            )}
 
-            {method}
+            {isCash ? 'Tiền mặt' : 'VNPay / QR'}
         </span>
     )
 }
@@ -120,8 +63,7 @@ export default function AdminPaymentHistoryPage() {
     const navigate = useNavigate()
     const hasLoadedHistoryRef = useRef(false)
 
-    const [payments, setPayments] =
-        useState<AdminPaymentHistoryItem[]>([])
+    const [payments, setPayments] = useState<AdminPaymentHistoryItem[]>([])
 
     const [page, setPage] = useState(1)
     const [totalItems, setTotalItems] = useState(0)
@@ -129,25 +71,37 @@ export default function AdminPaymentHistoryPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
+    // Danh sách bàn lấy từ máy chủ. Bản cũ sinh cứng T01..T12 bằng
+    // Array.from({length: 12}) — kê thêm bàn thứ 13 thì không lọc được theo nó,
+    // và bàn đã cất vẫn nằm trong danh sách.
+    const [tableOptions, setTableOptions] = useState<string[]>([])
+
     const [tableFilter, setTableFilter] = useState('')
     const [methodFilter, setMethodFilter] = useState('ALL')
     const [keywordInput, setKeywordInput] = useState('')
     const [keywordFilter, setKeywordFilter] = useState('')
 
+    useEffect(() => {
+        const controller = new AbortController()
 
+        adminApi
+            .getAllTables(controller.signal)
+            .then((res) => {
+                setTableOptions(res.data.map((table) => table.tableNumber))
+            })
+            .catch(() => {
+                // Không lấy được danh sách bàn thì bỏ lọc theo bàn, chứ không chặn
+                // cả màn: hóa đơn vẫn xem được.
+            })
+
+        return () => controller.abort()
+    }, [])
 
     const loadPaymentHistory = useCallback(
-        async (
-            targetPage: number,
-            showFullLoading = true,
-            signal?: AbortSignal,
-        ) => {
+        async (targetPage: number, showFullLoading = true, signal?: AbortSignal) => {
             const filters = {
                 tableNumber: tableFilter.trim() || undefined,
-                paymentMethod:
-                    methodFilter === 'ALL'
-                        ? undefined
-                        : methodFilter,
+                paymentMethod: methodFilter === 'ALL' ? undefined : methodFilter,
                 keyword: keywordFilter.trim() || undefined,
             }
 
@@ -165,19 +119,15 @@ export default function AdminPaymentHistoryPage() {
                     signal,
                 )
 
-                if (
-                    data.totalPages > 0
-                    && effectivePage > data.totalPages
-                ) {
+                if (data.totalPages > 0 && effectivePage > data.totalPages) {
                     effectivePage = data.totalPages
 
-                    const retryResponse =
-                        await adminApi.getPaymentHistory(
-                            effectivePage,
-                            PAYMENT_HISTORY_PAGE_SIZE,
-                            filters,
-                            signal,
-                        )
+                    const retryResponse = await adminApi.getPaymentHistory(
+                        effectivePage,
+                        PAYMENT_HISTORY_PAGE_SIZE,
+                        filters,
+                        signal,
+                    )
 
                     data = retryResponse.data
                 }
@@ -192,36 +142,28 @@ export default function AdminPaymentHistoryPage() {
                     setPage(effectivePage)
                 }
             } catch (requestError: unknown) {
-                console.error(
-                    '[ADMIN_PAYMENT_HISTORY_FETCH_ERROR]',
-                    requestError,
-                )
+                // Rời màn giữa chừng thì request đang bay bị huỷ — không phải lỗi.
+                if (isRequestCanceled(requestError)) {
+                    return
+                }
 
-                setError(
-                    'Không thể tải lịch sử thanh toán.',
-                )
+                console.error('[ADMIN_PAYMENT_HISTORY_FETCH_ERROR]', requestError)
+
+                setError('Không thể tải lịch sử thanh toán.')
             } finally {
                 if (showFullLoading) {
                     setIsLoading(false)
                 }
             }
         },
-        [
-            tableFilter,
-            methodFilter,
-            keywordFilter,
-        ],
+        [tableFilter, methodFilter, keywordFilter],
     )
 
     useEffect(() => {
         const controller = new AbortController()
         const shouldShowFullLoading = !hasLoadedHistoryRef.current
 
-        void loadPaymentHistory(
-            page,
-            shouldShowFullLoading,
-            controller.signal,
-        )
+        void loadPaymentHistory(page, shouldShowFullLoading, controller.signal)
 
         return () => controller.abort()
     }, [loadPaymentHistory, page])
@@ -250,10 +192,7 @@ export default function AdminPaymentHistoryPage() {
     function handlePageChange(nextPage: number) {
         const safeTotalPages = Math.max(totalPages, 1)
 
-        const safeNextPage = Math.min(
-            Math.max(nextPage, 1),
-            safeTotalPages,
-        )
+        const safeNextPage = Math.min(Math.max(nextPage, 1), safeTotalPages)
 
         setPage(safeNextPage)
     }
@@ -261,7 +200,7 @@ export default function AdminPaymentHistoryPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải lịch sử thanh toán..."
+                title="Đang tải lịch sử thanh toán…"
                 description="Hệ thống đang lấy danh sách hóa đơn đã thanh toán."
             />
         )
@@ -272,10 +211,7 @@ export default function AdminPaymentHistoryPage() {
             <ErrorState
                 message={error}
                 onRetry={() => {
-                    loadPaymentHistory(
-                        page,
-                        true,
-                    ).catch((requestError) => {
+                    loadPaymentHistory(page, true).catch((requestError) => {
                         console.error(requestError)
                     })
                 }}
@@ -283,59 +219,37 @@ export default function AdminPaymentHistoryPage() {
         )
     }
 
-    const firstVisibleItem =
-        totalItems === 0
-            ? 0
-            : (page - 1) * PAYMENT_HISTORY_PAGE_SIZE + 1
-
-    const lastVisibleItem = Math.min(
-        page * PAYMENT_HISTORY_PAGE_SIZE,
-        totalItems,
-    )
-
-    const safeTotalPages = Math.max(totalPages, 1)
-
     return (
-        <div className="admin-payment-history-page">
-            <PageCard className="admin-payment-header-card">
+        <div className="rk-stack">
+            <PageCard>
                 <PageHeader
-                    title="Lịch sử hóa đơn"
-                    description={`${totalItems} hóa đơn đã thanh toán được ghi nhận`}
-                    actions={
-                        <button
-                            aria-label="Quay lại"
-                            className="admin-payment-back-button"
-                            type="button"
-                            onClick={() => navigate(-1)}
-                        >
-                            ‹
-                        </button>
-                    }
+                    eyebrow="Quản trị"
+                    title="Lịch sử hoá đơn"
+                    description={`${totalItems} hoá đơn đã thanh toán được ghi nhận`}
+                    icon={<ReceiptText className="rk-icon" aria-hidden="true" />}
                 />
             </PageCard>
 
             <PageCard>
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: 10,
-                        flexWrap: 'wrap',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                    }}
-                >
+                <div className="rk-filterbar">
+                    <input
+                        className="rk-input"
+                        type="text"
+                        value={keywordInput}
+                        placeholder="Tìm theo mã hoá đơn…"
+                        onChange={(event) => setKeywordInput(event.target.value)}
+                    />
+
                     <select
+                        className="rk-select"
                         value={tableFilter}
-                        style={filterInputStyle}
                         onChange={(event) => {
                             setTableFilter(event.target.value)
                             handleFilterChange()
                         }}
                     >
                         <option value="">Tất cả bàn</option>
-                        {Array.from({length: 12}, (_, i) =>
-                            `T${String(i + 1).padStart(2, '0')}`,
-                        ).map((tableNumber) => (
+                        {tableOptions.map((tableNumber) => (
                             <option key={tableNumber} value={tableNumber}>
                                 Bàn {tableNumber}
                             </option>
@@ -343,8 +257,8 @@ export default function AdminPaymentHistoryPage() {
                     </select>
 
                     <select
+                        className="rk-select"
                         value={methodFilter}
-                        style={filterInputStyle}
                         onChange={(event) => {
                             setMethodFilter(event.target.value)
                             handleFilterChange()
@@ -352,144 +266,101 @@ export default function AdminPaymentHistoryPage() {
                     >
                         <option value="ALL">Tất cả phương thức</option>
                         <option value="CASH">Tiền mặt</option>
-                        <option value="QRCODE">VNPay/QR</option>
+                        <option value="QRCODE">VNPay / QR</option>
                     </select>
-
-                    <input
-                        type="text"
-                        value={keywordInput}
-                        placeholder="Mã hóa đơn..."
-                        style={{
-                            ...filterInputStyle,
-                            width: 140,
-                        }}
-                        onChange={(event) => {
-                            setKeywordInput(event.target.value)
-                        }}
-                    />
 
                     <button
                         type="button"
-                        className="secondary-button"
+                        className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
-                        Xóa bộ lọc
+                        Xoá bộ lọc
                     </button>
                 </div>
             </PageCard>
 
-            <section className="admin-payment-table-card">
-                <div className="admin-payment-table">
-                    <div className="admin-payment-table-header">
-                        <span>Mã hóa đơn</span>
-                        <span>Bàn</span>
-                        <span>Phương thức</span>
-                        <span>Số tiền</span>
-                        <span>Ngày thanh toán</span>
-                        <span/>
-                    </div>
+            <PageCard>
+                {payments.length === 0 ? (
+                    <EmptyState
+                        title="Chưa có hoá đơn đã thanh toán"
+                        description="Không có hoá đơn nào khớp bộ lọc hiện tại."
+                    />
+                ) : (
+                    <>
+                        <div className="rk-tablewrap">
+                            <table className="rk-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Mã hoá đơn</th>
+                                        <th scope="col">Bàn</th>
+                                        <th scope="col">Phương thức</th>
+                                        <th scope="col" className="rk-th--num">
+                                            Số tiền
+                                        </th>
+                                        <th scope="col">Ngày thanh toán</th>
+                                        <th scope="col">Thao tác</th>
+                                    </tr>
+                                </thead>
 
-                    {payments.length === 0 ? (
-                        <EmptyState
-                            title="Chưa có hóa đơn đã thanh toán"
-                            description="Hiện hệ thống chưa ghi nhận hóa đơn thanh toán nào."
+                                <tbody>
+                                    {payments.map((payment) => (
+                                        <tr key={payment.invoiceId}>
+                                            <td>
+                                                <strong>INV-{payment.invoiceId}</strong>
+                                            </td>
+
+                                            <td>
+                                                {formatTableName(payment.tableNumber)}
+                                            </td>
+
+                                            <td>
+                                                <PaymentMethodBadge
+                                                    method={payment.paymentMethod}
+                                                />
+                                            </td>
+
+                                            <td className="rk-td--num">
+                                                <strong>
+                                                    {formatCurrency(payment.amount)}
+                                                </strong>
+                                            </td>
+
+                                            <td>
+                                                {formatPaymentDate(payment.paymentDate)}
+                                            </td>
+
+                                            <td>
+                                                <button
+                                                    type="button"
+                                                    className="rk-iconbtn"
+                                                    title="Xem chi tiết hoá đơn"
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/admin/invoices/${payment.invoiceId}`,
+                                                        )
+                                                    }
+                                                >
+                                                    <Eye
+                                                        className="rk-icon"
+                                                        aria-hidden="true"
+                                                    />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <Pagination
+                            page={page}
+                            totalPages={Math.max(totalPages, 1)}
+                            totalItems={totalItems}
+                            onPageChange={handlePageChange}
                         />
-                    ) : (
-                        payments.map((payment) => (
-                            <button
-                                className="admin-payment-table-row"
-                                key={payment.invoiceId}
-                                type="button"
-                                onClick={() =>
-                                    navigate(
-                                        `/admin/invoices/${payment.invoiceId}`,
-                                    )
-                                }
-                            >
-                                <span className="admin-payment-id">
-                                    {payment.invoiceId}
-                                </span>
-
-                                <span>
-                                    {formatTableName(
-                                        payment.tableNumber,
-                                    )}
-                                </span>
-
-                                <span>
-                                    <PaymentMethodBadge
-                                        method={
-                                            payment.paymentMethod
-                                        }
-                                    />
-                                </span>
-
-                                <span className="admin-payment-amount">
-                                    {formatCurrency(payment.amount)}
-                                </span>
-
-                                <span>
-                                    {formatPaymentDate(
-                                        payment.paymentDate,
-                                    )}
-                                </span>
-
-                                <span className="admin-payment-row-arrow">
-                                    ›
-                                </span>
-                            </button>
-                        ))
-                    )}
-                </div>
-
-                {totalItems > 0 && (
-                    <div className="admin-payment-pagination">
-                        <div className="admin-payment-pagination-info">
-                            Hiển thị {firstVisibleItem}-
-                            {lastVisibleItem} trong tổng{' '}
-                            {totalItems} hóa đơn
-                        </div>
-
-                        <div className="admin-payment-pagination-controls">
-                            <button
-                                className="admin-payment-pagination-button"
-                                type="button"
-                                disabled={page === 1}
-                                onClick={() =>
-                                    handlePageChange(page - 1)
-                                }
-                            >
-                                Trước
-                            </button>
-
-                            <span className="admin-payment-pagination-page">
-                                Trang {page} / {safeTotalPages}
-                            </span>
-
-                            <button
-                                className="admin-payment-pagination-button"
-                                type="button"
-                                disabled={
-                                    totalPages === 0
-                                    || page >= totalPages
-                                }
-                                onClick={() =>
-                                    handlePageChange(page + 1)
-                                }
-                            >
-                                Sau
-                            </button>
-                        </div>
-                    </div>
+                    </>
                 )}
-            </section>
+            </PageCard>
         </div>
     )
-
-}
-const filterInputStyle: CSSProperties = {
-    padding: '8px 12px',
-    border: '1px solid #d1d5db',
-    borderRadius: 8,
-    fontSize: 13,
 }

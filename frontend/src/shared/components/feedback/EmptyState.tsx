@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react'
+import {Inbox} from 'lucide-react'
 
 type EmptyStateProps = {
     title?: string
@@ -7,30 +8,28 @@ type EmptyStateProps = {
     icon?: ReactNode
 }
 
+/**
+ * Trạng thái rỗng dùng chung.
+ *
+ * <p>Biểu tượng mặc định trước đây là ký tự ∅, trông như lỗi phông chứ không
+ * như một biểu tượng. Nay dùng SVG.
+ */
 export function EmptyState({
-                               title = 'Chưa có dữ liệu',
-                               description = 'Khi có dữ liệu mới, thông tin sẽ được hiển thị tại đây.',
-                               action,
-                               icon = '∅',
-                           }: EmptyStateProps) {
+    title = 'Chưa có dữ liệu',
+    description = 'Khi có dữ liệu mới, thông tin sẽ được hiển thị tại đây.',
+    action,
+    icon = <Inbox className="rk-icon" aria-hidden="true" />,
+}: EmptyStateProps) {
     return (
-        <div className="rims-feedback-state rims-feedback-empty">
-            <div className="rims-feedback-icon empty">
-                {icon}
-            </div>
+        <div className="rk-feedback">
+            <div className="rk-feedback__icon">{icon}</div>
 
             <div>
-                <h3>{title}</h3>
+                <h3 className="rk-feedback__title">{title}</h3>
 
-                {description && (
-                    <p>{description}</p>
-                )}
+                {description && <p className="rk-feedback__text">{description}</p>}
 
-                {action && (
-                    <div className="mt-3">
-                        {action}
-                    </div>
-                )}
+                {action && <div className="rk-feedback__actions">{action}</div>}
             </div>
         </div>
     )

@@ -1,8 +1,8 @@
 package vn.edu.fpt.swp391.g6.rimsapi.dto.response.auth;
 
 import lombok.*;
-import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 
+import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
 
 @Getter
 @Builder
@@ -23,4 +23,6 @@ public class AuthenticationResponse
     private String email;
     private RoleType role;
     private Integer rewardPoints;
+    /** Còn bật thì frontend giữ người dùng ở màn đổi mật khẩu. */
+    private boolean mustChangePassword;
 }

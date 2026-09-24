@@ -1,0 +1,9 @@
+/* Điểm vào duy nhất của lớp giao diện.
+
+   Trước đây đây là bootstrap-rims.css và nó gom chín file CSS cũ: một file
+   cho mỗi vai trò, cộng layout, components và base. Chín file đó đã hết.
+   tokens.css phải đứng đầu vì mọi thứ dưới nó đọc biến từ đó. */
+
+@import './tokens.css';
+@import './rims-kit.css';
+@import './rims-home.css';

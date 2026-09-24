@@ -1,32 +1,23 @@
-﻿import {
-    type CSSProperties,
-} from 'react'
-import {
-    useNavigate,
-    useSearchParams,
-} from 'react-router-dom'
+import {Check, Download} from 'lucide-react'
 
-import {cashierApi} from '@/shared/api/cashier'
+import {useNavigate, useSearchParams} from 'react-router-dom'
 
-function isRequestCanceled(error: unknown) {
-    if (typeof error !== 'object' || error === null) {
-        return false
-    }
+import * as cashierApi from '@/shared/api/cashier'
+import {isRequestCanceled} from '@/shared/utils/error'
+import {useToast} from '@/app/providers/useToast'
 
-    const requestError = error as {
-        name?: string
-        code?: string
-        message?: string
-    }
-
-    return (
-        requestError.name === 'CanceledError'
-        || requestError.code === 'ERR_CANCELED'
-        || requestError.message === 'canceled'
-    )
-}
-
+/**
+ * Trang VNPay trả về khi thanh toán thành công.
+ *
+ * <p>Trang này nằm ngoài khung quản trị: không thanh bên, không thanh trên,
+ * vì người dùng vừa từ cổng thanh toán quay lại chứ không đi từ trong hệ
+ * thống ra. Trước đây nó tự dựng thẻ, nút và màu bằng mười đối tượng style
+ * trong JS — nút còn đặt thẳng `color: white`, nên ở chế độ tối chữ trắng
+ * nằm trên nền sáng.
+ */
 export default function PaymentSuccess() {
+    const {notify} = useToast()
+
     const [searchParams] = useSearchParams()
     const navigate = useNavigate()
 
@@ -38,30 +29,18 @@ export default function PaymentSuccess() {
         }
 
         try {
-            const response =
-                await cashierApi.downloadInvoicePdf(
-                    Number(invoiceId),
-                )
+            const response = await cashierApi.downloadInvoicePdf(Number(invoiceId))
 
-            const blob =
-                new Blob(
-                    [response.data as BlobPart],
-                    {
-                        type: 'application/pdf',
-                    },
-                )
+            const blob = new Blob([response.data as BlobPart], {
+                type: 'application/pdf',
+            })
 
-            const url =
-                window.URL.createObjectURL(blob)
+            const url = window.URL.createObjectURL(blob)
 
-            const link =
-                document.createElement('a')
+            const link = document.createElement('a')
 
             link.href = url
-            link.setAttribute(
-                'download',
-                `Invoice-${invoiceId}.pdf`,
-            )
+            link.setAttribute('download', `Invoice-${invoiceId}.pdf`)
 
             document.body.appendChild(link)
             link.click()
@@ -73,130 +52,55 @@ export default function PaymentSuccess() {
                 return
             }
 
-            console.error(
-                '[PAYMENT_SUCCESS_DOWNLOAD_PDF_ERROR]',
-                requestError,
-            )
+            console.error('[PAYMENT_SUCCESS_DOWNLOAD_PDF_ERROR]', requestError)
 
-            alert('Không thể tải PDF! Vui lòng thử lại.')
+            notify('Không thể tải PDF! Vui lòng thử lại.', {tone: 'alert'})
         }
     }
 
     return (
-        <div style={pageStyle}>
-            <div
-                className="page-card"
-                style={cardStyle}
-            >
-                <div style={iconStyle}>
-                    ✔
+        <div className="rk-result">
+            <div className="rk-feedback rk-feedback--lg">
+                <div className="rk-feedback__icon rk-feedback__icon--ok">
+                    <Check className="rk-icon" aria-hidden="true" />
                 </div>
 
-                <h1 style={titleStyle}>
-                    Thanh Toán Thành Công!
-                </h1>
+                <div>
+                    <h1 className="rk-feedback__title">Thanh toán thành công</h1>
 
-                <p style={descriptionStyle}>
-                    Giao dịch qua VNPay đã hoàn tất. Hóa đơn của
-                    quý khách đã được lưu lại hệ thống.
-                </p>
+                    <p className="rk-feedback__text">
+                        Giao dịch qua VNPay đã hoàn tất. Hoá đơn của quý khách đã được lưu
+                        lại hệ thống.
+                    </p>
 
-                {invoiceId && (
-                    <div style={invoiceBoxStyle}>
-                        <strong>
-                            Mã hóa đơn: INV-{invoiceId}
-                        </strong>
+                    {invoiceId && (
+                        <p className="rk-feedback__text">
+                            Mã hoá đơn:{' '}
+                            <strong className="rk-num">INV-{invoiceId}</strong>
+                        </p>
+                    )}
+
+                    <div className="rk-feedback__actions">
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--primary"
+                            disabled={!invoiceId}
+                            onClick={() => void handleDownloadPdf()}
+                        >
+                            <Download className="rk-icon" aria-hidden="true" />
+                            Tải PDF hoá đơn
+                        </button>
+
+                        <button
+                            type="button"
+                            className="rk-btn"
+                            onClick={() => navigate('/cashier/payments')}
+                        >
+                            Về màn hình Thu ngân
+                        </button>
                     </div>
-                )}
-
-                <div style={actionRowStyle}>
-                    <button
-                        type="button"
-                        style={downloadButtonStyle}
-                        disabled={!invoiceId}
-                        onClick={() =>
-                            void handleDownloadPdf()
-                        }
-                    >
-                        📥 Tải PDF Hóa Đơn
-                    </button>
-
-                    <button
-                        type="button"
-                        style={backButtonStyle}
-                        onClick={() =>
-                            navigate('/cashier/payments')
-                        }
-                    >
-                        Về màn hình Thu Ngân
-                    </button>
                 </div>
             </div>
         </div>
     )
-}
-
-const pageStyle: CSSProperties = {
-    height: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: '#f0fdf4',
-}
-
-const cardStyle: CSSProperties = {
-    textAlign: 'center',
-    padding: '3rem',
-    maxWidth: '500px',
-    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-}
-
-const iconStyle: CSSProperties = {
-    fontSize: '5rem',
-    color: '#16a34a',
-    marginBottom: '1rem',
-}
-
-const titleStyle: CSSProperties = {
-    color: '#16a34a',
-    marginBottom: '1rem',
-}
-
-const descriptionStyle: CSSProperties = {
-    color: '#475569',
-    marginBottom: '2rem',
-}
-
-const invoiceBoxStyle: CSSProperties = {
-    background: '#e2e8f0',
-    padding: '1rem',
-    borderRadius: '8px',
-    marginBottom: '2rem',
-}
-
-const actionRowStyle: CSSProperties = {
-    display: 'flex',
-    gap: '1rem',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-}
-
-const downloadButtonStyle: CSSProperties = {
-    padding: '0.8rem 1.5rem',
-    background: '#2563eb',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-}
-
-const backButtonStyle: CSSProperties = {
-    padding: '0.8rem 1.5rem',
-    background: '#cbd5e1',
-    color: '#1e293b',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
 }

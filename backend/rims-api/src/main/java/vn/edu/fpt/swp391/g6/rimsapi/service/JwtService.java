@@ -2,10 +2,9 @@ package vn.edu.fpt.swp391.g6.rimsapi.service;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 
-
 public interface JwtService
 {
-    String generateAccessToken(int id, String username, String role);
+    String generateAccessToken(int id, String username, String role, boolean mustChangePassword);
 
     String generateRefreshToken(int id);
 
@@ -20,6 +19,7 @@ public interface JwtService
     String extractUsername(JWTClaimsSet claims);
 
     String extractRole(JWTClaimsSet claims);
+    boolean extractMustChangePassword(JWTClaimsSet claims);
 
     String extractJti(String token);
 

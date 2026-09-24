@@ -1,15 +1,7 @@
-import {
-    EmptyState,
-    ErrorState,
-    LoadingState,
-} from '@/shared/components/feedback'
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react'
+import {Bell, Check, MessageSquare} from 'lucide-react'
+
+import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useKitchenSocket} from '@/realtime'
 
 import {
@@ -21,6 +13,9 @@ import {
     type DishDetailResponse,
     type KitchenOrderItemResponse,
 } from '@/shared/api/chef'
+import {ConfirmDialog, Modal, Pagination} from '@/shared/components/ui'
+import {useToast} from '@/app/providers/useToast'
+import {ORDER_ITEM_STATUS_LABELS, type OrderItemStatus} from '@/shared/types/order'
 
 const ITEMS_PER_PAGE = 6
 const NEW_ORDER_MESSAGE_DURATION_MS = 6_000
@@ -31,15 +26,10 @@ type BrowserWindow = Window & {
 
 function createAudioContext(): AudioContext | null {
     const AudioContextClass =
-        window.AudioContext
-        || (window as BrowserWindow)
-            .webkitAudioContext
+        window.AudioContext || (window as BrowserWindow).webkitAudioContext
 
-    return AudioContextClass
-        ? new AudioContextClass()
-        : null
+    return AudioContextClass ? new AudioContextClass() : null
 }
-
 
 type SortOrder = 'OLDEST' | 'NEWEST'
 
@@ -61,78 +51,65 @@ function formatTime(value?: string) {
 }
 
 export default function KitchenQueuePage() {
-    const [items, setItems] =
-        useState<KitchenOrderItemResponse[]>([])
+    const {notify} = useToast()
+
+    const [items, setItems] = useState<KitchenOrderItemResponse[]>([])
 
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     const [searchText, setSearchText] = useState('')
     const [selectedTable, setSelectedTable] = useState('ALL')
-    const [sortOrder, setSortOrder] =
-        useState<SortOrder>('OLDEST')
+    const [sortOrder, setSortOrder] = useState<SortOrder>('OLDEST')
     const [currentPage, setCurrentPage] = useState(1)
 
-    const [selectedDish, setSelectedDish] =
-        useState<DishDetailResponse | null>(null)
-    const [isDetailLoading, setIsDetailLoading] =
-        useState(false)
-    const [detailError, setDetailError] =
-        useState<string | null>(null)
+    const [selectedDish, setSelectedDish] = useState<DishDetailResponse | null>(null)
+    const [isDetailLoading, setIsDetailLoading] = useState(false)
+    const [detailError, setDetailError] = useState<string | null>(null)
 
-    const [completingItemId, setCompletingItemId] =
-        useState<number | null>(null)
+    const [completingItemId, setCompletingItemId] = useState<number | null>(null)
+
+    // Món đang chờ người dùng xác nhận hoàn thành.
+    const [pendingComplete, setPendingComplete] = useState<{
+        orderItemId: number
+        dishName: string
+        tableNumber?: string
+        quantity?: number
+    } | null>(null)
 
     const [cancelReason, setCancelReason] = useState('')
-    const [cancelError, setCancelError] =
-        useState<string | null>(null)
-    const [isCancelSubmitting, setIsCancelSubmitting] =
-        useState(false)
+    const [cancelError, setCancelError] = useState<string | null>(null)
+    const [isCancelSubmitting, setIsCancelSubmitting] = useState(false)
 
-    const [chefInternalNote, setChefInternalNote] =
-        useState('')
+    const [chefInternalNote, setChefInternalNote] = useState('')
 
-    const [internalNoteError, setInternalNoteError] =
-        useState<string | null>(null)
+    const [internalNoteError, setInternalNoteError] = useState<string | null>(null)
 
-    const [
-        isInternalNoteSubmitting,
-        setIsInternalNoteSubmitting,
-    ] = useState(false)
+    const [isInternalNoteSubmitting, setIsInternalNoteSubmitting] = useState(false)
 
-    const [isSoundEnabled, setIsSoundEnabled] =
-        useState(false)
+    const [isSoundEnabled, setIsSoundEnabled] = useState(false)
 
-    const [newOrderMessage, setNewOrderMessage] =
-        useState<string | null>(null)
+    const [newOrderMessage, setNewOrderMessage] = useState<string | null>(null)
 
-    const audioContextRef =
-        useRef<AudioContext | null>(null)
+    const audioContextRef = useRef<AudioContext | null>(null)
 
-    const isSoundEnabledRef =
-        useRef(false)
+    const isSoundEnabledRef = useRef(false)
 
-    const knownOrderItemIdsRef =
-        useRef<Set<number>>(new Set())
+    const knownOrderItemIdsRef = useRef<Set<number>>(new Set())
 
-    const hasLoadedInitialOrdersRef =
-        useRef(false)
+    const hasLoadedInitialOrdersRef = useRef(false)
 
+    const newOrderMessageTimerRef = useRef<number | null>(null)
 
-
-    const newOrderMessageTimerRef =
-        useRef<number | null>(null)
-
-    const originalDocumentTitleRef =
-        useRef(document.title)
+    const originalDocumentTitleRef = useRef(document.title)
 
     const playNewOrderSound = useCallback(() => {
         const audioContext = audioContextRef.current
 
         if (
-            !isSoundEnabledRef.current
-            || !audioContext
-            || audioContext.state !== 'running'
+            !isSoundEnabledRef.current ||
+            !audioContext ||
+            audioContext.state !== 'running'
         ) {
             return
         }
@@ -158,11 +135,9 @@ export default function KitchenQueuePage() {
         ]
 
         tones.forEach((tone) => {
-            const oscillator =
-                audioContext.createOscillator()
+            const oscillator = audioContext.createOscillator()
 
-            const gain =
-                audioContext.createGain()
+            const gain = audioContext.createGain()
 
             oscillator.type = 'sine'
 
@@ -171,10 +146,7 @@ export default function KitchenQueuePage() {
                 startTime + tone.startOffset,
             )
 
-            gain.gain.setValueAtTime(
-                0.0001,
-                startTime + tone.startOffset,
-            )
+            gain.gain.setValueAtTime(0.0001, startTime + tone.startOffset)
 
             gain.gain.exponentialRampToValueAtTime(
                 0.18,
@@ -183,68 +155,43 @@ export default function KitchenQueuePage() {
 
             gain.gain.exponentialRampToValueAtTime(
                 0.0001,
-                startTime
-                + tone.startOffset
-                + tone.duration,
+                startTime + tone.startOffset + tone.duration,
             )
 
             oscillator.connect(gain)
             gain.connect(audioContext.destination)
 
-            oscillator.start(
-                startTime + tone.startOffset,
-            )
+            oscillator.start(startTime + tone.startOffset)
 
-            oscillator.stop(
-                startTime
-                + tone.startOffset
-                + tone.duration,
-            )
+            oscillator.stop(startTime + tone.startOffset + tone.duration)
         })
     }, [])
 
-    const showNewOrderMessage = useCallback(
-        (newOrderCount: number) => {
-            const message =
-                newOrderCount === 1
-                    ? 'Có 1 món mới vừa được gửi vào bếp.'
-                    : `Có ${newOrderCount} món mới vừa được gửi vào bếp.`
+    const showNewOrderMessage = useCallback((newOrderCount: number) => {
+        const message =
+            newOrderCount === 1
+                ? 'Có 1 món mới vừa được gửi vào bếp.'
+                : `Có ${newOrderCount} món mới vừa được gửi vào bếp.`
 
-            setNewOrderMessage(message)
+        setNewOrderMessage(message)
 
-            document.title =
-                `🔔 ${newOrderCount} món mới - `
-                + originalDocumentTitleRef.current
+        document.title = `${newOrderCount} món mới - ` + originalDocumentTitleRef.current
 
-            if (
-                newOrderMessageTimerRef.current
-                !== null
-            ) {
-                window.clearTimeout(
-                    newOrderMessageTimerRef.current,
-                )
-            }
+        if (newOrderMessageTimerRef.current !== null) {
+            window.clearTimeout(newOrderMessageTimerRef.current)
+        }
 
-            newOrderMessageTimerRef.current =
-                window.setTimeout(() => {
-                    setNewOrderMessage(null)
+        newOrderMessageTimerRef.current = window.setTimeout(() => {
+            setNewOrderMessage(null)
 
-                    document.title =
-                        originalDocumentTitleRef.current
+            document.title = originalDocumentTitleRef.current
 
-                    newOrderMessageTimerRef.current =
-                        null
-                }, NEW_ORDER_MESSAGE_DURATION_MS)
-        },
-        [],
-    )
+            newOrderMessageTimerRef.current = null
+        }, NEW_ORDER_MESSAGE_DURATION_MS)
+    }, [])
 
     const fetchKitchenOrders = useCallback(
-        async (
-            showFullLoading: boolean,
-            resetPage: boolean,
-            signal?: AbortSignal,
-        ) => {
+        async (showFullLoading: boolean, resetPage: boolean, signal?: AbortSignal) => {
             try {
                 if (showFullLoading) {
                     setIsLoading(true)
@@ -252,35 +199,23 @@ export default function KitchenQueuePage() {
 
                 const data = await getKitchenOrders(signal)
 
-                if (
-                    hasLoadedInitialOrdersRef.current
-                ) {
+                if (hasLoadedInitialOrdersRef.current) {
                     const newItems = data.filter(
-                        (item) =>
-                            !knownOrderItemIdsRef
-                                .current
-                                .has(item.orderItemId),
+                        (item) => !knownOrderItemIdsRef.current.has(item.orderItemId),
                     )
 
                     if (newItems.length > 0) {
                         playNewOrderSound()
 
-                        showNewOrderMessage(
-                            newItems.length,
-                        )
+                        showNewOrderMessage(newItems.length)
                     }
                 }
 
-                knownOrderItemIdsRef.current =
-                    new Set(
-                        data.map(
-                            (item) =>
-                                item.orderItemId,
-                        ),
-                    )
+                knownOrderItemIdsRef.current = new Set(
+                    data.map((item) => item.orderItemId),
+                )
 
-                hasLoadedInitialOrdersRef.current =
-                    true
+                hasLoadedInitialOrdersRef.current = true
 
                 setItems(data)
                 setError(null)
@@ -293,10 +228,7 @@ export default function KitchenQueuePage() {
                     return
                 }
 
-                console.error(
-                    '[CHEF_KITCHEN_QUEUE_FETCH_ERROR]',
-                    requestError,
-                )
+                console.error('[CHEF_KITCHEN_QUEUE_FETCH_ERROR]', requestError)
 
                 setError(
                     'Không thể tải danh sách món cần chế biến. Hãy kiểm tra backend hoặc đăng nhập bằng tài khoản Chef.',
@@ -307,37 +239,22 @@ export default function KitchenQueuePage() {
                 }
             }
         },
-        [
-            playNewOrderSound,
-            showNewOrderMessage,
-        ],
+        [playNewOrderSound, showNewOrderMessage],
     )
 
     useEffect(() => {
-        const originalTitle =
-            originalDocumentTitleRef.current
+        const originalTitle = originalDocumentTitleRef.current
 
         return () => {
-            if (
-                newOrderMessageTimerRef.current
-                !== null
-            ) {
-                window.clearTimeout(
-                    newOrderMessageTimerRef.current,
-                )
+            if (newOrderMessageTimerRef.current !== null) {
+                window.clearTimeout(newOrderMessageTimerRef.current)
             }
 
-            document.title =
-                originalTitle
+            document.title = originalTitle
 
-            audioContextRef.current
-                ?.close()
-                .catch((requestError) => {
-                    console.error(
-                        '[CHEF_AUDIO_CONTEXT_CLOSE_ERROR]',
-                        requestError,
-                    )
-                })
+            audioContextRef.current?.close().catch((requestError) => {
+                console.error('[CHEF_AUDIO_CONTEXT_CLOSE_ERROR]', requestError)
+            })
 
             audioContextRef.current = null
         }
@@ -353,8 +270,7 @@ export default function KitchenQueuePage() {
     }, [fetchKitchenOrders])
 
     // WebSocket: refresh when backend broadcasts a kitchen update
-    useKitchenSocket(() =>
-    {
+    useKitchenSocket(() => {
         void fetchKitchenOrders(false, false)
 
         // Nếu đang mở modal chi tiết, refetch để cập nhật trạng thái ghi chú/hủy...
@@ -383,14 +299,10 @@ export default function KitchenQueuePage() {
             return
         }
 
-        const audioContext =
-            audioContextRef.current
-            ?? createAudioContext()
+        const audioContext = audioContextRef.current ?? createAudioContext()
 
         if (!audioContext) {
-            alert(
-                'Trình duyệt này không hỗ trợ phát âm thanh.',
-            )
+            notify('Trình duyệt này không hỗ trợ phát âm thanh.', {tone: 'alert'})
 
             return
         }
@@ -404,8 +316,7 @@ export default function KitchenQueuePage() {
         isSoundEnabledRef.current = true
         setIsSoundEnabled(true)
 
-        const oscillator =
-            audioContext.createOscillator()
+        const oscillator = audioContext.createOscillator()
 
         const gain = audioContext.createGain()
 
@@ -431,13 +342,10 @@ export default function KitchenQueuePage() {
             setCancelReason('')
             setCancelError(null)
 
-            const data =
-                await getDishDetail(orderItemId)
+            const data = await getDishDetail(orderItemId)
 
             setSelectedDish(data)
-            setChefInternalNote(
-                data.chefInternalNote ?? '',
-            )
+            setChefInternalNote(data.chefInternalNote ?? '')
             setInternalNoteError(null)
         } catch (requestError) {
             console.error(requestError)
@@ -464,65 +372,47 @@ export default function KitchenQueuePage() {
             return
         }
 
-        const normalizedNote =
-            chefInternalNote.trim()
+        const normalizedNote = chefInternalNote.trim()
 
         if (normalizedNote.length > 500) {
-            setInternalNoteError(
-                'Ghi chú nội bộ không được vượt quá 500 ký tự.',
-            )
+            setInternalNoteError('Ghi chú nội bộ không được vượt quá 500 ký tự.')
             return
         }
 
-        const confirmed = window.confirm(
-            normalizedNote
-                ? 'Gửi ghi chú nội bộ này cho Waiter?'
-                : 'Xóa ghi chú nội bộ hiện tại?',
-        )
-
-        if (!confirmed) {
-            return
-        }
-
+        // Ghi chú sửa lại được bất cứ lúc nào nên không chặn để hỏi.
         try {
             setIsInternalNoteSubmitting(true)
             setInternalNoteError(null)
 
-            const updatedDetail =
-                await updateChefInternalNote(
-                    selectedDish.orderItemId,
-                    normalizedNote,
-                )
-
-            setSelectedDish(updatedDetail)
-            setChefInternalNote(
-                updatedDetail.chefInternalNote ?? '',
+            const updatedDetail = await updateChefInternalNote(
+                selectedDish.orderItemId,
+                normalizedNote,
             )
 
-            alert(
+            setSelectedDish(updatedDetail)
+            setChefInternalNote(updatedDetail.chefInternalNote ?? '')
+
+            notify(
                 normalizedNote
                     ? 'Đã gửi ghi chú nội bộ cho Waiter.'
                     : 'Đã xóa ghi chú nội bộ.',
+                {tone: 'alert'},
             )
         } catch (requestError) {
             console.error(requestError)
-            setInternalNoteError(
-                'Không thể lưu ghi chú nội bộ.',
-            )
+            setInternalNoteError('Không thể lưu ghi chú nội bộ.')
         } finally {
             setIsInternalNoteSubmitting(false)
         }
     }
 
     async function handleComplete(orderItemId: number) {
-        const currentItem = items.find(
-            (item) => item.orderItemId === orderItemId,
-        )
+        const currentItem = items.find((item) => item.orderItemId === orderItemId)
 
         const dishName =
             selectedDish?.orderItemId === orderItemId
                 ? selectedDish.dishName
-                : currentItem?.dishName ?? 'món này'
+                : (currentItem?.dishName ?? 'món này')
 
         const tableNumber =
             selectedDish?.orderItemId === orderItemId
@@ -534,41 +424,37 @@ export default function KitchenQueuePage() {
                 ? selectedDish.quantity
                 : currentItem?.quantity
 
-        const confirmed = window.confirm(
-            `Xác nhận hoàn thành món "${dishName}"?\n\n`
-            + `${tableNumber ? `Bàn: ${tableNumber}\n` : ''}`
-            + `${quantity ? `Số lượng: x${quantity}\n` : ''}`
-            + 'Sau khi xác nhận, món sẽ được chuyển '
-            + 'sang danh sách đã hoàn thành.',
-        )
+        // Hoàn thành món KHÔNG hoàn tác được: backend chặn mọi thay đổi trạng
+        // thái khi món không còn ở PREPARING. Nên vẫn hỏi lại, nhưng bằng hộp
+        // thoại trong trang thay vì window.confirm chặn cả trình duyệt.
+        setPendingComplete({orderItemId, dishName, tableNumber, quantity})
+    }
 
-        if (!confirmed) {
+    async function confirmComplete() {
+        const pending = pendingComplete
+
+        if (!pending) {
             return
         }
 
+        const orderItemId = pending.orderItemId
+
+        setPendingComplete(null)
         try {
             setCompletingItemId(orderItemId)
 
-            await updateOrderItemStatus(
-                orderItemId,
-                'COMPLETED',
-            )
+            await updateOrderItemStatus(orderItemId, 'COMPLETED')
 
             setItems((currentItems) =>
-                currentItems.filter(
-                    (item) =>
-                        item.orderItemId !== orderItemId,
-                ),
+                currentItems.filter((item) => item.orderItemId !== orderItemId),
             )
 
             if (selectedDish?.orderItemId === orderItemId) {
                 closeDishDetail()
             }
-
-            alert('Đã hoàn thành món thành công.')
         } catch (requestError) {
             console.error(requestError)
-            alert('Không thể cập nhật trạng thái món.')
+            notify('Không thể cập nhật trạng thái món.', {tone: 'alert'})
         } finally {
             setCompletingItemId(null)
         }
@@ -587,48 +473,29 @@ export default function KitchenQueuePage() {
         }
 
         if (normalizedReason.length > 500) {
-            setCancelError(
-                'Lý do hủy không được vượt quá 500 ký tự.',
-            )
+            setCancelError('Lý do hủy không được vượt quá 500 ký tự.')
             return
         }
 
-        const confirmed = window.confirm(
-            `Bạn có chắc muốn hủy món "${selectedDish.dishName}"?\n\n` +
-            'Món sẽ bị hủy ngay và Waiter sẽ được thông báo.',
-        )
-
-        if (!confirmed) {
-            return
-        }
-
+        // Người dùng đã phải gõ lý do huỷ trong form ngay trên, đó chính là
+        // bước xác nhận — hỏi thêm một lần nữa là thừa.
         try {
             setIsCancelSubmitting(true)
             setCancelError(null)
 
-            const cancelledOrderItemId =
-                selectedDish.orderItemId
+            const cancelledOrderItemId = selectedDish.orderItemId
 
-            await cancelDish(
-                cancelledOrderItemId,
-                normalizedReason,
-            )
+            await cancelDish(cancelledOrderItemId, normalizedReason)
 
             /*
              * Hủy từ modal chỉ xóa đúng OrderItem
              * đang được chọn khỏi hàng đợi.
              */
             setItems((currentItems) =>
-                currentItems.filter(
-                    (item) =>
-                        item.orderItemId
-                        !== cancelledOrderItemId,
-                ),
+                currentItems.filter((item) => item.orderItemId !== cancelledOrderItemId),
             )
 
             closeDishDetail()
-
-            alert('Đã hủy món thành công.')
         } catch (requestError) {
             console.error(requestError)
             setCancelError('Không thể hủy món.')
@@ -645,14 +512,9 @@ export default function KitchenQueuePage() {
     }
 
     const tableNumbers = useMemo<string[]>(() => {
-        return Array.from(
-            new Set(items.map((item) => item.tableNumber)),
-        ).sort((firstTable, secondTable) =>
-            firstTable.localeCompare(
-                secondTable,
-                'vi',
-                { numeric: true },
-            ),
+        return Array.from(new Set(items.map((item) => item.tableNumber))).sort(
+            (firstTable, secondTable) =>
+                firstTable.localeCompare(secondTable, 'vi', {numeric: true}),
         )
     }, [items])
 
@@ -663,18 +525,13 @@ export default function KitchenQueuePage() {
             .filter((item) => {
                 const matchesSearch =
                     keyword === '' ||
-                    item.dishName
-                        .toLowerCase()
-                        .includes(keyword) ||
-                    item.tableNumber
-                        .toLowerCase()
-                        .includes(keyword) ||
+                    item.dishName.toLowerCase().includes(keyword) ||
+                    item.tableNumber.toLowerCase().includes(keyword) ||
                     String(item.orderId).includes(keyword) ||
                     String(item.orderItemId).includes(keyword)
 
                 const matchesTable =
-                    selectedTable === 'ALL' ||
-                    item.tableNumber === selectedTable
+                    selectedTable === 'ALL' || item.tableNumber === selectedTable
 
                 return matchesSearch && matchesTable
             })
@@ -693,36 +550,18 @@ export default function KitchenQueuePage() {
             })
     }, [items, searchText, selectedTable, sortOrder])
 
-    const totalPages = Math.max(
-        1,
-        Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
-    )
+    const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE))
 
-    const safeCurrentPage = Math.min(
-        currentPage,
-        totalPages,
-    )
+    const safeCurrentPage = Math.min(currentPage, totalPages)
 
-    const startIndex =
-        (safeCurrentPage - 1) * ITEMS_PER_PAGE
+    const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE
 
-    const paginatedItems = filteredItems.slice(
-        startIndex,
-        startIndex + ITEMS_PER_PAGE,
-    )
-
-    const firstVisibleItem =
-        filteredItems.length === 0 ? 0 : startIndex + 1
-
-    const lastVisibleItem = Math.min(
-        startIndex + ITEMS_PER_PAGE,
-        filteredItems.length,
-    )
+    const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món cần chế biến..."
+                title="Đang tải danh sách món cần chế biến…"
                 description="Hệ thống đang lấy dữ liệu mới nhất từ bếp."
             />
         )
@@ -733,33 +572,27 @@ export default function KitchenQueuePage() {
             <ErrorState
                 message={error}
                 onRetry={() => {
-                    loadKitchenOrders().catch(
-                        (requestError) => {
-                            console.error(requestError)
-                        },
-                    )
+                    loadKitchenOrders().catch((requestError) => {
+                        console.error(requestError)
+                    })
                 }}
             />
         )
     }
 
     return (
-        <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
+        <div className="rk-stack">
+            <section className="rk-card rk-card--pad">
+                <div className="rk-card__head-inline">
                     <div>
                         <h2>Đơn cần chế biến</h2>
-                        <p>
-                            Chọn món để xem chi tiết, hoàn
-                            thành món hoặc hủy món.
-                        </p>
+                        <p>Chọn món để xem chi tiết, hoàn thành món hoặc hủy món.</p>
                     </div>
 
-                    <div className="chef-summary">
-                        <div>
-                            <strong>{items.length}</strong>
-                            <span>Đang chờ làm</span>
-                        </div>
+                    <div className="rk-actions">
+                        <span className="rk-chip rk-chip--busy">
+                            {items.length} món đang chờ làm
+                        </span>
 
                         <button
                             type="button"
@@ -769,33 +602,23 @@ export default function KitchenQueuePage() {
                                     ? 'Tắt chuông báo món mới'
                                     : 'Bật chuông báo món mới'
                             }
-                            className={
-                                isSoundEnabled
-                                    ? 'secondary-button sound-toggle-button enabled'
-                                    : 'secondary-button sound-toggle-button'
-                            }
+                            className={isSoundEnabled ? 'rk-btn rk-btn--go' : 'rk-btn'}
                             onClick={() => {
-                                handleSoundToggle().catch(
-                                    (requestError) => {
-                                        console.error(requestError)
-                                    },
-                                )
+                                handleSoundToggle().catch((requestError) => {
+                                    console.error(requestError)
+                                })
                             }}
                         >
-                            {isSoundEnabled
-                                ? '🔊 Âm thanh đang bật'
-                                : '🔇 Bật âm thanh'}
+                            {isSoundEnabled ? 'Âm thanh đang bật' : 'Bật âm thanh'}
                         </button>
 
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={() => {
-                                loadKitchenOrders().catch(
-                                    (requestError) => {
-                                        console.error(requestError)
-                                    },
-                                )
+                                loadKitchenOrders().catch((requestError) => {
+                                    console.error(requestError)
+                                })
                             }}
                         >
                             Làm mới
@@ -805,13 +628,9 @@ export default function KitchenQueuePage() {
             </section>
 
             {newOrderMessage && (
-                <div
-                    className="new-order-notification"
-                    role="status"
-                    aria-live="polite"
-                >
-                    <span className="new-order-notification-icon">
-                        🔔
+                <div className="rk-note rk-note--busy" role="status" aria-live="polite">
+                    <span className="rk-icon">
+                        <Bell className="rk-icon" aria-hidden="true" />
                     </span>
 
                     <div>
@@ -821,12 +640,12 @@ export default function KitchenQueuePage() {
                 </div>
             )}
 
-            <section className="page-card">
-                <div className="chef-filter-bar">
+            <section className="rk-card rk-card--pad">
+                <div className="rk-filterbar">
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm tên món, bàn hoặc mã đơn..."
+                        placeholder="Tìm theo tên món, bàn hoặc mã đơn…"
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -840,15 +659,10 @@ export default function KitchenQueuePage() {
                             setCurrentPage(1)
                         }}
                     >
-                        <option value="ALL">
-                            Tất cả bàn
-                        </option>
+                        <option value="ALL">Tất cả bàn</option>
 
                         {tableNumbers.map((tableNumber) => (
-                            <option
-                                key={tableNumber}
-                                value={tableNumber}
-                            >
+                            <option key={tableNumber} value={tableNumber}>
                                 Bàn {tableNumber}
                             </option>
                         ))}
@@ -857,24 +671,18 @@ export default function KitchenQueuePage() {
                     <select
                         value={sortOrder}
                         onChange={(event) => {
-                            setSortOrder(
-                                event.target.value as SortOrder,
-                            )
+                            setSortOrder(event.target.value as SortOrder)
                             setCurrentPage(1)
                         }}
                     >
-                        <option value="OLDEST">
-                            Cũ nhất trước
-                        </option>
+                        <option value="OLDEST">Cũ nhất trước</option>
 
-                        <option value="NEWEST">
-                            Mới nhất trước
-                        </option>
+                        <option value="NEWEST">Mới nhất trước</option>
                     </select>
 
                     <button
                         type="button"
-                        className="secondary-button"
+                        className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
                         Xóa bộ lọc
@@ -889,7 +697,7 @@ export default function KitchenQueuePage() {
                     action={
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
                             Xóa bộ lọc
@@ -898,463 +706,325 @@ export default function KitchenQueuePage() {
                 />
             ) : (
                 <>
-                    <div className="kitchen-board">
+                    <div className="rk-grid">
                         {paginatedItems.map((item) => (
-                            <section
-                                className="kitchen-order-card clickable-card"
-                                key={item.orderItemId}
-                                onClick={() => {
-                                    openDishDetail(
-                                        item.orderItemId,
-                                    ).catch(
-                                        (requestError) => {
-                                            console.error(
-                                                requestError,
-                                            )
-                                        },
-                                    )
-                                }}
-                            >
-                                <div className="kitchen-order-header">
-                                    <div>
-                                        <h3>
-                                            Bàn {item.tableNumber}
-                                        </h3>
-
-                                        <p>
-                                            Order #{item.orderId} · Item #
-                                            {item.orderItemId} ·{' '}
-                                            {formatTime(item.createdAt)}
-                                        </p>
-                                    </div>
-
-                                    <span className="status-badge preparing">
-                                        Đang làm
+                            <article className="rk-ticket" key={item.orderItemId}>
+                                {/* Số lượng đứng trước tên món và to gấp đôi: đầu bếp
+                                    nhìn từ xa cần thấy "mấy phần" trước tiên. */}
+                                <div className="rk-ticket__qty">
+                                    <span className="rk-ticket__qty-num">
+                                        {item.quantity}
                                     </span>
+                                    <span className="rk-ticket__qty-unit">phần</span>
                                 </div>
 
-                                <div className="kitchen-item-list">
-                                    <div className="kitchen-item">
-                                        <div>
-                                            <strong>
-                                                {item.dishName}
-                                            </strong>
+                                <div className="rk-ticket__main">
+                                    <h3 className="rk-ticket__dish">{item.dishName}</h3>
 
-                                            <p>
-                                                Số lượng: x
-                                                {item.quantity}
-                                            </p>
+                                    <div className="rk-ticket__meta">
+                                        <span className="rk-chip rk-chip--busy">
+                                            Đang làm
+                                        </span>
+                                        <span>
+                                            Bàn <strong>{item.tableNumber}</strong>
+                                        </span>
+                                        <span aria-hidden="true">·</span>
+                                        <span className="rk-num">
+                                            {formatTime(item.createdAt)}
+                                        </span>
+                                    </div>
 
-                                            <small>
-                                                Chọn để xem chi tiết
-                                            </small>
-                                        </div>
+                                    {item.note && (
+                                        <p className="rk-ticket__note">
+                                            <MessageSquare
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />{' '}
+                                            {item.note}
+                                        </p>
+                                    )}
 
-                                        <div className="kitchen-item-actions">
-                                            <button
-                                                type="button"
-                                                className="primary-button"
-                                                disabled={
-                                                    completingItemId ===
-                                                    item.orderItemId
-                                                }
-                                                onClick={(event) => {
-                                                    event.stopPropagation()
-                                                    handleComplete(
-                                                        item.orderItemId,
-                                                    ).catch(
-                                                        (requestError) => {
-                                                            console.error(
-                                                                requestError,
-                                                            )
-                                                        },
-                                                    )
-                                                }}
-                                            >
-                                                {completingItemId ===
-                                                item.orderItemId
-                                                    ? 'Đang cập nhật...'
-                                                    : 'Xong món'}
-                                            </button>
-                                        </div>
+                                    <div className="rk-ticket__actions">
+                                        <button
+                                            type="button"
+                                            className="rk-btn rk-btn--go"
+                                            disabled={
+                                                completingItemId === item.orderItemId
+                                            }
+                                            onClick={() => {
+                                                handleComplete(item.orderItemId).catch(
+                                                    (requestError) => {
+                                                        console.error(requestError)
+                                                    },
+                                                )
+                                            }}
+                                        >
+                                            <Check
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />
+                                            {completingItemId === item.orderItemId
+                                                ? 'Đang cập nhật…'
+                                                : 'Xong món'}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="rk-btn rk-btn--quiet"
+                                            onClick={() => {
+                                                openDishDetail(item.orderItemId).catch(
+                                                    (requestError) => {
+                                                        console.error(requestError)
+                                                    },
+                                                )
+                                            }}
+                                        >
+                                            Chi tiết
+                                        </button>
                                     </div>
                                 </div>
-                            </section>
+                            </article>
                         ))}
                     </div>
 
-                    <div className="chef-pagination">
-                        <div className="pagination-result-info">
-                            Hiển thị {firstVisibleItem}–
-                            {lastVisibleItem} trong{' '}
-                            {filteredItems.length} món
-                        </div>
-
-                        <div className="pagination-controls">
-                            <button
-                                type="button"
-                                className="pagination-button"
-                                disabled={safeCurrentPage === 1}
-                                onClick={() =>
-                                    setCurrentPage(
-                                        safeCurrentPage - 1,
-                                    )
-                                }
-                            >
-                                ← Trang trước
-                            </button>
-
-                            <div className="pagination-pages">
-                                {Array.from(
-                                    { length: totalPages },
-                                    (_, index) => index + 1,
-                                ).map((pageNumber) => (
-                                    <button
-                                        type="button"
-                                        key={pageNumber}
-                                        className={
-                                            pageNumber ===
-                                            safeCurrentPage
-                                                ? 'pagination-number active'
-                                                : 'pagination-number'
-                                        }
-                                        onClick={() =>
-                                            setCurrentPage(
-                                                pageNumber,
-                                            )
-                                        }
-                                    >
-                                        {pageNumber}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <button
-                                type="button"
-                                className="pagination-button"
-                                disabled={
-                                    safeCurrentPage === totalPages
-                                }
-                                onClick={() =>
-                                    setCurrentPage(
-                                        safeCurrentPage + 1,
-                                    )
-                                }
-                            >
-                                Trang sau →
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination
+                        page={safeCurrentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredItems.length}
+                        pageSize={ITEMS_PER_PAGE}
+                        onPageChange={setCurrentPage}
+                    />
                 </>
             )}
 
-            {(isDetailLoading || detailError || selectedDish) && (
-                <div
-                    className="modal-backdrop"
-                    onClick={closeDishDetail}
-                >
-                    <div
-                        className="modal-card"
-                        onClick={(event) =>
-                            event.stopPropagation()
-                        }
-                    >
-                        <div className="modal-header">
-                            <div>
-                                <h2>
-                                    Chi tiết món cần chế biến
-                                </h2>
-                                <p>Thông tin chi tiết từ bếp.</p>
-                            </div>
+            <Modal
+                open={isDetailLoading || Boolean(detailError) || Boolean(selectedDish)}
+                title={selectedDish ? selectedDish.dishName : 'Chi tiết món'}
+                description={
+                    selectedDish
+                        ? `Bàn ${selectedDish.tableNumber} · ${selectedDish.quantity} phần`
+                        : undefined
+                }
+                size="lg"
+                onClose={closeDishDetail}
+                footer={
+                    selectedDish ? (
+                        <>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet"
+                                onClick={closeDishDetail}
+                            >
+                                Quay lại
+                            </button>
 
                             <button
                                 type="button"
-                                className="modal-close"
-                                onClick={closeDishDetail}
+                                className="rk-btn rk-btn--danger"
+                                disabled={isCancelSubmitting}
+                                onClick={() =>
+                                    handleCancelDish().catch((requestError) => {
+                                        console.error(requestError)
+                                    })
+                                }
                             >
-                                ×
+                                {isCancelSubmitting ? 'Đang huỷ…' : 'Huỷ món'}
                             </button>
-                        </div>
 
-                        {isDetailLoading && (
-                            <div className="modal-body">
-                                <p>Đang tải chi tiết món...</p>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--go"
+                                disabled={completingItemId === selectedDish.orderItemId}
+                                onClick={() =>
+                                    handleComplete(selectedDish.orderItemId).catch(
+                                        (requestError) => {
+                                            console.error(requestError)
+                                        },
+                                    )
+                                }
+                            >
+                                {completingItemId === selectedDish.orderItemId
+                                    ? 'Đang cập nhật…'
+                                    : 'Xong món'}
+                            </button>
+                        </>
+                    ) : undefined
+                }
+            >
+                {isDetailLoading && (
+                    <p className="rk-modal__loading">Đang tải chi tiết món…</p>
+                )}
+
+                {detailError && <p className="rk-formerror">{detailError}</p>}
+
+                {selectedDish && (
+                    <>
+                        <div>
+                            <div className="rk-details">
+                                <div>
+                                    <span>Trạng thái</span>
+                                    <strong>
+                                        {ORDER_ITEM_STATUS_LABELS[
+                                            selectedDish.status as OrderItemStatus
+                                        ] ?? selectedDish.status}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Vào bếp lúc</span>
+                                    <strong>{formatTime(selectedDish.createdAt)}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Mã món</span>
+                                    <strong>#{selectedDish.orderItemId}</strong>
+                                </div>
                             </div>
-                        )}
 
-                        {detailError && (
-                            <div className="modal-body">
-                                <p className="modal-error">
-                                    {detailError}
-                                </p>
+                            <div className="rk-stack">
+                                <h3>Mô tả món</h3>
+                                <p>{selectedDish.description || 'Không có mô tả.'}</p>
                             </div>
-                        )}
 
-                        {selectedDish && (
-                            <>
-                                <div className="modal-body">
-                                    <div className="detail-grid">
-                                        <div>
-                                            <span>Bàn</span>
-                                            <strong>
-                                                {selectedDish.tableNumber}
-                                            </strong>
-                                        </div>
+                            <div className="rk-stack">
+                                <h3>Ghi chú</h3>
+                                <p>{selectedDish.note || 'Không có ghi chú.'}</p>
+                            </div>
 
-                                        <div>
-                                            <span>Mã item</span>
-                                            <strong>
-                                                #
-                                                {
-                                                    selectedDish.orderItemId
-                                                }
-                                            </strong>
-                                        </div>
+                            <div className="rk-field">
+                                <div className="rk-field__label">
+                                    <div>
+                                        <h3>Ghi chú nội bộ cho Waiter</h3>
 
-                                        <div>
-                                            <span>Tên món</span>
-                                            <strong>
-                                                {selectedDish.dishName}
-                                            </strong>
-                                        </div>
-
-                                        <div>
-                                            <span>Số lượng</span>
-                                            <strong>
-                                                x
-                                                {selectedDish.quantity}
-                                            </strong>
-                                        </div>
-
-                                        <div>
-                                            <span>Trạng thái</span>
-                                            <strong>
-                                                {selectedDish.status}
-                                            </strong>
-                                        </div>
-
-                                        <div>
-                                            <span>Thời gian</span>
-                                            <strong>
-                                                {formatTime(
-                                                    selectedDish.createdAt,
-                                                )}
-                                            </strong>
-                                        </div>
-                                    </div>
-
-                                    <div className="detail-section">
-                                        <h3>Mô tả món</h3>
                                         <p>
-                                            {selectedDish.description ||
-                                                'Không có mô tả.'}
+                                            Dùng để báo tình trạng bếp trước khi Waiter
+                                            trao đổi với khách.
                                         </p>
                                     </div>
 
-                                    <div className="detail-section">
-                                        <h3>Ghi chú</h3>
-                                        <p>
-                                            {selectedDish.note ||
-                                                'Không có ghi chú.'}
-                                        </p>
-                                    </div>
+                                    {selectedDish.chefInternalNote && (
+                                        <span
+                                            className={
+                                                selectedDish.chefInternalNoteAcknowledgedAt
+                                                    ? 'rk-chip rk-chip--ok'
+                                                    : 'rk-chip rk-chip--busy'
+                                            }
+                                        >
+                                            {selectedDish.chefInternalNoteAcknowledgedAt
+                                                ? 'Waiter đã xem'
+                                                : 'Chờ Waiter xem'}
+                                        </span>
+                                    )}
+                                </div>
 
-                                    <div className="chef-internal-note-box">
-                                        <div className="chef-internal-note-heading">
-                                            <div>
-                                                <h3>
-                                                    Ghi chú nội bộ cho Waiter
-                                                </h3>
-
-                                                <p>
-                                                    Dùng để báo tình trạng bếp
-                                                    trước khi Waiter trao đổi
-                                                    với khách.
-                                                </p>
-                                            </div>
-
-                                            {selectedDish.chefInternalNote && (
-                                                <span
-                                                    className={
-                                                        selectedDish
-                                                            .chefInternalNoteAcknowledgedAt
-                                                            ? 'internal-note-status acknowledged'
-                                                            : 'internal-note-status waiting'
-                                                    }
-                                                >
-                                                    {selectedDish
-                                                        .chefInternalNoteAcknowledgedAt
-                                                        ? 'Waiter đã xem'
-                                                        : 'Chờ Waiter xem'}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className="internal-note-quick-actions">
-                                            {[
-                                                'Hết sốt, vui lòng hỏi khách đổi lựa chọn.',
-                                                'Món sẽ chậm thêm khoảng 10 phút.',
-                                                'Món này hiện chỉ còn 1 phần.',
-                                                'Có thể phục vụ nhưng thiếu phần trang trí.',
-                                            ].map((quickNote) => (
-                                                <button
-                                                    type="button"
-                                                    key={quickNote}
-                                                    onClick={() => {
-                                                        setChefInternalNote(
-                                                            quickNote,
-                                                        )
-                                                        setInternalNoteError(
-                                                            null,
-                                                        )
-                                                    }}
-                                                >
-                                                    {quickNote}
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        <textarea
-                                            rows={4}
-                                            maxLength={500}
-                                            value={chefInternalNote}
-                                            placeholder="Ví dụ: Hết sốt tiêu đen, vui lòng hỏi khách đổi sang sốt nấm."
-                                            onChange={(event) => {
-                                                setChefInternalNote(
-                                                    event.target.value,
-                                                )
+                                <div className="rk-actions">
+                                    {[
+                                        'Hết sốt, vui lòng hỏi khách đổi lựa chọn.',
+                                        'Món sẽ chậm thêm khoảng 10 phút.',
+                                        'Món này hiện chỉ còn 1 phần.',
+                                        'Có thể phục vụ nhưng thiếu phần trang trí.',
+                                    ].map((quickNote) => (
+                                        <button
+                                            type="button"
+                                            key={quickNote}
+                                            onClick={() => {
+                                                setChefInternalNote(quickNote)
                                                 setInternalNoteError(null)
                                             }}
-                                        />
-
-                                        <div className="internal-note-bottom-row">
-                                            <span>
-                                                {chefInternalNote.length}/500
-                                            </span>
-
-                                            <button
-                                                type="button"
-                                                className="secondary-button internal-note-save-button"
-                                                disabled={
-                                                    isInternalNoteSubmitting
-                                                }
-                                                onClick={() =>
-                                                    handleSaveInternalNote()
-                                                        .catch(
-                                                            (requestError) => {
-                                                                console.error(
-                                                                    requestError,
-                                                                )
-                                                            },
-                                                        )
-                                                }
-                                            >
-                                                {isInternalNoteSubmitting
-                                                    ? 'Đang gửi...'
-                                                    : chefInternalNote.trim()
-                                                        ? 'Gửi cho Waiter'
-                                                        : 'Xóa ghi chú'}
-                                            </button>
-                                        </div>
-
-                                        {internalNoteError && (
-                                            <p className="modal-error">
-                                                {internalNoteError}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="cancel-request-box">
-                                        <h3>Hủy món</h3>
-
-                                        <p>
-                                            Món sẽ bị hủy ngay. Waiter chỉ nhận
-                                            thông báo để báo lại với khách.
-                                        </p>
-
-                                        <textarea
-                                            rows={4}
-                                            maxLength={500}
-                                            value={cancelReason}
-                                            placeholder="Nhập lý do hủy món..."
-                                            onChange={(event) => {
-                                                setCancelReason(
-                                                    event.target.value,
-                                                )
-                                                setCancelError(null)
-                                            }}
-                                        />
-
-                                        <div className="cancel-reason-count">
-                                            {cancelReason.length}/500
-                                        </div>
-
-                                        {cancelError && (
-                                            <p className="modal-error">
-                                                {cancelError}
-                                            </p>
-                                        )}
-                                    </div>
+                                        >
+                                            {quickNote}
+                                        </button>
+                                    ))}
                                 </div>
 
-                                <div className="modal-footer">
-                                    <button
-                                        type="button"
-                                        className="secondary-button"
-                                        onClick={closeDishDetail}
-                                    >
-                                        Quay lại
-                                    </button>
+                                <textarea
+                                    rows={4}
+                                    maxLength={500}
+                                    value={chefInternalNote}
+                                    placeholder="Ví dụ: Hết sốt tiêu đen, vui lòng hỏi khách đổi sang sốt nấm."
+                                    onChange={(event) => {
+                                        setChefInternalNote(event.target.value)
+                                        setInternalNoteError(null)
+                                    }}
+                                />
+
+                                <div className="rk-actions rk-actions--end">
+                                    <span>{chefInternalNote.length}/500</span>
 
                                     <button
                                         type="button"
-                                        className="danger-button"
-                                        disabled={isCancelSubmitting}
+                                        className="rk-btn rk-btn--quiet"
+                                        disabled={isInternalNoteSubmitting}
                                         onClick={() =>
-                                            handleCancelDish().catch(
+                                            handleSaveInternalNote().catch(
                                                 (requestError) => {
-                                                    console.error(
-                                                        requestError,
-                                                    )
+                                                    console.error(requestError)
                                                 },
                                             )
                                         }
                                     >
-                                        {isCancelSubmitting
-                                            ? 'Đang hủy...'
-                                            : 'Hủy món'}
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="primary-button"
-                                        disabled={
-                                            completingItemId ===
-                                            selectedDish.orderItemId
-                                        }
-                                        onClick={() =>
-                                            handleComplete(
-                                                selectedDish.orderItemId,
-                                            ).catch(
-                                                (requestError) => {
-                                                    console.error(
-                                                        requestError,
-                                                    )
-                                                },
-                                            )
-                                        }
-                                    >
-                                        {completingItemId ===
-                                        selectedDish.orderItemId
-                                            ? 'Đang cập nhật...'
-                                            : 'Xong món'}
+                                        {isInternalNoteSubmitting
+                                            ? 'Đang gửi…'
+                                            : chefInternalNote.trim()
+                                              ? 'Gửi cho Waiter'
+                                              : 'Xóa ghi chú'}
                                     </button>
                                 </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+
+                                {internalNoteError && (
+                                    <p className="rk-formerror">{internalNoteError}</p>
+                                )}
+                            </div>
+
+                            <div className="rk-dangerzone">
+                                <h3>Hủy món</h3>
+
+                                <p>
+                                    Món sẽ bị hủy ngay. Waiter chỉ nhận thông báo để báo
+                                    lại với khách.
+                                </p>
+
+                                <textarea
+                                    rows={4}
+                                    maxLength={500}
+                                    value={cancelReason}
+                                    placeholder="Nhập lý do hủy món…"
+                                    onChange={(event) => {
+                                        setCancelReason(event.target.value)
+                                        setCancelError(null)
+                                    }}
+                                />
+
+                                <div className="rk-field__hint">
+                                    {cancelReason.length}/500
+                                </div>
+
+                                {cancelError && (
+                                    <p className="rk-formerror">{cancelError}</p>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+            </Modal>
+
+            <ConfirmDialog
+                open={pendingComplete !== null}
+                title={`Hoàn thành món "${pendingComplete?.dishName ?? ''}"?`}
+                description={[
+                    pendingComplete?.tableNumber
+                        ? `Bàn ${pendingComplete.tableNumber}`
+                        : null,
+                    pendingComplete?.quantity ? `${pendingComplete.quantity} phần` : null,
+                    'Món sẽ chuyển sang danh sách đã hoàn thành và không hoàn tác được.',
+                ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                confirmLabel="Hoàn thành"
+                busy={completingItemId !== null}
+                onConfirm={() => void confirmComplete()}
+                onCancel={() => setPendingComplete(null)}
+            />
         </div>
     )
 }
