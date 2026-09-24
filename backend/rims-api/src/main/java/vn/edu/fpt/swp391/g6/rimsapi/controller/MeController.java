@@ -61,8 +61,15 @@ public class MeController
         return userService.updateAccount(principal.getId(), request);
     }
 
+    /**
+     * Đổi mật khẩu của chính mình.
+     *
+     * <p>Trước đây chỉ Quản trị viên và Khách hàng gọi được, theo SRS thì
+     * nhân viên muốn đổi phải nhờ Quản trị viên đặt lại. Nhưng đặt lại chỉ đưa
+     * mật khẩu về đúng chuỗi mặc định, nên Bếp, Phục vụ và Thu ngân không có
+     * cách nào thoát khỏi mật khẩu mặc định — và cũng không thể bắt họ đổi.
+     */
     @PostMapping("/change-password")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody ChangePasswordRequest request)

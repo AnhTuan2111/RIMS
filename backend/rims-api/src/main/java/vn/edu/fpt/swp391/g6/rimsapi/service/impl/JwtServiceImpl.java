@@ -27,6 +27,7 @@ public class JwtServiceImpl implements JwtService
     private static final String CLAIM_TYPE = "type";
     private static final String CLAIM_USERNAME = "username";
     private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_MUST_CHANGE_PASSWORD = "mustChangePassword";
     private static final String TOKEN_TYPE_ACCESS = "ACCESS";
     private static final String TOKEN_TYPE_REFRESH = "REFRESH";
 
@@ -35,7 +36,7 @@ public class JwtServiceImpl implements JwtService
     protected String signerKey;
 
     @Override
-    public String generateAccessToken(int id, String username, String role)
+    public String generateAccessToken(int id, String username, String role, boolean mustChangePassword)
     {
         try
         {
@@ -43,6 +44,7 @@ public class JwtServiceImpl implements JwtService
                     .subject(String.valueOf(id))
                     .claim(CLAIM_USERNAME, username)
                     .claim(CLAIM_ROLE, role)
+                    .claim(CLAIM_MUST_CHANGE_PASSWORD, mustChangePassword)
                     .claim(CLAIM_TYPE, TOKEN_TYPE_ACCESS)
                     .jwtID(UUID.randomUUID().toString())
                     .issuer(ISSUER)
@@ -150,6 +152,19 @@ public class JwtServiceImpl implements JwtService
         {
             throw new InvalidTokenException("Token không hợp lệ");
         }
+    }
+
+    /**
+     * Cờ "phải đổi mật khẩu" nằm trong access token.
+     *
+     * <p>Token cấp trước khi thêm claim này không có trường đó. Thiếu thì coi
+     * như false — người đang cầm token cũ vẫn dùng được cho đến khi nó hết hạn,
+     * thay vì bị đá ra giữa chừng sau khi triển khai.
+     */
+    @Override
+    public boolean extractMustChangePassword(JWTClaimsSet claims)
+    {
+        return Boolean.TRUE.equals(claims.getClaim(CLAIM_MUST_CHANGE_PASSWORD));
     }
 
     private String signClaims(JWTClaimsSet claimsSet) throws JOSEException

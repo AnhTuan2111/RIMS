@@ -2,6 +2,8 @@ import {useState} from 'react'
 import {Eye, EyeOff} from 'lucide-react'
 
 interface PasswordInputProps {
+    /** Gắn với thuộc tính htmlFor của nhãn, để bấm vào nhãn là nhảy vào ô. */
+    id?: string
     value: string
     onChange: (value: string) => void
     placeholder?: string
@@ -16,6 +18,7 @@ interface PasswordInputProps {
  * bản một cỡ chữ, một khoảng đệm.
  */
 export function PasswordInput({
+    id,
     value,
     onChange,
     placeholder,
@@ -26,6 +29,7 @@ export function PasswordInput({
     return (
         <div className="rk-passwordfield">
             <input
+                id={id}
                 className="rk-input"
                 type={visible ? 'text' : 'password'}
                 value={value}

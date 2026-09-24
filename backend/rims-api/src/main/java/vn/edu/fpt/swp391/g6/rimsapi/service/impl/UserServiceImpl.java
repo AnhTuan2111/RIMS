@@ -102,6 +102,8 @@ public class UserServiceImpl implements UserService
         user.setPhone(request.getPhone());
         user.setRole(request.getRole());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        // Quản trị viên chọn mật khẩu hộ, nên nhân viên phải đổi trước khi dùng.
+        user.setMustChangePassword(true);
         user.setActive(true);
 
         return convertToResponse(userRepository.save(user));
@@ -191,6 +193,7 @@ public class UserServiceImpl implements UserService
         }
 
         user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        user.setMustChangePassword(true);
         userRepository.save(user);
     }
 
@@ -226,6 +229,7 @@ public class UserServiceImpl implements UserService
         }
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
         userRepository.save(user);
     }
 
@@ -259,6 +263,7 @@ public class UserServiceImpl implements UserService
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email không tồn tại"));
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
         userRepository.save(user);
         otpStore.remove(request.getEmail());
     }
@@ -276,6 +281,7 @@ public class UserServiceImpl implements UserService
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        user.setMustChangePassword(true);
         user.setActive(true);
 
         User saved = userRepository.save(user);
@@ -295,6 +301,7 @@ public class UserServiceImpl implements UserService
         user.setPhone(request.getPhone());
         user.setRole(RoleType.CUSTOMER);
         user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        user.setMustChangePassword(true);
         user.setActive(true);
 
         return convertToResponse(userRepository.save(user));
@@ -344,7 +351,7 @@ public class UserServiceImpl implements UserService
                 .rewardPoints(user.getRewardPoints())
                 .role(user.getRole())
                 .isActive(user.isActive())
-                .rewardPoints(user.getRewardPoints())
+                .mustChangePassword(user.isMustChangePassword())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

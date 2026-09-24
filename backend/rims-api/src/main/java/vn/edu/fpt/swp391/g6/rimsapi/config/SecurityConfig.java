@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAccessDeniedHandler;
 import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationEntryPoint;
 import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationFilter;
+import vn.edu.fpt.swp391.g6.rimsapi.security.MustChangePasswordFilter;
 
 /**
  * Luật bảo mật cho toàn bộ API.
@@ -31,6 +32,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.security.JwtAuthenticationFilter;
 public class SecurityConfig
 {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final MustChangePasswordFilter mustChangePasswordFilter;
 
     /** Không có token hoặc token sai: trả 401. */
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -94,7 +96,11 @@ public class SecurityConfig
                         // đăng nhập, chứ không phải mở cho tất cả.
                         .anyRequest().authenticated())
 
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // Phải nằm SAU filter JWT vì nó đọc principal do filter kia đặt vào
+                // SecurityContext.
+                .addFilterAfter(mustChangePasswordFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

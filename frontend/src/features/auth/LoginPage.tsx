@@ -1,10 +1,10 @@
 import {useState, type FormEvent} from 'react'
-import {Link, useNavigate} from 'react-router-dom'
+import {Link, useLocation, useNavigate} from 'react-router-dom'
 
 import {AuthShell} from './AuthShell'
 
-import {login} from '@/shared/api/auth'
 import {useActor} from '@/app/providers/ActorContext'
+import {useAuth} from '@/app/providers/AuthContext'
 import {RoleType} from '@/shared/types/auth'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useRestaurant} from '@/app/providers/useRestaurant'
@@ -16,6 +16,21 @@ export default function LoginPage() {
 
     const navigate = useNavigate()
     const {setActor} = useActor()
+
+    /*
+     * Đăng nhập qua AuthContext chứ không gọi thẳng authApi.login.
+     *
+     * Bản cũ gọi thẳng rồi tự ghi localStorage, nên AuthContext vẫn giữ
+     * user = null cho đến lần tải trang sau. Mọi chốt chặn đọc user từ context
+     * đều thấy chưa đăng nhập và đá người dùng ngược về đây.
+     */
+    const {login} = useAuth()
+
+    // Màn đổi mật khẩu bắt buộc đẩy người dùng về đây kèm một dòng báo. Không
+    // có dòng đó thì họ vừa đổi xong lại thấy mình ở trang đăng nhập, không
+    // biết đã thành công hay chưa.
+    const location = useLocation()
+    const notice = (location.state as {notice?: string} | null)?.notice ?? null
 
     const [username, setUsername] = useState('')
 
@@ -43,11 +58,15 @@ export default function LoginPage() {
 
             localStorage.setItem('selectedActor', role)
 
-            localStorage.setItem('currentUser', JSON.stringify(user))
-
-            navigate(getHomePathForRole(role), {
-                replace: true,
-            })
+            // Tài khoản còn dùng mật khẩu do người khác đặt thì đi thẳng màn đổi
+            // mật khẩu. Vào màn làm việc trước cũng chỉ thấy một màn lỗi, vì
+            // backend chặn hết các endpoint khác.
+            navigate(
+                user.mustChangePassword ? '/change-password' : getHomePathForRole(role),
+                {
+                    replace: true,
+                },
+            )
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
                 return
@@ -79,6 +98,8 @@ export default function LoginPage() {
                 </>
             }
         >
+            {notice && !error && <p className="rk-note rk-note--ok">{notice}</p>}
+
             {error && <p className="rk-formerror">{error}</p>}
 
             <form

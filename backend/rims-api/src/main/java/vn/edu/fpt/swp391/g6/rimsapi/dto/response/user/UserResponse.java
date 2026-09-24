@@ -32,6 +32,13 @@ public class UserResponse
 
     @JsonProperty("isActive")
     private boolean isActive;
+    /**
+     * Còn bật thì tài khoản vẫn đang dùng mật khẩu do người khác đặt.
+     *
+     * <p>Có mặt ở đây để màn Hồ sơ biết được tình trạng sau khi tải lại trang,
+     * lúc đó phản hồi đăng nhập đã không còn.
+     */
+    private boolean mustChangePassword;
 
     private LocalDateTime createdAt;
 }

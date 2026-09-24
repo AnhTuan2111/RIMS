@@ -171,7 +171,8 @@ public class AuthServiceImpl implements AuthService
         String accessToken = jwtService.generateAccessToken(
                 user.getId(),
                 user.getUsername(),
-                user.getRole().name());
+                user.getRole().name(),
+                user.isMustChangePassword());
         String refreshToken = jwtService.generateRefreshToken(user.getId());
 
         return AuthenticationResponse.builder()
@@ -187,6 +188,7 @@ public class AuthServiceImpl implements AuthService
                 .email(user.getEmail())
                 .role(user.getRole())
                 .rewardPoints(user.getRewardPoints())
+                .mustChangePassword(user.isMustChangePassword())
                 .build();
     }
 
@@ -200,6 +202,7 @@ public class AuthServiceImpl implements AuthService
                 .email(user.getEmail())
                 .role(user.getRole())
                 .rewardPoints(user.getRewardPoints())
+                .mustChangePassword(user.isMustChangePassword())
                 .build();
     }
 

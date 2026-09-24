@@ -89,11 +89,21 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor
                 throw new AccessDeniedException("Token đã bị thu hồi");
             }
 
+            // Tài khoản chưa đổi mật khẩu được cấp thì không được mở kênh thời
+            // gian thực. Cùng một luật với MustChangePasswordFilter bên HTTP —
+            // chặn ở đó mà bỏ ngỏ ở đây thì vẫn theo dõi được đơn, bàn và bếp.
+            if (jwtService.extractMustChangePassword(claims))
+            {
+                throw new AccessDeniedException(
+                        "Tài khoản cần đổi mật khẩu trước khi tiếp tục");
+            }
+
             String role = jwtService.extractRole(claims);
             Integer userId = jwtService.extractUserId(claims);
             String username = jwtService.extractUsername(claims);
 
-            UserPrincipal principal = new UserPrincipal(userId, username, RoleType.valueOf(role));
+            UserPrincipal principal = new UserPrincipal(
+                    userId, username, RoleType.valueOf(role), false);
             accessor.setUser(new StompPrincipal(principal));
 
             if (accessor.getSessionAttributes() != null)

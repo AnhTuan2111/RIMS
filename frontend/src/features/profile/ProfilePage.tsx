@@ -122,7 +122,16 @@ export default function ProfilePage() {
      */
     const canEditProfile = isCustomer || isAdmin
 
-    const canChangePassword = canEditProfile
+    /*
+     * Đổi mật khẩu của chính mình: vai trò nào cũng được.
+     *
+     * Trước đây khối này dùng chung điều kiện với sửa hồ sơ — chỉ Quản trị
+     * viên và Khách hàng. Bếp, Phục vụ và Thu ngân muốn đổi thì phải nhờ Quản
+     * trị viên đặt lại, mà đặt lại chỉ đưa về đúng chuỗi mặc định — nên họ
+     * không có cách nào thoát khỏi mật khẩu mặc định. Backend đã mở
+     * /me/change-password cho mọi vai trò.
+     */
+    const canChangePassword = true
 
     // Các setter của useState vốn ổn định, nên deps rỗng là đủ.
     const syncFormFromUser = useCallback((user: StoredUser) => {
@@ -435,9 +444,6 @@ export default function ProfilePage() {
                 )}
             </div>
 
-            {/* SRS UC-AU-04: đổi mật khẩu dành cho Quản trị viên và Khách
-                hàng. Nhân viên muốn đổi thì nhờ Quản trị viên đặt lại trong
-                màn Quản lý tài khoản. */}
             {canChangePassword && (
                 <div className="rk-card rk-card--soft rk-card--pad">
                     <div className="rk-card__head-inline">

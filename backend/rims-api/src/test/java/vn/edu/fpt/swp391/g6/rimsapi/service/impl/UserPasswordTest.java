@@ -76,7 +76,7 @@ class UserPasswordTest
 
     private UserPrincipal principal()
     {
-        return new UserPrincipal(5, "customer2", RoleType.CUSTOMER);
+        return new UserPrincipal(5, "customer2", RoleType.CUSTOMER, false);
     }
 
     @Nested
@@ -158,6 +158,64 @@ class UserPasswordTest
 
             assertThat(user.getPasswordHash()).isEqualTo(truoc);
             verify(userRepository, never()).save(any());
+        }
+    }
+
+    /**
+     * Cờ bắt đổi mật khẩu.
+     *
+     * <p>Quy tắc một câu: mật khẩu do người khác đặt thì bật cờ, chính chủ đặt
+     * thì tắt cờ. Chỉ cần một nhánh quên set là hoặc người dùng bị khóa vĩnh
+     * viễn ở màn đổi mật khẩu, hoặc mật khẩu mặc định sống mãi.
+     */
+    @Nested
+    @DisplayName("Cờ bắt đổi mật khẩu")
+    class MustChangePassword
+    {
+
+        @Test
+        @DisplayName("tự đổi mật khẩu xong thì tắt cờ")
+        void tuDoiThiTatCo()
+        {
+            user.setMustChangePassword(true);
+
+            service.changePassword(principal(), doi("matkhaucu", "matkhaumoi"));
+
+            assertThat(user.isMustChangePassword()).isFalse();
+        }
+
+        @Test
+        @DisplayName("đổi mật khẩu thất bại thì cờ giữ nguyên")
+        void doiThatBaiThiCoGiuNguyen()
+        {
+            user.setMustChangePassword(true);
+
+            assertThatThrownBy(() -> service.changePassword(principal(), doi("sai", "matkhaumoi")))
+                    .isInstanceOf(BadCredentialsException.class);
+
+            assertThat(user.isMustChangePassword()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Quản trị viên đặt lại thì bật cờ")
+        void datLaiThiBatCo()
+        {
+            user.setRole(RoleType.CHEF);
+            user.setMustChangePassword(false);
+
+            service.resetPassword(5);
+
+            assertThat(user.isMustChangePassword()).isTrue();
+        }
+
+        @Test
+        @DisplayName("tài khoản cũ trong CSDL không bị bật cờ")
+        void taiKhoanCuKhongBiBatCo()
+        {
+            // Cột mới thêm vào bảng có sẵn sẽ mang giá trị mặc định của kiểu.
+            // Nếu mặc định là true thì mọi người đang dùng hệ thống bị đá sang màn
+            // đổi mật khẩu ngay sau khi triển khai.
+            assertThat(new User().isMustChangePassword()).isFalse();
         }
     }
 }

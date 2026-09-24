@@ -53,6 +53,7 @@ function normalizeLoginUser(response: LoginResponse): UserProfile {
         email: response.email,
         role: response.role,
         rewardPoints: response.rewardPoints,
+        mustChangePassword: response.mustChangePassword ?? false,
     }
 }
 
@@ -67,6 +68,7 @@ function normalizeProfileUser(response: UserProfile): UserProfile {
         email: response.email,
         role: response.role as UserProfile['role'],
         rewardPoints: response.rewardPoints,
+        mustChangePassword: response.mustChangePassword ?? false,
     }
 }
 

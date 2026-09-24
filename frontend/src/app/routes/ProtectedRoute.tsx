@@ -44,6 +44,13 @@ export function ProtectedRoute({allow}: ProtectedRouteProps) {
         return <Navigate to="/login" replace state={{from: location.pathname}} />
     }
 
+    // Tài khoản còn dùng mật khẩu do người khác đặt thì không đi đâu được
+    // ngoài màn đổi mật khẩu. Backend cũng chặn bằng MustChangePasswordFilter,
+    // chỗ này chỉ để người dùng thấy đúng việc cần làm thay vì một màn lỗi.
+    if (user.mustChangePassword) {
+        return <Navigate to="/change-password" replace />
+    }
+
     if (allow && !allow.includes(user.role)) {
         return <Navigate to={getHomePathForRole(user.role)} replace />
     }

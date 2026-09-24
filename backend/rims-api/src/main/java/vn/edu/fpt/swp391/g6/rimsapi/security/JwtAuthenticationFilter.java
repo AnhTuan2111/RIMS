@@ -58,7 +58,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
                     String username = jwtService.extractUsername(claims);
                     String role = jwtService.extractRole(claims);
 
-                    UserPrincipal principal = new UserPrincipal(userId, username, RoleType.valueOf(role));
+                    boolean mustChangePassword = jwtService.extractMustChangePassword(claims);
+                    UserPrincipal principal = new UserPrincipal(
+                            userId, username, RoleType.valueOf(role), mustChangePassword);
                     List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

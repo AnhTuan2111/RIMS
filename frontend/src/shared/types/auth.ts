@@ -27,6 +27,8 @@ export interface LoginResponse {
     email: string | null
     role: RoleType
     rewardPoints?: number
+    /** Còn bật thì tài khoản vẫn dùng mật khẩu do người khác đặt. */
+    mustChangePassword?: boolean
 }
 
 export interface UserProfile {
@@ -38,6 +40,7 @@ export interface UserProfile {
     email: string | null
     role: RoleType
     rewardPoints?: number
+    mustChangePassword?: boolean
 }
 
 export interface AuthUser {
@@ -49,6 +52,7 @@ export interface AuthUser {
     email: string | null
     role: RoleType
     rewardPoints?: number
+    mustChangePassword?: boolean
 }
 
 export interface UserResponse {

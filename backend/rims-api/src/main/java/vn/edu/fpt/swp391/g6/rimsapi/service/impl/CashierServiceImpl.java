@@ -524,6 +524,7 @@ public class CashierServiceImpl implements CashierService
         user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
         user.setUsername(phone);
         user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        user.setMustChangePassword(true);
         user.setRole(RoleType.CUSTOMER);
         user.setRewardPoints(0);
         user.setActive(true);

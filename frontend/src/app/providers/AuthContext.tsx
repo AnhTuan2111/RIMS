@@ -18,7 +18,7 @@ interface AuthContextValue {
     isAuthenticated: boolean
     isLoading: boolean
     error: string | null
-    login: (request: LoginRequest) => Promise<void>
+    login: (request: LoginRequest) => Promise<AuthUser>
     logout: () => Promise<void>
     clearError: () => void
 }
@@ -80,11 +80,9 @@ export function AuthProvider({children}: {children: ReactNode}) {
             const loggedInUser = await authApi.login(request)
 
             setUser(loggedInUser)
-        } catch (requestError: unknown) {
-            if (isRequestCanceled(requestError)) {
-                return
-            }
 
+            return loggedInUser
+        } catch (requestError: unknown) {
             console.error('[AUTH_LOGIN_ERROR]', requestError)
 
             setError(getErrorMessage(requestError))

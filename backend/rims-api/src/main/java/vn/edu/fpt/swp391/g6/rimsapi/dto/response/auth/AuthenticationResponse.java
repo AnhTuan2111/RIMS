@@ -23,4 +23,6 @@ public class AuthenticationResponse
     private String email;
     private RoleType role;
     private Integer rewardPoints;
+    /** Còn bật thì frontend giữ người dùng ở màn đổi mật khẩu. */
+    private boolean mustChangePassword;
 }
