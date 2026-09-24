@@ -100,7 +100,7 @@ export default function ChefDashboardPage() {
     }
 
     return (
-        <div className="chef-page">
+        <div className="rk-stack">
             <PageCard>
                 <PageHeader
                     title="Tổng quan bếp"
@@ -108,34 +108,35 @@ export default function ChefDashboardPage() {
                 />
             </PageCard>
 
-            <div className="chef-dashboard-grid">
-                <Link to="/chef/orders" className="chef-dashboard-card">
-                    <span className="chef-dashboard-card-label">Đang chế biến</span>
+            <div className="rk-statgrid">
+                <Link to="/chef/orders" className="rk-statcard">
+                    <span className="rk-statcard__label">Đang chế biến</span>
 
                     <strong>{dashboard.preparingCount}</strong>
 
                     <p>Món đang nằm trong hàng đợi bếp.</p>
                 </Link>
 
-                <Link to="/chef/completed-orders" className="chef-dashboard-card success">
-                    <span className="chef-dashboard-card-label">
-                        Đã hoàn thành hôm nay
-                    </span>
+                <Link to="/chef/completed-orders" className="rk-statcard rk-statcard--ok">
+                    <span className="rk-statcard__label">Đã hoàn thành hôm nay</span>
 
                     <strong>{dashboard.completedCount}</strong>
 
                     <p>Món đã được bếp xác nhận hoàn thành trong ngày hôm nay.</p>
                 </Link>
 
-                <Link to="/chef/cancelled-orders" className="chef-dashboard-card danger">
-                    <span className="chef-dashboard-card-label">Đã hủy hôm nay</span>
+                <Link
+                    to="/chef/cancelled-orders"
+                    className="rk-statcard rk-statcard--alert"
+                >
+                    <span className="rk-statcard__label">Đã hủy hôm nay</span>
 
                     <strong>{dashboard.cancelledCount}</strong>
 
                     <p>Món đã bị hủy trong ngày hôm nay và cần Waiter xử lý với khách.</p>
                 </Link>
-                <Link to="/chef/dishes" className="chef-dashboard-card warning">
-                    <span className="chef-dashboard-card-label">Món đang tắt bán</span>
+                <Link to="/chef/dishes" className="rk-statcard rk-statcard--busy">
+                    <span className="rk-statcard__label">Món đang tắt bán</span>
 
                     <strong>{dashboard.unavailableDishCount}</strong>
 
@@ -144,7 +145,7 @@ export default function ChefDashboardPage() {
             </div>
 
             <PageCard>
-                <div className="chef-dashboard-actions">
+                <div className="rk-actions">
                     <Link to="/chef/orders" className="rk-btn rk-btn--primary">
                         Xem hàng đợi bếp
                     </Link>

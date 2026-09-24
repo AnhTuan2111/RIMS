@@ -581,15 +581,15 @@ export default function KitchenQueuePage() {
     }
 
     return (
-        <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
+        <div className="rk-stack">
+            <section className="rk-card rk-card--pad">
+                <div className="rk-card__head-inline">
                     <div>
                         <h2>Đơn cần chế biến</h2>
                         <p>Chọn món để xem chi tiết, hoàn thành món hoặc hủy món.</p>
                     </div>
 
-                    <div className="chef-summary">
+                    <div className="rk-statrow">
                         <div>
                             <strong>{items.length}</strong>
                             <span>Đang chờ làm</span>
@@ -603,11 +603,7 @@ export default function KitchenQueuePage() {
                                     ? 'Tắt chuông báo món mới'
                                     : 'Bật chuông báo món mới'
                             }
-                            className={
-                                isSoundEnabled
-                                    ? 'secondary-button sound-toggle-button enabled'
-                                    : 'secondary-button sound-toggle-button'
-                            }
+                            className={isSoundEnabled ? 'rk-btn rk-btn--go' : 'rk-btn'}
                             onClick={() => {
                                 handleSoundToggle().catch((requestError) => {
                                     console.error(requestError)
@@ -633,8 +629,8 @@ export default function KitchenQueuePage() {
             </section>
 
             {newOrderMessage && (
-                <div className="new-order-notification" role="status" aria-live="polite">
-                    <span className="new-order-notification-icon">
+                <div className="rk-note rk-note--busy" role="status" aria-live="polite">
+                    <span className="rk-icon">
                         <Bell className="rk-icon" aria-hidden="true" />
                     </span>
 
@@ -645,8 +641,8 @@ export default function KitchenQueuePage() {
                 </div>
             )}
 
-            <section className="page-card">
-                <div className="chef-filter-bar">
+            <section className="rk-card rk-card--pad">
+                <div className="rk-filterbar">
                     <input
                         type="search"
                         value={searchText}
@@ -865,7 +861,7 @@ export default function KitchenQueuePage() {
                 {selectedDish && (
                     <>
                         <div>
-                            <div className="detail-grid">
+                            <div className="rk-details">
                                 <div>
                                     <span>Trạng thái</span>
                                     <strong>
@@ -886,18 +882,18 @@ export default function KitchenQueuePage() {
                                 </div>
                             </div>
 
-                            <div className="detail-section">
+                            <div className="rk-stack">
                                 <h3>Mô tả món</h3>
                                 <p>{selectedDish.description || 'Không có mô tả.'}</p>
                             </div>
 
-                            <div className="detail-section">
+                            <div className="rk-stack">
                                 <h3>Ghi chú</h3>
                                 <p>{selectedDish.note || 'Không có ghi chú.'}</p>
                             </div>
 
-                            <div className="chef-internal-note-box">
-                                <div className="chef-internal-note-heading">
+                            <div className="rk-field">
+                                <div className="rk-field__label">
                                     <div>
                                         <h3>Ghi chú nội bộ cho Waiter</h3>
 
@@ -922,7 +918,7 @@ export default function KitchenQueuePage() {
                                     )}
                                 </div>
 
-                                <div className="internal-note-quick-actions">
+                                <div className="rk-actions">
                                     {[
                                         'Hết sốt, vui lòng hỏi khách đổi lựa chọn.',
                                         'Món sẽ chậm thêm khoảng 10 phút.',
@@ -953,12 +949,12 @@ export default function KitchenQueuePage() {
                                     }}
                                 />
 
-                                <div className="internal-note-bottom-row">
+                                <div className="rk-actions rk-actions--end">
                                     <span>{chefInternalNote.length}/500</span>
 
                                     <button
                                         type="button"
-                                        className="rk-btn rk-btn--quiet internal-note-save-button"
+                                        className="rk-btn rk-btn--quiet"
                                         disabled={isInternalNoteSubmitting}
                                         onClick={() =>
                                             handleSaveInternalNote().catch(
@@ -981,7 +977,7 @@ export default function KitchenQueuePage() {
                                 )}
                             </div>
 
-                            <div className="cancel-request-box">
+                            <div className="rk-dangerzone">
                                 <h3>Hủy món</h3>
 
                                 <p>
@@ -1000,7 +996,7 @@ export default function KitchenQueuePage() {
                                     }}
                                 />
 
-                                <div className="cancel-reason-count">
+                                <div className="rk-field__hint">
                                     {cancelReason.length}/500
                                 </div>
 

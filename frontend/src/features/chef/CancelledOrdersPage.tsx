@@ -114,9 +114,9 @@ export default function CancelledOrdersPage() {
     }
 
     return (
-        <div className="chef-page">
-            <section className="page-card">
-                <div className="page-header">
+        <div className="rk-stack">
+            <section className="rk-card rk-card--pad">
+                <div className="rk-card__head-inline">
                     <div>
                         <h2>Món đã hủy hôm nay</h2>
 
@@ -126,7 +126,7 @@ export default function CancelledOrdersPage() {
                         </p>
                     </div>
 
-                    <div className="completed-page-actions">
+                    <div className="rk-actions">
                         <button
                             type="button"
                             className="rk-btn rk-btn--quiet"
@@ -137,15 +137,15 @@ export default function CancelledOrdersPage() {
                     </div>
                 </div>
 
-                <div className="completed-summary">
+                <div className="rk-statrow">
                     Tổng cộng hôm nay:
                     <strong>{items.length}</strong>
                     món đã hủy
                 </div>
             </section>
 
-            <section className="page-card">
-                <div className="chef-filter-bar">
+            <section className="rk-card rk-card--pad">
+                <div className="rk-filterbar">
                     <input
                         type="search"
                         value={searchText}
@@ -169,9 +169,9 @@ export default function CancelledOrdersPage() {
                 </div>
             </section>
 
-            <section className="page-card">
+            <section className="rk-card rk-card--pad">
                 {filteredItems.length === 0 ? (
-                    <div className="empty-state">
+                    <div className="rk-note">
                         <h3>
                             {items.length === 0
                                 ? 'Chưa có món bị hủy'
@@ -186,15 +186,12 @@ export default function CancelledOrdersPage() {
                         </p>
                     </div>
                 ) : (
-                    <div className="completed-orders-list">
+                    <div className="rk-rowlist">
                         {paginatedItems.map((item) => (
-                            <article
-                                key={item.orderItemId}
-                                className="completed-order-card"
-                            >
-                                <div className="completed-order-main">
+                            <article key={item.orderItemId} className="rk-rowlist__item">
+                                <div className="rk-media">
                                     <div>
-                                        <span className="completed-order-id">
+                                        <span className="rk-rowlist__title">
                                             Order #{item.orderId}
                                             {' · '}
                                             Item #{item.orderItemId}
@@ -206,7 +203,7 @@ export default function CancelledOrdersPage() {
                                     <span className="rk-chip rk-chip--alert">Đã hủy</span>
                                 </div>
 
-                                <div className="completed-order-info">
+                                <div className="rk-rowlist__main">
                                     <div>
                                         <small>Bàn</small>
                                         <strong>{item.tableNumber}</strong>

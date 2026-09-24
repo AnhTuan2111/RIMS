@@ -636,12 +636,6 @@
     box-shadow: 0 8px 24px rgb(var(--rims-tint-ink) / 5%);
 }
 
-/* Khoảng cách giữa các phần trong trang */
-.rims-app-content .chef-page {
-    display: grid;
-    gap: 20px;
-}
-
 /* =========================================================
    RESPONSIVE
    ========================================================= */

@@ -37,16 +37,21 @@ function getWaitingMinutes(value?: string) {
     return Math.max(0, Math.floor((Date.now() - createdTime) / 60_000))
 }
 
-function getWaitingClass(minutes: number) {
+/**
+ * Chip thời gian chờ, đổi màu theo mức độ trễ.
+ *
+ * <p>Màu KHÔNG phải tín hiệu duy nhất: chip luôn ghi rõ số phút bằng chữ.
+ */
+function getWaitingChip(minutes: number) {
     if (minutes >= 15) {
-        return 'danger'
+        return 'rk-chip rk-chip--alert'
     }
 
     if (minutes >= 10) {
-        return 'warning'
+        return 'rk-chip rk-chip--busy'
     }
 
-    return 'normal'
+    return 'rk-chip rk-chip--idle'
 }
 
 export default function GroupedKitchenPage() {
@@ -246,46 +251,32 @@ export default function GroupedKitchenPage() {
     }
 
     return (
-        <div className="chef-page">
+        <div className="rk-stack">
             <PageCard>
                 <PageHeader
                     title="Gom món để nấu"
-                    description="Món giống nhau và không có ghi chú được gom thành một nhóm. Món có ghi chú luôn được tách riêng."
+                    description={`${groups.length} nhóm cần nấu · ${groups.reduce(
+                        (total, group) => total + group.totalQuantity,
+                        0,
+                    )} phần. Món giống nhau và không có ghi chú được gom thành một nhóm; món có ghi chú luôn tách riêng.`}
                     actions={
-                        <div className="chef-summary">
-                            <div>
-                                <strong>{groups.length}</strong>
-                                <span>Nhóm cần nấu</span>
-                            </div>
-
-                            <div>
-                                <strong>
-                                    {groups.reduce(
-                                        (total, group) => total + group.totalQuantity,
-                                        0,
-                                    )}
-                                </strong>
-                                <span>Tổng số phần</span>
-                            </div>
-
-                            <button
-                                type="button"
-                                className="rk-btn rk-btn--quiet"
-                                onClick={() => {
-                                    loadGroups(true, true).catch((requestError) => {
-                                        console.error(requestError)
-                                    })
-                                }}
-                            >
-                                Làm mới
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--quiet"
+                            onClick={() => {
+                                loadGroups(true, true).catch((requestError) => {
+                                    console.error(requestError)
+                                })
+                            }}
+                        >
+                            Làm mới
+                        </button>
                     }
                 />
             </PageCard>
 
             <PageCard>
-                <div className="chef-filter-bar">
+                <div className="rk-filterbar">
                     <input
                         type="search"
                         value={searchText}
@@ -370,30 +361,30 @@ export default function GroupedKitchenPage() {
                 />
             ) : (
                 <>
-                    <div className="grouped-kitchen-grid">
+                    <div className="rk-cardgrid">
                         {paginatedGroups.map((group) => {
                             const waitingMinutes = getWaitingMinutes(
                                 group.earliestCreatedAt,
                             )
 
-                            const waitingClass = getWaitingClass(waitingMinutes)
+                            const waitingChip = getWaitingChip(waitingMinutes)
 
                             return (
                                 <article
                                     className={
                                         group.hasNote
-                                            ? 'grouped-kitchen-card has-note'
-                                            : 'grouped-kitchen-card'
+                                            ? 'rk-card rk-card--pad rk-card--flagged'
+                                            : 'rk-card rk-card--pad'
                                     }
                                     key={group.groupKey}
                                 >
-                                    <div className="grouped-card-head">
+                                    <div className="rk-card__head-inline">
                                         <div>
                                             <span
                                                 className={
                                                     group.hasNote
-                                                        ? 'group-type note'
-                                                        : 'group-type batch'
+                                                        ? 'rk-tag rk-tag--alert'
+                                                        : 'rk-tag'
                                                 }
                                             >
                                                 {group.hasNote
@@ -416,52 +407,55 @@ export default function GroupedKitchenPage() {
                                             </p>
                                         </div>
 
-                                        <div className="group-total">
-                                            <small>Tổng</small>
-                                            <strong>x{group.totalQuantity}</strong>
+                                        <div className="rk-qty">
+                                            <span className="rk-qty__num">
+                                                x{group.totalQuantity}
+                                            </span>
+                                            <span className="rk-qty__unit">tổng</span>
                                         </div>
                                     </div>
 
-                                    <div className={`waiting-badge ` + waitingClass}>
+                                    <span className={waitingChip}>
                                         Chờ {waitingMinutes} phút
-                                    </div>
+                                    </span>
 
                                     {group.hasNote && (
-                                        <div className="group-note">
+                                        <div className="rk-note">
                                             <strong>Ghi chú:</strong> {group.note}
                                         </div>
                                     )}
 
-                                    <div className="group-item-list">
+                                    <div className="rk-rowlist">
                                         {group.items.map((item) => (
                                             <div
                                                 className={
                                                     item.tableNumber === selectedTable
-                                                        ? 'group-item-row highlighted'
-                                                        : 'group-item-row'
+                                                        ? 'rk-rowlist__item is-highlighted'
+                                                        : 'rk-rowlist__item'
                                                 }
                                                 key={item.orderItemId}
                                             >
-                                                <span>
-                                                    <strong>
+                                                <div className="rk-rowlist__main">
+                                                    <div className="rk-rowlist__title">
                                                         Bàn {item.tableNumber}
-                                                    </strong>
+                                                    </div>
 
-                                                    <small>
-                                                        Order #{item.orderId}
-                                                        {' · '}
-                                                        Item #{item.orderItemId}
-                                                    </small>
-                                                </span>
+                                                    <p className="rk-rowlist__meta">
+                                                        Order #{item.orderId} · Item #
+                                                        {item.orderItemId}
+                                                    </p>
+                                                </div>
 
-                                                <b>x{item.quantity}</b>
+                                                <strong className="rk-num">
+                                                    x{item.quantity}
+                                                </strong>
                                             </div>
                                         ))}
                                     </div>
 
-                                    <div className="group-card-footer">
+                                    <div className="rk-actions rk-actions--end">
                                         <Link
-                                            className="group-detail-link"
+                                            className="rk-btn rk-btn--quiet"
                                             to="/chef/orders"
                                         >
                                             Xem từng đơn

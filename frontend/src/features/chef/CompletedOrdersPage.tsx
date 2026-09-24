@@ -170,13 +170,13 @@ export default function CompletedOrdersPage() {
     }
 
     return (
-        <div className="chef-page">
+        <div className="rk-stack">
             <PageCard>
                 <PageHeader
                     title="Món đã hoàn thành hôm nay"
                     description="Chỉ hiển thị món hoàn thành trong ngày hôm nay. Tìm theo tên món, bàn, mã đơn hoặc mã item."
                     actions={
-                        <div className="chef-summary">
+                        <div className="rk-statrow">
                             <div>
                                 <strong>{items.length}</strong>
                                 <span>Đã hoàn thành hôm nay</span>
@@ -201,7 +201,7 @@ export default function CompletedOrdersPage() {
             </PageCard>
 
             <PageCard>
-                <div className="chef-filter-bar">
+                <div className="rk-filterbar">
                     <input
                         type="search"
                         value={searchText}
@@ -267,15 +267,15 @@ export default function CompletedOrdersPage() {
             ) : (
                 <>
                     <PageCard>
-                        <div className="completed-orders-list">
+                        <div className="rk-rowlist">
                             {paginatedItems.map((item) => (
                                 <article
-                                    className="completed-order-card"
+                                    className="rk-rowlist__item"
                                     key={item.orderItemId}
                                 >
-                                    <div className="completed-order-main">
+                                    <div className="rk-media">
                                         <div>
-                                            <span className="completed-order-id">
+                                            <span className="rk-rowlist__title">
                                                 Order #{item.orderId}
                                                 {' · '}
                                                 Item #{item.orderItemId}
@@ -289,7 +289,7 @@ export default function CompletedOrdersPage() {
                                         </span>
                                     </div>
 
-                                    <div className="completed-order-info">
+                                    <div className="rk-rowlist__main">
                                         <div>
                                             <small>Bàn</small>
 

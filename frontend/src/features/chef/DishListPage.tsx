@@ -232,13 +232,13 @@ export default function DishListPage() {
     }
 
     return (
-        <div className="chef-page">
+        <div className="rk-stack">
             <PageCard>
                 <PageHeader
                     title={showUnavailableOnly ? 'Món đang tạm hết' : 'Quản lý món ăn'}
                     description="Tìm kiếm, lọc và thay đổi trạng thái phục vụ của thực đơn."
                     actions={
-                        <div className="chef-summary">
+                        <div className="rk-statrow">
                             <div>
                                 <strong>{availableCount}</strong>
 
@@ -275,7 +275,7 @@ export default function DishListPage() {
             </PageCard>
 
             <PageCard>
-                <div className="chef-filter-bar">
+                <div className="rk-filterbar">
                     <input
                         type="search"
                         value={searchText}

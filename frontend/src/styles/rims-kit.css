@@ -2746,3 +2746,46 @@ textarea.rk-input {
 .rk-cardgrid--sm {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
+
+/* Thẻ có cờ: vạch đậm bên trái. Dùng cho nhóm món có ghi chú riêng —
+   dấu hiệu là HÌNH DẠNG chứ không chỉ là màu. */
+.rk-card--flagged {
+    box-shadow: inset 3px 0 0 var(--rims-alert);
+}
+
+/* Nhãn cảnh báo. */
+.rk-tag--alert {
+    border-color: var(--rims-alert-line);
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
+/* Dòng được nhấn trong danh sách. */
+.rk-rowlist__item.is-highlighted {
+    background: var(--rims-brand-soft);
+    box-shadow: inset 3px 0 0 var(--rims-brand);
+}
+
+/* ---------- Số lượng lớn ----------
+   Chữ ký của app: đầu bếp đọc con số này từ cách màn hình một sải tay. */
+
+.rk-qty {
+    display: grid;
+    justify-items: center;
+    flex: none;
+    line-height: 1;
+}
+
+.rk-qty__num {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+    color: var(--rims-ink);
+}
+
+.rk-qty__unit {
+    margin-top: 2px;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
