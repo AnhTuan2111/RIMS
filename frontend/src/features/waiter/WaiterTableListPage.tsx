@@ -464,7 +464,7 @@ export default function WaiterTableListPage() {
 
                         <button
                             type="button"
-                            className="waiter-action-btn"
+                            className="rk-btn"
                             onClick={() => void loadTables(undefined, true)}
                         >
                             Thử lại

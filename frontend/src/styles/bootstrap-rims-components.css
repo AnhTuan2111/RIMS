@@ -4,9 +4,7 @@
    ========================================================= */
 
 /* Bootstrap aliases for existing pages */
-.primary-button,
-.secondary-button,
-.danger-button {
+.secondary-button {
     min-height: 40px;
     padding: 0.55rem 0.9rem;
     display: inline-flex;
@@ -38,10 +36,7 @@
     background: var(--rims-brand);
 }
 
-.primary-button:disabled,
-.secondary-button:disabled,
-.danger-button:disabled,
-.btn:disabled {
+.secondary-button:disabled {
     cursor: not-allowed;
     opacity: 0.65;
     transform: none;
@@ -119,7 +114,6 @@
     line-height: 1.65;
 }
 
-.rims-page-actions .btn,
 .rims-page-actions button {
     white-space: nowrap;
 }
@@ -203,9 +197,7 @@
 
 /* General shared grids that many pages already use */
 
-.stat-grid,
-.table-grid,
-.dashboard-shortcuts {
+.table-grid {
     display: grid;
     gap: 1rem;
 }
@@ -214,7 +206,6 @@
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
 }
 
-.stat-card,
 .table-card {
     padding: 1rem;
     border: 1px solid var(--rims-line);
@@ -223,16 +214,10 @@
     box-shadow: 0 10px 28px rgb(36 21 18 / 5%);
 }
 
-.stat-card span,
 .table-card span {
     color: var(--rims-ink-3);
     font-size: 0.9rem;
     font-weight: 750;
-}
-
-.status-badge.warning {
-    color: var(--rims-busy);
-    background: var(--rims-busy-soft);
 }
 
 .simple-table {
@@ -291,14 +276,11 @@
         border-radius: 18px;
     }
 
-    .stat-grid,
     .table-grid {
         grid-template-columns: 1fr;
     }
 
-    .primary-button,
-    .secondary-button,
-    .danger-button {
+    .secondary-button {
         width: 100%;
     }
 }
@@ -315,8 +297,7 @@
     gap: 1rem;
 }
 
-.page-card,
-.dashboard-card {
+.page-card {
     padding: 1.5rem;
     border-radius: 14px;
     background: var(--rims-surface);
@@ -324,15 +305,13 @@
     box-shadow: 0 10px 25px rgb(36 21 18 / 6%);
 }
 
-.page-card h2,
-.dashboard-card h2 {
+.page-card h2 {
     margin: 0 0 0.75rem;
     font-size: 1.3rem;
     color: var(--rims-ink);
 }
 
-.page-card p,
-.dashboard-card p {
+.page-card p {
     margin: 0;
     color: var(--rims-ink-2);
     line-height: 1.6;
@@ -389,11 +368,6 @@
     word-break: break-word;
 }
 
-.simple-table.three-columns .simple-table-header,
-.simple-table.three-columns .simple-table-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 /* =========================
    CHEF PAGES
 ========================= */
@@ -401,16 +375,6 @@
 .chef-page {
     display: grid;
     gap: 1rem;
-}
-
-.status-badge.completed {
-    background: var(--rims-ok-soft);
-    color: var(--rims-ok);
-}
-
-.status-badge.danger {
-    background: var(--rims-alert-soft);
-    color: var(--rims-alert);
 }
 
 .chef-dish-table .simple-table-header,
@@ -486,12 +450,10 @@
 }
 
 @media (max-width: 768px) {
-    .actor-card-header,
     .page-header {
         flex-direction: column;
     }
 
-    .stat-grid,
     .table-grid {
         grid-template-columns: 1fr;
     }

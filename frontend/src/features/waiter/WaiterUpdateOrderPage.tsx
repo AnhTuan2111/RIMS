@@ -523,7 +523,7 @@ export default function WaiterUpdateOrderPage() {
 
                     <button
                         type="button"
-                        className="waiter-action-btn"
+                        className="rk-btn rk-btn--primary"
                         disabled={isLoading || submitting || !tableIdNumber}
                         onClick={openConfirm}
                     >
@@ -536,7 +536,7 @@ export default function WaiterUpdateOrderPage() {
                     placeholder="Tìm theo tên món hoặc danh mục…"
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
-                    className="waiter-search-input"
+                    className="rk-input"
                 />
 
                 <div className="waiter-category-nav">

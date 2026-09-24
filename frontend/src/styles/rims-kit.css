@@ -185,6 +185,123 @@ body {
     border-color: var(--rims-ink-3);
 }
 
+.rk-textarea {
+    width: 100%;
+    min-height: 96px;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-sans);
+    font-size: var(--rims-text-base);
+    line-height: var(--rims-leading-normal);
+    resize: vertical;
+    transition: border-color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-textarea::placeholder {
+    color: var(--rims-ink-3);
+}
+
+.rk-textarea:hover {
+    border-color: var(--rims-ink-3);
+}
+
+.rk-textarea:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+/* ---------- Hàng bộ lọc ----------
+   Ô tìm kiếm ăn phần rộng còn lại, ô chọn giữ bề ngang vừa đủ. Màn hẹp thì
+   xếp dọc, vì ba ô nằm ngang trên điện thoại thì ô nào cũng quá hẹp để đọc. */
+
+.rk-filterbar {
+    display: flex;
+    gap: var(--rims-space-4);
+    align-items: center;
+    height: 100%;
+}
+
+.rk-filterbar > .rk-input {
+    flex: 1.5 1 0;
+}
+
+.rk-filterbar > .rk-select {
+    flex: 0 1 220px;
+}
+
+@media (max-width: 768px) {
+    .rk-filterbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .rk-filterbar > .rk-select {
+        flex: none;
+    }
+}
+
+/* ---------- Nút chỉ có icon ----------
+   Dùng trong hàng của bảng: xem, sửa, xoá. Quản lý danh mục và Quản lý món
+   từng có hai bộ tên riêng cho cùng một nút. */
+
+.rk-iconbtn {
+    /* inline-grid, không phải grid: ba nút thao tác phải nằm cùng một hàng
+       trong ô của bảng, grid thường đẩy mỗi nút xuống một dòng. */
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border: 1px solid transparent;
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+    cursor: pointer;
+    transition:
+        background-color var(--rims-dur-short) var(--rims-ease-out),
+        color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-iconbtn:hover:not(:disabled) {
+    background: var(--rims-surface-3);
+    color: var(--rims-ink);
+}
+
+.rk-iconbtn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+.rk-iconbtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.rk-iconbtn--brand:hover:not(:disabled) {
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-iconbtn--danger {
+    color: var(--rims-alert);
+}
+
+.rk-iconbtn--danger:hover:not(:disabled) {
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
+/* Màn hẹp: ba nút icon trên một hàng của bảng cần chỗ, nên thu nhỏ lại. */
+@media (max-width: 480px) {
+    .rk-iconbtn {
+        width: 28px;
+        height: 28px;
+    }
+}
+
 /* ---------- Chip trạng thái ----------
    Màu KHÔNG phải tín hiệu duy nhất: mỗi chip có chấm dẫn và nhãn chữ, nên
    người mù màu vẫn đọc được trạng thái. */
@@ -540,7 +657,6 @@ button.rk-chip:hover {
 }
 
 /* Thẻ sọc dày một bên — thay bằng viền mảnh đều bốn cạnh. */
-.kitchen-order-card,
 .chef-dashboard-card,
 .waiter-card {
     border-left-width: 1px;
@@ -548,7 +664,6 @@ button.rk-chip:hover {
 
 /* Bề mặt trắng tinh và bóng đổ trang trí. */
 .page-card,
-.dashboard-card,
 .rims-page-card {
     background: var(--rims-surface);
     border-color: var(--rims-line);
@@ -557,9 +672,7 @@ button.rk-chip:hover {
 }
 
 /* Mọi cột số phải thẳng hàng. */
-table,
-.rims-stat-card-value,
-.pagination-result-info {
+table {
     font-variant-numeric: tabular-nums;
 }
 

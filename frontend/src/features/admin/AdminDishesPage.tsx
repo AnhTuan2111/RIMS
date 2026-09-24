@@ -305,7 +305,7 @@ export default function AdminDishesPage() {
             {/* Filters */}
             <div className="admin-dish-filter-grid">
                 <div className="admin-dish-card">
-                    <div className="admin-dish-filter-container">
+                    <div className="rk-filterbar">
                         <input
                             type="text"
                             placeholder="Tìm theo tên món hoặc mã món…"
@@ -314,7 +314,7 @@ export default function AdminDishesPage() {
                                 setSearchKeyword(e.target.value)
                                 setCurrentPage(1)
                             }}
-                            className="admin-dish-search-input"
+                            className="rk-input"
                         />
                         <select
                             value={selectedCategory}
@@ -322,7 +322,7 @@ export default function AdminDishesPage() {
                                 setSelectedCategory(e.target.value)
                                 setCurrentPage(1)
                             }}
-                            className="admin-dish-select"
+                            className="rk-select"
                         >
                             <option value="ALL">Tất cả danh mục</option>
                             {categories.map((cat) => {
@@ -344,7 +344,7 @@ export default function AdminDishesPage() {
                                 setSelectedStatus(e.target.value)
                                 setCurrentPage(1)
                             }}
-                            className="admin-dish-select"
+                            className="rk-select"
                         >
                             <option value="ALL">Tất cả trạng thái</option>
                             <option value="VISIBLE">Đang hiển thị</option>
@@ -432,14 +432,14 @@ export default function AdminDishesPage() {
                                     <td className="admin-dish-cell-actions">
                                         <button
                                             onClick={() => openFormWithDish(dish, 'VIEW')}
-                                            className="admin-dish-action-btn"
+                                            className="rk-iconbtn"
                                             title="Xem chi tiết"
                                         >
                                             <Eye className="rk-icon" aria-hidden="true" />
                                         </button>
                                         <button
                                             onClick={() => openFormWithDish(dish, 'EDIT')}
-                                            className="admin-dish-action-btn admin-dish-edit-btn"
+                                            className="rk-iconbtn rk-iconbtn--brand"
                                             title="Chỉnh sửa"
                                         >
                                             <Pencil
@@ -452,7 +452,7 @@ export default function AdminDishesPage() {
                                                 setSelectedDish(dish)
                                                 setActiveModal('DELETE')
                                             }}
-                                            className="admin-dish-action-btn admin-dish-delete-btn"
+                                            className="rk-iconbtn rk-iconbtn--danger"
                                             title="Xóa món"
                                         >
                                             <Trash2
@@ -528,7 +528,7 @@ export default function AdminDishesPage() {
                                                 name: e.target.value,
                                             })
                                         }
-                                        className="admin-dish-input-field"
+                                        className="rk-input"
                                     />
                                 </div>
 
@@ -545,7 +545,7 @@ export default function AdminDishesPage() {
                                                     categoryId: e.target.value,
                                                 })
                                             }
-                                            className="admin-dish-select-field"
+                                            className="rk-select"
                                         >
                                             {activeCategories.map((c) => (
                                                 <option key={c.id} value={c.id}>
@@ -574,7 +574,7 @@ export default function AdminDishesPage() {
                                                     price: parseInt(e.target.value) || 0,
                                                 })
                                             }
-                                            className="admin-dish-input-field"
+                                            className="rk-input"
                                         />
                                     </div>
                                 </div>
@@ -594,7 +594,7 @@ export default function AdminDishesPage() {
                                                 description: e.target.value,
                                             })
                                         }
-                                        className="admin-dish-textarea-field"
+                                        className="rk-textarea"
                                     />
                                 </div>
 
@@ -652,7 +652,7 @@ export default function AdminDishesPage() {
                                             imageUrl: e.target.value,
                                         })
                                     }
-                                    className="admin-dish-input-field"
+                                    className="rk-input"
                                 />
                             </div>
 
@@ -788,7 +788,7 @@ export default function AdminDishesPage() {
                                                     name: e.target.value,
                                                 })
                                             }
-                                            className="admin-dish-input-field"
+                                            className="rk-input"
                                         />
                                     </div>
                                     <div>
@@ -803,7 +803,7 @@ export default function AdminDishesPage() {
                                                     categoryId: e.target.value,
                                                 })
                                             }
-                                            className="admin-dish-select-field"
+                                            className="rk-select"
                                         >
                                             <option value="">-- Chọn danh mục --</option>
                                             {activeCategories.map((c) => (
@@ -829,7 +829,7 @@ export default function AdminDishesPage() {
                                                     price: parseInt(e.target.value) || 0,
                                                 })
                                             }
-                                            className="admin-dish-input-field"
+                                            className="rk-input"
                                         />
                                     </div>
                                     <div>
@@ -883,7 +883,7 @@ export default function AdminDishesPage() {
                                                 description: e.target.value,
                                             })
                                         }
-                                        className="admin-dish-textarea-field"
+                                        className="rk-textarea"
                                     />
                                 </div>
 
@@ -901,7 +901,7 @@ export default function AdminDishesPage() {
                                                     imageUrl: e.target.value,
                                                 })
                                             }
-                                            className="admin-dish-input-field"
+                                            className="rk-input"
                                         />
                                         <button
                                             type="button"

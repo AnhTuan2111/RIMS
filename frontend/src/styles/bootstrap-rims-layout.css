@@ -22,11 +22,6 @@
     flex-shrink: 0;
 }
 
-.app-sidebar-link.active {
-    background: var(--rims-brand);
-    color: var(--rims-ink-on-dark);
-}
-
 .app-content {
     padding: 1.5rem;
     min-height: calc(100vh - 84px);
@@ -631,8 +626,7 @@
 }
 
 /* Các card cơ bản bên trong Dashboard */
-.rims-app-content .page-card,
-.rims-app-content .dashboard-card {
+.rims-app-content .page-card {
     padding: 24px;
 
     border: 1px solid var(--rims-line);
@@ -756,24 +750,6 @@
 
 .rims-shell-theme .rims-topbar-eyebrow {
     color: var(--rims-brand);
-}
-
-.rims-shell-theme .rims-current-role {
-    border-color: rgba(212, 175, 55, 0.25);
-    background: linear-gradient(135deg, var(--rims-gold-soft), var(--rims-gold-soft));
-}
-
-.rims-shell-theme .rims-current-role-icon {
-    background: linear-gradient(135deg, var(--rims-gold-soft), var(--rims-gold-soft));
-}
-
-.rims-shell-theme .rims-current-role strong {
-    color: var(--rims-ink);
-}
-
-.rims-shell-theme .rims-actor-switcher select:focus {
-    border-color: var(--rims-gold);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
 }
 
 .rims-shell-theme .app-content,

@@ -128,21 +128,6 @@
     margin: 0;
 }
 
-.waiter-action-btn {
-    border: 1px solid var(--rims-gold-deep);
-    background: var(--rims-busy-soft);
-    border-radius: 0.35rem;
-    padding: 0.5rem 1.5rem;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--rims-ink);
-    transition: background-color 0.2s;
-}
-
-.waiter-action-btn:hover {
-    background: var(--rims-busy-line);
-}
-
 /* Category Navbar */
 .waiter-category-nav {
     display: flex;
@@ -475,18 +460,4 @@
 .waiter-detail-row strong {
     color: var(--rims-ink);
     text-align: right;
-}
-
-.waiter-search-input {
-    width: 100%;
-    padding: 0.6rem 0.9rem;
-    margin: 0.75rem 0;
-    border: 1px solid var(--rims-line-strong);
-    border-radius: 8px;
-    font-size: 0.95rem;
-}
-
-.waiter-search-input:focus {
-    outline: none;
-    border-color: var(--rims-brand);
 }

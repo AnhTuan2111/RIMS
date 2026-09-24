@@ -199,47 +199,6 @@ export default function AdminCategoryPage() {
     const dishEndIndex = dishStartIndex + DISH_ITEMS_PER_PAGE
     const currentDishItems = categoryDishes.slice(dishStartIndex, dishEndIndex)
 
-    const goToDishPage = (page: number) => {
-        if (page >= 1 && page <= totalDishPages) {
-            setDishPage(page)
-        }
-    }
-
-    const goToPreviousDishPage = () => goToDishPage(dishPage - 1)
-    const goToNextDishPage = () => goToDishPage(dishPage + 1)
-
-    const getDishPageNumbers = () => {
-        const pages: (number | string)[] = []
-        const maxVisible = 5
-
-        if (totalDishPages <= maxVisible) {
-            for (let i = 1; i <= totalDishPages; i++) {
-                pages.push(i)
-            }
-        } else {
-            pages.push(1)
-
-            if (dishPage > 3) {
-                pages.push('...')
-            }
-
-            const start = Math.max(2, dishPage - 1)
-            const end = Math.min(totalDishPages - 1, dishPage + 1)
-
-            for (let i = start; i <= end; i++) {
-                pages.push(i)
-            }
-
-            if (dishPage < totalDishPages - 2) {
-                pages.push('...')
-            }
-
-            pages.push(totalDishPages)
-        }
-
-        return pages
-    }
-
     const totalDishes = categories.reduce((sum, c) => sum + (c.dishCount || 0), 0)
 
     if (loading) {
@@ -342,7 +301,7 @@ export default function AdminCategoryPage() {
                                             setSearchTerm(e.target.value)
                                             setCurrentPage(1)
                                         }}
-                                        className="admin-category-search-input"
+                                        className="rk-input"
                                     />
                                 </div>
                             </div>
@@ -431,7 +390,7 @@ export default function AdminCategoryPage() {
                                                     setDishPage(1) // Reset dish page khi mở detail
                                                     setView('DETAIL')
                                                 }}
-                                                className="admin-category-action-btn"
+                                                className="rk-iconbtn"
                                                 title="Xem chi tiết"
                                             >
                                                 <Eye
@@ -449,7 +408,7 @@ export default function AdminCategoryPage() {
                                                     })
                                                     setView('EDIT')
                                                 }}
-                                                className="admin-category-action-btn admin-category-edit-btn"
+                                                className="rk-iconbtn rk-iconbtn--brand"
                                                 title="Chỉnh sửa"
                                             >
                                                 <Pencil
@@ -465,7 +424,7 @@ export default function AdminCategoryPage() {
                                                         dishCount: item.dishCount || 0,
                                                     })
                                                 }
-                                                className="admin-category-action-btn admin-category-delete-btn"
+                                                className="rk-iconbtn rk-iconbtn--danger"
                                                 title="Xóa"
                                             >
                                                 <Trash2
@@ -560,7 +519,7 @@ export default function AdminCategoryPage() {
                     <div className="admin-category-detail-grid">
                         <div className="admin-category-card">
                             <span className="admin-category-input-label">
-                                TÊN Danh mục
+                                Tên danh mục
                             </span>
                             <p className="admin-category-detail-name">
                                 {selectedCategory.name}
@@ -727,44 +686,12 @@ export default function AdminCategoryPage() {
                                 </div>
 
                                 {/* THÊM: Pagination for Dishes */}
-                                {categoryDishes.length > DISH_ITEMS_PER_PAGE && (
-                                    <div className="admin-category-pagination admin-category-dish-pagination">
-                                        <div className="admin-category-pagination-info">
-                                            <span className="admin-category-pagination-current-page">
-                                                Trang {dishPage} / {totalDishPages}
-                                            </span>
-                                        </div>
-                                        <div className="admin-category-pagination-controls">
-                                            <button
-                                                onClick={goToPreviousDishPage}
-                                                disabled={dishPage === 1}
-                                                className="admin-category-pagination-btn"
-                                            >
-                                                ◀
-                                            </button>
-                                            {getDishPageNumbers().map((page, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() =>
-                                                        typeof page === 'number' &&
-                                                        goToDishPage(page)
-                                                    }
-                                                    className={`admin-category-pagination-btn ${dishPage === page ? 'active' : ''} ${typeof page === 'string' ? 'dots' : ''}`}
-                                                    disabled={typeof page === 'string'}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ))}
-                                            <button
-                                                onClick={goToNextDishPage}
-                                                disabled={dishPage === totalDishPages}
-                                                className="admin-category-pagination-btn"
-                                            >
-                                                ▶
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                                <Pagination
+                                    page={dishPage}
+                                    totalPages={totalDishPages}
+                                    totalItems={totalDishItems}
+                                    onPageChange={setDishPage}
+                                />
                             </>
                         ) : (
                             <EmptyState
@@ -787,15 +714,15 @@ export default function AdminCategoryPage() {
                         </button>
                         <h3 className="admin-category-form-title">
                             {view === 'CREATE'
-                                ? 'THÊM Danh mục MỚI'
-                                : 'CHỈNH SỬA Danh mục'}
+                                ? 'Thêm danh mục mới'
+                                : 'Chỉnh sửa danh mục'}
                         </h3>
                     </div>
 
                     <form onSubmit={handleSave} className="admin-category-form-card">
                         <div className="admin-category-form-group">
                             <label className="admin-category-input-label">
-                                TÊN Danh mục{' '}
+                                Tên danh mục{' '}
                                 <span className="admin-category-required">*</span>
                             </label>
                             <input
@@ -807,7 +734,7 @@ export default function AdminCategoryPage() {
                                 onChange={(e) =>
                                     setFormData({...formData, name: e.target.value})
                                 }
-                                className="admin-category-input-field"
+                                className="rk-input"
                             />
                         </div>
 
@@ -831,7 +758,7 @@ export default function AdminCategoryPage() {
                                         description: e.target.value,
                                     })
                                 }
-                                className="admin-category-textarea-field"
+                                className="rk-textarea"
                             />
                         </div>
 

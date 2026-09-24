@@ -197,7 +197,7 @@ export default function WaiterReservationDetailPage() {
 
                     <button
                         type="button"
-                        className="waiter-action-btn"
+                        className="rk-btn rk-btn--primary"
                         disabled={!reservationId}
                         onClick={() =>
                             navigate(

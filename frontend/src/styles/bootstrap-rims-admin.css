@@ -472,12 +472,6 @@
     margin: 0 auto;
 }
 
-.rims-stat-card.active {
-    border-color: var(--rims-brand);
-    background: linear-gradient(to bottom right, var(--rims-surface), var(--rims-brand-soft));
-    box-shadow: 0 10px 20px -8px rgb(122 16 48 / 15%);
-}
-
 .rims-report-subtitle {
     margin: 0;
     font-size: 0.85rem;
@@ -525,10 +519,6 @@
     background: var(--rims-surface);
     color: var(--rims-brand);
     box-shadow: 0 4px 6px -1px rgb(36 21 18 / 5%);
-}
-
-.rims-report-actions .rims-btn-group {
-    order: 1;
 }
 
 .admin-range-filter-shell {
@@ -586,10 +576,6 @@
     font-weight: 650;
 }
 
-.rims-metric-box strong.text-revenue {
-    color: var(--rims-ok);
-}
-
 .rims-empty-report {
     width: 100%;
     min-height: 160px;
@@ -597,15 +583,6 @@
     place-items: center;
     color: var(--rims-ink-3);
     font-weight: 750;
-}
-
-/* Tables in Report */
-.rims-table-section .table-title {
-    margin: 0 0 1rem 0;
-    font-size: 0.95rem;
-    font-weight: 900;
-    color: var(--rims-ink-2);
-    letter-spacing: 0.05em;
 }
 
 /* Bestsellers lists */
@@ -836,10 +813,6 @@
     white-space: nowrap;
 }
 
-.bestseller-item-card .item-category-tag {
-    display: none;
-}
-
 .bestseller-item-card .item-visual-bar-container {
     height: 10px;
     background: var(--rims-surface-2);
@@ -865,19 +838,6 @@
 .bestseller-item-card .item-metric-row strong {
     color: var(--rims-ink-2);
     font-weight: 500;
-}
-
-.reservation-performance-row.row-very-good,
-.reservation-performance-row.row-good {
-    background: var(--rims-ok-soft);
-}
-
-.reservation-performance-row.row-warning {
-    background: var(--rims-busy-soft);
-}
-
-.reservation-performance-row.row-low {
-    background: var(--rims-alert-soft);
 }
 
 /* Weekly revenue overview dashboard */
@@ -1028,21 +988,6 @@
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2.2;
-}
-
-.weekly-overview-kpi-icon .comparison-status-icon,
-.weekly-comparison-card-icon .comparison-status-icon {
-    width: auto;
-    height: auto;
-    background: transparent;
-    border-radius: 0;
-    color: inherit;
-}
-
-.weekly-overview-kpi-icon .comparison-status-icon svg,
-.weekly-comparison-card-icon .comparison-status-icon svg {
-    width: 22px;
-    height: 22px;
 }
 
 .weekly-overview-kpi-card.tone-orange .weekly-overview-kpi-icon {
@@ -1379,8 +1324,7 @@
         grid-template-columns: 20px minmax(0, 1fr) 18px;
     }
 
-    .weekly-overview-kpi-grid,
-    .weekly-comparison-card-grid {
+    .weekly-overview-kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -1404,8 +1348,7 @@
         font-size: 25px;
     }
 
-    .weekly-overview-kpi-grid,
-    .weekly-comparison-card-grid {
+    .weekly-overview-kpi-grid {
         grid-template-columns: 1fr;
     }
 
@@ -1417,12 +1360,6 @@
     .weekly-shift-donut {
         width: min(186px, 100%);
     }
-}
-
-/* Order shift dashboard */
-.rims-stat-card.highlighted {
-    border-color: var(--rims-brand-line);
-    box-shadow: 0 12px 24px -14px rgb(122 16 48 / 32%);
 }
 
 .order-shift-dashboard-panel {
@@ -1456,12 +1393,6 @@
     justify-items: end;
     gap: 8px;
     max-width: 100%;
-}
-
-.order-shift-filter.active {
-    border-color: var(--rims-ok);
-    background: var(--rims-ok);
-    color: var(--rims-ink-on-brand);
 }
 
 .order-shift-kpi-grid {
@@ -1745,9 +1676,7 @@
         align-items: stretch;
     }
 
-    .order-shift-filter-area,
-    .order-shift-filter-bar,
-    .order-shift-week-selector {
+    .order-shift-filter-area {
         width: 100%;
         justify-content: flex-start;
     }
@@ -2030,10 +1959,6 @@
     color: var(--rims-brand);
 }
 
-.admin-revenue-calendar-day.outside-month {
-    color: var(--rims-ink-3);
-}
-
 .admin-revenue-calendar-day.today {
     box-shadow: inset 0 0 0 1px var(--rims-brand-line);
 }
@@ -2145,8 +2070,6 @@
         padding: 24px;
     }
 
-    .admin-revenue-card-row,
-    .admin-comparison-date-form,
     .admin-revenue-filter-controls {
         grid-template-columns: 1fr;
     }
@@ -2243,22 +2166,6 @@
     color: var(--rims-ink);
     font-weight: 700;
     box-shadow: 0 2px 4px rgb(36 21 18 / 6%);
-}
-
-.admin-category-search-input {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--rims-line-strong);
-    background-color: var(--rims-surface-2);
-    font-size: 13.5px;
-    outline: none;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease;
-}
-
-.admin-category-search-input:focus {
-    border-color: var(--rims-brand);
 }
 
 .admin-category-col-id {
@@ -2371,53 +2278,6 @@
     white-space: pre-wrap;
     max-height: 60px;
     overflow-y: auto;
-}
-
-.admin-category-status-badge.active {
-    background-color: var(--rims-ok-soft);
-    color: var(--rims-ok);
-}
-
-.admin-category-status-badge.hidden {
-    background-color: var(--rims-surface-2);
-    color: var(--rims-ink-2);
-}
-
-/* Action Buttons */
-.admin-category-action-btn {
-    background: var(--rims-surface-2);
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-
-    /* Thêm các dòng dưới đây */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    /* Tuyệt đối không cho nút bị bóp méo khi thu nhỏ màn hình */
-    transition: all 0.15s ease;
-}
-
-.admin-category-action-btn:hover:not(.disabled) {
-    background: var(--rims-surface-3);
-}
-
-.admin-category-delete-btn {
-    color: var(--rims-alert);
-}
-
-.admin-category-delete-btn:hover {
-    background: var(--rims-alert-soft);
-}
-
-.admin-category-edit-btn.disabled {
-    color: var(--rims-ink-3);
-    cursor: not-allowed;
-    background: var(--rims-surface-2);
 }
 
 /* Detail View */
@@ -2713,40 +2573,6 @@
     color: var(--rims-alert);
 }
 
-.admin-category-input-field {
-    width: 100%;
-    padding: 11px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--rims-line-strong);
-    font-size: 14px;
-    box-sizing: border-box;
-    outline: none;
-    background-color: var(--rims-surface-2);
-    transition: all 0.2s ease;
-}
-
-.admin-category-input-field:focus,
-.admin-category-textarea-field:focus {
-    border-color: var(--rims-brand);
-    background-color: var(--rims-surface);
-    box-shadow: 0 0 0 3px rgb(122 16 48 / 10%);
-}
-
-.admin-category-textarea-field {
-    width: 100%;
-    padding: 11px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--rims-line-strong);
-    font-size: 14px;
-    box-sizing: border-box;
-    outline: none;
-    background-color: var(--rims-surface-2);
-    transition: all 0.2s ease;
-    resize: none;
-    line-height: 1.5;
-    font-family: inherit;
-}
-
 /* Toggle */
 .admin-category-toggle-row {
     display: flex;
@@ -2825,10 +2651,6 @@
         width: 100%;
     }
 
-    .admin-category-detail-header-right .admin-category-btn-secondary {
-        flex: 1;
-    }
-
     .admin-category-detail-metrics {
         flex-direction: column;
         gap: 16px;
@@ -2854,12 +2676,6 @@
 
     .admin-category-col-actions {
         width: 100px;
-    }
-
-    .admin-category-cell-actions .admin-category-action-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
     }
 
     .admin-category-dish-col-date {
@@ -2898,48 +2714,6 @@
         0 1px 2px rgb(36 21 18 / 4%);
     border: 1px solid var(--rims-line);
     box-sizing: border-box;
-}
-
-/* Filter Container */
-.admin-dish-filter-container {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    height: 100%;
-}
-
-.admin-dish-search-input {
-    flex: 1.5;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--rims-line-strong);
-    background-color: var(--rims-surface-2);
-    font-size: 13.5px;
-    outline: none;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease;
-}
-
-.admin-dish-search-input:focus {
-    border-color: var(--rims-brand);
-}
-
-.admin-dish-select {
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--rims-line-strong);
-    background: var(--rims-surface);
-    cursor: pointer;
-    font-size: 13.5px;
-    color: var(--rims-ink-2);
-    outline: none;
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.admin-dish-select:focus {
-    border-color: var(--rims-brand);
 }
 
 .admin-dish-col-image {
@@ -3055,40 +2829,6 @@
     color: var(--rims-alert);
 }
 
-/* Action Buttons */
-.admin-dish-action-btn {
-    background: var(--rims-surface-2);
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--rims-ink-2);
-    transition: all 0.15s ease;
-}
-
-.admin-dish-action-btn:hover:not(.disabled) {
-    background: var(--rims-surface-3);
-}
-
-.admin-dish-delete-btn {
-    color: var(--rims-alert);
-}
-
-.admin-dish-delete-btn:hover {
-    background: var(--rims-alert-soft);
-}
-
-.admin-dish-edit-btn.disabled {
-    color: var(--rims-ink-3);
-    cursor: not-allowed;
-    background: var(--rims-surface-2);
-}
-
 /* Form */
 .admin-dish-form-group {
     display: flex;
@@ -3109,53 +2849,6 @@
     color: var(--rims-ink-3);
     margin-bottom: 6px;
     letter-spacing: 0.05em;
-}
-
-.admin-dish-input-field {
-    width: 100%;
-    padding: 11px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--rims-line-strong);
-    font-size: 14px;
-    box-sizing: border-box;
-    outline: none;
-    background-color: var(--rims-surface-2);
-    transition: all 0.2s ease;
-}
-
-.admin-dish-input-field:focus,
-.admin-dish-textarea-field:focus,
-.admin-dish-select-field:focus {
-    border-color: var(--rims-brand);
-    background-color: var(--rims-surface);
-    box-shadow: 0 0 0 3px rgb(122 16 48 / 10%);
-}
-
-.admin-dish-select-field {
-    width: 100%;
-    padding: 11px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--rims-line-strong);
-    font-size: 14px;
-    box-sizing: border-box;
-    outline: none;
-    background-color: var(--rims-surface-2);
-    cursor: pointer;
-}
-
-.admin-dish-textarea-field {
-    width: 100%;
-    padding: 11px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--rims-line-strong);
-    font-size: 14px;
-    box-sizing: border-box;
-    outline: none;
-    background-color: var(--rims-surface-2);
-    transition: all 0.2s ease;
-    resize: none;
-    line-height: 1.5;
-    font-family: inherit;
 }
 
 .admin-dish-error-text {
@@ -3281,12 +2974,6 @@
     padding-top: 16px;
 }
 
-.admin-dish-modal-actions .admin-dish-btn-primary,
-.admin-dish-modal-actions .admin-dish-btn-secondary {
-    width: 100%;
-    justify-content: center;
-}
-
 /* Danger Zone */
 .admin-dish-danger-zone {
     margin-top: 24px;
@@ -3386,15 +3073,6 @@
         grid-template-columns: 1fr;
     }
 
-    .admin-dish-filter-container {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .admin-dish-select {
-        max-width: 100%;
-    }
-
     .admin-dish-col-date {
         display: none;
     }
@@ -3415,12 +3093,6 @@
 
     .admin-dish-col-actions {
         width: 100px;
-    }
-
-    .admin-dish-cell-actions .admin-dish-action-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
     }
 }
 
@@ -3548,16 +3220,6 @@
     font-size: 12px;
     margin-top: 2px;
     display: block;
-}
-
-.admin-menu-status-badge.active {
-    background-color: var(--rims-ok-soft);
-    color: var(--rims-ok);
-}
-
-.admin-menu-status-badge.hidden {
-    background-color: var(--rims-surface-2);
-    color: var(--rims-ink-2);
 }
 
 /* Progress */
@@ -3759,89 +3421,6 @@
     }
 }
 
-/* ===== PAGINATION ===== */
-.admin-category-pagination,
-.admin-dish-pagination {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-top: 1px solid var(--rims-line);
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.admin-category-pagination-info,
-.admin-dish-pagination-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    color: var(--rims-ink-3);
-}
-
-.admin-category-pagination-current-page,
-.admin-dish-pagination-current-page {
-    font-weight: 600;
-    color: var(--rims-ink);
-    background: var(--rims-surface-2);
-    padding: 2px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.admin-category-pagination-controls,
-.admin-dish-pagination-controls {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.admin-category-pagination-btn,
-.admin-dish-pagination-btn {
-    min-width: 36px;
-    height: 36px;
-    padding: 0 10px;
-    border: 1px solid var(--rims-line);
-    border-radius: 6px;
-    background: white;
-    color: var(--rims-ink-2);
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.admin-category-pagination-btn:hover:not(:disabled):not(.dots),
-.admin-dish-pagination-btn:hover:not(:disabled):not(.dots) {
-    background: var(--rims-surface-2);
-    border-color: var(--rims-line-strong);
-}
-
-.admin-category-pagination-btn.active,
-.admin-dish-pagination-btn.active {
-    background: var(--rims-brand);
-    color: white;
-    border-color: var(--rims-ink);
-}
-
-.admin-category-pagination-btn:disabled,
-.admin-dish-pagination-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.admin-category-pagination-btn.dots,
-.admin-dish-pagination-btn.dots {
-    border: none;
-    background: transparent;
-    cursor: default;
-    pointer-events: none;
-}
-
 /* ==========================================================================
    FIX — Weekly dashboard KPI cards
    Mục tiêu: 4 ô KPI đều nhau, cân đối, đẹp hơn trên màn /dashboard
@@ -3935,6 +3514,11 @@
     height: 52px;
     border-radius: 18px;
     box-shadow: 0 12px 24px rgb(36 21 18 / 7%);
+}
+
+.weekly-overview-kpi-card.featured .weekly-overview-kpi-icon {
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
 }
 
 .weekly-overview-kpi-card.tone-orange .weekly-overview-kpi-icon,

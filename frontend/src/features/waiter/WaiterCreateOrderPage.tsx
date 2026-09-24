@@ -255,7 +255,7 @@ export default function WaiterCreateOrderPage() {
 
                     <button
                         type="button"
-                        className="waiter-action-btn"
+                        className="rk-btn rk-btn--primary"
                         disabled={submitting || isLoadingMenu || !tableIdNumber}
                         onClick={openConfirm}
                     >
@@ -268,7 +268,7 @@ export default function WaiterCreateOrderPage() {
                     placeholder="Tìm theo tên món hoặc danh mục…"
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
-                    className="waiter-search-input"
+                    className="rk-input"
                 />
 
                 <div className="waiter-category-nav">
@@ -296,7 +296,7 @@ export default function WaiterCreateOrderPage() {
 
                         <button
                             type="button"
-                            className="waiter-action-btn"
+                            className="rk-btn"
                             onClick={() => void loadMenu(undefined, true)}
                         >
                             Thử lại

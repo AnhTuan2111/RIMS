@@ -114,7 +114,7 @@ export default function WaiterOrderDetailPage() {
 
                     <button
                         type="button"
-                        className="waiter-action-btn"
+                        className="rk-btn rk-btn--primary"
                         disabled={!tableIdNumber}
                         onClick={() =>
                             navigate(`/waiter/tables/${tableIdNumber}/order/edit`)
@@ -144,7 +144,7 @@ export default function WaiterOrderDetailPage() {
 
                                     <button
                                         type="button"
-                                        className="waiter-action-btn"
+                                        className="rk-btn"
                                         onClick={() =>
                                             void loadServingOrders(undefined, true)
                                         }
