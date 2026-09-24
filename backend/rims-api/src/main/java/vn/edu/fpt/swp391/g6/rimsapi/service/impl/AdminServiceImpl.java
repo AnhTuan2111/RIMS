@@ -37,6 +37,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.entity.Category;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Dish;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.RestaurantTable;
+import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderItemStatus;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.OrderShift;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.PaymentMethod;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.TableStatus;
@@ -550,28 +551,45 @@ public class AdminServiceImpl implements AdminService
                 ? "Không xác định"
                 : invoice.getPayments().getFirst().getPaymentMethod().name());
 
-        List<InvoiceItemResponse> items = invoice.getOrder().getOrderItems().stream().map(orderItem -> {
-            InvoiceItemResponse item = new InvoiceItemResponse();
+        // Món bị huỷ không được tính tiền, nên cũng không được nằm trong hoá đơn.
+        // Trước đây lấy toàn bộ order item, nên khách nhìn thấy món mình không hề
+        // trả tiền — và tổng các dòng không khớp với số phải trả.
+        List<InvoiceItemResponse> items = invoice.getOrder().getOrderItems().stream()
+                .filter(orderItem -> orderItem.getStatus() != OrderItemStatus.CANCELLED)
+                .map(orderItem -> {
+                    InvoiceItemResponse item = new InvoiceItemResponse();
 
-            item.setDishName(orderItem.getDish().getName());
-            item.setQuantity(orderItem.getQuantity());
-            item.setUnitPrice(orderItem.getUnitPrice());
-            item.setAmount(orderItem.getSubTotal());
+                    item.setDishName(orderItem.getDish().getName());
+                    item.setQuantity(orderItem.getQuantity());
+                    item.setUnitPrice(orderItem.getUnitPrice());
+                    item.setAmount(orderItem.getSubTotal());
 
-            return item;
-        }).toList();
+                    return item;
+                })
+                .toList();
 
         response.setItems(items);
 
-        // Tính tạm tính = tổng subTotal các món
-        BigDecimal totalBeforeVat = invoice.getOrder().getOrderItems().stream()
-                .map(oi -> oi.getSubTotal() != null ? oi.getSubTotal() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        response.setTotalBeforeVat(totalBeforeVat);
+        // Tạm tính lấy từ chính hoá đơn, không cộng lại các dòng món.
+        //
+        // <p>Bản cũ cộng subTotal của MỌI order item, kể cả món đã huỷ. Do VAT
+        // được suy ra bằng phép trừ, mọi sai lệch ở tạm tính đều dồn hết vào dòng VAT:
+        // một hoá đơn có món bị huỷ hiện ra VAT ÂM và thành tiền nhỏ hơn tạm tính.
+        //
+        // <p>restaurantRevenueAmount là số đã chốt lúc thanh toán: finalAmount trừ VAT.
+        // Lấy nó thì tạm tính và VAT luôn khớp với nhau dù khách có dùng điểm hay không.
+        BigDecimal totalBeforeVat = invoice.getRestaurantRevenueAmount();
 
-        // Tính VAT = finalAmount - totalBeforeVat
-        BigDecimal vatAmount = invoice.getFinalAmount().subtract(totalBeforeVat);
-        response.setVatAmount(vatAmount);
+        if (totalBeforeVat == null)
+        {
+            // Hoá đơn cũ chưa có cột này: cộng lại từ các dòng còn hiệu lực.
+            totalBeforeVat = items.stream()
+                    .map(item -> item.getAmount() != null ? item.getAmount() : BigDecimal.ZERO)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        response.setTotalBeforeVat(totalBeforeVat);
+        response.setVatAmount(invoice.getFinalAmount().subtract(totalBeforeVat));
 
         // Số tiền khách trả (lấy từ payment đầu tiên)
         BigDecimal amountPaid = invoice.getPayments().isEmpty()

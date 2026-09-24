@@ -2008,3 +2008,205 @@ textarea.rk-input {
     max-height: 250px;
     overflow-y: auto;
 }
+
+/* ---------- Hàng công tắc ----------
+   Một lựa chọn bật/tắt kèm câu giải thích. Trước đây mỗi màn tự dựng lại:
+   admin-category-toggle-row, admin-dish-toggle-row. */
+
+.rk-switchrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+}
+
+.rk-switchrow__label {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-switchrow__desc {
+    margin: var(--rims-space-1) 0 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-switchrow input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    accent-color: var(--rims-brand);
+    cursor: pointer;
+}
+
+/* ---------- Hàng lựa chọn tròn ---------- */
+
+.rk-radiorow {
+    display: flex;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+}
+
+.rk-radiorow label {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    cursor: pointer;
+}
+
+.rk-radiorow input[type='radio'] {
+    accent-color: var(--rims-brand);
+    cursor: pointer;
+}
+
+/* ---------- Ảnh thu nhỏ ----------
+   Ảnh món trong bảng và trong hộp xem trước. */
+
+.rk-thumb {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    flex: none;
+    overflow: hidden;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+}
+
+.rk-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rk-thumb--lg {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--rims-radius-lg);
+}
+
+/* ---------- Vùng nguy hiểm ----------
+   Nhóm riêng các thao tác không hoàn tác được, tách khỏi phần còn lại của
+   biểu mẫu để không bấm nhầm. */
+
+.rk-dangerzone {
+    padding: var(--rims-space-4);
+    border: 1px solid var(--rims-alert-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-alert-soft);
+}
+
+.rk-dangerzone__title {
+    margin: 0 0 var(--rims-space-1);
+    color: var(--rims-alert);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-dangerzone__desc {
+    margin: 0 0 var(--rims-space-3);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-xs);
+}
+
+/* ---------- Hàng tỉ lệ có nhãn ----------
+   Dùng ở Tổng quan thực đơn và các báo cáo: tên bên trái, phần trăm bên
+   phải, thanh nằm dưới. */
+
+.rk-barrow {
+    display: grid;
+    gap: var(--rims-space-2);
+}
+
+.rk-barrow__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+}
+
+.rk-barrow__label {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-barrow__value {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+/* ---------- Hai cột ----------
+   Cột trái rộng hơn cột phải. Màn hẹp thì xếp dọc. */
+
+.rk-two {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--rims-space-5);
+    align-items: start;
+}
+
+.rk-two--wideleft {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+}
+
+@media (max-width: 1024px) {
+    .rk-two,
+    .rk-two--wideleft {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ---------- Hộp cuộn ----------
+   Danh sách dài nằm trong một thẻ có chiều cao cố định. */
+
+.rk-scrollbox {
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+/* ---------- Danh sách gọn ----------
+   Danh mục, món mới cập nhật: từng dòng có gạch ngăn, không phải bảng. */
+
+.rk-rowlist {
+    display: grid;
+}
+
+.rk-rowlist__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) 0;
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-rowlist__item:last-child {
+    border-bottom: 0;
+}
+
+.rk-rowlist__main {
+    min-width: 0;
+}
+
+.rk-rowlist__title {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-rowlist__meta {
+    margin: 2px 0 0;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}

@@ -3,7 +3,10 @@ import {useNavigate, useParams} from 'react-router-dom'
 
 import * as adminApi from '@/shared/api/admin'
 import type {AdminPaymentDetail} from '@/shared/api/admin'
-import {ErrorState, LoadingState} from '@/shared/components/feedback'
+import {ArrowLeft, ReceiptText} from 'lucide-react'
+
+import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
+import {PageCard, PageHeader} from '@/shared/components/ui'
 
 function formatCurrency(value: number) {
     return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
@@ -132,15 +135,10 @@ export default function AdminPaymentDetailPage() {
 
     if (!hasValidInvoiceId) {
         return (
-            <div className="admin-invoice-detail-page">
-                <div className="admin-invoice-detail-gradient" />
-                <div className="admin-invoice-detail-content">
-                    <div className="admin-invoice-detail-card admin-invoice-detail-state">
-                        <h2>Không thể tải dữ liệu</h2>
-                        <p>Mã hóa đơn không hợp lệ.</p>
-                    </div>
-                </div>
-            </div>
+            <ErrorState
+                title="Không thể tải dữ liệu"
+                message="Mã hóa đơn không hợp lệ."
+            />
         )
     }
 
@@ -168,121 +166,123 @@ export default function AdminPaymentDetailPage() {
     }
 
     return (
-        <div className="admin-invoice-detail-page">
-            <div className="admin-invoice-detail-gradient" />
-
-            <div className="admin-invoice-detail-content">
-                <div className="admin-invoice-detail-card admin-invoice-main-card">
-                    <div className="admin-invoice-detail-header">
+        <div className="rk-stack">
+            <PageCard>
+                <PageHeader
+                    eyebrow="Lịch sử hoá đơn"
+                    title={`Hoá đơn ORD-${payment.orderId}`}
+                    description={`Bàn ${formatTableName(payment.tableNumber)} · ${formatTime(
+                        payment.invoiceDate,
+                    )} ${formatDate(payment.invoiceDate)}`}
+                    icon={<ReceiptText className="rk-icon" aria-hidden="true" />}
+                    actions={
                         <button
-                            aria-label="Quay lại lịch sử hóa đơn"
-                            className="admin-invoice-detail-back-button"
                             type="button"
+                            className="rk-btn"
                             onClick={() => navigate(-1)}
                         >
-                            ‹
+                            <ArrowLeft className="rk-icon" aria-hidden="true" />
+                            Quay lại
                         </button>
+                    }
+                />
+            </PageCard>
 
-                        <div className="admin-invoice-detail-heading">
-                            <h1>Hóa đơn ORD-{payment.orderId}</h1>
+            <div className="rk-two rk-two--wideleft">
+                <PageCard>
+                    {payment.items.length === 0 ? (
+                        <EmptyState
+                            title="Hoá đơn này chưa có món ăn"
+                            description="Không có dòng món nào được ghi cho đơn hàng."
+                        />
+                    ) : (
+                        <div className="rk-tablewrap">
+                            <table className="rk-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Món ăn</th>
+                                        <th scope="col" className="rk-th--num">
+                                            SL
+                                        </th>
+                                        <th scope="col" className="rk-th--num">
+                                            Đơn giá
+                                        </th>
+                                        <th scope="col" className="rk-th--num">
+                                            Thành tiền
+                                        </th>
+                                    </tr>
+                                </thead>
 
-                            <p>
-                                Bàn: {formatTableName(payment.tableNumber)}
-                                <span className="admin-invoice-info-dot">•</span>
-                                Giờ: {formatTime(payment.invoiceDate)}{' '}
-                                {formatDate(payment.invoiceDate)}
-                            </p>
+                                <tbody>
+                                    {payment.items.map((item, index) => (
+                                        <tr key={`${item.dishName}-${index}`}>
+                                            <td>{item.dishName}</td>
+                                            <td className="rk-td--num">
+                                                {item.quantity}
+                                            </td>
+                                            <td className="rk-td--num">
+                                                {formatCurrency(item.unitPrice)}
+                                            </td>
+                                            <td className="rk-td--num">
+                                                <strong>
+                                                    {formatCurrency(item.amount)}
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
+                    )}
+                </PageCard>
 
-                    <div className="admin-invoice-detail-table">
-                        <div className="admin-invoice-detail-table-head">
-                            <span>Món ăn</span>
-                            <span>SL</span>
-                            <span>Đơn giá</span>
-                            <span>Thành tiền</span>
-                        </div>
+                <PageCard>
+                    <h3 className="rk-sectiontitle">Tổng kết</h3>
 
-                        {payment.items.length === 0 ? (
-                            <div className="admin-invoice-detail-empty">
-                                Hóa đơn này chưa có món ăn.
-                            </div>
-                        ) : (
-                            payment.items.map((item, index) => (
-                                <div
-                                    className="admin-invoice-detail-row"
-                                    key={`${item.dishName}-${index}`}
-                                >
-                                    <span className="admin-invoice-dish-name">
-                                        {item.dishName}
-                                    </span>
-
-                                    <span className="admin-invoice-qty">
-                                        {item.quantity}
-                                    </span>
-
-                                    <span className="admin-invoice-price">
-                                        {formatCurrency(item.unitPrice)}
-                                    </span>
-
-                                    <span className="admin-invoice-line-total">
-                                        {formatCurrency(item.amount)}
-                                    </span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-
-                <div className="admin-invoice-detail-card admin-invoice-summary-wrapper">
-                    <div className="admin-invoice-summary-card">
-                        <div className="admin-invoice-summary-row">
-                            <span className="admin-invoice-summary-label">Tạm tính</span>
-                            <span className="admin-invoice-summary-value">
+                    <div className="rk-summary">
+                        <div className="rk-summary__row">
+                            <span className="rk-summary__label">Tạm tính</span>
+                            <span className="rk-summary__value">
                                 {formatCurrency(payment.totalBeforeVat)}
                             </span>
                         </div>
 
-                        <div className="admin-invoice-summary-row">
-                            <span className="admin-invoice-summary-label">VAT (10%)</span>
-                            <span className="admin-invoice-summary-value">
+                        <div className="rk-summary__row">
+                            <span className="rk-summary__label">VAT (10%)</span>
+                            <span className="rk-summary__value">
                                 {formatCurrency(payment.vatAmount)}
                             </span>
                         </div>
 
-                        <div className="admin-invoice-summary-divider" />
-
-                        <div className="admin-invoice-summary-row admin-invoice-summary-row-total">
-                            <span className="admin-invoice-total-label">Thành tiền</span>
-                            <span className="admin-invoice-summary-highlight">
+                        <div className="rk-summary__row rk-summary__row--total">
+                            <span className="rk-summary__label">Thành tiền</span>
+                            <span className="rk-summary__value">
                                 {formatCurrency(payment.finalAmount)}
                             </span>
                         </div>
 
-                        <div className="admin-invoice-summary-row">
-                            <span className="admin-invoice-summary-label">
-                                Phương thức
-                            </span>
-                            <span className="admin-invoice-summary-value">
+                        <div className="rk-summary__row">
+                            <span className="rk-summary__label">Phương thức</span>
+                            <span className="rk-summary__value">
                                 {formatPaymentMethod(payment.paymentMethod)}
                             </span>
                         </div>
 
-                        <div className="admin-invoice-summary-row">
-                            <span className="admin-invoice-summary-label">Khách trả</span>
-                            <span className="admin-invoice-summary-value">
+                        <div className="rk-summary__row">
+                            <span className="rk-summary__label">Khách trả</span>
+                            <span className="rk-summary__value">
                                 {formatCurrency(payment.amountPaid)}
                             </span>
                         </div>
 
-                        <div className="admin-invoice-summary-row">
-                            <span className="admin-invoice-summary-label">Tiền thừa</span>
-                            <span className="admin-invoice-summary-value">
+                        <div className="rk-summary__row">
+                            <span className="rk-summary__label">Tiền thừa</span>
+                            <span className="rk-summary__value">
                                 {formatCurrency(payment.excessAmount)}
                             </span>
                         </div>
                     </div>
-                </div>
+                </PageCard>
             </div>
         </div>
     )
