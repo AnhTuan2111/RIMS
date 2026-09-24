@@ -745,8 +745,8 @@ button.rk-chip:hover {
    class .rk-* thì phần CSS cũ của nó xoá được và các dòng ở đây cũng bớt đi.
    ========================================================================= */
 
-/* Dải gradient tím→cam chạy ngang đỉnh mọi panel. */
-.rims-page-card::before,
+/* Dải gradient chạy ngang đỉnh mọi panel — một nét trang trí không mang
+   thông tin gì, và nó buộc thẻ phải overflow:hidden nên cắt mất lịch bật ra. */
 .chef-page > .page-card::before,
 .rims-app-content .chef-page > .page-card::before {
     display: none;
@@ -759,8 +759,7 @@ button.rk-chip:hover {
 }
 
 /* Bề mặt trắng tinh và bóng đổ trang trí. */
-.page-card,
-.rims-page-card {
+.page-card {
     background: var(--rims-surface);
     border-color: var(--rims-line);
     border-radius: var(--rims-radius-lg);
@@ -1672,6 +1671,20 @@ textarea.rk-input {
     background: var(--rims-surface-2);
 }
 
+/* Thẻ dùng trực tiếp làm khung của một mục, không có phần đầu và thân
+   riêng. PageCard dựng ra dạng này. */
+.rk-card--pad {
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-6);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+@media (max-width: 576px) {
+    .rk-card--pad {
+        padding: var(--rims-space-4);
+    }
+}
+
 .rk-card--flush .rk-card__body {
     padding: 0;
 }
@@ -2491,4 +2504,174 @@ textarea.rk-input {
     padding: var(--rims-space-3) var(--rims-space-4);
     border-top: 1px solid var(--rims-line-strong);
     color: var(--rims-ink);
+}
+
+/* ---------- Ô chọn ngày ----------
+   Ô nhập kèm lịch bật ra. Trước đây mỗi thứ trong đây có một tên riêng của
+   màn Doanh thu, dù không có gì gắn với doanh thu cả. */
+
+.rk-datefield {
+    position: relative;
+    display: grid;
+    gap: var(--rims-space-2);
+}
+
+.rk-datefield__shell {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    padding-right: var(--rims-space-3);
+    border: 1px solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+}
+
+.rk-datefield__shell:focus-within {
+    border-color: var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: 1px;
+}
+
+.rk-datefield__shell .rk-input {
+    border: 0;
+    background: transparent;
+}
+
+.rk-datefield__shell .rk-input:focus-visible {
+    outline: none;
+}
+
+.rk-datefield__trigger {
+    display: grid;
+    place-items: center;
+    flex: none;
+    color: var(--rims-ink-3);
+    cursor: pointer;
+}
+
+.rk-datefield__trigger:hover {
+    color: var(--rims-brand);
+}
+
+/* ---------- Lịch ---------- */
+
+.rk-calendar {
+    position: absolute;
+    top: calc(100% + var(--rims-space-2));
+    left: 0;
+    z-index: var(--rims-z-drawer);
+    width: 280px;
+    padding: var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-overlay);
+}
+
+.rk-calendar__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-2);
+    margin-bottom: var(--rims-space-3);
+}
+
+.rk-calendar__title {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-calendar__title select {
+    padding: 2px var(--rims-space-2);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-sm);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-calendar__navbtn {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+    cursor: pointer;
+}
+
+.rk-calendar__navbtn:hover {
+    background: var(--rims-surface-3);
+    color: var(--rims-ink);
+}
+
+.rk-calendar__weekdays,
+.rk-calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.rk-calendar__weekdays {
+    margin-bottom: var(--rims-space-1);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+    text-align: center;
+}
+
+.rk-calendar__day {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: var(--rims-radius-sm);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-sm);
+    cursor: pointer;
+}
+
+.rk-calendar__day:hover {
+    background: var(--rims-surface-2);
+}
+
+.rk-calendar__day.is-outside {
+    color: var(--rims-ink-3);
+    opacity: 0.5;
+}
+
+/* Hôm nay: viền. Ngày đang chọn: nền đặc. Hai dấu hiệu khác hẳn nhau, không
+   chỉ khác sắc, nên nhìn là phân biệt được ngay. */
+.rk-calendar__day.is-today {
+    box-shadow: inset 0 0 0 1px var(--rims-brand);
+}
+
+.rk-calendar__day.is-selected {
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-calendar__foot {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--rims-space-2);
+    margin-top: var(--rims-space-3);
+    padding-top: var(--rims-space-3);
+    border-top: 1px solid var(--rims-line);
+}
+
+.rk-calendar__foot button {
+    color: var(--rims-brand);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    cursor: pointer;
+}
+
+.rk-calendar__foot button:hover {
+    text-decoration: underline;
 }

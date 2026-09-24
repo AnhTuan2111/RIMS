@@ -1,4 +1,4 @@
-import {CalendarDays} from 'lucide-react'
+import {CalendarDays, ChevronLeft, ChevronRight} from 'lucide-react'
 import {
     formatDateForApi,
     formatDisplayDate,
@@ -14,6 +14,8 @@ import {
 import {formatRevenueCurrency} from './format'
 import type {RangePreset, RevenueDashboardData, WeekOption} from './types'
 import {useEffect, useRef, useState, type KeyboardEvent} from 'react'
+
+import {PageCard, PageHeader} from '@/shared/components/ui'
 export function RevenueCard({
     title,
     amount,
@@ -114,12 +116,13 @@ export function RevenueDateInput({
     }
 
     return (
-        <div className="admin-revenue-date-field" ref={fieldRef}>
+        <div className="rk-datefield" ref={fieldRef}>
             <label htmlFor={id}>{label}</label>
 
-            <span className="admin-revenue-date-input-shell">
+            <span className="rk-datefield__shell">
                 <input
                     aria-label={`${label} dạng ngày/tháng/năm`}
+                    className="rk-input"
                     id={id}
                     inputMode="numeric"
                     maxLength={10}
@@ -133,28 +136,25 @@ export function RevenueDateInput({
 
                 <button
                     aria-label={`Mở lịch ${label}`}
-                    className="admin-revenue-calendar-trigger"
+                    className="rk-datefield__trigger"
                     type="button"
                     onClick={openCalendar}
                 >
-                    <CalendarDays
-                        className="rk-icon admin-revenue-calendar-icon"
-                        aria-hidden="true"
-                    />
+                    <CalendarDays className="rk-icon" aria-hidden="true" />
                 </button>
             </span>
 
             {isCalendarOpen && (
                 <div
                     aria-label={`Lịch chọn ${label}`}
-                    className="admin-revenue-date-picker"
+                    className="rk-calendar"
                     role="dialog"
                     onKeyDown={handleCalendarKeyDown}
                 >
-                    <div className="admin-revenue-calendar-nav">
+                    <div className="rk-calendar__nav">
                         <button
                             aria-label="Chuyển đến tháng trước"
-                            className="admin-revenue-calendar-nav-button"
+                            className="rk-calendar__navbtn"
                             type="button"
                             onClick={() =>
                                 setCalendarDate(
@@ -167,10 +167,10 @@ export function RevenueDateInput({
                                 )
                             }
                         >
-                            &lsaquo;
+                            <ChevronLeft className="rk-icon" aria-hidden="true" />
                         </button>
 
-                        <div className="admin-revenue-calendar-title">
+                        <div className="rk-calendar__title">
                             <select
                                 aria-label="Chọn tháng"
                                 value={calendarDate.getMonth()}
@@ -204,7 +204,7 @@ export function RevenueDateInput({
 
                         <button
                             aria-label="Chuyển đến tháng tiếp theo"
-                            className="admin-revenue-calendar-nav-button"
+                            className="rk-calendar__navbtn"
                             type="button"
                             onClick={() =>
                                 setCalendarDate(
@@ -217,17 +217,17 @@ export function RevenueDateInput({
                                 )
                             }
                         >
-                            &rsaquo;
+                            <ChevronRight className="rk-icon" aria-hidden="true" />
                         </button>
                     </div>
 
-                    <div aria-hidden="true" className="admin-revenue-calendar-weekdays">
+                    <div aria-hidden="true" className="rk-calendar__weekdays">
                         {vietnameseWeekdayLabels.map((weekdayLabel) => (
                             <span key={weekdayLabel}>{weekdayLabel}</span>
                         ))}
                     </div>
 
-                    <div className="admin-revenue-calendar-grid">
+                    <div className="rk-calendar__grid">
                         {calendarDays.map((date) => {
                             const dateValue = formatDateForApi(date)
                             const displayDate = formatDisplayDate(dateValue)
@@ -238,10 +238,10 @@ export function RevenueDateInput({
                                 selectedDate && isSameCalendarDate(date, selectedDate)
                             const isToday = isSameCalendarDate(date, new Date())
                             const className = [
-                                'admin-revenue-calendar-day',
-                                isCurrentMonth ? '' : 'outside-month',
-                                isSelected ? 'selected' : '',
-                                isToday ? 'today' : '',
+                                'rk-calendar__day',
+                                isCurrentMonth ? '' : 'is-outside',
+                                isSelected ? 'is-selected' : '',
+                                isToday ? 'is-today' : '',
                             ]
                                 .filter(Boolean)
                                 .join(' ')
@@ -260,7 +260,7 @@ export function RevenueDateInput({
                         })}
                     </div>
 
-                    <div className="admin-revenue-calendar-footer">
+                    <div className="rk-calendar__foot">
                         <button
                             type="button"
                             onClick={() => {
@@ -306,17 +306,13 @@ export function PresetButtonGroup({
     onYearChange: (year: number) => void
 }) {
     return (
-        <div
-            className={
-                activePreset === 'CUSTOM_WEEK'
-                    ? 'admin-range-filter-shell expanded'
-                    : 'admin-range-filter-shell'
-            }
-        >
-            <div className="rims-btn-group">
+        <div className={activePreset === 'CUSTOM_WEEK' ? 'rk-stack' : 'rk-stack'}>
+            <div className="rk-segment">
                 <button
                     className={
-                        activePreset === 'TODAY' ? 'rims-btn-tab active' : 'rims-btn-tab'
+                        activePreset === 'TODAY'
+                            ? 'rk-segment__btn is-active'
+                            : 'rk-segment__btn'
                     }
                     disabled={isLoading}
                     type="button"
@@ -326,7 +322,9 @@ export function PresetButtonGroup({
                 </button>
                 <button
                     className={
-                        activePreset === 'LAST_7' ? 'rims-btn-tab active' : 'rims-btn-tab'
+                        activePreset === 'LAST_7'
+                            ? 'rk-segment__btn is-active'
+                            : 'rk-segment__btn'
                     }
                     disabled={isLoading}
                     type="button"
@@ -337,8 +335,8 @@ export function PresetButtonGroup({
                 <button
                     className={
                         activePreset === 'CUSTOM_WEEK'
-                            ? 'rims-btn-tab active'
-                            : 'rims-btn-tab'
+                            ? 'rk-segment__btn is-active'
+                            : 'rk-segment__btn'
                     }
                     disabled={isLoading}
                     type="button"
@@ -349,7 +347,7 @@ export function PresetButtonGroup({
             </div>
 
             {activePreset === 'CUSTOM_WEEK' && (
-                <div className="admin-week-selector">
+                <div className="rk-formgrid">
                     <label>
                         <span>Năm</span>
                         <select
@@ -411,20 +409,29 @@ export function RevenueDashboard({
     onApplyCustomRange: () => void
 }) {
     return (
-        <section className="admin-revenue-dashboard">
-            <header className="admin-revenue-dashboard-header">
-                <h2>Báo cáo tổng doanh thu</h2>
-                <p>Tổng quan doanh thu hiện tại.</p>
-            </header>
+        <div className="rk-stack">
+            <PageCard>
+                <PageHeader
+                    eyebrow="Thống kê"
+                    title="Báo cáo tổng doanh thu"
+                    description="Tổng quan doanh thu hiện tại."
+                />
 
-            {error && (
-                <div className="admin-revenue-alert">
-                    <span>{error}</span>
-                    <button disabled={isLoading} type="button" onClick={onReload}>
-                        Thử lại
-                    </button>
-                </div>
-            )}
+                {error && (
+                    <p className="rk-note rk-note--alert">
+                        <span>{error}</span>
+
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--danger"
+                            disabled={isLoading}
+                            onClick={onReload}
+                        >
+                            Thử lại
+                        </button>
+                    </p>
+                )}
+            </PageCard>
 
             <div aria-busy={isLoading} className="rk-statrow">
                 <RevenueCard amount={data.totalRevenue?.revenue} title="Tổng doanh thu" />
@@ -443,57 +450,50 @@ export function RevenueDashboard({
                 <RevenueCard amount={data.yearlyRevenue?.revenue} title="Doanh thu năm" />
             </div>
 
-            <section className="admin-revenue-filter-panel">
-                <h3>Bộ lọc khoảng ngày tùy chỉnh</h3>
+            <PageCard>
+                <h3 className="rk-sectiontitle">Khoảng ngày tùy chọn</h3>
 
                 <form
-                    className="admin-revenue-filter-content"
+                    className="rk-stack"
                     onSubmit={(event) => {
                         event.preventDefault()
                         onApplyCustomRange()
                     }}
                 >
-                    <div className="admin-revenue-filter-left">
-                        <div className="admin-revenue-filter-controls">
-                            <RevenueDateInput
-                                id="admin-revenue-from-date"
-                                label="Từ ngày"
-                                value={fromDate}
-                                onChange={onFromDateChange}
-                            />
+                    <div className="rk-filterbar">
+                        <RevenueDateInput
+                            id="admin-revenue-from-date"
+                            label="Từ ngày"
+                            value={fromDate}
+                            onChange={onFromDateChange}
+                        />
 
-                            <RevenueDateInput
-                                id="admin-revenue-to-date"
-                                label="Đến ngày"
-                                value={toDate}
-                                onChange={onToDateChange}
-                            />
+                        <RevenueDateInput
+                            id="admin-revenue-to-date"
+                            label="Đến ngày"
+                            value={toDate}
+                            onChange={onToDateChange}
+                        />
 
-                            <button
-                                className="admin-revenue-apply-button"
-                                disabled={isCustomLoading}
-                                type="submit"
-                            >
-                                {isCustomLoading
-                                    ? 'Đang áp dụng…'
-                                    : 'Áp dụng khoảng ngày'}
-                            </button>
-                        </div>
-
-                        {customRangeError && (
-                            <p className="admin-revenue-filter-error">
-                                {customRangeError}
-                            </p>
-                        )}
+                        <button
+                            type="submit"
+                            className="rk-btn rk-btn--primary"
+                            disabled={isCustomLoading}
+                        >
+                            {isCustomLoading ? 'Đang áp dụng…' : 'Áp dụng'}
+                        </button>
                     </div>
+
+                    {customRangeError && (
+                        <p className="rk-formerror">{customRangeError}</p>
+                    )}
 
                     <RevenueCard
                         amount={data.customRangeRevenue?.revenue}
-                        className="admin-revenue-custom-card"
                         title="Doanh thu khoảng ngày"
                     />
                 </form>
-            </section>
-        </section>
+            </PageCard>
+        </div>
     )
 }

@@ -42,41 +42,6 @@
 
 /* Page card */
 
-.rims-page-card {
-    position: relative;
-    margin-bottom: 1.25rem;
-    padding: 1.35rem;
-    overflow: hidden;
-    border: 1px solid var(--rims-line);
-    border-radius: 24px;
-    background: var(--rims-surface);
-
-    /* Bootstrap tung lo hai thu nay qua .card: the la mot cot doc, va chu
-       trong the lay --rims-ink chu khong thua ke mau nhat cua vung ngoai. */
-    display: flex;
-    flex-direction: column;
-    color: var(--rims-ink);
-    box-shadow:
-        0 16px 45px rgb(var(--rims-tint-ink) / 8%),
-        inset 0 1px 0 rgb(var(--rims-tint-hi) / 90%);
-}
-
-.rims-page-card::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 4px;
-    background: linear-gradient(90deg, var(--rims-brand), var(--rims-brand) 45%, var(--rims-busy) 78%, transparent);
-}
-
-.rims-page-card-soft {
-    background: var(--rims-surface-2);
-}
-
-.rims-page-card-flush {
-    padding: 0;
-}
-
 /* General shared grids that many pages already use */
 
 .table-grid {
@@ -99,15 +64,7 @@
     font-weight: 750;
 }
 
-@media (max-width: 992px) {
-}
-
 @media (max-width: 576px) {
-    .rims-page-card {
-        padding: 1rem;
-        border-radius: 18px;
-    }
-
     .table-grid {
         grid-template-columns: 1fr;
     }

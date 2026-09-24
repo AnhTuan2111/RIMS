@@ -12,15 +12,11 @@ export function PageCard({
     ...props
 }: PageCardProps) {
     const variantClass =
-        variant === 'soft'
-            ? 'rims-page-card-soft'
-            : variant === 'flush'
-              ? 'rims-page-card-flush'
-              : 'rims-page-card-default'
+        variant === 'soft' ? 'rk-card--soft' : variant === 'flush' ? 'rk-card--flush' : ''
 
     return (
         <section
-            className={['page-card', 'rims-page-card', variantClass, className]
+            className={['rk-card', 'rk-card--pad', variantClass, className]
                 .filter(Boolean)
                 .join(' ')}
             {...props}
