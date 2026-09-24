@@ -9,44 +9,130 @@
    thể chuyển từng màn một mà không sợ đụng nhau.
    ========================================================================= */
 
-/* ---------- Cầu nối sang Bootstrap ----------
+/* ---------- Nền chung và reset ----------
 
-   Bootstrap mang bảng biến riêng với giá trị cố định. Mọi thẻ .card đều đặt
-   lại color về --bs-body-color (#212529), nên ở chế độ tối chữ trong thẻ vẫn
-   là màu tối trên nền tối — 1:1. Trỏ các biến đó vào token để Bootstrap đi
-   theo chủ đề thay vì chống lại nó. */
+   Trước đây phần này do reboot của Bootstrap lo, cộng một file
+   bootstrap-rims-base.css nhỏ chồng lên. Bootstrap tốn 232 KB cho đúng 20
+   lượt dùng class, và bảng biến --bs-* của nó phải được trỏ thủ công về
+   token thì chế độ tối mới không vỡ. Nay gộp vào đây, một lớp duy nhất. */
 
-:root {
-    --bs-body-color: var(--rims-ink);
-    --bs-body-color-rgb: 36, 21, 18;
-    --bs-body-bg: var(--rims-paper);
-    --bs-emphasis-color: var(--rims-ink);
-    --bs-secondary-color: var(--rims-ink-2);
-    --bs-tertiary-color: var(--rims-ink-3);
-    --bs-border-color: var(--rims-line);
-    --bs-border-color-translucent: var(--rims-line);
-    --bs-link-color: var(--rims-brand);
-    --bs-link-hover-color: var(--rims-brand-hover);
-    /* Giữ nguyên `inherit` như mặc định của Bootstrap. Đặt một màu cố định ở
-       đây thì tiêu đề nằm trong thẻ tô màu thương hiệu mất quyền thừa kế và
-       tụt xuống 1.63:1. */
-    --bs-heading-color: inherit;
-    --bs-secondary-bg: var(--rims-surface-2);
-    --bs-tertiary-bg: var(--rims-surface-3);
-    --bs-card-bg: var(--rims-surface);
-    --bs-card-color: var(--rims-ink);
-    --bs-card-border-color: var(--rims-line);
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
-/* ---------- Nền chung ---------- */
+html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+}
 
 body {
+    margin: 0;
+    min-height: 100vh;
     font-family: var(--rims-font-sans);
     font-size: var(--rims-text-base);
     line-height: var(--rims-leading-normal);
     background: var(--rims-paper);
     color: var(--rims-ink);
     -webkit-font-smoothing: antialiased;
+}
+
+main {
+    min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    margin-bottom: var(--rims-space-2);
+    line-height: var(--rims-leading-snug);
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: var(--rims-space-4);
+}
+
+ul,
+ol {
+    margin-top: 0;
+    margin-bottom: var(--rims-space-4);
+    padding-left: var(--rims-space-6);
+}
+
+hr {
+    margin: var(--rims-space-4) 0;
+    border: 0;
+    border-top: 1px solid var(--rims-line);
+}
+
+img,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* KHÔNG gộp svg vào luật trên: biểu tượng có width/height riêng, ép
+   height:auto là chúng bẹp xuống còn 0. */
+svg {
+    vertical-align: middle;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+legend {
+    padding: 0;
+}
+
+label {
+    display: inline-block;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+    margin: 0;
+}
+
+button {
+    cursor: pointer;
+
+    /* Nút không tự khai báo nền thì phải trong suốt. Trước đây chúng nhận nền
+       mặc định của trình duyệt — ở chế độ tối đó là xám đặc, nên chữ màu
+       thương hiệu trên nó chỉ còn 1.74:1. Class nào có đặt nền vẫn thắng luật
+       này vì độ ưu tiên cao hơn. */
+    background: transparent;
+    border: 0;
+    color: inherit;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+a {
+    color: inherit;
+}
+
+::placeholder {
+    color: var(--rims-ink-3);
+    opacity: 1;
 }
 
 /* Mọi chỗ hiện số thẳng cột: tiền, số lượng, giờ, mã đơn. */
@@ -1393,4 +1479,168 @@ textarea.rk-input {
 .rk-statcard--alert .rk-statcard__icon {
     background: var(--rims-surface);
     color: var(--rims-alert);
+}
+
+/* ---------- Tiêu đề trang ----------
+   Trước đây khối này dựng bằng 11 class tiện ích của Bootstrap
+   (d-flex, align-items-start, justify-content-between, gap-3, flex-wrap,
+   min-w-0, mb-1, mb-0...) rải trong JSX, nên muốn đổi bố cục là phải sửa
+   trong file component chứ không phải trong CSS. */
+
+.rk-pagehead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+}
+
+.rk-pagehead__lead {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rims-space-4);
+
+    /* Không có min-width:0 thì tên dài đẩy hàng nút bật ra khỏi thẻ. */
+    min-width: 0;
+}
+
+.rk-pagehead__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-pagehead__body {
+    min-width: 0;
+}
+
+.rk-pagehead__eyebrow {
+    margin-bottom: var(--rims-space-1);
+    color: var(--rims-brand);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+}
+
+.rk-pagehead__title {
+    margin: 0 0 var(--rims-space-1);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+    letter-spacing: var(--rims-tracking-tight);
+    line-height: var(--rims-leading-tight);
+}
+
+.rk-pagehead__desc {
+    margin: 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-pagehead__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .rk-pagehead {
+        align-items: stretch;
+    }
+
+    .rk-pagehead__actions {
+        width: 100%;
+    }
+}
+
+/* ---------- Trạng thái rỗng · đang tải · lỗi ----------
+   Ba trạng thái dùng chung một khung: biểu tượng tròn, tiêu đề, một dòng
+   giải thích, rồi mới tới nút. Chỉ khác nhau ở màu của biểu tượng. */
+
+.rk-feedback {
+    display: grid;
+    justify-items: center;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-10) var(--rims-space-6);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    text-align: center;
+}
+
+.rk-feedback--sm {
+    padding: var(--rims-space-6) var(--rims-space-4);
+}
+
+.rk-feedback--lg {
+    padding: var(--rims-space-16) var(--rims-space-6);
+}
+
+.rk-feedback__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+}
+
+.rk-feedback__icon--alert {
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
+.rk-feedback__icon .rk-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.rk-feedback__title {
+    margin: 0 0 var(--rims-space-2);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-feedback__text {
+    margin: 0;
+    max-width: 46ch;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-feedback__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+    margin-top: var(--rims-space-3);
+}
+
+/* ---------- Con quay ----------
+   Thay cho .spinner-border của Bootstrap. */
+
+.rk-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--rims-brand-line);
+    border-top-color: var(--rims-brand);
+    border-radius: var(--rims-radius-pill);
+    animation: rk-spin 720ms linear infinite;
+}
+
+@keyframes rk-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }

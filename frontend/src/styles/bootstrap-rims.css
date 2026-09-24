@@ -3,7 +3,6 @@
    bộ var(--rims-*) rải rác trong repo đều rơi về giá trị rỗng. */
 @import './tokens.css';
 
-@import './bootstrap-rims-base.css';
 @import './bootstrap-rims-auth.css';
 @import './bootstrap-rims-layout.css';
 @import './bootstrap-rims-components.css';

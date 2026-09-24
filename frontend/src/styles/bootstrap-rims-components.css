@@ -47,10 +47,15 @@
     margin-bottom: 1.25rem;
     padding: 1.35rem;
     overflow: hidden;
-    border: 1px solid rgb(var(--rims-tint-ink) / 90%) !important;
-    border-radius: 24px !important;
-    background:
-        linear-gradient(180deg, rgb(var(--rims-tint-hi) / 96%), rgb(var(--rims-tint-hi) / 90%)), var(--rims-surface);
+    border: 1px solid var(--rims-line);
+    border-radius: 24px;
+    background: var(--rims-surface);
+
+    /* Bootstrap tung lo hai thu nay qua .card: the la mot cot doc, va chu
+       trong the lay --rims-ink chu khong thua ke mau nhat cua vung ngoai. */
+    display: flex;
+    flex-direction: column;
+    color: var(--rims-ink);
     box-shadow:
         0 16px 45px rgb(var(--rims-tint-ink) / 8%),
         inset 0 1px 0 rgb(var(--rims-tint-hi) / 90%);
@@ -65,8 +70,7 @@
 }
 
 .rims-page-card-soft {
-    background:
-        linear-gradient(180deg, rgb(var(--rims-tint-hi) / 98%), rgb(var(--rims-tint-hi) / 94%)), var(--rims-surface);
+    background: var(--rims-surface-2);
 }
 
 .rims-page-card-flush {

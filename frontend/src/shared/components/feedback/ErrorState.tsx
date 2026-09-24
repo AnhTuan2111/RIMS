@@ -21,17 +21,17 @@ export function ErrorState({
     const displayMessage = message ?? description ?? 'Đã có lỗi xảy ra. Vui lòng thử lại.'
 
     return (
-        <div className="rims-feedback-state rims-feedback-error">
-            <div className="rims-feedback-icon error">
-                <TriangleAlert className="rims-feedback-glyph" aria-hidden="true" />
+        <div className="rk-feedback">
+            <div className="rk-feedback__icon rk-feedback__icon--alert">
+                <TriangleAlert className="rk-icon" aria-hidden="true" />
             </div>
 
             <div>
-                <h3>{title}</h3>
-                <p>{displayMessage}</p>
+                <h3 className="rk-feedback__title">{title}</h3>
+                <p className="rk-feedback__text">{displayMessage}</p>
 
                 {(onRetry || action) && (
-                    <div className="d-flex align-items-center justify-content-center gap-2 flex-wrap mt-3">
+                    <div className="rk-feedback__actions">
                         {onRetry && (
                             <button
                                 type="button"

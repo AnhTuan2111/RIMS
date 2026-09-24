@@ -58,7 +58,7 @@
 
 .customer-tab:hover {
     color: var(--rims-ink);
-    background: rgb(var(--rims-tint-hi) / 50%);
+    background: var(--rims-surface-2);
 }
 
 .customer-tab.active {

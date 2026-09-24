@@ -340,9 +340,9 @@
     align-items: center;
     gap: 20px;
 
-    background: rgb(var(--rims-tint-hi) / 86%);
+    background: var(--rims-surface);
 
-    border-bottom: 1px solid rgb(var(--rims-tint-ink) / 18%);
+    border-bottom: 1px solid var(--rims-line);
 
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);

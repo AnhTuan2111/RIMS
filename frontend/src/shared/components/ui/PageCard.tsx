@@ -20,14 +20,7 @@ export function PageCard({
 
     return (
         <section
-            className={[
-                'page-card',
-                'card',
-                'border-0',
-                'rims-page-card',
-                variantClass,
-                className,
-            ]
+            className={['page-card', 'rims-page-card', variantClass, className]
                 .filter(Boolean)
                 .join(' ')}
             {...props}
