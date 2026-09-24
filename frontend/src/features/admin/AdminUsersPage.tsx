@@ -372,15 +372,7 @@ export default function AdminUsersPage() {
 
             {/* ── Alerts ── */}
             {error && (
-                <div
-                    className="rk-note rk-note--alert"
-                    style={{
-                        marginBottom: 16,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                    }}
-                >
+                <div className="rk-note rk-note--alert">
                     <span>{error}</span>
                     <button
                         type="button"
@@ -391,29 +383,10 @@ export default function AdminUsersPage() {
                     </button>
                 </div>
             )}
-            {successMsg && (
-                <div
-                    style={{
-                        background: 'var(--rims-ok-soft)',
-                        color: 'var(--rims-ok)',
-                        padding: '12px 16px',
-                        borderRadius: 8,
-                        marginBottom: 16,
-                        fontWeight: 500,
-                    }}
-                >
-                    {successMsg}
-                </div>
-            )}
+            {successMsg && <div className="rk-note rk-note--ok">{successMsg}</div>}
 
             {/* ── Tabs ── */}
-            <div
-                style={{
-                    display: 'flex',
-                    borderBottom: '2px solid var(--rims-line)',
-                    marginBottom: 20,
-                }}
-            >
+            <div className="rk-tabs">
                 {(['staff', 'customer'] as Tab[]).map((t) => (
                     <button
                         key={t}
@@ -423,20 +396,8 @@ export default function AdminUsersPage() {
                             setFilterStatus('all')
                             setPage(0)
                         }}
-                        style={{
-                            padding: '10px 28px',
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            borderBottom:
-                                tab === t
-                                    ? '2px solid var(--rims-brand)'
-                                    : '2px solid transparent',
-                            color: tab === t ? 'var(--rims-brand)' : 'var(--rims-ink-3)',
-                            fontWeight: tab === t ? 700 : 400,
-                            marginBottom: -2,
-                            fontSize: 14,
-                        }}
+                        type="button"
+                        className={`rk-tabs__btn${tab === t ? ' is-active' : ''}`}
                     >
                         {t === 'staff'
                             ? `Nhân viên  (${staffCount})`
@@ -446,7 +407,7 @@ export default function AdminUsersPage() {
             </div>
 
             {/* ── Search & Filter bar ── */}
-            <div style={{display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap'}}>
+            <div className="rk-filterbar">
                 <input
                     value={search}
                     onChange={(e) => {
@@ -454,50 +415,27 @@ export default function AdminUsersPage() {
                         setPage(0)
                     }}
                     placeholder="Tìm theo tên, tài khoản, email hoặc số điện thoại…"
-                    style={{
-                        flex: 1,
-                        minWidth: 200,
-                        padding: '8px 12px',
-                        border: '1px solid var(--rims-line-strong)',
-                        borderRadius: 8,
-                        fontSize: 13,
-                    }}
+                    className="rk-input"
                 />
-                {(['all', 'active', 'inactive'] as const).map((s) => (
-                    <button
-                        key={s}
-                        onClick={() => {
-                            setFilterStatus(s)
-                            setPage(0)
-                        }}
-                        style={{
-                            padding: '8px 14px',
-                            borderRadius: 8,
-                            border: '1px solid',
-                            borderColor:
-                                filterStatus === s
-                                    ? 'var(--rims-brand)'
-                                    : 'var(--rims-line-strong)',
-                            background:
-                                filterStatus === s
-                                    ? 'var(--rims-brand-soft)'
-                                    : 'var(--rims-surface)',
-                            color:
-                                filterStatus === s
-                                    ? 'var(--rims-brand)'
-                                    : 'var(--rims-ink-3)',
-                            fontWeight: filterStatus === s ? 600 : 400,
-                            cursor: 'pointer',
-                            fontSize: 13,
-                        }}
-                    >
-                        {s === 'all'
-                            ? 'Tất cả'
-                            : s === 'active'
-                              ? 'Hoạt động'
-                              : 'Đã khóa'}
-                    </button>
-                ))}
+                <div className="rk-segment">
+                    {(['all', 'active', 'inactive'] as const).map((s) => (
+                        <button
+                            key={s}
+                            type="button"
+                            className={`rk-segment__btn${filterStatus === s ? ' is-active' : ''}`}
+                            onClick={() => {
+                                setFilterStatus(s)
+                                setPage(0)
+                            }}
+                        >
+                            {s === 'all'
+                                ? 'T\u1ea5t c\u1ea3'
+                                : s === 'active'
+                                  ? 'Ho\u1ea1t \u0111\u1ed9ng'
+                                  : '\u0110\u00e3 kho\u00e1'}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* ── Table ── */}
@@ -888,40 +826,15 @@ export default function AdminUsersPage() {
                         </>
                     }
                 >
-                    <div style={{marginBottom: 20}}>
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 14,
-                                padding: '16px 0',
-                                borderBottom: '1px solid var(--rims-line)',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    width: 48,
-                                    height: 48,
-                                    borderRadius: '50%',
-                                    background: 'var(--rims-brand)',
-                                    color: 'var(--rims-ink-on-brand)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontWeight: 700,
-                                    fontSize: 20,
-                                }}
-                            >
-                                {selectedUser.fullName.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <div style={{fontWeight: 700, fontSize: 16}}>
-                                    {selectedUser.fullName}
-                                </div>
-                                <div style={{color: 'var(--rims-ink-3)', fontSize: 13}}>
-                                    @{selectedUser.username}
-                                </div>
-                            </div>
+                    <div className="rk-idcard">
+                        <span className="rk-avatar">
+                            {selectedUser.fullName.charAt(0).toUpperCase()}
+                        </span>
+
+                        <div>
+                            <div className="rk-idcard__name">{selectedUser.fullName}</div>
+
+                            <p className="rk-idcard__meta">@{selectedUser.username}</p>
                         </div>
                     </div>
                     <DR label="Họ tên" value={selectedUser.fullName} />
@@ -982,19 +895,10 @@ export default function AdminUsersPage() {
                         </>
                     }
                 >
-                    <div
-                        style={{
-                            background: 'var(--rims-surface-2)',
-                            borderRadius: 8,
-                            padding: '10px 14px',
-                            marginBottom: 16,
-                            fontSize: 13,
-                            color: 'var(--rims-ink-3)',
-                        }}
-                    >
+                    <p className="rk-note">
                         Vai trò: <strong>{ROLE_LABELS[selectedUser.role]}</strong> · ID:{' '}
                         <strong>#{selectedUser.id}</strong>
-                    </div>
+                    </p>
                     <FieldGroup>
                         <Field label="Tên đăng nhập *">
                             <input
@@ -1047,13 +951,7 @@ export default function AdminUsersPage() {
                                         onChange={(e) =>
                                             setForm({...form, role: e.target.value})
                                         }
-                                        style={{
-                                            padding: '9px 12px',
-                                            border: '1px solid var(--rims-line-strong)',
-                                            borderRadius: 8,
-                                            fontSize: 14,
-                                            background: 'var(--rims-surface)',
-                                        }}
+                                        className="rk-select"
                                     >
                                         <option value="CHEF">Đầu bếp</option>
                                         <option value="WAITER">Phục vụ</option>

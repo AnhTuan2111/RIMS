@@ -3082,3 +3082,77 @@ textarea.rk-input {
         padding: var(--rims-space-4);
     }
 }
+
+/* ---------- Tab gạch chân ----------
+   Khác rk-segment ở chỗ: segment dùng cho bộ lọc phụ, tab dùng khi chuyển
+   giữa hai tập dữ liệu khác hẳn nhau. */
+
+.rk-tabs {
+    display: flex;
+    gap: var(--rims-space-1);
+    border-bottom: 2px solid var(--rims-line);
+}
+
+.rk-tabs__btn {
+    padding: var(--rims-space-3) var(--rims-space-5);
+    margin-bottom: -2px;
+    border-bottom: 2px solid transparent;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.rk-tabs__btn:hover:not(.is-active) {
+    color: var(--rims-ink);
+}
+
+.rk-tabs__btn:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline-offset: -2px;
+}
+
+.rk-tabs__btn.is-active {
+    border-bottom-color: var(--rims-brand);
+    color: var(--rims-brand);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* ---------- Ảnh đại diện chữ cái ----------
+   Dùng khi người dùng chưa có ảnh. */
+
+.rk-avatar {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* Đầu hộp thoại chi tiết: ảnh đại diện, tên, tên đăng nhập. */
+.rk-idcard {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-4);
+    padding-bottom: var(--rims-space-4);
+    margin-bottom: var(--rims-space-4);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-idcard__name {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-idcard__meta {
+    margin: 2px 0 0;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+}
