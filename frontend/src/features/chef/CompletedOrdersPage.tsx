@@ -176,11 +176,10 @@ export default function CompletedOrdersPage() {
                     title="Món đã hoàn thành hôm nay"
                     description="Chỉ hiển thị món hoàn thành trong ngày hôm nay. Tìm theo tên món, bàn, mã đơn hoặc mã item."
                     actions={
-                        <div className="rk-statrow">
-                            <div>
-                                <strong>{items.length}</strong>
-                                <span>Đã hoàn thành hôm nay</span>
-                            </div>
+                        <div className="rk-actions">
+                            <span className="rk-chip rk-chip--ok">
+                                {items.length} món đã hoàn thành
+                            </span>
 
                             <button
                                 type="button"

@@ -38,6 +38,30 @@ function getWaitingMinutes(value?: string) {
 }
 
 /**
+ * Thời gian chờ viết cho người đọc.
+ *
+ * <p>Bản cũ luôn in ra phút. Đơn nằm từ hôm trước thì thành "Chờ 84225 phút" —
+ * đúng về số nhưng không ai đọc ra được là gần hai tháng.
+ */
+function formatWaiting(minutes: number): string {
+    if (minutes < 60) {
+        return `${minutes} phút`
+    }
+
+    if (minutes < 1440) {
+        const hours = Math.floor(minutes / 60)
+        const rest = minutes % 60
+
+        return rest ? `${hours} giờ ${rest} phút` : `${hours} giờ`
+    }
+
+    const days = Math.floor(minutes / 1440)
+    const hours = Math.floor((minutes % 1440) / 60)
+
+    return hours ? `${days} ngày ${hours} giờ` : `${days} ngày`
+}
+
+/**
  * Chip thời gian chờ, đổi màu theo mức độ trễ.
  *
  * <p>Màu KHÔNG phải tín hiệu duy nhất: chip luôn ghi rõ số phút bằng chữ.
@@ -395,7 +419,7 @@ export default function GroupedKitchenPage() {
                                             <h3>{group.dishName}</h3>
 
                                             <p>
-                                                {group.items.length} order item ·{' '}
+                                                {group.items.length} dòng món ·{' '}
                                                 {
                                                     new Set(
                                                         group.items.map(
@@ -416,7 +440,7 @@ export default function GroupedKitchenPage() {
                                     </div>
 
                                     <span className={waitingChip}>
-                                        Chờ {waitingMinutes} phút
+                                        Chờ {formatWaiting(waitingMinutes)}
                                     </span>
 
                                     {group.hasNote && (

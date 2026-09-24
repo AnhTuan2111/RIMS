@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom'
 import {getChefDashboard, type ChefDashboardResponse} from '@/shared/api/chef'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
 import {usePolling} from '@/shared/hooks/usePolling'
 
 export default function ChefDashboardPage() {
@@ -109,39 +109,36 @@ export default function ChefDashboardPage() {
             </PageCard>
 
             <div className="rk-statgrid">
-                <Link to="/chef/orders" className="rk-statcard">
-                    <span className="rk-statcard__label">Đang chế biến</span>
+                <StatCard
+                    label="Đang chế biến"
+                    value={dashboard.preparingCount}
+                    description="Món đang nằm trong hàng đợi bếp."
+                    to="/chef/orders"
+                />
 
-                    <strong>{dashboard.preparingCount}</strong>
+                <StatCard
+                    label="Đã hoàn thành hôm nay"
+                    value={dashboard.completedCount}
+                    description="Món bếp đã xác nhận xong trong ngày."
+                    tone="ok"
+                    to="/chef/completed-orders"
+                />
 
-                    <p>Món đang nằm trong hàng đợi bếp.</p>
-                </Link>
-
-                <Link to="/chef/completed-orders" className="rk-statcard rk-statcard--ok">
-                    <span className="rk-statcard__label">Đã hoàn thành hôm nay</span>
-
-                    <strong>{dashboard.completedCount}</strong>
-
-                    <p>Món đã được bếp xác nhận hoàn thành trong ngày hôm nay.</p>
-                </Link>
-
-                <Link
+                <StatCard
+                    label="Đã huỷ hôm nay"
+                    value={dashboard.cancelledCount}
+                    description="Món bị huỷ trong ngày, Phục vụ cần báo khách."
+                    tone="alert"
                     to="/chef/cancelled-orders"
-                    className="rk-statcard rk-statcard--alert"
-                >
-                    <span className="rk-statcard__label">Đã hủy hôm nay</span>
+                />
 
-                    <strong>{dashboard.cancelledCount}</strong>
-
-                    <p>Món đã bị hủy trong ngày hôm nay và cần Waiter xử lý với khách.</p>
-                </Link>
-                <Link to="/chef/dishes" className="rk-statcard rk-statcard--busy">
-                    <span className="rk-statcard__label">Món đang tắt bán</span>
-
-                    <strong>{dashboard.unavailableDishCount}</strong>
-
-                    <p>Món hiện không khả dụng trên thực đơn.</p>
-                </Link>
+                <StatCard
+                    label="Món đang tắt bán"
+                    value={dashboard.unavailableDishCount}
+                    description="Món hiện không khả dụng trên thực đơn."
+                    tone="busy"
+                    to="/chef/dishes"
+                />
             </div>
 
             <PageCard>

@@ -238,18 +238,14 @@ export default function DishListPage() {
                     title={showUnavailableOnly ? 'Món đang tạm hết' : 'Quản lý món ăn'}
                     description="Tìm kiếm, lọc và thay đổi trạng thái phục vụ của thực đơn."
                     actions={
-                        <div className="rk-statrow">
-                            <div>
-                                <strong>{availableCount}</strong>
+                        <div className="rk-actions">
+                            <span className="rk-chip rk-chip--ok">
+                                {availableCount} món đang bán
+                            </span>
 
-                                <span>Đang bán</span>
-                            </div>
-
-                            <div>
-                                <strong>{unavailableCount}</strong>
-
-                                <span>Tạm hết</span>
-                            </div>
+                            <span className="rk-chip rk-chip--busy">
+                                {unavailableCount} món tạm hết
+                            </span>
 
                             <button
                                 type="button"

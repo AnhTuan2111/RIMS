@@ -3483,3 +3483,55 @@ textarea.rk-input {
     background: #00498a;
     border-color: #00498a;
 }
+
+/* Ô số liệu có thể là một liên kết — màn Tổng quan bếp bấm vào ô là sang
+   màn tương ứng. Không gạch chân, vì cả ô đã là vùng bấm. */
+a.rk-statcard {
+    text-decoration: none;
+    transition: border-color 120ms ease;
+}
+
+a.rk-statcard:hover {
+    border-color: var(--rims-line-strong);
+}
+
+a.rk-statcard:focus-visible {
+    outline: 2px solid var(--rims-brand);
+    outline-offset: 2px;
+}
+
+/* Dòng giải thích con số nói lên điều gì. */
+.rk-statcard__hint {
+    margin: var(--rims-space-2) 0 0;
+    max-width: 34ch;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    line-height: var(--rims-leading-normal);
+}
+
+/* ---------- Dải thông tin phụ của một hàng ----------
+   Vài cặp nhãn–giá trị nằm ngang, mỗi cặp xếp dọc. Màn Món đã huỷ trước
+   đây nhét các cặp này vào rk-rowlist__main — lớp đó không có bố cục cho
+   cặp small/strong, nên nhãn dính liền giá trị: "BànT12", "Số lượngx1". */
+
+.rk-metarow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rims-space-3) var(--rims-space-6);
+}
+
+.rk-metarow > div {
+    display: grid;
+    gap: 2px;
+}
+
+.rk-metarow small {
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-metarow strong {
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}

@@ -673,7 +673,7 @@ export default function WaiterUpdateOrderPage() {
                                                         {acknowledgingItemId ===
                                                         draft.orderItemId
                                                             ? 'Đang xác nhận…'
-                                                            : 'Đã xem'}
+                                                            : 'Xác nhận đã xem'}
                                                     </button>
                                                 )
                                             )}

@@ -589,11 +589,10 @@ export default function KitchenQueuePage() {
                         <p>Chọn món để xem chi tiết, hoàn thành món hoặc hủy món.</p>
                     </div>
 
-                    <div className="rk-statrow">
-                        <div>
-                            <strong>{items.length}</strong>
-                            <span>Đang chờ làm</span>
-                        </div>
+                    <div className="rk-actions">
+                        <span className="rk-chip rk-chip--busy">
+                            {items.length} món đang chờ làm
+                        </span>
 
                         <button
                             type="button"

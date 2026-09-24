@@ -127,6 +127,10 @@ export default function CancelledOrdersPage() {
                     </div>
 
                     <div className="rk-actions">
+                        <span className="rk-chip rk-chip--alert">
+                            {items.length} món đã huỷ hôm nay
+                        </span>
+
                         <button
                             type="button"
                             className="rk-btn rk-btn--quiet"
@@ -135,12 +139,6 @@ export default function CancelledOrdersPage() {
                             Làm mới
                         </button>
                     </div>
-                </div>
-
-                <div className="rk-statrow">
-                    Tổng cộng hôm nay:
-                    <strong>{items.length}</strong>
-                    món đã hủy
                 </div>
             </section>
 
@@ -203,7 +201,7 @@ export default function CancelledOrdersPage() {
                                     <span className="rk-chip rk-chip--alert">Đã hủy</span>
                                 </div>
 
-                                <div className="rk-rowlist__main">
+                                <div className="rk-metarow">
                                     <div>
                                         <small>Bàn</small>
                                         <strong>{item.tableNumber}</strong>
@@ -222,7 +220,7 @@ export default function CancelledOrdersPage() {
                                     </div>
 
                                     <div>
-                                        <small>LÝ DO HỦY</small>
+                                        <small>Lý do huỷ</small>
                                         <strong>
                                             {item.cancelReason || 'Không có lý do'}
                                         </strong>
