@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.UpdateProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
@@ -27,7 +26,6 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.report.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.restaurant.RestaurantProfileResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.service.AdminService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.RestaurantProfileService;
@@ -137,20 +135,8 @@ public class AdminController
         return ResponseEntity.noContent().build();
     }
 
-    // Legacy profile endpoints
-    @GetMapping("/user/profile/{id}")
-    public UserProfileResponse getProfile(@PathVariable Integer id)
-    {
-        return userService.getProfile(id);
-    }
-
-    @PutMapping("/user/profile/update/{id}")
-    public UserProfileResponse updateProfile(
-            @PathVariable Integer id,
-            @RequestBody @Valid UpdateProfileRequest request)
-    {
-        return userService.updateProfile(id, request);
-    }
+    // Hồ sơ cá nhân đã chuyển sang MeController (/rims/me). Hai endpoint cũ ở đây
+    // từng được màn Hồ sơ gọi để lách, nay không còn ai dùng.
 
     // =================== INVOICE ===================
 

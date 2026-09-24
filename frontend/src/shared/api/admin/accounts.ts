@@ -99,26 +99,3 @@ export async function setAccountStatus(id: number, active: boolean): Promise<voi
 export async function resetPassword(id: number): Promise<void> {
     await apiClient.post(`/admin/user/${id}/reset-password`)
 }
-
-/** Returns the profile of a specific user (used by ProfilePage) */
-export async function getProfile(
-    id: number,
-    signal?: AbortSignal,
-): Promise<UserProfileResponse> {
-    const res = await apiClient.get<UserProfileResponse>(`/admin/user/profile/${id}`, {
-        signal,
-    })
-    return res.data
-}
-
-/** Updates the caller's own profile */
-export async function updateProfile(
-    id: number,
-    data: UpdateOwnProfileRequest,
-): Promise<UserProfileResponse> {
-    const res = await apiClient.put<UserProfileResponse>(
-        `/admin/user/profile/update/${id}`,
-        data,
-    )
-    return res.data
-}

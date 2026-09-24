@@ -15,10 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import vn.edu.fpt.swp391.g6.rimsapi.dto.request.auth.UpdateProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.*;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.PageResponse;
-import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
@@ -55,40 +53,6 @@ public class UserServiceImpl implements UserService
         return userRepository.findAll().stream()
                 .map(this::convertToResponse)
                 .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public UserProfileResponse getProfile(Integer id)
-    {
-        User user = findUserById(id);
-        return toUserProfile(user);
-    }
-
-    @Override
-    @Transactional
-    public UserProfileResponse updateProfile(Integer id, UpdateProfileRequest request)
-    {
-        User user = findUserById(id);
-
-        if (!user.getPhone().equals(request.getPhone())
-                && userRepository.existsByPhone(request.getPhone()))
-        {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Số điện thoại đã được sử dụng");
-        }
-        if (request.getEmail() != null
-                && !request.getEmail().equals(user.getEmail())
-                && userRepository.existsByEmail(request.getEmail()))
-        {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã được sử dụng");
-        }
-
-        user.setFullName(request.getFullName());
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPhone(request.getPhone());
-        userRepository.save(user);
-        return toUserProfile(user);
     }
 
     // ===================== NEW =====================
@@ -367,19 +331,6 @@ public class UserServiceImpl implements UserService
         SecureRandom random = new SecureRandom();
         int otp = 100000 + random.nextInt(900000);
         return String.valueOf(otp);
-    }
-
-    private UserProfileResponse toUserProfile(User user)
-    {
-        return UserProfileResponse.builder()
-                .userId(user.getId())
-                .username(user.getUsername())
-                .fullName(user.getFullName())
-                .phone(user.getPhone())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .rewardPoints(user.getRewardPoints())
-                .build();
     }
 
     private UserResponse convertToResponse(User user)
