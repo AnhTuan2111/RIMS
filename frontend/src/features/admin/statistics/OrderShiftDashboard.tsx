@@ -1,5 +1,7 @@
 import {FileText, TrendingUp, Trophy} from 'lucide-react'
 import {PresetButtonGroup} from './RevenueDashboard'
+import {LoadingState} from '@/shared/components/feedback'
+import {PageCard, StatCard} from '@/shared/components/ui'
 import {getOrderShiftRangeLabel} from './dateUtils'
 import {buildDonutGradient, buildShiftRows, formatDecimal, formatNumber} from './format'
 import type {RangePreset, WeekOption} from './types'
@@ -38,16 +40,16 @@ export function OrderShiftDashboard({
     )
 
     return (
-        <section className="order-shift-dashboard-panel">
-            <header className="order-shift-dashboard-header">
-                <div>
-                    <h2>Thống kê đơn hàng theo ca</h2>
-                    <p className="rims-report-subtitle">
-                        Báo cáo đơn hàng đã thanh toán theo từng ca.
-                    </p>
-                </div>
+        <div className="rk-stack">
+            <PageCard>
+                <div className="rk-card__head-inline">
+                    <div>
+                        <h2 className="rk-sectiontitle">Thống kê đơn hàng theo ca</h2>
+                        <p className="rk-pagehead__desc">
+                            Báo cáo đơn hàng đã thanh toán theo từng ca.
+                        </p>
+                    </div>
 
-                <div className="order-shift-filter-area">
                     <PresetButtonGroup
                         activePreset={preset}
                         isLoading={isLoading}
@@ -60,138 +62,161 @@ export function OrderShiftDashboard({
                         onYearChange={onYearChange}
                     />
                 </div>
-            </header>
 
-            {error && <p className="revenue-comparison-error">{error}</p>}
+                {error && <p className="rk-note rk-note--alert">{error}</p>}
+            </PageCard>
 
-            <div className="order-shift-kpi-grid">
-                <article className="order-shift-kpi-card">
-                    <span className="order-shift-kpi-icon icon-green">
-                        <FileText className="rk-icon" aria-hidden="true" />
-                    </span>
-                    <div>
-                        <span>Tổng đơn đã thanh toán</span>
-                        <strong>{formatNumber(totalOrders)} đơn</strong>
-                    </div>
-                </article>
+            <div className="rk-statgrid">
+                <StatCard
+                    label="Tổng đơn đã thanh toán"
+                    value={`${formatNumber(totalOrders)} đơn`}
+                    textValue
+                    icon={<FileText className="rk-icon" aria-hidden="true" />}
+                />
 
-                <article className="order-shift-kpi-card featured">
-                    <span className="order-shift-kpi-icon icon-orange">
-                        <Trophy className="rk-icon" aria-hidden="true" />
-                    </span>
-                    <div>
-                        <span>Ca có nhiều đơn nhất</span>
-                        <strong>{highestShift?.displayName ?? 'Chưa có dữ liệu'}</strong>
-                        <small>
-                            {formatNumber(highestShift?.orderCount ?? 0)} đơn •{' '}
-                            {formatDecimal(highestShift?.percentage ?? 0)}%
-                        </small>
-                    </div>
-                </article>
+                <StatCard
+                    label="Ca có nhiều đơn nhất"
+                    value={highestShift?.displayName ?? 'Chưa có dữ liệu'}
+                    textValue
+                    tone="brand"
+                    icon={<Trophy className="rk-icon" aria-hidden="true" />}
+                />
 
-                <article className="order-shift-kpi-card">
-                    <span className="order-shift-kpi-icon icon-green">
-                        <TrendingUp className="rk-icon" aria-hidden="true" />
-                    </span>
-                    <div>
-                        <span>Trung bình mỗi ngày</span>
-                        <strong>{formatDecimal(averageOrdersPerDay)} đơn</strong>
-                    </div>
-                </article>
+                <StatCard
+                    label="Trung bình mỗi ngày"
+                    value={`${formatDecimal(averageOrdersPerDay)} đơn`}
+                    textValue
+                    icon={<TrendingUp className="rk-icon" aria-hidden="true" />}
+                />
             </div>
 
             {isLoading ? (
-                <div className="rims-empty-report">
-                    Đang tải dữ liệu đơn hàng theo ca...
-                </div>
+                <LoadingState
+                    size="sm"
+                    title="Đang tải đơn hàng theo ca…"
+                    description="Hệ thống đang tổng hợp số liệu theo khoảng thời gian đã chọn."
+                />
             ) : (
-                <div className="order-shift-detail-grid">
-                    <section className="order-shift-detail-card">
-                        <h3>Chi tiết theo ca</h3>
+                <div className="rk-two rk-two--wideleft">
+                    <PageCard>
+                        <h3 className="rk-sectiontitle">Chi tiết theo ca</h3>
 
-                        <div className="order-shift-table">
-                            <div className="order-shift-table-head">
-                                <span>Ca</span>
-                                <span>Thời gian</span>
-                                <span>Số đơn đã thanh toán</span>
-                                <span>Tỷ trọng</span>
-                            </div>
+                        <div className="rk-tablewrap">
+                            <table className="rk-table rk-table--compact">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Ca</th>
+                                        <th scope="col">Thời gian</th>
+                                        <th scope="col" className="rk-th--num">
+                                            Số đơn
+                                        </th>
+                                        <th scope="col" className="rk-th--num">
+                                            Tỷ trọng
+                                        </th>
+                                    </tr>
+                                </thead>
 
-                            {rows.map((row) => (
-                                <div
-                                    className={
-                                        row.shiftName === highestShift?.shiftName
-                                            ? 'order-shift-table-row highlighted'
-                                            : 'order-shift-table-row'
-                                    }
-                                    key={row.shiftName}
-                                >
-                                    <span>{row.displayName}</span>
-                                    <span>
-                                        {row.startTime} - {row.endTime}
-                                    </span>
-                                    <span>{formatNumber(row.orderCount)} đơn</span>
-                                    <span>{formatDecimal(row.percentage)}%</span>
-                                </div>
-                            ))}
+                                <tbody>
+                                    {rows.map((row) => (
+                                        <tr
+                                            key={row.shiftName}
+                                            className={
+                                                row.shiftName === highestShift?.shiftName
+                                                    ? 'is-highlighted'
+                                                    : undefined
+                                            }
+                                        >
+                                            <td>
+                                                <strong>{row.displayName}</strong>
+                                            </td>
 
-                            <div className="order-shift-table-row total">
-                                <span>Tổng</span>
-                                <span>
-                                    {getOrderShiftRangeLabel(
-                                        report,
-                                        preset,
-                                        selectedWeek,
-                                    )}
-                                </span>
-                                <span>{formatNumber(totalOrders)} đơn</span>
-                                <span>{totalOrders > 0 ? '100%' : '0%'}</span>
-                            </div>
+                                            <td>
+                                                {row.startTime}–{row.endTime}
+                                            </td>
+
+                                            <td className="rk-td--num">
+                                                {formatNumber(row.orderCount)}
+                                            </td>
+
+                                            <td className="rk-td--num">
+                                                {formatDecimal(row.percentage)}%
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+
+                                <tfoot>
+                                    <tr>
+                                        <td>
+                                            <strong>Tổng</strong>
+                                        </td>
+
+                                        <td>
+                                            {getOrderShiftRangeLabel(
+                                                report,
+                                                preset,
+                                                selectedWeek,
+                                            )}
+                                        </td>
+
+                                        <td className="rk-td--num">
+                                            <strong>{formatNumber(totalOrders)}</strong>
+                                        </td>
+
+                                        <td className="rk-td--num">
+                                            <strong>
+                                                {totalOrders > 0 ? '100%' : '0%'}
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
-                    </section>
+                    </PageCard>
 
-                    <section className="order-shift-detail-card chart-card">
-                        <h3>Tỷ trọng đơn theo ca</h3>
+                    <PageCard>
+                        <h3 className="rk-sectiontitle">Tỷ trọng đơn theo ca</h3>
 
-                        <div className="order-shift-donut-layout">
+                        <div className="rk-donutrow">
                             <div
-                                className="order-shift-donut"
+                                className="rk-donut"
                                 style={{
                                     background: `conic-gradient(from -90deg, ${donutGradient})`,
                                 }}
                             >
-                                <div className="order-shift-donut-hole">
-                                    <strong>{formatNumber(totalOrders)}</strong>
-                                    <span>đơn</span>
+                                <div className="rk-donut__hole">
+                                    <span className="rk-donut__value">
+                                        {formatNumber(totalOrders)}
+                                    </span>
+                                    <span className="rk-donut__label">đơn</span>
                                 </div>
                             </div>
 
-                            <div className="order-shift-legend">
+                            <ul className="rk-legend rk-legend--stack">
                                 {rows.map((row) => (
-                                    <div
-                                        className="order-shift-legend-item"
-                                        key={row.shiftName}
-                                    >
+                                    <li className="rk-legend__item" key={row.shiftName}>
                                         <span
-                                            className="legend-color"
-                                            style={{
-                                                background: row.color,
-                                            }}
+                                            className="rk-legend__dot"
+                                            style={{background: row.color}}
                                         />
+
                                         <div>
-                                            <strong>{row.displayName}</strong>
-                                            <span>
-                                                {formatDecimal(row.percentage)}% •{' '}
+                                            <div className="rk-rowlist__title">
+                                                {row.displayName}
+                                            </div>
+
+                                            <p className="rk-rowlist__meta">
+                                                {formatDecimal(row.percentage)}% ·{' '}
                                                 {formatNumber(row.orderCount)} đơn
-                                            </span>
+                                            </p>
                                         </div>
-                                    </div>
+                                    </li>
                                 ))}
-                            </div>
+                            </ul>
                         </div>
-                    </section>
+                    </PageCard>
                 </div>
             )}
-        </section>
+        </div>
     )
 }

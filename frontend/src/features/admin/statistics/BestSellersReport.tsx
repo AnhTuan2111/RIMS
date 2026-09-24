@@ -9,6 +9,9 @@ import {
 import type {RangePreset, WeekOption} from './types'
 import type {BestSellingDishItem, CategoryResponse} from '@/shared/api/admin'
 import {useState} from 'react'
+
+import {EmptyState, LoadingState} from '@/shared/components/feedback'
+import {PageCard} from '@/shared/components/ui'
 export function BestSellerDishImage({
     dishName,
     imageUrl,
@@ -20,20 +23,13 @@ export function BestSellerDishImage({
     const imageSrc = resolveDishImageSrc(imageUrl)
 
     if (!imageSrc || hasError) {
-        return (
-            <span className="bestseller-item-avatar bestseller-item-avatar-fallback">
-                {getDishInitial(dishName)}
-            </span>
-        )
+        return <span className="rk-thumb">{getDishInitial(dishName)}</span>
     }
 
     return (
-        <img
-            alt={dishName}
-            className="bestseller-item-avatar"
-            src={imageSrc}
-            onError={() => setHasError(true)}
-        />
+        <span className="rk-thumb">
+            <img alt={dishName} src={imageSrc} onError={() => setHasError(true)} />
+        </span>
     )
 }
 
@@ -75,126 +71,130 @@ export function BestSellersReport({
     const maxQuantity = Math.max(...items.map((item) => item.totalQuantity), 1)
 
     return (
-        <section className="order-shift-dashboard-panel admin-bestseller-dashboard-panel">
-            <header className="order-shift-dashboard-header">
+        <PageCard>
+            <div className="rk-card__head-inline">
                 <div>
-                    <h2>{title}</h2>
-                    <p className="rims-report-subtitle">{subtitle}</p>
+                    <h2 className="rk-sectiontitle">{title}</h2>
+                    <p className="rk-pagehead__desc">{subtitle}</p>
                 </div>
 
-                <div className="order-shift-filter-area">
-                    <PresetButtonGroup
-                        activePreset={preset}
-                        isLoading={isLoading}
-                        selectedWeek={selectedWeek}
-                        selectedYear={selectedYear}
-                        weekOptions={weekOptions}
-                        yearOptions={yearOptions}
-                        onChange={onPresetChange}
-                        onWeekChange={onWeekChange}
-                        onYearChange={onYearChange}
-                    />
-                </div>
-            </header>
+                <PresetButtonGroup
+                    activePreset={preset}
+                    isLoading={isLoading}
+                    selectedWeek={selectedWeek}
+                    selectedYear={selectedYear}
+                    weekOptions={weekOptions}
+                    yearOptions={yearOptions}
+                    onChange={onPresetChange}
+                    onWeekChange={onWeekChange}
+                    onYearChange={onYearChange}
+                />
+            </div>
 
             {categories && selectedCategoryId && onCategoryChange && (
-                <div className="admin-bestseller-category-filter-row">
-                    <label className="admin-bestseller-category-filter">
-                        <span>Danh mục</span>
-                        <select
-                            disabled={isLoading || categories.length === 0}
-                            value={selectedCategoryId}
-                            onChange={(event) => onCategoryChange(event.target.value)}
-                        >
-                            {categories.length === 0 ? (
-                                <option value="ALL">Chưa có danh mục</option>
-                            ) : (
-                                categories.map((category) => (
-                                    <option key={category.id} value={String(category.id)}>
-                                        {category.name}
-                                    </option>
-                                ))
-                            )}
-                        </select>
+                <div className="rk-field">
+                    <label className="rk-field__label" htmlFor="bestseller-category">
+                        Danh mục
                     </label>
+
+                    <select
+                        id="bestseller-category"
+                        className="rk-select"
+                        disabled={isLoading || categories.length === 0}
+                        value={selectedCategoryId}
+                        onChange={(event) => onCategoryChange(event.target.value)}
+                    >
+                        {categories.length === 0 ? (
+                            <option value="ALL">Chưa có danh mục</option>
+                        ) : (
+                            categories.map((category) => (
+                                <option key={category.id} value={String(category.id)}>
+                                    {category.name}
+                                </option>
+                            ))
+                        )}
+                    </select>
                 </div>
             )}
 
-            {error && <p className="revenue-comparison-error">{error}</p>}
+            {error && <p className="rk-note rk-note--alert">{error}</p>}
 
-            <section className="rims-bestsellers-list-section">
-                {isLoading ? (
-                    <div className="rims-empty-report">
-                        Đang tải dữ liệu món bán chạy...
-                    </div>
-                ) : items.length === 0 ? (
-                    <div className="rims-empty-report">
-                        Chưa có dữ liệu món bán chạy trong khoảng này.
-                    </div>
-                ) : (
-                    items.map((item, index) => {
+            {isLoading ? (
+                <LoadingState
+                    size="sm"
+                    title="Đang tải món bán chạy…"
+                    description="Hệ thống đang tổng hợp số liệu theo khoảng thời gian đã chọn."
+                />
+            ) : items.length === 0 ? (
+                <EmptyState
+                    title="Chưa có dữ liệu món bán chạy"
+                    description="Khoảng thời gian này chưa ghi nhận đơn nào."
+                />
+            ) : (
+                <div className="rk-rowlist">
+                    {items.map((item, index) => {
                         const rank = item.rank ?? index + 1
 
                         return (
-                            <article
-                                className={
-                                    rank === 1
-                                        ? 'bestseller-item-card is-top'
-                                        : 'bestseller-item-card'
-                                }
+                            <div
+                                className="rk-rowlist__item"
                                 key={`${rank}-${item.dishName}`}
                             >
-                                <span
-                                    className={`item-rank-badge rank-${Math.min(
-                                        rank,
-                                        3,
-                                    )}`}
-                                >
-                                    {rank === 1 && (
-                                        <Crown
-                                            className="rk-icon bestseller-rank-crown"
-                                            aria-hidden="true"
-                                        />
-                                    )}
-                                    <span>{rank}</span>
-                                </span>
-                                <BestSellerDishImage
-                                    dishName={item.dishName}
-                                    imageUrl={item.imageUrl}
-                                />
-                                <div className="item-info">
-                                    <div className="item-title-row">
-                                        <strong>{item.dishName}</strong>
-                                        <span className="rk-tag">
-                                            {formatRevenueCurrency(item.totalRevenue)}
-                                        </span>
-                                    </div>
+                                <div className="rk-media">
+                                    <span
+                                        className={`rk-rank${rank <= 3 ? ` rk-rank--${rank}` : ''}`}
+                                    >
+                                        {rank === 1 ? (
+                                            <Crown
+                                                className="rk-icon"
+                                                aria-hidden="true"
+                                            />
+                                        ) : (
+                                            rank
+                                        )}
+                                    </span>
 
-                                    <div className="item-visual-bar-container">
-                                        <div
-                                            className="item-bar-fill"
-                                            style={{
-                                                width: `${Math.max(
-                                                    8,
-                                                    (item.totalQuantity / maxQuantity) *
-                                                        100,
-                                                )}%`,
-                                            }}
-                                        />
-                                    </div>
+                                    <BestSellerDishImage
+                                        dishName={item.dishName}
+                                        imageUrl={item.imageUrl}
+                                    />
 
-                                    <div className="item-metric-row">
-                                        <span>Số lượng</span>
-                                        <strong>
-                                            {formatNumber(item.totalQuantity)}
-                                        </strong>
+                                    <div className="rk-rowlist__main">
+                                        <div className="rk-rowlist__title">
+                                            {item.dishName}
+                                        </div>
+
+                                        <div className="rk-barrow">
+                                            <div className="rk-bar">
+                                                <div
+                                                    className="rk-bar__fill"
+                                                    style={{
+                                                        width: `${Math.max(
+                                                            8,
+                                                            (item.totalQuantity /
+                                                                maxQuantity) *
+                                                                100,
+                                                        )}%`,
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <p className="rk-rowlist__meta">
+                                                {formatNumber(item.totalQuantity)} phần đã
+                                                bán
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </article>
+
+                                <span className="rk-tag">
+                                    {formatRevenueCurrency(item.totalRevenue)}
+                                </span>
+                            </div>
                         )
-                    })
-                )}
-            </section>
-        </section>
+                    })}
+                </div>
+            )}
+        </PageCard>
     )
 }

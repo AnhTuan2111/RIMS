@@ -2325,3 +2325,170 @@ textarea.rk-input {
 .rk-details .rk-detailrow__value {
     margin: 0;
 }
+
+/* ---------- Bảng xếp hạng ----------
+   Món bán chạy: số thứ hạng, ảnh, tên, thanh tỉ lệ, con số. Ba hạng đầu
+   được nhấn bằng ĐỘ ĐẬM của nền chứ không chỉ bằng màu, để người mù màu
+   vẫn thấy thứ tự. */
+
+.rk-rank {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface-3);
+    color: var(--rims-ink-2);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-rank--1 {
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-rank--2 {
+    background: var(--rims-brand-line);
+    color: var(--rims-brand);
+}
+
+.rk-rank--3 {
+    background: var(--rims-brand-soft);
+    color: var(--rims-brand);
+}
+
+.rk-rank .rk-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* ---------- Chú giải biểu đồ ---------- */
+
+.rk-legend {
+    display: flex;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+}
+
+.rk-legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-legend__dot {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+}
+
+/* ---------- Biểu đồ tròn ----------
+   Vẽ bằng conic-gradient, lỗ giữa là một lớp phủ tròn cùng màu mặt thẻ. */
+
+.rk-donut {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 180px;
+    height: 180px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+}
+
+.rk-donut__hole {
+    display: grid;
+    place-items: center;
+    width: 58%;
+    height: 58%;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface);
+    text-align: center;
+}
+
+.rk-donut__value {
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-black);
+    color: var(--rims-ink);
+}
+
+.rk-donut__label {
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
+
+/* ---------- Khung biểu đồ đường ---------- */
+
+.rk-chart {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.rk-chart__grid {
+    stroke: var(--rims-line);
+    stroke-width: 1;
+}
+
+.rk-chart__axis {
+    fill: var(--rims-ink-3);
+    font-family: var(--rims-font-mono);
+    font-size: 11px;
+}
+
+.rk-chart__line {
+    fill: none;
+    stroke: var(--rims-brand);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 3;
+}
+
+.rk-chart__point {
+    fill: var(--rims-surface);
+    stroke: var(--rims-brand);
+    stroke-width: 3;
+}
+
+/* Biểu đồ tròn cạnh chú giải. Màn hẹp thì chú giải xuống dưới. */
+.rk-donutrow {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-6);
+    flex-wrap: wrap;
+}
+
+.rk-legend--stack {
+    flex-direction: column;
+    gap: var(--rims-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rk-legend--stack .rk-legend__item {
+    align-items: flex-start;
+}
+
+.rk-legend--stack .rk-legend__dot {
+    margin-top: 5px;
+}
+
+/* Hàng được nhấn trong bảng số liệu: nền nhạt màu nhấn, kèm một vạch bên
+   trái để người mù màu cũng thấy. */
+.rk-table tbody tr.is-highlighted {
+    background: var(--rims-brand-soft);
+    box-shadow: inset 3px 0 0 var(--rims-brand);
+}
+
+.rk-table tfoot td {
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border-top: 1px solid var(--rims-line-strong);
+    color: var(--rims-ink);
+}
