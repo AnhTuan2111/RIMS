@@ -1,3 +1,4 @@
+import {CalendarDays} from 'lucide-react'
 import {
     formatDateForApi,
     formatDisplayDate,
@@ -11,7 +12,6 @@ import {
     vietnameseWeekdayLabels,
 } from './dateUtils'
 import {formatRevenueCurrency} from './format'
-import {CalendarIcon} from './icons'
 import type {RangePreset, RevenueDashboardData, WeekOption} from './types'
 import {useEffect, useRef, useState, type KeyboardEvent} from 'react'
 export function RevenueCard({
@@ -137,7 +137,10 @@ export function RevenueDateInput({
                     type="button"
                     onClick={openCalendar}
                 >
-                    <CalendarIcon />
+                    <CalendarDays
+                        className="rk-icon admin-revenue-calendar-icon"
+                        aria-hidden="true"
+                    />
                 </button>
             </span>
 

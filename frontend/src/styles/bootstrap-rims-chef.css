@@ -2111,20 +2111,6 @@
         background 0.18s ease;
 }
 
-.primary-button {
-    border: 1px solid var(--rims-brand);
-    background: var(--rims-brand);
-    color: var(--rims-ink-on-brand) !important;
-    box-shadow: 0 8px 20px rgb(122 16 48 / 20%);
-}
-
-.primary-button:hover:not(:disabled) {
-    border-color: var(--rims-brand);
-    background: var(--rims-brand);
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgb(122 16 48 / 26%);
-}
-
 .secondary-button {
     border: 1px solid var(--rims-line-strong);
     background: var(--rims-surface);

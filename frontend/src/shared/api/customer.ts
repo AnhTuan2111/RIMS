@@ -57,20 +57,6 @@ export async function cancelReservation(
     return response.data
 }
 
-export async function checkReservationByDate(
-    date: string,
-    signal?: AbortSignal,
-): Promise<boolean> {
-    const response = await apiClient.get<boolean>('/customer/reservations/check', {
-        params: {
-            date,
-        },
-        signal,
-    })
-
-    return response.data
-}
-
 export async function getCurrentReservation(
     signal?: AbortSignal,
 ): Promise<CustomerReservationResponse[]> {

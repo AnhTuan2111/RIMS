@@ -1,7 +1,7 @@
+import {FileText, TrendingUp, Trophy} from 'lucide-react'
 import {PresetButtonGroup} from './RevenueDashboard'
 import {getOrderShiftRangeLabel} from './dateUtils'
 import {buildDonutGradient, buildShiftRows, formatDecimal, formatNumber} from './format'
-import {FileIcon, TrendingIcon, TrophyIcon} from './icons'
 import type {RangePreset, WeekOption} from './types'
 import type {OrderShiftReportResponse} from '@/shared/api/admin'
 export function OrderShiftDashboard({
@@ -67,7 +67,7 @@ export function OrderShiftDashboard({
             <div className="order-shift-kpi-grid">
                 <article className="order-shift-kpi-card">
                     <span className="order-shift-kpi-icon icon-green">
-                        <FileIcon />
+                        <FileText className="rk-icon" aria-hidden="true" />
                     </span>
                     <div>
                         <span>Tổng đơn đã thanh toán</span>
@@ -77,7 +77,7 @@ export function OrderShiftDashboard({
 
                 <article className="order-shift-kpi-card featured">
                     <span className="order-shift-kpi-icon icon-orange">
-                        <TrophyIcon />
+                        <Trophy className="rk-icon" aria-hidden="true" />
                     </span>
                     <div>
                         <span>Ca có nhiều đơn nhất</span>
@@ -91,7 +91,7 @@ export function OrderShiftDashboard({
 
                 <article className="order-shift-kpi-card">
                     <span className="order-shift-kpi-icon icon-green">
-                        <TrendingIcon />
+                        <TrendingUp className="rk-icon" aria-hidden="true" />
                     </span>
                     <div>
                         <span>Trung bình mỗi ngày</span>

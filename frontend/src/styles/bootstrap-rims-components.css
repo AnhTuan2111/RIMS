@@ -26,17 +26,6 @@
         border-color 0.18s ease;
 }
 
-.primary-button {
-    color: var(--rims-ink-on-brand);
-    background: linear-gradient(135deg, var(--rims-brand), var(--rims-brand));
-    box-shadow: 0 12px 28px rgb(122 16 48 / 22%);
-}
-
-.primary-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 16px 36px rgb(122 16 48 / 28%);
-}
-
 .secondary-button {
     color: var(--rims-brand);
     border-color: var(--rims-brand-line);

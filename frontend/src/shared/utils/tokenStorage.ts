@@ -63,7 +63,3 @@ export function clearTokens() {
 export function hasAccessToken() {
     return Boolean(getAccessToken())
 }
-
-export function hasRefreshToken() {
-    return Boolean(getRefreshToken())
-}

@@ -52,15 +52,3 @@ a {
 main {
     min-height: 100vh;
 }
-
-/* =========================
-   LOADING
-========================= */
-
-.app-loading {
-    display: grid;
-    place-items: center;
-    min-height: 100vh;
-    color: var(--rims-ink-on-brand);
-    background: var(--rims-shell);
-}

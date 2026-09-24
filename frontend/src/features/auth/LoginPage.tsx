@@ -7,28 +7,7 @@ import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useRestaurant} from '@/app/providers/useRestaurant'
-
-function getRedirectPath(role: RoleType) {
-    switch (role) {
-        case RoleType.ADMIN:
-            return '/admin/dashboard'
-
-        case RoleType.CHEF:
-            return '/chef/dashboard'
-
-        case RoleType.WAITER:
-            return '/waiter/tables'
-
-        case RoleType.CASHIER:
-            return '/cashier/payments'
-
-        case RoleType.CUSTOMER:
-            return '/profile'
-
-        default:
-            return '/dashboard'
-    }
-}
+import {getHomePathForRole} from '@/app/routes/homePath'
 
 export default function LoginPage() {
     const {profile} = useRestaurant()
@@ -65,7 +44,7 @@ export default function LoginPage() {
 
             localStorage.setItem('currentUser', JSON.stringify(user))
 
-            navigate(getRedirectPath(role), {
+            navigate(getHomePathForRole(role), {
                 replace: true,
             })
         } catch (requestError: unknown) {

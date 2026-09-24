@@ -15,16 +15,6 @@ export function formatNumber(value: number): string {
     return new Intl.NumberFormat('vi-VN').format(value ?? 0)
 }
 
-/** Dạng rút gọn cho biểu đồ: 1500000 → "1,5M đ" */
-export function formatCurrencyCompact(value: number): string {
-    return (
-        new Intl.NumberFormat('vi-VN', {
-            notation: 'compact',
-            compactDisplay: 'short',
-        }).format(value ?? 0) + ' đ'
-    )
-}
-
 /** "2026-01-15T14:30:00" → "15/01/2026 14:30" */
 export function formatDateTime(value: string): string {
     const d = new Date(value)

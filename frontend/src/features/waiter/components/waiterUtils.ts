@@ -8,7 +8,3 @@ import {formatCurrency} from '@/shared/utils/format'
 export function fmtPrice(p: number | null | undefined) {
     return formatCurrency(p ?? 0)
 }
-
-export function toMs(date: string, time: string) {
-    return new Date(`${date}T${time}:00`).getTime()
-}

@@ -1,3 +1,4 @@
+import {Crown} from 'lucide-react'
 import {PresetButtonGroup} from './RevenueDashboard'
 import {
     formatNumber,
@@ -5,7 +6,6 @@ import {
     getDishInitial,
     resolveDishImageSrc,
 } from './format'
-import {CrownIcon} from './icons'
 import type {RangePreset, WeekOption} from './types'
 import type {BestSellingDishItem, CategoryResponse} from '@/shared/api/admin'
 import {useState} from 'react'
@@ -150,7 +150,12 @@ export function BestSellersReport({
                                         3,
                                     )}`}
                                 >
-                                    {rank === 1 && <CrownIcon />}
+                                    {rank === 1 && (
+                                        <Crown
+                                            className="rk-icon bestseller-rank-crown"
+                                            aria-hidden="true"
+                                        />
+                                    )}
                                     <span>{rank}</span>
                                 </span>
                                 <BestSellerDishImage

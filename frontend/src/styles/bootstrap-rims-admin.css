@@ -444,20 +444,6 @@
     font-weight: 800;
 }
 
-.primary-button {
-    width: fit-content;
-    padding: 0.75rem 1.1rem;
-    border: none;
-    border-radius: 10px;
-    background: var(--rims-brand);
-    color: var(--rims-ink-on-brand);
-    font-weight: 900;
-}
-
-.primary-button:hover {
-    background: var(--rims-brand);
-}
-
 .secondary-button {
     width: fit-content;
     padding: 0.75rem 1.1rem;
@@ -490,22 +476,6 @@
     border-color: var(--rims-brand);
     background: linear-gradient(to bottom right, var(--rims-surface), var(--rims-brand-soft));
     box-shadow: 0 10px 20px -8px rgb(122 16 48 / 15%);
-}
-
-/* Icon Wrapper Styles */
-.rims-stat-card-icon-wrapper {
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    flex-shrink: 0;
-    color: var(--rims-ink-on-brand);
-}
-
-.rims-stat-card-icon-wrapper svg {
-    width: 24px;
-    height: 24px;
 }
 
 .rims-report-subtitle {
@@ -1455,13 +1425,6 @@
     box-shadow: 0 12px 24px -14px rgb(122 16 48 / 32%);
 }
 
-.rims-stat-card-icon-wrapper span {
-    color: var(--rims-ink-on-brand);
-    font-size: 0.78rem;
-    font-weight: 900;
-    line-height: 1;
-}
-
 .order-shift-dashboard-panel {
     display: grid;
     gap: 22px;
@@ -1832,13 +1795,6 @@
     color: var(--rims-ink-3);
     font-size: 14px;
     font-weight: 500;
-}
-
-.admin-revenue-card-icon {
-    color: var(--rims-ink-3);
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1;
 }
 
 .admin-revenue-filter-panel {
