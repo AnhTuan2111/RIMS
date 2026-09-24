@@ -26,12 +26,30 @@ spring:
     username: ${DB_USERNAME:sa}
     password: ${DB_PASSWORD}
 
+  # schema.sql và data.sql trong thư mục này là nguồn thật của lược đồ và dữ
+  # liệu khởi tạo. Cả hai chạy lại được nhiều lần: mọi câu đều kiểm tra trước
+  # khi tạo hoặc chèn, nên khởi động lần thứ hai không lỗi và không mất gì.
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:always}
+      # Dừng ngay nếu một câu lỗi, thay vì bỏ qua rồi để app chạy trên một
+      # lược đồ thiếu bảng.
+      continue-on-error: false
+
   jpa:
     hibernate:
-      # update: giữ nguyên dữ liệu giữa các lần khởi động ứng dụng.
-      # Trước đây là "create" nên mỗi lần chạy lại là mất sạch dữ liệu nhập tay.
-      # Profile "dev" bên dưới ghi đè lại thành "create" khi cần schema sạch.
-      ddl-auto: ${DDL_AUTO:update}
+      # validate, KHÔNG phải update: Hibernate chỉ đối chiếu entity với lược
+      # đồ rồi báo lệch, không tự tạo và không tự sửa bảng.
+      #
+      # Vì sao bỏ update: nó im lặng bỏ qua những thay đổi không làm được.
+      # Đợt thêm cột must_change_password là ví dụ — SQL Server từ chối thêm
+      # cột NOT NULL vào bảng đã có dòng, Hibernate ghi một dòng WARN rồi đi
+      # tiếp, app khởi động bình thường, và mọi truy vấn bảng users đều lỗi.
+      # Với validate thì app dừng ngay lúc khởi động và nói rõ chỗ lệch.
+      ddl-auto: ${DDL_AUTO:validate}
+    # Để schema.sql chạy TRƯỚC khi Hibernate đối chiếu — nếu không, lần khởi
+    # động đầu trên CSDL rỗng sẽ trượt validate vì bảng chưa kịp tạo.
+    defer-datasource-initialization: false
     open-in-view: false
     show-sql: false
 
@@ -52,6 +70,45 @@ app:
   # trả kết quả về. Khi deploy thật chỉ cần đổi một chỗ này.
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
 
+  # ---------- Nhận diện nhà hàng ----------
+  # Giá trị dùng cho LẦN KHỞI ĐỘNG ĐẦU, khi bảng restaurant_profile còn rỗng.
+  # Sau đó chủ quán sửa trong màn Cấu hình nhà hàng và CSDL là nguồn thật —
+  # đổi các dòng này về sau không ghi đè lên dữ liệu đã có.
+  #
+  # Trước đây tên quán và câu mô tả bị gõ thẳng trong mã nguồn frontend, nên
+  # dựng một bản cài đặt cho quán khác là phải sửa code rồi build lại.
+  restaurant:
+    name: ${RESTAURANT_NAME:Yamazato}
+    tagline: ${RESTAURANT_TAGLINE:Ẩm thực Nhật Bản}
+    description: ${RESTAURANT_DESCRIPTION:Sashimi, ramen và các món nướng than, chế biến trong ngày.}
+    address: ${RESTAURANT_ADDRESS:}
+    phone: ${RESTAURANT_PHONE:}
+    email: ${RESTAURANT_EMAIL:}
+
+  # ---------- Tài khoản quản trị đầu tiên ----------
+  # Chỉ dùng khi bảng users còn rỗng. KHÔNG đặt mật khẩu mặc định ở đây: một
+  # mật khẩu nằm trong repo nghĩa là ai chạm được app cũng đăng nhập được
+  # trước chủ quán. Thiếu RIMS_ADMIN_PASSWORD trên CSDL rỗng thì app dừng và
+  # nói rõ phải đặt gì.
+  bootstrap:
+    admin-username: ${RIMS_ADMIN_USERNAME:admin}
+    admin-full-name: ${RIMS_ADMIN_FULL_NAME:Quản trị viên}
+    admin-email: ${RIMS_ADMIN_EMAIL:}
+    admin-phone: ${RIMS_ADMIN_PHONE:0900000001}
+    admin-password: ${RIMS_ADMIN_PASSWORD:}
+
+  # ---------- Tài khoản tạo về sau ----------
+  # Mật khẩu cấp cho tài khoản do Quản trị viên tạo, cho khách tự đăng ký, và
+  # cho tài khoản vừa được đặt lại mật khẩu. Người nhận bị bắt đổi ngay ở lần
+  # đăng nhập đầu (cờ must_change_password).
+  #
+  # Khác với admin-password ở trên: chỗ này BẮT BUỘC phải có giá trị, vì nếu
+  # không thì Quản trị viên tạo tài khoản xong không biết đưa gì cho nhân viên.
+  # Giá trị mặc định dưới đây ai đọc repo cũng biết, nên hãy đặt
+  # RIMS_DEFAULT_PASSWORD khi chạy thật.
+  account:
+    default-password: ${RIMS_DEFAULT_PASSWORD:123456}
+
 jwt:
   # Chuỗi ngẫu nhiên tối thiểu 32 ký tự. Sinh mới: openssl rand -base64 48
   signerKey: ${JWT_SIGNER_KEY}
@@ -67,13 +124,12 @@ vnpay:
   return-url: ${VNPAY_RETURN_URL:http://localhost:8080/rims/cashier/payments/vnpay-callback}
 
 ---
-# Profile "dev": dựng lại schema sạch và nạp dữ liệu mẫu (DatabaseSeeder chỉ chạy ở đây).
+# Profile "dev": chỉ bật log SQL. Không còn dựng lại lược đồ — schema.sql lo
+# việc đó, và nó chạy lại được nên không cần một profile riêng để tạo bảng.
 # Chạy: mvn spring-boot:run -Dspring-boot.run.profiles=dev
 spring:
   config:
     activate:
       on-profile: dev
   jpa:
-    hibernate:
-      ddl-auto: create
     show-sql: true

@@ -20,6 +20,14 @@ export interface RegisterResponse {
     isActive: boolean
     createdAt: string
     rewardPoints?: number
+
+    /**
+     * Mật khẩu backend vừa cấp cho tài khoản này.
+     *
+     * <p>Chỉ có ở phản hồi của lần tạo. Tuỳ chọn vì bản backend cũ không trả
+     * trường này — gặp bản cũ thì màn Đăng ký nói chung chung thay vì nói sai.
+     */
+    initialPassword?: string
 }
 
 function saveCurrentUser(user: UserProfile) {

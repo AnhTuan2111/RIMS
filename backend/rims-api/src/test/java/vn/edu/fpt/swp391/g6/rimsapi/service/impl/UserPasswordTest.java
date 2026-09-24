@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.ChangePasswordRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
@@ -48,6 +49,17 @@ class UserPasswordTest
     @Spy
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /**
+     * Cố tình KHÔNG phải giá trị mặc định trong application.yaml. Nếu để đúng
+     * chuỗi mặc định thì bài kiểm thử vẫn xanh kể cả khi mã nguồn quay lại gõ
+     * cứng mật khẩu — thứ cần kiểm là service đọc từ cấu hình, không phải là
+     * nó tình cờ trùng chuỗi nào đó.
+     */
+    private static final String MAT_KHAU_CAP_PHAT = "mat-khau-tu-cau-hinh";
+
+    @Spy
+    private AccountDefaults accountDefaults = new AccountDefaults();
+
     @InjectMocks
     private UserServiceImpl service;
 
@@ -61,6 +73,8 @@ class UserPasswordTest
         user.setRole(RoleType.CUSTOMER);
         user.setUsername("customer2");
         user.setPasswordHash(passwordEncoder.encode("matkhaucu"));
+
+        ReflectionTestUtils.setField(accountDefaults, "defaultPassword", MAT_KHAU_CAP_PHAT);
 
         lenient().when(userRepository.findById(5)).thenReturn(Optional.of(user));
         lenient().when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
@@ -133,7 +147,7 @@ class UserPasswordTest
             service.resetPassword(5);
 
             assertThat(passwordEncoder.matches(
-                    AccountDefaults.DEFAULT_PASSWORD, user.getPasswordHash())).isTrue();
+                    MAT_KHAU_CAP_PHAT, user.getPasswordHash())).isTrue();
         }
 
         @Test

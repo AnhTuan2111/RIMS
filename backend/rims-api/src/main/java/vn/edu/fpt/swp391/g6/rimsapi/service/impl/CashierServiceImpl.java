@@ -56,6 +56,7 @@ public class CashierServiceImpl implements CashierService
     private final ReservationRepository reservationRepository;
     private final WebSocketBroadcaster webSocketBroadcaster;
     private final PasswordEncoder passwordEncoder;
+    private final AccountDefaults accountDefaults;
 
     // Dashboard sơ đồ bàn cho Cashier: bàn nào đang có order SERVING/LOCKED -> hiển thị "đang phục vụ", còn lại "trống"
     @Override
@@ -523,7 +524,7 @@ public class CashierServiceImpl implements CashierService
         user.setPhone(phone);
         user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
         user.setUsername(phone);
-        user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        user.setPasswordHash(passwordEncoder.encode(accountDefaults.getDefaultPassword()));
         user.setMustChangePassword(true);
         user.setRole(RoleType.CUSTOMER);
         user.setRewardPoints(0);

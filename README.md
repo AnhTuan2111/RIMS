@@ -33,7 +33,7 @@ Hệ thống quản lý nhà hàng gồm 2 phần:
 ├── backend/
 │   └── rims-api/            # Spring Boot API
 │       ├── src/main/java/vn/edu/fpt/swp391/g6/rimsapi/
-│       │   ├── config/       # CORS, Security, WebSocket, VNPay, DB seeder
+│       │   ├── config/       # CORS, Security, WebSocket, VNPay, tài khoản quản trị đầu tiên
 │       │   ├── controller/   # Admin, Auth, Cashier, Chef, Customer, Waiter
 │       │   ├── dto/          # Request/Response DTOs
 │       │   ├── entity/       # JPA Entities
@@ -100,26 +100,52 @@ biến môi trường được ưu tiên hơn giá trị trong `.env`.
 
 Tạo database `RIMS_DB` trên SQL Server (hoặc đổi tên rồi sửa biến môi trường `DB_URL`).
 
-Về `ddl-auto`:
+Không cần tạo bảng bằng tay. Lần khởi động đầu, backend chạy hai file trong
+`src/main/resources`:
 
-- **Mặc định là `update`** — giữ nguyên dữ liệu giữa các lần khởi động.
-- **Profile `dev` dùng `create`** — dựng lại schema sạch và nạp dữ liệu mẫu.
+| File | Nội dung |
+| --- | --- |
+| `schema.sql` | 12 bảng, khoá ngoại, ràng buộc duy nhất, chỉ số |
+| `data.sql` | 14 bàn, 9 danh mục, 43 món — **không có tài khoản nào** |
 
-### 3.3. Chạy Backend
+Cả hai đều kiểm tra tồn tại trước khi tạo, nên khởi động lần thứ hai không lỗi
+và không ghi đè dữ liệu đang có.
 
-Từ thư mục `backend/rims-api`:
+Về `ddl-auto`: mặc định là **`validate`**. Hibernate chỉ đối chiếu entity với
+bảng thật rồi báo lỗi lúc khởi động nếu lệch — nó không còn tự sửa lược đồ nữa.
+Lý do đổi: `update` im lặng bỏ qua những thay đổi nó không làm được. Đợt thêm
+cột `must_change_password` là ví dụ — SQL Server từ chối thêm cột `NOT NULL`
+vào bảng đã có dòng, Hibernate ghi một dòng `WARN` rồi đi tiếp, app khởi động
+bình thường, và mọi truy vấn bảng `users` đều lỗi 500.
 
-**Lần đầu tiên** (tạo schema + nạp dữ liệu mẫu: tài khoản, bàn, món ăn, 3000 order lịch sử):
+Sửa entity thì phải sửa `schema.sql` theo. Cách sinh lại file đó nằm ngay trong
+phần chú thích đầu file.
 
-```bash
-# Windows
-mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
+Muốn đổi thực đơn mẫu sang nhà hàng khác thì sửa `data.sql` — nó là dữ liệu,
+không phải mã nguồn, nên không phải build lại.
 
-# macOS/Linux
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+### 3.3. Tài khoản quản trị đầu tiên
+
+Repo **không** chứa tài khoản nào. Trước lần chạy đầu, đặt mật khẩu quản trị
+trong `.env`:
+
+```
+RIMS_ADMIN_PASSWORD=<mật khẩu bạn chọn>
 ```
 
-**Các lần sau** (giữ nguyên dữ liệu — dùng cái này khi demo):
+Bảng `users` còn rỗng mà thiếu biến này thì app **dừng ngay lúc khởi động** và
+in ra hướng dẫn. Cố tình như vậy: hệ thống có quản trị viên mà không ai biết mật
+khẩu thì vô dụng, còn hệ thống tự đặt mật khẩu đoán được thì nguy hiểm.
+
+Tài khoản tạo ra tên `admin` (đổi bằng `RIMS_ADMIN_USERNAME`) và bị bắt đổi mật
+khẩu ngay lần đăng nhập đầu — mật khẩu đặt qua biến môi trường vẫn nằm trong
+lịch sử shell và file cấu hình triển khai.
+
+Đã có người dùng trong CSDL thì bước này không chạy, kể cả khi biến đổi giá trị.
+
+### 3.4. Chạy Backend
+
+Từ thư mục `backend/rims-api`:
 
 ```bash
 # Windows
@@ -129,20 +155,36 @@ mvnw.cmd spring-boot:run
 ./mvnw spring-boot:run
 ```
 
-`DatabaseSeeder` chỉ chạy ở profile `dev` vì nó tạo tài khoản với mật khẩu mặc định `123456`.
-Mỗi bước seed đều kiểm tra `count() > 0` nên chạy lại nhiều lần không tạo dữ liệu trùng.
-
-Các tài khoản do seeder tạo **không** bị bắt đổi mật khẩu — chúng là dữ liệu
-demo, bắt đổi thì mỗi lần dựng lại môi trường đều phải đổi sáu lần. Tài khoản
-tạo qua giao diện thì có, xem mục 3.5.
+Không còn profile riêng cho lần đầu: `schema.sql` và `data.sql` chạy lại được
+nhiều lần nên lần nào cũng dùng đúng một lệnh này. Profile `dev` giờ chỉ bật
+`show-sql`.
 
 Server mặc định chạy tại: `http://localhost:8080`
 
-### 3.4. Mật khẩu tài khoản
+### 3.5. Nhận diện nhà hàng
+
+Tên quán, câu giới thiệu, địa chỉ, điện thoại không nằm trong mã nguồn. Lần
+khởi động đầu chúng đọc từ `app.restaurant.*` trong `application.yaml`, đặt
+được qua biến môi trường:
+
+```
+RESTAURANT_NAME=Tên quán của bạn
+RESTAURANT_TAGLINE=Câu giới thiệu ngắn
+RESTAURANT_DESCRIPTION=Đoạn mô tả trên trang chủ
+RESTAURANT_ADDRESS=
+RESTAURANT_PHONE=
+RESTAURANT_EMAIL=
+```
+
+Sau lần đầu, **cơ sở dữ liệu là nguồn thật** — chủ quán sửa trong màn Cấu hình
+nhà hàng, và đổi các biến này về sau không ghi đè lên dữ liệu đã có.
+
+### 3.6. Mật khẩu tài khoản
 
 Tài khoản mới tạo và tài khoản vừa được Quản trị viên đặt lại đều mang mật khẩu
-do người khác biết — chuỗi mặc định `123456`, hoặc mật khẩu Quản trị viên chọn
-hộ khi tạo nhân viên. Hệ thống **bắt đổi** trước khi cho dùng:
+do người khác biết. Chuỗi đó lấy từ `RIMS_DEFAULT_PASSWORD`; không đặt thì rơi
+về giá trị mặc định ghi trong `application.yaml`, mà giá trị đó ai đọc repo cũng
+biết — **hãy đặt biến này khi chạy thật**. Hệ thống **bắt đổi** trước khi cho dùng:
 
 - Đăng nhập xong là vào thẳng màn `/change-password`, không vào được màn nào khác.
 - Backend chặn thật chứ không chỉ chặn giao diện: `MustChangePasswordFilter` trả
@@ -155,7 +197,7 @@ hộ khi tạo nhân viên. Hệ thống **bắt đổi** trước khi cho dùng
 Quản trị viên không đặt lại được mật khẩu của Quản trị viên khác; tài khoản đó
 dùng luồng **Quên mật khẩu** qua email.
 
-### 3.5. VNPay
+### 3.7. VNPay
 
 Cấu hình mặc định trỏ tới **sandbox**. Khi deploy thật cần đổi `vnpay.url`,
 `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET` theo tài khoản merchant, và `VNPAY_RETURN_URL` theo domain thật.

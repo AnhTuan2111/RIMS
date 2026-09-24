@@ -44,6 +44,7 @@ public class UserServiceImpl implements UserService
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final OtpStore otpStore;
+    private final AccountDefaults accountDefaults;
 
     // ===================== EXISTING =====================
     @Override
@@ -192,7 +193,7 @@ public class UserServiceImpl implements UserService
                             + "Hãy dùng chức năng Quên mật khẩu qua email.");
         }
 
-        user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        user.setPasswordHash(passwordEncoder.encode(accountDefaults.getDefaultPassword()));
         user.setMustChangePassword(true);
         userRepository.save(user);
     }
@@ -280,12 +281,16 @@ public class UserServiceImpl implements UserService
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        user.setPasswordHash(passwordEncoder.encode(accountDefaults.getDefaultPassword()));
         user.setMustChangePassword(true);
         user.setActive(true);
 
         User saved = userRepository.save(user);
-        return convertToResponse(saved);
+
+        UserResponse response = convertToResponse(saved);
+        response.setInitialPassword(accountDefaults.getDefaultPassword());
+
+        return response;
     }
 
     @Override
@@ -300,11 +305,14 @@ public class UserServiceImpl implements UserService
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setRole(RoleType.CUSTOMER);
-        user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        user.setPasswordHash(passwordEncoder.encode(accountDefaults.getDefaultPassword()));
         user.setMustChangePassword(true);
         user.setActive(true);
 
-        return convertToResponse(userRepository.save(user));
+        UserResponse response = convertToResponse(userRepository.save(user));
+        response.setInitialPassword(accountDefaults.getDefaultPassword());
+
+        return response;
     }
 
     // ===================== HELPERS =====================

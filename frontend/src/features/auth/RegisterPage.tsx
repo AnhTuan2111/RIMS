@@ -85,16 +85,21 @@ export default function RegisterPage() {
         setError(null)
 
         try {
-            await register({
+            const created = await register({
                 username: formData.username.trim(),
                 fullName: formData.fullName.trim(),
                 email: formData.email.trim(),
                 phone: formData.phone.trim(),
             })
 
+            // Mật khẩu do backend cấp và đọc từ cấu hình, nên phải lấy từ phản
+            // hồi. Bản cũ viết cứng "123456" ở đây, đổi cấu hình là màn này nói
+            // sai mà không có gì báo.
             navigate('/login', {
                 state: {
-                    message: 'Đăng ký thành công! Mật khẩu mặc định của bạn là: 123456',
+                    message: created.initialPassword
+                        ? `Đăng ký thành công! Mật khẩu của bạn là: ${created.initialPassword}`
+                        : 'Đăng ký thành công! Hãy dùng mật khẩu mặc định do nhà hàng cấp để đăng nhập.',
                 },
             })
         } catch (requestError: unknown) {
@@ -208,8 +213,8 @@ export default function RegisterPage() {
                     <Info className="rk-icon" aria-hidden="true" />
 
                     <span>
-                        Mật khẩu mặc định sẽ là <strong>123456</strong>. Đổi mật khẩu ngay
-                        sau khi đăng nhập lần đầu.
+                        Mật khẩu sẽ hiện ra sau khi đăng ký xong. Đổi mật khẩu ngay sau
+                        khi đăng nhập lần đầu.
                     </span>
                 </p>
 
