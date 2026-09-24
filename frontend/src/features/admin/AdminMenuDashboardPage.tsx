@@ -1,6 +1,6 @@
 import {
-    AlertTriangle,
     ArrowRight,
+    BookOpen,
     EyeOff,
     FolderOpen,
     PauseCircle,
@@ -15,6 +15,35 @@ import * as adminApi from '@/shared/api/admin'
 import type {MenuDashboardData} from '@/shared/api/admin'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
+
+/**
+ * Ảnh thu nhỏ của món.
+ *
+ * <p>Đoạn này trước đây được chép lại ba lần trong cùng một file, mỗi bản
+ * một tên class khác nhau nhưng cùng một việc.
+ */
+function DishThumb({imageUrl, name}: {imageUrl?: string | null; name: string}) {
+    if (!imageUrl) {
+        return (
+            <span className="rk-thumb">
+                <Soup className="rk-icon" aria-hidden="true" />
+            </span>
+        )
+    }
+
+    return (
+        <span className="rk-thumb">
+            <img
+                src={imageUrl.startsWith('http') ? imageUrl : `/image/${imageUrl}`}
+                alt={name}
+                onError={(event) => {
+                    event.currentTarget.onerror = null
+                    event.currentTarget.src = 'https://placehold.co/46x46?text='
+                }}
+            />
+        </span>
+    )
+}
 
 export default function AdminMenuDashboardPage() {
     const [data, setData] = useState<MenuDashboardData | null>(null)
@@ -152,11 +181,13 @@ export default function AdminMenuDashboardPage() {
     const allPausedDishesList = data.allPausedDishesList ?? []
 
     return (
-        <div className="admin-menu-page">
-            <PageCard className="admin-menu-header-card">
+        <div className="rk-stack">
+            <PageCard>
                 <PageHeader
+                    eyebrow="Quản trị"
                     title="Tổng quan thực đơn"
                     description="Theo dõi nhanh danh mục, món ăn mới cập nhật và các món đang tạm dừng bán."
+                    icon={<BookOpen className="rk-icon" aria-hidden="true" />}
                 />
             </PageCard>
 
@@ -188,38 +219,36 @@ export default function AdminMenuDashboardPage() {
                 />
             </div>
 
-            <div className="admin-menu-two-columns">
-                <div className="admin-menu-left-column">
-                    <div className="admin-menu-card admin-menu-category-list">
-                        <div className="admin-menu-section-header">
-                            <h3 className="admin-menu-section-title">
-                                Danh mục thực đơn
-                            </h3>
+            <div className="rk-two">
+                <div className="rk-stack">
+                    <PageCard>
+                        <div className="rk-card__head-inline">
+                            <h3 className="rk-sectiontitle">Danh mục thực đơn</h3>
 
                             <button
                                 type="button"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => navigate('/admin/categories')}
-                                className="admin-menu-manage-link"
                             >
-                                Quản lý danh mục{' '}
+                                Quản lý danh mục
                                 <ArrowRight className="rk-icon" aria-hidden="true" />
                             </button>
                         </div>
 
-                        <div className="admin-menu-scroll-container">
+                        <div className="rk-rowlist rk-scrollbox">
                             {data.categoryStats.map((category, index) => (
                                 <div
+                                    className="rk-rowlist__item"
                                     key={`${category.categoryName}-${index}`}
-                                    className="admin-menu-category-item"
                                 >
-                                    <div>
-                                        <div className="admin-menu-category-name">
+                                    <div className="rk-rowlist__main">
+                                        <div className="rk-rowlist__title">
                                             {category.categoryName}
                                         </div>
 
-                                        <small className="admin-menu-category-count">
+                                        <p className="rk-rowlist__meta">
                                             {category.dishCount} món ăn liên kết
-                                        </small>
+                                        </p>
                                     </div>
 
                                     <span
@@ -236,14 +265,12 @@ export default function AdminMenuDashboardPage() {
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </PageCard>
 
-                    <div className="admin-menu-card admin-menu-progress">
-                        <h3 className="admin-menu-section-title">
-                            Tỷ lệ món theo danh mục
-                        </h3>
+                    <PageCard>
+                        <h3 className="rk-sectiontitle">Tỷ lệ món theo danh mục</h3>
 
-                        <div className="admin-menu-scroll-container">
+                        <div className="rk-stack rk-scrollbox">
                             {data.categoryStats.map((category, index) => {
                                 const percentage =
                                     data.totalDishes > 0
@@ -252,21 +279,23 @@ export default function AdminMenuDashboardPage() {
 
                                 return (
                                     <div
+                                        className="rk-barrow"
                                         key={`${category.categoryName}-${index}`}
-                                        className="admin-menu-progress-item"
                                     >
-                                        <div className="admin-menu-progress-label">
-                                            <span>{category.categoryName}</span>
+                                        <div className="rk-barrow__head">
+                                            <span className="rk-barrow__label">
+                                                {category.categoryName}
+                                            </span>
 
-                                            <span className="admin-menu-progress-percent">
-                                                {category.dishCount} (
-                                                {percentage.toFixed(0)}%)
+                                            <span className="rk-barrow__value">
+                                                {category.dishCount} ·{' '}
+                                                {percentage.toFixed(0)}%
                                             </span>
                                         </div>
 
-                                        <div className="admin-menu-progress-track">
+                                        <div className="rk-bar">
                                             <div
-                                                className="admin-menu-progress-bar"
+                                                className="rk-bar__fill"
                                                 style={{width: `${percentage}%`}}
                                             />
                                         </div>
@@ -274,74 +303,49 @@ export default function AdminMenuDashboardPage() {
                                 )
                             })}
                         </div>
-                    </div>
+                    </PageCard>
                 </div>
 
-                <div className="admin-menu-right-column">
-                    <div className="admin-menu-card admin-menu-latest-dishes">
-                        <div className="admin-menu-section-header">
-                            <h3 className="admin-menu-section-title">
-                                Món ăn mới cập nhật
-                            </h3>
+                <div className="rk-stack">
+                    <PageCard>
+                        <div className="rk-card__head-inline">
+                            <h3 className="rk-sectiontitle">Món ăn mới cập nhật</h3>
 
                             <button
                                 type="button"
+                                className="rk-btn rk-btn--quiet"
                                 onClick={() => navigate('/admin/dishes')}
-                                className="admin-menu-manage-link"
                             >
-                                Quản lý món{' '}
+                                Quản lý món
                                 <ArrowRight className="rk-icon" aria-hidden="true" />
                             </button>
                         </div>
 
-                        <div className="admin-menu-table-wrapper">
+                        <div className="rk-tablewrap">
                             <table className="rk-table rk-table--compact">
                                 <thead>
                                     <tr>
-                                        <th>Món ăn</th>
-                                        <th>Danh mục</th>
-                                        <th>Giá niêm yết</th>
-                                        <th className="admin-menu-text-center">
-                                            Trạng thái
+                                        <th scope="col">Món ăn</th>
+                                        <th scope="col">Danh mục</th>
+                                        <th scope="col" className="rk-th--num">
+                                            Giá niêm yết
                                         </th>
+                                        <th scope="col">Trạng thái</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
                                     {data.latestDishes.map((dish) => (
                                         <tr key={dish.id}>
-                                            <td className="admin-menu-dish-cell">
-                                                <div className="admin-menu-dish-image-wrapper">
-                                                    {dish.imageUrl ? (
-                                                        <img
-                                                            src={
-                                                                dish.imageUrl.startsWith(
-                                                                    'http',
-                                                                )
-                                                                    ? dish.imageUrl
-                                                                    : `/image/${dish.imageUrl}`
-                                                            }
-                                                            alt={dish.name}
-                                                            onError={(event) => {
-                                                                event.currentTarget.onerror =
-                                                                    null
-                                                                event.currentTarget.src =
-                                                                    'https://placehold.co/36x36?text='
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <span className="admin-menu-dish-emoji">
-                                                            <Soup
-                                                                className="rk-icon"
-                                                                aria-hidden="true"
-                                                            />
-                                                        </span>
-                                                    )}
-                                                </div>
+                                            <td>
+                                                <div className="rk-media">
+                                                    <DishThumb
+                                                        imageUrl={dish.imageUrl}
+                                                        name={dish.name}
+                                                    />
 
-                                                <span className="admin-menu-dish-name">
-                                                    {dish.name}
-                                                </span>
+                                                    <span>{dish.name}</span>
+                                                </div>
                                             </td>
 
                                             <td>
@@ -350,11 +354,11 @@ export default function AdminMenuDashboardPage() {
                                                 </span>
                                             </td>
 
-                                            <td className="admin-menu-dish-price">
+                                            <td className="rk-td--num">
                                                 {dish.price.toLocaleString('vi-VN')}đ
                                             </td>
 
-                                            <td className="admin-menu-text-center">
+                                            <td>
                                                 <span
                                                     className={`rk-chip ${
                                                         dish.status === 'AVAILABLE'
@@ -372,74 +376,44 @@ export default function AdminMenuDashboardPage() {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </PageCard>
 
-                    <div className="admin-menu-card admin-menu-warning">
-                        <h3 className="admin-menu-section-title admin-menu-warning-title">
-                            <AlertTriangle className="rk-icon" aria-hidden="true" /> Cần
-                            chú ý (Món đang tạm dừng bán)
-                        </h3>
+                    <PageCard>
+                        <h3 className="rk-sectiontitle">Món đang tạm dừng bán</h3>
 
-                        <div className="admin-menu-scroll-container admin-menu-warning-scroll">
-                            {allPausedDishesList.length === 0 ? (
-                                <div className="admin-menu-empty-warning">
-                                    Tuyệt vời! Hiện tại không có món ăn nào bị gián đoạn
-                                    kinh doanh.
-                                </div>
-                            ) : (
-                                allPausedDishesList.map((dish) => (
-                                    <div
-                                        key={dish.id}
-                                        className="admin-menu-warning-item"
-                                    >
-                                        <div className="admin-menu-warning-item-left">
-                                            <div className="admin-menu-dish-image-wrapper admin-menu-warning-image">
-                                                {dish.imageUrl ? (
-                                                    <img
-                                                        src={
-                                                            dish.imageUrl.startsWith(
-                                                                'http',
-                                                            )
-                                                                ? dish.imageUrl
-                                                                : `/image/${dish.imageUrl}`
-                                                        }
-                                                        alt={dish.name}
-                                                        onError={(event) => {
-                                                            event.currentTarget.onerror =
-                                                                null
-                                                            event.currentTarget.src =
-                                                                'https://placehold.co/36x36?text='
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <span className="admin-menu-dish-emoji">
-                                                        <Soup
-                                                            className="rk-icon"
-                                                            aria-hidden="true"
-                                                        />
-                                                    </span>
-                                                )}
-                                            </div>
+                        {allPausedDishesList.length === 0 ? (
+                            <p className="rk-note rk-note--ok">
+                                Không có món nào đang bị gián đoạn kinh doanh.
+                            </p>
+                        ) : (
+                            <div className="rk-rowlist rk-scrollbox">
+                                {allPausedDishesList.map((dish) => (
+                                    <div className="rk-rowlist__item" key={dish.id}>
+                                        <div className="rk-media">
+                                            <DishThumb
+                                                imageUrl={dish.imageUrl}
+                                                name={dish.name}
+                                            />
 
-                                            <div>
-                                                <strong className="admin-menu-warning-dish-name">
+                                            <div className="rk-rowlist__main">
+                                                <div className="rk-rowlist__title">
                                                     {dish.name}
-                                                </strong>
+                                                </div>
 
-                                                <small className="admin-menu-warning-category">
+                                                <p className="rk-rowlist__meta">
                                                     Thuộc nhóm: {dish.categoryName}
-                                                </small>
+                                                </p>
                                             </div>
                                         </div>
 
-                                        <span className="admin-menu-paused-label">
+                                        <span className="rk-chip rk-chip--busy">
                                             Tạm ngưng
                                         </span>
                                     </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </PageCard>
                 </div>
             </div>
         </div>

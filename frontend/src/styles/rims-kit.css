@@ -2210,3 +2210,25 @@ textarea.rk-input {
     color: var(--rims-ink-3);
     font-size: var(--rims-text-xs);
 }
+
+/* Tiêu đề mục có nút ở cuối dòng. */
+.rk-card__head-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--rims-space-4);
+}
+
+.rk-card__head-inline .rk-sectiontitle {
+    margin: 0;
+}
+
+/* Ảnh nhỏ đi kèm một dòng chữ: ô món trong bảng, dòng trong danh sách. */
+.rk-media {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    min-width: 0;
+}
