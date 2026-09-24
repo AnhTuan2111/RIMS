@@ -907,8 +907,8 @@ export default function KitchenQueuePage() {
                                         <span
                                             className={
                                                 selectedDish.chefInternalNoteAcknowledgedAt
-                                                    ? 'internal-note-status acknowledged'
-                                                    : 'internal-note-status waiting'
+                                                    ? 'rk-chip rk-chip--ok'
+                                                    : 'rk-chip rk-chip--busy'
                                             }
                                         >
                                             {selectedDish.chefInternalNoteAcknowledgedAt

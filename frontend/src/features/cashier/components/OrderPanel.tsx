@@ -266,7 +266,7 @@ export default function OrderPanel({
 
     return (
         <div
-            className="page-card"
+            className="rk-card rk-card--pad"
             style={{
                 position: 'relative',
                 width: 'min(400px, 50vw)',

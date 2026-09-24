@@ -3,11 +3,6 @@
    bộ var(--rims-*) rải rác trong repo đều rơi về giá trị rỗng. */
 @import './tokens.css';
 
-@import './bootstrap-rims-layout.css';
-@import './bootstrap-rims-components.css';
-@import './bootstrap-rims-chef.css';
-@import './bootstrap-rims-customer.css';
-
 /* rims-kit đứng CUỐI để thắng các file cũ khi chuyển đổi từng màn một.
    Mỗi màn chuyển xong sang class .rk-* thì phần CSS cũ tương ứng có thể xoá,
    và file này sẽ dần trở thành lớp giao diện duy nhất. */

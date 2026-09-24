@@ -52,7 +52,7 @@ export default function PaymentSuccess() {
 
     return (
         <div style={pageStyle}>
-            <div className="page-card" style={cardStyle}>
+            <div className="rk-card rk-card--pad" style={cardStyle}>
                 <div style={iconStyle}>
                     <Check className="rk-icon" aria-hidden="true" />
                 </div>

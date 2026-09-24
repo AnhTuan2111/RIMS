@@ -280,7 +280,7 @@ export default function CashierPaymentsPage() {
     }
 
     return (
-        <div className="dashboard-page" style={gridLayoutLayout}>
+        <div className="rk-stack" style={gridLayoutLayout}>
             <PageCard>
                 <PageHeader
                     title="Sơ đồ bàn"

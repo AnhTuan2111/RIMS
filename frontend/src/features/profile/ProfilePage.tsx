@@ -189,7 +189,7 @@ export default function ProfilePage() {
 
     if (!savedUser) {
         return (
-            <div className="page-card">
+            <div className="rk-card rk-card--pad">
                 <p>Không tìm thấy thông tin người dùng.</p>
             </div>
         )
@@ -298,8 +298,8 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="page-card">
-            <div className="page-header">
+        <div className="rk-card rk-card--pad">
+            <div className="rk-card__head-inline">
                 <div>
                     <h2>Hồ sơ cá nhân</h2>
                     <p>

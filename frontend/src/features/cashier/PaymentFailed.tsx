@@ -8,7 +8,7 @@ export default function PaymentFailed() {
 
     return (
         <div style={pageStyle}>
-            <div className="page-card" style={cardStyle}>
+            <div className="rk-card rk-card--pad" style={cardStyle}>
                 <div style={iconStyle}>
                     <X className="rk-icon" aria-hidden="true" />
                 </div>
