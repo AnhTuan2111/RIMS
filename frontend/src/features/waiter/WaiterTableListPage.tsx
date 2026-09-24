@@ -441,7 +441,7 @@ export default function WaiterTableListPage() {
         <div className="rk-stack">
             <WaiterHeader />
 
-            <main className="rk-stack">
+            <div className="rk-stack">
                 <div className="rk-legend">
                     <span className="rk-legend__item">
                         <span className="rk-legend__dot rk-legend__dot--ok" />
@@ -503,7 +503,7 @@ export default function WaiterTableListPage() {
                         })}
                     </div>
                 )}
-            </main>
+            </div>
 
             <Modal
                 open={Boolean(tableModal)}

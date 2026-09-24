@@ -107,7 +107,7 @@ export default function WaiterOrderDetailPage() {
         <div className="rk-stack">
             <WaiterHeader title="Chi tiết đơn hàng" />
 
-            <main className="rk-stack">
+            <div className="rk-stack">
                 <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />
 
@@ -211,7 +211,7 @@ export default function WaiterOrderDetailPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     )
 }

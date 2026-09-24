@@ -245,7 +245,7 @@ export default function WaiterCreateOrderPage() {
         <div className="rk-stack">
             <WaiterHeader title="Tạo đơn hàng" />
 
-            <main className="rk-stack">
+            <div className="rk-stack">
                 <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />
 
@@ -391,7 +391,7 @@ export default function WaiterCreateOrderPage() {
                         })}
                     </div>
                 )}
-            </main>
+            </div>
 
             <Modal
                 open={showConfirm}

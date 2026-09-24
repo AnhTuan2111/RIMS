@@ -458,7 +458,7 @@ export default function WaiterEditReservationPage() {
         <div className="rk-stack">
             <WaiterHeader title="Sửa lần đặt bàn" />
 
-            <main className="rk-stack">
+            <div className="rk-stack">
                 <div className="rk-card__head-inline">
                     <h2 className="rk-sectiontitle">Sửa Đặt Bàn</h2>
                 </div>
@@ -700,7 +700,7 @@ export default function WaiterEditReservationPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     )
 }

@@ -21,7 +21,16 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="color-scheme" content="light dark" />
-        <title>RIMS</title>
+
+        <!-- Không có dòng này thì mọi lần tải trang đều kèm một request
+             /favicon.ico trả về 404. -->
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+        <title>RIMS — Hệ thống quản lý nhà hàng</title>
+        <meta
+            name="description"
+            content="Hệ thống quản lý nhà hàng: đặt bàn, gọi món, bếp và thanh toán."
+        />
 
         <!-- Be Vietnam Pro: font hình học do người Việt thiết kế, có đủ dấu.
              JetBrains Mono: dùng cho số tiền, số lượng, mã đơn và giờ — chữ số

@@ -111,9 +111,9 @@ export default function WaiterReservationDetailPage() {
             <div className="rk-stack">
                 <WaiterHeader title="Chi tiết đặt bàn" />
 
-                <main className="rk-stack">
+                <div className="rk-stack">
                     <p style={stateTextStyle}>Đang tải thông tin đặt bàn...</p>
-                </main>
+                </div>
             </div>
         )
     }
@@ -123,7 +123,7 @@ export default function WaiterReservationDetailPage() {
             <div className="rk-stack">
                 <WaiterHeader title="Chi tiết đặt bàn" />
 
-                <main className="rk-stack">
+                <div className="rk-stack">
                     <div className="rk-card__head-inline">
                         <BackArrow onClick={() => navigate('/waiter/tables')} />
 
@@ -144,7 +144,7 @@ export default function WaiterReservationDetailPage() {
                             </button>
                         </div>
                     </div>
-                </main>
+                </div>
             </div>
         )
     }
@@ -154,7 +154,7 @@ export default function WaiterReservationDetailPage() {
             <div className="rk-stack">
                 <WaiterHeader title="Chi tiết đặt bàn" />
 
-                <main className="rk-stack">
+                <div className="rk-stack">
                     <div className="rk-card__head-inline">
                         <BackArrow onClick={() => navigate('/waiter/tables')} />
 
@@ -178,7 +178,7 @@ export default function WaiterReservationDetailPage() {
                             </button>
                         </div>
                     </div>
-                </main>
+                </div>
             </div>
         )
     }
@@ -187,7 +187,7 @@ export default function WaiterReservationDetailPage() {
         <div className="rk-stack">
             <WaiterHeader title="Chi tiết đặt bàn" />
 
-            <main className="rk-stack">
+            <div className="rk-stack">
                 <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />
 
@@ -243,7 +243,7 @@ export default function WaiterReservationDetailPage() {
                         )}
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     )
 }

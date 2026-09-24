@@ -510,7 +510,7 @@ export default function WaiterUpdateOrderPage() {
         <div className="rk-stack">
             <WaiterHeader title="Cập nhật đơn hàng" />
 
-            <main className="rk-stack">
+            <div className="rk-stack">
                 <div className="rk-card__head-inline">
                     <BackArrow
                         onClick={() =>
@@ -761,7 +761,7 @@ export default function WaiterUpdateOrderPage() {
                         })}
                     </div>
                 )}
-            </main>
+            </div>
 
             <Modal
                 open={showConfirm}
