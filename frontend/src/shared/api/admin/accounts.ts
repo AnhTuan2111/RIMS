@@ -90,6 +90,16 @@ export async function setAccountStatus(id: number, active: boolean): Promise<voi
     } satisfies SetAccountStatusRequest)
 }
 
+/**
+ * Đặt lại mật khẩu của một tài khoản về mặc định.
+ *
+ * <p>Nhân viên không tự đổi được mật khẩu (SRS UC-AU-04 chỉ dành cho Khách hàng,
+ * dự án mở thêm cho Quản trị viên), nên quên mật khẩu thì cần đường này.
+ */
+export async function resetPassword(id: number): Promise<void> {
+    await apiClient.post(`/admin/user/${id}/reset-password`)
+}
+
 /** Returns the profile of a specific user (used by ProfilePage) */
 export async function getProfile(
     id: number,

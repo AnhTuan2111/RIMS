@@ -113,6 +113,21 @@ public class AdminController
         return userService.updateAccount(id, request);
     }
 
+    /**
+     * Đặt lại mật khẩu của một tài khoản về mặc định.
+     *
+     * <p>Nhân viên không tự đổi được mật khẩu (SRS UC-AU-04 chỉ dành cho Khách
+     * hàng, dự án mở thêm cho Quản trị viên), nên quên mật khẩu thì cần đường
+     * này — không thì phải sửa thẳng cơ sở dữ liệu.
+     */
+    @PostMapping("/user/{id}/reset-password")
+    public ResponseEntity<Void> resetPassword(@PathVariable Integer id)
+    {
+        userService.resetPassword(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/user/{id}/status")
     public ResponseEntity<Void> setAccountStatus(
             @PathVariable Integer id,

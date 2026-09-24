@@ -1,7 +1,7 @@
 import {X} from 'lucide-react'
 
 import {DR, ErrBox, Field, FieldGroup} from '@/features/admin/users/UserFormControls'
-import {Modal, PasswordInput} from '@/shared/components/ui'
+import {ConfirmDialog, Modal, PasswordInput} from '@/shared/components/ui'
 import {ROLE_COLORS, ROLE_LABELS, STAFF_ROLES} from '@/features/admin/users/constants'
 import type {ModalType, Tab} from '@/features/admin/users/constants'
 import {btn, ghostBtn, gridCols} from '@/features/admin/users/styles'
@@ -34,6 +34,8 @@ export default function AdminUsersPage() {
     const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
     const [modal, setModal] = useState<ModalType>(null)
+
+    const [resetTarget, setResetTarget] = useState<UserResponse | null>(null)
     const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null)
 
     const [form, setForm] = useState({
@@ -189,6 +191,22 @@ export default function AdminUsersPage() {
         })
         setFormError(null)
         setModal('edit')
+    }
+
+    const handleResetPassword = async () => {
+        if (!resetTarget) {
+            return
+        }
+
+        const target = resetTarget
+        setResetTarget(null)
+
+        try {
+            await adminApi.resetPassword(target.id)
+            showSuccess(`Đã đặt lại mật khẩu tài khoản ${target.username} về mặc định.`)
+        } catch (err: unknown) {
+            setError(getErrorMessage(err))
+        }
     }
 
     const handleStatusToggle = async (user: UserResponse) => {
@@ -606,6 +624,21 @@ export default function AdminUsersPage() {
                                         >
                                             Sửa
                                         </button>
+
+                                        {/* Nhân viên không tự đổi được mật khẩu
+                                            nên quên thì phải nhờ đường này. Tài
+                                            khoản Quản trị viên không đặt lại được. */}
+                                        {user.role !== 'ADMIN' && (
+                                            <button
+                                                onClick={() => setResetTarget(user)}
+                                                style={btn(
+                                                    'var(--rims-busy-soft)',
+                                                    'var(--rims-busy)',
+                                                )}
+                                            >
+                                                Đặt lại mật khẩu
+                                            </button>
+                                        )}
                                     </span>
                                 </div>
                             )
@@ -613,6 +646,20 @@ export default function AdminUsersPage() {
                     )}
                 </div>
             )}
+
+            <ConfirmDialog
+                open={Boolean(resetTarget)}
+                title="Đặt lại mật khẩu tài khoản này?"
+                description={
+                    resetTarget
+                        ? `Mật khẩu của ${resetTarget.fullName} (${resetTarget.username}) sẽ về mặc định. Họ sẽ không đăng nhập được bằng mật khẩu cũ nữa, nhớ báo lại cho họ.`
+                        : undefined
+                }
+                confirmLabel="Đặt lại"
+                destructive
+                onConfirm={() => void handleResetPassword()}
+                onCancel={() => setResetTarget(null)}
+            />
 
             {/* ── Pagination ── */}
             {!isLoading && totalElements > 0 && (

@@ -114,7 +114,15 @@ export default function ProfilePage() {
 
     const isAdmin = actor === RoleType.ADMIN || savedUser?.role === RoleType.ADMIN
 
+    /*
+     * SRS UC-PR-02 (sửa hồ sơ) và UC-AU-04 (đổi mật khẩu) chỉ dành cho Quản trị
+     * viên và Khách hàng. Nhân viên chỉ xem được hồ sơ; muốn đổi thì nhờ Quản
+     * trị viên. Backend chặn bằng @PreAuthorize, đây chỉ là để không hiện ra
+     * nút bấm vào sẽ báo lỗi.
+     */
     const canEditProfile = isCustomer || isAdmin
+
+    const canChangePassword = canEditProfile
 
     // Các setter của useState vốn ổn định, nên deps rỗng là đủ.
     const syncFormFromUser = useCallback((user: StoredUser) => {
@@ -294,7 +302,11 @@ export default function ProfilePage() {
             <div className="page-header">
                 <div>
                     <h2>Hồ sơ cá nhân</h2>
-                    <p>Xem và cập nhật thông tin tài khoản của bạn.</p>
+                    <p>
+                        {canEditProfile
+                            ? 'Xem và cập nhật thông tin tài khoản của bạn.'
+                            : 'Thông tin tài khoản của bạn. Cần sửa thì báo Quản trị viên.'}
+                    </p>
                 </div>
 
                 {!isEditing && canEditProfile && (
@@ -421,74 +433,76 @@ export default function ProfilePage() {
                 )}
             </div>
 
-            {/* Mọi vai trò đều phải tự đổi được mật khẩu của mình. Trước đây
-                khối này chỉ hiện cho khách hàng, nên nhân viên muốn đổi phải
-                nhờ quản trị viên sửa thẳng trong cơ sở dữ liệu. */}
-            <div style={passwordCardStyle}>
-                <div style={passwordHeaderStyle}>
-                    <div>
-                        <h3 style={passwordTitleStyle}>Đổi mật khẩu</h3>
+            {/* SRS UC-AU-04: đổi mật khẩu dành cho Quản trị viên và Khách
+                hàng. Nhân viên muốn đổi thì nhờ Quản trị viên đặt lại trong
+                màn Quản lý tài khoản. */}
+            {canChangePassword && (
+                <div style={passwordCardStyle}>
+                    <div style={passwordHeaderStyle}>
+                        <div>
+                            <h3 style={passwordTitleStyle}>Đổi mật khẩu</h3>
 
-                        <p style={passwordSubtitleStyle}>
-                            Cập nhật mật khẩu để bảo mật tài khoản
-                        </p>
-                    </div>
-
-                    <button
-                        type="button"
-                        className={`rk-btn ${
-                            showChangePw ? 'rk-btn--quiet' : 'rk-btn--primary'
-                        }`}
-                        onClick={() => {
-                            setShowChangePw(!showChangePw)
-                            setPwError(null)
-                        }}
-                    >
-                        {showChangePw ? 'Hủy' : 'Đổi mật khẩu'}
-                    </button>
-                </div>
-
-                {showChangePw && (
-                    <div style={passwordFormStyle}>
-                        <EditField
-                            label="Mật khẩu hiện tại *"
-                            type="password"
-                            value={currentPw}
-                            placeholder="••••••"
-                            onChange={setCurrentPw}
-                        />
-
-                        <EditField
-                            label="Mật khẩu mới *"
-                            type="password"
-                            value={newPw}
-                            placeholder="Tối thiểu 6 ký tự"
-                            onChange={setNewPw}
-                        />
-
-                        <EditField
-                            label="Xác nhận mật khẩu mới *"
-                            type="password"
-                            value={confirmPw}
-                            placeholder="Nhập lại mật khẩu mới"
-                            onChange={setConfirmPw}
-                        />
-
-                        {pwError && <div className="auth-error">{pwError}</div>}
-
-                        <div style={passwordActionStyle}>
-                            <button
-                                type="button"
-                                className="rk-btn rk-btn--primary"
-                                disabled={pwLoading}
-                                onClick={() => void handleChangePassword()}
-                            >
-                                {pwLoading ? 'Đang xử lý…' : 'Xác nhận đổi mật khẩu'}
-                            </button>
+                            <p style={passwordSubtitleStyle}>
+                                Cập nhật mật khẩu để bảo mật tài khoản
+                            </p>
                         </div>
+
+                        <button
+                            type="button"
+                            className={`rk-btn ${
+                                showChangePw ? 'rk-btn--quiet' : 'rk-btn--primary'
+                            }`}
+                            onClick={() => {
+                                setShowChangePw(!showChangePw)
+                                setPwError(null)
+                            }}
+                        >
+                            {showChangePw ? 'Hủy' : 'Đổi mật khẩu'}
+                        </button>
                     </div>
-                )}
-            </div>
+
+                    {showChangePw && (
+                        <div style={passwordFormStyle}>
+                            <EditField
+                                label="Mật khẩu hiện tại *"
+                                type="password"
+                                value={currentPw}
+                                placeholder="••••••"
+                                onChange={setCurrentPw}
+                            />
+
+                            <EditField
+                                label="Mật khẩu mới *"
+                                type="password"
+                                value={newPw}
+                                placeholder="Tối thiểu 6 ký tự"
+                                onChange={setNewPw}
+                            />
+
+                            <EditField
+                                label="Xác nhận mật khẩu mới *"
+                                type="password"
+                                value={confirmPw}
+                                placeholder="Nhập lại mật khẩu mới"
+                                onChange={setConfirmPw}
+                            />
+
+                            {pwError && <div className="auth-error">{pwError}</div>}
+
+                            <div style={passwordActionStyle}>
+                                <button
+                                    type="button"
+                                    className="rk-btn rk-btn--primary"
+                                    disabled={pwLoading}
+                                    onClick={() => void handleChangePassword()}
+                                >
+                                    {pwLoading ? 'Đang xử lý…' : 'Xác nhận đổi mật khẩu'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

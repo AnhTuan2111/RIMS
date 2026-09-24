@@ -38,6 +38,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TechnicalException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.AccountDefaults;
 import vn.edu.fpt.swp391.g6.rimsapi.util.PaymentCalculator;
 import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
 
@@ -507,7 +508,7 @@ public class CashierServiceImpl implements CashierService
         return null;
     }
 
-    // Tạo nhanh tài khoản khách vãng lai ngay tại quầy: username = phone, mật khẩu mặc định "123456" (đã mã hóa BCrypt)
+    // Tạo nhanh tài khoản khách vãng lai ngay tại quầy: username = phone, mật khẩu mặc định (đã mã hoá BCrypt)
     @Override
     @Transactional
     public User createCustomerFast(String fullName, String phone, String email)
@@ -521,7 +522,7 @@ public class CashierServiceImpl implements CashierService
         user.setPhone(phone);
         user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
         user.setUsername(phone);
-        user.setPasswordHash(passwordEncoder.encode("123456"));
+        user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
         user.setRole(RoleType.CUSTOMER);
         user.setRewardPoints(0);
         user.setActive(true);

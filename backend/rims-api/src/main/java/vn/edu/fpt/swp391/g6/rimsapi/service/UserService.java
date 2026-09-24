@@ -41,6 +41,9 @@ public interface UserService
 
     UserResponse updateAccount(Integer id, UpdateAccountRequest request);
 
+    /** Đặt lại mật khẩu của một tài khoản về mặc định. */
+    void resetPassword(Integer id);
+
     void setAccountStatus(Integer id, SetAccountStatusRequest request);
 
     void changePassword(UserPrincipal principal, ChangePasswordRequest request);

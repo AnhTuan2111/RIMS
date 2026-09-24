@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,13 +23,20 @@ import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
  * Hồ sơ của chính người đang đăng nhập, không phân biệt vai trò.
  *
  * <p>Ba thao tác này vốn nằm dưới {@code /rims/customer/**}, mà nhánh đó chỉ
- * cho vai trò CUSTOMER đi qua. Hậu quả: bốn vai trò còn lại KHÔNG đổi được mật
- * khẩu của chính mình, và màn Hồ sơ phải lách bằng cách gọi endpoint của Quản
- * trị — thứ mà Bếp, Phục vụ và Thu ngân lại không có quyền gọi.
+ * cho vai trò CUSTOMER đi qua — kể cả Quản trị viên cũng bị chặn. Màn Hồ sơ lách
+ * bằng cách cho nhân viên gọi endpoint của Quản trị, thứ mà Bếp, Phục vụ và Thu
+ * ngân cũng không có quyền gọi, nên nút Lưu của họ chưa bao giờ chạy.
  *
- * <p>Không khai báo vai trò nào ở đây: SecurityConfig đã bắt mọi đường dẫn chưa
- * liệt kê phải đăng nhập, và {@code principal} luôn là chính người gọi nên
- * không ai đọc hay sửa được hồ sơ của người khác.
+ * <p>{@code principal} luôn là chính người gọi, nên không ai đọc hay sửa được
+ * hồ sơ của người khác.
+ *
+ * <p>Quyền theo SRS:
+ * <ul>
+ *   <li>UC-PR-01 Xem hồ sơ — mọi vai trò;</li>
+ *   <li>UC-PR-02 Sửa hồ sơ — Quản trị viên và Khách hàng;</li>
+ *   <li>UC-AU-04 Đổi mật khẩu — Quản trị viên và Khách hàng. Nhân viên đổi mật
+ *       khẩu thì nhờ Quản trị viên đặt lại, xem {@code AdminController}.</li>
+ * </ul>
  */
 @RestController
 @RequestMapping("/rims/me")
@@ -45,6 +53,7 @@ public class MeController
     }
 
     @PutMapping("/profile")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public UserResponse updateMyProfile(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody UpdateAccountRequest request)
@@ -53,6 +62,7 @@ public class MeController
     }
 
     @PostMapping("/change-password")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody ChangePasswordRequest request)

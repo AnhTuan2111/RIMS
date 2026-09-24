@@ -22,11 +22,13 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.user.UserResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.User;
 import vn.edu.fpt.swp391.g6.rimsapi.enums.RoleType;
+import vn.edu.fpt.swp391.g6.rimsapi.exception.BusinessRuleException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.spec.UserSpecifications;
 import vn.edu.fpt.swp391.g6.rimsapi.security.UserPrincipal;
 import vn.edu.fpt.swp391.g6.rimsapi.service.EmailService;
 import vn.edu.fpt.swp391.g6.rimsapi.service.UserService;
+import vn.edu.fpt.swp391.g6.rimsapi.util.AccountDefaults;
 import vn.edu.fpt.swp391.g6.rimsapi.util.OtpStore;
 
 @Service
@@ -44,8 +46,6 @@ public class UserServiceImpl implements UserService
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final OtpStore otpStore;
-
-    private static final String DEFAULT_PASSWORD = "123456";
 
     // ===================== EXISTING =====================
     @Override
@@ -202,6 +202,34 @@ public class UserServiceImpl implements UserService
         return convertToResponse(userRepository.save(user));
     }
 
+    /**
+     * Đặt lại mật khẩu của một tài khoản về mặc định.
+     *
+     * <p>Nhân viên không tự đổi được mật khẩu (xem {@code MeController}), nên quên
+     * mật khẩu thì phải có đường này — không thì phải sửa thẳng cơ sở dữ liệu.
+     *
+     * <p>Không đặt lại được tài khoản Quản trị viên, giống như không khoá được
+     * tài khoản đó: nếu không, một quản trị viên chiếm được tài khoản của người
+     * khác chỉ bằng một cú bấm. Quản trị viên quên mật khẩu thì dùng luồng
+     * Quên mật khẩu qua email.
+     */
+    @Override
+    @Transactional
+    public void resetPassword(Integer id)
+    {
+        User user = findUserById(id);
+
+        if (user.getRole() == RoleType.ADMIN)
+        {
+            throw new BusinessRuleException(
+                    "Không thể đặt lại mật khẩu cho tài khoản Quản trị viên. "
+                            + "Hãy dùng chức năng Quên mật khẩu qua email.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
+        userRepository.save(user);
+    }
+
     @Override
     @Transactional
     public void setAccountStatus(Integer id, SetAccountStatusRequest request)
@@ -220,10 +248,19 @@ public class UserServiceImpl implements UserService
     public void changePassword(UserPrincipal principal, ChangePasswordRequest request)
     {
         User user = findUserById(principal.getId());
+
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash()))
         {
             throw new BadCredentialsException("Mật khẩu hiện tại không đúng");
         }
+
+        // SRS UC-AU-04 BR5. Trước đây gõ lại đúng mật khẩu cũ vẫn báo đổi thành
+        // công, nên người dùng tưởng đã đổi trong khi không có gì thay đổi.
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash()))
+        {
+            throw new BusinessRuleException("Mật khẩu mới phải khác mật khẩu hiện tại.");
+        }
+
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
@@ -274,7 +311,7 @@ public class UserServiceImpl implements UserService
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setPasswordHash(passwordEncoder.encode("123456"));
+        user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
         user.setActive(true);
 
         User saved = userRepository.save(user);
@@ -293,7 +330,7 @@ public class UserServiceImpl implements UserService
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
         user.setRole(RoleType.CUSTOMER);
-        user.setPasswordHash(passwordEncoder.encode(DEFAULT_PASSWORD));
+        user.setPasswordHash(passwordEncoder.encode(AccountDefaults.DEFAULT_PASSWORD));
         user.setActive(true);
 
         return convertToResponse(userRepository.save(user));
