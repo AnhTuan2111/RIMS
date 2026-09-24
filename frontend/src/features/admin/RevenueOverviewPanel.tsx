@@ -1,7 +1,9 @@
-import {CalendarDays, Crown, FileText, Trophy} from 'lucide-react'
-import {type ReactNode, useEffect, useState} from 'react'
+import {CalendarDays, Crown, FileText, Soup, Trophy, Wallet} from 'lucide-react'
+import {useEffect, useState} from 'react'
 import {useAdminSocket} from '@/realtime/useAdminSocket'
 import * as adminApi from '@/shared/api/admin'
+import {EmptyState} from '@/shared/components/feedback'
+import {PageCard, StatCard} from '@/shared/components/ui'
 import type {
     BestSellingDishItem,
     OrderShiftItem,
@@ -231,17 +233,13 @@ function WeeklyBestSellerImage({
     const imageSrc = resolveDishImageSrc(imageUrl)
 
     if (!imageSrc || hasError) {
-        return (
-            <span className="weekly-bestseller-avatar weekly-bestseller-avatar-fallback">
-                {getDishInitial(dishName)}
-            </span>
-        )
+        return <span className="rk-thumb">{getDishInitial(dishName)}</span>
     }
 
     return (
         <img
             alt={dishName}
-            className="weekly-bestseller-avatar"
+            className="rk-thumb"
             src={imageSrc}
             onError={() => setHasError(true)}
         />
@@ -321,73 +319,6 @@ function buildWeeklyRevenueRows(
     return rows
 }
 
-function MoneyIcon() {
-    return (
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-            <rect height="12" rx="2" width="20" x="2" y="6" />
-            <circle cx="12" cy="12" r="3" />
-        </svg>
-    )
-}
-
-function BowlIcon() {
-    return (
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="M4 11h16a7 7 0 0 1-14 0" />
-            <path d="M6 18h12" />
-            <path d="M8 7c0-1.5 2-1.5 2-3" />
-            <path d="M12 7c0-1.5 2-1.5 2-3" />
-            <path d="M16 7c0-1.5 2-1.5 2-3" />
-        </svg>
-    )
-}
-
-function ChevronDownIcon() {
-    return (
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="m6 9 6 6 6-6" />
-        </svg>
-    )
-}
-
-function WeeklyOverviewKpiCard({
-    title,
-    value,
-    caption,
-    tone,
-    icon,
-    marker,
-    featured = false,
-}: {
-    title: string
-    value: ReactNode
-    caption?: ReactNode
-    tone: 'orange' | 'green' | 'red' | 'blue'
-    icon: ReactNode
-    marker?: ReactNode
-    featured?: boolean
-}) {
-    return (
-        <article
-            className={
-                featured
-                    ? `weekly-overview-kpi-card tone-${tone} featured`
-                    : `weekly-overview-kpi-card tone-${tone}`
-            }
-        >
-            <div className="weekly-overview-kpi-top">
-                <span className="weekly-overview-kpi-icon">{icon}</span>
-                {marker && <span className="weekly-overview-kpi-marker">{marker}</span>}
-            </div>
-            <div className="weekly-overview-kpi-content">
-                <span>{title}</span>
-                <strong>{value}</strong>
-                {caption && <small>{caption}</small>}
-            </div>
-        </article>
-    )
-}
-
 function WeeklyRevenueLineChart({
     rows,
 }: {
@@ -427,10 +358,10 @@ function WeeklyRevenueLineChart({
             : ''
 
     return (
-        <div className="weekly-overview-chart-shell">
+        <div className="rk-chart__shell">
             <svg
                 aria-label="Biểu đồ doanh thu trong tuần"
-                className="weekly-overview-chart"
+                className="rk-chart"
                 role="img"
                 viewBox={`0 0 ${width} ${height}`}
             >
@@ -455,14 +386,14 @@ function WeeklyRevenueLineChart({
                     return (
                         <g key={tick}>
                             <line
-                                className="weekly-overview-chart-grid"
+                                className="rk-chart__grid"
                                 x1={left}
                                 x2={width - right}
                                 y1={y}
                                 y2={y}
                             />
                             <text
-                                className="weekly-overview-chart-axis-label"
+                                className="rk-chart__axis"
                                 textAnchor="end"
                                 x={left - 14}
                                 y={y + 4}
@@ -473,19 +404,19 @@ function WeeklyRevenueLineChart({
                     )
                 })}
 
-                {areaPath && <path className="weekly-overview-chart-area" d={areaPath} />}
-                {linePath && <path className="weekly-overview-chart-line" d={linePath} />}
+                {areaPath && <path className="rk-chart__area" d={areaPath} />}
+                {linePath && <path className="rk-chart__line" d={linePath} />}
 
                 {points.map((point) => (
                     <g key={point.date}>
                         <circle
-                            className="weekly-overview-chart-point"
+                            className="rk-chart__point"
                             cx={point.x}
                             cy={point.y}
                             r="5"
                         />
                         <text
-                            className="weekly-overview-chart-day-label"
+                            className="rk-chart__axis"
                             textAnchor="middle"
                             x={point.x}
                             y={bottom + 29}
@@ -536,197 +467,202 @@ function WeeklyRevenueOverviewDashboard({
     const chartRows = buildWeeklyRevenueRows(selectedWeek, data.dailyRevenue)
 
     return (
-        <section aria-busy={isLoading} className="weekly-overview-dashboard">
-            <header className="weekly-overview-header">
-                <div>
-                    <h2>Dashboard tổng quan tuần</h2>
-                    <p>
-                        Tổng quan doanh thu, đơn hàng, món bán chạy và biến động kinh
-                        doanh trong tuần.
+        <div aria-busy={isLoading} className="rk-stack">
+            <PageCard>
+                <div className="rk-card__head-inline">
+                    <div>
+                        <h2 className="rk-sectiontitle">Tổng quan tuần</h2>
+                        <p className="rk-pagehead__desc">
+                            Doanh thu, đơn hàng, món bán chạy và biến động kinh doanh
+                            trong tuần.
+                        </p>
+                    </div>
+
+                    <div className="rk-datefield__shell">
+                        <CalendarDays className="rk-icon" aria-hidden="true" />
+
+                        <select
+                            aria-label="Chọn khoảng thời gian"
+                            className="rk-select"
+                            disabled={isLoading}
+                            value={selectedWeek.value}
+                            onChange={(event) => onWeekChange(event.target.value)}
+                        >
+                            {weekOptions.map((week) => (
+                                <option key={week.value} value={week.value}>
+                                    {formatWeekRangeLabel(week)}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {error && (
+                    <p className="rk-note rk-note--alert">
+                        <span>{error}</span>
+
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--danger"
+                            disabled={isLoading}
+                            onClick={onReload}
+                        >
+                            Thử lại
+                        </button>
                     </p>
-                </div>
+                )}
+            </PageCard>
 
-                <label className="weekly-overview-date-select">
-                    <CalendarDays
-                        className="rk-icon admin-revenue-calendar-icon"
-                        aria-hidden="true"
-                    />
-                    <select
-                        aria-label="Chọn khoảng thời gian"
-                        disabled={isLoading}
-                        value={selectedWeek.value}
-                        onChange={(event) => onWeekChange(event.target.value)}
-                    >
-                        {weekOptions.map((week) => (
-                            <option key={week.value} value={week.value}>
-                                {formatWeekRangeLabel(week)}
-                            </option>
-                        ))}
-                    </select>
-                    <ChevronDownIcon />
-                </label>
-            </header>
-
-            {error && (
-                <div className="weekly-overview-alert">
-                    <span>{error}</span>
-                    <button disabled={isLoading} type="button" onClick={onReload}>
-                        Thử lại
-                    </button>
-                </div>
-            )}
-
-            <section className="weekly-overview-kpi-grid">
-                <WeeklyOverviewKpiCard
-                    icon={<MoneyIcon />}
-                    marker="đ"
-                    title="Doanh thu tuần"
-                    tone="blue"
+            <div className="rk-statgrid">
+                <StatCard
+                    label="Doanh thu tuần"
                     value={formatRevenueCurrency(revenue)}
+                    textValue
+                    tone="brand"
+                    icon={<Wallet className="rk-icon" aria-hidden="true" />}
                 />
-                <WeeklyOverviewKpiCard
-                    icon={<FileText className="rk-icon" aria-hidden="true" />}
-                    title="Đơn đã thanh toán"
-                    tone="green"
+
+                <StatCard
+                    label="Đơn đã thanh toán"
                     value={`${formatNumber(totalOrders)} đơn`}
+                    textValue
+                    tone="ok"
+                    icon={<FileText className="rk-icon" aria-hidden="true" />}
                 />
-                <WeeklyOverviewKpiCard
-                    caption={`${formatNumber(topDish?.totalQuantity ?? 0)} phần`}
-                    icon={<BowlIcon />}
-                    title="Món bán chạy nhất"
-                    tone="orange"
+
+                <StatCard
+                    label="Món bán chạy nhất"
                     value={topDish?.dishName ?? 'Chưa có dữ liệu'}
+                    textValue
+                    icon={<Soup className="rk-icon" aria-hidden="true" />}
                 />
-                <WeeklyOverviewKpiCard
-                    caption={
-                        <>
-                            {formatNumber(featuredShift?.orderCount ?? 0)} đơn
-                            {' · '}
-                            {formatDecimal(featuredShift?.percentage ?? 0)}%
-                        </>
-                    }
-                    featured
-                    icon={<Trophy className="rk-icon" aria-hidden="true" />}
-                    title="Ca nhiều đơn nhất"
-                    tone="orange"
+
+                <StatCard
+                    label="Ca nhiều đơn nhất"
                     value={featuredShift?.displayName ?? 'Chưa có dữ liệu'}
+                    textValue
+                    tone="busy"
+                    icon={<Trophy className="rk-icon" aria-hidden="true" />}
                 />
-            </section>
+            </div>
 
-            <section className="weekly-overview-main-grid">
-                <article className="weekly-overview-panel weekly-revenue-chart-panel">
-                    <h3>Biểu đồ doanh thu trong tuần</h3>
-                    <WeeklyRevenueLineChart rows={chartRows} />
-                </article>
-            </section>
+            <PageCard>
+                <h3 className="rk-sectiontitle">Biểu đồ doanh thu trong tuần</h3>
+                <WeeklyRevenueLineChart rows={chartRows} />
+            </PageCard>
 
-            <section className="weekly-overview-bottom-grid">
-                <article className="weekly-overview-panel weekly-bestseller-panel">
-                    <h3>Top món bán chạy</h3>
+            <div className="rk-two">
+                <PageCard>
+                    <h3 className="rk-sectiontitle">Top món bán chạy</h3>
 
-                    <div className="weekly-bestseller-list">
-                        {bestSellers.length === 0 ? (
-                            <div className="weekly-overview-empty">
-                                Chưa có dữ liệu món bán chạy trong tuần này.
-                            </div>
-                        ) : (
-                            bestSellers.map((item, index) => {
+                    {bestSellers.length === 0 ? (
+                        <EmptyState
+                            title="Chưa có dữ liệu món bán chạy"
+                            description="Tuần này chưa ghi nhận đơn nào."
+                        />
+                    ) : (
+                        <div className="rk-rowlist">
+                            {bestSellers.map((item, index) => {
                                 const rank = item.rank ?? index + 1
 
                                 return (
                                     <div
-                                        className={
-                                            rank === 1
-                                                ? 'weekly-bestseller-row is-top'
-                                                : 'weekly-bestseller-row'
-                                        }
+                                        className="rk-rowlist__item"
                                         key={`${rank}-${item.dishName}`}
                                     >
-                                        <span
-                                            className={`weekly-bestseller-rank rank-${Math.min(
-                                                rank,
-                                                3,
-                                            )}`}
-                                        >
-                                            {rank === 1 && (
-                                                <Crown
-                                                    className="rk-icon bestseller-rank-crown"
-                                                    aria-hidden="true"
-                                                />
-                                            )}
-                                            <span>{rank}</span>
-                                        </span>
-                                        <WeeklyBestSellerImage
-                                            dishName={item.dishName}
-                                            imageUrl={item.imageUrl}
-                                        />
-                                        <div className="weekly-bestseller-info">
-                                            <strong>{item.dishName}</strong>
-                                            <div className="weekly-bestseller-track">
-                                                <span
-                                                    style={{
-                                                        width: `${Math.max(
-                                                            8,
-                                                            (item.totalQuantity /
-                                                                maxQuantity) *
-                                                                100,
-                                                        )}%`,
-                                                    }}
-                                                />
+                                        <div className="rk-media">
+                                            <span
+                                                className={`rk-rank${rank <= 3 ? ` rk-rank--${rank}` : ''}`}
+                                            >
+                                                {rank === 1 ? (
+                                                    <Crown
+                                                        className="rk-icon"
+                                                        aria-hidden="true"
+                                                    />
+                                                ) : (
+                                                    rank
+                                                )}
+                                            </span>
+
+                                            <WeeklyBestSellerImage
+                                                dishName={item.dishName}
+                                                imageUrl={item.imageUrl}
+                                            />
+
+                                            <div className="rk-rowlist__main">
+                                                <div className="rk-rowlist__title">
+                                                    {item.dishName}
+                                                </div>
+
+                                                <div className="rk-bar">
+                                                    <div
+                                                        className="rk-bar__fill"
+                                                        style={{
+                                                            width: `${Math.max(
+                                                                8,
+                                                                (item.totalQuantity /
+                                                                    maxQuantity) *
+                                                                    100,
+                                                            )}%`,
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                        <strong className="weekly-bestseller-count">
+
+                                        <strong className="rk-num">
                                             {formatNumber(item.totalQuantity)}
                                         </strong>
                                     </div>
                                 )
-                            })
-                        )}
-                    </div>
-                </article>
+                            })}
+                        </div>
+                    )}
+                </PageCard>
 
-                <article className="weekly-overview-panel weekly-shift-panel">
-                    <h3>Tỉ trọng đơn theo ca</h3>
+                <PageCard>
+                    <h3 className="rk-sectiontitle">Tỉ trọng đơn theo ca</h3>
 
-                    <div className="weekly-shift-content">
+                    <div className="rk-donutrow">
                         <div
-                            className="weekly-shift-donut"
+                            className="rk-donut"
                             style={{
                                 background: `conic-gradient(from -90deg, ${donutGradient})`,
                             }}
                         >
-                            <div className="weekly-shift-donut-hole">
-                                <strong>{formatNumber(totalOrders)}</strong>
-                                <span>đơn</span>
+                            <div className="rk-donut__hole">
+                                <span className="rk-donut__value">
+                                    {formatNumber(totalOrders)}
+                                </span>
+                                <span className="rk-donut__label">đơn</span>
                             </div>
                         </div>
 
-                        <div className="weekly-shift-legend">
+                        <ul className="rk-legend rk-legend--stack">
                             {shiftRows.map((row) => (
-                                <div
-                                    className="weekly-shift-legend-item"
-                                    key={row.shiftName}
-                                >
+                                <li className="rk-legend__item" key={row.shiftName}>
                                     <span
-                                        className="weekly-shift-dot"
-                                        style={{
-                                            background: row.color,
-                                        }}
+                                        className="rk-legend__dot"
+                                        style={{background: row.color}}
                                     />
+
                                     <div>
-                                        <strong>{row.displayName}</strong>
-                                        <span>
-                                            {formatNumber(row.orderCount)} đơn (
-                                            {formatDecimal(row.percentage)}% )
-                                        </span>
+                                        <div className="rk-rowlist__title">
+                                            {row.displayName}
+                                        </div>
+
+                                        <p className="rk-rowlist__meta">
+                                            {formatNumber(row.orderCount)} đơn ·{' '}
+                                            {formatDecimal(row.percentage)}%
+                                        </p>
                                     </div>
-                                </div>
+                                </li>
                             ))}
-                        </div>
+                        </ul>
                     </div>
-                </article>
-            </section>
-        </section>
+                </PageCard>
+            </div>
+        </div>
     )
 }
 

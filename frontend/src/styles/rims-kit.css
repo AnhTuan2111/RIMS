@@ -2675,3 +2675,13 @@ textarea.rk-input {
 .rk-calendar__foot button:hover {
     text-decoration: underline;
 }
+
+/* Vùng vẽ của biểu đồ đường: cho tràn ngang trên màn hẹp thay vì bóp méo. */
+.rk-chart__shell {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.rk-chart__area {
+    fill: url(#weekly-revenue-area);
+}

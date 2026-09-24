@@ -453,7 +453,7 @@ export default function AdminStatisticsPage() {
     }
 
     return (
-        <div className="rims-statistics-container">
+        <div className="rk-stack">
             <StatisticsReportSelector
                 activeReport={activeReport}
                 bestSellerCount={bestSellers.length}
