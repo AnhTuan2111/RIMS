@@ -2749,10 +2749,6 @@ textarea.rk-input {
     gap: var(--rims-space-4);
 }
 
-.rk-cardgrid--sm {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
-
 /* Thẻ có cờ: vạch đậm bên trái. Dùng cho nhóm món có ghi chú riêng —
    dấu hiệu là HÌNH DẠNG chứ không chỉ là màu. */
 .rk-card--flagged {

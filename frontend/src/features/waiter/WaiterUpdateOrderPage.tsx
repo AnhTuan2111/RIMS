@@ -1,5 +1,5 @@
 import {Check, UtensilsCrossed} from 'lucide-react'
-import {statusChipClass} from './statusChip'
+import {statusChipClass, statusLabel} from './statusChip'
 
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
@@ -612,7 +612,7 @@ export default function WaiterUpdateOrderPage() {
                                                 <span
                                                     className={`rk-chip ${statusChipClass(draft.status)}`}
                                                 >
-                                                    {draft.status}
+                                                    {statusLabel(draft.status)}
                                                 </span>
                                             )}
 

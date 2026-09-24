@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from 'react'
-import {statusChipClass} from './statusChip'
+import {statusChipClass, statusLabel} from './statusChip'
 import {useNavigate, useParams} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
@@ -126,84 +126,79 @@ export default function WaiterOrderDetailPage() {
                     </button>
                 </div>
 
-                <div className="rk-two rk-two--wideleft">
-                    <div className="rk-card rk-card--pad">
-                        <h3 className="rk-sectiontitle">Danh sách món</h3>
+                <div className="rk-card rk-card--pad">
+                    <h3 className="rk-sectiontitle">Danh sách món</h3>
 
-                        <div className="rk-stack">
-                            {isLoading ? (
-                                <LoadingState
-                                    title="Đang tải chi tiết đơn hàng"
-                                    description=""
-                                    size="sm"
-                                />
-                            ) : error ? (
-                                <ErrorState
-                                    message={error}
-                                    onRetry={() =>
-                                        void loadServingOrders(undefined, true)
-                                    }
-                                />
-                            ) : orderItems.length === 0 ? (
-                                <EmptyState
-                                    title="Chưa có món đang phục vụ"
-                                    description="Bàn này chưa gọi món nào, hoặc các món đã phục vụ xong."
-                                />
-                            ) : (
-                                <table className="rk-table rk-table--compact">
-                                    <thead>
-                                        <tr>
-                                            <th>Món</th>
-                                            <th>SL</th>
-                                            <th>Đơn giá</th>
-                                            <th>Trạng thái</th>
+                    <div className="rk-stack">
+                        {isLoading ? (
+                            <LoadingState
+                                title="Đang tải chi tiết đơn hàng"
+                                description=""
+                                size="sm"
+                            />
+                        ) : error ? (
+                            <ErrorState
+                                message={error}
+                                onRetry={() => void loadServingOrders(undefined, true)}
+                            />
+                        ) : orderItems.length === 0 ? (
+                            <EmptyState
+                                title="Chưa có món đang phục vụ"
+                                description="Bàn này chưa gọi món nào, hoặc các món đã phục vụ xong."
+                            />
+                        ) : (
+                            <table className="rk-table rk-table--compact">
+                                <thead>
+                                    <tr>
+                                        <th>Món</th>
+                                        <th>SL</th>
+                                        <th>Đơn giá</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {orderItems.map((item) => (
+                                        <tr key={item.orderItemId}>
+                                            <td>
+                                                {item.dishName}
+
+                                                {item.note && (
+                                                    <div className="rk-subnote">
+                                                        {item.note}
+                                                    </div>
+                                                )}
+
+                                                {item.status === 'CANCELLED' &&
+                                                    item.cancelReason && (
+                                                        <div className="rk-subnote rk-subnote--alert">
+                                                            Lý do hủy: {item.cancelReason}
+                                                        </div>
+                                                    )}
+
+                                                {item.chefInternalNote && (
+                                                    <div className="rk-subnote rk-subnote--busy">
+                                                        Chef: {item.chefInternalNote}
+                                                    </div>
+                                                )}
+                                            </td>
+
+                                            <td>{item.quantity}</td>
+
+                                            <td>{fmtPrice(item.unitPrice)}</td>
+
+                                            <td>
+                                                <span
+                                                    className={`rk-chip ${statusChipClass(item.status)}`}
+                                                >
+                                                    {statusLabel(item.status)}
+                                                </span>
+                                            </td>
                                         </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {orderItems.map((item) => (
-                                            <tr key={item.orderItemId}>
-                                                <td>
-                                                    {item.dishName}
-
-                                                    {item.note && (
-                                                        <div className="rk-subnote">
-                                                            {item.note}
-                                                        </div>
-                                                    )}
-
-                                                    {item.status === 'CANCELLED' &&
-                                                        item.cancelReason && (
-                                                            <div className="rk-subnote rk-subnote--alert">
-                                                                Lý do hủy:{' '}
-                                                                {item.cancelReason}
-                                                            </div>
-                                                        )}
-
-                                                    {item.chefInternalNote && (
-                                                        <div className="rk-subnote rk-subnote--busy">
-                                                            Chef: {item.chefInternalNote}
-                                                        </div>
-                                                    )}
-                                                </td>
-
-                                                <td>{item.quantity}</td>
-
-                                                <td>{fmtPrice(item.unitPrice)}</td>
-
-                                                <td>
-                                                    <span
-                                                        className={`rk-chip ${statusChipClass(item.status)}`}
-                                                    >
-                                                        {item.status}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
             </div>
