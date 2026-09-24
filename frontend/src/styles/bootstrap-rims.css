@@ -6,7 +6,6 @@
 @import './bootstrap-rims-layout.css';
 @import './bootstrap-rims-components.css';
 @import './bootstrap-rims-chef.css';
-@import './bootstrap-rims-waiter.css';
 @import './bootstrap-rims-customer.css';
 
 /* rims-kit đứng CUỐI để thắng các file cũ khi chuyển đổi từng màn một.
