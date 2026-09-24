@@ -15,6 +15,7 @@ import {
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
+import {ANH_THAY_THE, dungAnhThayThe} from '@/shared/utils/image'
 
 type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE'
 
@@ -399,10 +400,7 @@ export default function AdminDishesPage() {
                                                         : `/image/${dish.imageUrl}`
                                                 }
                                                 alt={dish.name}
-                                                onError={(e) => {
-                                                    ;(e.target as HTMLImageElement).src =
-                                                        'https://placehold.co/48x48?text='
-                                                }}
+                                                onError={dungAnhThayThe}
                                             />
                                         </span>
                                     </td>
@@ -941,7 +939,6 @@ export default function AdminDishesPage() {
                                     Xem trước trên thực đơn
                                 </div>
                                 <div className="rk-media">
-                                    {/* Thay thế phần này */}
                                     <div className="rk-thumb rk-thumb--lg">
                                         <img
                                             src={
@@ -949,13 +946,10 @@ export default function AdminDishesPage() {
                                                     ? formData.imageUrl.startsWith('http')
                                                         ? formData.imageUrl
                                                         : `/image/${formData.imageUrl}`
-                                                    : 'https://placehold.co/300x200?text=No+Image'
+                                                    : ANH_THAY_THE
                                             }
                                             alt="Preview"
-                                            onError={(e) => {
-                                                ;(e.target as HTMLImageElement).src =
-                                                    'https://placehold.co/300x200?text=No+Image'
-                                            }}
+                                            onError={dungAnhThayThe}
                                         />
                                     </div>
                                     <div className="rk-rowlist__main"></div>

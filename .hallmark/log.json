@@ -2,17 +2,20 @@
   {
     "date": "2026-09-25",
     "scope": "app",
-    "macrostructure": "Workbench (vận hành) · Catalogue (quản trị) · Marquee Hero (công khai)",
-    "theme": "custom",
-    "theme_axes": "light / rounded-sans / warm",
-    "vibe": "phiếu order giấy, vận hành nhà hàng",
+    "macrostructure": "Workbench (vận hành) · Catalogue (quản trị + trang chủ) · Marquee Hero (trang chủ rỗng)",
+    "theme": "custom \"Thép\"",
+    "theme_axes": "light / rounded-sans / cool",
+    "vibe": "bảng điều khiển, xám lạnh một nhấn xanh",
     "genre": "modern-minimal",
     "nav": "N3 Side-rail + ngăn kéo dưới 60rem",
     "footer": "Ft2 một dòng, chỉ trang công khai",
     "enrichment": "none",
     "brief": "RIMS · thiết kế lại toàn bộ 35 màn, mobile-first, hệ khoá trong design.md",
     "amendments": [
-      "CTA: rk-btn--go duoc lam nut chinh o ho Van hanh (quy uoc xanh la = xong)"
-    ]
+      "CTA: rk-btn--go duoc lam nut chinh o ho Van hanh (quy uoc xanh la = xong)",
+      "Go vach trai 3px khoi toan he — tell side-stripe card",
+      "Trang chu doi dang theo du lieu: co mon -> Catalogue, chua co -> Marquee Hero"
+    ],
+    "voice": "V4 Đậm & nét — vuông tuốt, viền 2px, chip tô đặc"
   }
 ]

@@ -221,3 +221,43 @@
         padding-top: var(--rims-space-10);
     }
 }
+
+/* ---------- Dáng "Thực đơn ngay" ----------
+   Khi quán đã có món bán chạy, món ăn chính là trang bìa. Đầu trang thu gọn
+   thành một hàng: tên quán bên trái, nút đặt bàn bên phải — nhường hết chỗ
+   còn lại cho lưới món. */
+
+.rk-home__lead {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-6) var(--rims-gutter);
+    border-bottom: var(--rims-border) solid var(--rims-line);
+}
+
+.rk-home__leadtext {
+    min-width: 0;
+}
+
+.rk-home__eyebrow {
+    margin: 0;
+    color: var(--rims-brand);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+}
+
+.rk-home__title--sm {
+    font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+}
+
+@media (min-width: 48rem) {
+    .rk-home__lead {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: var(--rims-space-6);
+    }
+}

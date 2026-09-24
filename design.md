@@ -4,7 +4,7 @@ Hệ thiết kế đã khoá cho toàn bộ ứng dụng. Mọi lần thiết k�
 file này trước khi viết code. Không sinh lại theo từng màn — cần mở rộng thì sửa
 chính file này.
 
-Tên gọi nội bộ của hệ: **Phiếu bếp**.
+Tên gọi nội bộ của hệ: **Thép** (bảng màu) + **Đậm & nét** (giọng component).
 
 ---
 
@@ -13,9 +13,12 @@ Tên gọi nội bộ của hệ: **Phiếu bếp**.
 **modern-minimal** — phần mềm vận hành nội bộ, dữ liệu dày, đọc nhanh trong ca
 làm việc. Không editorial, không playful, không atmospheric.
 
-Giọng cụ thể: **phiếu order giấy**. Mặt làm việc trông gần với nghề hơn là gần
-với phần mềm. Kẻ đứt đoạn như phiếu in, khối vuông không bo góc, vạch trái đậm
-đánh dấu từng mục, số luôn là chữ số bảng.
+Giọng cụ thể: **bảng điều khiển**. Xám lạnh gần trung tính, một màu xanh dương
+duy nhất làm nhấn. Vuông tuốt kể cả nút và ô nhập, viền 2px, nhãn nhỏ in hoa,
+chip trạng thái tô đặc. Độ nổi do viền dày tạo ra, không do bóng.
+
+Bảng màu trung tính là có chủ ý: để **màu của món ăn trong ảnh** là thứ có sắc
+duy nhất trên màn.
 
 ## Họ macrostructure
 
@@ -24,7 +27,7 @@ thành phần.
 
 | Họ | Macrostructure | Màn | Knob được phép đổi |
 |---|---|---|---|
-| Công khai | **Marquee Hero** (trang chủ) · thẻ giữa màn (auth) | 7 | Archetype hero, có/không enrichment |
+| Công khai | **Catalogue** (trang chủ, có món) → **Marquee Hero** (chưa có món) · thẻ giữa màn (auth) | 7 | Dáng trang chủ tự đổi theo dữ liệu |
 | Vận hành | **Workbench** — mặt làm việc *là* trang, chrome lùi lại | 18 | Bề mặt dữ liệu (bảng / thẻ / sơ đồ), vị trí hành động chính |
 | Quản trị | **Catalogue** — chỉ mục bản ghi đều nhau + rail lọc | 11 | Cột bảng, bộ lọc, có/không thống kê đầu màn |
 
@@ -45,41 +48,34 @@ churn không mang lại gì cho người dùng.
 
 | Vai trò | Giá trị | Dùng cho |
 |---|---|---|
-| `--rims-paper` | `#faf6ef` | Nền trang, giấy ấm |
-| `--rims-surface` | `#fffdf8` | Mặt thẻ, mặt phiếu |
-| `--rims-surface-2` | `#f2ece1` | Đầu bảng, ô chìm |
-| `--rims-surface-3` | `#e8e0d1` | Ô chìm sâu hơn |
-| `--rims-line` | `#e0d5c2` | Kẻ mảnh |
-| `--rims-line-strong` | `#8a7b67` | Kẻ đậm, viền phi văn bản |
-| `--rims-ink` | `#2b2118` | Chữ chính |
-| `--rims-ink-2` | `#54483c` | Chữ phụ |
-| `--rims-ink-3` | `#6d6053` | Chữ mờ, nhãn |
-| `--rims-brand` | `#b02a1f` | Đỏ son — nhấn, hành động chính |
-| `--rims-brand-hover` | `#8f2018` | Trạng thái rê chuột |
-| `--rims-ink-on-brand` | `#fdf6f4` | Chữ trên nền đỏ son |
-| `--rims-ok` | `#2f6b3f` | Xong, đang bán, bàn trống |
-| `--rims-busy` | `#8a5a12` | Đang làm, đang phục vụ, đã đặt |
-| `--rims-alert` | `#a3231c` | Huỷ, lỗi, quá hạn |
+| `--rims-paper` | `#f6f7f9` | Nền trang |
+| `--rims-surface` | `#fdfefe` | Mặt thẻ |
+| `--rims-surface-2` | `#eceff3` | Đầu bảng, ô chìm |
+| `--rims-line` | `#dde1e7` | Kẻ mảnh |
+| `--rims-line-strong` | `#7d8894` | Viền phi văn bản |
+| `--rims-ink` | `#14181d` | Chữ chính |
+| `--rims-ink-2` | `#444c55` | Chữ phụ |
+| `--rims-ink-3` | `#5e6772` | Chữ mờ, nhãn |
+| `--rims-brand` | `#1f5fbf` | Xanh dương — nhấn, hành động chính |
+| `--rims-ok` | `#16704a` | Xong, đang bán, bàn trống |
+| `--rims-busy` | `#8a5a12` | Đang làm, đang phục vụ |
+| `--rims-alert` | `#b02532` | Huỷ, lỗi, quá hạn |
 
 ### Chế độ tối
 
 | Vai trò | Giá trị |
 |---|---|
-| `--rims-paper` | `#191512` |
-| `--rims-surface` | `#211c18` |
-| `--rims-surface-2` | `#2a241f` |
-| `--rims-surface-3` | `#332c26` |
-| `--rims-line` | `#3a322b` |
-| `--rims-line-strong` | `#8a7b67` |
-| `--rims-ink` | `#f2ece3` |
-| `--rims-ink-2` | `#c8bdae` |
-| `--rims-ink-3` | `#a2968a` |
-| `--rims-brand` | `#e8735f` |
-| `--rims-brand-hover` | `#f18e7c` |
-| `--rims-ink-on-brand` | `#2b120e` |
-| `--rims-ok` | `#6cbb7f` |
-| `--rims-busy` | `#e0a74a` |
-| `--rims-alert` | `#ef8177` |
+| `--rims-paper` | `#0f1216` |
+| `--rims-surface` | `#161b21` |
+| `--rims-surface-2` | `#1e242b` |
+| `--rims-line` | `#2c343d` |
+| `--rims-ink` | `#e6eaef` |
+| `--rims-ink-2` | `#b2bcc6` |
+| `--rims-ink-3` | `#8b96a2` |
+| `--rims-brand` | `#6aa6ff` |
+| `--rims-ok` | `#57b98a` |
+| `--rims-busy` | `#dda548` |
+| `--rims-alert` | `#f0808b` |
 
 **Đã kiểm 30 cặp chữ/nền ở cả hai chế độ: 0 cặp dưới ngưỡng WCAG AA.**
 Ngưỡng dùng: 4.5:1 cho chữ, 3:1 cho viền và thành phần phi văn bản.
@@ -125,12 +121,16 @@ Nhịp trang: `--rims-space-6` (24px) giữa các khối ở màn hẹp, `--rims
 
 ## Hình khối
 
-- **Bo góc 0px** cho thẻ, phiếu, bảng, ô nhập, chip. Đây là chữ ký của hệ.
-- **2px** cho nút — đủ để tay chạm thấy là nút, chưa đủ để thành viên thuốc.
-- Kẻ phân cách giữa các mục trong danh sách: **đứt đoạn** `1px dashed`.
-- Kẻ khung ngoài và kẻ bảng: **liền** `1px solid`.
-- Mục có trạng thái: **vạch trái 3px** đặc, màu theo trạng thái.
-- **Không đổ bóng ở đâu cả.** Độ sâu do kẻ và nền tạo ra, không do bóng.
+- **Bo góc 0px cho MỌI THỨ** — thẻ, bảng, ô nhập, nút, chip. Đây là chữ ký của
+  giọng V4.
+- **Viền 2px** (`--rims-border`) cho bề mặt và điều khiển; **1px**
+  (`--rims-hairline`) cho kẻ trong bảng.
+- Nhãn nhỏ in hoa, giãn chữ `0.06em`.
+- Chip trạng thái **tô đặc** màu trạng thái, chữ sáng, kèm chấm dẫn.
+- **Không đổ bóng ở đâu cả.** Độ sâu do viền dày và nền tạo ra.
+- **CẤM vạch trái đậm một cạnh.** Đó là anti-pattern "side-stripe card" —
+  Hallmark xếp critical, mô tả là "rất 2018-SaaS-AI". Bản trước của hệ này lấy
+  nó làm chữ ký, và đó là một phần lý do giao diện đọc ra cũ.
 
 ## Responsive
 

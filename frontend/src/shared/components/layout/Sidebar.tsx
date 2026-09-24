@@ -24,7 +24,6 @@ import {Fragment} from 'react'
 import {NavLink} from 'react-router-dom'
 import {ROLE_LABELS, roleMenus} from '@/app/config/roleMenus'
 import {useActor} from '@/app/providers/ActorContext'
-import {RoleType} from '@/shared/types/auth'
 import {useRestaurant} from '@/app/providers/useRestaurant'
 import {ThemeToggle} from '@/shared/components/ui'
 
@@ -69,10 +68,19 @@ export function Sidebar({open, onClose}: SidebarProps) {
     const {profile} = useRestaurant()
     const menus = roleMenus[actor] ?? []
 
-    // Khách hàng nhìn thấy thương hiệu nhà hàng; nhân viên nhìn thấy tên hệ thống.
-    const restaurantName = profile?.name ?? 'Nhà hàng'
-    const restaurantTagline = profile?.tagline ?? 'Thực đơn & đặt bàn'
-    const brandInitial = restaurantName.trim().charAt(0).toUpperCase() || 'R'
+    /*
+     * Ai cũng nhìn thấy tên NHÀ HÀNG, kể cả nhân viên.
+     *
+     * Bản cũ cho nhân viên thấy "RIMS / Vận hành nhà hàng" — tên sản phẩm, thứ
+     * họ không cần biết — còn khách thấy tên quán. Một app chạy cho một nhà
+     * hàng thì chỉ có một danh tính.
+     *
+     * Không có chuỗi dự phòng gõ cứng: hồ sơ chưa tải xong thì để trống,
+     * còn chưa cấu hình thì service đã tự tạo bản mặc định trung tính.
+     */
+    const restaurantName = profile?.name ?? ''
+    const restaurantTagline = profile?.tagline ?? ''
+    const brandInitial = restaurantName.trim().charAt(0).toUpperCase()
 
     const stored = localStorage.getItem('currentUser')
     const currentUser = stored
@@ -91,16 +99,10 @@ export function Sidebar({open, onClose}: SidebarProps) {
             </button>
 
             <div className="rk-shell__brand">
-                <div className="rk-shell__logo">
-                    {actor === RoleType.CUSTOMER ? brandInitial : 'R'}
-                </div>
+                <div className="rk-shell__logo">{brandInitial}</div>
                 <div>
-                    <h2>{actor === RoleType.CUSTOMER ? restaurantName : 'RIMS'}</h2>
-                    <p>
-                        {actor === RoleType.CUSTOMER
-                            ? restaurantTagline
-                            : 'Vận hành nhà hàng'}
-                    </p>
+                    <h2>{restaurantName}</h2>
+                    <p>{restaurantTagline}</p>
                 </div>
             </div>
 

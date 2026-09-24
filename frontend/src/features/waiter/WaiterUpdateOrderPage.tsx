@@ -17,6 +17,7 @@ import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 import {EmptyState, LoadingState} from '@/shared/components/feedback'
+import {dungAnhThayThe} from '@/shared/utils/image'
 
 type DraftItem = {
     qty: number
@@ -590,10 +591,7 @@ export default function WaiterUpdateOrderPage() {
                                                 }
                                                 alt={dish.name}
                                                 className="rk-thumb"
-                                                onError={(e) => {
-                                                    ;(e.target as HTMLImageElement).src =
-                                                        'https://placehold.co/64x64?text='
-                                                }}
+                                                onError={dungAnhThayThe}
                                             />
                                         ) : (
                                             <span className="rk-thumb">

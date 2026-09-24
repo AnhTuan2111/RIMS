@@ -1,5 +1,6 @@
 import {LogOut, Menu} from 'lucide-react'
 import {useActor} from '@/app/providers/ActorContext'
+import {useRestaurant} from '@/app/providers/useRestaurant'
 import {RoleType} from '@/shared/types/auth'
 
 type DashboardTopbarProps = {
@@ -10,7 +11,18 @@ type DashboardTopbarProps = {
 
 export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
     const {actor} = useActor()
+    const {profile} = useRestaurant()
     const isCustomer = actor === RoleType.CUSTOMER
+
+    /*
+     * Tên nhà hàng đọc từ hồ sơ trong CSDL, không gõ cứng.
+     *
+     * Dòng này từng là chuỗi "MÃN VỊ LÂU" viết thẳng trong mã, trong khi thanh
+     * bên ngay cạnh đó lại đọc tên thật từ hồ sơ — nên cùng một màn hiện hai tên
+     * nhà hàng khác nhau. Đây đúng là việc mà bảng restaurant_profile sinh ra để
+     * bỏ.
+     */
+    const restaurantName = (profile?.name ?? 'Nhà hàng').toUpperCase()
 
     const stored = localStorage.getItem('currentUser')
     const currentUser = stored
@@ -33,7 +45,7 @@ export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
                     <>
                         <span className="rk-shell__eyebrow">
                             <span className="rk-shell__livedot" />
-                            MÃN VỊ LÂU
+                            {restaurantName}
                         </span>
 
                         <h1>
@@ -52,11 +64,12 @@ export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
                             TRUNG TÂM ĐIỀU HÀNH RIMS
                         </span>
 
-                        <h1>Hệ thống quản lý nhà hàng</h1>
+                        {/* Tên quán, không phải khẩu hiệu của phần mềm. Hai dòng cũ
+                            — "Hệ thống quản lý nhà hàng" và câu mô tả bên dưới — lặp lại
+                            ở mọi màn và không nói gì về việc đang làm. */}
+                        <h1>{profile?.name ?? ''}</h1>
 
-                        <p>
-                            Theo dõi và điều phối hoạt động nhà hàng theo thời gian thực.
-                        </p>
+                        {profile?.tagline && <p>{profile.tagline}</p>}
                     </>
                 )}
             </div>

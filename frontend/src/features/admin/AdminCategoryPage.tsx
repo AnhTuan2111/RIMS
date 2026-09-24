@@ -21,6 +21,7 @@ import {
 } from '@/shared/components/ui'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
+import {dungAnhThayThe} from '@/shared/utils/image'
 
 type ViewMode = 'LIST' | 'CREATE' | 'EDIT' | 'DETAIL'
 type FilterStatus = 'ALL' | 'ACTIVE' | 'HIDDEN'
@@ -622,15 +623,9 @@ export default function AdminCategoryPage() {
                                                                             : `/image/${dish.imageUrl}`
                                                                     }
                                                                     alt={dish.name}
-                                                                    onError={(e) => {
-                                                                        ;(
-                                                                            e.target as HTMLImageElement
-                                                                        ).src =
-                                                                            'https://placehold.co/40x40?text='
-                                                                        ;(
-                                                                            e.target as HTMLImageElement
-                                                                        ).onerror = null
-                                                                    }}
+                                                                    onError={
+                                                                        dungAnhThayThe
+                                                                    }
                                                                 />
                                                             </span>
                                                             <div>

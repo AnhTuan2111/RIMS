@@ -1,6 +1,7 @@
 /* Hallmark · genre: modern-minimal · macrostructure: Workbench (vận hành) ·
- * Catalogue (quản trị) · Marquee Hero (công khai) · nav: N3 Side-rail + ngăn kéo ·
- * footer: Ft2 · theme: custom "Phiếu bếp" (light / rounded-sans / warm) ·
+ * Catalogue (quản trị, và trang chủ khi đã có món) · Marquee Hero (trang chủ
+ * khi chưa có món) · nav: N3 Side-rail + ngăn kéo · footer: Ft2 ·
+ * theme: custom "Thép" (light / rounded-sans / cool) · voice: V4 Đậm & nét ·
  * enrichment: none · design-system: design.md · designed-as-app
  *
  * Bảng màu, bộ chữ, hình khối và luật responsive KHOÁ trong design.md ở gốc
@@ -176,7 +177,7 @@ a {
     justify-content: center;
     gap: var(--rims-space-2);
     padding: var(--rims-space-3) var(--rims-space-5);
-    border: 1px solid transparent;
+    border: var(--rims-border) solid transparent;
     border-radius: var(--rims-radius-md);
     background: var(--rims-surface-2);
     color: var(--rims-ink);
@@ -413,6 +414,10 @@ a {
    Màu KHÔNG phải tín hiệu duy nhất: mỗi chip có chấm dẫn và nhãn chữ, nên
    người mù màu vẫn đọc được trạng thái. */
 
+/* Chip trạng thái — giọng V4 tô ĐẶC màu trạng thái, chữ in hoa.
+   Tô đặc thay cho nền nhạt vì trạng thái là thứ mắt phải bắt được đầu tiên
+   khi lướt một danh sách dài; nền nhạt chìm vào mặt thẻ. Mọi cặp chữ/nền ở
+   đây đều đã tính, thấp nhất 5.21:1. */
 .rk-chip {
     /* Trong cột flex, chip phải bó sát nội dung chứ không kéo hết chiều ngang. */
     align-self: flex-start;
@@ -420,17 +425,20 @@ a {
     align-items: center;
     gap: var(--rims-space-2);
     padding: var(--rims-space-1) var(--rims-space-3);
-    border: 1px solid var(--rims-idle-line);
-    /* Vuong, khong bo tron: chip la mot o tren phieu chu khong phai vien thuoc. */
+    border: var(--rims-hairline) solid transparent;
     border-radius: var(--rims-radius-md);
-    background: var(--rims-idle-soft);
-    color: var(--rims-idle);
+    background: var(--rims-idle);
+    color: var(--rims-ink-on-idle);
     font-size: var(--rims-text-xs);
-    font-weight: var(--rims-weight-semibold);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
     line-height: 1.5;
     white-space: nowrap;
 }
 
+/* Chấm dẫn: giữ lại vì trạng thái không bao giờ chỉ mang màu — chấm cộng
+   chữ cộng nền là ba tầng dấu hiệu. */
 .rk-chip::before {
     content: '';
     width: 6px;
@@ -441,21 +449,18 @@ a {
 }
 
 .rk-chip--ok {
-    background: var(--rims-ok-soft);
-    border-color: var(--rims-ok-line);
-    color: var(--rims-ok);
+    background: var(--rims-ok);
+    color: var(--rims-ink-on-ok);
 }
 
 .rk-chip--busy {
-    background: var(--rims-busy-soft);
-    border-color: var(--rims-busy-line);
-    color: var(--rims-busy);
+    background: var(--rims-busy);
+    color: var(--rims-ink-on-busy);
 }
 
 .rk-chip--alert {
-    background: var(--rims-alert-soft);
-    border-color: var(--rims-alert-line);
-    color: var(--rims-alert);
+    background: var(--rims-alert);
+    color: var(--rims-ink-on-alert);
 }
 
 /* Chip bấm được (bật/tắt trạng thái) phải cho thấy là bấm được. */
@@ -487,15 +492,13 @@ button.rk-chip:hover {
 }
 
 .rk-chip--idle {
-    background: var(--rims-idle-soft);
-    border-color: var(--rims-idle-line);
-    color: var(--rims-idle);
+    background: var(--rims-idle);
+    color: var(--rims-ink-on-idle);
 }
 
 .rk-chip--brand {
-    background: var(--rims-brand-soft);
-    border-color: var(--rims-brand-line);
-    color: var(--rims-brand);
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
 }
 
 /* ---------- Phiếu món trong bếp ----------
@@ -843,7 +846,7 @@ table {
 /* Tab đang mở: một màu nhấn duy nhất, không phải bốn màu như trước. */
 .rk-stat--active {
     background: var(--rims-brand-soft);
-    box-shadow: inset 3px 0 0 var(--rims-brand);
+    border-color: var(--rims-brand);
 }
 
 .rk-stat--active .rk-stat__label {
@@ -1379,7 +1382,7 @@ textarea.rk-input {
     overflow-x: auto;
     /* Cuon ngang trong hop thi phai co diem tua cho ngon tay va cho ban phim. */
     overscroll-behavior-x: contain;
-    border: 1px solid var(--rims-line);
+    border: var(--rims-border) solid var(--rims-line);
     border-radius: var(--rims-radius-lg);
     background: var(--rims-surface);
 }
@@ -1493,19 +1496,8 @@ textarea.rk-input {
 
 /* Sắc nền cho ô cần nổi hơn phần còn lại. Chữ vẫn là màu mực thường để
    không phải tính lại tương phản cho từng sắc. */
-/* Vạch trái 3px đặc — dấu hiệu trạng thái của hệ, đọc được cả khi không
-   phân biệt được sắc màu vì nó là HÌNH DẠNG chứ không chỉ là màu. */
-.rk-statcard--brand,
-.rk-statcard--ok,
-.rk-statcard--busy,
-.rk-statcard--alert {
-    border-inline-start-width: 3px;
-    border-inline-start-style: solid;
-}
-
 .rk-statcard--brand {
     border-color: var(--rims-brand-line);
-    border-inline-start-color: var(--rims-brand);
     background: var(--rims-brand-soft);
 }
 
@@ -1516,7 +1508,6 @@ textarea.rk-input {
 
 .rk-statcard--ok {
     border-color: var(--rims-ok-line);
-    border-inline-start-color: var(--rims-ok);
     background: var(--rims-ok-soft);
 }
 
@@ -1527,7 +1518,6 @@ textarea.rk-input {
 
 .rk-statcard--busy {
     border-color: var(--rims-busy-line);
-    border-inline-start-color: var(--rims-busy);
     background: var(--rims-busy-soft);
 }
 
@@ -1538,7 +1528,6 @@ textarea.rk-input {
 
 .rk-statcard--alert {
     border-color: var(--rims-alert-line);
-    border-inline-start-color: var(--rims-alert);
     background: var(--rims-alert-soft);
 }
 
@@ -1724,7 +1713,8 @@ textarea.rk-input {
 .rk-card {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--rims-line);
+    /* Giọng V4: viền dày dựng độ nổi, thay cho bóng. */
+    border: var(--rims-border) solid var(--rims-line);
     border-radius: var(--rims-radius-lg);
     background: var(--rims-surface);
 }
@@ -2266,16 +2256,15 @@ textarea.rk-input {
     display: grid;
 }
 
-/* Kẻ ĐỨT ĐOẠN giữa các mục — chữ ký của hệ. Kẻ liền dành cho khung ngoài
-   và cho bảng; kẻ đứt dành cho ranh giới giữa các dòng trong một danh sách,
-   đúng như đường xé trên tờ phiếu. */
+/* Kẻ liền giữa các mục. Bản trước dùng kẻ đứt cho giọng "phiếu in"; giọng
+   V4 dựng nhịp bằng viền dày và nét liền, kẻ đứt ở đây thành lạc lõng. */
 .rk-rowlist__item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--rims-space-3);
     padding: var(--rims-space-3) 0;
-    border-bottom: 1px dashed var(--rims-line);
+    border-bottom: var(--rims-hairline) solid var(--rims-line);
 }
 
 .rk-rowlist__item:last-child {
@@ -2585,7 +2574,7 @@ textarea.rk-input {
    trái để người mù màu cũng thấy. */
 .rk-table tbody tr.is-highlighted {
     background: var(--rims-brand-soft);
-    box-shadow: inset 3px 0 0 var(--rims-brand);
+    border-color: var(--rims-brand);
 }
 
 .rk-table tfoot td {
@@ -2834,7 +2823,7 @@ textarea.rk-input {
 /* Thẻ có cờ: vạch đậm bên trái. Dùng cho nhóm món có ghi chú riêng —
    dấu hiệu là HÌNH DẠNG chứ không chỉ là màu. */
 .rk-card--flagged {
-    box-shadow: inset 3px 0 0 var(--rims-alert);
+    border-color: var(--rims-alert);
 }
 
 /* Nhãn cảnh báo. */
@@ -2847,7 +2836,7 @@ textarea.rk-input {
 /* Dòng được nhấn trong danh sách. */
 .rk-rowlist__item.is-highlighted {
     background: var(--rims-brand-soft);
-    box-shadow: inset 3px 0 0 var(--rims-brand);
+    border-color: var(--rims-brand);
 }
 
 /* ---------- Số lượng lớn ----------
@@ -3230,7 +3219,7 @@ body.rk-drawer-open {
     gap: var(--rims-space-3);
     padding: var(--rims-space-3) var(--rims-gutter);
     padding-top: max(var(--rims-space-3), env(safe-area-inset-top));
-    border-bottom: 1px dashed var(--rims-line-strong);
+    border-bottom: var(--rims-border) solid var(--rims-line);
     background: var(--rims-surface);
 }
 

@@ -16,6 +16,7 @@ import type {MenuDashboardData} from '@/shared/api/admin'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {dungAnhThayThe} from '@/shared/utils/image'
 
 /**
  * Ảnh thu nhỏ của món.
@@ -37,10 +38,7 @@ function DishThumb({imageUrl, name}: {imageUrl?: string | null; name: string}) {
             <img
                 src={imageUrl.startsWith('http') ? imageUrl : `/image/${imageUrl}`}
                 alt={name}
-                onError={(event) => {
-                    event.currentTarget.onerror = null
-                    event.currentTarget.src = 'https://placehold.co/46x46?text='
-                }}
+                onError={dungAnhThayThe}
             />
         </span>
     )
