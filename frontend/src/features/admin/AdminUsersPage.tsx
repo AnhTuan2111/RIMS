@@ -843,15 +843,13 @@ export default function AdminUsersPage() {
                         <DR
                             label="Điểm tích lũy"
                             value={`${selectedUser.rewardPoints ?? 0} điểm`}
-                            color="var(--rims-ok)"
+                            tone="ok"
                         />
                     )}
                     <DR
                         label="Trạng thái"
                         value={selectedUser.isActive ? 'Đang hoạt động' : 'Đã khóa'}
-                        color={
-                            selectedUser.isActive ? 'var(--rims-ok)' : 'var(--rims-alert)'
-                        }
+                        tone={selectedUser.isActive ? 'ok' : 'alert'}
                     />
                     <DR
                         label="Ngày tạo"

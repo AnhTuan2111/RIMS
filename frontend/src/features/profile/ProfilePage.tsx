@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState, type CSSProperties} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 
 import * as meApi from '@/shared/api/me'
 import {useActor} from '@/app/providers/ActorContext'
@@ -320,26 +320,30 @@ export default function ProfilePage() {
                 )}
             </div>
 
-            {updateSuccess && <div style={successStyle}> Cập nhật hồ sơ thành công!</div>}
+            {updateSuccess && (
+                <div className="rk-note rk-note--ok">Cập nhật hồ sơ thành công!</div>
+            )}
 
-            {pwSuccess && <div style={successStyle}> Đổi mật khẩu thành công!</div>}
+            {pwSuccess && (
+                <div className="rk-note rk-note--ok">Đổi mật khẩu thành công!</div>
+            )}
 
-            <div style={cardStyle}>
-                <div style={profileHeaderStyle}>
-                    <div style={avatarStyle}>
+            <div className="rk-card rk-card--soft rk-card--pad">
+                <div className="rk-idcard">
+                    <div className="rk-avatar rk-avatar--lg">
                         {currentUser.fullName.charAt(0).toUpperCase()}
                     </div>
 
                     <div>
-                        <h3 style={profileNameStyle}>{currentUser.fullName}</h3>
+                        <h3 className="rk-idcard__name">{currentUser.fullName}</h3>
 
-                        <span style={roleBadgeStyle}>
+                        <span className="rk-tag rk-tag--brand">
                             {ROLE_LABELS[currentUser.role] ?? currentUser.role}
                         </span>
                     </div>
                 </div>
 
-                <div style={fieldGridStyle}>
+                <div className="rk-formgrid">
                     {isEditing ? (
                         <>
                             <EditField
@@ -402,13 +406,11 @@ export default function ProfilePage() {
                 </div>
 
                 {updateError && (
-                    <div className="rk-note rk-note--alert" style={profileErrorStyle}>
-                        {updateError}
-                    </div>
+                    <div className="rk-note rk-note--alert">{updateError}</div>
                 )}
 
                 {isEditing && (
-                    <div style={profileActionStyle}>
+                    <div className="rk-actions rk-actions--end">
                         <button
                             type="button"
                             className="rk-btn rk-btn--quiet"
@@ -437,12 +439,12 @@ export default function ProfilePage() {
                 hàng. Nhân viên muốn đổi thì nhờ Quản trị viên đặt lại trong
                 màn Quản lý tài khoản. */}
             {canChangePassword && (
-                <div style={passwordCardStyle}>
-                    <div style={passwordHeaderStyle}>
+                <div className="rk-card rk-card--soft rk-card--pad">
+                    <div className="rk-card__head-inline">
                         <div>
-                            <h3 style={passwordTitleStyle}>Đổi mật khẩu</h3>
+                            <h3 className="rk-sectiontitle">Đổi mật khẩu</h3>
 
-                            <p style={passwordSubtitleStyle}>
+                            <p className="rk-field__hint">
                                 Cập nhật mật khẩu để bảo mật tài khoản
                             </p>
                         </div>
@@ -462,7 +464,7 @@ export default function ProfilePage() {
                     </div>
 
                     {showChangePw && (
-                        <div style={passwordFormStyle}>
+                        <div className="rk-formgrid">
                             <EditField
                                 label="Mật khẩu hiện tại *"
                                 type="password"
@@ -491,7 +493,7 @@ export default function ProfilePage() {
                                 <div className="rk-note rk-note--alert">{pwError}</div>
                             )}
 
-                            <div style={passwordActionStyle}>
+                            <div className="rk-actions rk-actions--end">
                                 <button
                                     type="button"
                                     className="rk-btn rk-btn--primary"
@@ -519,8 +521,8 @@ function ProfileField({
     readOnly?: boolean
 }) {
     return (
-        <div style={profileFieldStyle}>
-            <span style={profileFieldLabelStyle}>{label}</span>
+        <div className="rk-detailrow">
+            <span className="rk-detailrow__label">{label}</span>
 
             <span
                 className={`rk-detailrow__value${
@@ -570,120 +572,4 @@ function EditField({
             )}
         </label>
     )
-}
-
-const cardStyle: CSSProperties = {
-    background: 'var(--rims-surface-2)',
-    border: '1px solid var(--rims-line)',
-    borderRadius: '12px',
-    padding: '24px',
-}
-
-const passwordCardStyle: CSSProperties = {
-    ...cardStyle,
-    marginTop: '16px',
-}
-
-const avatarStyle: CSSProperties = {
-    width: '64px',
-    height: '64px',
-    borderRadius: '50%',
-    background: 'var(--rims-brand)',
-    color: 'var(--rims-ink-on-brand)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '24px',
-    fontWeight: 700,
-    flexShrink: 0,
-}
-
-const successStyle: CSSProperties = {
-    background: 'var(--rims-ok-soft)',
-    color: 'var(--rims-ok)',
-    padding: '12px 16px',
-    borderRadius: '8px',
-    marginBottom: '16px',
-    fontWeight: 500,
-}
-
-const profileHeaderStyle: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    marginBottom: '28px',
-}
-
-const profileNameStyle: CSSProperties = {
-    margin: 0,
-    fontSize: '20px',
-    fontWeight: 700,
-}
-
-const roleBadgeStyle: CSSProperties = {
-    background: 'var(--rims-brand-soft)',
-    color: 'var(--rims-brand)',
-    padding: '3px 10px',
-    borderRadius: '12px',
-    fontSize: '12px',
-    fontWeight: 600,
-}
-
-const fieldGridStyle: CSSProperties = {
-    display: 'grid',
-    gap: '16px',
-}
-
-const profileErrorStyle: CSSProperties = {
-    marginTop: '12px',
-}
-
-const profileActionStyle: CSSProperties = {
-    display: 'flex',
-    gap: '8px',
-    marginTop: '20px',
-    justifyContent: 'flex-end',
-}
-
-const passwordHeaderStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-}
-
-const passwordTitleStyle: CSSProperties = {
-    margin: 0,
-    fontSize: '16px',
-    fontWeight: 600,
-}
-
-const passwordSubtitleStyle: CSSProperties = {
-    margin: '4px 0 0',
-    color: 'var(--rims-ink-3)',
-    fontSize: '13px',
-}
-
-const passwordFormStyle: CSSProperties = {
-    display: 'grid',
-    gap: '16px',
-    marginTop: '20px',
-}
-
-const passwordActionStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-}
-
-const profileFieldStyle: CSSProperties = {
-    display: 'flex',
-    padding: '12px 0',
-    borderBottom: '1px solid var(--rims-line)',
-    gap: '16px',
-}
-
-const profileFieldLabelStyle: CSSProperties = {
-    width: '160px',
-    color: 'var(--rims-ink-3)',
-    fontSize: '13px',
-    flexShrink: 0,
 }

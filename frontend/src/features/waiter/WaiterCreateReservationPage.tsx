@@ -1,4 +1,4 @@
-﻿import {useEffect, useMemo, useRef, useState, type CSSProperties} from 'react'
+﻿import {useEffect, useMemo, useRef, useState} from 'react'
 import {useNavigate, useSearchParams} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
@@ -521,13 +521,13 @@ export default function WaiterCreateReservationPage() {
 
                         <div className="rk-rowlist">
                             {!resForm.tableId || !resForm.date ? (
-                                <p style={emptyTextStyle}>
+                                <p className="rk-text--muted">
                                     Chọn bàn và ngày để xem lịch đặt.
                                 </p>
                             ) : isReservationsLoading ? (
-                                <p style={emptyTextStyle}>Đang tải lịch đặt...</p>
+                                <p className="rk-text--muted">Đang tải lịch đặt...</p>
                             ) : rightReservations.length === 0 ? (
-                                <p style={emptyTextStyle}>Không có lịch đặt nào.</p>
+                                <p className="rk-text--muted">Không có lịch đặt nào.</p>
                             ) : (
                                 rightReservations.map((reservation) => {
                                     const reservationId = getReservationId(reservation)
@@ -567,7 +567,7 @@ export default function WaiterCreateReservationPage() {
                                                     </p>
 
                                                     {reservation.note && (
-                                                        <p style={noteStyle}>
+                                                        <p className="rk-subnote">
                                                             {reservation.note}
                                                         </p>
                                                     )}
@@ -577,8 +577,7 @@ export default function WaiterCreateReservationPage() {
                                             {reservationId && (
                                                 <button
                                                     type="button"
-                                                    className="rk-btn rk-btn--quiet"
-                                                    style={editButtonStyle}
+                                                    className="rk-btn rk-btn--quiet rk-btn--sm"
                                                     onClick={() =>
                                                         navigate(
                                                             `/waiter/reservations/${reservationId}/edit`,
@@ -598,18 +597,4 @@ export default function WaiterCreateReservationPage() {
             </div>
         </div>
     )
-}
-
-const emptyTextStyle: CSSProperties = {
-    color: 'var(--rims-ink-3)',
-    fontWeight: 500,
-}
-
-const noteStyle: CSSProperties = {
-    fontSize: '0.85rem',
-    color: 'var(--rims-ink-3)',
-}
-
-const editButtonStyle: CSSProperties = {
-    padding: '0.35rem 0.85rem',
 }

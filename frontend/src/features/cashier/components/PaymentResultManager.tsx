@@ -1,6 +1,6 @@
 import {Check, Download} from 'lucide-react'
 
-import {useState, type CSSProperties} from 'react'
+import {useState} from 'react'
 
 import type {OrderDetailResponse, PaymentResponse} from '@/shared/types/cashier'
 import {formatCurrency} from '@/shared/utils/format'
@@ -59,32 +59,28 @@ export default function PaymentResultManager({
 
     if (step === 'SUCCESS') {
         return (
-            <button
-                type="button"
-                style={successScreenStyle}
-                onClick={() => setStep('BILL')}
-            >
-                <div style={successIconStyle}>
+            <button type="button" className="rk-paid" onClick={() => setStep('BILL')}>
+                <div className="rk-paid__icon">
                     <Check className="rk-icon" aria-hidden="true" />
                 </div>
 
-                <h1 style={successTitleStyle}>Thanh toán thành công</h1>
+                <h1 className="rk-paid__title">Thanh toán thành công</h1>
 
-                <p style={successInvoiceStyle}>Mã hóa đơn: INV-{invoiceId}</p>
+                <p className="rk-paid__code">Mã hóa đơn: INV-{invoiceId}</p>
 
                 {customerName && (
-                    <div style={successCustomerBoxStyle}>
-                        <p style={successCustomerNameStyle}>
+                    <div className="rk-paid__customer">
+                        <p>
                             Khách hàng: <strong>{customerName}</strong>
                         </p>
 
-                        <p style={successPointsStyle}>
+                        <p>
                             Tích lũy thêm: <strong>+{pointsEarned} điểm</strong>
                         </p>
                     </div>
                 )}
 
-                <p style={successHintStyle}>Chạm vào màn hình để xem hoá đơn</p>
+                <p className="rk-paid__hint">Chạm vào màn hình để xem hoá đơn</p>
             </button>
         )
     }
@@ -237,60 +233,4 @@ function SummaryRow({
             <span className="rk-summary__value">{value}</span>
         </div>
     )
-}
-
-const successScreenStyle: CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    background: 'var(--rims-ok)',
-    zIndex: 9999,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    cursor: 'pointer',
-    textAlign: 'center',
-    animation: 'fadeIn 0.3s',
-}
-
-const successIconStyle: CSSProperties = {
-    fontSize: '8rem',
-    marginBottom: '1rem',
-}
-
-const successTitleStyle: CSSProperties = {
-    fontSize: '4rem',
-    fontWeight: 'bold',
-}
-
-const successInvoiceStyle: CSSProperties = {
-    fontSize: '1.5rem',
-    opacity: 0.9,
-}
-
-const successCustomerBoxStyle: CSSProperties = {
-    marginTop: '1rem',
-    padding: '10px 20px',
-    background: 'rgb(var(--rims-tint-hi) / 20%)',
-    borderRadius: '8px',
-}
-
-const successCustomerNameStyle: CSSProperties = {
-    margin: '0 0 5px 0',
-    fontSize: '1.2rem',
-}
-
-const successPointsStyle: CSSProperties = {
-    margin: 0,
-    fontSize: '1.1rem',
-}
-
-const successHintStyle: CSSProperties = {
-    marginTop: '3rem',
-    fontSize: '1.1rem',
-    fontStyle: 'italic',
 }

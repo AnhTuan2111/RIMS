@@ -1,4 +1,4 @@
-﻿import {useEffect, useMemo, useRef, useState, type CSSProperties} from 'react'
+﻿import {useEffect, useMemo, useRef, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
@@ -18,6 +18,7 @@ import {WaiterHeader} from './components'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
+import {LoadingState} from '@/shared/components/feedback'
 
 type ReservationForm = {
     customerName: string
@@ -475,9 +476,11 @@ export default function WaiterEditReservationPage() {
                             )}
 
                             {isDetailLoading ? (
-                                <div style={stateBoxStyle}>
-                                    Đang tải thông tin đặt bàn...
-                                </div>
+                                <LoadingState
+                                    title="Đang tải thông tin đặt bàn"
+                                    description=""
+                                    size="sm"
+                                />
                             ) : (
                                 <>
                                     <div className="rk-field">
@@ -613,8 +616,7 @@ export default function WaiterEditReservationPage() {
 
                                         <button
                                             type="button"
-                                            className="rk-btn rk-btn--quiet"
-                                            style={cancelButtonStyle}
+                                            className="rk-btn rk-btn--danger"
                                             disabled={submitting || canceling}
                                             onClick={() => void handleCancelReservation()}
                                         >
@@ -642,13 +644,13 @@ export default function WaiterEditReservationPage() {
 
                         <div className="rk-rowlist">
                             {!resForm.tableId || !resForm.date ? (
-                                <p style={emptyTextStyle}>
+                                <p className="rk-text--muted">
                                     Chọn bàn và ngày để xem lịch đặt.
                                 </p>
                             ) : isReservationsLoading ? (
-                                <p style={emptyTextStyle}>Đang tải lịch đặt...</p>
+                                <p className="rk-text--muted">Đang tải lịch đặt...</p>
                             ) : rightReservations.length === 0 ? (
-                                <p style={emptyTextStyle}>Không có lịch đặt nào.</p>
+                                <p className="rk-text--muted">Không có lịch đặt nào.</p>
                             ) : (
                                 rightReservations.map((reservation) => {
                                     const itemId = getReservationId(reservation)
@@ -682,8 +684,7 @@ export default function WaiterEditReservationPage() {
                                             {itemId && !isCurrent && (
                                                 <button
                                                     type="button"
-                                                    className="rk-btn rk-btn--quiet"
-                                                    style={editButtonStyle}
+                                                    className="rk-btn rk-btn--quiet rk-btn--sm"
                                                     onClick={() =>
                                                         navigate(
                                                             `/waiter/reservations/${itemId}/edit`,
@@ -703,24 +704,4 @@ export default function WaiterEditReservationPage() {
             </div>
         </div>
     )
-}
-
-const stateBoxStyle: CSSProperties = {
-    padding: '2rem',
-    textAlign: 'center',
-    color: 'var(--rims-ink-3)',
-}
-
-const cancelButtonStyle: CSSProperties = {
-    color: 'var(--rims-alert)',
-    borderColor: 'var(--rims-alert-line)',
-}
-
-const emptyTextStyle: CSSProperties = {
-    color: 'var(--rims-ink-3)',
-    fontWeight: 500,
-}
-
-const editButtonStyle: CSSProperties = {
-    padding: '0.35rem 0.85rem',
 }

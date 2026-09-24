@@ -1,12 +1,20 @@
 import {Check, Download} from 'lucide-react'
 
-import {type CSSProperties} from 'react'
 import {useNavigate, useSearchParams} from 'react-router-dom'
 
 import * as cashierApi from '@/shared/api/cashier'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 
+/**
+ * Trang VNPay trả về khi thanh toán thành công.
+ *
+ * <p>Trang này nằm ngoài khung quản trị: không thanh bên, không thanh trên,
+ * vì người dùng vừa từ cổng thanh toán quay lại chứ không đi từ trong hệ
+ * thống ra. Trước đây nó tự dựng thẻ, nút và màu bằng mười đối tượng style
+ * trong JS — nút còn đặt thẳng `color: white`, nên ở chế độ tối chữ trắng
+ * nằm trên nền sáng.
+ */
 export default function PaymentSuccess() {
     const {notify} = useToast()
 
@@ -51,110 +59,48 @@ export default function PaymentSuccess() {
     }
 
     return (
-        <div style={pageStyle}>
-            <div className="rk-card rk-card--pad" style={cardStyle}>
-                <div style={iconStyle}>
+        <div className="rk-result">
+            <div className="rk-feedback rk-feedback--lg">
+                <div className="rk-feedback__icon rk-feedback__icon--ok">
                     <Check className="rk-icon" aria-hidden="true" />
                 </div>
 
-                <h1 style={titleStyle}>Thanh toán thành công</h1>
+                <div>
+                    <h1 className="rk-feedback__title">Thanh toán thành công</h1>
 
-                <p style={descriptionStyle}>
-                    Giao dịch qua VNPay đã hoàn tất. Hóa đơn của quý khách đã được lưu lại
-                    hệ thống.
-                </p>
+                    <p className="rk-feedback__text">
+                        Giao dịch qua VNPay đã hoàn tất. Hoá đơn của quý khách đã được lưu
+                        lại hệ thống.
+                    </p>
 
-                {invoiceId && (
-                    <div style={invoiceBoxStyle}>
-                        <strong>Mã hóa đơn: INV-{invoiceId}</strong>
+                    {invoiceId && (
+                        <p className="rk-feedback__text">
+                            Mã hoá đơn:{' '}
+                            <strong className="rk-num">INV-{invoiceId}</strong>
+                        </p>
+                    )}
+
+                    <div className="rk-feedback__actions">
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--primary"
+                            disabled={!invoiceId}
+                            onClick={() => void handleDownloadPdf()}
+                        >
+                            <Download className="rk-icon" aria-hidden="true" />
+                            Tải PDF hoá đơn
+                        </button>
+
+                        <button
+                            type="button"
+                            className="rk-btn"
+                            onClick={() => navigate('/cashier/payments')}
+                        >
+                            Về màn hình Thu ngân
+                        </button>
                     </div>
-                )}
-
-                <div style={actionRowStyle}>
-                    <button
-                        type="button"
-                        style={downloadButtonStyle}
-                        disabled={!invoiceId}
-                        onClick={() => void handleDownloadPdf()}
-                    >
-                        <Download className="rk-icon" aria-hidden="true" /> Tải PDF Hóa
-                        Đơn
-                    </button>
-
-                    <button
-                        type="button"
-                        style={backButtonStyle}
-                        onClick={() => navigate('/cashier/payments')}
-                    >
-                        Về màn hình Thu Ngân
-                    </button>
                 </div>
             </div>
         </div>
     )
-}
-
-const pageStyle: CSSProperties = {
-    height: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'var(--rims-ok-soft)',
-}
-
-const cardStyle: CSSProperties = {
-    textAlign: 'center',
-    padding: '3rem',
-    maxWidth: '500px',
-    boxShadow: '0 10px 15px -3px rgb(var(--rims-tint-ink) / 10%)',
-}
-
-const iconStyle: CSSProperties = {
-    fontSize: '5rem',
-    color: 'var(--rims-ok)',
-    marginBottom: '1rem',
-}
-
-const titleStyle: CSSProperties = {
-    color: 'var(--rims-ok)',
-    marginBottom: '1rem',
-}
-
-const descriptionStyle: CSSProperties = {
-    color: 'var(--rims-ink-2)',
-    marginBottom: '2rem',
-}
-
-const invoiceBoxStyle: CSSProperties = {
-    background: 'var(--rims-surface-3)',
-    padding: '1rem',
-    borderRadius: '8px',
-    marginBottom: '2rem',
-}
-
-const actionRowStyle: CSSProperties = {
-    display: 'flex',
-    gap: '1rem',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-}
-
-const downloadButtonStyle: CSSProperties = {
-    padding: '0.8rem 1.5rem',
-    background: 'var(--rims-brand)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-}
-
-const backButtonStyle: CSSProperties = {
-    padding: '0.8rem 1.5rem',
-    background: 'var(--rims-surface-3)',
-    color: 'var(--rims-ink)',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
 }

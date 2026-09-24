@@ -1,14 +1,7 @@
 import {Check, UtensilsCrossed} from 'lucide-react'
 import {statusChipClass} from './statusChip'
 
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    type CSSProperties,
-} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
@@ -23,6 +16,7 @@ import {Modal} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
+import {EmptyState, LoadingState} from '@/shared/components/feedback'
 
 type DraftItem = {
     qty: number
@@ -97,22 +91,6 @@ function buildDraftFromOrders(menu: MenuItemResponse[], orders: OrderDetailRespo
     })
 
     return draft
-}
-
-function getChefNoteBoxStyle(acknowledged: boolean): CSSProperties {
-    return {
-        margin: '0.85rem 0',
-        padding: '0.85rem 0.95rem',
-        border: acknowledged
-            ? '1px solid var(--rims-line)'
-            : '1px solid var(--rims-busy-line)',
-        borderLeft: acknowledged
-            ? '4px solid var(--rims-line-strong)'
-            : '4px solid var(--rims-busy)',
-        borderRadius: '10px',
-        background: acknowledged ? 'var(--rims-surface-2)' : 'var(--rims-busy-soft)',
-        color: acknowledged ? 'var(--rims-ink-2)' : 'var(--rims-busy)',
-    }
 }
 
 export default function WaiterUpdateOrderPage() {
@@ -554,13 +532,12 @@ export default function WaiterUpdateOrderPage() {
                 </div>
 
                 {pageError && (
-                    <div className="rk-formerror" style={errorBoxStyle}>
+                    <div className="rk-formerror">
                         {pageError}
 
                         <button
                             type="button"
-                            className="rk-btn rk-btn--quiet"
-                            style={retryButtonStyle}
+                            className="rk-btn rk-btn--quiet rk-btn--sm"
                             onClick={() => void loadOrderData(undefined, true)}
                         >
                             Thử lại
@@ -569,9 +546,15 @@ export default function WaiterUpdateOrderPage() {
                 )}
 
                 {isLoading ? (
-                    <div style={stateBoxStyle}>Đang tải dữ liệu cập nhật đơn hàng...</div>
+                    <LoadingState
+                        title="Đang tải dữ liệu đơn hàng"
+                        description="Hệ thống đang lấy thực đơn và các món đã gọi."
+                    />
                 ) : visibleMenu.length === 0 ? (
-                    <div style={stateBoxStyle}>Không có món nào trong danh mục này.</div>
+                    <EmptyState
+                        title="Không có món nào"
+                        description="Danh mục này chưa có món, hãy chọn danh mục khác."
+                    />
                 ) : (
                     <div className="rk-cardgrid">
                         {visibleMenu.map((dish) => {
@@ -593,8 +576,9 @@ export default function WaiterUpdateOrderPage() {
                             return (
                                 <div
                                     key={dish.dishId}
-                                    className="rk-card rk-card--pad"
-                                    style={isUnavailable ? {opacity: 0.5} : undefined}
+                                    className={`rk-card rk-card--pad${
+                                        isUnavailable ? ' is-unavailable' : ''
+                                    }`}
                                 >
                                     <div className="rk-media">
                                         {dish.imageUrl ? (
@@ -642,13 +626,15 @@ export default function WaiterUpdateOrderPage() {
 
                                     {draft.chefInternalNote && (
                                         <div
-                                            style={getChefNoteBoxStyle(noteAcknowledged)}
+                                            className={`rk-chefnote${
+                                                noteAcknowledged ? ' is-acknowledged' : ''
+                                            }`}
                                         >
-                                            <div style={chefNoteHeaderStyle}>
+                                            <div className="rk-chefnote__head">
                                                 <strong> Bếp nhắn</strong>
 
                                                 {draft.chefInternalNoteCreatedAt && (
-                                                    <span style={chefNoteTimeStyle}>
+                                                    <span className="rk-chefnote__time">
                                                         {formatChefNoteTime(
                                                             draft.chefInternalNoteCreatedAt,
                                                         )}
@@ -656,12 +642,12 @@ export default function WaiterUpdateOrderPage() {
                                                 )}
                                             </div>
 
-                                            <p style={chefNoteContentStyle}>
+                                            <p className="rk-chefnote__body">
                                                 {draft.chefInternalNote}
                                             </p>
 
                                             {noteAcknowledged ? (
-                                                <small style={seenTextStyle}>
+                                                <small className="rk-chefnote__seen">
                                                     <Check
                                                         className="rk-icon"
                                                         aria-hidden="true"
@@ -672,8 +658,7 @@ export default function WaiterUpdateOrderPage() {
                                                 draft.orderItemId && (
                                                     <button
                                                         type="button"
-                                                        className="rk-btn rk-btn--quiet"
-                                                        style={ackButtonStyle}
+                                                        className="rk-btn rk-btn--quiet rk-btn--sm"
                                                         disabled={
                                                             acknowledgingItemId ===
                                                             draft.orderItemId
@@ -750,7 +735,7 @@ export default function WaiterUpdateOrderPage() {
                                             </p>
 
                                             {draft.cancelReason && (
-                                                <p style={cancelReasonStyle}>
+                                                <p className="rk-subnote rk-subnote--alert">
                                                     Lý do hủy: {draft.cancelReason}
                                                 </p>
                                             )}
@@ -832,65 +817,8 @@ export default function WaiterUpdateOrderPage() {
                     </button>
                 }
             >
-                <div style={successSummaryStyle}>{successData?.itemSummary}</div>
+                <p className="rk-prose">{successData?.itemSummary}</p>
             </Modal>
         </div>
     )
-}
-
-const stateBoxStyle: CSSProperties = {
-    padding: '2rem',
-    textAlign: 'center',
-    color: 'var(--rims-ink-3)',
-}
-
-const errorBoxStyle: CSSProperties = {
-    marginBottom: '1rem',
-}
-
-const retryButtonStyle: CSSProperties = {
-    marginLeft: '0.75rem',
-}
-
-const chefNoteHeaderStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '0.75rem',
-    flexWrap: 'wrap',
-}
-
-const chefNoteTimeStyle: CSSProperties = {
-    fontSize: '0.75rem',
-    color: 'var(--rims-ink-3)',
-}
-
-const chefNoteContentStyle: CSSProperties = {
-    margin: '0.45rem 0',
-    whiteSpace: 'pre-wrap',
-    lineHeight: 1.45,
-}
-
-const seenTextStyle: CSSProperties = {
-    color: 'var(--rims-ok)',
-    fontWeight: 700,
-}
-
-const ackButtonStyle: CSSProperties = {
-    marginTop: '0.25rem',
-    padding: '0.4rem 0.75rem',
-}
-
-const cancelReasonStyle: CSSProperties = {
-    margin: '0.25rem 0 0',
-    color: 'var(--rims-alert)',
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    lineHeight: 1.4,
-}
-
-const successSummaryStyle: CSSProperties = {
-    marginTop: '1rem',
-    whiteSpace: 'pre-wrap',
-    color: 'var(--rims-ink-2)',
 }

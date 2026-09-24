@@ -1,7 +1,7 @@
 import {AlertTriangle} from 'lucide-react'
 import {Modal} from '@/shared/components/ui'
 
-import {useCallback, useEffect, useRef, useState, type CSSProperties} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
@@ -9,6 +9,7 @@ import type {ReservationResponse, TableDetailResponse} from '@/shared/api/waiter
 import {WaiterHeader, WaiterTableCard} from './components'
 import {useWaiterSocket} from '@/realtime'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 
 type WaiterTableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED'
 
@@ -460,21 +461,20 @@ export default function WaiterTableListPage() {
                 </div>
 
                 {isLoading ? (
-                    <div style={stateBoxStyle}>Đang tải danh sách bàn...</div>
+                    <LoadingState
+                        title="Đang tải danh sách bàn"
+                        description="Hệ thống đang lấy trạng thái từng bàn."
+                    />
                 ) : error ? (
-                    <div style={errorBoxStyle}>
-                        <p>{error}</p>
-
-                        <button
-                            type="button"
-                            className="rk-btn"
-                            onClick={() => void loadTables(undefined, true)}
-                        >
-                            Thử lại
-                        </button>
-                    </div>
+                    <ErrorState
+                        message={error}
+                        onRetry={() => void loadTables(undefined, true)}
+                    />
                 ) : displayTables.length === 0 ? (
-                    <div style={stateBoxStyle}>Chưa có bàn nào.</div>
+                    <EmptyState
+                        title="Chưa có bàn nào"
+                        description="Quản trị viên chưa thêm bàn nào vào hệ thống."
+                    />
                 ) : (
                     <div className="rk-tablegrid">
                         {displayTables.map((table) => {
@@ -567,7 +567,7 @@ export default function WaiterTableListPage() {
                                     </strong>
                                 </p>
 
-                                <ul style={reservationListStyle}>
+                                <ul className="rk-reslist">
                                     {modalReservations.map((reservation) => {
                                         const reservationTime = getReservationTime(
                                             reservation.reservationTime,
@@ -579,21 +579,20 @@ export default function WaiterTableListPage() {
                                                     getReservationId(reservation) ??
                                                     `${reservation.phone}-${reservation.reservationTime}`
                                                 }
-                                                style={reservationItemStyle}
                                             >
                                                 <strong>{reservationTime}</strong>
                                                 {' — '}
                                                 {reservation.customerName}
 
                                                 {reservation.phone && (
-                                                    <span style={phoneStyle}>
+                                                    <span className="rk-subnote rk-subnote--inline">
                                                         {' '}
                                                         ({reservation.phone})
                                                     </span>
                                                 )}
 
                                                 {reservation.note && (
-                                                    <span style={noteStyle}>
+                                                    <span className="rk-subnote rk-subnote--inline">
                                                         {' '}
                                                         · {reservation.note}
                                                     </span>
@@ -638,34 +637,4 @@ export default function WaiterTableListPage() {
             </Modal>
         </div>
     )
-}
-
-const stateBoxStyle: CSSProperties = {
-    padding: '2rem',
-    textAlign: 'center',
-    color: 'var(--rims-ink-3)',
-}
-
-const errorBoxStyle: CSSProperties = {
-    padding: '2rem',
-    textAlign: 'center',
-    color: 'var(--rims-alert)',
-}
-
-const reservationListStyle: CSSProperties = {
-    margin: '0.5rem 0 0.75rem 1.25rem',
-    padding: 0,
-}
-
-const reservationItemStyle: CSSProperties = {
-    marginBottom: '0.35rem',
-}
-
-const phoneStyle: CSSProperties = {
-    color: 'var(--rims-busy)',
-}
-
-const noteStyle: CSSProperties = {
-    color: 'var(--rims-busy)',
-    fontSize: '0.82rem',
 }

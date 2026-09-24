@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState, type CSSProperties} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import {statusChipClass} from './statusChip'
 import {useNavigate, useParams} from 'react-router-dom'
 
@@ -7,6 +7,7 @@ import type {OrderDetailResponse} from '@/shared/api/waiter'
 import {BackArrow, fmtPrice, WaiterHeader} from './components'
 import {useWaiterSocket} from '@/realtime'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 
 export default function WaiterOrderDetailPage() {
     const navigate = useNavigate()
@@ -131,27 +132,23 @@ export default function WaiterOrderDetailPage() {
 
                         <div className="rk-stack">
                             {isLoading ? (
-                                <div style={stateBoxStyle}>
-                                    Đang tải chi tiết đơn hàng...
-                                </div>
+                                <LoadingState
+                                    title="Đang tải chi tiết đơn hàng"
+                                    description=""
+                                    size="sm"
+                                />
                             ) : error ? (
-                                <div style={errorBoxStyle}>
-                                    <p>{error}</p>
-
-                                    <button
-                                        type="button"
-                                        className="rk-btn"
-                                        onClick={() =>
-                                            void loadServingOrders(undefined, true)
-                                        }
-                                    >
-                                        Thử lại
-                                    </button>
-                                </div>
+                                <ErrorState
+                                    message={error}
+                                    onRetry={() =>
+                                        void loadServingOrders(undefined, true)
+                                    }
+                                />
                             ) : orderItems.length === 0 ? (
-                                <div style={stateBoxStyle}>
-                                    Bàn này chưa có món đang phục vụ.
-                                </div>
+                                <EmptyState
+                                    title="Chưa có món đang phục vụ"
+                                    description="Bàn này chưa gọi món nào, hoặc các món đã phục vụ xong."
+                                />
                             ) : (
                                 <table className="rk-table rk-table--compact">
                                     <thead>
@@ -170,23 +167,21 @@ export default function WaiterOrderDetailPage() {
                                                     {item.dishName}
 
                                                     {item.note && (
-                                                        <div style={noteStyle}>
+                                                        <div className="rk-subnote">
                                                             {item.note}
                                                         </div>
                                                     )}
 
                                                     {item.status === 'CANCELLED' &&
                                                         item.cancelReason && (
-                                                            <div
-                                                                style={cancelReasonStyle}
-                                                            >
+                                                            <div className="rk-subnote rk-subnote--alert">
                                                                 Lý do hủy:{' '}
                                                                 {item.cancelReason}
                                                             </div>
                                                         )}
 
                                                     {item.chefInternalNote && (
-                                                        <div style={chefNoteStyle}>
+                                                        <div className="rk-subnote rk-subnote--busy">
                                                             Chef: {item.chefInternalNote}
                                                         </div>
                                                     )}
@@ -214,36 +209,4 @@ export default function WaiterOrderDetailPage() {
             </div>
         </div>
     )
-}
-
-const stateBoxStyle: CSSProperties = {
-    padding: '2rem',
-    textAlign: 'center',
-    color: 'var(--rims-ink-3)',
-}
-
-const errorBoxStyle: CSSProperties = {
-    padding: '2rem',
-    textAlign: 'center',
-    color: 'var(--rims-alert)',
-}
-
-const noteStyle: CSSProperties = {
-    fontSize: '0.85rem',
-    color: 'var(--rims-ink-3)',
-    marginTop: '0.25rem',
-}
-
-const chefNoteStyle: CSSProperties = {
-    fontSize: '0.85rem',
-    color: 'var(--rims-busy)',
-    marginTop: '0.25rem',
-    fontWeight: 600,
-}
-
-const cancelReasonStyle: CSSProperties = {
-    fontSize: '0.85rem',
-    color: 'var(--rims-alert)',
-    marginTop: '0.25rem',
-    fontWeight: 600,
 }

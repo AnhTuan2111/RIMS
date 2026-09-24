@@ -1,4 +1,4 @@
-import {type CSSProperties, useCallback, useEffect, useState} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
@@ -245,18 +245,6 @@ export default function CashierPaymentsPage() {
         }
     }
 
-    const gridLayoutLayout: CSSProperties = selectedTable
-        ? {
-              display: 'grid',
-              gridTemplateColumns: '1.4fr 0.6fr',
-              gap: '1.5rem',
-          }
-        : {
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '1.5rem',
-          }
-
     if (isLoading) {
         return (
             <LoadingState
@@ -280,7 +268,7 @@ export default function CashierPaymentsPage() {
     }
 
     return (
-        <div className="rk-stack" style={gridLayoutLayout}>
+        <div className={selectedTable ? 'rk-two rk-two--wideleft' : 'rk-stack'}>
             <PageCard>
                 <PageHeader
                     title="Sơ đồ bàn"

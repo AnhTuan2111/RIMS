@@ -1,4 +1,4 @@
-﻿import {useRef, useState, type CSSProperties} from 'react'
+﻿import {useRef, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
@@ -7,6 +7,7 @@ import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {BackArrow, WaiterHeader} from './components'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {isRequestCanceled} from '@/shared/utils/error'
+import {LoadingState} from '@/shared/components/feedback'
 
 function getReservationId(reservation: ReservationResponse) {
     return reservation.reservationId ?? reservation.id
@@ -112,7 +113,7 @@ export default function WaiterReservationDetailPage() {
                 <WaiterHeader title="Chi tiết đặt bàn" />
 
                 <div className="rk-stack">
-                    <p style={stateTextStyle}>Đang tải thông tin đặt bàn...</p>
+                    <LoadingState title="Đang tải thông tin đặt bàn" description="" />
                 </div>
             </div>
         )
@@ -130,14 +131,13 @@ export default function WaiterReservationDetailPage() {
                         <h2 className="rk-sectiontitle">Chi tiết đặt bàn</h2>
                     </div>
 
-                    <div className="rk-card rk-card--pad" style={cardStyle}>
+                    <div className="rk-card rk-card--pad rk-card--narrow">
                         <div className="rk-stack">
-                            <p style={errorTextStyle}>{error}</p>
+                            <p className="rk-text--alert">{error}</p>
 
                             <button
                                 type="button"
                                 className="rk-btn rk-btn--primary"
-                                style={buttonTopStyle}
                                 onClick={() => void loadReservation(undefined, true)}
                             >
                                 Thử lại
@@ -161,9 +161,9 @@ export default function WaiterReservationDetailPage() {
                         <h2 className="rk-sectiontitle">Chi tiết đặt bàn</h2>
                     </div>
 
-                    <div className="rk-card rk-card--pad" style={cardStyle}>
+                    <div className="rk-card rk-card--pad rk-card--narrow">
                         <div className="rk-stack">
-                            <p style={stateTextStyle}>
+                            <p className="rk-text--muted">
                                 Không có đặt bàn đang hoạt động cho bàn này. Bàn có thể đã
                                 hết thời gian chờ hoặc đã được phục vụ.
                             </p>
@@ -171,7 +171,6 @@ export default function WaiterReservationDetailPage() {
                             <button
                                 type="button"
                                 className="rk-btn rk-btn--primary"
-                                style={buttonTopStyle}
                                 onClick={() => navigate('/waiter/tables')}
                             >
                                 Về danh sách bàn
@@ -209,7 +208,7 @@ export default function WaiterReservationDetailPage() {
                     </button>
                 </div>
 
-                <div className="rk-card rk-card--pad" style={cardStyle}>
+                <div className="rk-card rk-card--pad rk-card--narrow">
                     <div className="rk-card__head-inline">Thông tin đặt bàn</div>
 
                     <div className="rk-stack">
@@ -246,20 +245,4 @@ export default function WaiterReservationDetailPage() {
             </div>
         </div>
     )
-}
-
-const cardStyle: CSSProperties = {
-    maxWidth: '600px',
-}
-
-const stateTextStyle: CSSProperties = {
-    color: 'var(--rims-ink-3)',
-}
-
-const errorTextStyle: CSSProperties = {
-    color: 'var(--rims-alert)',
-}
-
-const buttonTopStyle: CSSProperties = {
-    marginTop: '1rem',
 }

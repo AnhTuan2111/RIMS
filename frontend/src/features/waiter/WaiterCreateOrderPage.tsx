@@ -14,6 +14,7 @@ import {Modal} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
+import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 
 type DraftItem = {
     qty: number
@@ -285,21 +286,20 @@ export default function WaiterCreateOrderPage() {
                 </div>
 
                 {isLoadingMenu ? (
-                    <div style={stateBoxStyle}>Đang tải danh sách món...</div>
+                    <LoadingState
+                        title="Đang tải danh sách món"
+                        description="Hệ thống đang lấy thực đơn mới nhất."
+                    />
                 ) : menuError ? (
-                    <div style={errorBoxStyle}>
-                        <p>{menuError}</p>
-
-                        <button
-                            type="button"
-                            className="rk-btn"
-                            onClick={() => void loadMenu(undefined, true)}
-                        >
-                            Thử lại
-                        </button>
-                    </div>
+                    <ErrorState
+                        message={menuError}
+                        onRetry={() => void loadMenu(undefined, true)}
+                    />
                 ) : visibleMenu.length === 0 ? (
-                    <div style={stateBoxStyle}>Không có món nào trong danh mục này.</div>
+                    <EmptyState
+                        title="Không có món nào"
+                        description="Danh mục này chưa có món, hãy chọn danh mục khác."
+                    />
                 ) : (
                     <div className="rk-cardgrid">
                         {visibleMenu.map((dish) => {
@@ -313,8 +313,9 @@ export default function WaiterCreateOrderPage() {
                             return (
                                 <div
                                     key={dish.dishId}
-                                    className="rk-card rk-card--pad"
-                                    style={isUnavailable ? {opacity: 0.5} : undefined}
+                                    className={`rk-card rk-card--pad${
+                                        isUnavailable ? ' is-unavailable' : ''
+                                    }`}
                                 >
                                     <div className="rk-media">
                                         {dish.imageUrl ? (
@@ -457,26 +458,8 @@ export default function WaiterCreateOrderPage() {
                     </button>
                 }
             >
-                <div style={successSummaryStyle}>{successData?.itemSummary}</div>
+                <p className="rk-prose">{successData?.itemSummary}</p>
             </Modal>
         </div>
     )
-}
-
-const stateBoxStyle: React.CSSProperties = {
-    padding: '2rem',
-    textAlign: 'center',
-    color: 'var(--rims-ink-3)',
-}
-
-const errorBoxStyle: React.CSSProperties = {
-    padding: '2rem',
-    textAlign: 'center',
-    color: 'var(--rims-alert)',
-}
-
-const successSummaryStyle: React.CSSProperties = {
-    marginTop: '1rem',
-    whiteSpace: 'pre-wrap',
-    color: 'var(--rims-ink-2)',
 }

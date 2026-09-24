@@ -68,6 +68,12 @@
     /* Bản "R G B" để dùng được trong rgb(var(--x) / N%) cho các mảng sáng mờ. */
     --rims-shell-accent-rgb: 16 86 107;
 
+    /* Màn báo thanh toán xong phủ kín màn hình nên nó tự quyết màu nền, không
+       theo nền trang — cùng lý do với thanh bên. --rims-ok ở chế độ tối được
+       nâng sáng, lấy làm nền cho chữ trắng thì không đọc được. */
+    --rims-paid: #1f6b46;
+    --rims-ink-on-paid: #f1faf4;
+
     /* ---------- Thương hiệu ---------- */
     /* Xanh dầu là màu hành động chính: nút, điều hướng đang chọn, vòng tiêu
        điểm, liên kết. Đạt 7.4:1 trên nền đá và 7.8:1 khi làm nền nút. */

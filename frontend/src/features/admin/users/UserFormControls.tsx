@@ -22,22 +22,25 @@ export function Field({label, children}: {label: string; children: ReactNode}) {
 
 /**
  * Một dòng trong bảng "chi tiết tài khoản": nhãn bên trái, giá trị bên phải.
+ *
+ * <p>`tone` trước đây là `color` nhận một chuỗi màu bất kỳ rồi tô thẳng vào
+ * thuộc tính style. Nay là hai giá trị có nghĩa, để trình biên dịch chặn
+ * được màu lạ và để sửa màu thì sửa trong CSS.
  */
 export function DR({
     label,
     value,
-    color,
+    tone,
 }: {
     label: string
     value: string
-    /** Token màu cho giá trị, ví dụ khi muốn tô trạng thái. */
-    color?: string
+    tone?: 'ok' | 'alert'
 }) {
     return (
         <div className="rk-detailrow">
             <span className="rk-detailrow__label">{label}</span>
 
-            <span className="rk-detailrow__value" style={color ? {color} : undefined}>
+            <span className={`rk-detailrow__value${tone ? ` rk-text--${tone}` : ''}`}>
                 {value}
             </span>
         </div>

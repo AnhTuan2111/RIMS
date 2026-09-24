@@ -1626,6 +1626,12 @@ textarea.rk-input {
     font-size: var(--rims-text-sm);
 }
 
+/* Hai dòng giải thích liền nhau — ví dụ lời dẫn rồi mã hoá đơn — thì phải
+   tách ra, không thì dính thành một khối chữ. */
+.rk-feedback__text + .rk-feedback__text {
+    margin-top: var(--rims-space-2);
+}
+
 .rk-feedback__actions {
     display: flex;
     align-items: center;
@@ -3276,4 +3282,208 @@ textarea.rk-input {
     border-color: var(--rims-idle-line);
     background: var(--rims-idle-soft);
     color: var(--rims-idle);
+}
+
+/* ---------- Dòng phụ dưới một hàng ----------
+   Ghi chú của khách, lý do huỷ, lời nhắn của bếp: chữ nhỏ nằm ngay dưới
+   tên món hoặc tên người. Bảy màn Phục vụ trước đây mỗi màn tự khai một
+   đối tượng style riêng cho đúng ba thứ này — sửa cỡ chữ là phải mở bảy
+   file. */
+
+.rk-subnote {
+    margin: var(--rims-space-1) 0 0;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    line-height: var(--rims-leading-normal);
+}
+
+.rk-subnote--busy {
+    color: var(--rims-busy);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-subnote--alert {
+    color: var(--rims-alert);
+    font-weight: var(--rims-weight-semibold);
+}
+
+/* Nằm cùng dòng với nội dung chính chứ không xuống dòng riêng. */
+.rk-subnote--inline {
+    margin: 0;
+}
+
+/* ---------- Lời nhắn của bếp ----------
+   Bếp nhắn lên màn Cập nhật đơn. Chưa xác nhận thì viền trái cam và nền
+   cam nhạt cho nổi; xác nhận rồi thì lui về xám để khỏi tranh chú ý. */
+
+.rk-chefnote {
+    margin: var(--rims-space-3) 0;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-busy-line);
+    border-left: 4px solid var(--rims-busy);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
+}
+
+.rk-chefnote.is-acknowledged {
+    border-color: var(--rims-line);
+    border-left-color: var(--rims-line-strong);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+}
+
+.rk-chefnote__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+}
+
+.rk-chefnote__time {
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-chefnote__body {
+    margin: var(--rims-space-2) 0;
+    white-space: pre-wrap;
+    line-height: var(--rims-leading-normal);
+}
+
+.rk-chefnote__seen {
+    color: var(--rims-ok);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* ---------- Danh sách lịch đặt trong hộp thoại ----------
+   Hộp thoại bàn của Phục vụ liệt kê các lịch đặt trong hôm nay. */
+
+.rk-reslist {
+    margin: var(--rims-space-2) 0 var(--rims-space-3) var(--rims-space-5);
+    padding: 0;
+}
+
+.rk-reslist li + li {
+    margin-top: var(--rims-space-1);
+}
+
+/* Nút nhỏ: nằm trong hàng, trong ô bảng, hoặc cạnh một dòng chữ. */
+.rk-btn--sm {
+    padding: var(--rims-space-2) var(--rims-space-3);
+    font-size: var(--rims-text-sm);
+}
+
+/* Thẻ hẹp cho màn chỉ có một khối nội dung, khỏi kéo dài hết bề ngang. */
+.rk-card--narrow {
+    max-width: 600px;
+}
+
+/* Món hết hàng: thẻ mờ đi nhưng vẫn bấm được để xem. */
+.rk-card.is-unavailable {
+    opacity: 0.5;
+}
+
+/* Nút "Thử lại" đứng ngay sau dòng báo lỗi, không xuống dòng riêng. */
+.rk-formerror .rk-btn {
+    margin-left: var(--rims-space-3);
+}
+
+/* Ảnh đại diện lớn: dùng ở đầu màn Hồ sơ cá nhân, nơi nó là chủ thể của
+   cả trang chứ không phải một dòng trong danh sách. */
+.rk-avatar--lg {
+    width: 64px;
+    height: 64px;
+    font-size: var(--rims-text-2xl);
+}
+
+/* ---------- Trang kết quả thanh toán ----------
+   VNPay trả người dùng về hai trang này sau khi thanh toán. Không thanh bên,
+   không thanh trên: một thẻ ở giữa màn hình. */
+
+.rk-result {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: var(--rims-space-6);
+    background: var(--rims-paper);
+}
+
+.rk-result .rk-feedback {
+    max-width: 520px;
+    box-shadow: var(--rims-shadow-overlay);
+}
+
+/* ---------- Màn báo thanh toán xong ----------
+   Phủ kín màn hình, chạm vào đâu cũng chuyển sang hoá đơn. Thu ngân đứng
+   cách máy một quãng nên chữ ở đây to hơn mọi chỗ khác trong hệ thống. */
+
+.rk-paid {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rims-space-2);
+    width: 100%;
+    border: 0;
+    padding: var(--rims-space-6);
+    background: var(--rims-paid);
+    color: var(--rims-ink-on-paid);
+    font-family: var(--rims-font-sans);
+    text-align: center;
+    cursor: pointer;
+}
+
+.rk-paid__icon .rk-icon {
+    width: 88px;
+    height: 88px;
+    stroke-width: 2.5;
+}
+
+.rk-paid__title {
+    margin: var(--rims-space-4) 0 0;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: var(--rims-weight-bold);
+    line-height: 1.1;
+}
+
+.rk-paid__code {
+    margin: 0;
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xl);
+    opacity: 0.9;
+}
+
+.rk-paid__customer {
+    margin-top: var(--rims-space-4);
+    padding: var(--rims-space-3) var(--rims-space-5);
+    border-radius: var(--rims-radius-md);
+    background: rgb(var(--rims-tint-hi) / 18%);
+}
+
+.rk-paid__customer p {
+    margin: 0;
+    font-size: var(--rims-text-lg);
+}
+
+.rk-paid__hint {
+    margin-top: var(--rims-space-10);
+    font-size: var(--rims-text-base);
+    opacity: 0.85;
+}
+
+/* Nút chuyển sang VNPay mang màu thương hiệu của họ, không phải của mình. */
+.rk-btn--vnpay {
+    background: #005baa;
+    border-color: #005baa;
+    color: #f2f7fb;
+}
+
+.rk-btn--vnpay:hover:not(:disabled) {
+    background: #00498a;
+    border-color: #00498a;
 }

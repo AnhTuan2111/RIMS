@@ -31,7 +31,6 @@ function methodDisplay(method: string) {
 
 // Mau thuong hieu cua VNPay. Day la nhan dien cua ben thu ba nen khong
 // di qua bo token cua app.
-const VNPAY_BRAND = '#005baa'
 
 export default function PaymentModal({
     orderId,
@@ -296,12 +295,7 @@ export default function PaymentModal({
 
                             <button
                                 type="button"
-                                className="rk-btn rk-btn--grow"
-                                style={{
-                                    background: VNPAY_BRAND,
-                                    color: 'var(--rims-ink-on-brand)',
-                                    borderColor: VNPAY_BRAND,
-                                }}
+                                className="rk-btn rk-btn--grow rk-btn--vnpay"
                                 disabled={processing}
                                 onClick={() => void handleRedirectToVNPay()}
                             >
