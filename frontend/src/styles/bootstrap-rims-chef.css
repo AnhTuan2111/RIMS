@@ -33,17 +33,6 @@
 }
 
 /* =========================
-   LOADING / ERROR
-========================= */
-
-.rims-app-content > .page-card {
-    border: 1px solid var(--chef-border);
-    border-radius: var(--chef-radius-lg);
-    background: var(--chef-surface);
-    box-shadow: var(--chef-shadow-sm);
-}
-
-/* =========================
    RESPONSIVE
 ========================= */
 

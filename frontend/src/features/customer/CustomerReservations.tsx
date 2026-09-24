@@ -67,6 +67,28 @@ const statusLabels: Record<string, string> = {
     CANCELLED: 'Đã hủy',
 }
 
+/**
+ * Lớp chip theo trạng thái lần đặt bàn.
+ *
+ * <p>Trước đây ghép chuỗi thẳng trong JSX:
+ * `customer-status-badge-${status.toLowerCase()}`. Thêm một trạng thái mới
+ * thì chip rơi về không có màu mà không ai biết.
+ */
+function reservationChipClass(status: string): string {
+    switch (status.toUpperCase()) {
+        case 'WAITING':
+            return 'rk-chip--busy'
+        case 'QUEUED':
+            return 'rk-chip--brand'
+        case 'COMPLETED':
+            return 'rk-chip--ok'
+        case 'CANCELLED':
+            return 'rk-chip--alert'
+        default:
+            return 'rk-chip--idle'
+    }
+}
+
 export default function CustomerReservations() {
     const {profile} = useRestaurant()
 
@@ -363,17 +385,17 @@ export default function CustomerReservations() {
     }
 
     return (
-        <div className="customer-reservations-page">
-            <div className="customer-reservations-header">
-                <h1 className="customer-reservations-title">Đặt bàn</h1>
+        <div className="rk-stack">
+            <div className="rk-card__head-inline">
+                <h1 className="rk-sectiontitle">Đặt bàn</h1>
 
                 <p>Quản lý đặt bàn của bạn tại nhà hàng</p>
             </div>
 
-            <div className="customer-reservations-tabs">
+            <div className="rk-segment">
                 <button
                     type="button"
-                    className={`customer-tab ${activeTab === 'book' ? 'active' : ''}`}
+                    className={`rk-segment__btn${activeTab === 'book' ? ' is-active' : ''}`}
                     onClick={() => {
                         setActiveTab('book')
                         setBookSuccess(null)
@@ -385,7 +407,7 @@ export default function CustomerReservations() {
 
                 <button
                     type="button"
-                    className={`customer-tab ${activeTab === 'cancel' ? 'active' : ''}`}
+                    className={`rk-segment__btn${activeTab === 'cancel' ? ' is-active' : ''}`}
                     onClick={() => {
                         setActiveTab('cancel')
                         setCancelSuccess(null)
@@ -398,18 +420,18 @@ export default function CustomerReservations() {
             </div>
 
             {activeTab === 'book' && (
-                <div className="customer-reservation-card">
+                <div className="rk-rowlist__item">
                     <h2>Đặt bàn mới</h2>
 
-                    <p className="customer-reservation-sub">
+                    <p className="rk-rowlist__meta">
                         Mỗi khách hàng chỉ được đặt <strong>1 bàn/ngày</strong>
                     </p>
 
                     {bookSuccess && (
-                        <div className="customer-success-box">
+                        <div className="rk-note rk-note--ok">
                             <strong>Đặt bàn thành công!</strong>
 
-                            <div className="customer-success-detail">
+                            <div className="rk-rowlist__meta">
                                 <span>
                                     Bàn <strong>{bookSuccess.tableNumber}</strong>
                                     {' - '}
@@ -427,16 +449,19 @@ export default function CustomerReservations() {
                         </div>
                     )}
 
-                    {bookError && <div className="customer-error-box"> {bookError}</div>}
+                    {bookError && (
+                        <div className="rk-note rk-note--alert"> {bookError}</div>
+                    )}
 
                     <form
-                        className="customer-reservation-form"
+                        className="rk-fieldgroup"
                         onSubmit={(event) => void handleBookSubmit(event)}
                     >
-                        <div className="customer-form-row">
-                            <div className="customer-form-group">
+                        <div className="rk-formgrid">
+                            <div className="rk-field">
                                 <label>
-                                    Tên khách hàng <span className="required">*</span>
+                                    Tên khách hàng{' '}
+                                    <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
@@ -454,9 +479,10 @@ export default function CustomerReservations() {
                                 />
                             </div>
 
-                            <div className="customer-form-group">
+                            <div className="rk-field">
                                 <label>
-                                    Số điện thoại <span className="required">*</span>
+                                    Số điện thoại{' '}
+                                    <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
@@ -477,10 +503,10 @@ export default function CustomerReservations() {
                             </div>
                         </div>
 
-                        <div className="customer-form-row">
-                            <div className="customer-form-group">
+                        <div className="rk-formgrid">
+                            <div className="rk-field">
                                 <label>
-                                    Ngày đặt <span className="required">*</span>
+                                    Ngày đặt <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
@@ -506,9 +532,9 @@ export default function CustomerReservations() {
                                 />
                             </div>
 
-                            <div className="customer-form-group">
+                            <div className="rk-field">
                                 <label>
-                                    Giờ đặt <span className="required">*</span>
+                                    Giờ đặt <span className="rk-field__required">*</span>
                                 </label>
 
                                 <select
@@ -530,10 +556,10 @@ export default function CustomerReservations() {
                             </div>
                         </div>
 
-                        <div className="customer-form-row">
-                            <div className="customer-form-group">
+                        <div className="rk-formgrid">
+                            <div className="rk-field">
                                 <label>
-                                    Chọn bàn <span className="required">*</span>
+                                    Chọn bàn <span className="rk-field__required">*</span>
                                 </label>
 
                                 <select
@@ -572,15 +598,13 @@ export default function CustomerReservations() {
                                 </select>
 
                                 {tableError && (
-                                    <span className="customer-error-text">
-                                        {tableError}
-                                    </span>
+                                    <span className="rk-formerror">{tableError}</span>
                                 )}
 
                                 {!loadingTables &&
                                     !tableError &&
                                     availableTables.length === 0 && (
-                                        <span className="customer-warning-text">
+                                        <span className="rk-field__hint">
                                             <AlertTriangle
                                                 className="rk-icon"
                                                 aria-hidden="true"
@@ -590,7 +614,7 @@ export default function CustomerReservations() {
                                     )}
                             </div>
 
-                            <div className="customer-form-group">
+                            <div className="rk-field">
                                 <label>Ghi chú</label>
 
                                 <input
@@ -608,7 +632,7 @@ export default function CustomerReservations() {
                             </div>
                         </div>
 
-                        <div className="customer-form-actions">
+                        <div className="rk-actions rk-actions--end">
                             <button
                                 type="submit"
                                 className="rk-btn rk-btn--primary"
@@ -645,19 +669,19 @@ export default function CustomerReservations() {
             )}
 
             {activeTab === 'cancel' && (
-                <div className="customer-reservation-card">
+                <div className="rk-rowlist__item">
                     <h2> Hủy đặt bàn</h2>
 
-                    <p className="customer-reservation-sub">
+                    <p className="rk-rowlist__meta">
                         Danh sách các đặt bàn đang hoạt động của bạn (có thể ở nhiều ngày
                         khác nhau)
                     </p>
 
                     {cancelSuccess && (
-                        <div className="customer-success-box">
+                        <div className="rk-note rk-note--ok">
                             <strong>Hủy đặt bàn thành công!</strong>
 
-                            <div className="customer-success-detail">
+                            <div className="rk-rowlist__meta">
                                 <span>
                                     Đã hủy bàn{' '}
                                     <strong>{cancelSuccess.tableNumber}</strong>
@@ -669,24 +693,24 @@ export default function CustomerReservations() {
                     )}
 
                     {cancelError && (
-                        <div className="customer-error-box"> {cancelError}</div>
+                        <div className="rk-note rk-note--alert"> {cancelError}</div>
                     )}
 
                     {loadingCurrent ? (
-                        <div className="customer-loading">Đang tải thông tin...</div>
+                        <div className="rk-note">Đang tải thông tin...</div>
                     ) : currentReservations.length === 0 ? (
-                        <div className="customer-empty-state">
+                        <div className="rk-note">
                             <p>Bạn không có đơn đặt bàn nào đang hoạt động</p>
                         </div>
                     ) : (
-                        <div className="customer-reservation-list">
+                        <div className="rk-rowlist">
                             {currentReservations.map((reservation) => (
                                 <div
                                     key={reservation.id}
-                                    className="customer-current-reservation"
+                                    className="rk-note rk-note--busy"
                                 >
-                                    <div className="customer-current-info">
-                                        <span className="customer-current-label">
+                                    <div className="rk-rowlist__main">
+                                        <span className="rk-rowlist__title">
                                             Đặt bàn:
                                         </span>
 
@@ -697,14 +721,14 @@ export default function CustomerReservations() {
                                         </span>
 
                                         <span
-                                            className={`customer-status-badge-${reservation.status.toLowerCase()}`}
+                                            className={`rk-chip ${reservationChipClass(reservation.status)}`}
                                         >
                                             {statusLabels[reservation.status] ??
                                                 reservation.status}
                                         </span>
 
                                         {reservation.note && (
-                                            <span className="customer-current-note">
+                                            <span className="rk-rowlist__meta">
                                                 Ghi chú: {reservation.note}
                                             </span>
                                         )}
@@ -727,7 +751,7 @@ export default function CustomerReservations() {
                         </div>
                     )}
 
-                    <div className="customer-form-actions">
+                    <div className="rk-actions rk-actions--end">
                         <button
                             type="button"
                             className="rk-btn rk-btn--quiet"

@@ -1,3 +1,4 @@
+import {LogOut} from 'lucide-react'
 import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
 
@@ -15,12 +16,12 @@ export function DashboardTopbar({onLogout}: DashboardTopbarProps) {
         : null
 
     return (
-        <header className="rims-topbar">
-            <div className="rims-topbar-heading">
+        <header className="rk-shell__top">
+            <div className="rk-shell__topheading">
                 {isCustomer ? (
                     <>
-                        <span className="rims-topbar-eyebrow">
-                            <span className="rims-topbar-live-dot" />
+                        <span className="rk-shell__eyebrow">
+                            <span className="rk-shell__livedot" />
                             MÃN VỊ LÂU
                         </span>
 
@@ -35,8 +36,8 @@ export function DashboardTopbar({onLogout}: DashboardTopbarProps) {
                     </>
                 ) : (
                     <>
-                        <span className="rims-topbar-eyebrow">
-                            <span className="rims-topbar-live-dot" />
+                        <span className="rk-shell__eyebrow">
+                            <span className="rk-shell__livedot" />
                             TRUNG TÂM ĐIỀU HÀNH RIMS
                         </span>
 
@@ -49,27 +50,14 @@ export function DashboardTopbar({onLogout}: DashboardTopbarProps) {
                 )}
             </div>
 
-            <div className="rims-topbar-actions">
+            <div className="rk-actions">
                 <button
                     id="btn-logout"
                     type="button"
+                    className="rk-btn rk-btn--quiet"
                     onClick={onLogout}
-                    className="rims-logout-btn"
                 >
-                    <svg
-                        className="rims-logout-icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                    >
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
-                    </svg>
+                    <LogOut className="rk-icon" aria-hidden="true" />
                     Đăng xuất
                 </button>
             </div>

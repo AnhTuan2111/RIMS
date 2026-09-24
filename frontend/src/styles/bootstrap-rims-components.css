@@ -85,14 +85,6 @@
 }
 
 @media (max-width: 900px) {
-    .app-layout {
-        flex-direction: column;
-    }
-
-    .app-sidebar {
-        width: 100%;
-        min-height: auto;
-    }
 }
 
 @media (max-width: 768px) {

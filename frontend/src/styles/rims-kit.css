@@ -2789,3 +2789,296 @@ textarea.rk-input {
     color: var(--rims-ink-3);
     font-size: var(--rims-text-xs);
 }
+
+/* =========================================================================
+   KHUNG APP — thanh bên, thanh trên, vùng nội dung
+
+   Viết lại từ bootstrap-rims-layout.css, vốn 758 dòng và có ba lớp chồng
+   nhau: .app-layout, .rims-topbar và .rims-topbar-heading h1 mỗi cái được
+   định nghĩa hai lần ở hai chỗ khác nhau trong cùng một file.
+   ========================================================================= */
+
+.rk-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.rk-shell__side {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+    width: var(--rims-sidebar-width);
+    height: 100vh;
+    flex: none;
+    padding: var(--rims-space-5) var(--rims-space-4);
+    overflow: hidden;
+    color: var(--rims-ink-on-dark);
+    background:
+        radial-gradient(circle at 95% 85%, rgb(var(--rims-shell-accent-rgb) / 26%), transparent 40%),
+        linear-gradient(180deg, var(--rims-shell-2) 0%, var(--rims-shell) 55%);
+}
+
+.rk-shell__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.rk-shell__content {
+    flex: 1;
+    padding: var(--rims-space-6);
+    background: var(--rims-paper);
+}
+
+/* ---------- Nhận diện ---------- */
+
+.rk-shell__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+}
+
+.rk-shell__logo {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex: none;
+    border-radius: var(--rims-radius-lg);
+    background: linear-gradient(135deg, var(--rims-gold), var(--rims-shell-accent-2) 45%, var(--rims-shell-accent-3));
+    color: var(--rims-ink-on-dark);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-black);
+}
+
+.rk-shell__brand h2 {
+    margin: 0;
+    color: var(--rims-ink-on-dark);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-black);
+}
+
+.rk-shell__brand p {
+    margin: 0;
+    color: var(--rims-ink-on-dark-2);
+    font-size: var(--rims-text-xs);
+}
+
+/* ---------- Thẻ vai trò ---------- */
+
+.rk-shell__role {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3);
+    border: 1px solid rgb(var(--rims-tint-hi) / 12%);
+    border-radius: var(--rims-radius-lg);
+    background: linear-gradient(135deg, rgb(var(--rims-shell-accent-rgb) / 30%), rgb(var(--rims-tint-hi) / 5%));
+}
+
+.rk-shell__role-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border-radius: var(--rims-radius-md);
+    background: rgb(var(--rims-tint-hi) / 10%);
+    color: var(--rims-gold);
+}
+
+.rk-shell__role small {
+    display: block;
+    color: var(--rims-ink-on-dark-2);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-shell__role strong {
+    display: block;
+    color: var(--rims-ink-on-dark);
+    font-size: var(--rims-text-sm);
+}
+
+/* ---------- Điều hướng ---------- */
+
+.rk-shell__nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-1);
+    flex: 1;
+
+    /* Danh sách menu cuộn riêng khi nhiều mục hơn chiều cao màn hình. */
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--rims-tint-hi) / 18%) transparent;
+}
+
+.rk-shell__link {
+    display: grid;
+    grid-template-columns: 36px 1fr 16px;
+    align-items: center;
+    gap: var(--rims-space-3);
+    min-height: 48px;
+    padding: var(--rims-space-2) var(--rims-space-3);
+    border: 1px solid transparent;
+    border-radius: var(--rims-radius-lg);
+    color: var(--rims-ink-on-dark-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    text-decoration: none;
+    transition:
+        background-color var(--rims-dur-short) var(--rims-ease-out),
+        color var(--rims-dur-short) var(--rims-ease-out);
+}
+
+.rk-shell__link:hover {
+    border-color: rgb(var(--rims-tint-hi) / 14%);
+    color: var(--rims-ink-on-dark);
+}
+
+.rk-shell__link:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-gold);
+    outline-offset: 1px;
+}
+
+.rk-shell__link.active {
+    border-color: var(--rims-shell-accent-2);
+    background: linear-gradient(
+        100deg,
+        var(--rims-shell-accent-3),
+        var(--rims-shell-accent) 55%,
+        var(--rims-shell-accent-2)
+    );
+    color: var(--rims-ink-on-dark);
+}
+
+.rk-shell__linkicon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--rims-radius-md);
+    background: rgb(var(--rims-tint-hi) / 8%);
+    color: inherit;
+}
+
+.rk-shell__link.active .rk-shell__linkicon {
+    background: rgb(var(--rims-tint-hi) / 18%);
+}
+
+.rk-shell__linklabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rk-shell__linkarrow {
+    color: currentcolor;
+    opacity: 0.55;
+}
+
+/* ---------- Người dùng đang đăng nhập ---------- */
+
+.rk-shell__user {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3);
+    border-radius: var(--rims-radius-lg);
+    background: rgb(var(--rims-tint-hi) / 8%);
+}
+
+.rk-shell__dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-ok);
+}
+
+.rk-shell__user strong {
+    display: block;
+    color: var(--rims-ink-on-dark);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-shell__user small {
+    display: block;
+    color: var(--rims-ink-on-dark-2);
+    font-size: var(--rims-text-xs);
+}
+
+/* ---------- Thanh trên ---------- */
+
+.rk-shell__top {
+    position: sticky;
+    top: 0;
+    z-index: var(--rims-z-sticky);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-5);
+    flex-wrap: wrap;
+    padding: var(--rims-space-4) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+    background: var(--rims-surface);
+}
+
+.rk-shell__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    color: var(--rims-brand);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+}
+
+.rk-shell__livedot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-ok);
+}
+
+.rk-shell__top h1 {
+    margin: var(--rims-space-1) 0 2px;
+    color: var(--rims-ink);
+    font-size: var(--rims-text-2xl);
+    font-weight: var(--rims-weight-black);
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+.rk-shell__top p {
+    margin: 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+@media (max-width: 900px) {
+    .rk-shell {
+        flex-direction: column;
+    }
+
+    .rk-shell__side {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
+
+    .rk-shell__nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow: visible;
+    }
+
+    .rk-shell__content {
+        padding: var(--rims-space-4);
+    }
+}

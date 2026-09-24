@@ -73,9 +73,9 @@ export function Sidebar() {
         : null
 
     return (
-        <aside className="app-sidebar rims-sidebar">
-            <div className="rims-sidebar-brand">
-                <div className="rims-sidebar-logo">
+        <aside className="rk-shell__side">
+            <div className="rk-shell__brand">
+                <div className="rk-shell__logo">
                     {actor === RoleType.CUSTOMER ? brandInitial : 'R'}
                 </div>
                 <div>
@@ -88,8 +88,8 @@ export function Sidebar() {
                 </div>
             </div>
 
-            <div className="rims-sidebar-role">
-                <div className="rims-role-icon">
+            <div className="rk-shell__role">
+                <div className="rk-shell__role-icon">
                     <Sparkles className="rk-icon" aria-hidden="true" />
                 </div>
                 <div>
@@ -98,35 +98,33 @@ export function Sidebar() {
                 </div>
             </div>
 
-            <nav className="rims-sidebar-nav">
+            <nav className="rk-shell__nav">
                 {menus.map((item) => (
                     <Fragment key={item.path}>
                         <NavLink
                             to={item.path}
                             className={({isActive}) =>
-                                isActive
-                                    ? 'rims-sidebar-link active'
-                                    : 'rims-sidebar-link'
+                                isActive ? 'rk-shell__link active' : 'rk-shell__link'
                             }
                         >
-                            <span className="rims-menu-icon">
+                            <span className="rk-shell__linkicon">
                                 <MenuIcon path={item.path} />
                             </span>
 
-                            <span className="rims-menu-label">{item.label}</span>
+                            <span className="rk-shell__linklabel">{item.label}</span>
 
-                            <span className="rims-menu-arrow">›</span>
+                            <span className="rk-shell__linkarrow">›</span>
                         </NavLink>
 
                         {item.quickLinks && item.quickLinks.length > 0 && (
-                            <div className="rims-sidebar-quick-links">
+                            <div className="rk-shell__nav">
                                 {item.quickLinks.map((quickLink) => (
                                     <NavLink
                                         key={quickLink.path}
                                         to={quickLink.path}
                                         className={({isActive}) =>
                                             [
-                                                'rims-sidebar-quick-link',
+                                                'rk-shell__link',
                                                 `quick-${quickLink.variant}`,
                                                 isActive ? 'active' : '',
                                             ]
@@ -134,17 +132,15 @@ export function Sidebar() {
                                                 .join(' ')
                                         }
                                     >
-                                        <span className="rims-sidebar-quick-icon">
+                                        <span className="rk-shell__linkicon">
                                             {quickLink.icon}
                                         </span>
 
-                                        <span className="rims-sidebar-quick-label">
+                                        <span className="rk-shell__linklabel">
                                             {quickLink.label}
                                         </span>
 
-                                        <span className="rims-sidebar-quick-arrow">
-                                            ›
-                                        </span>
+                                        <span className="rk-shell__linkarrow">›</span>
                                     </NavLink>
                                 ))}
                             </div>
@@ -155,8 +151,8 @@ export function Sidebar() {
 
             <ThemeToggle />
 
-            <div className="rims-sidebar-status">
-                <span className="rims-online-dot" />
+            <div className="rk-shell__user">
+                <span className="rk-shell__dot" />
                 <div>
                     <strong>
                         {currentUser?.fullName ?? currentUser?.username ?? 'Người dùng'}

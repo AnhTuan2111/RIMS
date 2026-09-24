@@ -57,6 +57,17 @@
     --rims-shell: #191c1d;
     --rims-shell-2: #24292b;
 
+    /* Màu nhấn DÙNG TRÊN khung tối. KHÔNG đảo theo chủ đề: --rims-brand ở chế
+       độ tối được nâng sáng để đọc trên nền tối của TRANG, nhưng thanh bên
+       thì luôn tối — lấy bản sáng đó làm nền cho mục đang chọn thì chữ trắng
+       trên nó chỉ còn 1.82:1. */
+    --rims-shell-accent: #10566b;
+    --rims-shell-accent-2: #15697f;
+    --rims-shell-accent-3: #0b4253;
+
+    /* Bản "R G B" để dùng được trong rgb(var(--x) / N%) cho các mảng sáng mờ. */
+    --rims-shell-accent-rgb: 16 86 107;
+
     /* ---------- Thương hiệu ---------- */
     /* Xanh dầu là màu hành động chính: nút, điều hướng đang chọn, vòng tiêu
        điểm, liên kết. Đạt 7.4:1 trên nền đá và 7.8:1 khi làm nền nút. */
