@@ -19,9 +19,9 @@ Hệ thống quản lý nhà hàng gồm 2 phần:
 
 | Thành phần | Phiên bản đề xuất                                    |
 |------------|------------------------------------------------------|
-| JDK        | 21+ (theo Spring Boot 3.x)                           |
+| JDK        | 21 (Spring Boot 4.0)                                 |
 | Maven      | dùng kèm Maven Wrapper (`mvnw`), không cần cài riêng |
-| Node.js    | 19                                                   |
+| Node.js    | 20.19+ hoặc 22+ (Vite 8 yêu cầu)                     |
 | npm        | đi kèm Node.js                                       |
 | SQL Server | 2019+ (đã bật TCP/IP, port 1433)                     |
 | SMTP Gmail | tài khoản dùng để gửi mail (OTP, thông báo...)       |
@@ -49,7 +49,7 @@ Hệ thống quản lý nhà hàng gồm 2 phần:
         ├── features/          # Các trang theo vai trò (admin, cashier, chef, waiter...)
         ├── realtime/          # WebSocket (SockJS + StompJS)
         ├── shared/            # api client, components, hooks, types, utils
-        └── styles/            # Bootstrap tuỳ biến theo từng module
+        └── styles/            # 4 file: tokens, bộ component rk-*, trang chủ
 ```
 
 ## 3. Cấu hình Backend
@@ -132,9 +132,30 @@ mvnw.cmd spring-boot:run
 `DatabaseSeeder` chỉ chạy ở profile `dev` vì nó tạo tài khoản với mật khẩu mặc định `123456`.
 Mỗi bước seed đều kiểm tra `count() > 0` nên chạy lại nhiều lần không tạo dữ liệu trùng.
 
+Các tài khoản do seeder tạo **không** bị bắt đổi mật khẩu — chúng là dữ liệu
+demo, bắt đổi thì mỗi lần dựng lại môi trường đều phải đổi sáu lần. Tài khoản
+tạo qua giao diện thì có, xem mục 3.5.
+
 Server mặc định chạy tại: `http://localhost:8080`
 
-### 3.4. VNPay
+### 3.4. Mật khẩu tài khoản
+
+Tài khoản mới tạo và tài khoản vừa được Quản trị viên đặt lại đều mang mật khẩu
+do người khác biết — chuỗi mặc định `123456`, hoặc mật khẩu Quản trị viên chọn
+hộ khi tạo nhân viên. Hệ thống **bắt đổi** trước khi cho dùng:
+
+- Đăng nhập xong là vào thẳng màn `/change-password`, không vào được màn nào khác.
+- Backend chặn thật chứ không chỉ chặn giao diện: `MustChangePasswordFilter` trả
+  403 cho mọi endpoint trừ xem hồ sơ của chính mình, đổi mật khẩu, làm mới token
+  và đăng xuất. Kênh WebSocket cũng bị từ chối.
+- Đổi xong thì đăng xuất và đăng nhập lại — cờ nằm trong chữ ký của access token
+  nên chỉ token mới mới sạch cờ.
+- Mọi vai trò đều tự đổi được mật khẩu của mình ở màn **Hồ sơ cá nhân**.
+
+Quản trị viên không đặt lại được mật khẩu của Quản trị viên khác; tài khoản đó
+dùng luồng **Quên mật khẩu** qua email.
+
+### 3.5. VNPay
 
 Cấu hình mặc định trỏ tới **sandbox**. Khi deploy thật cần đổi `vnpay.url`,
 `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET` theo tài khoản merchant, và `VNPAY_RETURN_URL` theo domain thật.
@@ -154,10 +175,18 @@ npm install
 | Lệnh | Mô tả |
 |---|---|
 | `npm run dev` | Chạy dev server (Vite) |
-| `npm run build` | Kiểm tra type (`tsc -b`) rồi build production |
+| `npm run build` | Kiểm tra kiểu, chạy test, rồi build production |
 | `npm run preview` | Preview bản build |
 | `npm run lint` | Kiểm tra lỗi ESLint |
-| `npm run typecheck` | Chỉ kiểm tra kiểu TypeScript |
+| `npm run lint:fix` | Sửa những lỗi ESLint tự sửa được |
+| `npm run typecheck` | Chỉ kiểm tra kiểu TypeScript (`tsc -b`) |
+| `npm run format` | Chạy Prettier ghi đè |
+| `npm run format:check` | Kiểm tra format, không sửa |
+| `npm test` | Chạy test (Vitest) |
+
+> Kiểm kiểu phải gọi `npm run typecheck`, **không** gọi `npx tsc --noEmit`.
+> `tsconfig.json` ở gốc là dạng references với `"files": []`, nên `--noEmit`
+> chạy qua mà không kiểm file nào cả.
 
 ### 4.3. Chạy môi trường dev
 
@@ -177,13 +206,23 @@ Frontend gọi API qua `axios` (`frontend/src/shared/api/client.ts`) và kết n
 ## 5. Thứ tự khởi động khuyến nghị
 
 1. Khởi động SQL Server, tạo database `RIMS_DB`.
-2. Cập nhật `application.yaml` với thông tin DB/mail/VNPay của bạn.
+2. Copy `.env.example` thành `.env` ở gốc repo rồi điền DB/mail/VNPay của bạn
+   (xem mục 3.1). Không sửa `application.yaml` — file đó chỉ có placeholder.
 3. Chạy backend (`./mvnw spring-boot:run`) → API sẵn sàng tại `:8080`.
 4. Chạy frontend (`npm run dev`) → mở trình duyệt theo địa chỉ Vite in ra.
 5. Đăng nhập/đăng ký thử để kiểm tra luồng Auth → Order → Payment → Realtime (WebSocket).
 
 ## 6. Công nghệ sử dụng
 
-**Backend**: Java 21, Spring Boot, Spring Data JPA, Spring Security (JWT), WebSocket (STOMP), SQL Server, VNPay integration, Spring Mail.
+**Backend**: Java 21, Spring Boot 4, Spring Data JPA, Spring Security (JWT),
+WebSocket (STOMP), SQL Server, VNPay, Spring Mail. Test: JUnit 5 + Mockito +
+AssertJ.
 
-**Frontend**: React 19, TypeScript, Vite, React Router 7, Axios, Bootstrap 5, SockJS + StompJS (realtime), ESLint.
+**Frontend**: React 19, TypeScript, Vite 8, React Router 7, Axios,
+SockJS + StompJS (realtime), lucide-react (icon). Test: Vitest.
+ESLint + Prettier.
+
+Giao diện **không dùng framework CSS**. Bootstrap đã được gỡ; thay vào đó là một
+bộ component viết riêng trong `frontend/src/styles/rims-kit.css` (tiền tố `rk-`)
+dựng trên các biến màu và khoảng cách trong `tokens.css`. Bộ biến đó cũng là chỗ
+duy nhất khai báo chế độ tối.

@@ -44,7 +44,9 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 | **Lỗi** | Luôn `getErrorMessage(error, 'thông báo dự phòng')` từ `@/shared/utils/error`. **Cấm tự viết hàm bóc lỗi mới** — đã từng có 28 bản copy. |
 | **Loading / empty / error** | Dùng `LoadingState`, `EmptyState`, `ErrorState`. Không tự viết `{loading && <div>Đang tải...</div>}`. |
 | **Import** | Cross-feature dùng alias `@/`. Cùng thư mục dùng `./`. Không bao giờ `../../..`. |
-| **Style** | Class CSS trong `styles/bootstrap-rims-<area>.css`, tên `<area>-<block>-<element>`. Màu lấy từ biến trong `tokens.css`. `style={{}}` chỉ cho giá trị tính động lúc runtime. |
+| **Style** | Dùng lớp có sẵn trong `styles/rims-kit.css` (tiền tố `rk-`, đặt tên kiểu BEM: `rk-<block>__<element>--<biến thể>`). Cần lớp mới thì thêm vào kit, **không** tạo file CSS riêng cho từng màn. Màu và khoảng cách luôn lấy từ biến trong `tokens.css`, không gõ thẳng mã màu. |
+| **Style nội dòng** | `style={{}}` chỉ cho giá trị **thật sự tính lúc chạy**: bề rộng thanh tỉ lệ, `conic-gradient` của biểu đồ, màu lấy từ dữ liệu. Cấm khai báo `const xStyle: CSSProperties = {}` rồi tô vào JSX — đã từng có 93 đối tượng như vậy rải khắp 12 file, sửa một cỡ chữ phải mở cả chục file. |
+| **Màu theo chế độ tối** | Biến trong `tokens.css` tự đảo ở chế độ tối. Thành phần nào **luôn** nằm trên nền tối hoặc nền màu cố định (thanh bên, màn báo thanh toán xong, nút VNPay) thì dùng biến không đảo — `--rims-shell-*`, `--rims-paid`, hoặc mã màu thương hiệu của bên thứ ba. Lấy biến đảo làm nền cho chữ sáng thì ở chế độ tối tương phản tụt xuống dưới 2:1. |
 | **console** | `console.error` / `console.warn` được phép để ghi lỗi request. `console.log` thì không — ESLint sẽ cảnh báo. |
 
 ## Chung
@@ -57,3 +59,5 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 | **Di chuyển code** | Khi gộp hoặc tách file: commit riêng, **không đổi một ký tự nào** trong lúc di chuyển. Sửa logic ở commit sau. Ghi rõ file nguồn trong commit message. |
 | **Secret** | Không commit. Điền vào `.env` ở gốc repo (đã gitignore) hoặc đặt biến môi trường cùng tên. Xem `.env.example`. Thêm biến mới thì phải thêm cả vào `.env.example` kèm giải thích lấy ở đâu. |
 | **Biến lộ ra trình duyệt** | Chỉ biến có tiền tố `VITE_` mới được Vite nạp vào bundle. **Không bao giờ** đặt tiền tố `VITE_` cho secret của backend. |
+| **Mật khẩu do người khác đặt** | Thêm chỗ nào gán mật khẩu hộ người dùng thì phải `setMustChangePassword(true)`. Chỗ nào để chính chủ chọn mật khẩu thì `setMustChangePassword(false)`. Quên một nhánh là hoặc người dùng kẹt vĩnh viễn ở màn đổi mật khẩu, hoặc mật khẩu mặc định sống mãi. `UserPasswordTest` có test cho cả hai chiều. |
+| **Cột mới trên bảng đã có dữ liệu** | Cột `NOT NULL` phải kèm `@ColumnDefault`. SQL Server từ chối `ALTER TABLE ... ADD <cột> NOT NULL` trên bảng đã có dòng nếu không có DEFAULT — Hibernate chỉ báo WARN rồi đi tiếp, ứng dụng vẫn khởi động, nhưng mọi truy vấn bảng đó đều lỗi. |
