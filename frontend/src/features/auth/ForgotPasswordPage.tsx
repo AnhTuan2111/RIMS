@@ -1,7 +1,9 @@
 import {ArrowLeft, Check, X} from 'lucide-react'
 
-import {useState, type CSSProperties, type KeyboardEvent} from 'react'
-import {Link, useNavigate} from 'react-router-dom'
+import {useState, type KeyboardEvent} from 'react'
+import {useNavigate} from 'react-router-dom'
+
+import {AuthShell} from './AuthShell'
 
 import {forgotPassword, resetPassword} from '@/shared/api/auth'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
@@ -131,345 +133,206 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <main className="login-page">
-            <section className="login-card">
-                <Link className="login-back-link" to="/login">
-                    <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại đăng
-                    nhập
-                </Link>
+        <AuthShell
+            backTo="/login"
+            backLabel="Quay lại đăng nhập"
+            title="Quên mật khẩu"
+            description="Chỉ dành cho tài khoản khách hàng."
+        >
+            <ol className="rk-steps">
+                {STEPS.map((stepItem, index) => {
+                    const state =
+                        index < currentStepIdx
+                            ? ' rk-steps__item--done'
+                            : index === currentStepIdx
+                              ? ' rk-steps__item--active'
+                              : ''
 
-                <div className="login-header">
-                    <h1>Quên mật khẩu</h1>
-                    <p>Chỉ dành cho tài khoản khách hàng.</p>
-                </div>
+                    return (
+                        <li className={`rk-steps__item${state}`} key={stepItem}>
+                            <span className="rk-steps__mark">
+                                {index < currentStepIdx ? (
+                                    <Check className="rk-icon" aria-hidden="true" />
+                                ) : (
+                                    index + 1
+                                )}
+                            </span>
 
-                <div style={stepWrapperStyle}>
-                    {STEPS.map((stepItem, index) => (
-                        <div
-                            key={stepItem}
-                            style={{
-                                ...stepItemStyle,
-                                flex: index < STEPS.length - 1 ? 1 : 'none',
-                            }}
-                        >
-                            <div style={stepInnerStyle}>
-                                <div
-                                    style={{
-                                        ...stepCircleStyle,
-                                        background:
-                                            index < currentStepIdx
-                                                ? 'var(--rims-ok)'
-                                                : index === currentStepIdx
-                                                  ? 'var(--rims-brand)'
-                                                  : 'var(--rims-line)',
-                                        color:
-                                            index <= currentStepIdx
-                                                ? 'var(--rims-ink-on-brand)'
-                                                : 'var(--rims-ink-3)',
-                                    }}
-                                >
-                                    {index < currentStepIdx ? '' : index + 1}
-                                </div>
+                            <span className="rk-steps__label">
+                                {STEP_LABELS[stepItem]}
+                            </span>
+                        </li>
+                    )
+                })}
+            </ol>
 
-                                <span
-                                    style={{
-                                        ...stepLabelStyle,
-                                        color:
-                                            index === currentStepIdx
-                                                ? 'var(--rims-brand)'
-                                                : 'var(--rims-ink-3)',
-                                        fontWeight: index === currentStepIdx ? 600 : 400,
-                                    }}
-                                >
-                                    {STEP_LABELS[stepItem]}
-                                </span>
-                            </div>
+            {error && (
+                <p className="rk-note rk-note--alert">
+                    <span>{error}</span>
 
-                            {index < STEPS.length - 1 && (
-                                <div
-                                    style={{
-                                        ...stepLineStyle,
-                                        background:
-                                            index < currentStepIdx
-                                                ? 'var(--rims-ok)'
-                                                : 'var(--rims-line)',
-                                    }}
-                                />
-                            )}
-                        </div>
-                    ))}
-                </div>
+                    <button
+                        type="button"
+                        className="rk-iconbtn"
+                        aria-label="Đóng thông báo lỗi"
+                        onClick={() => setError(null)}
+                    >
+                        <X className="rk-icon" aria-hidden="true" />
+                    </button>
+                </p>
+            )}
 
-                {error && (
-                    <div className="auth-error" style={errorBoxStyle}>
-                        <span>{error}</span>
-
-                        <button
-                            type="button"
-                            style={errorCloseButtonStyle}
-                            onClick={() => setError(null)}
-                        >
-                            <X className="rk-icon" aria-hidden="true" />
-                        </button>
-                    </div>
-                )}
-
-                {step === 'email' && (
-                    <>
-                        <label className="auth-field">
+            {step === 'email' && (
+                <div className="rk-fieldgroup">
+                    <div className="rk-field">
+                        <label className="rk-field__label" htmlFor="fp-email">
                             Email tài khoản khách hàng
-                            <input
-                                type="email"
-                                value={email}
-                                placeholder="email@gmail.com"
-                                autoFocus
-                                onChange={(event) => {
-                                    setEmail(event.target.value)
-                                    setError(null)
-                                }}
-                                onKeyDown={handleEmailKeyDown}
-                            />
                         </label>
 
-                        <p style={hintTextStyle}>
-                            Nhập đúng email đã đăng ký. Chúng tôi sẽ gửi mã OTP 6 số — có
+                        <input
+                            id="fp-email"
+                            className="rk-input"
+                            type="email"
+                            value={email}
+                            placeholder="email@gmail.com"
+                            autoFocus
+                            onChange={(event) => {
+                                setEmail(event.target.value)
+                                setError(null)
+                            }}
+                            onKeyDown={handleEmailKeyDown}
+                        />
+
+                        <p className="rk-field__hint">
+                            Nhập đúng email đã đăng ký. Chúng tôi sẽ gửi mã OTP 6 số, có
                             hiệu lực trong 5 phút.
                         </p>
+                    </div>
 
-                        <button
-                            type="button"
-                            className="auth-submit"
-                            disabled={isLoading}
-                            onClick={() => void handleSendOtp()}
-                        >
-                            {isLoading ? 'Đang gửi…' : 'Gửi mã OTP'}
-                        </button>
-                    </>
-                )}
+                    <button
+                        type="button"
+                        className="rk-btn rk-btn--primary rk-btn--lg rk-btn--block"
+                        disabled={isLoading}
+                        onClick={() => void handleSendOtp()}
+                    >
+                        {isLoading ? 'Đang gửi…' : 'Gửi mã OTP'}
+                    </button>
+                </div>
+            )}
 
-                {step === 'otp' && (
-                    <>
-                        <div style={otpNoticeStyle}>
-                            <Check className="rk-icon" aria-hidden="true" /> Đã gửi mã OTP
-                            đến <strong>{email}</strong>
-                        </div>
+            {step === 'otp' && (
+                <div className="rk-fieldgroup">
+                    <p className="rk-note rk-note--ok">
+                        <Check className="rk-icon" aria-hidden="true" />
 
-                        <label className="auth-field">
+                        <span>
+                            Đã gửi mã OTP đến <strong>{email}</strong>
+                        </span>
+                    </p>
+
+                    <div className="rk-field">
+                        <label className="rk-field__label" htmlFor="fp-otp">
                             Mã OTP (6 chữ số)
-                            <input
-                                value={otp}
-                                maxLength={6}
-                                placeholder="_ _ _ _ _ _"
-                                style={otpInputStyle}
-                                autoFocus
-                                onChange={(event) => {
-                                    setOtp(event.target.value.replace(/\D/g, ''))
-
-                                    setError(null)
-                                }}
-                            />
                         </label>
 
-                        <label className="auth-field" style={fieldTopStyle}>
+                        <input
+                            id="fp-otp"
+                            className="rk-input rk-input--code"
+                            value={otp}
+                            maxLength={6}
+                            inputMode="numeric"
+                            placeholder="––––––"
+                            autoFocus
+                            onChange={(event) => {
+                                setOtp(event.target.value.replace(/\D/g, ''))
+                                setError(null)
+                            }}
+                        />
+                    </div>
+
+                    <div className="rk-field">
+                        <label className="rk-field__label" htmlFor="fp-new">
                             Mật khẩu mới
-                            <input
-                                type="password"
-                                value={newPassword}
-                                placeholder="Tối thiểu 6 ký tự"
-                                onChange={(event) => {
-                                    setNewPassword(event.target.value)
-
-                                    setError(null)
-                                }}
-                            />
                         </label>
 
-                        <label className="auth-field" style={fieldTopStyle}>
+                        <input
+                            id="fp-new"
+                            className="rk-input"
+                            type="password"
+                            value={newPassword}
+                            placeholder="Tối thiểu 6 ký tự"
+                            onChange={(event) => {
+                                setNewPassword(event.target.value)
+                                setError(null)
+                            }}
+                        />
+                    </div>
+
+                    <div className="rk-field">
+                        <label className="rk-field__label" htmlFor="fp-confirm">
                             Xác nhận mật khẩu mới
-                            <input
-                                type="password"
-                                value={confirmPassword}
-                                placeholder="Nhập lại mật khẩu mới"
-                                onChange={(event) => {
-                                    setConfirmPassword(event.target.value)
-
-                                    setError(null)
-                                }}
-                                onKeyDown={handleResetKeyDown}
-                            />
                         </label>
 
-                        <button
-                            type="button"
-                            className="auth-submit"
-                            disabled={isLoading}
-                            style={resetButtonStyle}
-                            onClick={() => void handleResetPassword()}
-                        >
-                            {isLoading ? 'Đang xử lý…' : 'Đặt lại mật khẩu'}
-                        </button>
+                        <input
+                            id="fp-confirm"
+                            className="rk-input"
+                            type="password"
+                            value={confirmPassword}
+                            placeholder="Nhập lại mật khẩu mới"
+                            onChange={(event) => {
+                                setConfirmPassword(event.target.value)
+                                setError(null)
+                            }}
+                            onKeyDown={handleResetKeyDown}
+                        />
+                    </div>
 
-                        <button
-                            type="button"
-                            style={backToEmailButtonStyle}
-                            onClick={goBackToEmailStep}
-                        >
-                            <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại
-                            / Gửi lại OTP
-                        </button>
-                    </>
-                )}
+                    <button
+                        type="button"
+                        className="rk-btn rk-btn--primary rk-btn--lg rk-btn--block"
+                        disabled={isLoading}
+                        onClick={() => void handleResetPassword()}
+                    >
+                        {isLoading ? 'Đang xử lý…' : 'Đặt lại mật khẩu'}
+                    </button>
 
-                {step === 'done' && (
-                    <div style={doneBoxStyle}>
-                        <div style={doneIconStyle}>
-                            <Check className="rk-icon" aria-hidden="true" />
-                        </div>
+                    <button
+                        type="button"
+                        className="rk-btn rk-btn--block"
+                        onClick={goBackToEmailStep}
+                    >
+                        <ArrowLeft className="rk-icon" aria-hidden="true" />
+                        Quay lại / Gửi lại OTP
+                    </button>
+                </div>
+            )}
 
-                        <h3 style={doneTitleStyle}>Đặt lại mật khẩu thành công!</h3>
+            {step === 'done' && (
+                <div className="rk-feedback rk-feedback--sm">
+                    <div className="rk-feedback__icon rk-feedback__icon--ok">
+                        <Check className="rk-icon" aria-hidden="true" />
+                    </div>
 
-                        <p style={doneTextStyle}>
+                    <div>
+                        <h3 className="rk-feedback__title">
+                            Đặt lại mật khẩu thành công
+                        </h3>
+
+                        <p className="rk-feedback__text">
                             Mật khẩu đã được cập nhật. Vui lòng đăng nhập lại.
                         </p>
 
-                        <button
-                            type="button"
-                            className="rk-btn rk-btn--primary"
-                            style={doneButtonStyle}
-                            onClick={() => navigate('/login')}
-                        >
-                            Đăng nhập ngay
-                        </button>
+                        <div className="rk-feedback__actions">
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--primary"
+                                onClick={() => navigate('/login')}
+                            >
+                                Đăng nhập ngay
+                            </button>
+                        </div>
                     </div>
-                )}
-            </section>
-        </main>
+                </div>
+            )}
+        </AuthShell>
     )
-}
-
-const stepWrapperStyle: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: 24,
-    gap: 0,
-}
-
-const stepItemStyle: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-}
-
-const stepInnerStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 4,
-}
-
-const stepCircleStyle: CSSProperties = {
-    width: 28,
-    height: 28,
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 12,
-    fontWeight: 700,
-}
-
-const stepLabelStyle: CSSProperties = {
-    fontSize: 11,
-    whiteSpace: 'nowrap',
-}
-
-const stepLineStyle: CSSProperties = {
-    flex: 1,
-    height: 2,
-    margin: '0 8px',
-    marginBottom: 18,
-}
-
-const errorBoxStyle: CSSProperties = {
-    marginBottom: 16,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 8,
-}
-
-const errorCloseButtonStyle: CSSProperties = {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    flexShrink: 0,
-    fontSize: 16,
-    lineHeight: 1,
-}
-
-const hintTextStyle: CSSProperties = {
-    fontSize: 13,
-    color: 'var(--rims-ink-3)',
-    margin: '8px 0 20px',
-}
-
-const otpNoticeStyle: CSSProperties = {
-    background: 'var(--rims-ok-soft)',
-    border: '1px solid var(--rims-ok-line)',
-    borderRadius: 8,
-    padding: '12px 14px',
-    marginBottom: 20,
-    fontSize: 14,
-    color: 'var(--rims-ok)',
-}
-
-const otpInputStyle: CSSProperties = {
-    letterSpacing: 8,
-    fontSize: 22,
-    textAlign: 'center',
-    fontWeight: 700,
-}
-
-const fieldTopStyle: CSSProperties = {
-    marginTop: 14,
-}
-
-const resetButtonStyle: CSSProperties = {
-    marginTop: 20,
-}
-
-const backToEmailButtonStyle: CSSProperties = {
-    width: '100%',
-    marginTop: 10,
-    padding: 10,
-    background: 'none',
-    border: 'none',
-    color: 'var(--rims-brand)',
-    cursor: 'pointer',
-    fontSize: 13,
-}
-
-const doneBoxStyle: CSSProperties = {
-    textAlign: 'center',
-    padding: '20px 0',
-}
-
-const doneIconStyle: CSSProperties = {
-    fontSize: 52,
-    marginBottom: 16,
-}
-
-const doneTitleStyle: CSSProperties = {
-    color: 'var(--rims-ok)',
-    marginBottom: 8,
-}
-
-const doneTextStyle: CSSProperties = {
-    color: 'var(--rims-ink-3)',
-    marginBottom: 28,
-    fontSize: 14,
-}
-
-const doneButtonStyle: CSSProperties = {
-    width: '100%',
-    padding: '12px',
 }

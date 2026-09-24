@@ -1,6 +1,8 @@
-import {ArrowLeft, Info} from 'lucide-react'
-import {useState, type CSSProperties, type FormEvent} from 'react'
+import {Info} from 'lucide-react'
+import {useState, type FormEvent} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
+
+import {AuthShell} from './AuthShell'
 
 import {register, type RegisterRequest} from '@/shared/api/auth'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
@@ -109,118 +111,116 @@ export default function RegisterPage() {
     }
 
     return (
-        <main className="login-page">
-            <section className="login-card">
-                <Link className="login-back-link" to="/login">
-                    <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại đăng
-                    nhập
-                </Link>
-
-                <div className="login-header">
-                    <h1>Đăng ký tài khoản</h1>
-                    <p>Tạo tài khoản khách hàng mới</p>
-                </div>
-
-                {error && <div className="auth-error">{error}</div>}
-
-                <form onSubmit={(event) => void handleSubmit(event)}>
-                    <label className="auth-field">
-                        Tên đăng nhập *
-                        <input
-                            value={formData.username}
-                            placeholder="Tên đăng nhập"
-                            required
-                            autoComplete="username"
-                            onChange={(event) =>
-                                updateField('username', event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label className="auth-field">
-                        Họ và tên *
-                        <input
-                            value={formData.fullName}
-                            placeholder="Nguyễn Văn A"
-                            required
-                            autoComplete="name"
-                            onChange={(event) =>
-                                updateField('fullName', event.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label className="auth-field">
-                        Email *
-                        <input
-                            type="email"
-                            value={formData.email}
-                            placeholder="email@gmail.com"
-                            required
-                            autoComplete="email"
-                            onChange={(event) => updateField('email', event.target.value)}
-                        />
-                    </label>
-
-                    <label className="auth-field">
-                        Số điện thoại *
-                        <input
-                            value={formData.phone}
-                            placeholder="0123456789"
-                            required
-                            inputMode="numeric"
-                            autoComplete="tel"
-                            maxLength={10}
-                            onChange={(event) =>
-                                updateField('phone', normalizePhone(event.target.value))
-                            }
-                        />
-                    </label>
-
-                    <div style={defaultPasswordNoticeStyle}>
-                        <Info className="rk-icon" aria-hidden="true" /> Mật khẩu mặc định
-                        sẽ là: <strong>123456</strong>
-                        <br />
-                        <small>
-                            Vui lòng thay đổi mật khẩu sau khi đăng nhập lần đầu.
-                        </small>
-                    </div>
-
-                    <button type="submit" className="auth-submit" disabled={isLoading}>
-                        {isLoading ? 'Đang đăng ký…' : 'Tạo tài khoản'}
-                    </button>
-                </form>
-
-                <div style={loginTextStyle}>
+        <AuthShell
+            backTo="/login"
+            backLabel="Quay lại đăng nhập"
+            title="Đăng ký tài khoản"
+            description="Tạo tài khoản khách hàng mới"
+            footer={
+                <>
                     Đã có tài khoản?{' '}
-                    <Link to="/login" style={loginLinkStyle}>
+                    <Link className="rk-link" to="/login">
                         Đăng nhập
                     </Link>
+                </>
+            }
+        >
+            {error && <p className="rk-formerror">{error}</p>}
+
+            <form
+                className="rk-fieldgroup"
+                onSubmit={(event) => void handleSubmit(event)}
+            >
+                <div className="rk-field">
+                    <label className="rk-field__label" htmlFor="reg-username">
+                        Tên đăng nhập
+                        <span className="rk-field__required">*</span>
+                    </label>
+
+                    <input
+                        id="reg-username"
+                        className="rk-input"
+                        value={formData.username}
+                        placeholder="Tên đăng nhập"
+                        required
+                        autoComplete="username"
+                        onChange={(event) => updateField('username', event.target.value)}
+                    />
                 </div>
-            </section>
-        </main>
+
+                <div className="rk-field">
+                    <label className="rk-field__label" htmlFor="reg-fullname">
+                        Họ và tên
+                        <span className="rk-field__required">*</span>
+                    </label>
+
+                    <input
+                        id="reg-fullname"
+                        className="rk-input"
+                        value={formData.fullName}
+                        placeholder="Nguyễn Văn A"
+                        required
+                        autoComplete="name"
+                        onChange={(event) => updateField('fullName', event.target.value)}
+                    />
+                </div>
+
+                <div className="rk-field">
+                    <label className="rk-field__label" htmlFor="reg-email">
+                        Email
+                        <span className="rk-field__required">*</span>
+                    </label>
+
+                    <input
+                        id="reg-email"
+                        className="rk-input"
+                        type="email"
+                        value={formData.email}
+                        placeholder="email@gmail.com"
+                        required
+                        autoComplete="email"
+                        onChange={(event) => updateField('email', event.target.value)}
+                    />
+                </div>
+
+                <div className="rk-field">
+                    <label className="rk-field__label" htmlFor="reg-phone">
+                        Số điện thoại
+                        <span className="rk-field__required">*</span>
+                    </label>
+
+                    <input
+                        id="reg-phone"
+                        className="rk-input"
+                        value={formData.phone}
+                        placeholder="0123456789"
+                        required
+                        inputMode="numeric"
+                        autoComplete="tel"
+                        maxLength={10}
+                        onChange={(event) =>
+                            updateField('phone', normalizePhone(event.target.value))
+                        }
+                    />
+                </div>
+
+                <p className="rk-note">
+                    <Info className="rk-icon" aria-hidden="true" />
+
+                    <span>
+                        Mật khẩu mặc định sẽ là <strong>123456</strong>. Đổi mật khẩu ngay
+                        sau khi đăng nhập lần đầu.
+                    </span>
+                </p>
+
+                <button
+                    type="submit"
+                    className="rk-btn rk-btn--primary rk-btn--lg rk-btn--block"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Đang đăng ký…' : 'Tạo tài khoản'}
+                </button>
+            </form>
+        </AuthShell>
     )
-}
-
-const defaultPasswordNoticeStyle: CSSProperties = {
-    background: 'var(--rims-ok-soft)',
-    border: '1px solid var(--rims-ok-line)',
-    borderRadius: 8,
-    padding: '12px 14px',
-    marginBottom: 20,
-    fontSize: 14,
-    color: 'var(--rims-ok)',
-}
-
-const loginTextStyle: CSSProperties = {
-    textAlign: 'center',
-    marginTop: '16px',
-    fontSize: '13px',
-    color: 'var(--rims-ink-3)',
-}
-
-const loginLinkStyle: CSSProperties = {
-    color: 'var(--rims-brand)',
-    textDecoration: 'none',
-    fontWeight: 600,
 }

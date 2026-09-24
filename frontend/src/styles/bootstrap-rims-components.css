@@ -189,15 +189,6 @@
     color: var(--rims-alert);
 }
 
-.auth-error {
-    padding: 0.85rem 1rem;
-    border: 1px solid var(--rims-alert-line);
-    border-radius: 16px;
-    background: var(--rims-alert-soft);
-    color: var(--rims-alert);
-    font-weight: 750;
-}
-
 /* General shared grids that many pages already use */
 
 .table-grid {

@@ -1,6 +1,7 @@
-import {ArrowLeft} from 'lucide-react'
-import {useState, type CSSProperties, type FormEvent} from 'react'
+import {useState, type FormEvent} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
+
+import {AuthShell} from './AuthShell'
 
 import {login} from '@/shared/api/auth'
 import {useActor} from '@/app/providers/ActorContext'
@@ -64,87 +65,73 @@ export default function LoginPage() {
     }
 
     return (
-        <main className="login-page">
-            <section className="login-card">
-                <Link className="login-back-link" to="/">
-                    <ArrowLeft className="rk-icon" aria-hidden="true" /> Quay lại trang
-                    chủ
-                </Link>
-
-                <div className="login-header">
-                    <h1>Đăng nhập {restaurantName}</h1>
-
-                    <p>Đăng nhập tài khoản để đặt bàn ngay hôm nay!</p>
-                </div>
-
-                {error && <div className="auth-error">{error}</div>}
-
-                <form onSubmit={(event) => void handleSubmit(event)}>
-                    <label className="auth-field">
-                        Tên đăng nhập
-                        <input
-                            value={username}
-                            placeholder="Nhập tên đăng nhập"
-                            required
-                            autoComplete="username"
-                            onChange={(event) => setUsername(event.target.value)}
-                        />
-                    </label>
-
-                    <label className="auth-field">
-                        Mật khẩu
-                        <input
-                            type="password"
-                            value={rawPassword}
-                            placeholder="Nhập mật khẩu"
-                            required
-                            autoComplete="current-password"
-                            onChange={(event) => setRawPassword(event.target.value)}
-                        />
-                    </label>
-
-                    <div style={forgotPasswordRowStyle}>
-                        <Link to="/forgot-password" style={forgotPasswordLinkStyle}>
-                            Quên mật khẩu?
-                        </Link>
-                    </div>
-
-                    <button type="submit" className="auth-submit" disabled={isLoading}>
-                        {isLoading ? 'Đang đăng nhập…' : 'Đăng nhập'}
-                    </button>
-                </form>
-
-                <div style={registerTextStyle}>
+        <AuthShell
+            backTo="/"
+            backLabel="Quay lại trang chủ"
+            title={`Đăng nhập ${restaurantName}`}
+            description="Đăng nhập tài khoản để đặt bàn ngay hôm nay!"
+            footer={
+                <>
                     Chưa có tài khoản?{' '}
-                    <Link to="/register" style={registerLinkStyle}>
+                    <Link className="rk-link" to="/register">
                         Đăng ký ngay
                     </Link>
+                </>
+            }
+        >
+            {error && <p className="rk-formerror">{error}</p>}
+
+            <form
+                className="rk-fieldgroup"
+                onSubmit={(event) => void handleSubmit(event)}
+            >
+                <div className="rk-field">
+                    <label className="rk-field__label" htmlFor="login-username">
+                        Tên đăng nhập
+                    </label>
+
+                    <input
+                        id="login-username"
+                        className="rk-input"
+                        value={username}
+                        placeholder="Nhập tên đăng nhập"
+                        required
+                        autoComplete="username"
+                        onChange={(event) => setUsername(event.target.value)}
+                    />
                 </div>
-            </section>
-        </main>
+
+                <div className="rk-field">
+                    <label className="rk-field__label" htmlFor="login-password">
+                        Mật khẩu
+                    </label>
+
+                    <input
+                        id="login-password"
+                        className="rk-input"
+                        type="password"
+                        value={rawPassword}
+                        placeholder="Nhập mật khẩu"
+                        required
+                        autoComplete="current-password"
+                        onChange={(event) => setRawPassword(event.target.value)}
+                    />
+                </div>
+
+                <div className="rk-actions rk-actions--end">
+                    <Link className="rk-link" to="/forgot-password">
+                        Quên mật khẩu?
+                    </Link>
+                </div>
+
+                <button
+                    type="submit"
+                    className="rk-btn rk-btn--primary rk-btn--lg rk-btn--block"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Đang đăng nhập…' : 'Đăng nhập'}
+                </button>
+            </form>
+        </AuthShell>
     )
-}
-
-const forgotPasswordRowStyle: CSSProperties = {
-    textAlign: 'right',
-    marginBottom: '8px',
-}
-
-const forgotPasswordLinkStyle: CSSProperties = {
-    fontSize: '13px',
-    color: 'var(--rims-brand)',
-    textDecoration: 'none',
-}
-
-const registerTextStyle: CSSProperties = {
-    textAlign: 'center',
-    marginTop: '16px',
-    fontSize: '13px',
-    color: 'var(--rims-ink-3)',
-}
-
-const registerLinkStyle: CSSProperties = {
-    color: 'var(--rims-brand)',
-    textDecoration: 'none',
-    fontWeight: 600,
 }

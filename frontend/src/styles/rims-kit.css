@@ -1644,3 +1644,348 @@ textarea.rk-input {
         transform: rotate(360deg);
     }
 }
+
+/* ---------- Thẻ ----------
+   Khuôn lặp nhiều nhất trong repo: 28 tên class khác nhau cho cùng một cái
+   thẻ có tiêu đề và thân. Mỗi màn tự đặt bo góc riêng — 18px, 20px, 22px,
+   24px — nên nhìn cả app như ghép từ nhiều bản thiết kế. */
+
+.rk-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+}
+
+.rk-card--soft {
+    background: var(--rims-surface-2);
+}
+
+.rk-card--flush .rk-card__body {
+    padding: 0;
+}
+
+.rk-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+    flex-wrap: wrap;
+    padding: var(--rims-space-5) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-card__title {
+    margin: 0;
+    color: var(--rims-ink);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-card__desc {
+    margin: var(--rims-space-1) 0 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-card__body {
+    padding: var(--rims-space-6);
+}
+
+.rk-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-4) var(--rims-space-6);
+    border-top: 1px solid var(--rims-line);
+}
+
+/* ---------- Tiêu đề một mục bên trong thẻ ---------- */
+
+.rk-sectiontitle {
+    margin: 0 0 var(--rims-space-4);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-base);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* ---------- Hàng nút ---------- */
+
+.rk-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    flex-wrap: wrap;
+}
+
+.rk-actions--end {
+    justify-content: flex-end;
+}
+
+/* ---------- Bảng tổng kết ----------
+   Hoá đơn, đơn hàng, chi tiết thanh toán: nhãn bên trái, số bên phải, dòng
+   cuối là tổng và được nhấn mạnh. */
+
+.rk-summary {
+    display: grid;
+    gap: var(--rims-space-2);
+}
+
+.rk-summary__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--rims-space-4);
+}
+
+.rk-summary__label {
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-summary__value {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--rims-ink);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+}
+
+.rk-summary__row--total {
+    margin-top: var(--rims-space-2);
+    padding-top: var(--rims-space-3);
+    border-top: 1px solid var(--rims-line);
+}
+
+.rk-summary__row--total .rk-summary__label {
+    color: var(--rims-ink);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-summary__row--total .rk-summary__value {
+    color: var(--rims-brand);
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-black);
+}
+
+/* ---------- Khối ghi chú ----------
+   Một dòng giải thích hoặc cảnh báo ngay trong luồng, không phải hộp thoại. */
+
+.rk-note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-note--alert {
+    border-color: var(--rims-alert-line);
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
+.rk-note--ok {
+    border-color: var(--rims-ok-line);
+    background: var(--rims-ok-soft);
+    color: var(--rims-ok);
+}
+
+.rk-note--busy {
+    border-color: var(--rims-busy-line);
+    background: var(--rims-busy-soft);
+    color: var(--rims-busy);
+}
+
+/* ---------- Thanh tỉ lệ ----------
+   Dùng trong báo cáo: món bán chạy, tỉ trọng đơn theo ca. */
+
+.rk-bar {
+    height: 8px;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-surface-3);
+    overflow: hidden;
+}
+
+.rk-bar__fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--rims-brand);
+}
+
+/* ---------- Dấu bắt buộc trong biểu mẫu ---------- */
+
+.rk-field__required {
+    margin-left: 2px;
+    color: var(--rims-alert);
+}
+
+/* ---------- Khung màn đăng nhập ----------
+   Ba màn (đăng nhập, đăng ký, quên mật khẩu) dựng chung một khung: nền tối
+   toàn trang, một thẻ sáng ở giữa. Trước đây mỗi màn tự lặp lại đoạn markup
+   đó, và thẻ dùng nền kem của bảng màu cũ. */
+
+.rk-auth {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: var(--rims-space-6);
+    background:
+        radial-gradient(circle at top left, rgb(var(--rims-tint-brand) / 26%), transparent 38%),
+        radial-gradient(circle at bottom right, rgb(var(--rims-tint-brand) / 22%), transparent 36%), var(--rims-shell);
+}
+
+.rk-auth__card {
+    width: min(460px, 100%);
+    padding: var(--rims-space-8);
+    border: 1px solid var(--rims-line);
+    border-radius: var(--rims-radius-lg);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-overlay);
+}
+
+.rk-auth__card--wide {
+    width: min(560px, 100%);
+}
+
+.rk-auth__title {
+    margin: 0 0 var(--rims-space-2);
+    color: var(--rims-ink);
+    font-size: var(--rims-text-3xl);
+    font-weight: var(--rims-weight-black);
+    letter-spacing: var(--rims-tracking-tight);
+    line-height: var(--rims-leading-tight);
+}
+
+.rk-auth__desc {
+    margin: 0 0 var(--rims-space-6);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-auth__foot {
+    margin-top: var(--rims-space-5);
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+    .rk-auth__card {
+        padding: var(--rims-space-5);
+    }
+}
+
+/* ---------- Liên kết quay lại ---------- */
+
+.rk-backlink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    margin-bottom: var(--rims-space-5);
+    color: var(--rims-brand);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    text-decoration: none;
+}
+
+.rk-backlink:hover {
+    text-decoration: underline;
+}
+
+.rk-link {
+    color: var(--rims-brand);
+    font-weight: var(--rims-weight-semibold);
+    text-decoration: none;
+}
+
+.rk-link:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Dãy bước ----------
+   Quên mật khẩu đi qua ba bước. Trước đây dãy này dựng bằng bảy đối tượng
+   style nội dòng, mỗi đối tượng tự chọn màu theo bước hiện tại. */
+
+.rk-steps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+    margin: 0 0 var(--rims-space-6);
+    padding: 0;
+    list-style: none;
+}
+
+.rk-steps__item {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+}
+
+.rk-steps__mark {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    flex: none;
+    border-radius: var(--rims-radius-pill);
+    background: var(--rims-line);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-steps__item--active .rk-steps__mark {
+    background: var(--rims-brand);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-steps__item--done .rk-steps__mark {
+    background: var(--rims-ok);
+    color: var(--rims-ink-on-brand);
+}
+
+.rk-steps__label {
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-xs);
+    white-space: nowrap;
+}
+
+.rk-steps__item--active .rk-steps__label {
+    color: var(--rims-brand);
+    font-weight: var(--rims-weight-semibold);
+}
+
+@media (max-width: 480px) {
+    .rk-steps__label {
+        display: none;
+    }
+}
+
+/* Biến thể xanh lá của biểu tượng trạng thái: việc đã xong. */
+.rk-feedback__icon--ok {
+    background: var(--rims-ok-soft);
+    color: var(--rims-ok);
+}
+
+/* Ô nhập mã: chữ giãn và căn giữa để đọc từng ký tự một. */
+.rk-input--code {
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xl);
+    letter-spacing: 0.4em;
+    text-align: center;
+}
+
+/* Ghi chú có nút đóng ở cuối dòng. */
+.rk-note .rk-iconbtn {
+    margin-left: auto;
+    background: transparent;
+}

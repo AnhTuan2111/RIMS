@@ -374,7 +374,7 @@ export default function AdminUsersPage() {
             {/* ── Alerts ── */}
             {error && (
                 <div
-                    className="auth-error"
+                    className="rk-note rk-note--alert"
                     style={{
                         marginBottom: 16,
                         display: 'flex',

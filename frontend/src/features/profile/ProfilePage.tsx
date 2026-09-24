@@ -402,7 +402,7 @@ export default function ProfilePage() {
                 </div>
 
                 {updateError && (
-                    <div className="auth-error" style={profileErrorStyle}>
+                    <div className="rk-note rk-note--alert" style={profileErrorStyle}>
                         {updateError}
                     </div>
                 )}
@@ -487,7 +487,9 @@ export default function ProfilePage() {
                                 onChange={setConfirmPw}
                             />
 
-                            {pwError && <div className="auth-error">{pwError}</div>}
+                            {pwError && (
+                                <div className="rk-note rk-note--alert">{pwError}</div>
+                            )}
 
                             <div style={passwordActionStyle}>
                                 <button
