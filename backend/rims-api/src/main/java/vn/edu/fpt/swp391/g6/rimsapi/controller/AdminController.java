@@ -21,6 +21,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateStaffRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.SetAccountStatusRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.UpdateAccountRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.common.PageResponse;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
@@ -276,10 +277,9 @@ public class AdminController
     }
 
     @DeleteMapping("/category/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Integer id)
+    public CategoryRemovalResponse deleteCategory(@PathVariable Integer id)
     {
-        adminService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
+        return adminService.deleteCategory(id);
     }
 
     // =================== DISH ===================

@@ -74,14 +74,10 @@ export default function AdminCategoryPage() {
 
                 setDishes(processedDishes)
 
-                const formattedData = categoriesData.data
-                    .map((cat) => ({
-                        ...cat,
-                        dishCount: processedDishes.filter(
-                            (d) => d.categoryName === cat.name,
-                        ).length,
-                    }))
-                    .sort((a, b) => a.id - b.id)
+                // dishCount do backend trả về. Bản cũ tự đếm bằng cách lọc danh
+                // sách món theo TÊN danh mục — đổi tên danh mục là đếm sai, và
+                // danh sách đó không chắc chứa món đang ẩn.
+                const formattedData = [...categoriesData.data].sort((a, b) => a.id - b.id)
 
                 setCategories(formattedData)
                 setError(null)
@@ -154,10 +150,13 @@ export default function AdminCategoryPage() {
         }
 
         try {
-            await adminApi.deleteCategory(deleteTarget.id)
+            const res = await adminApi.deleteCategory(deleteTarget.id)
             setDeleteTarget(null)
             await loadCategories(true, true)
-            notify(`Đã xoá danh mục ${deleteTarget.name}.`)
+
+            // Backend mới là nơi quyết định xoá hay ẩn, nên lấy câu của nó
+            // thay vì tự đoán — số món có thể đã đổi từ lúc màn này tải về.
+            notify(res.data.message)
         } catch (err: unknown) {
             console.error('Lỗi khi xóa danh mục:', err)
             const errMsg = getErrorMessage(err, 'Không thể thực hiện xóa danh mục!')
@@ -881,22 +880,23 @@ export default function AdminCategoryPage() {
                 </div>
             )}
 
-            {/* Backend XOÁ HẲN danh mục và mọi món thuộc nó, không phải ẩn đi.
-                Nói rõ số món sẽ mất để người xoá thấy được phạm vi ảnh hưởng. */}
+            {/*
+                Danh mục rỗng thì xoá hẳn, còn món thì chỉ ẩn — món đã bán còn
+                nằm trong hoá đơn và báo cáo doanh thu. Hộp thoại phải nói đúng
+                việc nào sắp xảy ra, vì cùng một nút bấm cho hai kết quả.
+            */}
             <ConfirmDialog
                 open={Boolean(deleteTarget)}
-                title="Xoá danh mục này?"
+                title={deleteTarget?.dishCount ? 'Ẩn danh mục này?' : 'Xoá danh mục này?'}
                 description={
                     deleteTarget
-                        ? `Danh mục “${deleteTarget.name}”${
-                              deleteTarget.dishCount
-                                  ? ` và ${deleteTarget.dishCount} món thuộc nó`
-                                  : ''
-                          } sẽ bị xoá khỏi hệ thống. Việc này không hoàn tác được. Nếu chỉ muốn tạm ngừng bán, hãy sửa danh mục và tắt trạng thái hiển thị.`
+                        ? deleteTarget.dishCount
+                            ? `Danh mục “${deleteTarget.name}” và ${deleteTarget.dishCount} món thuộc nó sẽ không còn hiện trong thực đơn. Dữ liệu vẫn giữ nguyên để báo cáo doanh thu không bị thiếu, và bật lại được bất cứ lúc nào.`
+                            : `Danh mục “${deleteTarget.name}” chưa có món nào nên sẽ bị xoá khỏi hệ thống. Việc này không hoàn tác được.`
                         : undefined
                 }
-                confirmLabel="Xoá vĩnh viễn"
-                destructive
+                confirmLabel={deleteTarget?.dishCount ? 'Ẩn danh mục' : 'Xoá vĩnh viễn'}
+                destructive={!deleteTarget?.dishCount}
                 onConfirm={() => void confirmDelete()}
                 onCancel={() => setDeleteTarget(null)}
             />

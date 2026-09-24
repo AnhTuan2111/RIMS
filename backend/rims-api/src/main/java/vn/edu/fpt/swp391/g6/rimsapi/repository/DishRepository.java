@@ -50,6 +50,16 @@ public interface DishRepository extends JpaRepository<Dish, Integer>
     @Query("SELECT COUNT(oi) > 0 FROM OrderItem oi WHERE oi.dish.category.id = :categoryId")
     boolean existsOrderItemByCategoryId(@Param("categoryId") Integer categoryId);
 
+    /**
+     * Số món của từng danh mục: [categoryId, số món].
+     *
+     * <p>Một truy vấn cho cả bảng, thay vì đếm riêng từng danh mục.
+     */
+    @Query("SELECT d.category.id, COUNT(d) FROM Dish d GROUP BY d.category.id")
+    List<Object[]> countDishesByCategory();
+
+    long countByCategoryId(Integer categoryId);
+
     // Đếm số món bị ẩn
     long countByIsHidden(boolean isHidden);
 

@@ -7,6 +7,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
@@ -42,7 +43,13 @@ public interface AdminService
 
     CategoryResponse updateCategory(Integer id, UpdateCategoryRequest updateCategoryRequest);
 
-    void deleteCategory(Integer id);
+    /**
+     * Xoá danh mục rỗng, hoặc ẩn danh mục còn món.
+     *
+     * <p>Kết quả nói rõ việc nào đã xảy ra, vì cùng một nút bấm mà hệ thống
+     * làm hai việc khác nhau.
+     */
+    CategoryRemovalResponse deleteCategory(Integer id);
 
     // menu dash board
     MenuDashboardResponse getMenuDashboardData();

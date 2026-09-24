@@ -38,7 +38,22 @@ export const updateCategory = (id: number, data: CategoryFormData) =>
 
 /** Soft-deletes a category */
 
-export const deleteCategory = (id: number) => apiClient.delete(`/admin/category/${id}`)
+export interface CategoryRemovalResponse {
+    /** true: đã xoá khỏi cơ sở dữ liệu. false: chỉ ẩn khỏi thực đơn. */
+    deleted: boolean
+    /** Số món bị ẩn theo. Bằng 0 khi danh mục bị xoá hẳn. */
+    hiddenDishCount: number
+    message: string
+}
+
+/**
+ * Xoá danh mục rỗng, hoặc ẩn danh mục còn món.
+ *
+ * <p>Món đã bán còn nằm trong hoá đơn và các báo cáo doanh thu, nên danh mục
+ * còn món thì chỉ ẩn. Kết quả trả về nói rõ việc nào đã xảy ra.
+ */
+export const deleteCategory = (id: number) =>
+    apiClient.delete<CategoryRemovalResponse>(`/admin/category/${id}`)
 
 /** Returns all dishes */
 export const getAllDishes = (signal?: AbortSignal) =>

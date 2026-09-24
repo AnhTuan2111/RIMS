@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.DishResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.MenuDashboardResponse;
@@ -228,17 +230,34 @@ public class AdminServiceImpl implements AdminService
     @Transactional(readOnly = true)
     public List<CategoryResponse> getAllCategories()
     {
-        return categoryRepository.findAll().stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+        return withDishCount(categoryRepository.findAll());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CategoryResponse> getAvailableCategories()
     {
-        return categoryRepository.findByIsAvailableTrue().stream()
-                .map(this::convertToResponse)
+        return withDishCount(categoryRepository.findByIsAvailableTrue());
+    }
+
+    /**
+     * Gắn số món vào từng danh mục.
+     *
+     * <p>Đếm một lần cho cả bảng rồi tra theo id, không đếm riêng từng danh mục.
+     */
+    private List<CategoryResponse> withDishCount(List<Category> categories)
+    {
+        Map<Integer, Long> counts = dishRepository.countDishesByCategory().stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0],
+                        row -> (Long) row[1]));
+
+        return categories.stream()
+                .map(category -> {
+                    CategoryResponse response = convertToResponse(category);
+                    response.setDishCount(counts.getOrDefault(category.getId(), 0L));
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -248,7 +267,11 @@ public class AdminServiceImpl implements AdminService
     {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy category với ID: " + id));
-        return convertToResponse(category);
+
+        CategoryResponse detail = convertToResponse(category);
+        detail.setDishCount(dishRepository.countByCategoryId(id));
+
+        return detail;
     }
 
     @Override
@@ -297,23 +320,27 @@ public class AdminServiceImpl implements AdminService
             boolean newStatus = updateCategoryRequest.getIsAvailable();
             boolean oldStatus = category.isAvailable();
 
-            // Ẩn danh mục thì ẩn luôn mọi món thuộc nó: để sót món lẻ trong một
-            // danh mục đã ẩn thì bếp vẫn nhận được đơn cho món đó.
-            if (oldStatus && !newStatus)
+            // Ẩn danh mục thì ẩn luôn mọi món thuộc nó, và bật lại thì hiện lại
+            // cả món. Trước đây chỉ làm chiều ẩn: bật lại một danh mục vẫn để
+            // toàn bộ món của nó biến mất khỏi thực đơn, và phải vào bật tay từng món
+            // mới thấy lại — không ai đoán được điều đó.
+            //
+            // Đánh đổi: món bị ẩn riêng lẻ từ trước cũng được hiện lại theo. Hệ
+            // thống không ghi lại món nào bị ẩn vì lý do gì, nên không phân biệt được.
+            if (oldStatus != newStatus)
             {
                 List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
 
                 if (!dishesInCategory.isEmpty())
                 {
-                    // Ẩn tất cả dishes trong category
                     for (Dish dish : dishesInCategory)
                     {
-                        dish.setAvailable(false);
-                        dish.setHidden(true);
+                        dish.setAvailable(newStatus);
+                        dish.setHidden(!newStatus);
                     }
+
                     dishRepository.saveAll(dishesInCategory);
 
-                    // Broadcast cho từng dish bị ẩn
                     for (Dish dish : dishesInCategory)
                     {
                         broadcastMenuVisibilityChanged(dish);
@@ -321,7 +348,6 @@ public class AdminServiceImpl implements AdminService
                 }
             }
 
-            // Cập nhật trạng thái category
             category.setAvailable(newStatus);
         }
 
@@ -333,31 +359,61 @@ public class AdminServiceImpl implements AdminService
     }
     @Override
     @Transactional
-    public void deleteCategory(Integer id)
+    public CategoryRemovalResponse deleteCategory(Integer id)
     {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
-        // Đã có đơn nào gọi món trong danh mục này thì không xoá được: xoá sẽ làm
-        // mất lịch sử bán hàng. Một truy vấn có/không, không lặp qua từng món.
-        if (dishRepository.existsOrderItemByCategoryId(id))
-        {
-            throw new IllegalStateException(
-                    "Không thể xóa danh mục này vì có món ăn đã phát sinh đơn hàng. " +
-                            "Vui lòng dùng chức năng \"Tạm dừng\" để ẩn danh mục.");
-        }
-
-        // XOÁ CỨNG, không phải ẩn: danh mục và toàn bộ món thuộc nó biến mất khỏi
-        // cơ sở dữ liệu. Món phải xoá trước vì khoá ngoại trỏ về danh mục.
         List<Dish> dishesInCategory = dishRepository.findByCategoryId(id);
 
+        // Còn món thì chỉ ẩn, không xoá. Món đã bán còn nằm trong hoá đơn và các
+        // báo cáo doanh thu; xoá đi là thủng số liệu của những ngày đã qua.
         if (!dishesInCategory.isEmpty())
         {
-            dishRepository.deleteAll(dishesInCategory);
+            hideCategoryWithDishes(category, dishesInCategory);
+
+            return CategoryRemovalResponse.builder()
+                    .deleted(false)
+                    .hiddenDishCount(dishesInCategory.size())
+                    .message("Đã ẩn danh mục “" + category.getName() + "” cùng "
+                            + dishesInCategory.size() + " món thuộc nó. "
+                            + "Dữ liệu vẫn giữ để báo cáo doanh thu không bị thiếu.")
+                    .build();
         }
 
+        // Danh mục rỗng thì không có gì để mất: xoá hẳn.
         categoryRepository.delete(category);
 
+        return CategoryRemovalResponse.builder()
+                .deleted(true)
+                .hiddenDishCount(0)
+                .message("Đã xoá danh mục “" + category.getName() + "”.")
+                .build();
+    }
+
+    /**
+     * Ẩn danh mục và mọi món thuộc nó.
+     *
+     * <p>Để sót một món còn hiện trong danh mục đã ẩn thì bếp vẫn nhận đơn cho
+     * món đó, nên hai thứ phải đi cùng nhau.
+     */
+    private void hideCategoryWithDishes(Category category, List<Dish> dishesInCategory)
+    {
+        category.setAvailable(false);
+        categoryRepository.save(category);
+
+        for (Dish dish : dishesInCategory)
+        {
+            dish.setAvailable(false);
+            dish.setHidden(true);
+        }
+
+        dishRepository.saveAll(dishesInCategory);
+
+        for (Dish dish : dishesInCategory)
+        {
+            broadcastMenuVisibilityChanged(dish);
+        }
     }
 
     // MENU DASHBOARD
