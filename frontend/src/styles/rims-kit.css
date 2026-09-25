@@ -54,9 +54,18 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-main {
-    min-height: 100dvh;
-}
+/* CỐ Ý KHÔNG đặt min-height cho <main>.
+   Từng có luật `main { min-height: 100dvh }` ở đây. Nó đúng với hai trang
+   không có khung app (đăng nhập, kết quả thanh toán), nhưng trong khung quản
+   trị thì <main> nằm DƯỚI thanh tiêu đề, nên chiều cao thành
+   `thanh trên + 100dvh` — mọi màn sau khi đăng nhập đều dư ra đúng chiều cao
+   thanh trên (118px ở 1920x1080). Hệ quả thấy rõ nhất ở màn rộng: trang sinh
+   ra thanh cuộn dọc dù nội dung ngắn, và thanh bên cố định (cao 100dvh) kết
+   thúc bằng một cạnh cứng giữa nền trắng.
+
+   Ba nơi dùng <main> đều đã tự lo chiều cao: .rk-auth và .rk-result đặt
+   100dvh, .rk-home đặt 100%, còn .rk-shell__content dùng flex: 1 để lấp phần
+   còn lại của .rk-shell — đó mới là cách đúng khi có phần tử anh em phía trên. */
 
 h1,
 h2,
