@@ -29,3 +29,29 @@ export function dungAnhThayThe(event: {currentTarget: HTMLImageElement}) {
     img.onerror = null
     img.src = ANH_THAY_THE
 }
+
+/**
+ * Đường dẫn dùng cho thuộc tính `src` của ảnh món ăn.
+ *
+ * <p>Backend lưu ảnh món theo hai dạng: một URL đầy đủ, hoặc chỉ tên file nằm
+ * trong thư mục ảnh của app. Chỗ nào hiển thị ảnh món cũng phải phân biệt hai
+ * dạng đó, nên trước đây cùng một biểu thức ba ngôi được chép ra sáu chỗ.
+ *
+ * <p>Hai trong sáu chỗ đó quên mất rằng ảnh có thể KHÔNG CÓ. Món trong
+ * data.sql không kèm ảnh, nên `imageUrl` là null, và `null.startsWith` làm
+ * sập toàn bộ màn Quản lý món ăn thành trang trắng. Gộp về một chỗ để không
+ * còn chỗ nào quên được nữa.
+ */
+export function duongDanAnh(imageUrl?: string | null): string {
+    if (!imageUrl) {
+        return ANH_THAY_THE
+    }
+
+    // Đã là địa chỉ hoàn chỉnh thì dùng nguyên: URL tuyệt đối, giao thức kế
+    // thừa (//), data URI, hoặc đường dẫn đã bắt đầu từ gốc site.
+    if (/^(https?:)?\/\/|^data:|^\//.test(imageUrl)) {
+        return imageUrl
+    }
+
+    return `/image/${imageUrl}`
+}

@@ -21,7 +21,7 @@ import {
 } from '@/shared/components/ui'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
-import {dungAnhThayThe} from '@/shared/utils/image'
+import {dungAnhThayThe, duongDanAnh} from '@/shared/utils/image'
 
 type ViewMode = 'LIST' | 'CREATE' | 'EDIT' | 'DETAIL'
 type FilterStatus = 'ALL' | 'ACTIVE' | 'HIDDEN'
@@ -614,14 +614,9 @@ export default function AdminCategoryPage() {
                                                         <div className="rk-media">
                                                             <span className="rk-thumb">
                                                                 <img
-                                                                    src={
-                                                                        dish.imageUrl &&
-                                                                        dish.imageUrl.startsWith(
-                                                                            'http',
-                                                                        )
-                                                                            ? dish.imageUrl
-                                                                            : `/image/${dish.imageUrl}`
-                                                                    }
+                                                                    src={duongDanAnh(
+                                                                        dish.imageUrl,
+                                                                    )}
                                                                     alt={dish.name}
                                                                     onError={
                                                                         dungAnhThayThe

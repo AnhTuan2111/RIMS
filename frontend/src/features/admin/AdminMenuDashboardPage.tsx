@@ -16,7 +16,7 @@ import type {MenuDashboardData} from '@/shared/api/admin'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
 import {isRequestCanceled} from '@/shared/utils/error'
-import {dungAnhThayThe} from '@/shared/utils/image'
+import {dungAnhThayThe, duongDanAnh} from '@/shared/utils/image'
 
 /**
  * Ảnh thu nhỏ của món.
@@ -35,11 +35,7 @@ function DishThumb({imageUrl, name}: {imageUrl?: string | null; name: string}) {
 
     return (
         <span className="rk-thumb">
-            <img
-                src={imageUrl.startsWith('http') ? imageUrl : `/image/${imageUrl}`}
-                alt={name}
-                onError={dungAnhThayThe}
-            />
+            <img src={duongDanAnh(imageUrl)} alt={name} onError={dungAnhThayThe} />
         </span>
     )
 }

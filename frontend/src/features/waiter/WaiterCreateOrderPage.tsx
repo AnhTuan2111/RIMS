@@ -15,7 +15,7 @@ import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {dungAnhThayThe} from '@/shared/utils/image'
+import {dungAnhThayThe, duongDanAnh} from '@/shared/utils/image'
 
 type DraftItem = {
     qty: number
@@ -321,11 +321,7 @@ export default function WaiterCreateOrderPage() {
                                     <div className="rk-media">
                                         {dish.imageUrl ? (
                                             <img
-                                                src={
-                                                    dish.imageUrl.startsWith('http')
-                                                        ? dish.imageUrl
-                                                        : `/image/${dish.imageUrl}`
-                                                }
+                                                src={duongDanAnh(dish.imageUrl)}
                                                 alt={dish.name}
                                                 className="rk-thumb"
                                                 onError={dungAnhThayThe}

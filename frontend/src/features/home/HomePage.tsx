@@ -4,6 +4,7 @@ import {CalendarClock, Clock, MapPin, Phone} from 'lucide-react'
 
 import {useRestaurant} from '@/app/providers/useRestaurant'
 import {getPublicBestSellingDishes, type PublicBestSellingDish} from '@/shared/api/public'
+import {duongDanAnh} from '@/shared/utils/image'
 
 /**
  * Trang công khai của nhà hàng.
@@ -126,7 +127,7 @@ export default function HomePage() {
                                 <li className="rk-home__dish" key={dish.rank}>
                                     <img
                                         className="rk-home__dishimg"
-                                        src={`/image/${dish.imageUrl}`}
+                                        src={duongDanAnh(dish.imageUrl)}
                                         alt=""
                                         loading="lazy"
                                     />

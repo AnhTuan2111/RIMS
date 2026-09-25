@@ -15,7 +15,7 @@ import {
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
-import {ANH_THAY_THE, dungAnhThayThe} from '@/shared/utils/image'
+import {dungAnhThayThe, duongDanAnh} from '@/shared/utils/image'
 
 type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE'
 
@@ -394,11 +394,7 @@ export default function AdminDishesPage() {
                                     <td>
                                         <span className="rk-thumb">
                                             <img
-                                                src={
-                                                    dish.imageUrl.startsWith('http')
-                                                        ? dish.imageUrl
-                                                        : `/image/${dish.imageUrl}`
-                                                }
+                                                src={duongDanAnh(dish.imageUrl)}
                                                 alt={dish.name}
                                                 onError={dungAnhThayThe}
                                             />
@@ -731,11 +727,7 @@ export default function AdminDishesPage() {
                             </span>
                             <div className="rk-thumb rk-thumb--lg">
                                 <img
-                                    src={
-                                        selectedDish.imageUrl.startsWith('http')
-                                            ? selectedDish.imageUrl
-                                            : `/image/${selectedDish.imageUrl}`
-                                    }
+                                    src={duongDanAnh(selectedDish.imageUrl)}
                                     alt={selectedDish.name}
                                 />
                             </div>
@@ -941,13 +933,7 @@ export default function AdminDishesPage() {
                                 <div className="rk-media">
                                     <div className="rk-thumb rk-thumb--lg">
                                         <img
-                                            src={
-                                                formData.imageUrl
-                                                    ? formData.imageUrl.startsWith('http')
-                                                        ? formData.imageUrl
-                                                        : `/image/${formData.imageUrl}`
-                                                    : ANH_THAY_THE
-                                            }
+                                            src={duongDanAnh(formData.imageUrl)}
                                             alt="Preview"
                                             onError={dungAnhThayThe}
                                         />
