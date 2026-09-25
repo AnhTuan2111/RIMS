@@ -319,15 +319,24 @@ export default function AdminUsersPage() {
 
     const handleUpdate = async () => {
         if (!selectedUser) return
-        if (!form.username.trim() || !form.fullName.trim() || !form.phone.trim()) {
-            setFormError('Tên đăng nhập, họ tên và số điện thoại không được để trống')
+        if (
+            !form.username.trim() ||
+            !form.fullName.trim() ||
+            !form.phone.trim() ||
+            !form.email.trim()
+        ) {
+            setFormError(
+                'Tên đăng nhập, họ tên, email và số điện thoại không được để trống',
+            )
             return
         }
         if (!isValidPhone(form.phone)) {
             setFormError('Số điện thoại không hợp lệ! Phải bắt đầu bằng 0 và đủ 10 số.')
             return
         }
-        if (form.email.trim() && !isValidEmail(form.email)) {
+        // Email là đường lấy lại mật khẩu duy nhất, nên xoá trắng ô này là gỡ
+        // mất khả năng đăng nhập lại của chủ tài khoản.
+        if (!isValidEmail(form.email)) {
             setFormError('Email không hợp lệ!')
             return
         }
@@ -910,7 +919,7 @@ export default function AdminUsersPage() {
                                 placeholder="Nguyễn Văn A"
                             />
                         </Field>
-                        <Field label="Email">
+                        <Field label="Email *">
                             <input
                                 type="email"
                                 value={form.email}

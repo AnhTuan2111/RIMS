@@ -62,7 +62,54 @@ IF OBJECT_ID(N'dbo.revoked_tokens', N'U') IS NULL
 create table revoked_tokens (expires_at datetime2(7), revoked_at datetime2(7), jti varchar(255) not null, primary key (jti));
 
 IF OBJECT_ID(N'dbo.users', N'U') IS NULL
-create table users (is_active bit not null, must_change_password bit default 0 not null, reward_points int not null, user_id int identity not null, created_at datetime2(7) not null, updated_at datetime2(7) not null, phone varchar(10) not null, role varchar(10) not null check ((role in ('ADMIN','CHEF','WAITER','CASHIER','CUSTOMER'))), email varchar(50), full_name nvarchar(50) not null, username varchar(50) not null, password_hash varchar(255) not null, primary key (user_id));
+create table users (is_active bit not null, must_change_password bit default 0 not null, reward_points int not null, user_id int identity not null, created_at datetime2(7) not null, updated_at datetime2(7) not null, phone varchar(10) not null, role varchar(10) not null check ((role in ('ADMIN','CHEF','WAITER','CASHIER','CUSTOMER'))), email varchar(50) not null, full_name nvarchar(50) not null, username varchar(50) not null, password_hash varchar(255) not null, primary key (user_id));
+
+-- ---------- Chuyển cột đã có sang NOT NULL ----------
+--
+-- Câu create table ở trên chỉ chạy khi bảng chưa tồn tại, nên CSDL đang chạy
+-- sẽ không nhận thay đổi nào từ nó. Những cột đổi ràng buộc về sau phải có
+-- một câu ALTER riêng, viết sao cho chạy lại nhiều lần không lỗi.
+--
+-- users.email: trước đây cho phép để trống, giờ bắt buộc. Nó là đường lấy lại
+-- mật khẩu duy nhất của tài khoản — OTP chỉ gửi qua email, vì tin nhắn
+-- thương hiệu đòi giấy phép kinh doanh.
+
+-- MỖI CÂU TRONG FILE NÀY PHẢI LÀ MỘT CÂU, VỚI ĐÚNG MỘT DẤU CHẤM PHẨY Ở CUỐI.
+-- Spring cắt file theo dấu chấm phẩy rồi gửi từng mảnh sang JDBC, kể cả dấu
+-- chấm phẩy nằm trong chuỗi hay trong khối BEGIN...END. Viết một khối nhiều
+-- câu ở đây thì nó bị cắt đôi giữa chừng và lỗi cú pháp.
+--
+-- Còn tài khoản nào email trống thì câu dưới đây thất bại và ứng dụng dừng
+-- lúc khởi động. Đó là ý muốn. Cách xử lý:
+--     SELECT user_id, username FROM users WHERE email IS NULL
+-- điền email cho những tài khoản đó rồi khởi động lại.
+-- SQL Server từ chối ALTER một cột đang có chỉ số duy nhất dựa vào nó, nên
+-- phải gỡ chỉ số trước rồi mới đổi cột. Tên chỉ số không đoán được: CSDL dựng
+-- bằng ddl-auto: update mang tên Hibernate băm ra (UK6dotkott...), CSDL dựng
+-- bằng file này mang tên ix_users_email. Vì vậy phải tra tên theo cột rồi
+-- dựng câu lệnh động.
+--
+-- Không tạo lại chỉ số ở đây — câu create unique index ở cuối file lo việc đó,
+-- và nó cũng hỏi theo cột nên sau khi gỡ là nó tạo lại.
+IF EXISTS (SELECT 1 FROM sys.columns
+           WHERE object_id = OBJECT_ID(N'dbo.users') AND name = N'email' AND is_nullable = 1)
+EXEC sp_executesql N'DECLARE @ten sysname, @sql nvarchar(400);
+SELECT TOP 1 @ten = i.name
+FROM sys.indexes i
+JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+WHERE i.object_id = OBJECT_ID(N''dbo.users'') AND i.is_unique = 1
+  AND i.is_primary_key = 0 AND c.name = N''email'';
+IF @ten IS NOT NULL
+BEGIN
+  IF EXISTS (SELECT 1 FROM sys.key_constraints
+             WHERE parent_object_id = OBJECT_ID(N''dbo.users'') AND name = @ten)
+    SET @sql = N''ALTER TABLE users DROP CONSTRAINT '' + QUOTENAME(@ten);
+  ELSE
+    SET @sql = N''DROP INDEX '' + QUOTENAME(@ten) + N'' ON users'';
+  EXEC sp_executesql @sql;
+END;
+ALTER TABLE users ALTER COLUMN email varchar(50) NOT NULL;';
 
 -- ---------- Ràng buộc duy nhất và khoá ngoại ----------
 --
@@ -189,10 +236,10 @@ IF NOT EXISTS (
     WHERE ic.object_id = OBJECT_ID(N'dbo.reservations') AND ic.key_ordinal = 1 AND c.name = N'reservation_time')
 create index ix_reservations_reservation_time on reservations (reservation_time);
 
--- Chỉ số lọc, không phải ràng buộc UNIQUE thường: SQL Server chỉ cho đúng MỘT
--- dòng NULL trong một cột UNIQUE, mà email là cột được phép bỏ trống. Mệnh đề
--- WHERE bỏ các dòng NULL ra khỏi phạm vi kiểm, nên nhiều tài khoản không có
--- email vẫn cùng tồn tại.
+-- Mệnh đề WHERE là dấu vết từ thời email còn được bỏ trống: SQL Server chỉ cho
+-- đúng MỘT dòng NULL trong một cột UNIQUE, nên phải lọc các dòng NULL ra.
+-- Email giờ là NOT NULL nên mệnh đề này không còn lọc gì, nhưng giữ lại thì
+-- vô hại mà bỏ đi lại buộc những CSDL đang chạy phải dựng lại chỉ số.
 --
 -- Hỏi theo cột: CSDL dựng bằng ddl-auto: update trước đây có một ràng buộc
 -- UNIQUE thường trên chính cột này, tên do Hibernate băm ra. Hỏi theo tên thì

@@ -42,7 +42,20 @@ public class User
     @Column(nullable = false, length = 50)
     private String fullName;
 
-    @Column(unique = true, length = 50)
+    /**
+     * Bắt buộc, vì đây là đường lấy lại mật khẩu DUY NHẤT của tài khoản.
+     *
+     * <p>Trước đây để trống được, và {@code CashierServiceImpl} bịa ra
+     * {@code <số điện thoại>@rims.com} khi quầy không nhập. Địa chỉ đó trông
+     * như thật nhưng OTP gửi tới sẽ không bao giờ đến tay ai, nên khách quên
+     * mật khẩu là mất tài khoản kèm toàn bộ điểm tích luỹ.
+     *
+     * <p>Gửi OTP qua SMS thì không vướng chuyện này, nhưng tên định danh
+     * brandname chỉ cấp cho doanh nghiệp có giấy phép kinh doanh và mỗi tin
+     * tốn 600–1.000đ. Chừng nào chưa có pháp nhân thì email là kênh khả thi
+     * duy nhất, nên nó phải có thật.
+     */
+    @Column(nullable = false, unique = true, length = 50)
     private String email;
 
     @Column(nullable = false, unique = true, length = 10)

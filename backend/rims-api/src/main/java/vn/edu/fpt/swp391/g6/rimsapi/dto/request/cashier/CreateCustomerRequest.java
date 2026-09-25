@@ -28,8 +28,9 @@ public class CreateCustomerRequest
     @Pattern(regexp = "0\\d{9}", message = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0")
     private String phone;
 
-    /** Không bắt buộc: bỏ trống thì hệ thống tự sinh từ số điện thoại. */
+    /** Bắt buộc: đây là đường lấy lại mật khẩu duy nhất của tài khoản. */
+    @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không đúng định dạng")
-    @Size(max = 150, message = "Email không quá 150 ký tự")
+    @Size(max = 50, message = "Email không quá 50 ký tự")
     private String email;
 }

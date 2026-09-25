@@ -522,7 +522,7 @@ public class CashierServiceImpl implements CashierService
         User user = new User();
         user.setFullName(fullName);
         user.setPhone(phone);
-        user.setEmail(email != null && !email.isEmpty() ? email : phone + "@rims.com");
+        user.setEmail(email);
         user.setUsername(phone);
         user.setPasswordHash(passwordEncoder.encode(accountDefaults.getDefaultPassword()));
         user.setMustChangePassword(true);
