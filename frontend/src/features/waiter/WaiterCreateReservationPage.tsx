@@ -15,7 +15,6 @@ import {
 import {useRestaurant} from '@/app/providers/useRestaurant'
 
 import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {WaiterHeader} from './components'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
@@ -369,7 +368,6 @@ export default function WaiterCreateReservationPage() {
 
     return (
         <div className="rk-stack">
-            <WaiterHeader title="Đặt bàn" />
 
             <div className="rk-stack">
                 <div className="rk-card__head-inline">

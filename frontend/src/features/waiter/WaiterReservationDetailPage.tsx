@@ -4,7 +4,7 @@ import {useNavigate, useParams} from 'react-router-dom'
 import * as waiterApi from '@/shared/api/waiter'
 import type {ReservationResponse} from '@/shared/api/waiter'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {BackArrow, WaiterHeader} from './components'
+import {BackArrow} from './components'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {LoadingState} from '@/shared/components/feedback'
@@ -110,7 +110,6 @@ export default function WaiterReservationDetailPage() {
     if (isLoading) {
         return (
             <div className="rk-stack">
-                <WaiterHeader title="Chi tiết đặt bàn" />
 
                 <div className="rk-stack">
                     <LoadingState title="Đang tải thông tin đặt bàn" description="" />
@@ -122,7 +121,6 @@ export default function WaiterReservationDetailPage() {
     if (error) {
         return (
             <div className="rk-stack">
-                <WaiterHeader title="Chi tiết đặt bàn" />
 
                 <div className="rk-stack">
                     <div className="rk-card__head-inline">
@@ -152,7 +150,6 @@ export default function WaiterReservationDetailPage() {
     if (!reservation) {
         return (
             <div className="rk-stack">
-                <WaiterHeader title="Chi tiết đặt bàn" />
 
                 <div className="rk-stack">
                     <div className="rk-card__head-inline">
@@ -184,7 +181,6 @@ export default function WaiterReservationDetailPage() {
 
     return (
         <div className="rk-stack">
-            <WaiterHeader title="Chi tiết đặt bàn" />
 
             <div className="rk-stack">
                 <div className="rk-card__head-inline">

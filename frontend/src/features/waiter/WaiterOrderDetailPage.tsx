@@ -4,7 +4,7 @@ import {useNavigate, useParams} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
 import type {OrderDetailResponse} from '@/shared/api/waiter'
-import {BackArrow, fmtPrice, WaiterHeader} from './components'
+import {BackArrow, fmtPrice} from './components'
 import {useWaiterSocket} from '@/realtime'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
@@ -106,7 +106,6 @@ export default function WaiterOrderDetailPage() {
 
     return (
         <div className="rk-stack">
-            <WaiterHeader title="Chi tiết đơn hàng" />
 
             <div className="rk-stack">
                 <div className="rk-card__head-inline">

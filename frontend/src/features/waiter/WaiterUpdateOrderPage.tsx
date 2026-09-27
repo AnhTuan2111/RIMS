@@ -11,7 +11,7 @@ import type {
     OrderItemStatus,
     UpdateOrderItemRequest,
 } from '@/shared/api/waiter'
-import {BackArrow, fmtPrice, WaiterHeader} from './components'
+import {BackArrow, fmtPrice} from './components'
 import {Modal} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
@@ -487,30 +487,21 @@ export default function WaiterUpdateOrderPage() {
 
     return (
         <div className="rk-stack">
-            <WaiterHeader title="Cập nhật đơn hàng" />
 
-            <div className="rk-stack">
-                <div className="rk-card__head-inline">
-                    <BackArrow
-                        onClick={() =>
-                            navigate(`/waiter/tables/${tableIdNumber}/order/detail`)
-                        }
-                    />
+            <div className="rk-titlerow">
+                <BackArrow
+                    onClick={() =>
+                        navigate(`/waiter/tables/${tableIdNumber}/order/detail`)
+                    }
+                />
 
-                    <h2 className="rk-sectiontitle">
-                        Cập nhật đơn hàng - Bàn {tableIdNumber || '—'}
-                    </h2>
+                <h2 className="rk-sectiontitle">
+                    Cập nhật đơn hàng · Bàn {tableIdNumber || '—'}
+                </h2>
+            </div>
 
-                    <button
-                        type="button"
-                        className="rk-btn rk-btn--primary"
-                        disabled={isLoading || submitting || !tableIdNumber}
-                        onClick={openConfirm}
-                    >
-                        Lưu Cập Nhật
-                    </button>
-                </div>
-
+            <div className="rk-order">
+                <div className="rk-order__menu">
                 <input
                     type="text"
                     placeholder="Tìm theo tên món hoặc danh mục..."
@@ -557,7 +548,7 @@ export default function WaiterUpdateOrderPage() {
                         description="Danh mục này chưa có món, hãy chọn danh mục khác."
                     />
                 ) : (
-                    <div className="rk-cardgrid">
+                    <div className="rk-menugrid">
                         {visibleMenu.map((dish) => {
                             const draft = orderDraft[dish.dishId] ?? {
                                 qty: 0,
@@ -575,29 +566,36 @@ export default function WaiterUpdateOrderPage() {
                             const isUnavailable = !dish.available
 
                             return (
-                                <div
+                                <article
                                     key={dish.dishId}
-                                    className={`rk-card rk-card--pad${
+                                    className={`rk-menucard${draft.qty > 0 ? ' is-picked' : ''}${
                                         isUnavailable ? ' is-unavailable' : ''
                                     }`}
                                 >
-                                    <div className="rk-media">
+                                    <div className="rk-menucard__figure">
                                         {dish.imageUrl ? (
                                             <img
                                                 src={duongDanAnh(dish.imageUrl)}
                                                 alt={dish.name}
-                                                className="rk-thumb"
                                                 onError={dungAnhThayThe}
                                             />
                                         ) : (
-                                            <span className="rk-thumb">
-                                                <Icon name="kitchen" className="rk-icon" />
-                                            </span>
+                                            <Icon name="kitchen" className="rk-icon" />
                                         )}
 
-                                        <div className="rk-rowlist__main">
-                                            <h4>{dish.name}</h4>
-                                            <p>{fmtPrice(dish.price)}</p>
+                                        {draft.qty > 0 && (
+                                            <span className="rk-menucard__count">
+                                                {draft.qty}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="rk-menucard__body">
+                                        <div className="rk-menucard__head">
+                                            <h3 className="rk-menucard__name">{dish.name}</h3>
+                                            <span className="rk-menucard__price">
+                                                {fmtPrice(dish.price)}
+                                            </span>
 
                                             {hasExisting && draft.status && (
                                                 <span
@@ -615,6 +613,7 @@ export default function WaiterUpdateOrderPage() {
                                         </div>
                                     </div>
 
+                                    <div className="rk-menucard__foot">
                                     {draft.chefInternalNote && (
                                         <div
                                             className={`rk-chefnote${
@@ -729,11 +728,70 @@ export default function WaiterUpdateOrderPage() {
                                             )}
                                         </>
                                     )}
-                                </div>
+                                    </div>
+                                </article>
                             )
                         })}
                     </div>
                 )}
+                </div>
+
+                <aside className="rk-cart" aria-label="Thay đổi sắp gửi">
+                    <h2 className="rk-cart__head">
+                        Thay đổi
+                        <span className="rk-cart__count">{changeSummary.length}</span>
+                    </h2>
+
+                    {/* Giỏ ở màn Sửa đơn liệt kê THAY ĐỔI, không liệt kê cả đơn:
+                        cả đơn đã có ở màn Chi tiết. Thứ phục vụ cần thấy trước
+                        khi bấm gửi là đúng những gì sắp xuống bếp. */}
+                    {changeSummary.length === 0 ? (
+                        <p className="rk-cart__empty">
+                            Chưa thay đổi gì. Sửa số lượng hoặc ghi chú để bắt đầu.
+                        </p>
+                    ) : (
+                        <div className="rk-cart__body">
+                            {changeSummary.map((item) => (
+                                <div className="rk-cart__line" key={item.dishId}>
+                                    <span className="rk-cart__qty">
+                                        {item.kind === 'new' && item.qty + '\u00d7'}
+                                        {item.kind === 'increase' && '+' + item.qty}
+                                        {item.kind === 'decrease' && '\u2212' + item.qty}
+                                        {item.kind === 'cancel' && '\u00d7'}
+                                        {item.kind === 'note' && '\u270e'}
+                                    </span>
+                                    <span className="rk-cart__name">{item.name}</span>
+                                    <span className="rk-cart__sum">
+                                        {item.kind === 'new' && 'Món mới'}
+                                        {item.kind === 'increase' && 'Gọi thêm'}
+                                        {item.kind === 'decrease' && 'Bớt'}
+                                        {item.kind === 'cancel' && 'Huỷ món'}
+                                        {item.kind === 'note' && 'Đổi ghi chú'}
+                                    </span>
+                                    {item.note && (
+                                        <span className="rk-cart__note">{item.note}</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="rk-cart__foot">
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--go"
+                            disabled={
+                                isLoading ||
+                                submitting ||
+                                !tableIdNumber ||
+                                changeSummary.length === 0
+                            }
+                            onClick={openConfirm}
+                        >
+                            Gửi cập nhật xuống bếp
+                        </button>
+                    </div>
+                </aside>
             </div>
 
             <Modal

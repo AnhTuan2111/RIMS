@@ -6,7 +6,7 @@ import {useNavigate} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
 import type {ReservationResponse, TableDetailResponse} from '@/shared/api/waiter'
-import {WaiterHeader, WaiterTableCard} from './components'
+import {WaiterTableCard} from './components'
 import {useWaiterSocket} from '@/realtime'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
@@ -440,7 +440,6 @@ export default function WaiterTableListPage() {
 
     return (
         <div className="rk-stack">
-            <WaiterHeader />
 
             <div className="rk-stack">
                 <div className="rk-legend">

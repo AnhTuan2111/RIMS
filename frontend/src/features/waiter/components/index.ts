@@ -1,5 +1,3 @@
-export * from './Clock'
 export * from './BackArrow'
-export * from './WaiterHeader'
 export * from './waiterUtils'
 export * from './WaiterTableCard'

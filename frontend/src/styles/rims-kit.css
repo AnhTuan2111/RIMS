@@ -2395,8 +2395,12 @@ textarea.rk-input {
 /* Khối chữ co được, con số thì không.
    Bản cũ để cả hàng `flex-wrap: wrap`, nên thẻ nào có nhãn dài hơn là con số
    tổng rơi xuống hàng dưới — sáu thẻ cạnh nhau mà ba thẻ đặt số ở một chỗ, ba
-   thẻ ở chỗ khác. Nay tên món xuống dòng, vị trí con số cố định. */
-.rk-card__head-inline > :first-child {
+   thẻ ở chỗ khác. Nay tên món xuống dòng, vị trí con số cố định.
+
+   Luật CHỈ áp cho hàng có ô số. Bản đầu tôi viết thẳng `> :first-child` nên
+   nó giãn cả nút Quay lại ở màn Tạo đơn: nút nở ra thành một dải ngang hết
+   khung, còn tiêu đề bị đẩy sang tận mép phải. */
+.rk-card__head-inline:has(> .rk-qty) > :first-child {
     flex: 1 1 auto;
     min-width: 0;
 }
@@ -2905,8 +2909,8 @@ textarea.rk-input {
 }
 
 .rk-stepper__btn:hover:not(:disabled) {
-    border-color: var(--rims-brand);
-    color: var(--rims-info);
+    border-color: var(--rims-ink);
+    background: var(--rims-surface-2);
 }
 
 .rk-stepper__btn:focus-visible {
@@ -3393,6 +3397,288 @@ textarea.rk-input {
     margin-top: auto;
     padding: var(--rims-space-3) var(--rims-space-4);
     border-top: 1px solid var(--rims-line);
+}
+
+/* Hàng tiêu đề có nút Quay lại.
+   Khác rk-card__head-inline ở chỗ nó KHÔNG space-between: nút và tiêu đề là
+   một cụm đi liền nhau, không phải hai đầu của một hàng. */
+.rk-titlerow {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    margin-bottom: var(--rims-space-4);
+}
+
+.rk-titlerow .rk-sectiontitle {
+    margin: 0;
+    min-width: 0;
+}
+
+/* ---------- Màn đặt món ----------
+   Hai màn Tạo đơn và Sửa đơn dựng như MỘT THỰC ĐƠN, không như một biểu mẫu:
+   lưới ảnh món to bên trái, giỏ đơn là cột DÍNH bên phải.
+
+   Vì sao giỏ phải dính: phục vụ gọi mười lăm món cho một bàn tám người thì
+   lưới dài hơn màn hình, và mỗi lần muốn biết "đã gọi những gì, hết bao nhiêu"
+   lại phải cuộn lên đầu. Giỏ dính thì tổng tiền luôn nằm trong tầm mắt. */
+
+.rk-order {
+    display: grid;
+    gap: var(--rims-space-4);
+    align-items: start;
+}
+
+@media (min-width: 60rem) {
+    .rk-order {
+        grid-template-columns: minmax(0, 1fr) 22rem;
+    }
+}
+
+.rk-order__menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+    min-width: 0;
+}
+
+/* Lưới ảnh món — cùng luật với lưới thẻ thực đơn: nhiều nhất bốn cột, cột
+   không hẹp hơn 15rem, màn rộng thì ảnh to hơn. */
+.rk-menugrid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(max(15rem, (100% - 3 * var(--rims-space-4)) / 4), 1fr)
+    );
+    gap: var(--rims-space-4);
+}
+
+.rk-menucard {
+    display: flex;
+    flex-direction: column;
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+/* Món đã gọi: viền và bóng đổi sang màu LÀM.
+   Dấu hiệu nằm ở VIỀN chứ không ở nền, vì nền tô nhạt biến mất ở chế độ tối —
+   ở đó cấu trúc phải đến từ ĐƯỜNG KẺ. */
+.rk-menucard.is-picked {
+    border-color: var(--rims-ok);
+    box-shadow: var(--rims-offset) var(--rims-offset) 0 var(--rims-ok);
+}
+
+/* Món hết hàng: làm mờ ẢNH và CHỮ, KHÔNG làm mờ chip.
+   Bản đầu để `opacity: .55` lên cả thẻ, nên chip "Hết hàng" cũng nhạt đi —
+   mà đó đúng là thứ quan trọng nhất trên thẻ đó. Nút cộng đã bị khoá rồi,
+   nên chip là lời giải thích duy nhất cho việc vì sao không bấm được. */
+.rk-menucard.is-unavailable .rk-menucard__figure img {
+    filter: grayscale(1);
+    opacity: 0.5;
+}
+
+.rk-menucard.is-unavailable .rk-menucard__body {
+    color: var(--rims-ink-3);
+}
+
+.rk-menucard__figure {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-bottom: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface-3);
+}
+
+.rk-menucard__figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Chấm rỗng giữa ô ảnh khi món chưa có ảnh. */
+.rk-menucard__figure .rk-icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--rims-ink-3);
+}
+
+.rk-menucard__flag {
+    position: absolute;
+    top: var(--rims-space-2);
+    left: var(--rims-space-2);
+}
+
+/* Số phần đã gọi — ô vuông tô LÀM, góc trên phải của ảnh. */
+.rk-menucard__count {
+    position: absolute;
+    top: var(--rims-space-2);
+    right: var(--rims-space-2);
+    min-width: 2rem;
+    padding: var(--rims-space-1) var(--rims-space-2);
+    background: var(--rims-ok-fill);
+    color: var(--rims-ink-on-ok);
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--rims-weight-bold);
+    text-align: center;
+}
+
+.rk-menucard__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-4);
+}
+
+/* Tên, giá và chip xếp DỌC.
+   Ba thứ đó đứng chung một dòng thì chip trạng thái chen vào ngay sau con số,
+   và giá đọc ra thành "75.000 đ ĐÃ HUỶ". */
+.rk-menucard__head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--rims-space-2);
+    min-width: 0;
+}
+
+.rk-menucard__name {
+    margin: 0;
+    font-size: var(--rims-text-base);
+    font-weight: var(--rims-weight-bold);
+    overflow-wrap: anywhere;
+}
+
+.rk-menucard__price {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-menucard__foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-2);
+    margin-top: auto;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border-top: 1px solid var(--rims-line);
+}
+
+/* ---------- Giỏ đơn ---------- */
+
+.rk-cart {
+    display: flex;
+    flex-direction: column;
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+@media (min-width: 60rem) {
+    .rk-cart {
+        position: sticky;
+        /* Chừa chỗ cho hàng breadcrumb dính ở trên. */
+        top: var(--rims-space-4);
+        max-height: calc(100dvh - 2 * var(--rims-space-4));
+    }
+}
+
+.rk-cart__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border-bottom: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-tablehead);
+    color: var(--rims-ink-on-tablehead);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+}
+
+.rk-cart__count {
+    min-width: 2.25rem;
+    padding: 0 var(--rims-space-2);
+    background: var(--rims-ok-fill);
+    color: var(--rims-ink-on-ok);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.rk-cart__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding: var(--rims-space-3) var(--rims-space-4);
+}
+
+.rk-cart__empty {
+    padding: var(--rims-space-5) var(--rims-space-4);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    text-align: center;
+}
+
+.rk-cart__line {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    gap: var(--rims-space-2);
+    align-items: baseline;
+    padding: var(--rims-space-2) 0;
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-cart__line:last-child {
+    border-bottom: 0;
+}
+
+.rk-cart__qty {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--rims-weight-bold);
+}
+
+.rk-cart__name {
+    overflow-wrap: anywhere;
+}
+
+.rk-cart__note {
+    grid-column: 2 / -1;
+    color: var(--rims-busy);
+    font-size: var(--rims-text-xs);
+}
+
+.rk-cart__sum {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+.rk-cart__foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-4);
+    border-top: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface-2);
+}
+
+.rk-cart__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+}
+
+.rk-cart__total b {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-xl);
 }
 
 /* ---------- Bảng cột trạng thái (kanban) ----------
