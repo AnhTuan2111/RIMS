@@ -352,6 +352,13 @@ export default function CashierPaymentsPage() {
                         setPointsUsed(0)
                     }}
                     onCheckout={() => setShowPaymentModal(true)}
+                    onAutoClosed={() => {
+                        setSelectedTable(null)
+                        setOrderDetail(null)
+                        setCustomer(null)
+                        setPointsUsed(0)
+                        void loadTables(undefined, false, false)
+                    }}
                     customer={customer}
                     pointsUsed={pointsUsed}
                     onCustomerChange={setCustomer}

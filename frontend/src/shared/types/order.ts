@@ -33,6 +33,10 @@ export interface OrderDetailResponse {
     totalAmountBeforeVat: number
     vatAmount: number
     finalAmount: number
+    /** Chỉ màn thu ngân: các món còn đang nấu, dạng "Tên món ×2". */
+    pendingItems?: string[]
+    /** Chỉ màn thu ngân: số dòng món bếp đã huỷ. */
+    cancelledItemCount?: number
 }
 
 /** Kitchen view of a single order item */

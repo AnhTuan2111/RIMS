@@ -3,7 +3,7 @@ import {useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
 import type {OrderDetailResponse, TableDashboardResponse} from '@/shared/types/cashier'
-import {isRequestCanceled} from '@/shared/utils/error'
+import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {formatCurrency, formatNumber} from '@/shared/utils/format'
 import {useToast} from '@/app/providers/useToast'
 
@@ -20,6 +20,8 @@ interface OrderPanelProps {
     loading: boolean
     onClose: () => void
     onCheckout: () => void
+    /** Backend đã đóng đơn vì mọi món đều bị huỷ — không mở hộp thanh toán. */
+    onAutoClosed: () => void
     customer: CustomerInfo | null
     pointsUsed: number
     onCustomerChange: (customer: CustomerInfo | null) => void
@@ -49,6 +51,7 @@ export default function OrderPanel({
     loading,
     onClose,
     onCheckout,
+    onAutoClosed,
     customer,
     pointsUsed,
     onCustomerChange,
@@ -59,6 +62,15 @@ export default function OrderPanel({
     const itemsList = orderDetail?.orderItems ?? []
 
     const totalAmount = orderDetail?.finalAmount ?? 0
+
+    // Ba tình huống trước đây trông y hệt nhau ("0 ₫, Thanh toán"):
+    //   · còn món đang nấu  → chưa thu được, phải chờ bếp;
+    //   · mọi món đã bị huỷ → không có gì để thu, chỉ cần đóng bàn;
+    //   · có món đã xong    → thu bình thường.
+    const pendingItems = orderDetail?.pendingItems ?? []
+    const isCooking = pendingItems.length > 0
+    const isAllCancelled =
+        itemsList.length === 0 && !isCooking && (orderDetail?.cancelledItemCount ?? 0) > 0
 
     const [isLocking, setIsLocking] = useState(false)
 
@@ -242,6 +254,18 @@ export default function OrderPanel({
                 amountPaid: 0,
             })
 
+            // Mọi món đã bị huỷ: backend đã đóng đơn và trả bàn. Mở hộp thanh
+            // toán ở đây là mở cho một đơn không còn tồn tại — bấm tiếp sẽ gặp
+            // lỗi "đơn chưa được chốt".
+            if (response.data.autoClosedNoPayment) {
+                notify(
+                    `Đã đóng bàn ${selectedTable.tableNumber} — không có món nào để thu.`,
+                    {tone: 'ok'},
+                )
+                onAutoClosed()
+                return
+            }
+
             if (response.data.success) {
                 onCheckout()
                 return
@@ -258,8 +282,13 @@ export default function OrderPanel({
 
             console.error('[CASHIER_PAYMENT_LOCK_ERROR]', requestError)
 
+            // Hiện NGUYÊN VĂN lời backend: nó nêu đúng tên món còn đang nấu,
+            // còn câu chung chung thì bắt thu ngân tự đi hỏi bếp.
             setLockError(
-                'Không thể thực hiện thanh toán đơn hàng.Vui lòng huỷ hoặc hoàn thành các món còn lại',
+                getErrorMessage(
+                    requestError,
+                    'Không thể thanh toán đơn hàng. Hãy chờ bếp hoàn thành các món còn lại.',
+                ),
             )
         } finally {
             setIsLocking(false)
@@ -274,7 +303,9 @@ export default function OrderPanel({
 
             <h2>Chi tiết đơn hàng</h2>
 
-            <div className="rk-pagehead__desc">
+            {/* rk-actions (flex + khe) thay cho một khối chữ thường: JSX nuốt
+                khoảng trắng giữa hai phần tử, nên "Vị trí: B01" dính sát vào chip. */}
+            <div className="rk-actions">
                 <strong>Vị trí: {selectedTable.tableNumber}</strong>
 
                 <span className="rk-chip rk-chip--busy">{displayStatus}</span>
@@ -403,10 +434,29 @@ export default function OrderPanel({
                 <p className="rk-note">Chưa có thông tin đơn hàng cho bàn này.</p>
             ) : (
                 <div>
-                    {itemsList.length === 0 ? (
+                    {isCooking && (
+                        <div className="rk-note rk-note--busy" role="status">
+                            <Icon name="clock" className="rk-icon" />
+
+                            <div>
+                                <strong>
+                                    Còn {pendingItems.length} món đang nấu — chưa thu được
+                                </strong>
+                                <p>{pendingItems.join(' · ')}</p>
+                                <p>Thu tiền khi bếp báo xong tất cả các món.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {isAllCancelled ? (
                         <p className="rk-note">
-                            Bàn hiện tại chưa có món nào hoàn thành.
+                            Mọi món của bàn này đã bị bếp huỷ — không có gì để thu. Đóng
+                            bàn để trả bàn về trống.
                         </p>
+                    ) : itemsList.length === 0 ? (
+                        !isCooking && (
+                            <p className="rk-note">Bàn chưa có món nào hoàn thành.</p>
+                        )
                     ) : (
                         <div className="rk-tablewrap rk-tablewrap--scroll">
                             <table className="rk-table rk-table--compact">
@@ -478,10 +528,14 @@ export default function OrderPanel({
                             <button
                                 type="button"
                                 className="rk-btn rk-btn--primary"
-                                disabled={isLocking}
+                                disabled={isLocking || isCooking}
                                 onClick={() => void handleCheckoutClick()}
                             >
-                                {isLocking ? 'Đang khoá đơn...' : 'Thanh toán'}
+                                {isLocking
+                                    ? 'Đang khoá đơn...'
+                                    : isAllCancelled
+                                      ? 'Đóng bàn'
+                                      : 'Thanh toán'}
                             </button>
                         )}
                     </div>

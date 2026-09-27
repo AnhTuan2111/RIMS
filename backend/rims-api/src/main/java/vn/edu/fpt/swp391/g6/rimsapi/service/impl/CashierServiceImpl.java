@@ -121,6 +121,16 @@ public class CashierServiceImpl implements CashierService
         BigDecimal vatAmount = PaymentCalculator.vatOf(totalBeforeVat);
         BigDecimal finalAmount = PaymentCalculator.totalAfterVat(totalBeforeVat);
 
+        // 3. Những gì CHƯA vào hoá đơn — để thu ngân biết vì sao chưa thu được.
+        List<String> pendingItems = order.getOrderItems().stream()
+                .filter(oi -> oi.getStatus() == OrderItemStatus.PREPARING)
+                .map(oi -> oi.getDishNameSnapshot() + " ×" + oi.getQuantity())
+                .toList();
+
+        int cancelledItemCount = (int) order.getOrderItems().stream()
+                .filter(oi -> oi.getStatus() == OrderItemStatus.CANCELLED)
+                .count();
+
         return OrderDetailResponse.builder()
                 .orderId(order.getId())
                 .tableNumber(order.getTable() != null ? order.getTable().getTableNumber() : "N/A")
@@ -129,6 +139,8 @@ public class CashierServiceImpl implements CashierService
                 .totalAmountBeforeVat(totalBeforeVat)
                 .vatAmount(vatAmount)
                 .finalAmount(finalAmount)
+                .pendingItems(pendingItems)
+                .cancelledItemCount(cancelledItemCount)
                 .build();
     }
 

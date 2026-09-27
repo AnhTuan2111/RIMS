@@ -386,3 +386,88 @@ test.describe('Phục vụ · gọi lại món bếp đã huỷ', () => {
         expect(await res.text()).toMatch(/đã bị huỷ/)
     })
 })
+
+test.describe('Thu ngân · bàn chưa thu được', () => {
+    // Hai tình huống từng trông y hệt nhau ở quầy — "0 ₫" và nút Thanh toán bấm
+    // được — dù một bên phải CHỜ bếp, một bên chỉ cần ĐÓNG BÀN.
+
+    async function openOrder(dishCount: number) {
+        const tables = await api(ACCOUNTS.waiter, '/waiter/tables')
+        const free = tables.find((t: {status: string}) => t.status === 'AVAILABLE')
+        expect(free, 'không còn bàn trống nào để kiểm').toBeTruthy()
+
+        const menu = await api(ACCOUNTS.waiter, '/waiter/menu')
+        const dishes = menu
+            .filter((d: {available: boolean}) => d.available)
+            .slice(0, dishCount)
+
+        await api(ACCOUNTS.waiter, '/waiter/orders', {
+            method: 'POST',
+            body: JSON.stringify({
+                tableId: free.tableId,
+                items: dishes.map((d: {dishId: number}) => ({
+                    dishId: d.dishId,
+                    quantity: 1,
+                })),
+            }),
+        })
+
+        const queue = await api(ACCOUNTS.chef, '/chef/orders')
+        const lines = queue.filter(
+            (item: {tableNumber: string}) => item.tableNumber === free.tableNumber,
+        )
+
+        return {table: free, lines, dishes}
+    }
+
+    test('còn món đang nấu: nêu tên món và khoá nút thu tiền', async ({page}) => {
+        const {table, dishes} = await openOrder(1)
+
+        await login(page, ACCOUNTS.cashier)
+        await page.goto('/cashier/payments')
+        await expectRendered(page)
+        await page.locator('.rk-tablecard', {hasText: table.tableNumber}).first().click()
+
+        await expect(
+            page.getByRole('status').filter({hasText: /đang nấu/i}),
+        ).toContainText(dishes[0].name)
+        await expect(page.getByRole('button', {name: 'Thanh toán'})).toBeDisabled()
+    })
+
+    test('mọi món đã bị huỷ: nút là "Đóng bàn", bấm thì trả bàn về trống', async ({
+        page,
+    }) => {
+        const {table, lines} = await openOrder(1)
+
+        for (const line of lines) {
+            await api(ACCOUNTS.chef, `/chef/orders/${line.orderItemId}/cancel`, {
+                method: 'PUT',
+                body: JSON.stringify({reason: 'Hết nguyên liệu'}),
+            })
+        }
+
+        await login(page, ACCOUNTS.cashier)
+        await page.goto('/cashier/payments')
+        await expectRendered(page)
+        await page.locator('.rk-tablecard', {hasText: table.tableNumber}).first().click()
+
+        await expect(page.getByText(/đã bị bếp huỷ/i)).toBeVisible()
+        await page.getByRole('button', {name: 'Đóng bàn'}).click()
+
+        // Không được mở hộp thanh toán cho một đơn đã đóng.
+        await expect(page.locator('.rk-modal')).toHaveCount(0)
+        await expect(page.locator('.rk-toast')).toContainText(/đã đóng bàn/i)
+
+        await expect
+            .poll(
+                async () => {
+                    const tables = await api(ACCOUNTS.waiter, '/waiter/tables')
+                    return tables.find(
+                        (t: {tableId: number}) => t.tableId === table.tableId,
+                    )?.status
+                },
+                {timeout: 15_000, message: 'bàn không trở về trống'},
+            )
+            .toBe('AVAILABLE')
+    })
+})

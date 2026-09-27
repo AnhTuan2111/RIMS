@@ -16,6 +16,8 @@ export interface PaymentRequest {
 export interface PaymentResponse {
     message: string
     success: boolean
+    /** Mọi món đã bị huỷ: backend đóng đơn và trả bàn, không có gì để thu. */
+    autoClosedNoPayment?: boolean
     invoiceId: number
     amountPaid: number
     excessAmount: number
