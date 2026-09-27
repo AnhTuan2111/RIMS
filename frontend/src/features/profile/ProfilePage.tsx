@@ -468,34 +468,43 @@ export default function ProfilePage() {
                     </div>
 
                     {showChangePw && (
-                        <div className="rk-formgrid">
-                            <EditField
-                                label="Mật khẩu hiện tại *"
-                                type="password"
-                                value={currentPw}
-                                placeholder="••••••"
-                                onChange={setCurrentPw}
-                            />
-
-                            <EditField
-                                label="Mật khẩu mới *"
-                                type="password"
-                                value={newPw}
-                                placeholder="Tối thiểu 6 ký tự"
-                                onChange={setNewPw}
-                            />
-
-                            <EditField
-                                label="Xác nhận mật khẩu mới *"
-                                type="password"
-                                value={confirmPw}
-                                placeholder="Nhập lại mật khẩu mới"
-                                onChange={setConfirmPw}
-                            />
-
+                        <div className="rk-stack">
+                            {/* Lỗi đứng TRÊN lưới, không nằm trong lưới. Là con
+                                trực tiếp của .rk-formgrid thì nó rơi vào một ô
+                                lưới cạnh "Xác nhận mật khẩu mới" và trông y như
+                                một trường nhập nữa — trong khi nó đang nói về
+                                trường đầu tiên. */}
                             {pwError && (
-                                <div className="rk-note rk-note--alert">{pwError}</div>
+                                <div className="rk-note rk-note--alert" role="alert">
+                                    {pwError}
+                                </div>
                             )}
+
+                            <div className="rk-formgrid">
+                                <EditField
+                                    label="Mật khẩu hiện tại *"
+                                    type="password"
+                                    value={currentPw}
+                                    placeholder="••••••"
+                                    onChange={setCurrentPw}
+                                />
+
+                                <EditField
+                                    label="Mật khẩu mới *"
+                                    type="password"
+                                    value={newPw}
+                                    placeholder="Tối thiểu 6 ký tự"
+                                    onChange={setNewPw}
+                                />
+
+                                <EditField
+                                    label="Xác nhận mật khẩu mới *"
+                                    type="password"
+                                    value={confirmPw}
+                                    placeholder="Nhập lại mật khẩu mới"
+                                    onChange={setConfirmPw}
+                                />
+                            </div>
 
                             <div className="rk-actions rk-actions--end">
                                 <button
