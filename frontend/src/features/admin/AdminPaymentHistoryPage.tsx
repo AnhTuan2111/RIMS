@@ -6,13 +6,10 @@ import * as adminApi from '@/shared/api/admin'
 import type {AdminPaymentHistoryItem, AdminPaymentMethod} from '@/shared/api/admin'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
+import {formatCurrency} from '@/shared/utils/format'
 
 const PAYMENT_HISTORY_PAGE_SIZE = 10
 const PAYMENT_HISTORY_FILTER_DELAY_MS = 350
-
-function formatCurrency(value: number) {
-    return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
-}
 
 function formatPaymentDate(value: string) {
     const date = new Date(value)

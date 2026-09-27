@@ -6,10 +6,7 @@ import type {AdminPaymentDetail} from '@/shared/api/admin'
 import {Icon} from '@/shared/components/ui/Icon'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader} from '@/shared/components/ui'
-
-function formatCurrency(value: number) {
-    return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
-}
+import {formatCurrency} from '@/shared/utils/format'
 
 function formatTime(value: string) {
     const date = new Date(value)

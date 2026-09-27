@@ -226,8 +226,12 @@ a {
 
 /* Lún vào bóng của chính nó: rê chuột lún nửa khoảng, bấm lún hết và bóng về 0.
    Dưới 100ms, không easing mềm — brutalism dùng chuyển động dứt khoát. */
+/* Luật chung CHỈ lo chuyển động. KHÔNG đụng vào nền.
+   Bản cũ đặt `background: var(--rims-surface-3)` ở đây, và vì biến thể màu chỉ
+   khai `filter` chứ không khai lại `background`, nên rê chuột vào nút "Xong
+   món" là nó chuyển từ LỤC sang XÁM — nghĩa của nút biến mất đúng lúc người
+   dùng đang nhắm vào nó. Nền đổi theo hover là việc của riêng nút trung tính. */
 .rk-btn:hover:not(:disabled) {
-    background: var(--rims-surface-3);
     transform: translate(calc(var(--rims-offset) / 2), calc(var(--rims-offset) / 2));
     box-shadow: var(--rims-shadow-pressed);
 }
@@ -280,7 +284,7 @@ a {
 }
 
 .rk-btn--quiet:hover:not(:disabled) {
-    background: var(--rims-surface-2);
+    background: var(--rims-surface-3);
     color: var(--rims-ink);
 }
 
@@ -3392,6 +3396,17 @@ textarea.rk-input {
     border: var(--rims-border) solid var(--rims-line-strong);
     background: var(--rims-surface);
     box-shadow: var(--rims-shadow-raised);
+    transition:
+        transform var(--rims-dur-short) linear,
+        box-shadow var(--rims-dur-short) linear;
+}
+
+/* Lún vào bóng của chính nó — cùng cơ chế với nút và với thẻ món ở trang chủ.
+   Thiếu luật này thì thẻ ở màn Quản trị là thứ duy nhất trong app không phản
+   ứng khi rê chuột, và nó đọc ra như một ảnh chụp chứ không phải thẻ bấm được. */
+.rk-dishcard:hover {
+    transform: translate(calc(var(--rims-offset) / 2), calc(var(--rims-offset) / 2));
+    box-shadow: calc(var(--rims-offset) / 2) calc(var(--rims-offset) / 2) 0 var(--rims-line-strong);
 }
 
 /* Khung ảnh giữ tỉ lệ cố định để lưới không so le khi ảnh về muộn hoặc hỏng. */

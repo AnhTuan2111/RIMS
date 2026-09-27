@@ -1,12 +1,18 @@
+import {formatCurrencyShort, formatNumber} from '@/shared/utils/format'
+
 import {shiftCatalog} from './types'
 import type {ShiftViewItem} from './types'
 import type {OrderShiftReportResponse} from '@/shared/api/admin'
+/*
+ * Ba hàm định dạng dưới đây từng là bản CHÉP LẠI của shared/utils/format —
+ * đúng thứ CONTRIBUTING cấm, và là lý do cùng một số tiền hiện ra ở màn Thống
+ * kê bằng "0 đ" trong khi mọi màn khác đã là "0 ₫".
+ *
+ * Ô thống kê là "chỗ hẹp" theo luật tiền đã chốt, nên nó rút gọn: 68,4tr chứ
+ * không phải 68.430.000 ₫.
+ */
 export function formatRevenueCurrency(value?: number | null) {
-    return `${new Intl.NumberFormat('vi-VN').format(value ?? 0)} đ`
-}
-
-export function formatNumber(value?: number | null) {
-    return new Intl.NumberFormat('vi-VN').format(value ?? 0)
+    return formatCurrencyShort(value ?? 0)
 }
 
 export function getDishInitial(dishName: string) {
@@ -31,6 +37,8 @@ export function resolveDishImageSrc(imageUrl?: string | null) {
 
     return `/image/${value}`
 }
+
+export {formatNumber}
 
 export function formatDecimal(value?: number | null) {
     return new Intl.NumberFormat('vi-VN', {
