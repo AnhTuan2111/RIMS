@@ -22,8 +22,8 @@ spring:
   # Không có giá trị mặc định cho secret: thiếu là app không khởi động được,
   # tốt hơn là chạy bằng một mật khẩu mặc định nào đó mà không ai để ý.
   datasource:
-    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=RIMS_DB;encrypt=true;trustServerCertificate=true}
-    username: ${DB_USERNAME:sa}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/rims_db}
+    username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD}
 
   # schema.sql và data.sql trong thư mục này là nguồn thật của lược đồ và dữ
@@ -42,14 +42,19 @@ spring:
       # đồ rồi báo lệch, không tự tạo và không tự sửa bảng.
       #
       # Vì sao bỏ update: nó im lặng bỏ qua những thay đổi không làm được.
-      # Đợt thêm cột must_change_password là ví dụ — SQL Server từ chối thêm
-      # cột NOT NULL vào bảng đã có dòng, Hibernate ghi một dòng WARN rồi đi
-      # tiếp, app khởi động bình thường, và mọi truy vấn bảng users đều lỗi.
+      # Đợt thêm cột must_change_password là ví dụ — thêm một cột NOT NULL vào
+      # bảng đã có dòng mà không kèm DEFAULT thì CSDL từ chối, Hibernate ghi một
+      # dòng WARN rồi đi tiếp, app khởi động bình thường, và mọi truy vấn bảng
+      # users đều lỗi.
       # Với validate thì app dừng ngay lúc khởi động và nói rõ chỗ lệch.
       ddl-auto: ${DDL_AUTO:validate}
     # Để schema.sql chạy TRƯỚC khi Hibernate đối chiếu — nếu không, lần khởi
     # động đầu trên CSDL rỗng sẽ trượt validate vì bảng chưa kịp tạo.
     defer-datasource-initialization: false
+    # Khai báo dialect tường minh thay vì để Hibernate hỏi JDBC metadata: bớt
+    # một vòng gọi lúc khởi động, và nếu ai đó cắm nhầm một loại CSDL khác thì
+    # app dừng ngay thay vì âm thầm sinh SQL theo phương ngữ khác.
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
     show-sql: false
 

@@ -75,14 +75,15 @@ public class User
      * <p>Mặc định false để các tài khoản đã có sẵn trong cơ sở dữ liệu không
      * bị chặn ngay khi nâng cấp.
      *
-     * <p>{@code @ColumnDefault} là bắt buộc chứ không phải cho đẹp: SQL Server từ
-     * chối {@code ALTER TABLE ... ADD <cột> NOT NULL} trên bảng đã có dòng nếu
-     * không kèm DEFAULT. Thiếu dòng này thì mọi cơ sở dữ liệu đang chạy đều
-     * không nâng cấp được: Hibernate báo WARN rồi đi tiếp, ứng dụng khởi động
-     * bình thường, nhưng mọi truy vấn bảng users đều lỗi vì cột không tồn tại.
+     * <p>{@code @ColumnDefault} là bắt buộc chứ không phải cho đẹp: thêm một cột
+     * {@code NOT NULL} vào bảng đã có dòng thì cơ sở dữ liệu phải biết điền gì
+     * vào những dòng cũ, không có DEFAULT là câu ALTER thất bại. Giá trị phải
+     * viết là {@code true}/{@code false} chứ không phải {@code 1}/{@code 0}:
+     * PostgreSQL không tự đổi số sang boolean, một cột boolean nhận
+     * {@code default 0} là lỗi ngay lúc tạo bảng.
      */
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("false")
     private boolean mustChangePassword = false;
 
     private boolean isActive = true;

@@ -24,6 +24,12 @@ import vn.edu.fpt.swp391.g6.rimsapi.repository.UserRepository;
  * biết mật khẩu thì vô dụng, còn một hệ thống tự đặt mật khẩu đoán được thì
  * nguy hiểm. Bắt người cài đặt quyết định là lựa chọn duy nhất còn lại.
  *
+ * <p>{@code RIMS_ADMIN_EMAIL} cũng bắt buộc, và cũng dừng ứng dụng nếu thiếu.
+ * Trước đây email để trống thì lớp này ghi {@code null}; từ khi cột
+ * {@code users.email} thành NOT NULL, ghi {@code null} nghĩa là cơ sở dữ liệu
+ * từ chối câu INSERT và ứng dụng chết với một vết ngăn xếp JDBC không nói được
+ * người cài đặt thiếu gì. Chốt lại ở đây thì lời báo nêu đúng tên biến.
+ *
  * <p>Tài khoản tạo ra mang cờ {@code mustChangePassword}, nên người cài đặt
  * phải đổi ngay ở lần đăng nhập đầu — mật khẩu đặt qua biến môi trường vẫn
  * nằm trong lịch sử shell và file cấu hình triển khai.
@@ -74,12 +80,26 @@ public class BootstrapAdmin implements CommandLineRunner
                     Tài khoản tạo ra sẽ bị bắt đổi mật khẩu ngay ở lần đăng nhập đầu.""");
         }
 
+        if (email == null || email.isBlank())
+        {
+            throw new IllegalStateException("""
+                    Cơ sở dữ liệu chưa có người dùng nào và chưa đặt email cho tài khoản quản trị đầu tiên.
+
+                    Đặt biến môi trường RIMS_ADMIN_EMAIL rồi khởi động lại, ví dụ:
+                        RIMS_ADMIN_EMAIL=<email bạn dùng>
+
+                    Hoặc thêm RIMS_ADMIN_EMAIL vào file .env ở gốc repo.
+
+                    Email là bắt buộc vì nó là đường lấy lại mật khẩu duy nhất: OTP chỉ gửi
+                    qua email. Không có email thì mất mật khẩu là mất luôn tài khoản.""");
+        }
+
         User admin = new User();
 
         admin.setRole(RoleType.ADMIN);
         admin.setUsername(username);
         admin.setFullName(fullName);
-        admin.setEmail(email == null || email.isBlank() ? null : email);
+        admin.setEmail(email);
         admin.setPhone(phone);
         admin.setPasswordHash(passwordEncoder.encode(password));
         admin.setMustChangePassword(true);

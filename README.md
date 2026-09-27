@@ -23,7 +23,7 @@ Hệ thống quản lý nhà hàng gồm 2 phần:
 | Maven      | dùng kèm Maven Wrapper (`mvnw`), không cần cài riêng |
 | Node.js    | 20.19+ hoặc 22+ (Vite 8 yêu cầu)                     |
 | npm        | đi kèm Node.js                                       |
-| SQL Server | 2019+ (đã bật TCP/IP, port 1433)                     |
+| PostgreSQL | 16+ (port 5432)                                      |
 | SMTP Gmail | tài khoản dùng để gửi mail (OTP, thông báo...)       |
 
 ## 2. Cấu trúc thư mục chính
@@ -71,7 +71,7 @@ Năm giá trị bắt buộc — thiếu là backend không khởi động đư�
 
 | Biến | Là gì | Lấy ở đâu |
 |---|---|---|
-| `DB_PASSWORD` | Mật khẩu SQL Server | Bạn đặt khi cài SQL Server (username mặc định là `sa`) |
+| `DB_PASSWORD` | Mật khẩu PostgreSQL | Bạn đặt khi cài PostgreSQL (username mặc định là `postgres`) |
 | `MAIL_USERNAME` | Email gửi OTP | Tài khoản Gmail của bạn |
 | `MAIL_PASSWORD` | App Password 16 ký tự | [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) — phải bật xác thực 2 bước trước. Không dùng mật khẩu đăng nhập thường. |
 | `JWT_SIGNER_KEY` | Khoá ký JWT, tối thiểu 32 ký tự | Tự sinh: `openssl rand -base64 48` |
@@ -96,9 +96,10 @@ Ngoài ra `VITE_API_BASE_URL` cho frontend biết backend chạy ở đâu (mặ
 Nếu không muốn dùng file, đặt thẳng biến môi trường cùng tên cũng được —
 biến môi trường được ưu tiên hơn giá trị trong `.env`.
 
-### 3.2. Database (SQL Server)
+### 3.2. Database (PostgreSQL)
 
-Tạo database `RIMS_DB` trên SQL Server (hoặc đổi tên rồi sửa biến môi trường `DB_URL`).
+Tạo database `rims_db` trên PostgreSQL (hoặc đổi tên rồi sửa biến môi trường
+`DB_URL`).
 
 Không cần tạo bảng bằng tay. Lần khởi động đầu, backend chạy hai file trong
 `src/main/resources`:
@@ -108,15 +109,16 @@ Không cần tạo bảng bằng tay. Lần khởi động đầu, backend chạ
 | `schema.sql` | 12 bảng, khoá ngoại, ràng buộc duy nhất, chỉ số |
 | `data.sql` | 14 bàn, 9 danh mục, 43 món — **không có tài khoản nào** |
 
-Cả hai đều kiểm tra tồn tại trước khi tạo, nên khởi động lần thứ hai không lỗi
-và không ghi đè dữ liệu đang có.
+Cả hai đều chạy lại được nhiều lần: `schema.sql` dùng `CREATE TABLE IF NOT
+EXISTS`, `data.sql` dùng `INSERT ... ON CONFLICT DO NOTHING`. Khởi động lần thứ
+hai không lỗi và không ghi đè dữ liệu đang có.
 
 Về `ddl-auto`: mặc định là **`validate`**. Hibernate chỉ đối chiếu entity với
 bảng thật rồi báo lỗi lúc khởi động nếu lệch — nó không còn tự sửa lược đồ nữa.
 Lý do đổi: `update` im lặng bỏ qua những thay đổi nó không làm được. Đợt thêm
-cột `must_change_password` là ví dụ — SQL Server từ chối thêm cột `NOT NULL`
-vào bảng đã có dòng, Hibernate ghi một dòng `WARN` rồi đi tiếp, app khởi động
-bình thường, và mọi truy vấn bảng `users` đều lỗi 500.
+cột `must_change_password` là ví dụ — thêm cột `NOT NULL` vào bảng đã có dòng
+mà không kèm `DEFAULT` thì CSDL từ chối, Hibernate ghi một dòng `WARN` rồi đi
+tiếp, app khởi động bình thường, và mọi truy vấn bảng `users` đều lỗi 500.
 
 Sửa entity thì phải sửa `schema.sql` theo. Cách sinh lại file đó nằm ngay trong
 phần chú thích đầu file.
@@ -247,7 +249,7 @@ Frontend gọi API qua `axios` (`frontend/src/shared/api/client.ts`) và kết n
 
 ## 5. Thứ tự khởi động khuyến nghị
 
-1. Khởi động SQL Server, tạo database `RIMS_DB`.
+1. Khởi động PostgreSQL, tạo database `rims_db`.
 2. Copy `.env.example` thành `.env` ở gốc repo rồi điền DB/mail/VNPay của bạn
    (xem mục 3.1). Không sửa `application.yaml` — file đó chỉ có placeholder.
 3. Chạy backend (`./mvnw spring-boot:run`) → API sẵn sàng tại `:8080`.
@@ -257,7 +259,7 @@ Frontend gọi API qua `axios` (`frontend/src/shared/api/client.ts`) và kết n
 ## 6. Công nghệ sử dụng
 
 **Backend**: Java 21, Spring Boot 4, Spring Data JPA, Spring Security (JWT),
-WebSocket (STOMP), SQL Server, VNPay, Spring Mail. Test: JUnit 5 + Mockito +
+WebSocket (STOMP), PostgreSQL, VNPay, Spring Mail. Test: JUnit 5 + Mockito +
 AssertJ.
 
 **Frontend**: React 19, TypeScript, Vite 8, React Router 7, Axios,

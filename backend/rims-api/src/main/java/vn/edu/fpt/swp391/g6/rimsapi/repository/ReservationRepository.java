@@ -44,7 +44,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>
 
     // Lấy các reservation còn "sống" (chưa CANCELLED/COMPLETED) của 1 bàn để service tự tính overlap
     // Tính existingEnd = reservationTime + duration + buffer ở tầng Java để không phụ thuộc cú pháp
-    // DATE_ADD/DATEADD riêng của từng loại DB (MySQL vs SQL Server khác nhau)
+    // cú pháp cộng thời gian riêng của từng loại DB (PostgreSQL dùng interval,
+    // MySQL dùng DATE_ADD, SQL Server dùng DATEADD)
     @Query("SELECT r FROM Reservation r WHERE r.table.id = :tableId AND r.status NOT IN ('CANCELLED', 'COMPLETED')")
     List<Reservation> findActiveReservationsByTableId(@Param("tableId") Integer tableId);
 

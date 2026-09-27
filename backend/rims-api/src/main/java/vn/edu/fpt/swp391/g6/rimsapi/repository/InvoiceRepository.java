@@ -91,6 +91,25 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             LocalDateTime endDate);
 
     //Get invoice history, có filter theo bàn / phương thức / mã HĐ / tên-SĐT khách hàng.
+    /**
+     * Lịch sử hoá đơn, bốn ô lọc đều có thể để trống.
+     *
+     * <p>ĐỪNG BỎ {@code CAST(:tham_số AS string)} vì thấy nó dư. Nó là thứ giữ
+     * cho màn này chạy được trên PostgreSQL: khi ô lọc để trống, tham số là
+     * {@code null} và trình điều khiển gửi sang một NULL không kèm kiểu.
+     * PostgreSQL phải tự suy ra kiểu từ ngữ cảnh, mà trong
+     * {@code lower('%' || ? || '%')} thì toán tử {@code ||} có nhiều phiên bản
+     * nên nó đoán ra {@code bytea} rồi báo
+     * {@code function lower(bytea) does not exist} — lỗi 500 ngay ở lần mở màn
+     * hình, vì không lọc gì mới là trường hợp mặc định.
+     *
+     * <p>CAST nói thẳng kiểu của tham số nên không còn gì phải đoán. Chỉ cần
+     * cho tham số CHUỖI; {@code :paymentMethod} (enum) và {@code :categoryId}
+     * (số) thì Hibernate đã gửi kèm kiểu sẵn.
+     *
+     * <p>Khối WHERE này lặp lại y nguyên ở countQuery — sửa một chỗ thì phải
+     * sửa cả chỗ kia, nếu không số trang sẽ lệch với dữ liệu trả về.
+     */
     @Query(value = """
             SELECT
                 i.id as invoiceId,
@@ -104,10 +123,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             JOIN o.table t
             JOIN i.payments p
             LEFT JOIN User u ON u.id = o.pendingCustomerId
-            WHERE (:tableNumber IS NULL OR LOWER(t.tableNumber) LIKE LOWER(CONCAT('%', :tableNumber, '%')))
+            WHERE (CAST(:tableNumber AS string) IS NULL OR LOWER(t.tableNumber) LIKE LOWER(CONCAT('%', CAST(:tableNumber AS string), '%')))
               AND (:paymentMethod IS NULL OR p.paymentMethod = :paymentMethod)
-              AND (:keyword IS NULL OR CAST(i.id AS string) LIKE CONCAT('%', :keyword, '%'))
-              AND (:customerKeyword IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :customerKeyword, '%')) OR u.phone LIKE CONCAT('%', :customerKeyword, '%'))
+              AND (CAST(:keyword AS string) IS NULL OR CAST(i.id AS string) LIKE CONCAT('%', CAST(:keyword AS string), '%'))
+              AND (CAST(:customerKeyword AS string) IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', CAST(:customerKeyword AS string), '%')) OR u.phone LIKE CONCAT('%', CAST(:customerKeyword AS string), '%'))
             ORDER BY i.invoiceDate DESC
             """, countQuery = """
             SELECT COUNT(i)
@@ -116,10 +135,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>
             JOIN o.table t
             JOIN i.payments p
             LEFT JOIN User u ON u.id = o.pendingCustomerId
-            WHERE (:tableNumber IS NULL OR LOWER(t.tableNumber) LIKE LOWER(CONCAT('%', :tableNumber, '%')))
+            WHERE (CAST(:tableNumber AS string) IS NULL OR LOWER(t.tableNumber) LIKE LOWER(CONCAT('%', CAST(:tableNumber AS string), '%')))
               AND (:paymentMethod IS NULL OR p.paymentMethod = :paymentMethod)
-              AND (:keyword IS NULL OR CAST(i.id AS string) LIKE CONCAT('%', :keyword, '%'))
-              AND (:customerKeyword IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :customerKeyword, '%')) OR u.phone LIKE CONCAT('%', :customerKeyword, '%'))
+              AND (CAST(:keyword AS string) IS NULL OR CAST(i.id AS string) LIKE CONCAT('%', CAST(:keyword AS string), '%'))
+              AND (CAST(:customerKeyword AS string) IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', CAST(:customerKeyword AS string), '%')) OR u.phone LIKE CONCAT('%', CAST(:customerKeyword AS string), '%'))
             """)
     Page<InvoiceHistoryProjection> getInvoiceHistory(
             @Param("tableNumber") String tableNumber,

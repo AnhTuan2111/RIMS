@@ -6,7 +6,10 @@
 -- khởi tạo là DỮ LIỆU, không phải mã nguồn: để trong SQL thì sửa được bằng
 -- công cụ CSDL, xem được diff, và không phải build lại app.
 --
--- CHẠY LẠI ĐƯỢC NHIỀU LẦN: mọi câu đều kiểm tra trước khi chèn.
+-- CHẠY LẠI ĐƯỢC NHIỀU LẦN: mọi câu INSERT đều kết bằng
+-- ON CONFLICT (<cột duy nhất>) DO NOTHING, nên khởi động lần thứ hai không lỗi
+-- và không ghi đè gì. Cột nêu trong ON CONFLICT phải có ràng buộc duy nhất
+-- trong schema.sql — nếu không, PostgreSQL từ chối cả câu lệnh.
 --
 -- KHÔNG CÓ TÀI KHOẢN NÀO Ở ĐÂY. Commit một hash mật khẩu admin vào repo
 -- nghĩa là ai chạm được app cũng đăng nhập được trước chủ quán. Tài khoản
@@ -19,384 +22,384 @@
 
 -- ---------- Bàn ----------
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B01')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B01', 2, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B01', 2, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B02')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B02', 2, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B02', 2, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B03')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B03', 2, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B03', 2, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B04')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B04', 2, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B04', 2, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B05')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B05', 4, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B05', 4, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B06')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B06', 4, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B06', 4, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B07')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B07', 4, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B07', 4, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B08')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B08', 4, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B08', 4, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B09')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B09', 4, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B09', 4, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B10')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B10', 4, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B10', 4, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B11')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B11', 6, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B11', 6, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B12')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B12', 6, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B12', 6, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B13')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B13', 6, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B13', 6, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM restaurant_tables WHERE table_number = 'B14')
 INSERT INTO restaurant_tables (table_number, capacity, status, active, created_at, updated_at)
-VALUES ('B14', 6, 'AVAILABLE', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('B14', 6, 'AVAILABLE', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (table_number) DO NOTHING;
 
 
 -- ---------- Danh mục ----------
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Sashimi')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Sashimi', N'Cá sống thái lát, phục vụ cùng wasabi và củ cải bào.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Sashimi', 'Cá sống thái lát, phục vụ cùng wasabi và củ cải bào.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Sushi & Maki')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Sushi & Maki', N'Cơm giấm cuộn hoặc nắm, làm theo từng phần.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Sushi & Maki', 'Cơm giấm cuộn hoặc nắm, làm theo từng phần.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Ramen & Mì')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Ramen & Mì', N'Nước dùng ninh trong ngày, mì làm tươi.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Ramen & Mì', 'Nước dùng ninh trong ngày, mì làm tươi.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Tempura')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Tempura', N'Chiên bột mỏng, dùng nóng cùng nước chấm tentsuyu.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Tempura', 'Chiên bột mỏng, dùng nóng cùng nước chấm tentsuyu.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Yakitori & Nướng')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Yakitori & Nướng', N'Nướng than, xiên tre, quết sốt tare.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Yakitori & Nướng', 'Nướng than, xiên tre, quết sốt tare.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Donburi & Cơm')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Donburi & Cơm', N'Cơm Nhật, phần một người.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Donburi & Cơm', 'Cơm Nhật, phần một người.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Khai vị')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Khai vị', N'Món nhỏ dùng đầu bữa.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Khai vị', 'Món nhỏ dùng đầu bữa.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Tráng miệng')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Tráng miệng', N'Đồ ngọt Nhật, làm trong ngày.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Tráng miệng', 'Đồ ngọt Nhật, làm trong ngày.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'Đồ uống')
 INSERT INTO categories (name, description, is_available, created_at, updated_at)
-VALUES (N'Đồ uống', N'Nước và trà phục vụ tại quán.', 1, SYSDATETIME(), SYSDATETIME());
+VALUES ('Đồ uống', 'Nước và trà phục vụ tại quán.', true, LOCALTIMESTAMP, LOCALTIMESTAMP)
+ON CONFLICT (name) DO NOTHING;
 
 
 -- ---------- Món ăn ----------
 
 -- Sashimi
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Sashimi cá hồi')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Sashimi cá hồi', N'Phi lê cá hồi Na Uy thái dày, 8 lát.', 189000, N'sashimi-ca-hoi.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sashimi';
+SELECT category_id, 'Sashimi cá hồi', 'Phi lê cá hồi Na Uy thái dày, 8 lát.', 189000, 'sashimi-ca-hoi.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sashimi'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Sashimi cá ngừ đại dương')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Sashimi cá ngừ đại dương', N'Phần lưng cá ngừ, thái 8 lát.', 229000, N'sashimi-ca-ngu.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sashimi';
+SELECT category_id, 'Sashimi cá ngừ đại dương', 'Phần lưng cá ngừ, thái 8 lát.', 229000, 'sashimi-ca-ngu.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sashimi'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Sashimi cá cam Hamachi')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Sashimi cá cam Hamachi', N'Cá cam Nhật, vị béo nhẹ, 8 lát.', 249000, N'sashimi-hamachi.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sashimi';
+SELECT category_id, 'Sashimi cá cam Hamachi', 'Cá cam Nhật, vị béo nhẹ, 8 lát.', 249000, 'sashimi-hamachi.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sashimi'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Sashimi bạch tuộc')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Sashimi bạch tuộc', N'Bạch tuộc chần, thái mỏng, 8 lát.', 159000, N'sashimi-bach-tuoc.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sashimi';
+SELECT category_id, 'Sashimi bạch tuộc', 'Bạch tuộc chần, thái mỏng, 8 lát.', 159000, 'sashimi-bach-tuoc.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sashimi'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Sashimi tổng hợp')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Sashimi tổng hợp', N'Năm loại cá theo ngày, 15 lát.', 389000, N'sashimi-tong-hop.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sashimi';
+SELECT category_id, 'Sashimi tổng hợp', 'Năm loại cá theo ngày, 15 lát.', 389000, 'sashimi-tong-hop.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sashimi'
+ON CONFLICT (name) DO NOTHING;
 
 
 -- Sushi & Maki
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Nigiri cá hồi')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Nigiri cá hồi', N'Hai miếng, cơm giấm nắm tay.', 79000, N'nigiri-ca-hoi.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sushi & Maki';
+SELECT category_id, 'Nigiri cá hồi', 'Hai miếng, cơm giấm nắm tay.', 79000, 'nigiri-ca-hoi.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sushi & Maki'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Nigiri lươn nướng')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Nigiri lươn nướng', N'Lươn nướng sốt kabayaki, hai miếng.', 99000, N'nigiri-luon.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sushi & Maki';
+SELECT category_id, 'Nigiri lươn nướng', 'Lươn nướng sốt kabayaki, hai miếng.', 99000, 'nigiri-luon.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sushi & Maki'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Maki cá ngừ cay')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Maki cá ngừ cay', N'Cuộn cá ngừ trộn sốt cay, 8 miếng.', 129000, N'maki-ca-ngu-cay.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sushi & Maki';
+SELECT category_id, 'Maki cá ngừ cay', 'Cuộn cá ngừ trộn sốt cay, 8 miếng.', 129000, 'maki-ca-ngu-cay.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sushi & Maki'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'California maki')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'California maki', N'Cua, bơ, dưa leo, trứng cá tobiko, 8 miếng.', 139000, N'california-maki.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sushi & Maki';
+SELECT category_id, 'California maki', 'Cua, bơ, dưa leo, trứng cá tobiko, 8 miếng.', 139000, 'california-maki.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sushi & Maki'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Futomaki chay')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Futomaki chay', N'Cuộn dày nhân rau củ và trứng, 8 miếng.', 109000, N'futomaki-chay.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Sushi & Maki';
+SELECT category_id, 'Futomaki chay', 'Cuộn dày nhân rau củ và trứng, 8 miếng.', 109000, 'futomaki-chay.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Sushi & Maki'
+ON CONFLICT (name) DO NOTHING;
 
 
 -- Ramen & Mì
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Tonkotsu ramen')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Tonkotsu ramen', N'Nước dùng xương heo ninh 12 tiếng, thịt chashu.', 159000, N'tonkotsu-ramen.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Ramen & Mì';
+SELECT category_id, 'Tonkotsu ramen', 'Nước dùng xương heo ninh 12 tiếng, thịt chashu.', 159000, 'tonkotsu-ramen.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Ramen & Mì'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Shoyu ramen')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Shoyu ramen', N'Nước dùng gà và tương đậu nành, trứng lòng đào.', 145000, N'shoyu-ramen.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Ramen & Mì';
+SELECT category_id, 'Shoyu ramen', 'Nước dùng gà và tương đậu nành, trứng lòng đào.', 145000, 'shoyu-ramen.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Ramen & Mì'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Miso ramen')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Miso ramen', N'Nước dùng miso đỏ, bắp và măng chua.', 149000, N'miso-ramen.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Ramen & Mì';
+SELECT category_id, 'Miso ramen', 'Nước dùng miso đỏ, bắp và măng chua.', 149000, 'miso-ramen.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Ramen & Mì'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Mì udon nước')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Mì udon nước', N'Udon sợi to trong nước dashi, chả cá.', 119000, N'udon-nuoc.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Ramen & Mì';
+SELECT category_id, 'Mì udon nước', 'Udon sợi to trong nước dashi, chả cá.', 119000, 'udon-nuoc.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Ramen & Mì'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Mì soba lạnh')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Mì soba lạnh', N'Soba kiều mạch, chấm tsuyu, dùng lạnh.', 109000, N'soba-lanh.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Ramen & Mì';
+SELECT category_id, 'Mì soba lạnh', 'Soba kiều mạch, chấm tsuyu, dùng lạnh.', 109000, 'soba-lanh.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Ramen & Mì'
+ON CONFLICT (name) DO NOTHING;
 
 
 -- Tempura
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Tempura tôm')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Tempura tôm', N'Bốn con tôm sú, bột tempura giòn.', 139000, N'tempura-tom.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Tempura';
+SELECT category_id, 'Tempura tôm', 'Bốn con tôm sú, bột tempura giòn.', 139000, 'tempura-tom.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Tempura'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Tempura rau củ')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Tempura rau củ', N'Khoai lang, bí đỏ, cà tím, ớt chuông.', 99000, N'tempura-rau-cu.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Tempura';
+SELECT category_id, 'Tempura rau củ', 'Khoai lang, bí đỏ, cà tím, ớt chuông.', 99000, 'tempura-rau-cu.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Tempura'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Tempura cá bơn')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Tempura cá bơn', N'Phi lê cá bơn tẩm bột, chiên nhanh.', 159000, N'tempura-ca.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Tempura';
+SELECT category_id, 'Tempura cá bơn', 'Phi lê cá bơn tẩm bột, chiên nhanh.', 159000, 'tempura-ca.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Tempura'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Tempura tổng hợp')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Tempura tổng hợp', N'Hai tôm và năm loại rau củ.', 179000, N'tempura-tong-hop.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Tempura';
+SELECT category_id, 'Tempura tổng hợp', 'Hai tôm và năm loại rau củ.', 179000, 'tempura-tong-hop.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Tempura'
+ON CONFLICT (name) DO NOTHING;
 
 
 -- Yakitori & Nướng
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Yakitori đùi gà')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Yakitori đùi gà', N'Ba xiên thịt đùi và hành boa rô.', 89000, N'yakitori-dui-ga.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Yakitori & Nướng';
+SELECT category_id, 'Yakitori đùi gà', 'Ba xiên thịt đùi và hành boa rô.', 89000, 'yakitori-dui-ga.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Yakitori & Nướng'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Yakitori da gà')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Yakitori da gà', N'Ba xiên da gà nướng giòn, muối tiêu.', 69000, N'yakitori-da-ga.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Yakitori & Nướng';
+SELECT category_id, 'Yakitori da gà', 'Ba xiên da gà nướng giòn, muối tiêu.', 69000, 'yakitori-da-ga.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Yakitori & Nướng'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Cá saba nướng muối')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Cá saba nướng muối', N'Nửa con cá thu Nhật, nướng muối.', 149000, N'saba-nuong-muoi.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Yakitori & Nướng';
+SELECT category_id, 'Cá saba nướng muối', 'Nửa con cá thu Nhật, nướng muối.', 149000, 'saba-nuong-muoi.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Yakitori & Nướng'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Bò lưỡi nướng')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Bò lưỡi nướng', N'Lưỡi bò thái lát, nướng than, chanh muối.', 199000, N'bo-luoi-nuong.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Yakitori & Nướng';
+SELECT category_id, 'Bò lưỡi nướng', 'Lưỡi bò thái lát, nướng than, chanh muối.', 199000, 'bo-luoi-nuong.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Yakitori & Nướng'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Măng tây cuộn ba chỉ')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Măng tây cuộn ba chỉ', N'Bốn cuộn, nướng than.', 99000, N'mang-tay-cuon.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Yakitori & Nướng';
+SELECT category_id, 'Măng tây cuộn ba chỉ', 'Bốn cuộn, nướng than.', 99000, 'mang-tay-cuon.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Yakitori & Nướng'
+ON CONFLICT (name) DO NOTHING;
 
 
 -- Donburi & Cơm
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Cơm cá hồi áp chảo')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Cơm cá hồi áp chảo', N'Cá hồi áp chảo, cơm và rong biển.', 149000, N'com-ca-hoi.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Donburi & Cơm';
+SELECT category_id, 'Cơm cá hồi áp chảo', 'Cá hồi áp chảo, cơm và rong biển.', 149000, 'com-ca-hoi.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Donburi & Cơm'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Gyudon bò')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Gyudon bò', N'Bò thái mỏng nấu sốt ngọt mặn, hành tây.', 129000, N'gyudon.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Donburi & Cơm';
+SELECT category_id, 'Gyudon bò', 'Bò thái mỏng nấu sốt ngọt mặn, hành tây.', 129000, 'gyudon.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Donburi & Cơm'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Katsudon')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Katsudon', N'Heo tẩm bột chiên, trứng, sốt dashi.', 139000, N'katsudon.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Donburi & Cơm';
+SELECT category_id, 'Katsudon', 'Heo tẩm bột chiên, trứng, sốt dashi.', 139000, 'katsudon.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Donburi & Cơm'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Unadon lươn')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Unadon lươn', N'Lươn nướng sốt kabayaki trên cơm.', 239000, N'unadon.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Donburi & Cơm';
+SELECT category_id, 'Unadon lươn', 'Lươn nướng sốt kabayaki trên cơm.', 239000, 'unadon.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Donburi & Cơm'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Chirashi don')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Chirashi don', N'Cơm giấm phủ cá sống thái hạt lựu.', 219000, N'chirashi-don.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Donburi & Cơm';
+SELECT category_id, 'Chirashi don', 'Cơm giấm phủ cá sống thái hạt lựu.', 219000, 'chirashi-don.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Donburi & Cơm'
+ON CONFLICT (name) DO NOTHING;
 
 
 -- Khai vị
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Edamame muối')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Edamame muối', N'Đậu nành Nhật luộc, rắc muối biển.', 49000, N'edamame.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Khai vị';
+SELECT category_id, 'Edamame muối', 'Đậu nành Nhật luộc, rắc muối biển.', 49000, 'edamame.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Khai vị'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Gyoza chiên')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Gyoza chiên', N'Sáu chiếc, nhân heo và bắp cải.', 89000, N'gyoza-chien.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Khai vị';
+SELECT category_id, 'Gyoza chiên', 'Sáu chiếc, nhân heo và bắp cải.', 89000, 'gyoza-chien.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Khai vị'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Chawanmushi')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Chawanmushi', N'Trứng hấp dashi, tôm và nấm.', 79000, N'chawanmushi.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Khai vị';
+SELECT category_id, 'Chawanmushi', 'Trứng hấp dashi, tôm và nấm.', 79000, 'chawanmushi.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Khai vị'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Salad rong biển')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Salad rong biển', N'Rong biển wakame trộn giấm mè.', 69000, N'salad-rong-bien.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Khai vị';
+SELECT category_id, 'Salad rong biển', 'Rong biển wakame trộn giấm mè.', 69000, 'salad-rong-bien.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Khai vị'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Đậu hũ lạnh Hiyayakko')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Đậu hũ lạnh Hiyayakko', N'Đậu hũ non, gừng bào, hành lá.', 59000, N'hiyayakko.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Khai vị';
+SELECT category_id, 'Đậu hũ lạnh Hiyayakko', 'Đậu hũ non, gừng bào, hành lá.', 59000, 'hiyayakko.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Khai vị'
+ON CONFLICT (name) DO NOTHING;
 
 
 -- Tráng miệng
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Mochi kem')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Mochi kem', N'Ba viên, vị trà xanh, đậu đỏ và xoài.', 79000, N'mochi-kem.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Tráng miệng';
+SELECT category_id, 'Mochi kem', 'Ba viên, vị trà xanh, đậu đỏ và xoài.', 79000, 'mochi-kem.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Tráng miệng'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Bánh dorayaki')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Bánh dorayaki', N'Hai chiếc, nhân đậu đỏ.', 59000, N'dorayaki.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Tráng miệng';
+SELECT category_id, 'Bánh dorayaki', 'Hai chiếc, nhân đậu đỏ.', 59000, 'dorayaki.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Tráng miệng'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Kem trà xanh')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Kem trà xanh', N'Matcha Uji, một phần.', 55000, N'kem-tra-xanh.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Tráng miệng';
+SELECT category_id, 'Kem trà xanh', 'Matcha Uji, một phần.', 55000, 'kem-tra-xanh.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Tráng miệng'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Bánh phô mai Nhật')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Bánh phô mai Nhật', N'Bông xốp, một lát.', 69000, N'banh-pho-mai-nhat.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Tráng miệng';
+SELECT category_id, 'Bánh phô mai Nhật', 'Bông xốp, một lát.', 69000, 'banh-pho-mai-nhat.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Tráng miệng'
+ON CONFLICT (name) DO NOTHING;
 
 
 -- Đồ uống
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Trà xanh nóng')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Trà xanh nóng', N'Sencha, ấm nhỏ.', 35000, N'tra-xanh-nong.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Đồ uống';
+SELECT category_id, 'Trà xanh nóng', 'Sencha, ấm nhỏ.', 35000, 'tra-xanh-nong.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Đồ uống'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Trà lúa mạch lạnh')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Trà lúa mạch lạnh', N'Mugicha, ly lớn.', 35000, N'tra-lua-mach.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Đồ uống';
+SELECT category_id, 'Trà lúa mạch lạnh', 'Mugicha, ly lớn.', 35000, 'tra-lua-mach.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Đồ uống'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Ramune soda')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Ramune soda', N'Soda Nhật, vị nguyên bản.', 45000, N'ramune.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Đồ uống';
+SELECT category_id, 'Ramune soda', 'Soda Nhật, vị nguyên bản.', 45000, 'ramune.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Đồ uống'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Nước suối')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Nước suối', N'Chai 500ml.', 20000, N'nuoc-suoi.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Đồ uống';
+SELECT category_id, 'Nước suối', 'Chai 500ml.', 20000, 'nuoc-suoi.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Đồ uống'
+ON CONFLICT (name) DO NOTHING;
 
-IF NOT EXISTS (SELECT 1 FROM dishes WHERE name = N'Bia Nhật')
 INSERT INTO dishes (category_id, name, description, price, image_url, is_available, is_hidden, created_at, updated_at)
-SELECT category_id, N'Bia Nhật', N'Chai 330ml.', 65000, N'bia-nhat.jpg', 1, 0, SYSDATETIME(), SYSDATETIME()
-FROM categories WHERE name = N'Đồ uống';
+SELECT category_id, 'Bia Nhật', 'Chai 330ml.', 65000, 'bia-nhat.jpg', true, false, LOCALTIMESTAMP, LOCALTIMESTAMP
+FROM categories WHERE name = 'Đồ uống'
+ON CONFLICT (name) DO NOTHING;
 
 -- ---------- Ảnh món cho cơ sở dữ liệu đã có sẵn ----------
 --
--- Câu INSERT ở trên có điều kiện IF NOT EXISTS nên một CSDL đang chạy sẽ bỏ
+-- Câu INSERT ở trên có ON CONFLICT DO NOTHING nên một CSDL đang chạy sẽ bỏ
 -- qua nó, và món đã tạo từ trước không bao giờ nhận ảnh. Khối này lo phần đó.
 --
 -- Chỉ điền vào món CHƯA có ảnh. Chủ quán tự tải ảnh khác lên thì lần khởi
 -- động sau không bị ghi đè.
 
-UPDATE dishes SET image_url = N'bia-nhat.jpg' WHERE name = N'Bia Nhật' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'dorayaki.jpg' WHERE name = N'Bánh dorayaki' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'banh-pho-mai-nhat.jpg' WHERE name = N'Bánh phô mai Nhật' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'bo-luoi-nuong.jpg' WHERE name = N'Bò lưỡi nướng' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'california-maki.jpg' WHERE name = N'California maki' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'chawanmushi.jpg' WHERE name = N'Chawanmushi' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'chirashi-don.jpg' WHERE name = N'Chirashi don' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'saba-nuong-muoi.jpg' WHERE name = N'Cá saba nướng muối' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'com-ca-hoi.jpg' WHERE name = N'Cơm cá hồi áp chảo' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'edamame.jpg' WHERE name = N'Edamame muối' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'futomaki-chay.jpg' WHERE name = N'Futomaki chay' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'gyoza-chien.jpg' WHERE name = N'Gyoza chiên' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'gyudon.jpg' WHERE name = N'Gyudon bò' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'katsudon.jpg' WHERE name = N'Katsudon' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'kem-tra-xanh.jpg' WHERE name = N'Kem trà xanh' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'maki-ca-ngu-cay.jpg' WHERE name = N'Maki cá ngừ cay' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'miso-ramen.jpg' WHERE name = N'Miso ramen' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'mochi-kem.jpg' WHERE name = N'Mochi kem' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'soba-lanh.jpg' WHERE name = N'Mì soba lạnh' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'udon-nuoc.jpg' WHERE name = N'Mì udon nước' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'mang-tay-cuon.jpg' WHERE name = N'Măng tây cuộn ba chỉ' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'nigiri-ca-hoi.jpg' WHERE name = N'Nigiri cá hồi' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'nigiri-luon.jpg' WHERE name = N'Nigiri lươn nướng' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'nuoc-suoi.jpg' WHERE name = N'Nước suối' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'ramune.jpg' WHERE name = N'Ramune soda' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'salad-rong-bien.jpg' WHERE name = N'Salad rong biển' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'sashimi-bach-tuoc.jpg' WHERE name = N'Sashimi bạch tuộc' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'sashimi-hamachi.jpg' WHERE name = N'Sashimi cá cam Hamachi' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'sashimi-ca-hoi.jpg' WHERE name = N'Sashimi cá hồi' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'sashimi-ca-ngu.jpg' WHERE name = N'Sashimi cá ngừ đại dương' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'sashimi-tong-hop.jpg' WHERE name = N'Sashimi tổng hợp' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'shoyu-ramen.jpg' WHERE name = N'Shoyu ramen' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'tempura-ca.jpg' WHERE name = N'Tempura cá bơn' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'tempura-rau-cu.jpg' WHERE name = N'Tempura rau củ' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'tempura-tom.jpg' WHERE name = N'Tempura tôm' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'tempura-tong-hop.jpg' WHERE name = N'Tempura tổng hợp' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'tonkotsu-ramen.jpg' WHERE name = N'Tonkotsu ramen' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'tra-lua-mach.jpg' WHERE name = N'Trà lúa mạch lạnh' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'tra-xanh-nong.jpg' WHERE name = N'Trà xanh nóng' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'unadon.jpg' WHERE name = N'Unadon lươn' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'yakitori-da-ga.jpg' WHERE name = N'Yakitori da gà' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'yakitori-dui-ga.jpg' WHERE name = N'Yakitori đùi gà' AND image_url IS NULL;
-UPDATE dishes SET image_url = N'hiyayakko.jpg' WHERE name = N'Đậu hũ lạnh Hiyayakko' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'bia-nhat.jpg' WHERE name = 'Bia Nhật' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'dorayaki.jpg' WHERE name = 'Bánh dorayaki' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'banh-pho-mai-nhat.jpg' WHERE name = 'Bánh phô mai Nhật' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'bo-luoi-nuong.jpg' WHERE name = 'Bò lưỡi nướng' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'california-maki.jpg' WHERE name = 'California maki' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'chawanmushi.jpg' WHERE name = 'Chawanmushi' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'chirashi-don.jpg' WHERE name = 'Chirashi don' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'saba-nuong-muoi.jpg' WHERE name = 'Cá saba nướng muối' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'com-ca-hoi.jpg' WHERE name = 'Cơm cá hồi áp chảo' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'edamame.jpg' WHERE name = 'Edamame muối' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'futomaki-chay.jpg' WHERE name = 'Futomaki chay' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'gyoza-chien.jpg' WHERE name = 'Gyoza chiên' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'gyudon.jpg' WHERE name = 'Gyudon bò' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'katsudon.jpg' WHERE name = 'Katsudon' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'kem-tra-xanh.jpg' WHERE name = 'Kem trà xanh' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'maki-ca-ngu-cay.jpg' WHERE name = 'Maki cá ngừ cay' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'miso-ramen.jpg' WHERE name = 'Miso ramen' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'mochi-kem.jpg' WHERE name = 'Mochi kem' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'soba-lanh.jpg' WHERE name = 'Mì soba lạnh' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'udon-nuoc.jpg' WHERE name = 'Mì udon nước' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'mang-tay-cuon.jpg' WHERE name = 'Măng tây cuộn ba chỉ' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'nigiri-ca-hoi.jpg' WHERE name = 'Nigiri cá hồi' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'nigiri-luon.jpg' WHERE name = 'Nigiri lươn nướng' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'nuoc-suoi.jpg' WHERE name = 'Nước suối' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'ramune.jpg' WHERE name = 'Ramune soda' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'salad-rong-bien.jpg' WHERE name = 'Salad rong biển' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'sashimi-bach-tuoc.jpg' WHERE name = 'Sashimi bạch tuộc' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'sashimi-hamachi.jpg' WHERE name = 'Sashimi cá cam Hamachi' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'sashimi-ca-hoi.jpg' WHERE name = 'Sashimi cá hồi' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'sashimi-ca-ngu.jpg' WHERE name = 'Sashimi cá ngừ đại dương' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'sashimi-tong-hop.jpg' WHERE name = 'Sashimi tổng hợp' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'shoyu-ramen.jpg' WHERE name = 'Shoyu ramen' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'tempura-ca.jpg' WHERE name = 'Tempura cá bơn' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'tempura-rau-cu.jpg' WHERE name = 'Tempura rau củ' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'tempura-tom.jpg' WHERE name = 'Tempura tôm' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'tempura-tong-hop.jpg' WHERE name = 'Tempura tổng hợp' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'tonkotsu-ramen.jpg' WHERE name = 'Tonkotsu ramen' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'tra-lua-mach.jpg' WHERE name = 'Trà lúa mạch lạnh' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'tra-xanh-nong.jpg' WHERE name = 'Trà xanh nóng' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'unadon.jpg' WHERE name = 'Unadon lươn' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'yakitori-da-ga.jpg' WHERE name = 'Yakitori da gà' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'yakitori-dui-ga.jpg' WHERE name = 'Yakitori đùi gà' AND image_url IS NULL;
+UPDATE dishes SET image_url = 'hiyayakko.jpg' WHERE name = 'Đậu hũ lạnh Hiyayakko' AND image_url IS NULL;
