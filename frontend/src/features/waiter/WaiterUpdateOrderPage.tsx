@@ -11,7 +11,7 @@ import type {
     OrderItemStatus,
     UpdateOrderItemRequest,
 } from '@/shared/api/waiter'
-import {BackArrow, fmtPrice} from './components'
+import {BackArrow, fmtPriceShort, useTableNumber} from './components'
 import {Modal} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
@@ -101,6 +101,10 @@ export default function WaiterUpdateOrderPage() {
     const {tableId} = useParams()
 
     const tableIdNumber = Number.parseInt(tableId ?? '0', 10)
+
+    // SỐ BÀN để hiển thị. Đường dẫn mang khoá chính, mà bàn ngoài đời
+    // mang số "B01" — hai con số đó không trùng nhau.
+    const tableNumber = useTableNumber(tableIdNumber)
 
     const [menu, setMenu] = useState<MenuItemResponse[]>([])
 
@@ -495,7 +499,7 @@ export default function WaiterUpdateOrderPage() {
                 />
 
                 <h2 className="rk-sectiontitle">
-                    Cập nhật đơn hàng · Bàn {tableIdNumber || '—'}
+                    Cập nhật đơn hàng · Bàn {tableNumber ?? '—'}
                 </h2>
             </div>
 
@@ -598,7 +602,7 @@ export default function WaiterUpdateOrderPage() {
                                                     {dish.name}
                                                 </h3>
                                                 <span className="rk-menucard__price">
-                                                    {fmtPrice(dish.price)}
+                                                    {fmtPriceShort(dish.price)}
                                                 </span>
 
                                                 {hasExisting && draft.status && (

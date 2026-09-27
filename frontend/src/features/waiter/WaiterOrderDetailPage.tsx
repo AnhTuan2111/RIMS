@@ -110,7 +110,11 @@ export default function WaiterOrderDetailPage() {
                 <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />
 
-                    <h2 className="rk-sectiontitle">Bàn: {tableIdNumber || '—'}</h2>
+                    {/* SỐ BÀN, không phải khoá chính. `tableIdNumber` là id
+                        trong CSDL; ngoài đời không có cái bàn nào mang số đó. */}
+                    <h2 className="rk-sectiontitle">
+                        Bàn {servingOrders[0]?.tableNumber ?? tableIdNumber ?? '—'}
+                    </h2>
 
                     <button
                         type="button"

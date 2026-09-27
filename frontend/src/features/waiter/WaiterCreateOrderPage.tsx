@@ -8,7 +8,7 @@ import type {
     MenuItemResponse,
     OrderItemRequest,
 } from '@/shared/api/waiter'
-import {BackArrow, fmtPrice} from './components'
+import {BackArrow, fmtPrice, fmtPriceShort, useTableNumber} from './components'
 import {Modal} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
@@ -29,6 +29,10 @@ export default function WaiterCreateOrderPage() {
     const [searchParams] = useSearchParams()
 
     const tableIdNumber = Number.parseInt(tableId ?? '0', 10)
+
+    // SỐ BÀN để hiển thị. Đường dẫn mang khoá chính, mà bàn ngoài đời
+    // mang số "B01" — hai con số đó không trùng nhau.
+    const tableNumber = useTableNumber(tableIdNumber)
 
     const reservationIdParam = searchParams.get('reservationId')
 
@@ -251,7 +255,7 @@ export default function WaiterCreateOrderPage() {
                 <BackArrow onClick={() => navigate('/waiter/tables')} />
 
                 <h2 className="rk-sectiontitle">
-                    Tạo đơn hàng · Bàn {tableIdNumber || '—'}
+                    Tạo đơn hàng · Bàn {tableNumber ?? '—'}
                 </h2>
             </div>
 
@@ -345,7 +349,7 @@ export default function WaiterCreateOrderPage() {
                                                 {dish.name}
                                             </h3>
                                             <span className="rk-menucard__price">
-                                                {fmtPrice(dish.price)}
+                                                {fmtPriceShort(dish.price)}
                                             </span>
                                         </div>
 
@@ -412,7 +416,7 @@ export default function WaiterCreateOrderPage() {
 
                 <aside className="rk-cart" aria-label="Giỏ đơn">
                     <h2 className="rk-cart__head">
-                        Đơn bàn {tableIdNumber || '—'}
+                        Đơn bàn {tableNumber ?? '—'}
                         <span className="rk-cart__count">{selectedItems.length}</span>
                     </h2>
 
@@ -463,7 +467,7 @@ export default function WaiterCreateOrderPage() {
             <Modal
                 open={showConfirm}
                 title="Xác nhận tạo đơn hàng"
-                description={`Bàn ${tableIdNumber} — ${selectedItems.length} món, tổng tạm tính ${fmtPrice(orderTotal)}`}
+                description={`Bàn ${tableNumber ?? ''} — ${selectedItems.length} món, tổng tạm tính ${fmtPrice(orderTotal)}`}
                 onClose={() => {
                     if (!submitting) {
                         setShowConfirm(false)
