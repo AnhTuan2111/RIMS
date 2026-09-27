@@ -8,6 +8,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.CreateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.SaveLayoutRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.UpdateTableRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
@@ -72,6 +73,13 @@ public interface AdminService
      * làm hai việc khác nhau.
      */
     TableRemovalResponse deleteTable(Integer id);
+
+    /**
+     * Lưu chỗ đứng của mọi bàn trên sơ đồ mặt bằng.
+     *
+     * <p>Nhận CẢ SƠ ĐỒ một lần. Bàn không có trong danh sách sẽ bị xoá chỗ.
+     */
+    List<AdminTableResponse> saveTableLayout(SaveLayoutRequest request);
 
     // invoice service
     InvoiceHistoryPageResponse getInvoiceHistory(

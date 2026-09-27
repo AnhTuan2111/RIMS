@@ -82,6 +82,11 @@ public class WaiterServiceImpl implements WaiterService
                     .tableNumber(table.getTableNumber())
                     .capacity(table.getCapacity())
                     .status(table.getStatus())
+                    .layoutX(table.getLayoutX())
+                    .layoutY(table.getLayoutY())
+                    .layoutW(table.getLayoutW())
+                    .layoutH(table.getLayoutH())
+                    .zone(table.getZone())
                     .build();
 
             //mapping thời gian / tên khách hàng đặt bàn sớm nhất vào các bàn đang AVAILABLE

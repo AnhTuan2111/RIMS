@@ -17,6 +17,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.restaurant.UpdateRestaurantProfileRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.CreateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.SaveLayoutRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.UpdateTableRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateCustomerRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.user.CreateStaffRequest;
@@ -307,6 +308,19 @@ public class AdminController
             @RequestBody @Valid UpdateTableRequest request)
     {
         return adminService.updateTable(id, request);
+    }
+
+    /**
+     * Lưu sơ đồ mặt bằng.
+     *
+     * <p>PUT chứ không PATCH: thân yêu cầu là TOÀN BỘ sơ đồ, không phải phần
+     * thay đổi. Bàn vắng mặt trong danh sách nghĩa là bị kéo ra khỏi mặt bằng.
+     */
+    @PutMapping("/table/layout")
+    public List<AdminTableResponse> saveTableLayout(
+            @RequestBody @Valid SaveLayoutRequest request)
+    {
+        return adminService.saveTableLayout(request);
     }
 
     @DeleteMapping("/table/{id}")

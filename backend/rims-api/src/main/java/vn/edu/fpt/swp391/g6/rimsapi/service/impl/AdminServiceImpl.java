@@ -25,6 +25,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.CreateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateCategoryRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.menu.UpdateDishRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.CreateTableRequest;
+import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.SaveLayoutRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.request.table.UpdateTableRequest;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryRemovalResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.dto.response.menu.CategoryResponse;
@@ -1093,6 +1094,11 @@ public class AdminServiceImpl implements AdminService
                 .orderCount(orderCount)
                 .reservationCount(reservationCount)
                 .deletable(orderCount == 0 && reservationCount == 0)
+                .layoutX(table.getLayoutX())
+                .layoutY(table.getLayoutY())
+                .layoutW(table.getLayoutW())
+                .layoutH(table.getLayoutH())
+                .zone(table.getZone())
                 .build();
     }
 
@@ -1102,6 +1108,66 @@ public class AdminServiceImpl implements AdminService
      * <p>Thêm hay cất một bàn mà màn đang mở không biết thì Phục vụ vẫn bấm vào
      * một bàn không còn tồn tại.
      */
+    /**
+     * Lưu chỗ đứng của mọi bàn trên sơ đồ mặt bằng.
+     *
+     * <p>Nhận cả sơ đồ một lần rồi ghi trong MỘT giao dịch. Kéo thả sinh ra
+     * hàng chục lần đổi chỗ trong vài giây; gửi từng bàn thì thứ tự tới nơi
+     * không còn chắc chắn và sơ đồ lưu xong có thể khác sơ đồ trên màn hình.
+     *
+     * <p>Bàn KHÔNG có trong danh sách gửi lên sẽ bị xoá chỗ về NULL. Quản lý
+     * kéo một bàn ra khỏi mặt bằng thì đó là ý định chứ không phải thiếu sót,
+     * và để nguyên chỗ cũ sẽ khiến bàn hiện lại ở lần mở sau.
+     *
+     * <p>KHÔNG kiểm tra hai bàn có đè lên nhau hay không. Mặt bằng thật có bàn
+     * kê sát nhau, có bàn gộp, có bàn kê chéo — bắt chúng rời nhau tuyệt đối là
+     * áp một luật hình học lên một việc mà người kê bàn biết rõ hơn máy.
+     */
+    @Override
+    @Transactional
+    public List<AdminTableResponse> saveTableLayout(SaveLayoutRequest request)
+    {
+        Map<Integer, SaveLayoutRequest.TableSlot> slots = request.getTables().stream()
+                .collect(Collectors.toMap(
+                        SaveLayoutRequest.TableSlot::getTableId,
+                        slot -> slot,
+                        // Gửi trùng một bàn hai lần thì lấy lần sau: đó là chỗ
+                        // cuối cùng người dùng thả nó xuống.
+                        (first, second) -> second));
+
+        List<RestaurantTable> tables = restaurantTableRepository.findAll();
+
+        for (RestaurantTable table : tables)
+        {
+            SaveLayoutRequest.TableSlot slot = slots.get(table.getId());
+
+            if (slot == null)
+            {
+                table.setLayoutX(null);
+                table.setLayoutY(null);
+                table.setLayoutW(null);
+                table.setLayoutH(null);
+                table.setZone(null);
+                continue;
+            }
+
+            table.setLayoutX(slot.getX());
+            table.setLayoutY(slot.getY());
+            table.setLayoutW(slot.getW());
+            table.setLayoutH(slot.getH());
+
+            String zone = slot.getZone() == null ? null : slot.getZone().trim();
+            table.setZone(zone == null || zone.isEmpty() ? null : zone);
+        }
+
+        restaurantTableRepository.saveAll(tables);
+
+        // Sơ đồ của Phục vụ và Thu ngân đang mở phải vẽ lại theo mặt bằng mới.
+        broadcastTablesChanged();
+
+        return getAllTables();
+    }
+
     private void broadcastTablesChanged()
     {
         messagingTemplate.convertAndSend("/topic/tables", "TABLE_UPDATED");

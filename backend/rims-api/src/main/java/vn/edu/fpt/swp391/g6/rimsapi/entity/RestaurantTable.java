@@ -51,6 +51,34 @@ public class RestaurantTable
     @Column(nullable = false)
     private boolean active = true;
 
+    /**
+     * Chỗ đứng của bàn trên sơ đồ mặt bằng.
+     *
+     * <p>Đơn vị là Ô LƯỚI, không phải pixel: mặt bằng vẽ trên một lưới và phải
+     * hiện đúng hình dạng ở mọi cỡ màn. Lưu pixel thì sơ đồ vẽ trên máy tính
+     * bàn sẽ tràn ra ngoài màn hình điện thoại.
+     *
+     * <p>Để NULL nghĩa là bàn chưa được đặt chỗ. Sơ đồ tự xếp những bàn đó
+     * thành hàng ở cuối — không bịa ra một vị trí rồi để quản lý tưởng mình đã
+     * đặt. Quán chưa vẽ mặt bằng thì mọi bàn đều NULL và sơ đồ rơi về đúng lưới
+     * thẻ như cũ.
+     */
+    @Column(name = "layout_x")
+    private Integer layoutX;
+
+    @Column(name = "layout_y")
+    private Integer layoutY;
+
+    @Column(name = "layout_w")
+    private Integer layoutW;
+
+    @Column(name = "layout_h")
+    private Integer layoutH;
+
+    /** Khu vực: "Tầng 1", "Sân vườn", "Phòng VIP". Chữ tự do do quản lý đặt. */
+    @Column(name = "zone", length = 50)
+    private String zone;
+
     @OneToMany(mappedBy = "table")
     private List<Reservation> reservations;
 

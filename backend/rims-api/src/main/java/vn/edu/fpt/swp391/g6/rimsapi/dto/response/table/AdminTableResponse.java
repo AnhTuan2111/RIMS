@@ -29,4 +29,18 @@ public class AdminTableResponse
 
     /** Chưa từng dùng thì mới xoá hẳn được; đã dùng rồi thì chỉ cất đi. */
     private boolean deletable;
+
+    /**
+     * Chỗ đứng trên sơ đồ mặt bằng, tính bằng ô lưới.
+     *
+     * <p>NULL nghĩa là bàn chưa được đặt chỗ — sơ đồ xếp những bàn đó thành
+     * hàng ở cuối thay vì dồn tất cả vào góc (0,0).
+     */
+    private Integer layoutX;
+    private Integer layoutY;
+    private Integer layoutW;
+    private Integer layoutH;
+
+    /** Khu vực do quản lý đặt tên: "Tầng 1", "Sân vườn". */
+    private String zone;
 }
