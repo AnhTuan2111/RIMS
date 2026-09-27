@@ -34,3 +34,6 @@ replay_pid*
 # Không thuộc về mã nguồn dự án.
 .claude/
 CLAUDE.md
+
+# Ảnh render walk là sản phẩm phụ, không commit.
+frontend/tools/shots/

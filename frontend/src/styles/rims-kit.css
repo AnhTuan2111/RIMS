@@ -75,7 +75,16 @@ h5,
 h6 {
     margin-top: 0;
     margin-bottom: var(--rims-space-2);
-    line-height: var(--rims-leading-snug);
+    /* Archivo in hoa. Thân chữ đặc nên in hoa rất chắc, và tiêu đề IN HOA là
+       một nửa chữ ký của hệ. Roman, KHÔNG BAO GIỜ nghiêng. */
+    font-family: var(--rims-font-display);
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    /* Tiếng Việt có dấu, từ dài; ở 320px tiêu đề phải ngắt được trong lòng từ
+       thay vì tràn ra ngoài khung. */
+    overflow-wrap: anywhere;
+    line-height: var(--rims-leading-tight);
 }
 
 p {
@@ -193,9 +202,13 @@ a {
     /* Bóng offset cứng là chữ ký của hệ. Mọi nút đều có, kể cả nút huỷ và kể
        cả cỡ nhỏ nhất trong hàng bảng. */
     box-shadow: var(--rims-shadow-raised);
-    font-family: var(--rims-font-sans);
-    font-size: var(--rims-text-base);
-    font-weight: var(--rims-weight-semibold);
+    font-family: var(--rims-font-display);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-black);
+    /* Nhãn nút IN HOA bằng text-transform, KHÔNG viết hoa trong chuỗi — tiếng
+       Việt không dùng Title Case. */
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
     line-height: 1;
     /* Nút dựng bằng thẻ <a> hoặc <Link> vẫn bị trình duyệt gạch chân nếu
        không tắt — nút thì không bao giờ gạch chân. */
@@ -1949,8 +1962,10 @@ textarea.rk-input {
     place-items: center;
     padding: var(--rims-space-6);
     /* Một màu một mặt. Không gradient — hai quầng đỏ ở đây là nét trang trí
-       không mang nghĩa, và neo-brutalism cấm gradient. */
-    background: var(--rims-shell);
+       không mang nghĩa, và neo-brutalism cấm gradient.
+       Nền GIẤY, không phải khung tối: hệ mới không có màn nào nền đen ở chế độ
+       sáng. Thẻ nổi lên bằng viền 2px và bóng lệch, đúng như mọi bề mặt khác. */
+    background: var(--rims-paper);
 }
 
 .rk-auth__card {

@@ -165,13 +165,13 @@
     /* ---------- Chữ ----------
        Ràng buộc cứng: giao diện toàn tiếng Việt, mặt chữ phải đủ dấu ở mọi
        cân nặng. Cả ba đều có subset vietnamese.
-       Archivo áp vào h1..h6 và nhãn nút ở pha P3; token khai sẵn từ đây. */
+       Archivo áp vào h1..h6 và nhãn nút, luôn IN HOA. */
     --rims-font-display: 'Archivo', 'IBM Plex Sans', system-ui, sans-serif;
-    --rims-font-sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --rims-font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
     /* Mặt chữ thân đứng ngay sau JetBrains Mono để hứng ký hiệu ₫ (U+20AB) và
        các dấu tiếng Việt mà subset mono đang nạp không có — nếu không, ký hiệu
        tiền rơi sang font hệ thống và lệch hẳn cỡ so với chữ số. */
-    --rims-font-mono: 'JetBrains Mono', 'Be Vietnam Pro', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    --rims-font-mono: 'JetBrains Mono', 'IBM Plex Sans', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
     --rims-text-xs: 12px;
     --rims-text-sm: 13px;
