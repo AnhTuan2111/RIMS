@@ -138,7 +138,7 @@ export default function AdminMenuDashboardPage() {
     if (loading) {
         return (
             <LoadingState
-                title="Đang tải tổng quan thực đơn…"
+                title="Đang tải tổng quan thực đơn..."
                 description="Hệ thống đang cập nhật danh mục, món ăn và trạng thái kinh doanh."
             />
         )

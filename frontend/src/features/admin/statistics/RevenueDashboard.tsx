@@ -268,7 +268,7 @@ export function RevenueDateInput({
                                 setIsCalendarOpen(false)
                             }}
                         >
-                            Xóa
+                            Xoá
                         </button>
 
                         <button
@@ -480,7 +480,7 @@ export function RevenueDashboard({
                             className="rk-btn rk-btn--primary"
                             disabled={isCustomLoading}
                         >
-                            {isCustomLoading ? 'Đang áp dụng…' : 'Áp dụng'}
+                            {isCustomLoading ? 'Đang áp dụng...' : 'Áp dụng'}
                         </button>
                     </div>
 

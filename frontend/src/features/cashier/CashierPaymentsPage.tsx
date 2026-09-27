@@ -241,14 +241,14 @@ export default function CashierPaymentsPage() {
             window.URL.revokeObjectURL(url)
         } catch (requestError: unknown) {
             console.error(requestError)
-            notify('Không thể tải PDF!', {tone: 'alert'})
+            notify('Không tải được PDF. Hoá đơn vẫn còn trong hệ thống.', {tone: 'alert'})
         }
     }
 
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải sơ đồ quầy thu ngân…"
+                title="Đang tải sơ đồ quầy thu ngân..."
                 description="Hệ thống đang lấy trạng thái bàn và đơn hàng mới nhất."
             />
         )

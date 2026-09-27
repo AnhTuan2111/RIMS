@@ -245,11 +245,11 @@ export default function AdminUsersPage() {
             return
         }
         if (!isValidEmail(form.email)) {
-            setFormError('Email không hợp lệ!')
+            setFormError('Email không hợp lệ')
             return
         }
         if (form.password.length < 6) {
-            setFormError('Mật khẩu phải có ít nhất 6 ký tự!')
+            setFormError('Mật khẩu phải có ít nhất 6 ký tự')
             return
         }
         setFormLoading(true)
@@ -264,7 +264,7 @@ export default function AdminUsersPage() {
                 password: form.password,
             })
             setModal(null)
-            showSuccess('Tạo tài khoản nhân viên thành công!')
+            showSuccess('Đã tạo tài khoản nhân viên')
             void loadData()
         } catch (err: unknown) {
             setFormError(getErrorMessage(err))
@@ -289,11 +289,11 @@ export default function AdminUsersPage() {
             return
         }
         if (!isValidEmail(form.email)) {
-            setFormError('Email không hợp lệ!')
+            setFormError('Email không hợp lệ')
             return
         }
         if (form.password.length < 6) {
-            setFormError('Mật khẩu phải có ít nhất 6 ký tự!')
+            setFormError('Mật khẩu phải có ít nhất 6 ký tự')
             return
         }
         setFormLoading(true)
@@ -307,7 +307,7 @@ export default function AdminUsersPage() {
                 password: form.password,
             })
             setModal(null)
-            showSuccess('Tạo tài khoản khách hàng thành công!')
+            showSuccess('Đã tạo tài khoản khách hàng')
             void loadData()
         } catch (err: unknown) {
             setFormError(getErrorMessage(err))
@@ -336,7 +336,7 @@ export default function AdminUsersPage() {
         // Email là đường lấy lại mật khẩu duy nhất, nên xoá trắng ô này là gỡ
         // mất khả năng đăng nhập lại của chủ tài khoản.
         if (!isValidEmail(form.email)) {
-            setFormError('Email không hợp lệ!')
+            setFormError('Email không hợp lệ')
             return
         }
         setFormLoading(true)
@@ -352,7 +352,7 @@ export default function AdminUsersPage() {
                 role: isStaff ? form.role : undefined,
             })
             setModal(null)
-            showSuccess('Cập nhật tài khoản thành công!')
+            showSuccess('Đã cập nhật tài khoản')
             void loadData()
         } catch (err: unknown) {
             setFormError(getErrorMessage(err))
@@ -422,7 +422,7 @@ export default function AdminUsersPage() {
                         setSearch(e.target.value)
                         setPage(0)
                     }}
-                    placeholder="Tìm theo tên, tài khoản, email hoặc số điện thoại…"
+                    placeholder="Tìm theo tên, tài khoản, email hoặc số điện thoại..."
                     className="rk-input"
                 />
                 <div className="rk-segment">
@@ -449,7 +449,7 @@ export default function AdminUsersPage() {
             {/* ── Table ── */}
             {isLoading ? (
                 <LoadingState
-                    title="Đang tải danh sách tài khoản…"
+                    title="Đang tải danh sách tài khoản..."
                     description="Hệ thống đang lấy dữ liệu tài khoản mới nhất."
                 />
             ) : items.length === 0 ? (
@@ -626,14 +626,14 @@ export default function AdminUsersPage() {
                                 className="rk-btn rk-btn--quiet"
                                 onClick={() => setModal(null)}
                             >
-                                Hủy
+                                Huỷ
                             </button>
                             <button
                                 className="rk-btn rk-btn--primary"
                                 disabled={formLoading}
                                 onClick={() => void handleCreateStaff()}
                             >
-                                {formLoading ? 'Đang tạo…' : 'Tạo tài khoản'}
+                                {formLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
                             </button>
                         </>
                     }
@@ -723,14 +723,14 @@ export default function AdminUsersPage() {
                                 className="rk-btn rk-btn--quiet"
                                 onClick={() => setModal(null)}
                             >
-                                Hủy
+                                Huỷ
                             </button>
                             <button
                                 className="rk-btn rk-btn--primary"
                                 disabled={formLoading}
                                 onClick={() => void handleCreateCustomer()}
                             >
-                                {formLoading ? 'Đang tạo…' : 'Tạo tài khoản'}
+                                {formLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
                             </button>
                         </>
                     }
@@ -874,14 +874,14 @@ export default function AdminUsersPage() {
                                 className="rk-btn rk-btn--quiet"
                                 onClick={() => setModal(null)}
                             >
-                                Hủy
+                                Huỷ
                             </button>
                             <button
                                 className="rk-btn rk-btn--primary"
                                 disabled={formLoading}
                                 onClick={() => void handleUpdate()}
                             >
-                                {formLoading ? 'Đang lưu…' : 'Lưu thay đổi'}
+                                {formLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
                             </button>
                         </>
                     }

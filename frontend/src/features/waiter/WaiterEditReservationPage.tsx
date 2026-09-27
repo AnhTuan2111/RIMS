@@ -434,7 +434,7 @@ export default function WaiterEditReservationPage() {
         try {
             await waiterApi.cancelReservation(reservationId)
 
-            notify('Đã hủy đặt bàn')
+            notify('Đã huỷ đặt bàn')
 
             window.setTimeout(() => navigate('/waiter/tables'), 800)
         } catch (requestError: unknown) {
@@ -444,7 +444,7 @@ export default function WaiterEditReservationPage() {
 
             console.error('[WAITER_EDIT_RESERVATION_CANCEL_ERROR]', requestError)
 
-            notify(getErrorMessage(requestError, 'Hủy đặt bàn thất bại.'), {
+            notify(getErrorMessage(requestError, 'Huỷ đặt bàn thất bại.'), {
                 tone: 'alert',
             })
         } finally {
@@ -461,7 +461,7 @@ export default function WaiterEditReservationPage() {
 
             <div className="rk-stack">
                 <div className="rk-card__head-inline">
-                    <h2 className="rk-sectiontitle">Sửa Đặt Bàn</h2>
+                    <h2 className="rk-sectiontitle">Sửa đặt bàn</h2>
                 </div>
 
                 <div className="rk-two">
@@ -573,7 +573,7 @@ export default function WaiterEditReservationPage() {
                                         >
                                             <option value={0}>
                                                 {isTablesLoading
-                                                    ? 'Đang tải bàn…'
+                                                    ? 'Đang tải bàn...'
                                                     : 'Chọn bàn'}
                                             </option>
 
@@ -611,7 +611,7 @@ export default function WaiterEditReservationPage() {
                                             disabled={submitting || canceling}
                                             onClick={() => void submitReservation()}
                                         >
-                                            {submitting ? 'Đang lưu…' : 'Lưu thay đổi'}
+                                            {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
                                         </button>
 
                                         <button
@@ -620,7 +620,7 @@ export default function WaiterEditReservationPage() {
                                             disabled={submitting || canceling}
                                             onClick={() => void handleCancelReservation()}
                                         >
-                                            {canceling ? 'Đang hủy…' : 'Hủy đặt bàn'}
+                                            {canceling ? 'Đang huỷ...' : 'Huỷ đặt bàn'}
                                         </button>
 
                                         <button

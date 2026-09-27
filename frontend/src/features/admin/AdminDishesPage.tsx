@@ -115,7 +115,7 @@ export default function AdminDishesPage() {
 
         const catIdParsed = parseInt(formData.categoryId)
         if (isNaN(catIdParsed) || catIdParsed <= 0) {
-            notify('Lỗi: Vui lòng lựa chọn một Danh mục món ăn hợp lệ!', {tone: 'alert'})
+            notify('Chưa chọn danh mục. Mỗi món phải thuộc đúng một danh mục.', {tone: 'alert'})
             return
         }
 
@@ -129,7 +129,7 @@ export default function AdminDishesPage() {
         }
 
         if (formData.imageUrl && formData.imageUrl.length > 500) {
-            notify('Lỗi: Đường dẫn hình ảnh quá dài (tối đa 500 ký tự)!', {tone: 'alert'})
+            notify('Đường dẫn ảnh quá dài, tối đa 500 ký tự.', {tone: 'alert'})
             return
         }
 
@@ -146,7 +146,7 @@ export default function AdminDishesPage() {
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
         } catch (err: unknown) {
-            const errMsg = getErrorMessage(err, 'Lỗi khi thêm món ăn mới!')
+            const errMsg = getErrorMessage(err, 'Không thêm được món. Dữ liệu vừa nhập vẫn được giữ.')
             notify(errMsg, {tone: 'alert'})
         } finally {
             setIsSubmitting(false)
@@ -159,7 +159,7 @@ export default function AdminDishesPage() {
 
         const catIdParsed = parseInt(formData.categoryId)
         if (isNaN(catIdParsed) || catIdParsed <= 0) {
-            notify('Lỗi: Vui lòng lựa chọn một Danh mục món ăn hợp lệ!', {tone: 'alert'})
+            notify('Chưa chọn danh mục. Mỗi món phải thuộc đúng một danh mục.', {tone: 'alert'})
             return
         }
 
@@ -173,7 +173,7 @@ export default function AdminDishesPage() {
         }
 
         if (formData.imageUrl && formData.imageUrl.length > 500) {
-            notify('Lỗi: Đường dẫn hình ảnh quá dài (tối đa 500 ký tự)!', {tone: 'alert'})
+            notify('Đường dẫn ảnh quá dài, tối đa 500 ký tự.', {tone: 'alert'})
             return
         }
         try {
@@ -190,7 +190,7 @@ export default function AdminDishesPage() {
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
         } catch (err: unknown) {
-            const errMsg = getErrorMessage(err, 'Lỗi khi cập nhật món ăn!')
+            const errMsg = getErrorMessage(err, 'Không cập nhật được món. Thay đổi chưa được lưu.')
             notify(errMsg, {tone: 'alert'})
         } finally {
             setIsSubmitting(false)
@@ -204,7 +204,7 @@ export default function AdminDishesPage() {
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
         } catch (err: unknown) {
-            const errMsg = getErrorMessage(err, 'Lỗi khi xóa món ăn!')
+            const errMsg = getErrorMessage(err, 'Không xoá được món. Món vẫn còn trong thực đơn.')
             notify(errMsg, {tone: 'alert'})
         }
     }
@@ -259,7 +259,7 @@ export default function AdminDishesPage() {
     if (loading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món ăn hệ thống…"
+                title="Đang tải danh sách món ăn hệ thống..."
                 description="Hệ thống đang lấy dữ liệu món ăn và danh mục mới nhất."
             />
         )
@@ -313,7 +313,7 @@ export default function AdminDishesPage() {
                     <div className="rk-filterbar">
                         <input
                             type="text"
-                            placeholder="Tìm theo tên món hoặc mã món…"
+                            placeholder="Tìm theo tên món hoặc mã món..."
                             value={searchKeyword}
                             onChange={(e) => {
                                 setSearchKeyword(e.target.value)
@@ -453,7 +453,7 @@ export default function AdminDishesPage() {
                                                 setActiveModal('DELETE')
                                             }}
                                             className="rk-iconbtn rk-iconbtn--danger"
-                                            title="Xóa món"
+                                            title="Xoá món"
                                         >
                                             <Icon name="trash" className="rk-icon" />
                                         </button>
@@ -478,7 +478,7 @@ export default function AdminDishesPage() {
                                     setCurrentPage(1)
                                 }}
                             >
-                                Xóa bộ lọc
+                                Xoá bộ lọc
                             </button>
                         }
                     />
@@ -582,7 +582,7 @@ export default function AdminDishesPage() {
                                     </label>
                                     <textarea
                                         rows={4}
-                                        placeholder="Mô tả tóm tắt hương vị, các thành phần nguyên liệu đặc biệt…"
+                                        placeholder="Mô tả tóm tắt hương vị, các thành phần nguyên liệu đặc biệt..."
                                         maxLength={100}
                                         value={formData.description}
                                         onChange={(e) =>
@@ -656,14 +656,14 @@ export default function AdminDishesPage() {
                                     }
                                     className="rk-btn rk-btn--primary rk-btn--block"
                                 >
-                                    {isSubmitting ? ' Đang thêm…' : 'Thêm món ăn'}
+                                    {isSubmitting ? ' Đang thêm...' : 'Thêm món ăn'}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveModal('NONE')}
                                     className="rk-btn rk-btn--quiet"
                                 >
-                                    Hủy bỏ
+                                    Huỷ bỏ
                                 </button>
                             </div>
                         </div>
@@ -902,14 +902,14 @@ export default function AdminDishesPage() {
                                     onClick={() => setActiveModal('NONE')}
                                     className="rk-btn rk-btn--quiet"
                                 >
-                                    HỦY
+                                    HUỶ
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
                                     className="rk-btn rk-btn--primary rk-btn--block"
                                 >
-                                    {isSubmitting ? ' Đang lưu…' : 'Cập nhật'}
+                                    {isSubmitting ? ' Đang lưu...' : 'Cập nhật'}
                                 </button>
                             </div>
                         </div>
@@ -940,7 +940,7 @@ export default function AdminDishesPage() {
                                     }}
                                     className="rk-btn rk-btn--danger rk-btn--block"
                                 >
-                                    XÓA Món ăn KHỎI MENU
+                                    XOÁ Món ăn KHỎI MENU
                                 </button>
                             </div>
                         </div>

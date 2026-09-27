@@ -364,7 +364,7 @@ export default function WaiterUpdateOrderPage() {
             hasUserEditedDraftRef.current = false
 
             setSuccessData({
-                message: response.data?.message || 'Cập nhật đơn hàng thành công!',
+                message: response.data?.message || 'Đã cập nhật đơn',
                 itemSummary: '',
             })
         } catch (requestError: unknown) {
@@ -513,7 +513,7 @@ export default function WaiterUpdateOrderPage() {
 
                 <input
                     type="text"
-                    placeholder="Tìm theo tên món hoặc danh mục…"
+                    placeholder="Tìm theo tên món hoặc danh mục..."
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     className="rk-input"
@@ -660,7 +660,7 @@ export default function WaiterUpdateOrderPage() {
                                                     >
                                                         {acknowledgingItemId ===
                                                         draft.orderItemId
-                                                            ? 'Đang xác nhận…'
+                                                            ? 'Đang xác nhận...'
                                                             : 'Xác nhận đã xem'}
                                                     </button>
                                                 )
@@ -719,12 +719,12 @@ export default function WaiterUpdateOrderPage() {
                                     {draft.status === 'CANCELLED' && (
                                         <>
                                             <p className="rk-field__hint">
-                                                Món đã hủy — nhấn + để thêm mới từ đầu.
+                                                Món đã huỷ — nhấn + để thêm mới từ đầu.
                                             </p>
 
                                             {draft.cancelReason && (
                                                 <p className="rk-subnote rk-subnote--alert">
-                                                    Lý do hủy: {draft.cancelReason}
+                                                    Lý do huỷ: {draft.cancelReason}
                                                 </p>
                                             )}
                                         </>
@@ -766,7 +766,7 @@ export default function WaiterUpdateOrderPage() {
                                 }
                             }}
                         >
-                            {submitting ? 'Đang gửi…' : 'Gửi cập nhật xuống bếp'}
+                            {submitting ? 'Đang gửi...' : 'Gửi cập nhật xuống bếp'}
                         </button>
                     </>
                 }
@@ -779,7 +779,7 @@ export default function WaiterUpdateOrderPage() {
                                 {item.kind === 'new' && ` × ${item.qty} (Món mới)`}
                                 {item.kind === 'increase' && ` +${item.qty}`}
                                 {item.kind === 'decrease' && ` −${item.qty}`}
-                                {item.kind === 'cancel' && ' (Hủy món)'}
+                                {item.kind === 'cancel' && ' (Huỷ món)'}
                                 {item.kind === 'note' && ' (Cập nhật ghi chú)'}
                             </span>
 

@@ -97,8 +97,8 @@ export default function RegisterPage() {
             navigate('/login', {
                 state: {
                     message: created.initialPassword
-                        ? `Đăng ký thành công! Mật khẩu của bạn là: ${created.initialPassword}`
-                        : 'Đăng ký thành công! Hãy dùng mật khẩu mặc định do nhà hàng cấp để đăng nhập.',
+                        ? `Đã tạo tài khoản. Mật khẩu của bạn là: ${created.initialPassword}`
+                        : 'Đã tạo tài khoản. Hãy dùng mật khẩu mặc định do nhà hàng cấp để đăng nhập.',
                 },
             })
         } catch (requestError: unknown) {
@@ -220,7 +220,7 @@ export default function RegisterPage() {
                     className="rk-btn rk-btn--primary rk-btn--lg rk-btn--block"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Đang đăng ký…' : 'Tạo tài khoản'}
+                    {isLoading ? 'Đang đăng ký...' : 'Tạo tài khoản'}
                 </button>
             </form>
         </AuthShell>

@@ -121,7 +121,7 @@ export function BestSellersReport({
             {isLoading ? (
                 <LoadingState
                     size="sm"
-                    title="Đang tải món bán chạy…"
+                    title="Đang tải món bán chạy..."
                     description="Hệ thống đang tổng hợp số liệu theo khoảng thời gian đã chọn."
                 />
             ) : items.length === 0 ? (

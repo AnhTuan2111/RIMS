@@ -238,7 +238,7 @@ export default function AdminTablesPage() {
     }
 
     if (loading) {
-        return <LoadingState title="Đang tải danh sách bàn…" />
+        return <LoadingState title="Đang tải danh sách bàn..." />
     }
 
     if (error) {
@@ -308,7 +308,7 @@ export default function AdminTablesPage() {
                                     <tr>
                                         <th scope="col">Số bàn</th>
                                         <th scope="col">Số chỗ</th>
-                                        <th scope="col">Tình trạng</th>
+                                        <th scope="col">Trạng thái</th>
                                         <th scope="col">Đã dùng</th>
                                         <th scope="col">Trong sơ đồ</th>
                                         <th scope="col">Thao tác</th>
@@ -451,7 +451,7 @@ export default function AdminTablesPage() {
                             className="rk-btn rk-btn--primary"
                             disabled={submitting}
                         >
-                            {submitting ? 'Đang lưu…' : 'Lưu'}
+                            {submitting ? 'Đang lưu...' : 'Lưu'}
                         </button>
                     </>
                 }

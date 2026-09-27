@@ -47,7 +47,7 @@ function PaymentMethodBadge({method}: {method: AdminPaymentMethod}) {
 
     return (
         <span className={`rk-chip ${isCash ? 'rk-chip--ok' : 'rk-chip--brand'}`}>
-            {isCash ? 'Tiền mặt' : 'VNPay / QR'}
+            {isCash ? 'Tiền mặt' : 'Mã QR'}
         </span>
     )
 }
@@ -193,7 +193,7 @@ export default function AdminPaymentHistoryPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải lịch sử thanh toán…"
+                title="Đang tải lịch sử thanh toán..."
                 description="Hệ thống đang lấy danh sách hóa đơn đã thanh toán."
             />
         )
@@ -229,7 +229,7 @@ export default function AdminPaymentHistoryPage() {
                         className="rk-input"
                         type="text"
                         value={keywordInput}
-                        placeholder="Tìm theo mã hoá đơn…"
+                        placeholder="Tìm theo mã hoá đơn..."
                         onChange={(event) => setKeywordInput(event.target.value)}
                     />
 
@@ -259,7 +259,7 @@ export default function AdminPaymentHistoryPage() {
                     >
                         <option value="ALL">Tất cả phương thức</option>
                         <option value="CASH">Tiền mặt</option>
-                        <option value="QRCODE">VNPay / QR</option>
+                        <option value="QRCODE">Mã QR</option>
                     </select>
 
                     <button

@@ -150,7 +150,7 @@ export default function CompletedOrdersPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món đã hoàn thành…"
+                title="Đang tải danh sách món đã hoàn thành..."
                 description="Hệ thống đang lấy dữ liệu mới nhất từ bếp."
             />
         )
@@ -204,7 +204,7 @@ export default function CompletedOrdersPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm theo tên món, bàn, mã đơn hoặc mã món…"
+                        placeholder="Tìm theo tên món, bàn, mã đơn hoặc mã món..."
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -244,7 +244,7 @@ export default function CompletedOrdersPage() {
                         className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
-                        Xóa bộ lọc
+                        Xoá bộ lọc
                     </button>
                 </div>
             </PageCard>
@@ -252,14 +252,14 @@ export default function CompletedOrdersPage() {
             {filteredItems.length === 0 ? (
                 <EmptyState
                     title="Không tìm thấy món phù hợp"
-                    description="Hãy thay đổi từ khóa hoặc xóa bộ lọc."
+                    description="Hãy thay đổi từ khóa hoặc xoá bộ lọc."
                     action={
                         <button
                             type="button"
                             className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
-                            Xóa bộ lọc
+                            Xoá bộ lọc
                         </button>
                     }
                 />

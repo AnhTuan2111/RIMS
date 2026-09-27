@@ -175,7 +175,7 @@ export default function ForceChangePasswordPage() {
                     className="rk-btn rk-btn--primary rk-btn--block"
                     disabled={submitting}
                 >
-                    {submitting ? 'Đang đổi…' : 'Đổi mật khẩu'}
+                    {submitting ? 'Đang đổi...' : 'Đổi mật khẩu'}
                 </button>
             </form>
         </AuthShell>

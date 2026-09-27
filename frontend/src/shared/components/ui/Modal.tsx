@@ -158,7 +158,7 @@ export function ConfirmDialog({
                         disabled={busy}
                         onClick={onConfirm}
                     >
-                        {busy ? 'Đang xử lý…' : confirmLabel}
+                        {busy ? 'Đang xử lý...' : confirmLabel}
                     </button>
                 </>
             }

@@ -148,7 +148,7 @@ export default function AdminRestaurantPage() {
     }
 
     if (isLoading) {
-        return <LoadingState title="Đang tải cấu hình nhà hàng…" />
+        return <LoadingState title="Đang tải cấu hình nhà hàng..." />
     }
 
     if (error) {
@@ -217,7 +217,7 @@ export default function AdminRestaurantPage() {
                         label="Đường dẫn logo"
                         hint="Để trống thì giao diện hiện chữ cái đầu của tên nhà hàng."
                         value={form.logoUrl ?? ''}
-                        placeholder="https://…"
+                        placeholder="https://..."
                         onChange={(value) => setField('logoUrl', value)}
                     />
 
@@ -225,7 +225,7 @@ export default function AdminRestaurantPage() {
                         id="heroImageUrl"
                         label="Ảnh bìa trang chủ"
                         value={form.heroImageUrl ?? ''}
-                        placeholder="https://…"
+                        placeholder="https://..."
                         onChange={(value) => setField('heroImageUrl', value)}
                     />
                 </div>
@@ -248,7 +248,7 @@ export default function AdminRestaurantPage() {
                         type="submit"
                     >
                         <Icon name="gear" className="rk-icon" />
-                        {isSaving ? 'Đang lưu…' : 'Lưu cấu hình'}
+                        {isSaving ? 'Đang lưu...' : 'Lưu cấu hình'}
                     </button>
 
                     {/* Báo thành công lặng lẽ, không dùng toast ăn mừng. */}

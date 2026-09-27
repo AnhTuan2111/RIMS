@@ -91,7 +91,7 @@ export function OrderShiftDashboard({
             {isLoading ? (
                 <LoadingState
                     size="sm"
-                    title="Đang tải đơn hàng theo ca…"
+                    title="Đang tải đơn hàng theo ca..."
                     description="Hệ thống đang tổng hợp số liệu theo khoảng thời gian đã chọn."
                 />
             ) : (

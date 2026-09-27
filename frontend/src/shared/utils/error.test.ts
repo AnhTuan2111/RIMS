@@ -25,12 +25,12 @@ describe('Đọc lỗi từ backend', () => {
                 loiApi({
                     status: 400,
                     error: 'Yêu cầu không hợp lệ',
-                    message: 'Khách đưa thiếu tiền!',
+                    message: 'Khách đưa thiếu tiền',
                     details: {amountPaid: 'phải lớn hơn 0'},
                 }),
             )
 
-            expect(msg).toBe('Khách đưa thiếu tiền!')
+            expect(msg).toBe('Khách đưa thiếu tiền')
         })
 
         it('không có message thì lấy error', () => {

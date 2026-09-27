@@ -20,7 +20,7 @@ function getPaymentMethodLabel(method: string | null | undefined) {
     }
 
     if (method === 'QRCODE') {
-        return 'Chuyển khoản/QR'
+        return 'Mã QR'
     }
 
     return '—'

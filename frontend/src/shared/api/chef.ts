@@ -146,7 +146,7 @@ export async function getChefDashboard(
 }
 
 /**
- * Hủy món.
+ * Huỷ món.
  * PUT /rims/chef/orders/{orderItemId}/cancel
  */
 export async function cancelDish(orderItemId: number, reason: string): Promise<void> {
@@ -173,7 +173,7 @@ export async function getCompletedOrders(
 }
 
 /**
- * Lấy danh sách món đã hủy.
+ * Lấy danh sách món đã huỷ.
  * GET /rims/chef/orders/cancelled
  */
 export async function getCancelledOrders(
@@ -219,7 +219,7 @@ export async function completeGroupedKitchenOrders(
 }
 
 /**
- * Chef gửi, cập nhật hoặc xóa ghi chú nội bộ.
+ * Chef gửi, cập nhật hoặc xoá ghi chú nội bộ.
  * PUT /rims/chef/orders/{orderItemId}/internal-note
  */
 export async function updateChefInternalNote(

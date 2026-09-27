@@ -212,7 +212,7 @@ export default function DishListPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món ăn…"
+                title="Đang tải danh sách món ăn..."
                 description="Hệ thống đang lấy dữ liệu thực đơn mới nhất."
             />
         )
@@ -275,7 +275,7 @@ export default function DishListPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm theo tên món, danh mục hoặc mã món…"
+                        placeholder="Tìm theo tên món, danh mục hoặc mã món..."
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -333,7 +333,7 @@ export default function DishListPage() {
                         className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
-                        Xóa bộ lọc
+                        Xoá bộ lọc
                     </button>
                 </div>
             </PageCard>
@@ -341,14 +341,14 @@ export default function DishListPage() {
             {filteredDishes.length === 0 ? (
                 <EmptyState
                     title="Không tìm thấy món phù hợp"
-                    description="Hãy thay đổi điều kiện lọc hoặc xóa bộ lọc."
+                    description="Hãy thay đổi điều kiện lọc hoặc xoá bộ lọc."
                     action={
                         <button
                             type="button"
                             className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
-                            Xóa bộ lọc
+                            Xoá bộ lọc
                         </button>
                     }
                 />
@@ -422,7 +422,7 @@ export default function DishListPage() {
                                                     }}
                                                 >
                                                     {updatingDishId === dishItem.dishId
-                                                        ? 'Đang cập nhật…'
+                                                        ? 'Đang cập nhật...'
                                                         : dishItem.available
                                                           ? 'Tạm hết'
                                                           : 'Mở bán'}

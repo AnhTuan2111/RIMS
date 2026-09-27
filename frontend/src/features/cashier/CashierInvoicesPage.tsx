@@ -40,7 +40,7 @@ function methodLabel(method: string | null) {
     }
 
     if (method === 'QRCODE') {
-        return 'VNPay/QR'
+        return 'Mã QR'
     }
 
     return '—'
@@ -260,7 +260,7 @@ export default function CashierInvoicesPage() {
 
             console.error('[CASHIER_INVOICE_PDF_ERROR]', requestError)
 
-            notify('Không thể tải PDF!', {tone: 'alert'})
+            notify('Không tải được PDF. Hoá đơn vẫn còn trong hệ thống.', {tone: 'alert'})
         }
     }
 
@@ -288,7 +288,7 @@ export default function CashierInvoicesPage() {
 
                 <input
                     value={keyword}
-                    placeholder="Tìm theo tên hoặc số điện thoại khách…"
+                    placeholder="Tìm theo tên hoặc số điện thoại khách..."
                     className="rk-input"
                     onChange={(event) => handleKeywordChange(event.target.value)}
                 />
@@ -300,12 +300,12 @@ export default function CashierInvoicesPage() {
                 >
                     <option value="">Tất cả phương thức</option>
                     <option value="CASH">Tiền mặt</option>
-                    <option value="QRCODE">VNPay/QR</option>
+                    <option value="QRCODE">Mã QR</option>
                 </select>
 
                 <input
                     value={invoiceCode}
-                    placeholder="Mã hóa đơn…"
+                    placeholder="Mã hóa đơn..."
                     className="rk-input"
                     onChange={(event) => handleInvoiceCodeChange(event.target.value)}
                 />
@@ -317,7 +317,7 @@ export default function CashierInvoicesPage() {
 
             {isLoading ? (
                 <LoadingState
-                    title="Đang tải lịch sử hóa đơn…"
+                    title="Đang tải lịch sử hóa đơn..."
                     description="Hệ thống đang lấy danh sách hóa đơn mới nhất."
                 />
             ) : invoices.length === 0 ? (
@@ -439,7 +439,7 @@ export default function CashierInvoicesPage() {
                 }
             >
                 {loadingDetail || !selectedInvoice ? (
-                    <p className="rk-modal__loading">Đang tải chi tiết…</p>
+                    <p className="rk-modal__loading">Đang tải chi tiết...</p>
                 ) : (
                     <>
                         <div className="rk-tablewrap rk-tablewrap--scroll">

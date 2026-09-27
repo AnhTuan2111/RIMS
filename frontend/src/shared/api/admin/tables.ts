@@ -11,7 +11,7 @@ export interface AdminTable {
     id: number
     tableNumber: string
     capacity: number
-    /** Tình trạng lúc này, do các luồng vận hành đổi — không phải quyết định của quản lý. */
+    /** Trạng thái lúc này, do các luồng vận hành đổi — không phải quyết định của quản lý. */
     status: TableStatus
     /** Còn nằm trong sơ đồ bàn hay đã cất đi. */
     active: boolean

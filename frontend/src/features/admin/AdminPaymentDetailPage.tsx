@@ -55,7 +55,7 @@ function formatPaymentMethod(method: string) {
         case 'CASH':
             return 'Tiền mặt'
         case 'QRCODE':
-            return 'VNPay / QR Code'
+            return 'Mã QR'
         default:
             return method
     }
@@ -144,7 +144,7 @@ export default function AdminPaymentDetailPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải chi tiết hóa đơn…"
+                title="Đang tải chi tiết hóa đơn..."
                 description="Hệ thống đang lấy thông tin hóa đơn và danh sách món ăn."
             />
         )

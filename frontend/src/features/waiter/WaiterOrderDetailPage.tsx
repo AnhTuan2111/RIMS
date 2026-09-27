@@ -175,7 +175,7 @@ export default function WaiterOrderDetailPage() {
                                                     {item.status === 'CANCELLED' &&
                                                         item.cancelReason && (
                                                             <div className="rk-subnote rk-subnote--alert">
-                                                                Lý do hủy:{' '}
+                                                                Lý do huỷ:{' '}
                                                                 {item.cancelReason}
                                                             </div>
                                                         )}

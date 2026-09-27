@@ -255,7 +255,7 @@ export default function GroupedKitchenPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách gom món…"
+                title="Đang tải danh sách gom món..."
                 description="Hệ thống đang lấy dữ liệu nhóm món mới nhất từ bếp."
             />
         )
@@ -304,7 +304,7 @@ export default function GroupedKitchenPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm theo tên món, bàn, mã đơn hoặc ghi chú…"
+                        placeholder="Tìm theo tên món, bàn, mã đơn hoặc ghi chú..."
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -364,7 +364,7 @@ export default function GroupedKitchenPage() {
                         className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
-                        Xóa bộ lọc
+                        Xoá bộ lọc
                     </button>
                 </div>
             </PageCard>
@@ -379,7 +379,7 @@ export default function GroupedKitchenPage() {
                             className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
-                            Xóa bộ lọc
+                            Xoá bộ lọc
                         </button>
                     }
                 />
@@ -500,7 +500,7 @@ export default function GroupedKitchenPage() {
                                             }}
                                         >
                                             {completingGroupKey === group.groupKey
-                                                ? 'Đang cập nhật…'
+                                                ? 'Đang cập nhật...'
                                                 : group.hasNote
                                                   ? 'Xong món'
                                                   : 'Xong cả nhóm'}

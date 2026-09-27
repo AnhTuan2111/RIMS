@@ -35,7 +35,7 @@ export function Pagination({
         return null
     }
 
-    // 1 … 4 5 [6] 7 8 … 20
+    // 1 ... 4 5 [6] 7 8 ... 20
     const pages: (number | 'gap')[] = []
     const left = Math.max(2, page - 1)
     const right = Math.min(totalPages - 1, page + 1)
@@ -91,7 +91,7 @@ export function Pagination({
                     {pages.map((entry, index) =>
                         entry === 'gap' ? (
                             <span className="rk-pager__gap" key={`gap-${index}`}>
-                                …
+                                ...
                             </span>
                         ) : (
                             <button

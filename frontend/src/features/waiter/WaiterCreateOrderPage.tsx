@@ -266,7 +266,7 @@ export default function WaiterCreateOrderPage() {
 
                 <input
                     type="text"
-                    placeholder="Tìm theo tên món hoặc danh mục…"
+                    placeholder="Tìm theo tên món hoặc danh mục..."
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     className="rk-input"
@@ -414,7 +414,7 @@ export default function WaiterCreateOrderPage() {
                                 }
                             }}
                         >
-                            {submitting ? 'Đang tạo…' : 'Gửi đơn xuống bếp'}
+                            {submitting ? 'Đang tạo...' : 'Gửi đơn xuống bếp'}
                         </button>
                     </>
                 }

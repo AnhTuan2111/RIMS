@@ -150,7 +150,7 @@ export default function LoginPage() {
                     className="rk-btn rk-btn--primary rk-btn--lg rk-btn--block"
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Đang đăng nhập…' : 'Đăng nhập'}
+                    {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                 </button>
             </form>
         </AuthShell>

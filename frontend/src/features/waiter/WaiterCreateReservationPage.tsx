@@ -466,7 +466,7 @@ export default function WaiterCreateReservationPage() {
                                     }
                                 >
                                     <option value={0}>
-                                        {isTablesLoading ? 'Đang tải bàn…' : 'Chọn bàn'}
+                                        {isTablesLoading ? 'Đang tải bàn...' : 'Chọn bàn'}
                                     </option>
 
                                     {tables.map((table) => (
@@ -499,7 +499,7 @@ export default function WaiterCreateReservationPage() {
                                     disabled={submitting}
                                     onClick={() => void submitReservation()}
                                 >
-                                    {submitting ? 'Đang lưu…' : 'Lưu đặt bàn'}
+                                    {submitting ? 'Đang lưu...' : 'Lưu đặt bàn'}
                                 </button>
 
                                 <button
@@ -508,7 +508,7 @@ export default function WaiterCreateReservationPage() {
                                     disabled={submitting}
                                     onClick={() => navigate('/waiter/tables')}
                                 >
-                                    Hủy
+                                    Huỷ
                                 </button>
                             </div>
                         </div>

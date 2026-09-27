@@ -49,7 +49,7 @@ export default function CancelledOrdersPage() {
             console.error(requestError)
 
             setError(
-                'Không thể tải danh sách món đã hủy. ' +
+                'Không thể tải danh sách món đã huỷ. ' +
                     'Hãy kiểm tra backend hoặc tài khoản Chef.',
             )
         } finally {
@@ -84,8 +84,8 @@ export default function CancelledOrdersPage() {
                     : 0
 
                 /*
-                 * Món hủy sau hiển thị ở trên.
-                 * Món hủy trước được đẩy xuống dưới.
+                 * Món huỷ sau hiển thị ở trên.
+                 * Món huỷ trước được đẩy xuống dưới.
                  */
                 return secondTime - firstTime
             })
@@ -100,7 +100,7 @@ export default function CancelledOrdersPage() {
     const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
     if (isLoading) {
-        return <LoadingState title="Đang tải danh sách món đã hủy…" />
+        return <LoadingState title="Đang tải danh sách món đã huỷ..." />
     }
 
     if (error) {
@@ -118,10 +118,10 @@ export default function CancelledOrdersPage() {
             <section className="rk-card rk-card--pad">
                 <div className="rk-card__head-inline">
                     <div>
-                        <h2>Món đã hủy hôm nay</h2>
+                        <h2>Món đã huỷ hôm nay</h2>
 
                         <p>
-                            Danh sách món Chef hủy trực tiếp hoặc tự động bị hủy khi món
+                            Danh sách món Chef huỷ trực tiếp hoặc tự động bị huỷ khi món
                             được đánh dấu tạm hết, trong ngày hôm nay.
                         </p>
                     </div>
@@ -147,7 +147,7 @@ export default function CancelledOrdersPage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder={'Tìm tên món, bàn, mã đơn ' + 'hoặc lý do hủy…'}
+                        placeholder={'Tìm tên món, bàn, mã đơn ' + 'hoặc lý do huỷ...'}
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -162,7 +162,7 @@ export default function CancelledOrdersPage() {
                             setCurrentPage(1)
                         }}
                     >
-                        Xóa tìm kiếm
+                        Xoá tìm kiếm
                     </button>
                 </div>
             </section>
@@ -172,7 +172,7 @@ export default function CancelledOrdersPage() {
                     <div className="rk-note">
                         <h3>
                             {items.length === 0
-                                ? 'Chưa có món bị hủy'
+                                ? 'Chưa có món bị huỷ'
                                 : 'Không tìm thấy món phù hợp'}
                         </h3>
 
@@ -198,7 +198,7 @@ export default function CancelledOrdersPage() {
                                         <h3>{item.dishName}</h3>
                                     </div>
 
-                                    <span className="rk-chip rk-chip--alert">Đã hủy</span>
+                                    <span className="rk-chip rk-chip--alert">Đã huỷ</span>
                                 </div>
 
                                 <div className="rk-metarow">

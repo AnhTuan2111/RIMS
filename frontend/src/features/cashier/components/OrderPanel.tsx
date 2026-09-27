@@ -117,7 +117,7 @@ export default function OrderPanel({
         const phone = phoneSearch.trim()
 
         if (!phone) {
-            setPhoneError('Vui lòng nhập số điện thoại!')
+            setPhoneError('Vui lòng nhập số điện thoại')
             return
         }
 
@@ -150,7 +150,7 @@ export default function OrderPanel({
 
             console.error('[CASHIER_CUSTOMER_SEARCH_ERROR]', requestError)
 
-            notify('Lỗi tìm kiếm khách hàng!', {tone: 'alert'})
+            notify('Không tìm được khách hàng. Thử lại sau ít phút.', {tone: 'alert'})
         } finally {
             setIsSearching(false)
         }
@@ -162,7 +162,7 @@ export default function OrderPanel({
         const email = newCusEmail.trim()
 
         if (!fullName) {
-            notify('Vui lòng nhập tên khách hàng!', {tone: 'alert'})
+            notify('Vui lòng nhập tên khách hàng', {tone: 'alert'})
             return
         }
 
@@ -174,7 +174,7 @@ export default function OrderPanel({
         }
 
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            notify('Vui lòng nhập email hợp lệ!', {tone: 'alert'})
+            notify('Vui lòng nhập email hợp lệ', {tone: 'alert'})
             return
         }
 
@@ -192,7 +192,7 @@ export default function OrderPanel({
 
                 setShowCreate(false)
 
-                notify('Đăng ký thành viên thành công')
+                notify('Đã đăng ký thành viên')
             }
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
@@ -201,7 +201,7 @@ export default function OrderPanel({
 
             console.error('[CASHIER_CUSTOMER_CREATE_ERROR]', requestError)
 
-            notify('Lỗi tạo khách hàng. Có thể số điện thoại đã tồn tại!', {
+            notify('Không tạo được khách hàng. Số điện thoại này có thể đã có tài khoản.', {
                 tone: 'alert',
             })
         } finally {
@@ -226,7 +226,7 @@ export default function OrderPanel({
 
     async function handleCheckoutClick() {
         if (!orderDetail) {
-            setLockError('Chưa có thông tin đơn hàng để thanh toán!')
+            setLockError('Chưa có thông tin đơn hàng để thanh toán')
             return
         }
 
@@ -246,7 +246,7 @@ export default function OrderPanel({
 
             setLockError(
                 response.data.message ??
-                    'Đơn hàng còn món chưa hoàn thành hoặc chưa hủy. Hãy hoàn thành để có thể thanh toán.',
+                    'Đơn hàng còn món chưa hoàn thành hoặc chưa huỷ. Hãy hoàn thành để có thể thanh toán.',
             )
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
@@ -256,7 +256,7 @@ export default function OrderPanel({
             console.error('[CASHIER_PAYMENT_LOCK_ERROR]', requestError)
 
             setLockError(
-                'Không thể thực hiện thanh toán đơn hàng.Vui lòng huỷ hoặc hoàn thành các món còn lại!',
+                'Không thể thực hiện thanh toán đơn hàng.Vui lòng huỷ hoặc hoàn thành các món còn lại',
             )
         } finally {
             setIsLocking(false)
@@ -285,7 +285,7 @@ export default function OrderPanel({
                         <input
                             type="text"
                             inputMode="numeric"
-                            placeholder="Nhập Số điện thoại khách hàng…"
+                            placeholder="Nhập Số điện thoại khách hàng..."
                             className="rk-input"
                             value={phoneSearch}
                             disabled={!!customer}
@@ -350,7 +350,7 @@ export default function OrderPanel({
                                 disabled={!isCreateFormValid || processingCreate}
                                 onClick={() => void handleCreateCustomer()}
                             >
-                                {processingCreate ? 'Đang tạo…' : 'Tạo tài khoản'}
+                                {processingCreate ? 'Đang tạo...' : 'Tạo tài khoản'}
                             </button>
                         </div>
                     )}
@@ -476,7 +476,7 @@ export default function OrderPanel({
                                 disabled={isLocking}
                                 onClick={() => void handleCheckoutClick()}
                             >
-                                {isLocking ? 'Đang khóa đơn…' : 'Thanh toán'}
+                                {isLocking ? 'Đang khóa đơn...' : 'Thanh toán'}
                             </button>
                         )}
                     </div>

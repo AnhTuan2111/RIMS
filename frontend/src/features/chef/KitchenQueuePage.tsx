@@ -272,7 +272,7 @@ export default function KitchenQueuePage() {
     useKitchenSocket(() => {
         void fetchKitchenOrders(false, false)
 
-        // Nếu đang mở modal chi tiết, refetch để cập nhật trạng thái ghi chú/hủy...
+        // Nếu đang mở modal chi tiết, refetch để cập nhật trạng thái ghi chú/huỷ...
         if (selectedDish) {
             getDishDetail(selectedDish.orderItemId)
                 .then(setSelectedDish)
@@ -394,7 +394,7 @@ export default function KitchenQueuePage() {
             notify(
                 normalizedNote
                     ? 'Đã gửi ghi chú nội bộ cho Waiter.'
-                    : 'Đã xóa ghi chú nội bộ.',
+                    : 'Đã xoá ghi chú nội bộ.',
                 {tone: 'alert'},
             )
         } catch (requestError) {
@@ -467,12 +467,12 @@ export default function KitchenQueuePage() {
         const normalizedReason = cancelReason.trim()
 
         if (!normalizedReason) {
-            setCancelError('Vui lòng nhập lý do hủy món.')
+            setCancelError('Vui lòng nhập lý do huỷ món.')
             return
         }
 
         if (normalizedReason.length > 500) {
-            setCancelError('Lý do hủy không được vượt quá 500 ký tự.')
+            setCancelError('Lý do huỷ không được vượt quá 500 ký tự.')
             return
         }
 
@@ -487,7 +487,7 @@ export default function KitchenQueuePage() {
             await cancelDish(cancelledOrderItemId, normalizedReason)
 
             /*
-             * Hủy từ modal chỉ xóa đúng OrderItem
+             * Huỷ từ modal chỉ xoá đúng OrderItem
              * đang được chọn khỏi hàng đợi.
              */
             setItems((currentItems) =>
@@ -497,7 +497,7 @@ export default function KitchenQueuePage() {
             closeDishDetail()
         } catch (requestError) {
             console.error(requestError)
-            setCancelError('Không thể hủy món.')
+            setCancelError('Không thể huỷ món.')
         } finally {
             setIsCancelSubmitting(false)
         }
@@ -560,7 +560,7 @@ export default function KitchenQueuePage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải danh sách món cần chế biến…"
+                title="Đang tải danh sách món cần chế biến..."
                 description="Hệ thống đang lấy dữ liệu mới nhất từ bếp."
             />
         )
@@ -585,7 +585,7 @@ export default function KitchenQueuePage() {
                 <div className="rk-card__head-inline">
                     <div>
                         <h2>Đơn cần chế biến</h2>
-                        <p>Chọn món để xem chi tiết, hoàn thành món hoặc hủy món.</p>
+                        <p>Chọn món để xem chi tiết, hoàn thành món hoặc huỷ món.</p>
                     </div>
 
                     <div className="rk-actions">
@@ -644,7 +644,7 @@ export default function KitchenQueuePage() {
                     <input
                         type="search"
                         value={searchText}
-                        placeholder="Tìm theo tên món, bàn hoặc mã đơn…"
+                        placeholder="Tìm theo tên món, bàn hoặc mã đơn..."
                         onChange={(event) => {
                             setSearchText(event.target.value)
                             setCurrentPage(1)
@@ -684,7 +684,7 @@ export default function KitchenQueuePage() {
                         className="rk-btn rk-btn--quiet"
                         onClick={clearFilters}
                     >
-                        Xóa bộ lọc
+                        Xoá bộ lọc
                     </button>
                 </div>
             </section>
@@ -692,14 +692,14 @@ export default function KitchenQueuePage() {
             {filteredItems.length === 0 ? (
                 <EmptyState
                     title="Không tìm thấy món phù hợp"
-                    description="Hãy thay đổi từ khóa hoặc xóa bộ lọc."
+                    description="Hãy thay đổi từ khóa hoặc xoá bộ lọc."
                     action={
                         <button
                             type="button"
                             className="rk-btn rk-btn--quiet"
                             onClick={clearFilters}
                         >
-                            Xóa bộ lọc
+                            Xoá bộ lọc
                         </button>
                     }
                 />
@@ -757,7 +757,7 @@ export default function KitchenQueuePage() {
                                         >
                                             <Icon name="check" className="rk-icon" />
                                             {completingItemId === item.orderItemId
-                                                ? 'Đang cập nhật…'
+                                                ? 'Đang cập nhật...'
                                                 : 'Xong món'}
                                         </button>
 
@@ -821,7 +821,7 @@ export default function KitchenQueuePage() {
                                     })
                                 }
                             >
-                                {isCancelSubmitting ? 'Đang huỷ…' : 'Huỷ món'}
+                                {isCancelSubmitting ? 'Đang huỷ...' : 'Huỷ món'}
                             </button>
 
                             <button
@@ -837,7 +837,7 @@ export default function KitchenQueuePage() {
                                 }
                             >
                                 {completingItemId === selectedDish.orderItemId
-                                    ? 'Đang cập nhật…'
+                                    ? 'Đang cập nhật...'
                                     : 'Xong món'}
                             </button>
                         </>
@@ -845,7 +845,7 @@ export default function KitchenQueuePage() {
                 }
             >
                 {isDetailLoading && (
-                    <p className="rk-modal__loading">Đang tải chi tiết món…</p>
+                    <p className="rk-modal__loading">Đang tải chi tiết món...</p>
                 )}
 
                 {detailError && <p className="rk-formerror">{detailError}</p>}
@@ -957,10 +957,10 @@ export default function KitchenQueuePage() {
                                         }
                                     >
                                         {isInternalNoteSubmitting
-                                            ? 'Đang gửi…'
+                                            ? 'Đang gửi...'
                                             : chefInternalNote.trim()
                                               ? 'Gửi cho Waiter'
-                                              : 'Xóa ghi chú'}
+                                              : 'Xoá ghi chú'}
                                     </button>
                                 </div>
 
@@ -970,10 +970,10 @@ export default function KitchenQueuePage() {
                             </div>
 
                             <div className="rk-dangerzone">
-                                <h3>Hủy món</h3>
+                                <h3>Huỷ món</h3>
 
                                 <p>
-                                    Món sẽ bị hủy ngay. Waiter chỉ nhận thông báo để báo
+                                    Món sẽ bị huỷ ngay. Waiter chỉ nhận thông báo để báo
                                     lại với khách.
                                 </p>
 
@@ -981,7 +981,7 @@ export default function KitchenQueuePage() {
                                     rows={4}
                                     maxLength={500}
                                     value={cancelReason}
-                                    placeholder="Nhập lý do hủy món…"
+                                    placeholder="Nhập lý do huỷ món..."
                                     onChange={(event) => {
                                         setCancelReason(event.target.value)
                                         setCancelError(null)

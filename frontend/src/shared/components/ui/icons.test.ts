@@ -77,7 +77,7 @@ describe('Bộ icon', () => {
 
     it('không có icon nào không ai dùng', () => {
         // Bộ icon chưa được gắn vào màn nào thì chưa có gì để canh. Cổng này tự bật
-        // khi màn đầu tiên dùng <Icon name="…" />, tức là lúc pha P4 bắt đầu.
+        // khi màn đầu tiên dùng <Icon name="..." />, tức là lúc pha P4 bắt đầu.
         //
         // Dấu hiệu phải là `<Icon name=` chứ không phải `<Icon`: HomePage và
         // ThemeToggle đang đặt biến cục bộ tên Icon cho component của lucide, nên

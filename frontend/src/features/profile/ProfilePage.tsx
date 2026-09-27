@@ -330,11 +330,11 @@ export default function ProfilePage() {
             </div>
 
             {updateSuccess && (
-                <div className="rk-note rk-note--ok">Cập nhật hồ sơ thành công!</div>
+                <div className="rk-note rk-note--ok">Đã cập nhật hồ sơ</div>
             )}
 
             {pwSuccess && (
-                <div className="rk-note rk-note--ok">Đổi mật khẩu thành công!</div>
+                <div className="rk-note rk-note--ok">Đã đổi mật khẩu</div>
             )}
 
             <div className="rk-card rk-card--soft rk-card--pad">
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                                 setUpdateError(null)
                             }}
                         >
-                            Hủy
+                            Huỷ
                         </button>
 
                         <button
@@ -438,7 +438,7 @@ export default function ProfilePage() {
                             disabled={updateLoading}
                             onClick={() => void handleSaveProfile()}
                         >
-                            {updateLoading ? 'Đang lưu…' : 'Lưu thay đổi'}
+                            {updateLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
                         </button>
                     </div>
                 )}
@@ -465,7 +465,7 @@ export default function ProfilePage() {
                                 setPwError(null)
                             }}
                         >
-                            {showChangePw ? 'Hủy' : 'Đổi mật khẩu'}
+                            {showChangePw ? 'Huỷ' : 'Đổi mật khẩu'}
                         </button>
                     </div>
 
@@ -506,7 +506,7 @@ export default function ProfilePage() {
                                     disabled={pwLoading}
                                     onClick={() => void handleChangePassword()}
                                 >
-                                    {pwLoading ? 'Đang xử lý…' : 'Xác nhận đổi mật khẩu'}
+                                    {pwLoading ? 'Đang xử lý...' : 'Xác nhận đổi mật khẩu'}
                                 </button>
                             </div>
                         </div>

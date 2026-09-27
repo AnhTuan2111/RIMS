@@ -163,8 +163,8 @@ export default function AdminCategoryPage() {
             // thay vì tự đoán — số món có thể đã đổi từ lúc màn này tải về.
             notify(res.data.message)
         } catch (err: unknown) {
-            console.error('Lỗi khi xóa danh mục:', err)
-            const errMsg = getErrorMessage(err, 'Không thể thực hiện xóa danh mục!')
+            console.error('Lỗi khi xoá danh mục:', err)
+            const errMsg = getErrorMessage(err, 'Không xoá được danh mục. Danh mục còn món thì phải chuyển món đi trước.')
             notify(errMsg, {tone: 'alert'})
             setDeleteTarget(null)
         }
@@ -209,7 +209,7 @@ export default function AdminCategoryPage() {
     if (loading) {
         return (
             <LoadingState
-                title="Đang tải dữ liệu danh mục thực đơn…"
+                title="Đang tải dữ liệu danh mục thực đơn..."
                 description="Hệ thống đang lấy danh sách danh mục và món ăn liên quan."
             />
         )
@@ -298,7 +298,7 @@ export default function AdminCategoryPage() {
                                     </span>
                                     <input
                                         type="text"
-                                        placeholder="Tìm theo tên danh mục hoặc mã danh mục…"
+                                        placeholder="Tìm theo tên danh mục hoặc mã danh mục..."
                                         value={searchTerm}
                                         onChange={(e) => {
                                             setSearchTerm(e.target.value)
@@ -415,7 +415,7 @@ export default function AdminCategoryPage() {
                                                     })
                                                 }
                                                 className="rk-iconbtn rk-iconbtn--danger"
-                                                title="Xóa"
+                                                title="Xoá"
                                             >
                                                 <Icon name="trash" className="rk-icon" />
                                             </button>
@@ -438,7 +438,7 @@ export default function AdminCategoryPage() {
                                             setCurrentPage(1)
                                         }}
                                     >
-                                        Xóa bộ lọc
+                                        Xoá bộ lọc
                                     </button>
                                 }
                             />
@@ -497,7 +497,7 @@ export default function AdminCategoryPage() {
                                 }
                                 className="rk-btn rk-btn--danger"
                             >
-                                <Icon name="trash" className="rk-icon" /> Xóa danh
+                                <Icon name="trash" className="rk-icon" /> Xoá danh
                                 mục
                             </button>
                         </div>
@@ -691,7 +691,7 @@ export default function AdminCategoryPage() {
                             <input
                                 type="text"
                                 required
-                                placeholder="Ví dụ: Hải Sản, Món Nướng, Đồ Tráng Miệng…"
+                                placeholder="Ví dụ: Hải Sản, Món Nướng, Đồ Tráng Miệng..."
                                 maxLength={50}
                                 value={formData.name}
                                 onChange={(e) =>
@@ -711,7 +711,7 @@ export default function AdminCategoryPage() {
                             <textarea
                                 maxLength={100}
                                 rows={4}
-                                placeholder="Nhập tóm tắt thông tin mô tả về nhóm món ăn này…"
+                                placeholder="Nhập tóm tắt thông tin mô tả về nhóm món ăn này..."
                                 value={formData.description}
                                 onChange={(e) =>
                                     setFormData({
@@ -753,14 +753,14 @@ export default function AdminCategoryPage() {
                                 onClick={() => setView('LIST')}
                                 className="rk-btn rk-btn--quiet"
                             >
-                                Hủy bỏ
+                                Huỷ bỏ
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
                                 className="rk-btn rk-btn--primary"
                             >
-                                {isSubmitting ? ' Đang lưu…' : 'Lưu dữ liệu'}
+                                {isSubmitting ? ' Đang lưu...' : 'Lưu dữ liệu'}
                             </button>
                         </div>
                     </form>

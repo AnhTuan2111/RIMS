@@ -79,7 +79,7 @@ const statusLabels: Record<string, string> = {
     QUEUED: 'Đang trong hàng đợi',
     WAITING: 'Đang chờ',
     COMPLETED: 'Đã hoàn thành',
-    CANCELLED: 'Đã hủy',
+    CANCELLED: 'Đã huỷ',
 }
 
 /**
@@ -393,7 +393,7 @@ export default function CustomerReservations() {
 
             console.error('[CUSTOMER_CANCEL_RESERVATION_ERROR]', requestError)
 
-            setCancelError(getErrorMessage(requestError, 'Hủy đặt bàn thất bại'))
+            setCancelError(getErrorMessage(requestError, 'Huỷ đặt bàn thất bại'))
         } finally {
             setCancelingId(null)
         }
@@ -431,7 +431,7 @@ export default function CustomerReservations() {
                         void loadCurrentReservation(undefined, true)
                     }}
                 >
-                    Hủy đặt bàn
+                    Huỷ đặt bàn
                 </button>
             </div>
 
@@ -447,7 +447,7 @@ export default function CustomerReservations() {
 
                     {bookSuccess && (
                         <div className="rk-note rk-note--ok">
-                            <strong>Đặt bàn thành công!</strong>
+                            <strong>Đã đặt bàn</strong>
 
                             <div className="rk-rowlist__meta">
                                 <span>
@@ -641,7 +641,7 @@ export default function CustomerReservations() {
                                     className="rk-input"
                                     type="text"
                                     value={bookForm.note}
-                                    placeholder="Yêu cầu đặc biệt…"
+                                    placeholder="Yêu cầu đặc biệt..."
                                     maxLength={100}
                                     onChange={(event) =>
                                         setBookForm((previous) => ({
@@ -663,7 +663,7 @@ export default function CustomerReservations() {
                                     Boolean(tableError)
                                 }
                             >
-                                {bookLoading ? 'Đang xử lý…' : 'Lưu đặt bàn'}
+                                {bookLoading ? 'Đang xử lý...' : 'Lưu đặt bàn'}
                             </button>
 
                             <button
@@ -682,7 +682,7 @@ export default function CustomerReservations() {
                                     setBookSuccess(null)
                                 }}
                             >
-                                Hủy
+                                Huỷ
                             </button>
                         </div>
                     </form>
@@ -702,11 +702,11 @@ export default function CustomerReservations() {
 
                     {cancelSuccess && (
                         <div className="rk-note rk-note--ok">
-                            <strong>Hủy đặt bàn thành công!</strong>
+                            <strong>Đã huỷ đặt bàn</strong>
 
                             <div className="rk-rowlist__meta">
                                 <span>
-                                    Đã hủy bàn{' '}
+                                    Đã huỷ bàn{' '}
                                     <strong>{cancelSuccess.tableNumber}</strong>
                                     {' - '}
                                     {formatDateTime(cancelSuccess.reservationTime)}
@@ -771,8 +771,8 @@ export default function CustomerReservations() {
                                         }
                                     >
                                         {cancelingId === reservation.id
-                                            ? 'Đang xử lý…'
-                                            : 'Hủy đặt bàn'}
+                                            ? 'Đang xử lý...'
+                                            : 'Huỷ đặt bàn'}
                                     </button>
                                 </div>
                             ))}

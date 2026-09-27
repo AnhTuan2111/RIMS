@@ -34,7 +34,7 @@ export function ProtectedRoute({allow}: ProtectedRouteProps) {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang kiểm tra phiên đăng nhập…"
+                title="Đang kiểm tra phiên đăng nhập..."
                 description="Chờ một chút để hệ thống xác nhận tài khoản."
             />
         )

@@ -24,7 +24,7 @@ interface PaymentModalProps {
 
 function methodDisplay(method: string) {
     if (method === 'CASH') return {icon: '', label: 'Tiền mặt'}
-    if (method === 'QRCODE') return {icon: '', label: 'Thẻ / VNPay'}
+    if (method === 'QRCODE') return {icon: '', label: 'Mã QR'}
     return {icon: '', label: method}
 }
 
@@ -99,7 +99,7 @@ export default function PaymentModal({
 
     async function handleConfirmCash() {
         if (amountReceived < finalAmount) {
-            notify('Tiền khách đưa chưa đủ!', {tone: 'alert'})
+            notify('Tiền khách đưa chưa đủ', {tone: 'alert'})
             return
         }
 
@@ -120,7 +120,7 @@ export default function PaymentModal({
                 return
             }
 
-            notify(response?.data?.message ?? 'Có lỗi xảy ra từ server!', {tone: 'alert'})
+            notify(response?.data?.message ?? 'Máy chủ không phản hồi. Dữ liệu chưa được lưu, thử lại sau ít phút.', {tone: 'alert'})
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
                 return
@@ -128,7 +128,7 @@ export default function PaymentModal({
 
             console.error('[CASHIER_CASH_PAYMENT_ERROR]', requestError)
 
-            notify('Lỗi thanh toán: Kiểm tra lại mạng hoặc đơn hàng!', {tone: 'alert'})
+            notify('Không gửi được yêu cầu thanh toán. Đơn vẫn giữ nguyên, kiểm tra mạng rồi thử lại.', {tone: 'alert'})
         } finally {
             setProcessing(false)
         }
@@ -261,7 +261,7 @@ export default function PaymentModal({
                                 disabled={amountReceived < finalAmount || processing}
                                 onClick={() => void handleConfirmCash()}
                             >
-                                {processing ? 'Đang xử lý…' : 'Xác nhận và in hoá đơn'}
+                                {processing ? 'Đang xử lý...' : 'Xác nhận và in hoá đơn'}
                             </button>
                         </div>
                     </div>
@@ -288,7 +288,7 @@ export default function PaymentModal({
                                 disabled={processing}
                                 onClick={() => setMethod(null)}
                             >
-                                Hủy bỏ
+                                Huỷ bỏ
                             </button>
 
                             <button
@@ -297,7 +297,7 @@ export default function PaymentModal({
                                 disabled={processing}
                                 onClick={() => void handleRedirectToVNPay()}
                             >
-                                {processing ? 'Đang kết nối…' : 'Chuyển hướng ngay'}
+                                {processing ? 'Đang kết nối...' : 'Chuyển hướng ngay'}
                             </button>
                         </div>
                     </div>
