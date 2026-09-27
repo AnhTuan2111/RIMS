@@ -12,7 +12,7 @@ import type {
     UpdateOrderItemRequest,
 } from '@/shared/api/waiter'
 import {BackArrow, fmtPriceShort, useTableNumber} from './components'
-import {Modal} from '@/shared/components/ui'
+import {Modal, OrderCart} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
@@ -506,6 +506,7 @@ export default function WaiterUpdateOrderPage() {
             <div className="rk-order">
                 <div className="rk-order__menu">
                     <input
+                        aria-label="Tìm theo tên món hoặc danh mục"
                         type="text"
                         placeholder="Tìm theo tên món hoặc danh mục..."
                         value={searchQuery}
@@ -708,17 +709,30 @@ export default function WaiterUpdateOrderPage() {
                                                 </button>
                                             </div>
 
-                                            <input
-                                                placeholder="Ghi chú (ít cay, ...)"
-                                                value={draft.note}
-                                                className="rk-input"
-                                                onChange={(event) =>
-                                                    setDraftNote(
-                                                        dish.dishId,
-                                                        event.target.value,
-                                                    )
-                                                }
-                                            />
+                                            {/* Ô ghi chú chỉ hiện với món CÓ TRONG ĐƠN
+                                                (đã gọi, vừa thêm, hoặc đang mang ghi
+                                                chú). Trước đây nó hiện ở cả bốn mươi
+                                                ba món, trong khi màn Tạo đơn chỉ hiện
+                                                khi món đã được gọi — cùng một thao
+                                                tác mà hai màn làm hai kiểu. */}
+                                            {(draft.qty > 0 ||
+                                                hasExisting ||
+                                                draft.note) && (
+                                                <input
+                                                    placeholder="Ghi chú (ít cay, ...)"
+                                                    aria-label={
+                                                        'Ghi chú cho ' + dish.name
+                                                    }
+                                                    value={draft.note}
+                                                    className="rk-input"
+                                                    onChange={(event) =>
+                                                        setDraftNote(
+                                                            dish.dishId,
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            )}
 
                                             {isUnavailable && (
                                                 <p className="rk-field__hint">
@@ -757,47 +771,15 @@ export default function WaiterUpdateOrderPage() {
                     )}
                 </div>
 
-                <aside className="rk-cart" aria-label="Thay đổi sắp gửi">
-                    <h2 className="rk-cart__head">
-                        Thay đổi
-                        <span className="rk-cart__count">{changeSummary.length}</span>
-                    </h2>
-
-                    {/* Giỏ ở màn Sửa đơn liệt kê THAY ĐỔI, không liệt kê cả đơn:
-                        cả đơn đã có ở màn Chi tiết. Thứ phục vụ cần thấy trước
-                        khi bấm gửi là đúng những gì sắp xuống bếp. */}
-                    {changeSummary.length === 0 ? (
-                        <p className="rk-cart__empty">
-                            Chưa thay đổi gì. Sửa số lượng hoặc ghi chú để bắt đầu.
-                        </p>
-                    ) : (
-                        <div className="rk-cart__body">
-                            {changeSummary.map((item) => (
-                                <div className="rk-cart__line" key={item.dishId}>
-                                    <span className="rk-cart__qty">
-                                        {item.kind === 'new' && item.qty + '\u00d7'}
-                                        {item.kind === 'increase' && '+' + item.qty}
-                                        {item.kind === 'decrease' && '\u2212' + item.qty}
-                                        {item.kind === 'cancel' && '\u00d7'}
-                                        {item.kind === 'note' && '\u270e'}
-                                    </span>
-                                    <span className="rk-cart__name">{item.name}</span>
-                                    <span className="rk-cart__sum">
-                                        {item.kind === 'new' && 'Món mới'}
-                                        {item.kind === 'increase' && 'Gọi thêm'}
-                                        {item.kind === 'decrease' && 'Bớt'}
-                                        {item.kind === 'cancel' && 'Huỷ món'}
-                                        {item.kind === 'note' && 'Đổi ghi chú'}
-                                    </span>
-                                    {item.note && (
-                                        <span className="rk-cart__note">{item.note}</span>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="rk-cart__foot">
+                {/* Giỏ ở màn Sửa đơn liệt kê THAY ĐỔI, không liệt kê cả đơn:
+                    cả đơn đã có ở màn Chi tiết. Thứ phục vụ cần thấy trước
+                    khi bấm gửi là đúng những gì sắp xuống bếp. */}
+                <OrderCart
+                    label="Thay đổi sắp gửi"
+                    title="Thay đổi"
+                    count={changeSummary.length}
+                    empty="Chưa thay đổi gì. Sửa số lượng hoặc ghi chú để bắt đầu."
+                    foot={
                         <button
                             type="button"
                             className="rk-btn rk-btn--go"
@@ -811,8 +793,31 @@ export default function WaiterUpdateOrderPage() {
                         >
                             Gửi cập nhật xuống bếp
                         </button>
-                    </div>
-                </aside>
+                    }
+                >
+                    {changeSummary.map((item) => (
+                        <div className="rk-cart__line" key={item.dishId}>
+                            <span className="rk-cart__qty">
+                                {item.kind === 'new' && item.qty + '×'}
+                                {item.kind === 'increase' && '+' + item.qty}
+                                {item.kind === 'decrease' && '−' + item.qty}
+                                {item.kind === 'cancel' && '×'}
+                                {item.kind === 'note' && '✎'}
+                            </span>
+                            <span className="rk-cart__name">{item.name}</span>
+                            <span className="rk-cart__sum">
+                                {item.kind === 'new' && 'Món mới'}
+                                {item.kind === 'increase' && 'Gọi thêm'}
+                                {item.kind === 'decrease' && 'Bớt'}
+                                {item.kind === 'cancel' && 'Huỷ món'}
+                                {item.kind === 'note' && 'Đổi ghi chú'}
+                            </span>
+                            {item.note && (
+                                <span className="rk-cart__note">{item.note}</span>
+                            )}
+                        </div>
+                    ))}
+                </OrderCart>
             </div>
 
             <Modal

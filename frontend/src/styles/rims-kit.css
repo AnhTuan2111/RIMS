@@ -324,11 +324,15 @@ a {
 
 /* ---------- Ô nhập ---------- */
 
+/* Viền 2px: ô nhập là ĐIỀU KHIỂN, và luật đã chốt là "2px cho bề mặt và điều
+   khiển, 1px cho kẻ trong lòng bảng và viền chip". Bản trước để 1px nên cạnh
+   một cái nút 2px, ô nhập trông như vẽ bằng bút khác. KHÔNG có bóng — bóng chỉ
+   ở thẻ, nút, modal, phiếu, ô thống kê. */
 .rk-input,
 .rk-select {
     width: 100%;
     padding: var(--rims-space-3) var(--rims-space-4);
-    border: 1px solid var(--rims-line-strong);
+    border: var(--rims-border) solid var(--rims-line-strong);
     border-radius: var(--rims-radius-md);
     background: var(--rims-surface);
     color: var(--rims-ink);
@@ -350,7 +354,7 @@ a {
     width: 100%;
     min-height: 96px;
     padding: var(--rims-space-3) var(--rims-space-4);
-    border: 1px solid var(--rims-line-strong);
+    border: var(--rims-border) solid var(--rims-line-strong);
     border-radius: var(--rims-radius-md);
     background: var(--rims-surface);
     color: var(--rims-ink);
@@ -1160,6 +1164,7 @@ textarea.rk-input {
 
 .rk-pager__size {
     width: auto;
+    min-height: 2.5rem;
     padding: var(--rims-space-1) var(--rims-space-3);
     font-size: var(--rims-text-sm);
 }
@@ -1174,10 +1179,12 @@ textarea.rk-input {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 34px;
-    height: 34px;
+    /* 40px và viền 2px như mọi điều khiển khác. Bản trước 34px viền 1px —
+       nút bấm được nhỏ nhất app, và trên điện thoại là nút khó trúng nhất. */
+    min-width: 2.5rem;
+    height: 2.5rem;
     padding: 0 var(--rims-space-2);
-    border: 1px solid var(--rims-line-strong);
+    border: var(--rims-border) solid var(--rims-line-strong);
     border-radius: var(--rims-radius-md);
     background: var(--rims-surface);
     color: var(--rims-ink-2);
@@ -1994,6 +2001,100 @@ textarea.rk-input {
     font-weight: var(--rims-weight-black);
 }
 
+/* Dòng lịch đặt: GIỜ đứng trước, to, kiểu số bảng tỉ số — người trực quét
+   dọc cột giờ để biết tối nay kín tới đâu, không đọc từng dòng. */
+.rk-rowlist__lead {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rims-space-4);
+    min-width: 0;
+}
+
+.rk-rowlist__time {
+    flex: none;
+    min-width: 4.5ch;
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+/* ---------- Dòng món (chi tiết đơn) ----------
+   Ba cột: số phần | tên + ghi chú | thành tiền + trạng thái. Không phải một
+   <table>: bốn cột của bảng không vừa 375px, còn ba khối này thì co được —
+   cột giữa nhận phần còn lại và xuống dòng, hai cột bên giữ nguyên bề ngang. */
+.rk-lines {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: var(--rims-border) solid var(--rims-line-strong);
+}
+
+.rk-lines__item {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    gap: var(--rims-space-3);
+    align-items: start;
+    padding: var(--rims-space-3) 0;
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-lines__qty {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    line-height: 1.2;
+}
+
+.rk-lines__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-1);
+    min-width: 0;
+}
+
+.rk-lines__name {
+    font-weight: var(--rims-weight-bold);
+    overflow-wrap: anywhere;
+}
+
+.rk-lines__unit {
+    color: var(--rims-ink-3);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-variant-numeric: tabular-nums;
+}
+
+.rk-lines__side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--rims-space-2);
+}
+
+.rk-lines__sum {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--rims-weight-bold);
+    white-space: nowrap;
+}
+
+/* Món đã huỷ: tên nhạt đi, tiền gạch ngang. Chip "Đã huỷ" vẫn đậm — nó là
+   lời giải thích cho việc vì sao dòng này nhạt. */
+.rk-lines__item.is-cancelled .rk-lines__qty,
+.rk-lines__item.is-cancelled .rk-lines__name,
+.rk-lines__item.is-cancelled .rk-lines__sum {
+    color: var(--rims-ink-3);
+}
+
+.rk-lines + .rk-summary {
+    margin-top: var(--rims-space-2);
+}
+
 /* ---------- Khối ghi chú ----------
    Một dòng giải thích hoặc cảnh báo ngay trong luồng, không phải hộp thoại. */
 
@@ -2791,7 +2892,8 @@ textarea.rk-input {
     align-items: center;
     gap: var(--rims-space-2);
     padding-right: var(--rims-space-3);
-    border: 1px solid var(--rims-line-strong);
+    /* Vỏ mang viền thay cho ô bên trong — nên vỏ phải 2px như ô nhập thường. */
+    border: var(--rims-border) solid var(--rims-line-strong);
     border-radius: var(--rims-radius-md);
     background: var(--rims-surface);
 }
@@ -3908,6 +4010,30 @@ html {
     container-name: rk-tile;
 }
 
+/* Bàn RẤT NHỎ — sơ đồ tự vừa khung trên điện thoại thì một bàn hai ô chỉ còn
+   khoảng 3rem. Ở đó chỉ giữ hai thứ: số bàn và dấu trạng thái. "2 chỗ" là
+   thông tin tĩnh, bấm vào bàn là thấy; số bàn mà bị cắt thì cả ô vô dụng. */
+@container rk-tile (max-width: 4.5rem) {
+    .rk-floor__slot > .rk-tablecard {
+        padding: var(--rims-space-1);
+        align-items: center;
+    }
+
+    .rk-floor__slot > .rk-tablecard .rk-tablecard__no {
+        font-size: var(--rims-text-sm);
+    }
+
+    .rk-floor__slot > .rk-tablecard .rk-tablecard__seats {
+        display: none;
+    }
+
+    /* Vuông đỏ nhỏ lại theo ô, không thì nó đè lên chữ số cuối của số bàn. */
+    .rk-floor__slot > .rk-tablecard .rk-tablecard__alert {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+}
+
 .rk-floor__slot > .rk-tablecard .rk-tablecard__hint,
 .rk-floor__slot > .rk-tablecard .rk-tablecard__amount {
     display: none;
@@ -4283,6 +4409,159 @@ html {
     font-size: var(--rims-text-xl);
 }
 
+/* ---------- Giỏ đơn DÍNH ĐÁY (màn hẹp) ----------
+   Dưới 60rem giỏ không còn chỗ làm cột bên phải và rơi xuống SAU cả thực
+   đơn. Nay nó dính ở đáy màn: đầu giỏ là nút thu/mở, chân giỏ (tổng tiền +
+   nút gửi) luôn hiện.
+
+   Bóng đổ LÊN TRÊN chứ không xuống dưới-phải như mọi khối khác: khối nằm sát
+   mép dưới màn hình thì bóng xuống dưới bị cắt mất, và thứ cần tách khỏi thực
+   đơn đang cuộn phía sau là cạnh TRÊN của giỏ. */
+.rk-cart.is-docked {
+    position: sticky;
+    bottom: 0;
+    z-index: var(--rims-z-sticky);
+    max-height: 75dvh;
+    box-shadow: 0 calc(var(--rims-offset) * -1) 0 var(--rims-line-strong);
+}
+
+.rk-cart.is-docked .rk-cart__head {
+    padding: 0;
+}
+
+.rk-cart__title {
+    min-width: 0;
+    margin-inline-end: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rk-cart__toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-3);
+    width: 100%;
+    min-height: 2.75rem;
+    padding: var(--rims-space-2) var(--rims-space-4);
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.rk-cart__toggle:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
+    outline-offset: calc(var(--rims-focus-ring) * -1 - 2px);
+}
+
+/* "Xem món" — gạch chân để đọc ra là một thứ bấm được, không chỉ là nhãn. */
+.rk-cart__hint {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+}
+
+.rk-cart__toggle:hover .rk-cart__hint {
+    text-decoration-thickness: 2px;
+}
+
+.rk-cart.is-docked .rk-cart__body {
+    max-height: 40dvh;
+}
+
+/* Chân giỏ nằm NGANG: tổng tiền bên trái, nút gửi bên phải. Xếp dọc như ở cột
+   bên phải thì cái giỏ đang thu lại vẫn cao gần bằng một phần tư màn hình. */
+.rk-cart.is-docked .rk-cart__foot {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--rims-space-3) var(--rims-space-4);
+}
+
+.rk-cart.is-docked .rk-cart__foot > .rk-btn:only-child {
+    flex: 1 1 auto;
+}
+
+.rk-cart.is-docked .rk-cart__total {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    font-size: var(--rims-text-xs);
+}
+
+.rk-cart.is-docked .rk-cart__total b {
+    font-size: var(--rims-text-lg);
+    white-space: nowrap;
+}
+
+/* ---------- Thẻ món dạng HÀNG (điện thoại) ----------
+   Ảnh 4:3 hết bề ngang thì mỗi món cao cả một màn hình, và bốn mươi ba món là
+   hai mươi hai nghìn điểm ảnh để cuộn. Trên điện thoại ảnh chỉ còn để NHẬN RA
+   món — một ô vuông bên trái là đủ; tên, giá và nút cộng trừ nằm bên phải. */
+@media (max-width: 47.99rem) {
+    .rk-menugrid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--rims-space-3);
+    }
+
+    .rk-menucard {
+        display: grid;
+        grid-template-columns: 5.5rem minmax(0, 1fr);
+        grid-template-areas:
+            'fig body'
+            'fig foot';
+    }
+
+    .rk-menucard__figure {
+        grid-area: fig;
+        aspect-ratio: auto;
+        min-height: 5.5rem;
+        border-bottom: 0;
+        border-right: var(--rims-border) solid var(--rims-line-strong);
+    }
+
+    /* Ảnh KHÔNG góp chiều cao vào thẻ. Để nó trong dòng chảy thì một ảnh chụp
+       dọc kéo thẻ đó cao gấp rưỡi thẻ bên cạnh, và hàng nút cộng trừ lệch
+       nhau suốt cả danh sách. */
+    .rk-menucard__figure img {
+        position: absolute;
+        inset: 0;
+    }
+
+    .rk-menucard__body {
+        grid-area: body;
+        gap: var(--rims-space-1);
+        padding: var(--rims-space-3) var(--rims-space-3) 0;
+    }
+
+    .rk-menucard__foot {
+        grid-area: foot;
+        padding: var(--rims-space-2) var(--rims-space-3) var(--rims-space-3);
+        border-top: 0;
+    }
+
+    /* Ô số phần trên ảnh nhỏ lại theo ảnh. */
+    .rk-menucard__count {
+        top: var(--rims-space-1);
+        right: var(--rims-space-1);
+        min-width: 1.75rem;
+        padding: 0 var(--rims-space-1);
+    }
+
+    /* Chip "Hết hàng" rời khỏi ảnh xuống đáy ô, chữ vẫn đọc được trọn. */
+    .rk-menucard__flag {
+        top: auto;
+        bottom: var(--rims-space-1);
+        left: var(--rims-space-1);
+        right: var(--rims-space-1);
+        justify-content: center;
+    }
+}
+
 /* ---------- Bảng cột trạng thái (kanban) ----------
    Dùng cho màn CÓ DÒNG TRẠNG THÁI THẬT, không dùng cho mọi màn vận hành.
 
@@ -4300,10 +4579,21 @@ html {
     align-items: start;
 }
 
-/* Băng tab chỉ tồn tại ở khung hẹp. */
+/* Băng tab chỉ tồn tại ở khung hẹp.
+
+   XUỐNG HÀNG chứ không cuộn ngang. Cuộn ngang thì ở 375px tab thứ ba bị đẩy
+   ra ngoài mép, chỉ còn lại một vạch viền — trông như lỗi vẽ, và người dùng
+   không biết là còn một cột nữa. Mỗi TAB vẫn một dòng; chỉ có BĂNG là thành
+   hai hàng khi chật.
+
+   Đường kẻ giữa các tab là viền phải + viền dưới của chính từng tab, lùi vào
+   2px bằng lề âm để viền ở mép ngoài chìm dưới viền của băng (overflow:
+   hidden cắt phần thò ra). Không dùng mẹo tô nền băng bằng màu đường kẻ rồi
+   chừa khe: token đường kẻ không bao giờ được làm nền. */
 .rk-board__tabs {
     display: flex;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    overflow: hidden;
     border: var(--rims-border) solid var(--rims-line-strong);
     background: var(--rims-surface-2);
 }
@@ -4314,9 +4604,12 @@ html {
     align-items: center;
     justify-content: center;
     gap: var(--rims-space-2);
+    margin-inline-end: calc(var(--rims-border) * -1);
+    margin-block-end: calc(var(--rims-border) * -1);
     padding: var(--rims-space-3) var(--rims-space-4);
     border: 0;
     border-inline-end: var(--rims-border) solid var(--rims-line-strong);
+    border-block-end: var(--rims-border) solid var(--rims-line-strong);
     background: transparent;
     color: var(--rims-ink-2);
     font-family: var(--rims-font-mono);
@@ -4325,10 +4618,6 @@ html {
     letter-spacing: var(--rims-tracking-label);
     text-transform: uppercase;
     white-space: nowrap;
-}
-
-.rk-board__tab:last-child {
-    border-inline-end: 0;
 }
 
 .rk-board__tab:hover {

@@ -417,6 +417,7 @@ export default function AdminUsersPage() {
             {/* ── Search & Filter bar ── */}
             <div className="rk-filterbar">
                 <input
+                    aria-label="Tìm theo tên, tài khoản, email hoặc số điện thoại"
                     value={search}
                     onChange={(e) => {
                         setSearch(e.target.value)
@@ -645,6 +646,7 @@ export default function AdminUsersPage() {
                     <FieldGroup>
                         <Field label="Họ tên *">
                             <input
+                                className="rk-input"
                                 value={form.fullName}
                                 onChange={(e) =>
                                     setForm({
@@ -657,6 +659,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Tên đăng nhập *">
                             <input
+                                className="rk-input"
                                 value={form.username}
                                 onChange={(e) =>
                                     setForm({
@@ -669,6 +672,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Email *">
                             <input
+                                className="rk-input"
                                 type="email"
                                 value={form.email}
                                 onChange={(e) =>
@@ -679,6 +683,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Số điện thoại *">
                             <input
+                                className="rk-input"
                                 value={form.phone}
                                 pattern="0[0-9]{9}"
                                 inputMode="numeric"
@@ -694,6 +699,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Vai trò *">
                             <select
+                                className="rk-select"
                                 value={form.role}
                                 onChange={(e) => setForm({...form, role: e.target.value})}
                             >
@@ -742,6 +748,7 @@ export default function AdminUsersPage() {
                     <FieldGroup>
                         <Field label="Họ tên *">
                             <input
+                                className="rk-input"
                                 value={form.fullName}
                                 onChange={(e) =>
                                     setForm({
@@ -754,6 +761,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Tên đăng nhập *">
                             <input
+                                className="rk-input"
                                 value={form.username}
                                 onChange={(e) =>
                                     setForm({
@@ -766,6 +774,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Email *">
                             <input
+                                className="rk-input"
                                 type="email"
                                 value={form.email}
                                 onChange={(e) =>
@@ -776,6 +785,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Số điện thoại *">
                             <input
+                                className="rk-input"
                                 value={form.phone}
                                 pattern="0[0-9]{9}"
                                 inputMode="numeric"
@@ -897,6 +907,7 @@ export default function AdminUsersPage() {
                     <FieldGroup>
                         <Field label="Tên đăng nhập *">
                             <input
+                                className="rk-input"
                                 value={form.username}
                                 onChange={(e) =>
                                     setForm({...form, username: e.target.value})
@@ -906,6 +917,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Họ tên *">
                             <input
+                                className="rk-input"
                                 value={form.fullName}
                                 onChange={(e) =>
                                     setForm({...form, fullName: e.target.value})
@@ -915,6 +927,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Email *">
                             <input
+                                className="rk-input"
                                 type="email"
                                 value={form.email}
                                 onChange={(e) =>
@@ -925,6 +938,7 @@ export default function AdminUsersPage() {
                         </Field>
                         <Field label="Số điện thoại *">
                             <input
+                                className="rk-input"
                                 value={form.phone}
                                 pattern="0[0-9]{9}"
                                 inputMode="numeric"

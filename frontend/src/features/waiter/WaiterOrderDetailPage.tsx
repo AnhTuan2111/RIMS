@@ -104,6 +104,17 @@ export default function WaiterOrderDetailPage() {
 
     const orderItems = servingOrders.flatMap((order) => order.orderItems)
 
+    // Tạm tính = cộng thành tiền các món CHƯA HUỶ.
+    //
+    // Không lấy tổng của backend: với đơn đang mở, totalAmountBeforeVat,
+    // vatAmount và finalAmount đều là null — backend chỉ tính chúng lúc thu
+    // ngân chốt đơn. Bản đầu dùng ba trường đó và hiện "Tổng 0 ₫" cho một bàn
+    // vừa gọi món. VAT cũng vì vậy mà không hiện ở đây: số đó thuộc về lúc
+    // thanh toán, và hiện nó sớm là đoán.
+    const subtotal = orderItems
+        .filter((item) => item.status !== 'CANCELLED')
+        .reduce((sum, item) => sum + (item.subTotal ?? 0), 0)
+
     return (
         <div className="rk-stack">
             <div className="rk-stack">
@@ -149,24 +160,35 @@ export default function WaiterOrderDetailPage() {
                                 description="Bàn này chưa gọi món nào, hoặc các món đã phục vụ xong."
                             />
                         ) : (
-                            <div className="rk-tablewrap" tabIndex={0}>
-                                {/* Hop cuon: o 320px bang rong hon khung.
-                                    tabIndex de ban phim cuon ngang duoc. */}
-                                <table className="rk-table rk-table--compact">
-                                    <thead>
-                                        <tr>
-                                            <th>Món</th>
-                                            <th>SL</th>
-                                            <th>Đơn giá</th>
-                                            <th>Trạng thái</th>
-                                        </tr>
-                                    </thead>
+                            <>
+                                {/* Danh sách DÒNG MÓN thay cho bảng bốn cột.
+                                    Bảng ở 375px bị cắt ngang ngay cột giá, và
+                                    phục vụ phải cuộn ngang trong một cái bảng
+                                    để biết món nào đang nấu. Mỗi dòng ở đây
+                                    đọc trọn ở mọi khổ màn. */}
+                                <ul className="rk-lines" aria-label="Các món của bàn">
+                                    {orderItems.map((item) => {
+                                        const cancelled = item.status === 'CANCELLED'
 
-                                    <tbody>
-                                        {orderItems.map((item) => (
-                                            <tr key={item.orderItemId}>
-                                                <td>
-                                                    {item.dishName}
+                                        return (
+                                            <li
+                                                key={item.orderItemId}
+                                                className={`rk-lines__item${
+                                                    cancelled ? ' is-cancelled' : ''
+                                                }`}
+                                            >
+                                                <span className="rk-lines__qty">
+                                                    {item.quantity}×
+                                                </span>
+
+                                                <div className="rk-lines__main">
+                                                    <span className="rk-lines__name">
+                                                        {item.dishName}
+                                                    </span>
+
+                                                    <span className="rk-lines__unit">
+                                                        {fmtPrice(item.unitPrice)} / phần
+                                                    </span>
 
                                                     {item.note && (
                                                         <div className="rk-subnote">
@@ -174,37 +196,62 @@ export default function WaiterOrderDetailPage() {
                                                         </div>
                                                     )}
 
-                                                    {item.status === 'CANCELLED' &&
-                                                        item.cancelReason && (
-                                                            <div className="rk-subnote rk-subnote--alert">
-                                                                Lý do huỷ:{' '}
-                                                                {item.cancelReason}
-                                                            </div>
-                                                        )}
+                                                    {cancelled && item.cancelReason && (
+                                                        <div className="rk-subnote rk-subnote--alert">
+                                                            Lý do huỷ: {item.cancelReason}
+                                                        </div>
+                                                    )}
 
                                                     {item.chefInternalNote && (
                                                         <div className="rk-subnote rk-subnote--busy">
                                                             Chef: {item.chefInternalNote}
                                                         </div>
                                                     )}
-                                                </td>
+                                                </div>
 
-                                                <td>{item.quantity}</td>
+                                                <div className="rk-lines__side">
+                                                    {/* Món huỷ: số tiền gạch ngang
+                                                        và KHÔNG cộng vào tổng. */}
+                                                    {cancelled ? (
+                                                        <s className="rk-lines__sum">
+                                                            {fmtPrice(item.subTotal)}
+                                                        </s>
+                                                    ) : (
+                                                        <span className="rk-lines__sum">
+                                                            {fmtPrice(item.subTotal)}
+                                                        </span>
+                                                    )}
 
-                                                <td>{fmtPrice(item.unitPrice)}</td>
-
-                                                <td>
                                                     <span
                                                         className={`rk-chip ${statusChipClass(item.status)}`}
                                                     >
                                                         {statusLabel(item.status)}
                                                     </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </div>
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+
+                                {/* Tổng tiền của bàn. Trước đây màn này không
+                                    có con số nào — khách hỏi "bàn tôi hết bao
+                                    nhiêu rồi" thì phục vụ phải chạy ra quầy. */}
+                                <div className="rk-summary">
+                                    <div className="rk-summary__row rk-summary__row--total">
+                                        <span className="rk-summary__label">
+                                            Tạm tính
+                                        </span>
+                                        <span className="rk-summary__value">
+                                            {fmtPrice(subtotal)}
+                                        </span>
+                                    </div>
+
+                                    <p className="rk-field__hint">
+                                        Chưa gồm VAT — thu ngân tính khi thanh toán. Món
+                                        đã huỷ không tính tiền.
+                                    </p>
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>

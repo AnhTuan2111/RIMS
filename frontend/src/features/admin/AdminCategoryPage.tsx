@@ -307,6 +307,7 @@ export default function AdminCategoryPage() {
                                         Tìm kiếm nhanh
                                     </span>
                                     <input
+                                        aria-label="Tìm theo tên danh mục hoặc mã danh mục"
                                         type="text"
                                         placeholder="Tìm theo tên danh mục hoặc mã danh mục..."
                                         value={searchTerm}
@@ -813,6 +814,7 @@ export default function AdminCategoryPage() {
                                 </span>
                             </div>
                             <textarea
+                                aria-label="Mô tả danh mục"
                                 maxLength={100}
                                 rows={4}
                                 placeholder="Nhập tóm tắt thông tin mô tả về nhóm món ăn này..."

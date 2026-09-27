@@ -272,6 +272,8 @@ export default function DishListPage() {
             <PageCard>
                 <div className="rk-filterbar">
                     <input
+                        className="rk-input"
+                        aria-label="Tìm theo tên món, danh mục hoặc mã món"
                         type="search"
                         value={searchText}
                         placeholder="Tìm theo tên món, danh mục hoặc mã món..."
@@ -282,6 +284,8 @@ export default function DishListPage() {
                     />
 
                     <select
+                        className="rk-select"
+                        aria-label="Lọc theo danh mục"
                         value={selectedCategory}
                         onChange={(event) => {
                             setSelectedCategory(event.target.value)
@@ -298,6 +302,8 @@ export default function DishListPage() {
                     </select>
 
                     <select
+                        className="rk-select"
+                        aria-label="Lọc theo trạng thái"
                         value={selectedStatus}
                         onChange={(event) => {
                             setSelectedStatus(event.target.value as StatusFilter)
@@ -312,6 +318,8 @@ export default function DishListPage() {
                     </select>
 
                     <select
+                        className="rk-select"
+                        aria-label="Sắp xếp"
                         value={sortOrder}
                         onChange={(event) => {
                             setSortOrder(event.target.value as SortOrder)

@@ -273,6 +273,7 @@ export default function CashierInvoicesPage() {
 
             <div className="rk-filterbar">
                 <select
+                    aria-label="Lọc theo bàn"
                     value={tableNumber}
                     className="rk-select"
                     onChange={(event) => handleTableNumberChange(event.target.value)}
@@ -287,6 +288,7 @@ export default function CashierInvoicesPage() {
                 </select>
 
                 <input
+                    aria-label="Tìm theo tên hoặc số điện thoại khách"
                     value={keyword}
                     placeholder="Tìm theo tên hoặc số điện thoại khách..."
                     className="rk-input"
@@ -294,6 +296,7 @@ export default function CashierInvoicesPage() {
                 />
 
                 <select
+                    aria-label="Lọc theo phương thức thanh toán"
                     value={paymentMethod}
                     className="rk-select"
                     onChange={(event) => handlePaymentMethodChange(event.target.value)}
@@ -304,6 +307,7 @@ export default function CashierInvoicesPage() {
                 </select>
 
                 <input
+                    aria-label="Tìm theo mã hoá đơn"
                     value={invoiceCode}
                     placeholder="Mã hóa đơn..."
                     className="rk-input"

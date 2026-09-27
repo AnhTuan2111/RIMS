@@ -286,6 +286,7 @@ export default function OrderPanel({
 
                     <div className="rk-actions">
                         <input
+                            aria-label="Số điện thoại khách hàng"
                             type="text"
                             inputMode="numeric"
                             placeholder="Nhập Số điện thoại khách hàng..."
@@ -332,6 +333,7 @@ export default function OrderPanel({
                             </div>
 
                             <input
+                                aria-label="Tên khách hàng"
                                 type="text"
                                 placeholder="Tên khách hàng (*)"
                                 className="rk-input"
@@ -340,6 +342,7 @@ export default function OrderPanel({
                             />
 
                             <input
+                                aria-label="Email khách hàng"
                                 type="email"
                                 placeholder="Email (*)"
                                 className="rk-input"

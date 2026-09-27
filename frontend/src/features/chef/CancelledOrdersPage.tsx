@@ -1,7 +1,7 @@
 ﻿import {useEffect, useMemo, useState} from 'react'
 import {getCancelledOrders, type CancelledOrderResponse} from '@/shared/api/chef'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
-import {Pagination} from '@/shared/components/ui'
+import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 
 const ITEMS_PER_PAGE = 20
 
@@ -115,36 +115,33 @@ export default function CancelledOrdersPage() {
 
     return (
         <div className="rk-stack">
-            <section className="rk-card rk-card--pad">
-                <div className="rk-card__head-inline">
-                    <div>
-                        <h2>Món đã huỷ hôm nay</h2>
+            <PageCard>
+                <PageHeader
+                    title="Món đã huỷ hôm nay"
+                    description="Danh sách món Chef huỷ trực tiếp hoặc tự động bị huỷ khi món được đánh dấu tạm hết, trong ngày hôm nay."
+                    actions={
+                        <div className="rk-actions">
+                            <span className="rk-chip rk-chip--alert">
+                                {items.length} món đã huỷ hôm nay
+                            </span>
 
-                        <p>
-                            Danh sách món Chef huỷ trực tiếp hoặc tự động bị huỷ khi món
-                            được đánh dấu tạm hết, trong ngày hôm nay.
-                        </p>
-                    </div>
-
-                    <div className="rk-actions">
-                        <span className="rk-chip rk-chip--alert">
-                            {items.length} món đã huỷ hôm nay
-                        </span>
-
-                        <button
-                            type="button"
-                            className="rk-btn rk-btn--quiet"
-                            onClick={() => void loadCancelledOrders()}
-                        >
-                            Làm mới
-                        </button>
-                    </div>
-                </div>
-            </section>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet"
+                                onClick={() => void loadCancelledOrders()}
+                            >
+                                Làm mới
+                            </button>
+                        </div>
+                    }
+                />
+            </PageCard>
 
             <section className="rk-card rk-card--pad">
                 <div className="rk-filterbar">
                     <input
+                        className="rk-input"
+                        aria-label="Tìm theo tên món, bàn, mã đơn hoặc lý do huỷ"
                         type="search"
                         value={searchText}
                         placeholder={'Tìm tên món, bàn, mã đơn ' + 'hoặc lý do huỷ...'}

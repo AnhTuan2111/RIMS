@@ -368,12 +368,14 @@ export default function WaiterCreateReservationPage() {
         <div className="rk-stack">
             <div className="rk-stack">
                 <div className="rk-card__head-inline">
-                    <h2 className="rk-sectiontitle">Thông tin đặt bàn</h2>
+                    <h2 className="rk-sectiontitle">Đặt bàn</h2>
                 </div>
 
                 <div className="rk-two">
                     <div className="rk-card rk-card--pad">
-                        <div className="rk-card__head-inline">Thông tin đặt bàn</div>
+                        <div className="rk-card__head-inline">
+                            <h3 className="rk-sectiontitle">Lượt đặt mới</h3>
+                        </div>
 
                         <div className="rk-stack">
                             {resFormError && (
@@ -574,7 +576,9 @@ export default function WaiterCreateReservationPage() {
                                         reservation.tableNumber ??
                                         reservation.tableId
 
-                                    const {date, time} = splitReservationTime(
+                                    // Chỉ lấy GIỜ: cả bảng đã là lịch của đúng
+                                    // một ngày, lặp ngày ở mỗi dòng là nhiễu.
+                                    const {time} = splitReservationTime(
                                         reservation.reservationTime,
                                     )
 
@@ -586,9 +590,9 @@ export default function WaiterCreateReservationPage() {
                                             }
                                             className="rk-rowlist__item"
                                         >
-                                            <div>
-                                                <div className="rk-num">
-                                                    {date} — {time}
+                                            <div className="rk-rowlist__lead">
+                                                <div className="rk-rowlist__time">
+                                                    {time}
                                                 </div>
 
                                                 <div className="rk-rowlist__main">

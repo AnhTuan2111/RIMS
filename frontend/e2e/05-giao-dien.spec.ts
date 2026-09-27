@@ -225,6 +225,64 @@ test.describe('Bố cục', () => {
         expect(problems, problems.join('\n')).toHaveLength(0)
     })
 
+    test('mọi ô nhập đều có nhãn và cùng một khuôn', async ({page}) => {
+        // Hai lỗi cùng gốc — ô viết tay, không qua bộ kit:
+        //   · không có lớp chuẩn → trình duyệt vẽ ô mặc định cao 23px, viền 1px;
+        //   · chỉ có placeholder → trình đọc màn hình đọc ra "ô nhập" trống trơn,
+        //     và placeholder biến mất ngay khi gõ chữ đầu tiên.
+        // Luật đã chốt: viền 2px cho điều khiển; ô bấm được cao tối thiểu 40px.
+        const problems: string[] = []
+        let signedIn: string | null = null
+
+        for (const screen of SCREENS) {
+            signedIn = await visit(page, screen, signedIn)
+
+            const bad = await page.evaluate(() => {
+                const out: string[] = []
+                const skip = ['checkbox', 'radio', 'hidden', 'file']
+
+                for (const el of document.querySelectorAll<HTMLElement>(
+                    'input, select, textarea',
+                )) {
+                    if (skip.includes(el.getAttribute('type') ?? '')) continue
+                    // Ô chọn tháng/năm trong lịch là điều khiển gọn có chủ đích.
+                    if (el.closest('.rk-calendar__title')) continue
+
+                    const box = el.getBoundingClientRect()
+                    if (box.width === 0) continue
+
+                    // Ô ghép (ô ngày + nút lịch): viền nằm ở VỎ, không ở ô.
+                    const shell = el.closest('.rk-datefield__shell') ?? el
+                    const cs = getComputedStyle(shell)
+                    const field = el as HTMLInputElement
+                    const named =
+                        (field.labels?.length ?? 0) > 0 ||
+                        el.hasAttribute('aria-label') ||
+                        el.hasAttribute('aria-labelledby')
+                    const what = `<${el.tagName.toLowerCase()}> «${(
+                        el.getAttribute('placeholder') ?? ''
+                    ).slice(0, 30)}»`
+
+                    if (!named) out.push(`${what} không có nhãn`)
+                    if (cs.borderTopWidth !== '2px') {
+                        out.push(`${what} viền ${cs.borderTopWidth}`)
+                    }
+                    if (box.height < 40) {
+                        out.push(`${what} cao ${Math.round(box.height)}px`)
+                    }
+                }
+
+                return out
+            })
+
+            for (const line of bad) {
+                problems.push(`${screen.name}: ${line}`)
+            }
+        }
+
+        expect(problems, problems.join('\n')).toHaveLength(0)
+    })
+
     test('không chữ nào bị cắt cụt trong khung không cuộn được', async ({page}) => {
         const problems: string[] = []
         let signedIn: string | null = null

@@ -354,7 +354,6 @@ export default function AdminFloorPlanPage() {
         }
     })
 
-
     const numberOf = (id: number) =>
         tables.find((table) => table.id === id)?.tableNumber ?? String(id)
 
@@ -385,9 +384,7 @@ export default function AdminFloorPlanPage() {
                 <div className="rk-note rk-note--alert" role="status">
                     <Icon name="alert" className="rk-icon" />
                     <div>
-                        <strong>
-                            {overlaps.length} chỗ bàn đè lên nhau
-                        </strong>
+                        <strong>{overlaps.length} chỗ bàn đè lên nhau</strong>
                         <p>
                             {overlaps
                                 .slice(0, 4)
@@ -396,8 +393,8 @@ export default function AdminFloorPlanPage() {
                             {overlaps.length > 4 ? ' — và nữa' : ''}
                         </p>
                         <p>
-                            Bàn nằm dưới sẽ không bấm được ở màn Phục vụ. Vẫn
-                            lưu được nếu quán thật sự kê như vậy.
+                            Bàn nằm dưới sẽ không bấm được ở màn Phục vụ. Vẫn lưu được nếu
+                            quán thật sự kê như vậy.
                         </p>
                     </div>
                 </div>

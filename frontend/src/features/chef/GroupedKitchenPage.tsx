@@ -302,6 +302,8 @@ export default function GroupedKitchenPage() {
             <PageCard>
                 <div className="rk-filterbar">
                     <input
+                        className="rk-input"
+                        aria-label="Tìm theo tên món, bàn, mã đơn hoặc ghi chú"
                         type="search"
                         value={searchText}
                         placeholder="Tìm theo tên món, bàn, mã đơn hoặc ghi chú..."
@@ -312,6 +314,8 @@ export default function GroupedKitchenPage() {
                     />
 
                     <select
+                        className="rk-select"
+                        aria-label="Lọc theo bàn"
                         value={selectedTable}
                         onChange={(event) => {
                             setSelectedTable(event.target.value)
@@ -328,6 +332,8 @@ export default function GroupedKitchenPage() {
                     </select>
 
                     <select
+                        className="rk-select"
+                        aria-label="Lọc theo nhóm món"
                         value={groupFilter}
                         onChange={(event) => {
                             const nextFilter = event.target.value as GroupFilter
@@ -344,6 +350,8 @@ export default function GroupedKitchenPage() {
                     </select>
 
                     <select
+                        className="rk-select"
+                        aria-label="Sắp xếp"
                         value={sortOrder}
                         onChange={(event) => {
                             const nextSortOrder = event.target.value as SortOrder

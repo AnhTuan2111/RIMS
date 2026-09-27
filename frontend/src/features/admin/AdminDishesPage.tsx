@@ -333,6 +333,7 @@ export default function AdminDishesPage() {
                         {/* Nút đổi khung đứng CUỐI hàng lọc, vì nó không phải
                             bộ lọc: nó đổi cách nhìn, không đổi cái được nhìn. */}
                         <input
+                            aria-label="Tìm theo tên món hoặc mã món"
                             type="text"
                             placeholder="Tìm theo tên món hoặc mã món..."
                             value={searchKeyword}
@@ -343,6 +344,7 @@ export default function AdminDishesPage() {
                             className="rk-input"
                         />
                         <select
+                            aria-label="Lọc theo danh mục"
                             value={selectedCategory}
                             onChange={(e) => {
                                 setSelectedCategory(e.target.value)
@@ -365,6 +367,7 @@ export default function AdminDishesPage() {
                             })}
                         </select>
                         <select
+                            aria-label="Lọc theo trạng thái"
                             value={selectedStatus}
                             onChange={(e) => {
                                 setSelectedStatus(e.target.value)
@@ -750,6 +753,7 @@ export default function AdminDishesPage() {
                                     )}
                                 </div>
                                 <input
+                                    aria-label="Đường dẫn ảnh món"
                                     type="text"
                                     placeholder="Dán URL hình ảnh đường dẫn công khai (https://...)"
                                     value={formData.imageUrl}
@@ -1010,6 +1014,7 @@ export default function AdminDishesPage() {
                                     </span>
                                     <div className="rk-actions">
                                         <input
+                                            aria-label="Đường dẫn ảnh món"
                                             type="text"
                                             value={formData.imageUrl}
                                             onChange={(e) =>

@@ -351,6 +351,7 @@ export function PresetButtonGroup({
                     <label>
                         <span>Năm</span>
                         <select
+                            className="rk-select"
                             disabled={isLoading}
                             value={selectedYear}
                             onChange={(event) => onYearChange(Number(event.target.value))}
@@ -366,6 +367,7 @@ export function PresetButtonGroup({
                     <label>
                         <span>Tuần</span>
                         <select
+                            className="rk-select"
                             disabled={isLoading}
                             value={selectedWeek.value}
                             onChange={(event) => onWeekChange(event.target.value)}

@@ -1,4 +1,4 @@
-import {useMemo, useState, type ReactNode} from 'react'
+import {useEffect, useMemo, useRef, useState, type ReactNode} from 'react'
 
 import {Icon} from './Icon'
 
@@ -35,6 +35,8 @@ const DEFAULT_W = 3
 const DEFAULT_H = 2
 
 /** Giới hạn thu phóng. 100% là một ô lưới bằng 2.5rem. */
+const CELL_REM = 2.5
+const GRID_GAP_PX = 2
 const ZOOM_MIN = 50
 const ZOOM_MAX = 160
 const ZOOM_STEP = 15
@@ -62,6 +64,14 @@ export function FloorPlan<T extends FloorItem>({
     overlay,
 }: FloorPlanProps<T>) {
     const [zoom, setZoom] = useState(100)
+
+    /**
+     * Người dùng đã tự thu phóng chưa. Chưa thì sơ đồ TỰ VỪA KHUNG mỗi lần
+     * khung đổi cỡ; rồi thì thôi — tự chỉnh đè lên lựa chọn của người dùng là
+     * giật mất thứ họ vừa chọn.
+     */
+    const [manual, setManual] = useState(false)
+    const viewRef = useRef<HTMLDivElement>(null)
 
     const {zones, loose, cols} = useMemo(() => {
         const placed = tables.filter((t) => t.layoutX != null && t.layoutY != null)
@@ -91,8 +101,49 @@ export function FloorPlan<T extends FloorItem>({
         return {zones: [...byZone.entries()], loose: rest, cols: width}
     }, [tables])
 
+    /**
+     * Tự vừa khung. Sơ đồ là để thấy CẢ QUÁN một lượt: ở 100% trên điện thoại
+     * thì chỉ thấy được nửa bên trái, và không có gì nói rằng bên phải còn bàn
+     * — người phục vụ thấy B05 rồi B07 và tưởng quán không có B06.
+     *
+     * <p>Chỉ THU NHỎ, không bao giờ phóng quá 100%: trên màn rộng mà sơ đồ tự
+     * phình ra thì một quán mười bàn chiếm cả màn hình như một tấm áp phích.
+     */
+    useEffect(() => {
+        const view = viewRef.current
+
+        if (!view || manual) {
+            return
+        }
+
+        const fit = () => {
+            const cs = getComputedStyle(view)
+            const room =
+                view.clientWidth -
+                parseFloat(cs.paddingLeft) -
+                parseFloat(cs.paddingRight)
+            const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+            const cell = (room - (cols - 1) * GRID_GAP_PX) / cols
+            const wanted = Math.floor((cell / (CELL_REM * rem)) * 100)
+
+            setZoom(Math.max(ZOOM_MIN, Math.min(100, wanted)))
+        }
+
+        fit()
+
+        const observer = new ResizeObserver(fit)
+        observer.observe(view)
+
+        return () => observer.disconnect()
+    }, [cols, manual])
+
+    const zoomBy = (step: number) => {
+        setManual(true)
+        setZoom((z) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z + step)))
+    }
+
     const style = {
-        '--rims-floor-cell': `${(zoom / 100) * 2.5}rem`,
+        '--rims-floor-cell': `${(zoom / 100) * CELL_REM}rem`,
         '--rims-floor-cols': cols,
     } as React.CSSProperties
 
@@ -106,7 +157,7 @@ export function FloorPlan<T extends FloorItem>({
                     className="rk-iconbtn"
                     aria-label="Thu nhỏ sơ đồ"
                     disabled={zoom <= ZOOM_MIN}
-                    onClick={() => setZoom((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))}
+                    onClick={() => zoomBy(-ZOOM_STEP)}
                 >
                     <Icon name="zoomOut" className="rk-icon" />
                 </button>
@@ -118,7 +169,7 @@ export function FloorPlan<T extends FloorItem>({
                     className="rk-iconbtn"
                     aria-label="Phóng to sơ đồ"
                     disabled={zoom >= ZOOM_MAX}
-                    onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))}
+                    onClick={() => zoomBy(ZOOM_STEP)}
                 >
                     <Icon name="zoomIn" className="rk-icon" />
                 </button>
@@ -127,7 +178,7 @@ export function FloorPlan<T extends FloorItem>({
             {/* Khung cuộn mang touch-action: pinch-zoom để hai ngón phóng to
                 được trên màn cảm ứng. Nút bấm vẫn phải có: chúng là cách duy
                 nhất dùng được bằng chuột và bàn phím. */}
-            <div className="rk-floor__view" style={style}>
+            <div className="rk-floor__view" style={style} ref={viewRef}>
                 {zones.map(([zone, items]) => (
                     <section className="rk-floor__zone" key={zone || '_'}>
                         {zone && <h3 className="rk-floor__zonename">{zone}</h3>}

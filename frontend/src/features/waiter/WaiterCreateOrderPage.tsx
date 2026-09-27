@@ -9,7 +9,7 @@ import type {
     OrderItemRequest,
 } from '@/shared/api/waiter'
 import {BackArrow, fmtPrice, fmtPriceShort, useTableNumber} from './components'
-import {Modal} from '@/shared/components/ui'
+import {Modal, OrderCart} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
@@ -262,6 +262,7 @@ export default function WaiterCreateOrderPage() {
             <div className="rk-order">
                 <div className="rk-order__menu">
                     <input
+                        aria-label="Tìm theo tên món hoặc danh mục"
                         type="text"
                         placeholder="Tìm theo tên món hoặc danh mục..."
                         value={searchQuery}
@@ -395,6 +396,9 @@ export default function WaiterCreateOrderPage() {
                                             {picked && (
                                                 <input
                                                     placeholder="Ghi chú"
+                                                    aria-label={
+                                                        'Ghi chú cho ' + dish.name
+                                                    }
                                                     value={draft.note}
                                                     disabled={isUnavailable}
                                                     className="rk-input"
@@ -414,54 +418,47 @@ export default function WaiterCreateOrderPage() {
                     )}
                 </div>
 
-                <aside className="rk-cart" aria-label="Giỏ đơn">
-                    <h2 className="rk-cart__head">
-                        Đơn bàn {tableNumber ?? '—'}
-                        <span className="rk-cart__count">{selectedItems.length}</span>
-                    </h2>
+                <OrderCart
+                    label="Giỏ đơn"
+                    title={`Đơn bàn ${tableNumber ?? '—'}`}
+                    count={selectedItems.length}
+                    empty="Chưa gọi món nào. Bấm dấu cộng trên thẻ món để thêm."
+                    foot={
+                        <>
+                            <div className="rk-cart__total">
+                                <span>Tạm tính</span>
+                                <b>{fmtPrice(orderTotal)}</b>
+                            </div>
 
-                    {selectedItems.length === 0 ? (
-                        <p className="rk-cart__empty">
-                            Chưa gọi món nào. Bấm dấu cộng trên thẻ món để thêm.
-                        </p>
-                    ) : (
-                        <div className="rk-cart__body">
-                            {selectedItems.map((item) => (
-                                <div className="rk-cart__line" key={item.dishId}>
-                                    <span className="rk-cart__qty">{item.qty}×</span>
-                                    <span className="rk-cart__name">{item.name}</span>
-                                    <span className="rk-cart__sum">
-                                        {fmtPrice(item.price * item.qty)}
-                                    </span>
-                                    {item.note && (
-                                        <span className="rk-cart__note">{item.note}</span>
-                                    )}
-                                </div>
-                            ))}
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--go"
+                                disabled={
+                                    submitting ||
+                                    isLoadingMenu ||
+                                    !tableIdNumber ||
+                                    selectedItems.length === 0
+                                }
+                                onClick={openConfirm}
+                            >
+                                Gửi đơn xuống bếp
+                            </button>
+                        </>
+                    }
+                >
+                    {selectedItems.map((item) => (
+                        <div className="rk-cart__line" key={item.dishId}>
+                            <span className="rk-cart__qty">{item.qty}×</span>
+                            <span className="rk-cart__name">{item.name}</span>
+                            <span className="rk-cart__sum">
+                                {fmtPrice(item.price * item.qty)}
+                            </span>
+                            {item.note && (
+                                <span className="rk-cart__note">{item.note}</span>
+                            )}
                         </div>
-                    )}
-
-                    <div className="rk-cart__foot">
-                        <div className="rk-cart__total">
-                            <span>Tạm tính</span>
-                            <b>{fmtPrice(orderTotal)}</b>
-                        </div>
-
-                        <button
-                            type="button"
-                            className="rk-btn rk-btn--go"
-                            disabled={
-                                submitting ||
-                                isLoadingMenu ||
-                                !tableIdNumber ||
-                                selectedItems.length === 0
-                            }
-                            onClick={openConfirm}
-                        >
-                            Gửi đơn xuống bếp
-                        </button>
-                    </div>
-                </aside>
+                    ))}
+                </OrderCart>
             </div>
 
             <Modal

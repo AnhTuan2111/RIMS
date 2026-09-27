@@ -223,6 +223,7 @@ export default function AdminPaymentHistoryPage() {
             <PageCard>
                 <div className="rk-filterbar">
                     <input
+                        aria-label="Tìm theo mã hoá đơn"
                         className="rk-input"
                         type="text"
                         value={keywordInput}
@@ -231,6 +232,7 @@ export default function AdminPaymentHistoryPage() {
                     />
 
                     <select
+                        aria-label="Lọc theo bàn"
                         className="rk-select"
                         value={tableFilter}
                         onChange={(event) => {
@@ -247,6 +249,7 @@ export default function AdminPaymentHistoryPage() {
                     </select>
 
                     <select
+                        aria-label="Lọc theo phương thức thanh toán"
                         className="rk-select"
                         value={methodFilter}
                         onChange={(event) => {

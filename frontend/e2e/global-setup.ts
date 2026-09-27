@@ -13,6 +13,13 @@
 const API = process.env.E2E_API ?? 'http://localhost:8080/rims'
 const PW = process.env.RIMS_PW ?? 'Rims@2026'
 
+/**
+ * In trạng thái dọn ra màn hình người chạy — cố ý: đọc được "còn 14/14 bàn
+ * trống" trước khi bộ kiểm chạy là biết ngay lần đỏ sau đó có phải do dữ liệu.
+ */
+// eslint-disable-next-line no-console
+const log = (message: string) => console.log(message)
+
 /** Số bàn trống tối thiểu để cả bộ kiểm chạy trọn. */
 const MIN_FREE = 6
 
@@ -43,7 +50,9 @@ async function call(tok: string, path: string, init?: RequestInit) {
     const text = await res.text()
 
     if (!res.ok) {
-        throw new Error(`${init?.method ?? 'GET'} ${path} → ${res.status} ${text.slice(0, 120)}`)
+        throw new Error(
+            `${init?.method ?? 'GET'} ${path} → ${res.status} ${text.slice(0, 120)}`,
+        )
     }
 
     return text ? JSON.parse(text) : null
@@ -73,7 +82,7 @@ export default async function globalSetup() {
     }
 
     if (queue.length > 0) {
-        console.log(`  [dọn] bếp làm xong ${queue.length} món còn chờ`)
+        log(`  [dọn] bếp làm xong ${queue.length} món còn chờ`)
     }
 
     // BƯỚC 2 — thu tiền mọi bàn đang phục vụ.
@@ -105,7 +114,7 @@ export default async function globalSetup() {
             // Đơn mà mọi món đều đã huỷ thì app tự đóng ở bước khoá, nên bước
             // thu tiền trả 409. Đó là đúng, không phải lỗi cần kêu.
             if (!message.includes('chưa được chốt')) {
-                console.log(`  [dọn] bàn ${table.tableNumber}: ${message}`)
+                log(`  [dọn] bàn ${table.tableNumber}: ${message}`)
             }
         }
     }
@@ -152,10 +161,43 @@ export default async function globalSetup() {
         }),
     })
 
+    // BƯỚC 4 — huỷ các lượt đặt bàn do bộ kiểm để lại.
+    //
+    // Bài "phục vụ đặt bàn" đặt thật, và app buộc hai lượt trên cùng một bàn
+    // cách nhau 2,5 tiếng. Không dọn thì mỗi lần chạy ăn mất một khung giờ,
+    // và tới lúc nào đó mọi bàn đều kín lịch. HUỶ chứ không xoá: lượt huỷ vẫn
+    // nằm trong lịch sử, chỉ trả lại khung giờ.
+    let cancelled = 0
+    const today = new Date()
+
+    for (let offset = 0; offset < 3; offset++) {
+        const day = new Date(today.getTime() + offset * 86_400_000)
+        const iso = day.toLocaleDateString('sv-SE') // yyyy-mm-dd theo giờ máy
+        const bookings = await call(waiter, `/waiter/reservations?date=${iso}`)
+
+        for (const booking of bookings) {
+            const isTest = /^khách kiểm thử$/i.test(booking.customerName?.trim() ?? '')
+            const isOpen = booking.status === 'QUEUED' || booking.status === 'WAITING'
+
+            if (isTest && isOpen) {
+                await call(
+                    waiter,
+                    `/waiter/reservations/${booking.reservationId}/cancel`,
+                    {
+                        method: 'PUT',
+                    },
+                ).catch(() => {})
+                cancelled++
+            }
+        }
+    }
+
     const after = await call(waiter, '/waiter/tables')
     const free = after.filter((t: {status: string}) => t.status === 'AVAILABLE').length
 
-    console.log(`  [dọn] đã thu ${closed} đơn · còn ${free}/${after.length} bàn trống`)
+    log(
+        `  [dọn] đã thu ${closed} đơn · huỷ ${cancelled} lượt đặt thử · còn ${free}/${after.length} bàn trống`,
+    )
 
     if (free < MIN_FREE) {
         throw new Error(

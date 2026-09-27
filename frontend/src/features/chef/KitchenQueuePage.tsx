@@ -15,7 +15,14 @@ import {
     type DishDetailResponse,
     type KitchenOrderItemResponse,
 } from '@/shared/api/chef'
-import {ConfirmDialog, Modal, StatusBoard, type BoardColumn} from '@/shared/components/ui'
+import {
+    ConfirmDialog,
+    Modal,
+    PageCard,
+    PageHeader,
+    StatusBoard,
+    type BoardColumn,
+} from '@/shared/components/ui'
 import {useToast} from '@/app/providers/useToast'
 import {ORDER_ITEM_STATUS_LABELS, type OrderItemStatus} from '@/shared/types/order'
 
@@ -691,50 +698,54 @@ export default function KitchenQueuePage() {
 
     return (
         <div className="rk-stack">
-            <section className="rk-card rk-card--pad">
-                <div className="rk-card__head-inline">
-                    <div>
-                        <h2>Đơn cần chế biến</h2>
-                        <p>Chọn món để xem chi tiết, hoàn thành món hoặc huỷ món.</p>
-                    </div>
+            {/* Đầu trang dùng PageHeader như ba màn bếp còn lại. Bản trước tự dựng
+                bằng hàng ngang h2 + nút, nên ở 375px tiêu đề bị ép vào một cột
+                rộng 120px và vỡ thành ba dòng. PageHeader tự xếp chồng khi hẹp. */}
+            <PageCard>
+                <PageHeader
+                    title="Đơn cần chế biến"
+                    description="Chọn món để xem chi tiết, hoàn thành món hoặc huỷ món."
+                    actions={
+                        <div className="rk-actions">
+                            <span className="rk-chip rk-chip--busy">
+                                {items.length} món đang chờ làm
+                            </span>
 
-                    <div className="rk-actions">
-                        <span className="rk-chip rk-chip--busy">
-                            {items.length} món đang chờ làm
-                        </span>
+                            <button
+                                type="button"
+                                aria-pressed={isSoundEnabled}
+                                title={
+                                    isSoundEnabled
+                                        ? 'Tắt chuông báo món mới'
+                                        : 'Bật chuông báo món mới'
+                                }
+                                className={
+                                    isSoundEnabled ? 'rk-btn rk-btn--go' : 'rk-btn'
+                                }
+                                onClick={() => {
+                                    handleSoundToggle().catch((requestError) => {
+                                        console.error(requestError)
+                                    })
+                                }}
+                            >
+                                {isSoundEnabled ? 'Âm thanh đang bật' : 'Bật âm thanh'}
+                            </button>
 
-                        <button
-                            type="button"
-                            aria-pressed={isSoundEnabled}
-                            title={
-                                isSoundEnabled
-                                    ? 'Tắt chuông báo món mới'
-                                    : 'Bật chuông báo món mới'
-                            }
-                            className={isSoundEnabled ? 'rk-btn rk-btn--go' : 'rk-btn'}
-                            onClick={() => {
-                                handleSoundToggle().catch((requestError) => {
-                                    console.error(requestError)
-                                })
-                            }}
-                        >
-                            {isSoundEnabled ? 'Âm thanh đang bật' : 'Bật âm thanh'}
-                        </button>
-
-                        <button
-                            type="button"
-                            className="rk-btn rk-btn--quiet"
-                            onClick={() => {
-                                loadKitchenOrders().catch((requestError) => {
-                                    console.error(requestError)
-                                })
-                            }}
-                        >
-                            Làm mới
-                        </button>
-                    </div>
-                </div>
-            </section>
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet"
+                                onClick={() => {
+                                    loadKitchenOrders().catch((requestError) => {
+                                        console.error(requestError)
+                                    })
+                                }}
+                            >
+                                Làm mới
+                            </button>
+                        </div>
+                    }
+                />
+            </PageCard>
 
             {newOrderMessage && (
                 <div className="rk-note rk-note--busy" role="status" aria-live="polite">
@@ -752,6 +763,8 @@ export default function KitchenQueuePage() {
             <section className="rk-card rk-card--pad">
                 <div className="rk-filterbar">
                     <input
+                        className="rk-input"
+                        aria-label="Tìm theo tên món, bàn hoặc mã đơn"
                         type="search"
                         value={searchText}
                         placeholder="Tìm theo tên món, bàn hoặc mã đơn..."
@@ -761,6 +774,8 @@ export default function KitchenQueuePage() {
                     />
 
                     <select
+                        className="rk-select"
+                        aria-label="Lọc theo bàn"
                         value={selectedTable}
                         onChange={(event) => {
                             setSelectedTable(event.target.value)
@@ -776,6 +791,8 @@ export default function KitchenQueuePage() {
                     </select>
 
                     <select
+                        className="rk-select"
+                        aria-label="Sắp xếp"
                         value={sortOrder}
                         onChange={(event) => {
                             setSortOrder(event.target.value as SortOrder)
@@ -1044,6 +1061,8 @@ export default function KitchenQueuePage() {
                                 </div>
 
                                 <textarea
+                                    className="rk-textarea"
+                                    aria-label="Ghi chú nội bộ gửi phục vụ"
                                     rows={4}
                                     maxLength={500}
                                     value={chefInternalNote}
@@ -1091,6 +1110,8 @@ export default function KitchenQueuePage() {
                                 </p>
 
                                 <textarea
+                                    className="rk-textarea"
+                                    aria-label="Lý do huỷ món"
                                     rows={4}
                                     maxLength={500}
                                     value={cancelReason}

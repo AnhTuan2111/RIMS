@@ -202,6 +202,8 @@ export default function CompletedOrdersPage() {
             <PageCard>
                 <div className="rk-filterbar">
                     <input
+                        className="rk-input"
+                        aria-label="Tìm theo tên món, bàn, mã đơn hoặc mã món"
                         type="search"
                         value={searchText}
                         placeholder="Tìm theo tên món, bàn, mã đơn hoặc mã món..."
@@ -212,6 +214,8 @@ export default function CompletedOrdersPage() {
                     />
 
                     <select
+                        className="rk-select"
+                        aria-label="Lọc theo bàn"
                         value={selectedTable}
                         onChange={(event) => {
                             setSelectedTable(event.target.value)
@@ -228,6 +232,8 @@ export default function CompletedOrdersPage() {
                     </select>
 
                     <select
+                        className="rk-select"
+                        aria-label="Sắp xếp"
                         value={sortOrder}
                         onChange={(event) => {
                             setSortOrder(event.target.value as SortOrder)
