@@ -37,3 +37,7 @@ CLAUDE.md
 
 # Ảnh render walk là sản phẩm phụ, không commit.
 frontend/tools/shots/
+
+# Ảnh render walk: sinh lại được bằng `node tools/render-walk.mjs`, và 204 file
+# PNG sẽ làm kho phình ra mà không nói thêm điều gì so với chính mã nguồn.
+frontend/tools/shots/

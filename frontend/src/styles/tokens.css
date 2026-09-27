@@ -110,6 +110,12 @@
     --rims-alert-soft: #f7dedb;
     --rims-alert-line: #e8b5af;
 
+    /* Đỏ ĐẬM, chỉ dùng cho CHỮ NẰM TRÊN nền đỏ nhạt.
+       Đỏ thương hiệu #c8271b trên #f7dedb đo được 4.37:1 — thiếu 0.13 so với
+       ngưỡng 4.5, và trên #e8b5af thì chỉ còn 3.10. Đây không phải màu thứ
+       năm: vẫn là BỎ, chỉ là sắc dành cho chữ. #8f1b11 đo được 7.04 và 5.00. */
+    --rims-alert-deep: #8f1b11;
+
     /* TIN — đã đặt trước · chờ thanh toán · liên kết · vòng focus.
        Vai này trước đây do --rims-brand gánh, nên đổi brand sang đỏ mà không
        tách TIN ra thì mọi liên kết và vòng focus đều đỏ, đọc ra là lỗi. */
@@ -127,7 +133,10 @@
     --rims-ink-on-ok: #ffffff;
     --rims-ink-on-busy: #ffffff;
     --rims-ink-on-alert: #ffffff;
-    --rims-ink-on-idle: #3c3e42;
+    /* Chữ trên chip TRUNG TÍNH.
+       Trước là #3c3e42 trên nền #5c5f64 — 1.67:1, tức là gần như không đọc
+       được. Trắng trên cùng nền đó đo được 6.41:1. */
+    --rims-ink-on-idle: #ffffff;
 
     /* Đầu bảng. KHÔNG dùng --rims-ink làm nền: ở chế độ tối --rims-ink là màu
        SÁNG, nên nền sẽ sáng và chữ trên nó cũng sáng — mất chữ. Ở chế độ tối
@@ -258,8 +267,7 @@
        hai bài tham chiếu đều cảnh báo style này tệ với bảng dữ liệu dày. */
     --rims-offset: 4px;
     --rims-shadow-raised: var(--rims-offset) var(--rims-offset) 0 var(--rims-line-strong);
-    --rims-shadow-pressed: calc(var(--rims-offset) / 2) calc(var(--rims-offset) / 2) 0
-        var(--rims-line-strong);
+    --rims-shadow-pressed: calc(var(--rims-offset) / 2) calc(var(--rims-offset) / 2) 0 var(--rims-line-strong);
     --rims-shadow-overlay: var(--rims-offset) var(--rims-offset) 0 var(--rims-line-strong);
 
     /* ---------- Chuyển động ----------
@@ -366,7 +374,9 @@
         --rims-ink: #ececec;
         --rims-ink-2: #bdbdbd;
         --rims-ink-3: #a3a3a3;
-        --rims-ink-on-brand: #ff8a72;
+        /* Trắng, KHÔNG phải đỏ nhạt: ô rail đang mở vẫn là khối đỏ đặc ở
+           chế độ tối. Trắng trên #c8271b đo được 5.58:1. */
+        --rims-ink-on-brand: #ffffff;
 
         --rims-ink-on-dark: #ececec;
         --rims-ink-on-dark-2: #bdbdbd;
@@ -398,6 +408,7 @@
         --rims-alert-fill: #2b1512;
         --rims-alert-soft: #2b1512;
         --rims-alert-line: #ff8a72;
+        --rims-alert-deep: #ff8a72;
 
         --rims-info: #7aaaff;
         --rims-info-fill: #141c2e;
@@ -410,7 +421,7 @@
         --rims-ink-on-ok: #5fd08e;
         --rims-ink-on-busy: #ffc94a;
         --rims-ink-on-alert: #ff8a72;
-        --rims-ink-on-idle: #bdbdbd;
+        --rims-ink-on-idle: #131313;
 
         --rims-tablehead: #232323;
         --rims-ink-on-tablehead: #ececec;
@@ -451,7 +462,8 @@
     --rims-ink: #ececec;
     --rims-ink-2: #bdbdbd;
     --rims-ink-3: #a3a3a3;
-    --rims-ink-on-brand: #ff8a72;
+    /* Xem ghi chú ở khối @media trên. */
+    --rims-ink-on-brand: #ffffff;
 
     --rims-ink-on-dark: #ececec;
     --rims-ink-on-dark-2: #bdbdbd;
@@ -483,6 +495,7 @@
     --rims-alert-fill: #2b1512;
     --rims-alert-soft: #2b1512;
     --rims-alert-line: #ff8a72;
+    --rims-alert-deep: #ff8a72;
 
     --rims-info: #7aaaff;
     --rims-info-fill: #141c2e;
@@ -495,7 +508,7 @@
     --rims-ink-on-ok: #5fd08e;
     --rims-ink-on-busy: #ffc94a;
     --rims-ink-on-alert: #ff8a72;
-    --rims-ink-on-idle: #bdbdbd;
+    --rims-ink-on-idle: #131313;
 
     --rims-tablehead: #232323;
     --rims-ink-on-tablehead: #ececec;

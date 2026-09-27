@@ -241,11 +241,7 @@ a {
    không đọc ra là không bấm được. */
 .rk-btn:disabled {
     background: var(--rims-surface-2);
-    background-image: repeating-linear-gradient(
-        45deg,
-        transparent 0 5px,
-        rgb(var(--rims-tint-ink) / 18%) 5px 6px
-    );
+    background-image: repeating-linear-gradient(45deg, transparent 0 5px, rgb(var(--rims-tint-ink) / 18%) 5px 6px);
     border-color: var(--rims-ink-3);
     color: var(--rims-ink-3);
     box-shadow: none;
@@ -663,7 +659,7 @@ button.rk-chip:hover {
    huỷ là việc đã dừng hẳn — cùng một nền hổ phách sẽ nói sai. */
 .rk-ticket__note--void {
     background: var(--rims-alert-soft);
-    color: var(--rims-alert);
+    color: var(--rims-alert-deep);
 }
 
 .rk-ticket__actions {
@@ -938,7 +934,7 @@ table {
 }
 
 .rk-stat--active .rk-stat__label {
-    color: var(--rims-brand);
+    color: var(--rims-alert-deep);
 }
 
 /* Giá trị là CHỮ chứ không phải số (tên ca, tên danh mục) thì dùng font chữ.
@@ -2107,7 +2103,9 @@ textarea.rk-input {
     flex: none;
     border-radius: var(--rims-radius-pill);
     background: var(--rims-line);
-    color: var(--rims-ink-3);
+    /* --rims-ink-3 trên --rims-line chỉ đạt 4.32:1 — thiếu 0.18. Mực đậm hơn
+       một bậc đo được 7.23:1 mà vẫn đọc ra là "bước chưa tới". */
+    color: var(--rims-ink-2);
     font-size: var(--rims-text-sm);
     font-weight: var(--rims-weight-bold);
 }
@@ -2561,14 +2559,21 @@ textarea.rk-input {
     color: var(--rims-ink-on-brand);
 }
 
+/* Ba hạng phân biệt bằng ĐỘ ĐẬM CỦA KHỐI, không bằng ba sắc đỏ làm nền.
+   Bản cũ lấy --rims-brand-line làm NỀN cho hạng nhì. Đó là token ĐƯỜNG KẺ, và
+   ở chế độ tối nó đảo thành đỏ sáng — nền đỏ sáng với chữ đỏ sáng, đo ra đúng
+   1:1. Luật của chế độ tối là cấu trúc đến từ ĐƯỜNG KẺ, nên hạng nhì và hạng
+   ba nhận viền thay vì nhận một nền thứ hai và thứ ba. */
 .rk-rank--2 {
-    background: var(--rims-brand-line);
-    color: var(--rims-brand);
+    border: var(--rims-border) solid var(--rims-brand-line);
+    background: var(--rims-brand-soft);
+    color: var(--rims-alert-deep);
 }
 
 .rk-rank--3 {
-    background: var(--rims-brand-soft);
-    color: var(--rims-brand);
+    border: 1px solid var(--rims-line-strong);
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-2);
 }
 
 .rk-rank .rk-icon {
@@ -2964,7 +2969,7 @@ textarea.rk-input {
 .rk-tag--alert {
     border-color: var(--rims-alert-line);
     background: var(--rims-alert-soft);
-    color: var(--rims-alert);
+    color: var(--rims-alert-deep);
 }
 
 /* Dòng được nhấn trong danh sách. */
@@ -3302,7 +3307,6 @@ textarea.rk-input {
     }
 }
 
-
 /* ---------- Thẻ món có ảnh ----------
    Khung THẺ của ba màn thực đơn: Món ăn, Danh mục, Tổng quan thực đơn.
 
@@ -3321,10 +3325,7 @@ textarea.rk-input {
        vẫn đúng khi lưới nằm trong cột phải hẹp của màn Tổng quan thực đơn.
        Media query không làm được việc đó, và @container cũng không: một phần
        tử không phải là container của chính nó. */
-    grid-template-columns: repeat(
-        auto-fill,
-        minmax(max(15rem, (100% - 3 * var(--rims-space-4)) / 4), 1fr)
-    );
+    grid-template-columns: repeat(auto-fill, minmax(max(15rem, (100% - 3 * var(--rims-space-4)) / 4), 1fr));
     gap: var(--rims-space-4);
 }
 
@@ -3575,6 +3576,11 @@ textarea.rk-input {
 
 /* Dòng "Có cập nhật món" thu lại thành một VUÔNG ĐỎ ở góc. Chữ thì không vừa,
    nhưng dấu hiệu thì phải còn: đó là thứ bảo phục vụ chạy tới bàn nào. */
+/* Ô vuông đỏ ở góc thẻ, chữ vẫn còn cho trình đọc màn hình.
+   Bản đầu đẩy chữ đi bằng text-indent mà GIỮ NGUYÊN màu chữ trùng màu nền —
+   đo ra đúng 1:1. Nếu một luật khác sau này gỡ text-indent thì chữ hiện lại và
+   không ai đọc được. Nay chữ thu về cỡ 0 và MÀU vẫn là màu đọc được trên nền
+   đỏ — màu không còn là thứ gánh việc che giấu. */
 .rk-floor__slot > .rk-tablecard .rk-tablecard__alert {
     position: absolute;
     top: 0;
@@ -3584,9 +3590,9 @@ textarea.rk-input {
     padding: 0;
     overflow: hidden;
     background: var(--rims-alert-fill);
-    /* Chữ vẫn nằm đó cho trình đọc màn hình, chỉ đẩy ra ngoài tầm nhìn. */
-    text-indent: 2rem;
-    white-space: nowrap;
+    color: var(--rims-ink-on-alert);
+    /* Chữ vẫn nằm trong cây trợ năng, chỉ không còn chiếm pixel nào. */
+    font-size: 0;
 }
 
 .rk-floor__slot > .rk-tablecard .rk-tablecard__alert-dot {
@@ -3692,10 +3698,7 @@ textarea.rk-input {
    không hẹp hơn 15rem, màn rộng thì ảnh to hơn. */
 .rk-menugrid {
     display: grid;
-    grid-template-columns: repeat(
-        auto-fill,
-        minmax(max(15rem, (100% - 3 * var(--rims-space-4)) / 4), 1fr)
-    );
+    grid-template-columns: repeat(auto-fill, minmax(max(15rem, (100% - 3 * var(--rims-space-4)) / 4), 1fr));
     gap: var(--rims-space-4);
 }
 

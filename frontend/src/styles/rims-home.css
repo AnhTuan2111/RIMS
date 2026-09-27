@@ -338,10 +338,7 @@
     display: grid;
     /* Nhiều nhất BỐN cột, cột không hẹp hơn 15rem — cùng luật với lưới thẻ
        trong app: màn rộng thì ẢNH TO HƠN, không phải nhiều cột hơn. */
-    grid-template-columns: repeat(
-        auto-fill,
-        minmax(max(15rem, (100% - 3 * var(--rims-space-5)) / 4), 1fr)
-    );
+    grid-template-columns: repeat(auto-fill, minmax(max(15rem, (100% - 3 * var(--rims-space-5)) / 4), 1fr));
     gap: var(--rims-space-5);
     margin: 0;
     padding: 0;
@@ -438,4 +435,3 @@
 .rk-home__title--sm {
     font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
 }
-
