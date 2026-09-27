@@ -45,8 +45,14 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 | **Loading / empty / error** | Dùng `LoadingState`, `EmptyState`, `ErrorState`. Không tự viết `{loading && <div>Đang tải...</div>}`. |
 | **Import** | Cross-feature dùng alias `@/`. Cùng thư mục dùng `./`. Không bao giờ `../../..`. |
 | **Style** | Dùng lớp có sẵn trong `styles/rims-kit.css` (tiền tố `rk-`, đặt tên kiểu BEM: `rk-<block>__<element>--<biến thể>`). Cần lớp mới thì thêm vào kit, **không** tạo file CSS riêng cho từng màn. Màu và khoảng cách luôn lấy từ biến trong `tokens.css`, không gõ thẳng mã màu. |
+| **Icon** | Chỉ dùng `<Icon name="..." />`. Cấm cài thư viện icon và cấm dán `<svg>` rời vào màn. Icon mới thì thêm vào `icons.ts` **kèm nghĩa** — một nghĩa một icon, một icon một nghĩa; icon thiếu nghĩa làm test đỏ. |
 | **Style nội dòng** | `style={{}}` chỉ cho giá trị **thật sự tính lúc chạy**: bề rộng thanh tỉ lệ, `conic-gradient` của biểu đồ, màu lấy từ dữ liệu. Cấm khai báo `const xStyle: CSSProperties = {}` rồi tô vào JSX — đã từng có 93 đối tượng như vậy rải khắp 12 file, sửa một cỡ chữ phải mở cả chục file. |
-| **Màu theo chế độ tối** | Biến trong `tokens.css` tự đảo ở chế độ tối. Thành phần nào **luôn** nằm trên nền tối hoặc nền màu cố định (thanh bên, màn báo thanh toán xong, nút VNPay) thì dùng biến không đảo — `--rims-shell-*`, `--rims-paid`, hoặc mã màu thương hiệu của bên thứ ba. Lấy biến đảo làm nền cho chữ sáng thì ở chế độ tối tương phản tụt xuống dưới 2:1. |
+| **Màu theo chế độ tối** | Biến trong `tokens.css` tự đảo ở chế độ tối. Thành phần nào **luôn** nằm trên nền tối hoặc nền màu cố định (rail điều hướng, màn báo thanh toán xong, nút VNPay) thì dùng biến không đảo — `--rims-shell-*`, `--rims-paid`, hoặc mã màu thương hiệu của bên thứ ba. Lấy biến đảo làm nền cho chữ sáng thì ở chế độ tối tương phản tụt xuống dưới 2:1. |
+| **Ba token một nghĩa** | Mỗi màu ngữ nghĩa có **ba** token và chúng không thay nhau được: `--rims-ok` là màu **chữ và viền**, `--rims-ok-fill` là màu **nền khối tô đặc**, `--rims-ink-on-ok` là màu **chữ nằm trên khối đó**. Lấy nhầm là ở chế độ tối chữ và nền cùng sáng. |
+| **Đừng lấy đường kẻ làm nền** | Token `*-line` đảo sang màu sáng ở chế độ tối. Dùng nó làm `background` thì nền sáng gặp chữ sáng, đo ra 1:1. Cần nền nhạt thì dùng `*-soft`. |
+| **Màu chỉ mang bốn nghĩa** | LÀM lục · BỎ đỏ · CHỜ hổ phách · TIN xanh. Vai trò, danh mục, thứ hạng **không** được mượn bốn màu này — chúng không phải trạng thái. |
+| **Bo góc luôn là 0** | Kể cả `--rims-radius-pill`. Vòng tròn chỉ còn ở nút radio và ở `--rims-shape-round` (biểu đồ vành khuyên, con quay) — chỗ mà vòng tròn là *nét vẽ* chứ không phải góc hộp. |
+| **Đo tương phản trên màn thật** | `node tools/contrast-audit.mjs` mở từng màn và đo cặp màu **CSS thực sự ghép**, không đo cặp trong bảng token. Lần đầu chạy nó tìm ra 83 cặp dưới ngưỡng mà đọc token không thể thấy. |
 | **console** | `console.error` / `console.warn` được phép để ghi lỗi request. `console.log` thì không — ESLint sẽ cảnh báo. |
 
 ## Chung

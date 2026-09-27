@@ -263,10 +263,18 @@ WebSocket (STOMP), PostgreSQL, VNPay, Spring Mail. Test: JUnit 5 + Mockito +
 AssertJ.
 
 **Frontend**: React 19, TypeScript, Vite 8, React Router 7, Axios,
-SockJS + StompJS (realtime), lucide-react (icon). Test: Vitest.
-ESLint + Prettier.
+SockJS + StompJS (realtime). Test: Vitest. ESLint + Prettier.
 
-Giao diện **không dùng framework CSS**. Bootstrap đã được gỡ; thay vào đó là một
-bộ component viết riêng trong `frontend/src/styles/rims-kit.css` (tiền tố `rk-`)
-dựng trên các biến màu và khoảng cách trong `tokens.css`. Bộ biến đó cũng là chỗ
-duy nhất khai báo chế độ tối.
+Giao diện **không dùng framework CSS và không dùng thư viện icon**. Bootstrap đã
+được gỡ; lucide-react cũng đã gỡ. Thay vào đó:
+
+- Bộ component viết riêng trong `frontend/src/styles/rims-kit.css` (tiền tố
+  `rk-`), dựng trên các biến trong `tokens.css`. Bộ biến đó cũng là chỗ duy
+  nhất khai báo chế độ tối.
+- Bộ icon viết riêng trong `frontend/src/shared/components/ui/icons.ts` — một
+  bảng chuỗi `<path>`, một component `<Icon name>`. Kiểm thử chặn trôi: icon
+  không ai dùng, hoặc icon dùng mà chưa khai nghĩa, đều làm test đỏ.
+
+Hệ thiết kế đầy đủ nằm ở **`design.md`**, và bản **xem được** ở
+**`design.html`** (mở từ gốc kho — nó nạp thẳng hai file CSS trên nên không thể
+nói khác app).

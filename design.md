@@ -6,8 +6,18 @@ chính file này.
 
 Tên gọi nội bộ của hệ: **Phiếu bếp**.
 
-> File này thay hệ cũ ("Thép" + "Đậm & nét"). Nguồn quyết định:
-> `docs/redesign/00-quyet-dinh.md` — 7 phiếu phỏng vấn, chốt 2026-09-27.
+> **Muốn NHÌN THẤY hệ này thay vì đọc nó: mở `design.html` ở gốc kho.**
+> Trang đó nạp thẳng `tokens.css` và `rims-kit.css` mà app đang chạy, nên nó
+> không thể nói khác app; mọi con số tương phản trong đó được đo lúc mở trang.
+> Sinh lại bằng `cd frontend && node tools/build-design-html.mjs`.
+>
+> File này thay hệ cũ ("Thép" + "Đậm & nét"). Hệ được chốt qua 7 phiếu phỏng
+> vấn ngày 2026-09-27; phiếu và bản ghi quyết định đã gỡ sau khi hệ vào code,
+> vì từ lúc đó mã nguồn mới là nguồn thật, còn phiếu chỉ là đường đi tới nó.
+
+> **Phần "đã sửa lại sau khi thi công" nằm ở cuối file.** Thi công chứng minh
+> vài chỗ trong bản chốt là sai — chúng được sửa tại chỗ, và ghi lại lý do ở
+> § Những chỗ bản chốt nói sai.
 
 ---
 
@@ -58,6 +68,13 @@ Màu **là** nghĩa. Dùng màu không mang nghĩa là sai luật.
 5. **Hổ phách không dùng cho nút.** Chỉ dành cho trạng thái chờ.
 6. Chế độ tối **giữ nguyên hue**, chỉ nâng độ sáng vừa đủ đạt 3:1. Không có bộ màu
    thứ hai.
+7. **Không trục nào khác được mượn bốn màu này.** Vai trò, danh mục, thứ hạng —
+   chúng không phải trạng thái. Mượn là hai thứ khác hẳn nhau trông như một:
+   nhãn "Phục vụ" lục nằm cạnh chip "Hoạt động" lục.
+8. **Token đường kẻ không được dùng làm nền.** Ở chế độ tối nó đảo thành màu
+   sáng, và nền sáng với chữ sáng cho ra 1:1.
+9. **`--rims-alert-deep`** là đỏ đậm dành riêng cho **chữ nằm trên nền đỏ nhạt**.
+   Đỏ thương hiệu ở đó chỉ đạt 4.37:1 — thiếu 0.13. Không phải màu thứ năm.
 
 ### Audit
 
@@ -115,8 +132,11 @@ gợi ý) vì không có dấu tiếng Việt.
 
 ## Hình khối
 
-- **Bo góc 0px cho MỌI THỨ.** Ngoại lệ duy nhất: **radio tròn** — quy ước quá mạnh
-  để phá.
+- **Bo góc 0px cho MỌI THỨ**, kể cả `--rims-radius-pill`. Ngoại lệ duy nhất là
+  **nút radio** — quy ước tròn của nó quá mạnh để phá.
+- **Hình TRÒN khác với GÓC BO.** Biểu đồ vành khuyên và con quay chờ dùng token
+  riêng `--rims-shape-round`: ở đó vòng tròn là *nét vẽ*, không phải góc của
+  một cái hộp. Token riêng để đếm được chỗ nào tròn, không lẫn vào bo góc.
 - **Viền 2px** cho bề mặt và điều khiển; **1px** cho kẻ trong lòng bảng và viền chip.
 - **Bóng offset cứng, blur 0.** Sáng 4px, tối 2px.
 - **Bóng chỉ ở: thẻ · nút · modal · phiếu · ô thống kê.** Không bao giờ đổ bóng
@@ -424,7 +444,11 @@ Mobile-first, không ngoại lệ.
 
 ---
 
-## Bản đồ 37 màn
+## Bản đồ màn
+
+Đếm lại sau khi thi công: **34 màn có route**, kể cả màn Mặt bằng mới thêm. Con
+số 37 trong bản chốt là đếm nhầm — nó gộp cả những màn con nằm trong hộp thoại
+của một màn khác.
 
 | Nhóm màn | Khung |
 |---|---|
@@ -435,8 +459,10 @@ Mobile-first, không ngoại lệ.
 | `WaiterCreateOrderPage` · `WaiterUpdateOrderPage` | **Giống thực đơn**: lưới ảnh món to + **giỏ đơn là cột dính bên phải** |
 | `WaiterOrderDetailPage` · `WaiterReservationDetailPage` | Một bản ghi, phiếu dọc, hành động trên phiếu |
 | `WaiterCreateReservationPage` · `WaiterEditReservationPage` | Biểu mẫu ≤46rem |
-| `KitchenQueuePage` · `ChefDashboardPage` · `GroupedKitchenPage` | **Kanban ba cột trạng thái** |
-| `CashierPaymentsPage` | **Kanban ba cột**: Chờ trả · Đang xử lý · Đã trả |
+| `KitchenQueuePage` | **Ba cột theo `OrderItemStatus`**: Đang làm · Đã xong · Đã huỷ |
+| `ChefDashboardPage` | Ô số — **không** phải kanban, màn này chỉ có con số |
+| `GroupedKitchenPage` | Lưới thẻ — **không** phải kanban, màn này gom theo MÓN |
+| `CashierPaymentsPage` | **Ba cột theo `TableStatus`**: Đang phục vụ · Đã đặt trước · Bàn trống |
 | `CompletedOrdersPage` · `CancelledOrdersPage` · `CashierInvoicesPage` | Bảng dày + lọc |
 | `PaymentSuccess` · `PaymentFailed` | Một khối lớn giữa màn — chỗ duy nhất dùng chữ nét đôi ở họ vận hành |
 | `DishListPage` | Lưới thẻ ảnh, chỉ đọc |
@@ -445,22 +471,30 @@ Mobile-first, không ngoại lệ.
 | `AdminPaymentHistoryPage` · `AdminPaymentDetailPage` | Bảng dày + rail lọc |
 | `AdminStatisticsPage` · `RevenueOverviewPanel` | Dải số to + biểu đồ + bảng |
 | `ProfilePage` | Biểu mẫu ≤46rem |
-| **MỚI — màn thứ 37** | **Quản trị vẽ mặt bằng** (kéo thả bàn, đặt quầy bar và cửa) |
+| `AdminFloorPlanPage` **(mới)** | **Quản trị vẽ mặt bằng** — kéo thả, và đặt được bằng phím mũi tên |
 
 ---
 
-## Việc phải làm ngoài giao diện
+## Việc ngoài giao diện — đã làm
 
-Ba việc này **không phải CSS**, cần backend và phải tính vào kế hoạch:
+Bốn việc này **không phải CSS**. Tất cả đã vào code:
 
-1. **Thêm `x, y, w, h, zone` cho bàn** trong `schema.sql` + API lưu mặt bằng.
-2. **Thêm màn thứ 37**: Quản trị kéo thả vẽ mặt bằng. Kéo thả trên cảm ứng là
-   tương tác khó làm đúng; dự án motion-cut nên phải tự viết, không cài thư viện.
-3. **Phóng to hai ngón** cho sơ đồ mặt bằng ở khung hẹp.
+1. **`layout_x, layout_y, layout_w, layout_h, zone` cho bàn** — entity,
+   `schema.sql` (cả câu `create` cho CSDL mới lẫn `alter table ... add column
+   if not exists` cho CSDL đã chạy), và `PUT /rims/admin/table/layout` nhận
+   **cả sơ đồ một lần**. Đơn vị là **ô lưới**, không phải pixel.
+2. **`GET /rims/public/menu`** — cả thực đơn công khai, gom sẵn theo danh mục,
+   lọc ba lớp ở server. Trang chủ cần nó để dựng băng danh mục dính; trước đó
+   API công khai chỉ có `/best-selling` trả năm món.
+3. **Màn Mặt bằng của Quản trị** — kéo thả tự viết bằng Pointer Events, không
+   cài thư viện, vì dự án motion-cut. Đặt được bằng **phím mũi tên**: một màn
+   chỉ kéo thả được là một màn khoá cửa với người không dùng chuột.
+4. **Phóng to hai ngón** cho sơ đồ ở khung hẹp (`touch-action: pinch-zoom`),
+   kèm nút bấm — nút là cách duy nhất dùng được bằng chuột và bàn phím.
 
-Và một việc frontend thuần:
+Và một việc frontend thuần, cũng đã làm:
 
-4. **Sửa 8 chỗ giọng văn đã đếm trong code**:
+5. **Sửa 8 chỗ giọng văn đã đếm trong code**:
 
 | Sửa | Số chỗ |
 |---|---|
@@ -474,13 +508,60 @@ Và một việc frontend thuần:
 
 ---
 
-## Exports
+## Nguồn thật
 
-| File | Ở đâu |
+Hệ này **không còn bản xuất riêng**. Từ lúc nó vào code, mã nguồn là nguồn
+thật, và mọi bản chép ra chỉ là một thứ nữa có thể lệch.
+
+| Thứ | Nguồn thật |
 |---|---|
-| Bản token | `docs/redesign/exports/tokens.css` → đích: `frontend/src/styles/tokens.css` |
-| Bảng icon | `frontend/src/shared/components/ui/icons.ts` — đã vào code ở pha P4 |
-| Spec dựng thật | `docs/redesign/06-spec.html` — mở bằng trình duyệt, xem được cả hai chế độ |
-| Sổ quyết định | `docs/redesign/00-quyet-dinh.md` — đầy đủ lý do, kể cả những chỗ làm sai rồi sửa |
-| Kế hoạch áp vào code | `docs/redesign/07-ke-hoach.md` |
-| Bảy phiếu phỏng vấn | `docs/redesign/0*.html` |
+| Token màu, cỡ, khoảng cách, bóng | `frontend/src/styles/tokens.css` |
+| Component | `frontend/src/styles/rims-kit.css` |
+| Trang công khai | `frontend/src/styles/rims-home.css` |
+| Bảng icon và bảng nghĩa | `frontend/src/shared/components/ui/icons.ts` |
+| Bản mô tả **xem được** | `design.html` ở gốc kho — nạp thẳng hai file CSS trên |
+| Luật viết code | `CONTRIBUTING.md` |
+
+---
+
+## Cách kiểm lại
+
+Build xanh không có nghĩa là màn đúng. Ba công cụ, chạy từ `frontend/`:
+
+| Việc | Lệnh |
+|---|---|
+| Chụp 34 màn × 2 chế độ × 3 cỡ | `node tools/render-walk.mjs` |
+| Đo tương phản trên màn thật | `node tools/contrast-audit.mjs` |
+| Chặn trôi bảng icon | `npm test` |
+| Sinh lại `design.html` | `node tools/build-design-html.mjs` |
+
+Hai công cụ đầu cần một máy chủ tĩnh đang chạy:
+
+```
+npm run build && npx vite preview --port 4200 --strictPort
+```
+
+Chúng **không cần backend**: phiên được gieo thẳng vào `localStorage` theo vai,
+và mọi lời gọi `/rims/**` bị chặn ở tầng mạng rồi trả bằng
+`tools/walk-fixtures.mjs`. Hình dạng dữ liệu giả ở đó **chép từ type thật**, và
+ảnh chụp lặp lại được — điều mà một cơ sở dữ liệu thật không cho.
+
+---
+
+## Những chỗ bản chốt nói sai
+
+Thi công chứng minh vài chỗ trong bản chốt là sai. Chúng đã sửa tại chỗ; mục
+này giữ lại **lý do**, để lần sau không ai chốt lại đúng cái sai đó.
+
+| Bản chốt nói | Thực tế | Vì sao |
+|---|---|---|
+| Dòng bếp là "Chờ → Đang nấu → Xong" | `OrderItemStatus` chỉ có `PREPARING`, `COMPLETED`, `CANCELLED` | Món vào bếp là đã đang làm. Không có bậc chờ. |
+| Ba cột thu ngân: Chờ trả · Đang xử lý · Đã trả | Ba cột theo `TableStatus` | Ba giai đoạn đó thuộc `OrderStatus`, mà `/cashier/tables` trả trạng thái BÀN. |
+| Kanban cho 4 màn | Kanban cho 2 màn | `GroupedKitchenPage` gom theo MÓN, `ChefDashboardPage` chỉ có con số — cả hai không có trục trạng thái để chia cột. |
+| 37 màn | 34 màn có route | Bản chốt gộp cả màn con nằm trong hộp thoại. |
+| Bo góc 0 cho mọi thứ | `--rims-radius-pill` bị bỏ sót ở P1 | 12 chỗ vẫn bo tròn 999px giữa một hệ vuông tuyệt đối, tới P6 mới phát hiện. |
+| "Đo tương phản, audit lại là được" | Audit trên bảng token bỏ lọt 83 cặp | Bảng token nói cặp màu mà người viết ĐỊNH ghép. Cái tới mắt người dùng là cặp mà CSS thực sự ghép. Phải đo trên màn đang chạy. |
+
+Và một thứ bản chốt không nhắc tới nhưng hoá ra là luật quan trọng nhất của
+chế độ tối: **token đường kẻ không được dùng làm nền.** Nó đảo sang màu sáng ở
+chế độ tối, cho ra nền sáng với chữ sáng — đúng 1:1.
