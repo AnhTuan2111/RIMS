@@ -1,0 +1,1498 @@
+<!doctype html>
+<html lang="vi" data-off="4" data-accent="do" data-bd="2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phiếu 02 — Khung màn &amp; điều hướng RIMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · instrument: design-interview sheet 02/05 · genre: modern-minimal → brutalist voice
+ * macrostructure: Catalogue (index of structural variants) · nav: N7 brutal slab · footer: Ft1 one-line
+ * theme: LOCKED by sheet 01 — direction C "Phiếu bếp", neo-brutalist POS
+ * hard rules from the user's two references: border 2–5px · radius 0 · box-shadow Npx Npx 0 (blur 0)
+ *   · hover = translate into own shadow ≤100ms · one flat colour per surface · warm off-white paper
+ * deliberately NOT applied: -webkit-font-smoothing:none — breaks Vietnamese diacritics at small sizes
+ * pre-emit critique: P5 H5 E4 S5 R4 V4
+ */
+
+:root{
+  --paper:#f3f1ea; --surface:#ffffff; --surface-2:#e8e5db; --surface-3:#d8d4c7;
+  --ink:#111214; --ink-2:#3c3e42; --ink-3:#5c5f64;
+  --accent:#e0301f; --accent-ink:#ffffff;
+  --ok:#0f6b3c; --busy:#a25f00; --alert:#c41f14;
+
+  --bd:2px;                                      /* núm sống: độ dày viền */
+  --off:4px;                                     /* núm sống: độ lệch bóng */
+  --sh:var(--off) var(--off) 0 var(--ink);
+  --sh-half:calc(var(--off)/2) calc(var(--off)/2) 0 var(--ink);
+
+  --fd:'Archivo','IBM Plex Sans',system-ui,sans-serif;
+  --fb:'IBM Plex Sans',system-ui,sans-serif;
+  --fm:'JetBrains Mono',ui-monospace,monospace;
+
+  --sp-1:.25rem; --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem;
+  --sp-5:1.5rem; --sp-6:2rem; --sp-7:3rem;
+  --dur:90ms;
+}
+:root[data-off="3"]{--off:3px}
+:root[data-off="6"]{--off:6px}
+:root[data-off="8"]{--off:8px}
+:root[data-bd="3"]{--bd:3px}
+:root[data-bd="4"]{--bd:4px}
+:root[data-accent="vang"]{--accent:#ffd400;--accent-ink:#111214}
+:root[data-accent="lime"]{--accent:#c4f000;--accent-ink:#111214}
+:root[data-accent="hong"]{--accent:#ff4d9d;--accent-ink:#111214}
+:root[data-accent="cyan"]{--accent:#00d4e8;--accent-ink:#111214}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--fb);font-size:1rem;line-height:1.5;
+}
+h1,h2,h3,h4{margin:0;font-family:var(--fd);font-weight:800;line-height:1.1;font-style:normal;
+  text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+p{margin:0}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+.wrap{max-width:78rem;margin:0 auto;padding:0 16px}
+.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.lbl{font-family:var(--fm);font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- slab bar ---------- */
+.bar{position:sticky;top:0;z-index:30;background:var(--ink);color:var(--paper);border-bottom:var(--bd) solid var(--ink)}
+.bar__in{max-width:78rem;margin:0 auto;padding:.5rem 16px;display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.bar__id{font-family:var(--fm);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.bar__id b{color:var(--accent);background:var(--accent-ink);padding:0 .3em}
+.bar__nav{display:flex;gap:.25rem;flex-wrap:wrap;margin-inline-start:auto}
+.bar__nav a{
+  font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  text-decoration:none;color:var(--paper);border:2px solid var(--paper);padding:.25rem .45rem;white-space:nowrap;
+}
+.bar__nav a:hover{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* ---------- head ---------- */
+.head{padding:var(--sp-7) 0 var(--sp-5)}
+.head h1{font-size:clamp(1.9rem,1.3rem + 2.6vw,3.4rem)}
+.head__lede{margin-top:var(--sp-4);max-width:64ch;font-size:clamp(.95rem,.9rem + .3vw,1.06rem);color:var(--ink-2)}
+
+.locked{
+  margin-top:var(--sp-5);border:var(--bd) solid var(--ink);background:var(--surface);
+  box-shadow:var(--sh);padding:var(--sp-4);
+}
+.locked h2{font-size:.95rem;margin-bottom:var(--sp-3)}
+.locked dl{margin:0;display:grid;gap:.3rem .9rem;font-size:.85rem}
+@media (min-width:44rem){.locked dl{grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr)}}
+.locked dt{font-family:var(--fm);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);align-self:center}
+.locked dd{margin:0;font-weight:600}
+
+.route{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:var(--sp-5)}
+.route span{font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  border:2px solid var(--ink-3);color:var(--ink-3);padding:.3rem .5rem}
+.route span.is-now{border-color:var(--ink);background:var(--accent);color:var(--accent-ink)}
+.route span.is-done{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+
+/* ---------- section ---------- */
+.sec{padding:var(--sp-6) 0}
+.sec__n{font-family:var(--fm);font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--ink);display:inline-block;padding:.2rem .5rem;margin-bottom:var(--sp-3)}
+.sec h2{font-size:clamp(1.3rem,1.1rem + 1vw,1.9rem)}
+.sec__p{margin-top:var(--sp-3);max-width:68ch;color:var(--ink-2);font-size:.92rem}
+.sec__p + .sec__p{margin-top:var(--sp-2)}
+.sec__p b{color:var(--ink)}
+.rule{border:0;border-top:var(--bd) solid var(--ink);margin:0}
+
+.warn{
+  margin-top:var(--sp-4);border:var(--bd) solid var(--ink);background:var(--surface-2);
+  padding:var(--sp-3) var(--sp-4);font-size:.86rem;max-width:68ch;
+}
+.warn b{text-transform:uppercase;font-family:var(--fm);font-size:.72rem;letter-spacing:.06em;display:block;margin-bottom:.3rem}
+
+/* ---------- pickable card ---------- */
+.grid{display:grid;gap:var(--sp-5);margin-top:var(--sp-5)}
+@media (min-width:50rem){.grid--2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:62rem){.grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.pk{border:var(--bd) solid var(--ink);background:var(--surface);box-shadow:var(--sh);display:grid;align-content:start}
+.pk:has(input:checked){background:var(--accent);box-shadow:var(--sh)}
+.pk:has(input:checked) .pk__body{background:var(--surface)}
+.pk__lab{display:block;cursor:pointer;padding:var(--sp-3) var(--sp-4);border-bottom:var(--bd) solid var(--ink)}
+.pk__lab:hover{background:var(--surface-2)}
+.pk:has(input:checked) .pk__lab:hover{background:transparent}
+.pk__top{display:flex;gap:.6rem;align-items:flex-start}
+.pk__top input{margin:.3rem 0 0;width:1.05rem;height:1.05rem;accent-color:var(--ink);flex:none}
+.pk__k{font-family:var(--fm);font-weight:700;font-size:.78rem;border:2px solid var(--ink);padding:.1rem .35rem;flex:none;margin-top:.1rem}
+.pk__n{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:1rem;letter-spacing:.01em;line-height:1.15}
+.pk__d{font-size:.84rem;color:var(--ink-2);margin-top:.25rem}
+.pk:has(input:checked) .pk__d{color:var(--ink)}
+.pk__body{padding:var(--sp-4);display:grid;gap:var(--sp-3)}
+.pk__notes{display:grid;gap:.4rem;font-size:.8rem}
+.pk__notes p{padding-inline-start:1.3em;position:relative;color:var(--ink-2)}
+.pk__notes p::before{position:absolute;inset-inline-start:0;font-family:var(--fm);font-weight:700}
+.pk__notes .y::before{content:'+';color:var(--ok)}
+.pk__notes .n::before{content:'−';color:var(--busy)}
+
+/* ================= live-knob previews ================= */
+.knobs{display:grid;gap:var(--sp-5);margin-top:var(--sp-5)}
+@media (min-width:56rem){.knobs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.knob{border:var(--bd) solid var(--ink);background:var(--surface);padding:var(--sp-4);display:grid;gap:var(--sp-3);align-content:start}
+.knob h3{font-size:.95rem}
+.knob p{font-size:.82rem;color:var(--ink-2)}
+.opts{display:flex;flex-wrap:wrap;gap:.3rem}
+.opts label{cursor:pointer}
+.opts input{position:absolute;opacity:0;width:0;height:0}
+.opts span{
+  display:block;font-family:var(--fm);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  border:2px solid var(--ink);padding:.35rem .55rem;background:var(--surface);white-space:nowrap;
+}
+.opts input:checked + span{background:var(--ink);color:var(--paper)}
+.opts input:focus-visible + span{outline:3px solid var(--accent);outline-offset:2px}
+.sw-row{display:flex;flex-wrap:wrap;gap:.3rem}
+.sw-row label{cursor:pointer;position:relative}
+.sw-row input{position:absolute;opacity:0;width:0;height:0}
+.sw-row span{display:grid;place-items:center;width:3.4rem;height:2.4rem;border:2px solid var(--ink);
+  font-family:var(--fm);font-size:.6rem;font-weight:700;text-transform:uppercase}
+.sw-row input:checked + span{box-shadow:0 0 0 2px var(--surface) inset, 0 0 0 4px var(--ink) inset}
+.sw-do span{background:#e0301f;color:#fff}
+.sw-vang span{background:#ffd400;color:#111214}
+.sw-lime span{background:#c4f000;color:#111214}
+.sw-hong span{background:#ff4d9d;color:#111214}
+.sw-cyan span{background:#00d4e8;color:#111214}
+
+.demo{border:var(--bd) solid var(--ink);background:var(--surface-2);padding:var(--sp-3);display:grid;gap:var(--sp-2);justify-items:start}
+.demo .lbl{font-size:.6rem}
+.k{
+  font-family:var(--fd);font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:.82rem;
+  border:var(--bd) solid var(--ink);background:var(--accent);color:var(--accent-ink);
+  padding:.5rem .9rem;box-shadow:var(--sh);cursor:pointer;
+  transition:transform var(--dur) linear,box-shadow var(--dur) linear;
+}
+.k:hover{transform:translate(calc(var(--off)/2),calc(var(--off)/2));box-shadow:var(--sh-half)}
+.k:active{transform:translate(var(--off),var(--off));box-shadow:0 0 0 var(--ink)}
+.k--2{background:var(--surface);color:var(--ink)}
+.k--bad{background:transparent;color:var(--alert);border-color:var(--alert);box-shadow:none}
+.k--bad:hover{transform:none;box-shadow:none;background:var(--alert);color:var(--paper)}
+.demo-card{border:var(--bd) solid var(--ink);background:var(--surface);box-shadow:var(--sh);padding:.6rem .8rem;width:100%}
+.demo-card b{font-family:var(--fd);text-transform:uppercase;font-size:.9rem}
+.demo-card small{display:block;font-size:.72rem;color:var(--ink-3)}
+.scan{position:relative}
+.scan::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px);
+}
+
+/* ================= nav shells (real fidelity) ================= */
+.shell{border:var(--bd) solid var(--ink);background:var(--paper);font-size:12px;display:grid;min-width:0}
+.nbrand{font-family:var(--fd);font-weight:800;font-size:1.15em;text-transform:uppercase;letter-spacing:.02em}
+.nitem{
+  border:2px solid var(--ink);background:var(--surface);padding:.45em .55em;font-weight:600;font-size:.95em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.nitem.is-on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.nwho{font-family:var(--fm);font-size:.78em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3)}
+.nrail{border-inline-end:var(--bd) solid var(--ink);background:var(--surface-2);padding:.7em;display:grid;gap:.3em;align-content:start}
+.nrail .nwho{margin-top:.4em;border-top:2px solid var(--ink);padding-top:.5em}
+.nmain{padding:.8em;display:grid;gap:.6em;align-content:start;min-width:0}
+.ntop{display:flex;gap:.5em;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.ntitle{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:1.5em;letter-spacing:.01em}
+.nbtn{
+  font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:.85em;letter-spacing:.03em;
+  border:var(--bd) solid var(--ink);background:var(--accent);color:var(--accent-ink);padding:.45em .7em;box-shadow:var(--sh);white-space:nowrap;
+}
+.nstats{display:grid;gap:.5em;grid-template-columns:repeat(3,minmax(0,1fr))}
+.nstat{border:var(--bd) solid var(--ink);background:var(--surface);box-shadow:var(--sh);padding:.5em .6em}
+.nstat span{display:block;font-family:var(--fm);font-size:.68em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+.nstat b{display:block;font-family:var(--fd);font-size:1.6em;font-weight:800;font-variant-numeric:tabular-nums}
+.nslab{background:var(--ink);color:var(--paper);padding:.5em .7em;display:flex;gap:.6em;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.nslab .nwho{color:var(--paper)}
+.nbelt{display:flex;flex-wrap:wrap;gap:0;border-bottom:var(--bd) solid var(--ink);background:var(--surface-2)}
+.nbelt .nitem{border:0;border-inline-end:var(--bd) solid var(--ink);background:transparent;border-radius:0;
+  text-transform:uppercase;font-family:var(--fm);font-size:.75em;font-weight:700;letter-spacing:.06em;padding:.6em .8em}
+.nbelt .nitem.is-on{background:var(--accent);color:var(--accent-ink)}
+.ntabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4em;padding:.5em;background:var(--surface-2);border-bottom:var(--bd) solid var(--ink)}
+@media (min-width:38rem){.ntabs{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ntab{
+  border:var(--bd) solid var(--ink);background:var(--surface);box-shadow:var(--sh);
+  min-height:3.4em;display:grid;place-items:center;text-align:center;padding:.4em;
+  font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:.82em;line-height:1.1;letter-spacing:.02em;
+}
+.ntab.is-on{background:var(--accent);color:var(--accent-ink)}
+.nicons{border-inline-end:var(--bd) solid var(--ink);background:var(--ink);padding:.5em .35em;display:grid;gap:.35em;align-content:start;justify-items:center}
+.nico{width:2.2em;height:2.2em;display:grid;place-items:center;border:2px solid var(--paper);color:var(--paper);
+  font-family:var(--fm);font-size:.7em;font-weight:700}
+.nico.is-on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.ndock{
+  border-top:var(--bd) solid var(--ink);background:var(--surface-2);padding:.5em .7em;
+  display:flex;gap:.5em;align-items:center;justify-content:space-between;flex-wrap:wrap;
+}
+.nclock{font-family:var(--fm);font-weight:700;font-size:.95em;font-variant-numeric:tabular-nums}
+
+/* ================= wireframes ================= */
+.wf{
+  border:var(--bd) solid var(--ink);background:var(--surface);box-shadow:var(--sh);
+  padding:.45rem;display:grid;gap:.35rem;align-content:start;
+  font-family:var(--fm);font-size:.6rem;min-height:15rem;
+}
+.wrow{display:grid;gap:.35rem;min-width:0}
+.wcol{display:grid;gap:.35rem;align-content:start;min-width:0}
+.wb{
+  border:2px solid var(--ink);background:var(--surface-2);padding:.35rem .4rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink);
+  display:grid;align-content:center;min-height:1.8rem;min-width:0;overflow:hidden;
+}
+.wb--a{background:var(--accent);color:var(--accent-ink)}
+.wb--ink{background:var(--ink);color:var(--paper)}
+.wb--q{background:transparent;border-style:dashed;color:var(--ink-3);font-weight:500}
+.wb--t{min-height:3rem}
+.wb--xt{min-height:5.4rem}
+.wb--img{background:repeating-linear-gradient(45deg,var(--surface-3) 0 5px,var(--surface-2) 5px 10px);min-height:4.2rem;color:var(--ink-3);font-weight:500}
+.wb--img-xl{background:repeating-linear-gradient(45deg,var(--surface-3) 0 5px,var(--surface-2) 5px 10px);min-height:7.5rem;color:var(--ink-3);font-weight:500}
+.wb--sh{box-shadow:var(--sh)}
+.wb--sm{min-height:1.3rem;font-size:.92em;padding:.2rem .35rem}
+
+/* ---------- tamed table demo ---------- */
+.tt{border:var(--bd) solid var(--ink);background:var(--surface);overflow-x:auto;margin-top:var(--sp-4)}
+.tt table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:30rem}
+.tt th{
+  text-align:start;background:var(--ink);color:var(--paper);padding:.45rem .6rem;
+  font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;
+}
+.tt td{padding:.4rem .6rem;border-bottom:1px solid var(--surface-3)}
+.tt tr:last-child td{border-bottom:0}
+.tt .num{text-align:end;font-family:var(--fm);font-variant-numeric:tabular-nums}
+.tt .code{font-family:var(--fm);font-weight:500}
+.tchip{
+  display:inline-block;font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  border:1px solid var(--ink);padding:.1rem .35rem;white-space:nowrap;
+}
+.tchip--ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.tchip--busy{background:var(--busy);color:#fff;border-color:var(--busy)}
+.tchip--alert{background:var(--alert);color:#fff;border-color:var(--alert)}
+
+/* ---------- questions ---------- */
+.qs{display:grid;gap:var(--sp-4);margin-top:var(--sp-5)}
+@media (min-width:50rem){.qs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.q{border:var(--bd) solid var(--ink);background:var(--surface);padding:var(--sp-4);align-content:start;display:grid;gap:.5rem}
+.q h3{font-size:.92rem}
+.q__h{font-size:.8rem;color:var(--ink-3)}
+.q__o{display:grid;gap:.3rem}
+.q__o label{display:flex;gap:.5rem;align-items:flex-start;font-size:.84rem;border:2px solid var(--ink);padding:.4rem .5rem;cursor:pointer;background:var(--surface)}
+.q__o label:hover{background:var(--surface-2)}
+.q__o label:has(input:checked){background:var(--accent);color:var(--accent-ink);font-weight:600}
+.q__o input{margin:.2rem 0 0;accent-color:var(--ink);flex:none}
+.q textarea,.q input[type=text]{
+  width:100%;font:inherit;font-size:.85rem;background:var(--paper);color:var(--ink);
+  border:var(--bd) solid var(--ink);padding:.5rem .6rem;
+}
+.q textarea{min-height:5rem;resize:vertical}
+
+/* ---------- result ---------- */
+.res{border:var(--bd) solid var(--ink);background:var(--accent);box-shadow:var(--sh);padding:var(--sp-5);margin:var(--sp-6) 0}
+.res h2{font-size:1.25rem;color:var(--accent-ink)}
+.res__p{color:var(--accent-ink);font-size:.88rem;margin-top:.4rem;max-width:62ch}
+.res__box{background:var(--surface);border:var(--bd) solid var(--ink);padding:var(--sp-4);margin-top:var(--sp-4)}
+.res__acts{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.out{
+  width:100%;min-height:16rem;margin-top:var(--sp-3);font-family:var(--fm);font-size:.76rem;line-height:1.6;
+  background:var(--paper);color:var(--ink);border:var(--bd) solid var(--ink);padding:var(--sp-3);
+  white-space:pre;overflow:auto;resize:vertical;
+}
+.said{font-family:var(--fm);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ok)}
+.ft{border-top:var(--bd) solid var(--ink);padding:var(--sp-4) 0 var(--sp-7);font-family:var(--fm);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar__in">
+    <span class="bar__id">RIMS · phiếu <b>02/05</b> · khung màn</span>
+    <nav class="bar__nav" aria-label="Mục lục">
+      <a href="#nut">0 · Núm</a>
+      <a href="#nav">1 · Điều hướng</a>
+      <a href="#bep">2 · Bếp</a>
+      <a href="#ban">3 · Bàn</a>
+      <a href="#quantri">4 · Quản trị</a>
+      <a href="#khach">5 · Khách</a>
+      <a href="#ketqua">Kết quả</a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="head">
+    <p class="lbl">Phỏng vấn thiết kế lại · phiếu 02 trong 05</p>
+    <h1>Khung xương &amp; đường đi</h1>
+    <p class="head__lede">
+      Style đã chốt ở phiếu 01, nên phiếu này <b>không hỏi về màu và hình khối nữa</b> —
+      cả trang này đã được vẽ bằng đúng style bạn chọn. Việc của phiếu này là chốt
+      <b>bộ xương</b>: nhân viên đi lại trong app bằng cái gì, và 36 màn được xếp theo khung nào.
+      Mọi bản dựng dưới đây đều mang cùng một style, chỉ khác cấu trúc.
+    </p>
+
+    <div class="locked">
+      <h2>Đã khoá từ phiếu 01</h2>
+      <dl>
+        <dt>Hướng</dt><dd>C · Phiếu bếp (neo-brutalist POS)</dd>
+        <dt>Bo góc</dt><dd>0px</dd>
+        <dt>Bóng</dt><dd>offset cứng, blur 0</dd>
+        <dt>Hover</dt><dd>lún vào bóng, ≤100ms</dd>
+        <dt>Sáng / tối</dt><dd>sáng là chính</dd>
+        <dt>Mật độ</dt><dd>vận hành thoáng · quản trị dày</dd>
+        <dt>Giọng</dt><dd>một hệ cho cả 36 màn</dd>
+        <dt>Ảnh món</dt><dd>nhân vật chính</dd>
+        <dt>Mặt chữ</dt><dd>Archivo · IBM Plex Sans · JetBrains Mono</dd>
+        <dt>Thiết bị</dt><dd>tablet · laptop · điện thoại, ngang nhau</dd>
+      </dl>
+    </div>
+
+    <div class="route" aria-label="Lộ trình">
+      <span class="is-done">01 · Hướng thiết kế</span>
+      <span class="is-now">02 · Khung màn &amp; điều hướng</span>
+      <span>03 · Component</span>
+      <span>04 · Icon &amp; giọng văn</span>
+      <span>05 · Spec tổng hợp</span>
+    </div>
+  </header>
+
+  <hr class="rule">
+  <form id="sheet">
+
+  <!-- ======================= §0 KNOBS ======================= -->
+  <section class="sec" id="nut">
+    <p class="sec__n">Phần 0</p>
+    <h2>Ba núm sống</h2>
+    <p class="sec__p">
+      Ba thứ này chưa hiệu chỉnh. Bấm đổi và <b>cả trang đổi theo ngay</b> — mọi bản dựng ở
+      phần 1 đến phần 5 đều ăn theo ba núm này, nên bạn thấy được hệ quả thật trước khi chốt.
+    </p>
+
+    <div class="knobs">
+
+      <div class="knob">
+        <p class="lbl">Núm 1</p>
+        <h3>Bóng lệch bao nhiêu</h3>
+        <p>Bài tham chiếu cho cả <span class="mono">6px</span> và <span class="mono">8px</span>. Càng lệch càng mạnh, nhưng trên màn nhiều thẻ thì bóng chen nhau.</p>
+        <div class="opts" role="radiogroup" aria-label="Độ lệch bóng">
+          <label><input type="radio" name="k_off" value="3px — nhẹ" data-knob="off" data-val="3"><span>3px</span></label>
+          <label><input type="radio" name="k_off" value="4px — vừa" data-knob="off" data-val="4" checked><span>4px</span></label>
+          <label><input type="radio" name="k_off" value="6px — mạnh (theo bài tham chiếu)" data-knob="off" data-val="6"><span>6px</span></label>
+          <label><input type="radio" name="k_off" value="8px — rất mạnh" data-knob="off" data-val="8"><span>8px</span></label>
+        </div>
+        <div class="demo">
+          <span class="lbl">Rê chuột và bấm thử — nút lún vào bóng của chính nó</span>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="k" type="button">Xong món</button>
+            <button class="k k--2" type="button">Để sau</button>
+            <button class="k k--bad" type="button">Huỷ món</button>
+          </div>
+          <div class="demo-card"><b>Bàn 04</b><small>2 món chờ bếp · 18:55</small></div>
+        </div>
+      </div>
+
+      <div class="knob">
+        <p class="lbl">Núm 2</p>
+        <h3>Màu nhấn</h3>
+        <p>Neo-brutalism dùng một màu chroma cao, một màu cho một mặt, không tint. Chữ đen trên vàng / lime / hồng / cyan đều đạt AAA.</p>
+        <div class="sw-row" role="radiogroup" aria-label="Màu nhấn">
+          <label class="sw-do"><input type="radio" name="k_accent" value="Đỏ son #e0301f" data-knob="accent" data-val="do" checked><span>Đỏ</span></label>
+          <label class="sw-vang"><input type="radio" name="k_accent" value="Vàng chanh #ffd400" data-knob="accent" data-val="vang"><span>Vàng</span></label>
+          <label class="sw-lime"><input type="radio" name="k_accent" value="Lime #c4f000" data-knob="accent" data-val="lime"><span>Lime</span></label>
+          <label class="sw-hong"><input type="radio" name="k_accent" value="Hồng nóng #ff4d9d" data-knob="accent" data-val="hong"><span>Hồng</span></label>
+          <label class="sw-cyan"><input type="radio" name="k_accent" value="Cyan #00d4e8" data-knob="accent" data-val="cyan"><span>Cyan</span></label>
+        </div>
+        <div class="pk__notes">
+          <p class="n"><b>Đỏ</b> trùng họ với màu lỗi — phải phân biệt bằng hình dạng: nút chính tô đặc, nút huỷ chỉ có viền.</p>
+          <p class="y"><b>Vàng</b> là màu kinh điển nhất của style này, và hợp nghề ăn uống.</p>
+          <p class="n"><b>Lime · hồng · cyan</b> rất mạnh. Đẹp ở nút và chip, nhưng rải cả màn thì mỏi mắt trong ca dài.</p>
+        </div>
+      </div>
+
+      <div class="knob">
+        <p class="lbl">Núm 3</p>
+        <h3>Viền dày bao nhiêu</h3>
+        <p>Bài tham chiếu cho khoảng <span class="mono">2–5px</span>. Đây là thứ ảnh hưởng nặng nhất tới 11 màn quản trị: viền dày nhân với nhiều thẻ thành lưới rối.</p>
+        <div class="opts" role="radiogroup" aria-label="Độ dày viền">
+          <label><input type="radio" name="k_bd" value="2px" data-knob="bd" data-val="2" checked><span>2px</span></label>
+          <label><input type="radio" name="k_bd" value="3px" data-knob="bd" data-val="3"><span>3px</span></label>
+          <label><input type="radio" name="k_bd" value="4px" data-knob="bd" data-val="4"><span>4px</span></label>
+        </div>
+        <div class="demo">
+          <span class="lbl">Bốn thẻ cạnh nhau ở độ dày hiện tại</span>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;width:100%">
+            <div class="demo-card"><b>Bàn 03</b><small>Trống</small></div>
+            <div class="demo-card"><b>Bàn 04</b><small>Đang phục vụ</small></div>
+            <div class="demo-card"><b>Bàn 05</b><small>Đã đặt 19:30</small></div>
+            <div class="demo-card"><b>Bàn 06</b><small>Chờ thanh toán</small></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="knob" style="margin-top:var(--sp-5)">
+      <p class="lbl">Núm 4</p>
+      <h3>Bóng được xuất hiện ở đâu</h3>
+      <p class="sec__p" style="margin-top:0">
+        Đây là câu quan trọng nhất phần này. Cả hai bài bạn gửi đều xếp
+        <b>“dense data / tables”</b> vào danh sách style này không phù hợp — mà RIMS có
+        11 màn quản trị toàn bảng. Nếu bóng đổ lên mọi bề mặt thì màn thống kê thành rừng bóng.
+      </p>
+      <div class="q__o" style="max-width:52rem">
+        <label><input type="radio" name="k_shwhere" value="Chỉ thẻ · nút · modal · phiếu · chip nổi — KHÔNG đổ trong bảng, hàng danh sách, ô nhập" checked><span><b>Tiết chế</b> — bóng chỉ cho thẻ, nút, modal, phiếu. Trong lòng bảng: kẻ 1px, không bóng, không in hoa từng ô. <i>(tôi đề xuất cái này)</i></span></label>
+        <label><input type="radio" name="k_shwhere" value="Mọi bề mặt đều có bóng, kể cả hàng bảng"><span><b>Không tiết chế</b> — mọi bề mặt đều có bóng, kể cả hàng bảng. Trung thành style nhất, và ồn nhất.</span></label>
+        <label><input type="radio" name="k_shwhere" value="Chỉ nút và modal có bóng, thẻ chỉ có viền"><span><b>Rất kiệm</b> — chỉ nút và modal có bóng; thẻ chỉ có viền dày.</span></label>
+      </div>
+      <p class="sec__p">Dưới đây là <b>bảng đã tiết chế</b> theo phương án tôi đề xuất — đầu bảng là thanh đen đặc, trong lòng bảng kẻ mảnh 1px, ô không in hoa, chip trạng thái viền 1px:</p>
+      <div class="tt">
+        <table>
+          <thead><tr><th>Mã hoá đơn</th><th>Bàn</th><th>Món</th><th class="num">Tổng tiền</th><th>Trạng thái</th></tr></thead>
+          <tbody>
+            <tr><td class="code">HD-2409-118</td><td>04</td><td>Phở bò, Nem cuốn</td><td class="num">312.000</td><td><span class="tchip tchip--busy">Đang nấu</span></td></tr>
+            <tr><td class="code">HD-2409-117</td><td>06</td><td>Cơm gà, Trà đá</td><td class="num">485.000</td><td><span class="tchip tchip--alert">Chờ trả</span></td></tr>
+            <tr><td class="code">HD-2409-116</td><td>02</td><td>Bún chả, Chè đậu đen</td><td class="num">198.000</td><td><span class="tchip tchip--ok">Đã xong</span></td></tr>
+            <tr><td class="code">HD-2409-115</td><td>09</td><td>Lẩu thái, Rau muống</td><td class="num">742.000</td><td><span class="tchip tchip--ok">Đã xong</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ======================= §1 NAV ======================= -->
+  <section class="sec" id="nav">
+    <p class="sec__n">Phần 1</p>
+    <h2>Điều hướng</h2>
+    <p class="sec__p">
+      Năm phương án, cùng nội dung: màn <b>“Đơn cần chế biến”</b> của Đầu bếp.
+      Nhớ là màn vận hành phải chạy cả trên tablet, laptop và điện thoại — nên phương án nào
+      cũng phải trả lời được câu “dưới 60rem thì nó thành cái gì”, và tôi ghi rõ ở từng thẻ.
+    </p>
+
+    <div class="grid grid--2">
+
+      <!-- N1 -->
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="nav" value="N1 · Thanh bên dày">
+            <span class="pk__k">N1</span>
+            <span><span class="pk__n">Thanh bên dày</span>
+            <span class="pk__d">Thanh bên cố định, mỗi mục là một khối có viền. Mục đang mở tô đặc màu nhấn.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="shell" style="grid-template-columns:8.5rem minmax(0,1fr)">
+            <aside class="nrail">
+              <span class="nbrand">RIMS</span>
+              <span class="nitem is-on">Đơn cần chế biến</span>
+              <span class="nitem">Gom món để nấu</span>
+              <span class="nitem">Món đã xong</span>
+              <span class="nitem">Món đã huỷ</span>
+              <span class="nwho">TA · Đầu bếp</span>
+            </aside>
+            <div class="nmain">
+              <div class="ntop"><span class="ntitle">Đơn cần chế biến</span><span class="nbtn">Xong món</span></div>
+              <div class="nstats">
+                <div class="nstat"><span>Chờ</span><b>7</b></div>
+                <div class="nstat"><span>Đang nấu</span><b>3</b></div>
+                <div class="nstat"><span>Quá 15′</span><b>1</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Đi tới đâu cũng thấy mình đang ở đâu. Tốt nhất cho vai trò có nhiều màn (Quản trị 10 mục).</p>
+            <p class="y">Giữ được cái bạn đang có, nên ít rủi ro nhất.</p>
+            <p class="n">Dưới 60rem phải thu thành ngăn kéo — thêm một nút và một trạng thái mở/đóng.</p>
+            <p class="n">Ăn 8–9rem chiều ngang, trên tablet dọc là đáng kể.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- N2 -->
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="nav" value="N2 · Slab ngang hai tầng">
+            <span class="pk__k">N2</span>
+            <span><span class="pk__n">Slab ngang hai tầng</span>
+            <span class="pk__d">Tầng trên đen đặc: tên app và người dùng. Tầng dưới: băng mục nối liền nhau bằng viền. Nội dung chiếm hết chiều ngang.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="shell">
+            <div class="nslab"><span class="nbrand">RIMS</span><span class="nwho">TA · Đầu bếp · 19:42</span></div>
+            <div class="nbelt">
+              <span class="nitem is-on">Cần chế biến</span>
+              <span class="nitem">Gom món</span>
+              <span class="nitem">Đã xong</span>
+              <span class="nitem">Đã huỷ</span>
+            </div>
+            <div class="nmain">
+              <div class="ntop"><span class="ntitle">Đơn cần chế biến</span><span class="nbtn">Xong món</span></div>
+              <div class="nstats">
+                <div class="nstat"><span>Chờ</span><b>7</b></div>
+                <div class="nstat"><span>Đang nấu</span><b>3</b></div>
+                <div class="nstat"><span>Quá 15′</span><b>1</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Nội dung được cả chiều ngang — hợp bảng rộng của họ Quản trị.</p>
+            <p class="y">Băng mục in hoa nối viền là hình ảnh rất đúng style, không cần ngăn kéo: xuống hẹp thì cuộn ngang.</p>
+            <p class="n">Quá 6 mục là băng bị tràn. Quản trị có 10 mục — sẽ phải gộp nhóm hoặc cho cuộn ngang.</p>
+            <p class="n">Ăn hai tầng chiều cao, màn bếp đứng sẽ mất đất.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- N3 -->
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="nav" value="N3 · Tab POS lớn">
+            <span class="pk__k">N3</span>
+            <span><span class="pk__n">Tab POS lớn</span>
+            <span class="pk__d">4–6 tab rất to, cao 56–64px, có bóng, như mặt máy tính tiền. Không có thanh bên.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="shell">
+            <div class="nslab"><span class="nbrand">RIMS</span><span class="nwho">TA · Đầu bếp</span></div>
+            <div class="ntabs">
+              <span class="ntab is-on">Cần chế biến</span>
+              <span class="ntab">Gom món</span>
+              <span class="ntab">Đã xong</span>
+              <span class="ntab">Đã huỷ</span>
+            </div>
+            <div class="nmain">
+              <div class="ntop"><span class="ntitle">Đơn cần chế biến</span><span class="nbtn">Xong món</span></div>
+              <div class="nstats">
+                <div class="nstat"><span>Chờ</span><b>7</b></div>
+                <div class="nstat"><span>Đang nấu</span><b>3</b></div>
+                <div class="nstat"><span>Quá 15′</span><b>1</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Bấm bằng ngón tay ướt, đeo găng, không cần nhìn kỹ. Mạnh nhất cho bếp và thu ngân.</p>
+            <p class="y">Vùng chạm 48px trở lên là mặc định, không cần luật riêng cho cảm ứng.</p>
+            <p class="n">Không kham được 10 mục của Quản trị — sẽ phải cho Quản trị một kiểu nav khác, mà bạn đã chốt “một hệ duy nhất”.</p>
+            <p class="n">Tab to ăn nhiều chiều cao nhất trong năm phương án.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- N4 -->
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="nav" value="N4 · Rail ký hiệu hẹp">
+            <span class="pk__k">N4</span>
+            <span><span class="pk__n">Rail ký hiệu hẹp</span>
+            <span class="pk__d">Dải đen hẹp 3rem, mỗi mục một ký hiệu vuông. Bấm nút mở rộng thì hiện nhãn chữ.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="shell" style="grid-template-columns:3.2rem minmax(0,1fr)">
+            <aside class="nicons">
+              <span class="nico is-on">ĐƠN</span>
+              <span class="nico">GOM</span>
+              <span class="nico">XON</span>
+              <span class="nico">HUỶ</span>
+              <span class="nico">≡</span>
+            </aside>
+            <div class="nmain">
+              <div class="ntop"><span class="ntitle">Đơn cần chế biến</span><span class="nbtn">Xong món</span></div>
+              <div class="nstats">
+                <div class="nstat"><span>Chờ</span><b>7</b></div>
+                <div class="nstat"><span>Đang nấu</span><b>3</b></div>
+                <div class="nstat"><span>Quá 15′</span><b>1</b></div>
+              </div>
+              <div class="wf" style="box-shadow:none;border-width:2px">
+                <div class="wb wb--q">Nội dung được gần hết chiều ngang</div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Tốn ít đất nhất mà vẫn luôn thấy nav. Hợp cả ba thiết bị mà không cần ngăn kéo.</p>
+            <p class="n">Ký hiệu 3 chữ như trên là tạm — phiếu 04 mới chốt bộ icon. Nếu icon không rõ nghĩa thì nhân viên mới sẽ mò.</p>
+            <p class="n">10 mục Quản trị xếp dọc trong rail hẹp thì phải cuộn dọc, khó quét.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- N5 -->
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="nav" value="N5 · Slab trên + thanh hành động dính đáy">
+            <span class="pk__k">N5</span>
+            <span><span class="pk__n">Slab trên + thanh dính đáy</span>
+            <span class="pk__d">Mục ở trên, còn <b>hành động chính và đồng hồ ca nằm ở thanh dính đáy</b> — chỗ ngón tay chạm tới dễ nhất.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="shell">
+            <div class="nslab"><span class="nbrand">RIMS</span><span class="nwho">TA · Đầu bếp</span></div>
+            <div class="nbelt">
+              <span class="nitem is-on">Cần chế biến</span>
+              <span class="nitem">Gom món</span>
+              <span class="nitem">Đã xong</span>
+            </div>
+            <div class="nmain">
+              <div class="ntop"><span class="ntitle">Đơn cần chế biến</span></div>
+              <div class="nstats">
+                <div class="nstat"><span>Chờ</span><b>7</b></div>
+                <div class="nstat"><span>Đang nấu</span><b>3</b></div>
+                <div class="nstat"><span>Quá 15′</span><b>1</b></div>
+              </div>
+            </div>
+            <div class="ndock">
+              <span class="nclock">Ca chiều · 19:42</span>
+              <span class="nbtn">Xong món #118</span>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Hành động chính luôn ở một chỗ cố định, không phải tìm. Rất mạnh khi tay đang bận.</p>
+            <p class="y">Trên điện thoại đây là bố cục đúng nhất — nút nằm trong vùng ngón cái.</p>
+            <p class="n">Thanh đáy ăn chiều cao vĩnh viễn, và phải xử lý vùng an toàn của iOS.</p>
+            <p class="n">Màn không có hành động chính rõ ràng (thống kê, hoá đơn) thì thanh đáy trống, trông thừa.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="warn">
+      <b>Một điều tôi phải nói thẳng</b>
+      Bạn chốt “một hệ duy nhất cho cả 36 màn”, nhưng Quản trị có <b>10 mục</b> còn Phục vụ chỉ có <b>3</b>.
+      N3 tab lớn và N4 rail hẹp gần như không kham được 10 mục. Nếu bạn thích N3, cách giữ đúng lời hứa
+      “một hệ” là: <b>cùng một hình dạng tab, nhưng Quản trị được phép gộp 10 mục thành 4 nhóm</b>
+      (Bán hàng · Thực đơn · Tài khoản · Cấu hình) rồi mở mục con bên trong. Nói tôi biết nếu bạn muốn thế.
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ======================= §2 KITCHEN ======================= -->
+  <section class="sec" id="bep">
+    <p class="sec__n">Phần 2</p>
+    <h2>Khung màn vận hành — lấy màn bếp làm ví dụ</h2>
+    <p class="sec__p">
+      Đây là khung cho <b>18 màn</b> của Phục vụ, Bếp, Thu ngân. Dưới đây là sơ đồ khung —
+      khối gạch là chỗ đặt nội dung, không phải bản dựng cuối. Bạn chọn <b>hình dạng mặt làm việc</b>.
+    </p>
+
+    <div class="grid grid--2">
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="vanhanh" value="V1 · Một cột phiếu dọc">
+            <span class="pk__k">V1</span>
+            <span><span class="pk__n">Một cột phiếu dọc</span>
+            <span class="pk__d">Phiếu xếp dọc, mỗi phiếu một khối lớn, nút “Xong món” nằm ngay trên phiếu. Cuộn một chiều.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Đơn cần chế biến · 7 phiếu · sắp theo giờ vào</div>
+            <div class="wb wb--t wb--sh">Phiếu #118 · Bàn 04 · 18:55 — 2 món &nbsp;&nbsp;[ XONG MÓN ]</div>
+            <div class="wb wb--t wb--sh">Phiếu #119 · Bàn 07 · 18:58 — 4 món &nbsp;&nbsp;[ XONG MÓN ]</div>
+            <div class="wb wb--t wb--sh">Phiếu #120 · Bàn 02 · 19:02 — 1 món &nbsp;&nbsp;[ XONG MÓN ]</div>
+            <div class="wb wb--q">… cuộn tiếp 4 phiếu</div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Đơn giản nhất, không bao giờ vỡ ở khung hẹp. Điện thoại và tablet dọc dùng y nguyên.</p>
+            <p class="y">Phiếu to nên chữ to được — đọc từ xa tốt.</p>
+            <p class="n">Bếp đông 20 phiếu thì phải cuộn nhiều, không thấy được toàn cảnh.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="vanhanh" value="V2 · Ba cột theo trạng thái (kanban)">
+            <span class="pk__k">V2</span>
+            <span><span class="pk__n">Ba cột theo trạng thái</span>
+            <span class="pk__d">Chờ · Đang nấu · Đã xong. Phiếu chuyển cột khi bấm. Toàn cảnh bếp trong một màn.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Đơn cần chế biến · toàn cảnh ca chiều</div>
+            <div class="wrow" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+              <div class="wcol">
+                <div class="wb wb--a wb--sm">Chờ · 4</div>
+                <div class="wb wb--t wb--sh">#118 Bàn 04</div>
+                <div class="wb wb--t wb--sh">#119 Bàn 07</div>
+              </div>
+              <div class="wcol">
+                <div class="wb wb--sm">Đang nấu · 3</div>
+                <div class="wb wb--t wb--sh">#116 Bàn 02</div>
+                <div class="wb wb--q">kéo hoặc bấm</div>
+              </div>
+              <div class="wcol">
+                <div class="wb wb--sm">Đã xong · 12</div>
+                <div class="wb wb--t wb--sh">#115 Bàn 09</div>
+                <div class="wb wb--q">tự ẩn sau 5′</div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Nhìn một cái biết bếp đang nghẽn ở đâu. Mạnh nhất cho ca cao điểm.</p>
+            <p class="y">Trạng thái là vị trí, không phải màu — người không phân biệt màu vẫn đọc đúng.</p>
+            <p class="n">Ba cột không sống nổi ở 320px — phải đổi thành một cột có tab trạng thái. Thành hai bố cục phải bảo trì.</p>
+            <p class="n">Phiếu trong cột hẹp thì chữ phải nhỏ lại, ngược với “vận hành thoáng”.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="vanhanh" value="V3 · Lưới thẻ phiếu">
+            <span class="pk__k">V3</span>
+            <span><span class="pk__n">Lưới thẻ phiếu</span>
+            <span class="pk__d">Phiếu là thẻ vuông, xếp lưới tự giãn 1→4 cột theo khổ màn. Một bố cục cho mọi thiết bị.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Đơn cần chế biến · 7 phiếu</div>
+            <div class="wrow" style="grid-template-columns:repeat(auto-fit,minmax(min(7rem,100%),1fr))">
+              <div class="wb wb--xt wb--sh">#118<br>Bàn 04<br>2 món</div>
+              <div class="wb wb--xt wb--sh">#119<br>Bàn 07<br>4 món</div>
+              <div class="wb wb--xt wb--sh">#120<br>Bàn 02<br>1 món</div>
+              <div class="wb wb--xt wb--sh">#121<br>Bàn 11<br>3 món</div>
+            </div>
+            <div class="wb wb--q">Lưới tự giãn — 1 cột ở 320px, 4 cột ở laptop</div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Một bố cục duy nhất cho cả ba thiết bị — ít code, ít bug nhất.</p>
+            <p class="y">Thẻ vuông có viền dày và bóng cứng là hình ảnh đúng style nhất trong bốn phương án.</p>
+            <p class="n">Thẻ vuông chứa ít chữ hơn phiếu ngang — tên món dài sẽ bị cắt.</p>
+            <p class="n">Không thể hiện được thứ tự ưu tiên rõ như V1 (xếp dọc theo giờ).</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="vanhanh" value="V4 · Danh sách + chi tiết cạnh nhau">
+            <span class="pk__k">V4</span>
+            <span><span class="pk__n">Danh sách + chi tiết</span>
+            <span class="pk__d">Cột trái danh sách gọn, cột phải chi tiết phiếu đang chọn. Không rời màn khi xem phiếu khác.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Đơn cần chế biến</div>
+            <div class="wrow" style="grid-template-columns:8rem minmax(0,1fr)">
+              <div class="wcol">
+                <div class="wb wb--a wb--sm">#118 Bàn 04</div>
+                <div class="wb wb--sm">#119 Bàn 07</div>
+                <div class="wb wb--sm">#120 Bàn 02</div>
+                <div class="wb wb--sm">#121 Bàn 11</div>
+                <div class="wb wb--q wb--sm">… 3 nữa</div>
+              </div>
+              <div class="wcol">
+                <div class="wb wb--t wb--sh">Phiếu #118 · Bàn 04 · 18:55<br>Phở bò × 1 · Nem cuốn × 2</div>
+                <div class="wb wb--q">Ghi chú bếp: ít hành, không rau mùi</div>
+                <div class="wb wb--a">[ XONG MÓN ]</div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Xem nhiều phiếu liên tiếp mà không mất ngữ cảnh — tốt cho Thu ngân xử lý hoá đơn.</p>
+            <p class="y">Chỗ cho ghi chú bếp và chi tiết dài, không bị cắt chữ.</p>
+            <p class="n">Dưới 60rem phải gập thành hai màn rời (danh sách → chi tiết) kèm nút quay lại. Hai luồng phải bảo trì.</p>
+            <p class="n">Trên điện thoại gần như mất hết ưu điểm.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ======================= §3 TABLES MAP ======================= -->
+  <section class="sec" id="ban">
+    <p class="sec__n">Phần 3</p>
+    <h2>Sơ đồ bàn — màn chính của Phục vụ</h2>
+    <p class="sec__p">
+      Màn này Phục vụ mở nhiều nhất trong ca. Commit gần đây của bạn vừa bỏ trần 12 bàn viết cứng,
+      nên khung phải sống được với <b>số bàn bất kỳ</b>.
+    </p>
+
+    <div class="grid grid--2">
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="ban" value="B1 · Lưới thẻ đều">
+            <span class="pk__k">B1</span>
+            <span><span class="pk__n">Lưới thẻ đều</span>
+            <span class="pk__d">Mỗi bàn một thẻ bằng nhau, xếp lưới tự giãn. Trạng thái đọc bằng chip chữ trên thẻ.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Danh sách bàn · 13 bàn</div>
+            <div class="wrow" style="grid-template-columns:repeat(auto-fit,minmax(min(5.5rem,100%),1fr))">
+              <div class="wb wb--t wb--sh">Bàn 01<br>Trống</div>
+              <div class="wb wb--t wb--sh">Bàn 02<br>Phục vụ</div>
+              <div class="wb wb--t wb--sh">Bàn 03<br>Trống</div>
+              <div class="wb wb--t wb--sh">Bàn 04<br>Đã đặt</div>
+              <div class="wb wb--t wb--sh">Bàn 05<br>Chờ trả</div>
+              <div class="wb wb--t wb--sh">Bàn 06<br>Trống</div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Sống với số bàn bất kỳ, không cần cấu hình gì. Không bao giờ vỡ.</p>
+            <p class="y">Thẻ vuông viền dày là hình ảnh đúng style.</p>
+            <p class="n">Không phản ánh vị trí thật — Phục vụ phải dịch “Bàn 07” ra chỗ nào trong quán.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="ban" value="B2 · Sơ đồ mặt bằng thật">
+            <span class="pk__k">B2</span>
+            <span><span class="pk__n">Sơ đồ mặt bằng thật</span>
+            <span class="pk__d">Bàn đặt đúng vị trí trong quán, có quầy bar, cửa, khu. Nhìn màn ra ngay chỗ ngồi.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Sơ đồ tầng 1</div>
+            <div class="wrow" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+              <div class="wb wb--sh">01</div><div class="wb wb--sh">02</div>
+              <div class="wb wb--q" style="grid-column:3 / span 2">Quầy bar</div>
+              <div class="wb wb--sh">03</div><div class="wb wb--a wb--sh">04</div><div class="wb wb--sh">05</div><div class="wb wb--sh">06</div>
+              <div class="wb wb--q" style="grid-column:1 / span 2">Cửa chính</div>
+              <div class="wb wb--sh">07</div><div class="wb wb--sh">08</div>
+            </div>
+            <div class="wb wb--q wb--sm">Tầng 2 · Sân sau — chuyển bằng tab</div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Mạnh nhất về nghiệp vụ — Phục vụ không phải dịch số bàn ra vị trí.</p>
+            <p class="y">Viền dày và khối vuông rất hợp để vẽ mặt bằng, style ăn khớp với chức năng.</p>
+            <p class="n">Cần thêm màn cho Quản trị <b>vẽ mặt bằng</b>, và thêm dữ liệu toạ độ cho bàn. Đây là việc backend, không chỉ giao diện.</p>
+            <p class="n">Ở 320px thì mặt bằng phải cuộn hai chiều, khó bấm.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="ban" value="B3 · Lưới nhóm theo khu">
+            <span class="pk__k">B3</span>
+            <span><span class="pk__n">Lưới nhóm theo khu</span>
+            <span class="pk__d">Vẫn là thẻ đều, nhưng gộp nhóm có tiêu đề khu: Tầng 1 · Tầng 2 · Sân sau. Nửa đường giữa B1 và B2.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Danh sách bàn</div>
+            <div class="wb wb--a wb--sm">Tầng 1 · 6 bàn · 2 trống</div>
+            <div class="wrow" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+              <div class="wb wb--t wb--sh">01 Trống</div><div class="wb wb--t wb--sh">02 Phục vụ</div><div class="wb wb--t wb--sh">03 Đã đặt</div>
+            </div>
+            <div class="wb wb--sm">Sân sau · 4 bàn · 1 trống</div>
+            <div class="wrow" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+              <div class="wb wb--t wb--sh">07 Trống</div><div class="wb wb--t wb--sh">08 Chờ trả</div><div class="wb wb--q">…</div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Có ngữ cảnh vị trí mà không cần dữ liệu toạ độ — chỉ cần trường “khu” cho bàn.</p>
+            <p class="y">Vẫn là lưới nên không vỡ ở khung hẹp.</p>
+            <p class="n">Vẫn không biết bàn 07 nằm cạnh bàn nào.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="ban" value="B4 · Bảng dày mỗi bàn một hàng">
+            <span class="pk__k">B4</span>
+            <span><span class="pk__n">Bảng dày</span>
+            <span class="pk__d">Mỗi bàn một hàng bảng: số bàn, khu, số chỗ, trạng thái, khách, giờ vào, tiền tạm tính. Lọc và sắp xếp mạnh.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Danh sách bàn · lọc: tất cả · sắp theo giờ vào</div>
+            <div class="wb wb--sm wb--a">Bàn · Khu · Chỗ · Trạng thái · Khách · Giờ · Tạm tính</div>
+            <div class="wb wb--sm">01 · T1 · 4 · Trống · — · — · —</div>
+            <div class="wb wb--sm">02 · T1 · 2 · Phục vụ · 2 · 18:40 · 312.000</div>
+            <div class="wb wb--sm">04 · T1 · 6 · Đã đặt · Chị Hiền · 19:30 · —</div>
+            <div class="wb wb--sm">05 · SS · 4 · Chờ trả · 3 · 17:55 · 485.000</div>
+            <div class="wb wb--q wb--sm">… 9 bàn nữa</div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Nhiều thông tin nhất mỗi màn. Quản lý ca nhìn bảng này là biết hết.</p>
+            <p class="n">Bảng dày là đúng thứ hai bài tham chiếu bảo style này làm dở. Phải tiết chế mạnh.</p>
+            <p class="n">Bấm vào hàng bảng bằng ngón tay khó hơn bấm thẻ. Ngược với “cả ba thiết bị”.</p>
+            <p class="n">Trạng thái bàn đọc bằng chữ trong cột, không quét mắt nhanh được như thẻ.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ======================= §4 ADMIN ======================= -->
+  <section class="sec" id="quantri">
+    <p class="sec__n">Phần 4</p>
+    <h2>Khung màn quản trị — 11 màn</h2>
+    <p class="sec__p">
+      Đây là chỗ style và chức năng đánh nhau. Bạn đã chốt <b>quản trị dày</b>, và núm 4 ở phần 0
+      quyết bóng có vào bảng hay không. Còn lại là chọn hình dạng chung cho 11 màn này.
+    </p>
+
+    <div class="grid grid--2">
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="quantri" value="Q1 · Bảng toàn màn + rail lọc bên trái">
+            <span class="pk__k">Q1</span>
+            <span><span class="pk__n">Bảng toàn màn + rail lọc</span>
+            <span class="pk__d">Bảng chiếm hết, bộ lọc nằm trong một dải dọc bên trái, luôn thấy.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Lịch sử hoá đơn · 1.284 bản ghi</div>
+            <div class="wrow" style="grid-template-columns:7rem minmax(0,1fr)">
+              <div class="wcol">
+                <div class="wb wb--a wb--sm">Bộ lọc</div>
+                <div class="wb wb--q wb--sm">Khoảng ngày</div>
+                <div class="wb wb--q wb--sm">Trạng thái</div>
+                <div class="wb wb--q wb--sm">Bàn</div>
+                <div class="wb wb--q wb--sm">Thu ngân</div>
+              </div>
+              <div class="wcol">
+                <div class="wb wb--sm wb--a">Mã · Ngày · Bàn · Tiền · Trạng thái</div>
+                <div class="wb wb--sm">HD-118 · 27/09 · 04 · 312.000 · Đã trả</div>
+                <div class="wb wb--sm">HD-117 · 27/09 · 06 · 485.000 · Chờ trả</div>
+                <div class="wb wb--sm">HD-116 · 27/09 · 02 · 198.000 · Đã trả</div>
+                <div class="wb wb--sm">HD-115 · 26/09 · 09 · 742.000 · Đã trả</div>
+                <div class="wb wb--q wb--sm">Trang 1 / 26</div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Lọc luôn trong tầm mắt — không phải mở đóng hộp thoại. Nhanh nhất khi soi dữ liệu.</p>
+            <p class="y">Đúng cái bạn đang có ở họ Quản trị, nên chuyển đổi nhẹ nhất.</p>
+            <p class="n">Rail lọc + nav thanh bên là hai dải dọc cùng lúc — ở 1024px bảng còn rất ít đất.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="quantri" value="Q2 · Dải thống kê trên + bảng dưới">
+            <span class="pk__k">Q2</span>
+            <span><span class="pk__n">Dải thống kê + bảng</span>
+            <span class="pk__d">Bốn khối số to trên đầu màn, bộ lọc thành một hàng ngang, bảng chiếm phần còn lại.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Lịch sử hoá đơn</div>
+            <div class="wrow" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+              <div class="wb wb--t wb--sh">Doanh thu<br>18.4tr</div>
+              <div class="wb wb--t wb--sh">Hoá đơn<br>126</div>
+              <div class="wb wb--t wb--sh">Chờ trả<br>2</div>
+              <div class="wb wb--t wb--sh">TB/đơn<br>146k</div>
+            </div>
+            <div class="wb wb--q wb--sm">Ngày ▾ · Trạng thái ▾ · Bàn ▾ · Thu ngân ▾ · [ Xuất Excel ]</div>
+            <div class="wb wb--sm wb--a">Mã · Ngày · Bàn · Tiền · Trạng thái</div>
+            <div class="wb wb--sm">HD-118 · 27/09 · 04 · 312.000 · Đã trả</div>
+            <div class="wb wb--sm">HD-117 · 27/09 · 06 · 485.000 · Chờ trả</div>
+            <div class="wb wb--q wb--sm">Trang 1 / 26</div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Trả lời “hôm nay thế nào” trước khi bắt người ta đọc bảng. Khối số to viền dày rất đẹp trong style này.</p>
+            <p class="y">Bảng được cả chiều ngang.</p>
+            <p class="n">Dải thống kê ăn chiều cao — mỗi lần vào màn phải cuộn qua nó mới tới bảng.</p>
+            <p class="n">Không phải màn nào trong 11 màn cũng có số đáng đưa lên đầu.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="quantri" value="Q3 · Danh sách + form sửa cạnh nhau">
+            <span class="pk__k">Q3</span>
+            <span><span class="pk__n">Danh sách + form cạnh nhau</span>
+            <span class="pk__d">Trái là danh sách bản ghi, phải là form sửa. Sửa món, sửa tài khoản mà không rời màn, không modal.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Quản lý món ăn · 43 món</div>
+            <div class="wrow" style="grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)">
+              <div class="wcol">
+                <div class="wb wb--q wb--sm">Tìm món…</div>
+                <div class="wb wb--a wb--sm">Phở bò · 65.000</div>
+                <div class="wb wb--sm">Nem cuốn · 45.000</div>
+                <div class="wb wb--sm">Cơm gà · 55.000</div>
+                <div class="wb wb--sm">Lẩu thái · 320.000</div>
+              </div>
+              <div class="wcol">
+                <div class="wb wb--img">Ảnh món · kéo thả để đổi</div>
+                <div class="wb wb--q wb--sm">Tên món</div>
+                <div class="wb wb--q wb--sm">Giá · Danh mục · Đang bán</div>
+                <div class="wb wb--a wb--sm">[ LƯU MÓN ]</div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Sửa 43 món liên tiếp mà không mở đóng modal 43 lần. Nhanh nhất cho việc nhập liệu.</p>
+            <p class="y">Có chỗ cho <b>ảnh món to</b> — khớp với “ảnh là nhân vật chính”.</p>
+            <p class="n">Không dùng được cho màn chỉ đọc (thống kê, lịch sử hoá đơn) — nửa 11 màn không cần form.</p>
+            <p class="n">Dưới 60rem phải gập thành hai bước.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="quantri" value="Q4 · Catalogue thẻ có ảnh">
+            <span class="pk__k">Q4</span>
+            <span><span class="pk__n">Catalogue thẻ có ảnh</span>
+            <span class="pk__d">Bản ghi là thẻ có ảnh, không phải hàng bảng. Dành cho món và danh mục — nơi ảnh mới là thứ nhận diện.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">Quản lý món ăn · 43 món · [ THÊM MÓN ]</div>
+            <div class="wb wb--q wb--sm">Danh mục ▾ · Đang bán ▾ · Sắp theo giá ▾</div>
+            <div class="wrow" style="grid-template-columns:repeat(auto-fit,minmax(min(7rem,100%),1fr))">
+              <div class="wcol"><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--sm">Phở bò · 65k</div></div>
+              <div class="wcol"><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--sm">Nem cuốn · 45k</div></div>
+              <div class="wcol"><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--sm">Cơm gà · 55k</div></div>
+              <div class="wcol"><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--sm">Lẩu thái · 320k</div></div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Duy nhất phương án dùng được 43 ảnh món thật của bạn ở màn quản trị.</p>
+            <p class="y">Cùng hình dạng với màn khách xem menu — một hệ thật sự, không phải hai.</p>
+            <p class="n">Ngược hẳn với “quản trị dày”. Thẻ có ảnh thì mỗi màn hiện được rất ít bản ghi.</p>
+            <p class="n">Không dùng được cho tài khoản, hoá đơn, thống kê — 8 trong 11 màn không có ảnh.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="warn">
+      <b>Cách tôi nghĩ nên làm</b>
+      11 màn quản trị không cùng một loại việc. Ba màn có ảnh (món, danh mục, menu) thì <b>Q4</b> đúng;
+      bốn màn nhập liệu (tài khoản, bàn, cấu hình) thì <b>Q3</b> đúng; bốn màn chỉ đọc (hoá đơn, thống kê)
+      thì <b>Q1</b> hoặc <b>Q2</b> đúng. Chọn một cái làm <b>khung mặc định</b>, rồi cho hai cái kia làm
+      ngoại lệ có ghi rõ — thế vẫn là một hệ. Nếu bạn muốn thế thì chọn cái mặc định, và viết ở câu cuối
+      hai cái ngoại lệ.
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ======================= §5 PUBLIC ======================= -->
+  <section class="sec" id="khach">
+    <p class="sec__n">Phần 5</p>
+    <h2>Trang cho khách — nơi ảnh món làm nhân vật chính</h2>
+    <p class="sec__p">
+      Bảy màn công khai: trang chủ, menu, đăng nhập, đăng ký, quên mật khẩu, đặt bàn của khách.
+      Bạn chốt <b>ảnh món là nhân vật chính</b> và <b>một hệ duy nhất</b> — nên câu hỏi là:
+      ảnh to tới mức nào trước khi trang thôi trông giống phần còn lại của app?
+    </p>
+
+    <div class="grid grid--2">
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="khach" value="P1 · Catalogue lưới ảnh vuông">
+            <span class="pk__k">P1</span>
+            <span><span class="pk__n">Catalogue lưới ảnh vuông</span>
+            <span class="pk__d">Vào là thấy món ngay. Lưới ảnh vuông viền dày, tên và giá trong khối đen dưới ảnh. Không có màn giới thiệu.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">RIMS · Thực đơn · [ ĐẶT BÀN ]</div>
+            <div class="wb wb--q wb--sm">Tất cả · Món chính · Khai vị · Đồ uống · Tráng miệng</div>
+            <div class="wrow" style="grid-template-columns:repeat(auto-fit,minmax(min(7.5rem,100%),1fr))">
+              <div class="wcol"><div class="wb wb--img-xl wb--sh">ảnh món</div><div class="wb wb--ink wb--sm">Phở bò · 65.000</div></div>
+              <div class="wcol"><div class="wb wb--img-xl wb--sh">ảnh món</div><div class="wb wb--ink wb--sm">Nem cuốn · 45.000</div></div>
+              <div class="wcol"><div class="wb wb--img-xl wb--sh">ảnh món</div><div class="wb wb--ink wb--sm">Cơm gà · 55.000</div></div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Ảnh nhiều nhất trên một màn. Khách vào là thấy đồ ăn, không phải đọc khẩu hiệu.</p>
+            <p class="y">Cùng khung với Q4 ở màn quản trị — một hệ thật.</p>
+            <p class="n">Không có chỗ nói quán là quán gì, ở đâu, mở mấy giờ.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="khach" value="P2 · Câu tuyên bố lớn rồi mới tới lưới món">
+            <span class="pk__k">P2</span>
+            <span><span class="pk__n">Tuyên bố lớn + lưới món</span>
+            <span class="pk__d">Màn đầu là một câu chữ rất to trên nền màu nhấn, không ảnh. Cuộn xuống mới tới lưới món.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">RIMS · [ ĐẶT BÀN ] · [ ĐĂNG NHẬP ]</div>
+            <div class="wb wb--a wb--xt">CƠM TRƯA<br>NÓNG TỪ 10:30</div>
+            <div class="wb wb--q wb--sm">Mở 10:30 – 22:00 · 12 Nguyễn Huệ · 0901 234 567</div>
+            <div class="wrow" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+              <div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--img wb--sh">ảnh</div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Chữ rất to trên nền màu nhấn là hình ảnh mạnh nhất của style này. Đáng nhớ nhất.</p>
+            <p class="y">Có chỗ cho giờ mở, địa chỉ, số điện thoại.</p>
+            <p class="n">Đi ngược “ảnh món là nhân vật chính” — màn đầu không có ảnh nào.</p>
+            <p class="n">Cần một câu khẩu hiệu thật. Tôi sẽ không tự bịa — bạn phải cho chữ.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="khach" value="P3 · Một ảnh chiếm màn, chữ là chú thích">
+            <span class="pk__k">P3</span>
+            <span><span class="pk__n">Một ảnh chiếm màn</span>
+            <span class="pk__d">Mỗi màn cuộn là một ảnh món rất lớn, chữ chỉ là chú thích nhỏ có viền. Ảnh dẫn, chữ theo.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">RIMS · [ ĐẶT BÀN ]</div>
+            <div class="wb wb--img-xl wb--sh" style="min-height:9rem">ảnh món cỡ lớn — chiếm gần hết màn đầu</div>
+            <div class="wb wb--sm">Phở bò · 65.000 · món bán chạy nhất tuần</div>
+            <div class="wb wb--img wb--sh">ảnh món tiếp theo</div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Trung thành nhất với “ảnh là nhân vật chính”. 43 ảnh thật được dùng hết công suất.</p>
+            <p class="n">Xem hết menu phải cuộn rất nhiều — khách muốn tìm nhanh một món sẽ khổ.</p>
+            <p class="n">Ảnh phải đẹp và cùng tông. Ảnh Wikimedia lệch tông sẽ lộ ngay ở cỡ này.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab">
+          <span class="pk__top">
+            <input type="radio" name="khach" value="P4 · Danh mục dính bên trái + lưới món bên phải">
+            <span class="pk__k">P4</span>
+            <span><span class="pk__n">Danh mục dính + lưới món</span>
+            <span class="pk__d">Cột danh mục dính bên trái, lưới món cuộn bên phải. Như thực đơn máy gọi món.</span></span>
+          </span>
+        </label>
+        <div class="pk__body">
+          <div class="wf">
+            <div class="wb wb--ink">RIMS · Thực đơn · [ ĐẶT BÀN ]</div>
+            <div class="wrow" style="grid-template-columns:6.5rem minmax(0,1fr)">
+              <div class="wcol">
+                <div class="wb wb--a wb--sm">Món chính</div>
+                <div class="wb wb--sm">Khai vị</div>
+                <div class="wb wb--sm">Đồ uống</div>
+                <div class="wb wb--sm">Tráng miệng</div>
+                <div class="wb wb--q wb--sm">dính khi cuộn</div>
+              </div>
+              <div class="wrow" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+                <div class="wcol"><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--ink wb--sm">Phở bò · 65k</div></div>
+                <div class="wcol"><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--ink wb--sm">Cơm gà · 55k</div></div>
+                <div class="wcol"><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--ink wb--sm">Bún chả · 50k</div></div>
+                <div class="wcol"><div class="wb wb--img wb--sh">ảnh</div><div class="wb wb--ink wb--sm">Lẩu thái · 320k</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Tìm món nhanh nhất — không cuộn mò. Hợp menu 43 món trở lên.</p>
+            <p class="y">Cùng hình dạng với V4 và Q3, nên cả app dùng lại một khung.</p>
+            <p class="n">Ảnh nhỏ hơn P1 và P3 vì phải nhường đất cho cột danh mục.</p>
+            <p class="n">Dưới 48rem cột danh mục phải thành băng cuộn ngang ở trên.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ======================= §6 QUESTIONS ======================= -->
+  <section class="sec" id="cauhoi">
+    <p class="sec__n">Phần 6</p>
+    <h2>Sáu câu chốt xương</h2>
+    <p class="sec__p">Không có bản dựng, chỉ chọn. Mấy câu này quyết những thứ xuất hiện ở cả 36 màn.</p>
+
+    <div class="qs">
+
+      <div class="q">
+        <p class="lbl">Câu 1</p>
+        <h3>Hành động chính nằm ở đâu</h3>
+        <p class="q__h">“Xong món”, “Lưu đặt bàn”, “Thanh toán” — một màn đúng một nút chính.</p>
+        <div class="q__o">
+          <label><input type="radio" name="q_cta" value="Trên đầu màn, cạnh tiêu đề"><span>Trên đầu màn, cạnh tiêu đề</span></label>
+          <label><input type="radio" name="q_cta" value="Thanh dính đáy, luôn thấy"><span>Thanh dính đáy, luôn thấy</span></label>
+          <label><input type="radio" name="q_cta" value="Ngay trên từng phiếu / từng thẻ"><span>Ngay trên từng phiếu / thẻ</span></label>
+          <label><input type="radio" name="q_cta" value="Đầu màn khi rộng, dính đáy khi hẹp"><span>Đầu màn khi rộng, dính đáy khi hẹp</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 2</p>
+        <h3>Bảng ở 320px thì thành gì</h3>
+        <p class="q__h">Bạn chốt “cả ba thiết bị”, nên bảng 7 cột phải có câu trả lời cho điện thoại.</p>
+        <div class="q__o">
+          <label><input type="radio" name="q_table" value="Cuộn ngang trong hộp có viền"><span>Cuộn ngang trong hộp có viền</span></label>
+          <label><input type="radio" name="q_table" value="Mỗi hàng biến thành một thẻ xếp dọc"><span>Mỗi hàng thành một thẻ xếp dọc</span></label>
+          <label><input type="radio" name="q_table" value="Ẩn cột phụ, chỉ giữ 3 cột quan trọng"><span>Ẩn cột phụ, giữ 3 cột chính</span></label>
+          <label><input type="radio" name="q_table" value="Điện thoại không vào được màn quản trị"><span>Màn quản trị không hỗ trợ điện thoại</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 3</p>
+        <h3>Quay lại bằng gì</h3>
+        <p class="q__h">App có nhiều màn chi tiết: chi tiết đơn, chi tiết đặt bàn, chi tiết thanh toán.</p>
+        <div class="q__o">
+          <label><input type="radio" name="q_back" value="Nút ← QUAY LẠI dày, in hoa, góc trên trái"><span>Nút ← QUAY LẠI dày, góc trên trái</span></label>
+          <label><input type="radio" name="q_back" value="Đường dẫn breadcrumb kiểu Bàn / Bàn 04 / Đơn #118"><span>Breadcrumb: Bàn / Bàn 04 / Đơn #118</span></label>
+          <label><input type="radio" name="q_back" value="Cả hai: breadcrumb khi rộng, nút quay lại khi hẹp"><span>Cả hai, tuỳ khổ màn</span></label>
+          <label><input type="radio" name="q_back" value="Không có gì, dùng nav và nút back của trình duyệt"><span>Không có, dùng nav + back trình duyệt</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 4</p>
+        <h3>Chiều rộng nội dung tối đa</h3>
+        <p class="q__h">Trên màn 27 inch thì nội dung giãn hết hay dừng lại?</p>
+        <div class="q__o">
+          <label><input type="radio" name="q_width" value="Giãn hết màn, không giới hạn"><span>Giãn hết màn, không giới hạn</span></label>
+          <label><input type="radio" name="q_width" value="Dừng ở khoảng 1200px, canh giữa"><span>Dừng ~1200px, canh giữa</span></label>
+          <label><input type="radio" name="q_width" value="Dừng ở khoảng 1440px, canh giữa"><span>Dừng ~1440px, canh giữa</span></label>
+          <label><input type="radio" name="q_width" value="Bảng thì giãn hết, form và trang khách thì giới hạn"><span>Bảng giãn hết · form và trang khách giới hạn</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 5</p>
+        <h3>Vân scanline</h3>
+        <p class="q__h">Bài tham chiếu cho phép một lớp vân mờ <span class="mono">rgba(0,0,0,.06)</span> phủ lên nền, không chạm chữ. Khối dưới đây đang có vân:</p>
+        <div class="demo scan"><span class="lbl">Có vân — nhìn kỹ thấy sọc ngang rất mờ</span><div class="demo-card"><b>Bàn 04</b><small>2 món chờ bếp</small></div></div>
+        <div class="q__o">
+          <label><input type="radio" name="q_scan" value="Không dùng vân — sạch"><span>Không dùng — giữ sạch</span></label>
+          <label><input type="radio" name="q_scan" value="Chỉ dùng ở trang công khai"><span>Chỉ ở trang công khai</span></label>
+          <label><input type="radio" name="q_scan" value="Dùng khắp app, rất mờ"><span>Dùng khắp app, rất mờ</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 6</p>
+        <h3>Đồng hồ và ca làm</h3>
+        <p class="q__h">App đang có component <span class="mono">Clock</span> ở màn Phục vụ. Nó thuộc về đâu?</p>
+        <div class="q__o">
+          <label><input type="radio" name="q_clock" value="Luôn hiện ở thanh trên, mọi vai trò"><span>Luôn hiện ở thanh trên, mọi vai trò</span></label>
+          <label><input type="radio" name="q_clock" value="Chỉ ở màn vận hành, không có ở quản trị"><span>Chỉ ở màn vận hành</span></label>
+          <label><input type="radio" name="q_clock" value="Ở thanh dính đáy cùng hành động chính"><span>Ở thanh dính đáy cùng hành động chính</span></label>
+          <label><input type="radio" name="q_clock" value="Bỏ hẳn — nhân viên đã có đồng hồ trên máy"><span>Bỏ hẳn</span></label>
+        </div>
+      </div>
+
+      <div class="q" style="grid-column:1/-1">
+        <p class="lbl">Câu 7 · quan trọng</p>
+        <h3>Ngoại lệ và ghi chú</h3>
+        <p class="q__h">
+          Chỗ để bạn nói những thứ khung ở trên không diễn tả được: ngoại lệ theo màn,
+          màn nào bạn thấy đang tệ nhất, nghiệp vụ nào tôi hiểu sai.
+          Nếu bạn muốn dùng lời khuyên ở phần 4 (một khung mặc định + hai ngoại lệ có ghi) thì viết ở đây.
+        </p>
+        <textarea name="q_note" placeholder="Ví dụ: mặc định Q1, nhưng màn Món ăn và Danh mục dùng Q4, màn Tài khoản dùng Q3. Màn thống kê hiện tại rối nhất. Bếp không có tablet, chỉ có một máy tính để bàn ở góc…"></textarea>
+      </div>
+
+    </div>
+  </section>
+
+  </form>
+
+  <!-- ======================= RESULT ======================= -->
+  <section class="res" id="ketqua">
+    <h2>Lấy kết quả</h2>
+    <p class="res__p">
+      Bấm “Sinh kết quả”, copy khối chữ, dán lại cho tôi trong Claude Code.
+      Tôi sẽ chốt xuống <span class="mono">docs/redesign/00-quyet-dinh.md</span> rồi dựng phiếu 03 — toàn bộ component.
+    </p>
+    <div class="res__box">
+      <div class="res__acts">
+        <button class="k" type="button" id="genBtn">Sinh kết quả</button>
+        <button class="k k--2" type="button" id="copyBtn">Copy</button>
+        <button class="k k--2" type="button" id="dlBtn">Tải .txt</button>
+        <button class="k k--bad" type="button" id="clearBtn">Xoá hết</button>
+        <span class="said" id="said" role="status" aria-live="polite"></span>
+      </div>
+      <textarea class="out" id="out" readonly spellcheck="false" aria-label="Kết quả phiếu 02"></textarea>
+    </div>
+  </section>
+
+  <footer class="ft">
+    RIMS · phiếu 02/05 · trang này vẽ bằng chính style đã chốt ở phiếu 01 · dữ liệu là mẫu
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var form = document.getElementById('sheet');
+  var out  = document.getElementById('out');
+  var said = document.getElementById('said');
+  var root = document.documentElement;
+  var KEY  = 'rims-sheet-02';
+
+  function note(m){
+    said.textContent = m;
+    setTimeout(function(){ if (said.textContent === m) said.textContent = ''; }, 2600);
+  }
+
+  /* ---- live knobs: off / accent / bd ---- */
+  function applyKnobs(){
+    form.querySelectorAll('input[data-knob]:checked').forEach(function(el){
+      root.setAttribute('data-' + el.dataset.knob, el.dataset.val);
+    });
+  }
+
+  function read(){
+    var d = {};
+    new FormData(form).forEach(function(v,k){ d[k] = v; });
+    return d;
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(read())); }catch(e){} }
+  function restore(){
+    var raw; try{ raw = localStorage.getItem(KEY); }catch(e){ return; }
+    if (!raw) return;
+    var d; try{ d = JSON.parse(raw); }catch(e){ return; }
+    Object.keys(d).forEach(function(k){
+      var els = form.elements[k];
+      if (!els) return;
+      if (els.length && els[0] && els[0].type === 'radio'){
+        Array.prototype.forEach.call(els, function(el){ if (el.value === d[k]) el.checked = true; });
+      } else if (els.value !== undefined){
+        els.value = d[k];
+      }
+    });
+  }
+
+  form.addEventListener('change', function(){ applyKnobs(); save(); });
+  form.addEventListener('input', save);
+
+  var Q = [
+    ['k_off',     'Bóng lệch'],
+    ['k_accent',  'Màu nhấn'],
+    ['k_bd',      'Độ dày viền'],
+    ['k_shwhere', 'Bóng xuất hiện ở đâu'],
+    ['nav',       'ĐIỀU HƯỚNG'],
+    ['vanhanh',   'Khung màn vận hành'],
+    ['ban',       'Sơ đồ bàn'],
+    ['quantri',   'Khung màn quản trị'],
+    ['khach',     'Trang cho khách'],
+    ['q_cta',     'Vị trí hành động chính'],
+    ['q_table',   'Bảng ở 320px'],
+    ['q_back',    'Quay lại'],
+    ['q_width',   'Chiều rộng tối đa'],
+    ['q_scan',    'Vân scanline'],
+    ['q_clock',   'Đồng hồ / ca làm']
+  ];
+  function pad(s,n){ while (s.length < n) s += ' '; return s; }
+
+  function build(){
+    var d = read(), L = [];
+    L.push('=== RIMS · PHIẾU 02/05 — KHUNG MÀN & ĐIỀU HƯỚNG ===');
+    L.push('');
+    Q.forEach(function(q){
+      var v = (d[q[0]] || '').trim();
+      L.push(pad(q[1], 24) + ' : ' + (v || '(bỏ trống — bạn chọn giúp)'));
+    });
+    L.push('');
+    L.push('--- Ngoại lệ & ghi chú ---');
+    L.push((d.q_note || '').trim() || '(bỏ trống)');
+    L.push('');
+    L.push('=== HẾT PHIẾU 02 — dựng phiếu 03: toàn bộ component ===');
+    return L.join('\n');
+  }
+
+  document.getElementById('genBtn').addEventListener('click', function(){
+    out.value = build();
+    out.scrollIntoView({behavior:'smooth', block:'center'});
+    var need = ['nav','vanhanh','ban','quantri','khach'].filter(function(n){
+      return !form.querySelector('input[name="'+n+'"]:checked');
+    });
+    note(need.length ? ('Còn ' + need.length + ' phần chưa chọn — vẫn sinh được.') : 'Xong. Copy dán cho tôi.');
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    if (!out.value) out.value = build();
+    out.focus(); out.select();
+    var ok = false;
+    try{ ok = document.execCommand('copy'); }catch(e){}
+    if (!ok && navigator.clipboard){
+      navigator.clipboard.writeText(out.value).then(
+        function(){ note('Đã copy.'); },
+        function(){ note('Bôi đen rồi Ctrl+C.'); });
+      return;
+    }
+    note(ok ? 'Đã copy.' : 'Bôi đen rồi Ctrl+C.');
+  });
+
+  document.getElementById('dlBtn').addEventListener('click', function(){
+    if (!out.value) out.value = build();
+    var b = new Blob([out.value], {type:'text/plain;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = 'rims-phieu-02.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+    note('Đã tải rims-phieu-02.txt');
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    if (!confirm('Xoá hết câu trả lời của phiếu 02?')) return;
+    form.reset(); out.value = '';
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    applyKnobs(); note('Đã xoá.');
+  });
+
+  restore();
+  applyKnobs();
+})();
+</script>
+</body>
+</html>

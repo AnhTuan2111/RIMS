@@ -1,0 +1,1360 @@
+<!doctype html>
+<html lang="vi" data-mode="light" data-red="hai">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phiếu 04 — Toàn bộ component RIMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · component-scope · RIMS design system · sheet 04/06
+ * genre: modern-minimal → neo-brutalist POS voice (direction C, locked sheet 01)
+ * theme: P2 audited · light + dark · border 2px · radius 0 · offset shadow 4px
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * contrast: 29/29 pairs pass (4.5 text / 3.0 non-text), both modes — measured, not estimated
+ * every status chip comes from a real enum in backend/.../enums — none invented
+ * pre-emit critique: P5 H5 E5 S5 R4 V4
+ */
+
+:root{
+  /* --- surfaces --- */
+  --paper:#f3f1ea; --surface:#ffffff; --surface-2:#e8e5db; --surface-3:#d8d4c7;
+  --ink:#111214; --ink-2:#3c3e42; --ink-3:#5c5f64;
+  --line:#111214; --sh-col:#111214;
+
+  /* --- semantic colours · light --- */
+  --go:#12703f;    --go-ink:#ffffff;
+  --stop:#c8271b;  --stop-ink:#ffffff;
+  --wait:#a15c00;  --wait-ink:#ffffff;
+  --info:#1b5fbf;  --info-ink:#ffffff;
+  --brand:#cf3a24; --brand-ink:#ffffff;
+
+  --bd:2px; --hair:1px; --off:4px;
+  --sh:var(--off) var(--off) 0 var(--sh-col);
+  --sh-half:calc(var(--off)/2) calc(var(--off)/2) 0 var(--sh-col);
+  --touch:48px;
+
+  --fd:'Archivo','IBM Plex Sans',system-ui,sans-serif;
+  --fb:'IBM Plex Sans',system-ui,sans-serif;
+  --fm:'JetBrains Mono',ui-monospace,monospace;
+
+  --sp-1:.25rem; --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem;
+  --sp-5:1.5rem; --sp-6:2rem; --sp-7:3rem;
+  --dur:90ms;
+}
+/* --- dark: same hues, raised lightness, ink flips to black on colour --- */
+:root[data-mode="dark"]{
+  --paper:#12141a; --surface:#1b1e26; --surface-2:#232833; --surface-3:#2d333f;
+  --ink:#eceef2; --ink-2:#b6bcc6; --ink-3:#8b929c;
+  --line:#eceef2; --sh-col:#eceef2;
+  --go:#10ad5b;    --go-ink:#111214;
+  --stop:#eb746b;  --stop-ink:#111214;
+  --wait:#e08000;  --wait-ink:#111214;
+  --info:#5999f3;  --info-ink:#111214;
+  --brand:#ee7462; --brand-ink:#111214;
+}
+/* một đỏ duy nhất: thương hiệu dùng chính màu huỷ */
+:root[data-red="mot"]{--brand:var(--stop);--brand-ink:var(--stop-ink)}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--fb);line-height:1.5}
+h1,h2,h3,h4{margin:0;font-family:var(--fd);font-weight:800;line-height:1.12;font-style:normal;
+  text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+p{margin:0}
+img{display:block;max-width:100%}
+:focus-visible{outline:3px solid var(--info);outline-offset:3px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.wrap{max-width:82rem;margin:0 auto;padding:0 16px}
+.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.lbl{font-family:var(--fm);font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- chrome ---------- */
+.bar{position:sticky;top:0;z-index:40;background:var(--ink);color:var(--paper)}
+.bar__in{max-width:82rem;margin:0 auto;padding:.5rem 16px;display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.bar__id{font-family:var(--fm);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.bar__id b{background:var(--brand);color:var(--brand-ink);padding:0 .3em}
+.bar__nav{display:flex;gap:.25rem;flex-wrap:wrap;margin-inline-start:auto}
+.bar__nav a,.bar__nav button{font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;text-decoration:none;color:var(--paper);background:transparent;
+  border:2px solid var(--paper);padding:.25rem .45rem;white-space:nowrap;cursor:pointer}
+.bar__nav a:hover,.bar__nav button:hover{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+
+.head{padding:var(--sp-7) 0 var(--sp-5)}
+.head h1{font-size:clamp(1.8rem,1.25rem + 2.5vw,3.2rem)}
+.head__lede{margin-top:var(--sp-4);max-width:68ch;font-size:clamp(.95rem,.9rem + .3vw,1.06rem);color:var(--ink-2)}
+.head__lede b{color:var(--ink)}
+.route{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:var(--sp-5)}
+.route span{font-family:var(--fm);font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:2px solid var(--ink-3);color:var(--ink-3);padding:.3rem .5rem}
+.route span.is-now{border-color:var(--line);background:var(--brand);color:var(--brand-ink)}
+.route span.is-done{border-color:var(--line);background:var(--ink);color:var(--paper)}
+.rule{border:0;border-top:var(--bd) solid var(--line);margin:0}
+
+.sec{padding:var(--sp-6) 0}
+.sec__n{display:inline-block;font-family:var(--fm);font-size:.7rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;background:var(--ink);color:var(--paper);padding:.2rem .5rem;margin-bottom:var(--sp-3)}
+.sec h2{font-size:clamp(1.25rem,1.05rem + 1vw,1.85rem)}
+.sec__p{margin-top:var(--sp-3);max-width:72ch;font-size:.92rem;color:var(--ink-2)}
+.sec__p + .sec__p{margin-top:var(--sp-2)}
+.sec__p b{color:var(--ink)}
+
+/* ---------- spec block: component + note ---------- */
+.spec{border:var(--bd) solid var(--line);background:var(--surface);margin-top:var(--sp-4);display:grid}
+@media (min-width:62rem){.spec--split{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}}
+.spec__h{padding:var(--sp-3) var(--sp-4);border-bottom:var(--bd) solid var(--line);
+  display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap;grid-column:1/-1}
+.spec__h h3{font-size:.92rem}
+.spec__h code{font-family:var(--fm);font-size:.68rem;font-weight:500;color:var(--ink-3);
+  border:1px solid var(--surface-3);padding:0 .3em}
+.spec__d{padding:var(--sp-4);display:grid;gap:var(--sp-3);align-content:start;min-width:0}
+.spec__n{padding:var(--sp-4);border-top:var(--bd) solid var(--line);background:var(--surface-2);
+  font-size:.8rem;display:grid;gap:.4rem;align-content:start}
+@media (min-width:62rem){.spec--split .spec__n{border-top:0;border-inline-start:var(--bd) solid var(--line)}}
+.spec__n p{color:var(--ink-2)}
+.spec__n b{color:var(--ink);font-family:var(--fm);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;display:block}
+.spec__n code{font-family:var(--fm);font-size:.72rem;background:var(--surface);border:1px solid var(--surface-3);padding:0 .25em}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.col{display:grid;gap:.4rem;align-content:start;min-width:0}
+.cap{font-family:var(--fm);font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.grid2{display:grid;gap:var(--sp-4)}
+@media (min-width:56rem){.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ================= 1 · BUTTONS ================= */
+.b{
+  font-family:var(--fd);font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:.84rem;
+  border:var(--bd) solid var(--line);padding:.55rem .9rem;box-shadow:var(--sh);cursor:pointer;
+  background:var(--surface);color:var(--ink);white-space:nowrap;
+  min-height:2.4rem;display:inline-flex;align-items:center;gap:.4em;justify-content:center;
+  transition:transform var(--dur) linear,box-shadow var(--dur) linear;
+}
+.b:hover,.b.is-hover{transform:translate(calc(var(--off)/2),calc(var(--off)/2));box-shadow:var(--sh-half)}
+.b:active,.b.is-active{transform:translate(var(--off),var(--off));box-shadow:0 0 0 var(--sh-col)}
+.b:focus-visible,.b.is-focus{outline:3px solid var(--info);outline-offset:3px}
+.b[disabled],.b.is-disabled{
+  background:var(--surface-2);color:var(--ink-3);border-color:var(--ink-3);box-shadow:none;
+  cursor:not-allowed;transform:none;
+  background-image:repeating-linear-gradient(45deg,transparent 0 5px,color-mix(in srgb,var(--ink-3) 22%,transparent) 5px 6px);
+}
+.b--go{background:var(--go);color:var(--go-ink)}
+.b--stop{background:var(--stop);color:var(--stop-ink)}
+.b--brand{background:var(--brand);color:var(--brand-ink)}
+.b--wait{background:var(--wait);color:var(--wait-ink)}
+.b--ink{background:var(--ink);color:var(--paper)}
+.b--lg{font-size:1rem;padding:.8rem 1.2rem;min-height:3.2rem}
+.b--sm{font-size:.72rem;padding:.35rem .55rem;min-height:1.9rem;box-shadow:none}
+.b--sm:hover{transform:none;box-shadow:none;background:var(--ink);color:var(--paper)}
+.b--block{width:100%}
+.b[aria-busy="true"]{cursor:progress}
+.spin{width:.85em;height:.85em;border:2px solid currentColor;border-inline-end-color:transparent;
+  animation:sp .7s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (pointer:coarse){.b{min-height:var(--touch);padding-inline:1.1rem}}
+
+/* ================= 2 · FIELDS ================= */
+.f{display:grid;gap:.3rem;min-width:0}
+.f > label{font-family:var(--fm);font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.f > label .req{color:var(--stop)}
+.i{
+  font:inherit;font-size:.92rem;width:100%;min-height:2.6rem;
+  background:var(--surface);color:var(--ink);border:var(--bd) solid var(--line);padding:.5rem .6rem;
+}
+.i::placeholder{color:var(--ink-3)}
+.i:focus-visible{outline:3px solid var(--info);outline-offset:0;border-color:var(--info)}
+.i[disabled]{background:var(--surface-2);color:var(--ink-3);border-color:var(--ink-3);cursor:not-allowed}
+.i[aria-invalid="true"]{border-color:var(--stop);box-shadow:inset 0 0 0 var(--bd) var(--stop)}
+.f__err{font-size:.78rem;font-weight:600;color:var(--stop);display:flex;gap:.3em;align-items:baseline}
+.f__ok{font-size:.78rem;font-weight:600;color:var(--go);display:flex;gap:.3em;align-items:baseline}
+.f__hint{font-size:.76rem;color:var(--ink-3)}
+textarea.i{min-height:5rem;resize:vertical}
+select.i{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);
+  background-position:calc(100% - 15px) 1.15rem,calc(100% - 10px) 1.15rem;background-size:5px 5px;background-repeat:no-repeat;padding-inline-end:2rem}
+@media (pointer:coarse){.i{min-height:var(--touch)}}
+
+.check{display:flex;gap:.55rem;align-items:flex-start;font-size:.9rem;cursor:pointer;min-height:2rem}
+.check input{appearance:none;width:1.3rem;height:1.3rem;flex:none;margin:.1rem 0 0;
+  border:var(--bd) solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.check input:checked{background:var(--go);border-color:var(--line)}
+.check input:checked::after{content:'✓';color:var(--go-ink);font-size:.9rem;font-weight:700;line-height:1}
+.check input[type=radio]{border-radius:50%}
+.check input[type=radio]:checked::after{content:'';width:.6rem;height:.6rem;background:var(--go-ink);border-radius:50%}
+.check input:focus-visible{outline:3px solid var(--info);outline-offset:2px}
+
+.sw{display:flex;gap:.55rem;align-items:center;font-size:.9rem;cursor:pointer}
+.sw input{appearance:none;width:3rem;height:1.6rem;flex:none;border:var(--bd) solid var(--line);
+  background:var(--surface-2);position:relative;cursor:pointer}
+.sw input::after{content:'';position:absolute;inset-block:2px;inset-inline-start:2px;width:1.1rem;
+  background:var(--ink);transition:transform var(--dur) linear}
+.sw input:checked{background:var(--go)}
+.sw input:checked::after{transform:translateX(1.2rem);background:var(--go-ink)}
+.sw input:focus-visible{outline:3px solid var(--info);outline-offset:2px}
+
+.qty{display:inline-flex;border:var(--bd) solid var(--line);background:var(--surface)}
+.qty button{font-family:var(--fd);font-weight:800;font-size:1.1rem;line-height:1;width:2.4rem;min-height:2.4rem;
+  border:0;background:var(--surface);color:var(--ink);cursor:pointer;
+  border-inline-end:var(--bd) solid var(--line)}
+.qty button:last-child{border-inline:var(--bd) solid var(--line);border-inline-end:0}
+.qty button:hover{background:var(--ink);color:var(--paper)}
+.qty output{font-family:var(--fm);font-weight:700;font-size:1rem;min-width:2.6rem;display:grid;place-items:center;
+  font-variant-numeric:tabular-nums}
+@media (pointer:coarse){.qty button{width:var(--touch);min-height:var(--touch)}}
+
+/* ================= 3 · CHIPS ================= */
+.chip{display:inline-flex;gap:.3em;align-items:center;font-family:var(--fm);font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;border:var(--hair) solid var(--line);padding:.2rem .45rem;white-space:nowrap}
+.chip i{font-style:normal;font-weight:700;font-size:1.05em;line-height:1}
+.chip--go{background:var(--go);color:var(--go-ink)}
+.chip--stop{background:var(--stop);color:var(--stop-ink)}
+.chip--wait{background:var(--wait);color:var(--wait-ink)}
+.chip--info{background:var(--info);color:var(--info-ink)}
+.chip--mute{background:var(--surface-2);color:var(--ink-2);border-color:var(--ink-3)}
+
+/* ================= 4 · SURFACES ================= */
+.card{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);padding:var(--sp-3);display:grid;gap:.4rem;min-width:0}
+.card__t{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:1.05rem}
+.card__m{font-size:.78rem;color:var(--ink-3)}
+.card--flat{box-shadow:none}
+
+.tcard{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);padding:var(--sp-3);
+  display:grid;gap:.35rem;justify-items:start;min-width:0}
+.tcard__n{font-family:var(--fd);font-weight:800;font-size:1.5rem;line-height:1;font-variant-numeric:tabular-nums}
+.tcard--dim{background:repeating-linear-gradient(45deg,var(--surface) 0 6px,var(--surface-2) 6px 12px)}
+
+.ticket{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);display:grid;min-width:0}
+.ticket__h{background:var(--ink);color:var(--paper);padding:.35rem .5rem;display:flex;justify-content:space-between;
+  gap:.5rem;font-family:var(--fm);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ticket__b{padding:.5rem;display:grid;gap:.25rem}
+.ticket__i{display:flex;justify-content:space-between;gap:.5rem;font-size:.88rem;font-weight:600;
+  border-bottom:var(--hair) dashed var(--surface-3);padding-block:.2rem}
+.ticket__i:last-of-type{border-bottom:0}
+.ticket__i b{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.ticket__note{font-size:.78rem;color:var(--ink-2);background:var(--surface-2);border:var(--hair) solid var(--surface-3);padding:.25rem .4rem}
+.ticket__f{padding:.5rem;border-top:var(--bd) solid var(--line);display:flex;gap:.4rem;flex-wrap:wrap}
+
+.dish{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);display:grid;min-width:0}
+.dish img{width:100%;height:8rem;object-fit:cover;border-bottom:var(--bd) solid var(--line);background:var(--surface-3)}
+.dish__b{padding:.45rem .55rem;display:grid;gap:.2rem}
+.dish__n{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:.82rem;line-height:1.15}
+.dish__p{font-family:var(--fm);font-weight:700;font-size:.9rem;font-variant-numeric:tabular-nums}
+
+.stat{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);padding:var(--sp-3);display:grid;gap:.3rem}
+.stat__l{font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
+.counter{display:flex;gap:.2rem;flex-wrap:wrap}
+.counter b{font-family:var(--fm);font-weight:700;font-size:1.9rem;line-height:1;background:var(--ink);color:var(--paper);
+  border:var(--bd) solid var(--line);padding:.1rem .28rem;font-variant-numeric:tabular-nums}
+.counter b.sep{background:transparent;color:var(--ink);border-color:transparent;padding-inline:0}
+
+/* ================= 5 · TABLE ================= */
+.tw{border:var(--bd) solid var(--line);background:var(--surface);overflow-x:auto}
+.tw table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:34rem}
+.tw th{text-align:start;background:var(--ink);color:var(--paper);padding:.5rem .6rem;font-family:var(--fm);
+  font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.tw th button{font:inherit;color:inherit;background:transparent;border:0;cursor:pointer;padding:0;
+  display:inline-flex;gap:.3em;align-items:center}
+.tw th button:hover{text-decoration:underline}
+.tw td{padding:.45rem .6rem;border-bottom:var(--hair) solid var(--surface-3)}
+.tw tbody tr:last-child td{border-bottom:0}
+.tw tbody tr:hover{background:var(--surface-2)}
+.tw .num{text-align:end;font-family:var(--fm);font-variant-numeric:tabular-nums}
+.tw .code{font-family:var(--fm);font-size:.78rem}
+.pager{display:flex;gap:.3rem;align-items:center;flex-wrap:wrap;padding:var(--sp-3);
+  border-top:var(--bd) solid var(--line);font-family:var(--fm);font-size:.72rem;font-weight:700}
+
+/* ================= 6 · OVERLAY ================= */
+.modal{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);max-width:26rem;display:grid}
+.modal__h{background:var(--stop);color:var(--stop-ink);padding:.5rem .7rem;font-family:var(--fd);
+  font-weight:800;text-transform:uppercase;font-size:.9rem;display:flex;gap:.4rem;align-items:center}
+.modal__b{padding:var(--sp-4);display:grid;gap:var(--sp-3);font-size:.9rem}
+.modal__f{padding:var(--sp-3);border-top:var(--bd) solid var(--line);display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
+.toast{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);padding:.55rem .7rem;
+  display:flex;gap:.5rem;align-items:center;font-size:.86rem;max-width:24rem}
+.toast__k{width:1.6rem;height:1.6rem;flex:none;display:grid;place-items:center;font-weight:700;
+  border:var(--hair) solid var(--line);font-family:var(--fm)}
+.toast--ok .toast__k{background:var(--go);color:var(--go-ink)}
+.toast--bad .toast__k{background:var(--stop);color:var(--stop-ink)}
+.toast--info .toast__k{background:var(--info);color:var(--info-ink)}
+.toast button{margin-inline-start:auto}
+.tip{position:relative;display:inline-block}
+.tip__t{border:var(--bd) solid var(--line);background:var(--ink);color:var(--paper);padding:.25rem .45rem;
+  font-family:var(--fm);font-size:.72rem;font-weight:700;white-space:nowrap}
+
+/* ================= 7 · STATES ================= */
+.feed{border:var(--bd) dashed var(--ink-3);background:var(--surface);padding:var(--sp-5);display:grid;gap:.5rem;
+  justify-items:center;text-align:center}
+.feed__t{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:1rem}
+.feed__p{font-size:.85rem;color:var(--ink-2);max-width:34ch}
+.skel{display:grid;gap:.4rem}
+.skel i{display:block;height:1rem;background:repeating-linear-gradient(90deg,var(--surface-2) 0 10px,var(--surface-3) 10px 20px);
+  border:var(--hair) solid var(--surface-3)}
+.skel i:nth-child(2){width:70%} .skel i:nth-child(3){width:45%}
+
+/* ================= 8 · SHELL ================= */
+.shell{border:var(--bd) solid var(--line);background:var(--paper);font-size:12px;display:grid;
+  grid-template-columns:4.6rem minmax(0,1fr);min-width:0}
+.shell__rail{border-inline-end:var(--bd) solid var(--line);background:var(--ink);padding:.4em .3em;display:grid;gap:.3em;align-content:start}
+.ri{display:grid;gap:.1rem;justify-items:center;padding:.3em .2em;border:2px solid var(--paper);color:var(--paper);cursor:pointer}
+.ri svg{width:1.15rem;height:1.15rem}
+.ri s{text-decoration:none;font-family:var(--fm);font-size:.56rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.ri.is-on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.hdr{display:flex;gap:.5em;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  padding:.45em .6em;border-bottom:var(--bd) solid var(--line);background:var(--surface)}
+.crumb{font-family:var(--fm);font-size:.78em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3)}
+.crumb b{color:var(--ink)}
+.crumb a{color:var(--ink-3);text-decoration:none}
+.crumb a:hover{color:var(--ink);text-decoration:underline}
+.clockbox{display:flex;gap:.3em;align-items:center;font-family:var(--fm);font-size:.85em;font-weight:700;font-variant-numeric:tabular-nums}
+.clockbox svg{width:1.05em;height:1.05em}
+.belt{display:flex;flex-wrap:wrap;border-bottom:var(--bd) solid var(--line);background:var(--surface-2)}
+.belt span{border-inline-end:var(--bd) solid var(--line);padding:.5em .7em;font-family:var(--fm);font-size:.76em;
+  font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;cursor:pointer}
+.belt span.is-on{background:var(--brand);color:var(--brand-ink)}
+.body{padding:.7em;display:grid;gap:.5em;align-content:start}
+.ktabs{display:flex;gap:.35rem;flex-wrap:wrap}
+.ktab{border:var(--bd) solid var(--line);background:var(--surface);padding:.35rem .6rem;font-family:var(--fm);
+  font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;
+  display:inline-flex;gap:.4em;align-items:center}
+.ktab b{font-variant-numeric:tabular-nums}
+.ktab--wait.is-on{background:var(--wait);color:var(--wait-ink)}
+.ktab--info.is-on{background:var(--info);color:var(--info-ink)}
+.ktab--go.is-on{background:var(--go);color:var(--go-ink)}
+
+/* ================= 9 · RETRO ================= */
+.stripe{background:repeating-linear-gradient(45deg,var(--ink) 0 6px,transparent 6px 12px);
+  border:var(--bd) solid var(--line);min-height:2.4rem;display:grid;place-items:center;padding:.3rem}
+.stripe span{background:var(--surface);border:var(--bd) solid var(--line);padding:.2rem .5rem;
+  font-family:var(--fm);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.halftone{background-color:var(--brand);background-image:radial-gradient(var(--ink) 1.4px,transparent 1.5px);
+  background-size:7px 7px;border:var(--bd) solid var(--line);min-height:3.4rem;display:grid;place-items:center;padding:.4rem}
+.halftone span{background:var(--surface);border:var(--bd) solid var(--line);padding:.2rem .5rem;
+  font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:.85rem}
+.burst{width:6rem;height:6rem;display:grid;place-items:center;color:var(--brand-ink);position:relative;
+  background:conic-gradient(from 0deg,var(--brand) 0 9deg,transparent 9deg 18deg)}
+.burst::before{content:'';position:absolute;inset:14%;background:var(--brand);border:var(--bd) solid var(--line);border-radius:50%}
+.burst b{position:relative;font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:.82rem;text-align:center;line-height:1.05}
+.dbl{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:clamp(1.4rem,1.1rem + 1.8vw,2.2rem);
+  color:var(--surface);-webkit-text-stroke:2px var(--ink);text-shadow:4px 4px 0 var(--brand);line-height:1}
+.ticker{border:var(--bd) solid var(--line);background:var(--ink);color:var(--paper);overflow:hidden;padding:.3rem 0;position:relative}
+.ticker__t{display:inline-block;white-space:nowrap;font-family:var(--fm);font-size:.74rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;animation:slide 22s linear infinite}
+.ticker__t.is-paused{animation-play-state:paused}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.strip{border:var(--bd) solid var(--line);background:var(--ink);overflow:hidden;position:relative}
+.strip__track{display:flex;width:max-content;animation:roll 40s linear infinite}
+.strip__track.is-paused{animation-play-state:paused}
+@keyframes roll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.strip figure{margin:0;width:8rem;flex:none;border-inline-end:var(--bd) solid var(--paper)}
+.strip img{width:100%;height:5.5rem;object-fit:cover;background:var(--surface-3)}
+.strip figcaption{font-family:var(--fm);font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--paper);
+  padding:.2rem .3rem;display:flex;justify-content:space-between;gap:.3rem}
+.strip figcaption b{color:var(--brand)}
+.pausebtn{position:absolute;inset-block-end:.35rem;inset-inline-end:.35rem;z-index:2;
+  font-family:var(--fm);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  border:var(--bd) solid var(--line);background:var(--paper);color:var(--ink);padding:.25rem .45rem;cursor:pointer;box-shadow:var(--sh)}
+.pausebtn:hover{background:var(--go);color:var(--go-ink)}
+
+/* ---------- audit table ---------- */
+.audit{border:var(--bd) solid var(--line);background:var(--surface);overflow-x:auto;margin-top:var(--sp-4)}
+.audit table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:36rem}
+.audit th{text-align:start;background:var(--ink);color:var(--paper);padding:.4rem .55rem;font-family:var(--fm);
+  font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.audit td{padding:.35rem .55rem;border-bottom:var(--hair) solid var(--surface-3)}
+.audit .num{text-align:end;font-family:var(--fm);font-variant-numeric:tabular-nums}
+.audit .grp td{background:var(--surface-2);font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.pass{font-family:var(--fm);font-size:.64rem;font-weight:700;background:var(--go);color:var(--go-ink);padding:.05rem .3rem;border:1px solid var(--line)}
+.dot{display:inline-block;width:1.4rem;height:.9rem;border:1px solid var(--line);vertical-align:-1px}
+
+/* ---------- questions ---------- */
+.qs{display:grid;gap:var(--sp-4);margin-top:var(--sp-5)}
+@media (min-width:50rem){.qs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.q{border:var(--bd) solid var(--line);background:var(--surface);padding:var(--sp-4);display:grid;gap:.5rem;align-content:start}
+.q h3{font-size:.92rem}
+.q__h{font-size:.8rem;color:var(--ink-3)}
+.q__o{display:grid;gap:.3rem}
+.q__o label{display:flex;gap:.5rem;align-items:flex-start;font-size:.84rem;border:2px solid var(--line);
+  padding:.4rem .5rem;cursor:pointer;background:var(--surface)}
+.q__o label:hover{background:var(--surface-2)}
+.q__o label:has(input:checked){background:var(--ink);color:var(--paper);font-weight:600}
+.q__o input{margin:.2rem 0 0;accent-color:var(--ink);flex:none}
+.q textarea{width:100%;font:inherit;font-size:.85rem;background:var(--paper);color:var(--ink);
+  border:var(--bd) solid var(--line);padding:.5rem .6rem;min-height:5rem;resize:vertical}
+
+.res{border:var(--bd) solid var(--line);background:var(--ink);box-shadow:var(--sh);padding:var(--sp-5);margin:var(--sp-6) 0}
+.res h2{font-size:1.2rem;color:var(--paper)}
+.res__p{color:var(--surface-3);font-size:.88rem;margin-top:.4rem;max-width:64ch}
+.res__box{background:var(--surface);border:var(--bd) solid var(--paper);padding:var(--sp-4);margin-top:var(--sp-4)}
+.res__acts{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.out{width:100%;min-height:14rem;margin-top:var(--sp-3);font-family:var(--fm);font-size:.76rem;line-height:1.6;
+  background:var(--paper);color:var(--ink);border:var(--bd) solid var(--line);padding:var(--sp-3);white-space:pre;overflow:auto;resize:vertical}
+.said{font-family:var(--fm);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.ft{border-top:var(--bd) solid var(--line);padding:var(--sp-4) 0 var(--sp-7);font-family:var(--fm);font-size:.7rem;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+</style>
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true" focusable="false"><defs>
+  <g id="ic-grid" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square">
+    <rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></g>
+  <g id="ic-list" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square">
+    <rect x="3" y="4" width="18" height="16"/><path d="M7 9h10M7 13h10M7 17h6"/></g>
+  <g id="ic-check" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square"><path d="M4 13l5 5L20 6"/></g>
+  <g id="ic-x" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square"><path d="M5 5l14 14M19 5L5 19"/></g>
+  <g id="ic-sun" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square">
+    <circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></g>
+</defs></svg>
+
+<div class="bar">
+  <div class="bar__in">
+    <span class="bar__id">RIMS · phiếu <b>04/06</b> · component</span>
+    <nav class="bar__nav" aria-label="Mục lục">
+      <a href="#token">0 · Token</a>
+      <a href="#nut">1 · Nút</a>
+      <a href="#nhap">2 · Nhập liệu</a>
+      <a href="#chip">3 · Chip</a>
+      <a href="#matphang">4 · Bề mặt</a>
+      <a href="#bang">5 · Bảng</a>
+      <a href="#noi">6 · Lớp nổi</a>
+      <a href="#trangthai">7 · Rỗng/tải/lỗi</a>
+      <a href="#vo">8 · Vỏ</a>
+      <a href="#retro">9 · Retro</a>
+      <button type="button" id="modeBtn">◑ Sáng / Tối</button>
+      <a href="#ketqua">Kết quả</a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="head">
+    <p class="lbl">Phỏng vấn thiết kế lại · phiếu 04 trong 06</p>
+    <h1>Bộ component</h1>
+    <p class="head__lede">
+      Đây không còn là phiếu chọn phong cách — phong cách đã chốt hết. Đây là <b>bộ phụ tùng thật</b>
+      dựng bằng mọi thứ bạn đã chọn qua bốn phiếu trước. Việc của bạn ở đây là <b>duyệt hoặc bác</b>,
+      và trả lời sáu câu còn lại ở cuối.
+    </p>
+    <p class="head__lede">
+      Bấm <b>◑ Sáng / Tối</b> trên thanh trên để xem cả hai chế độ — bộ màu tối đã được đo,
+      <b>29/29 cặp đạt ngưỡng</b>. Mọi chip trạng thái lấy từ <b>enum thật trong code</b>,
+      không có cái nào tôi bịa. Nút bấm được thật, ô nhập gõ được thật.
+    </p>
+    <div class="route" aria-label="Lộ trình">
+      <span class="is-done">01 · Hướng</span><span class="is-done">02 · Khung màn</span>
+      <span class="is-done">02B · Ngoại lệ</span><span class="is-done">02C · Hệ màu</span>
+      <span class="is-done">03 · Đỏ retro</span><span class="is-now">04 · Component</span>
+      <span>05 · Icon &amp; giọng văn</span><span>06 · Spec</span>
+    </div>
+  </header>
+
+  <hr class="rule">
+  <form id="sheet">
+
+  <!-- ==================== §0 TOKEN ==================== -->
+  <section class="sec" id="token">
+    <p class="sec__n">Phần 0</p>
+    <h2>Token cuối &amp; audit</h2>
+    <p class="sec__p">
+      Bạn yêu cầu: giữ bộ màu, chỉnh lại giá trị cho chế độ tối, rồi <b>đo và audit</b>.
+      Tôi giữ nguyên <b>hue</b> của cả năm màu (lệch tối đa 4°), chỉ nâng độ sáng, và đổi chữ trên màu
+      từ trắng sang đen. Kết quả đo dưới đây — <b>29/29 cặp đạt</b>, không cặp nào trượt.
+    </p>
+
+    <div class="audit">
+      <table>
+        <thead><tr><th>Cặp</th><th>Nền</th><th>Chữ / khối</th><th class="num">Tỉ lệ</th><th class="num">Sàn</th><th>Kết quả</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="6">Chế độ sáng · giấy #f3f1ea · mặt #ffffff</td></tr>
+          <tr><td>Mực trên giấy</td><td class="mono">#f3f1ea</td><td class="mono">#111214</td><td class="num">16.58</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td>Mực trên mặt trắng</td><td class="mono">#ffffff</td><td class="mono">#111214</td><td class="num">18.74</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td>Chữ phụ trên giấy</td><td class="mono">#f3f1ea</td><td class="mono">#3c3e42</td><td class="num">9.48</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td>Chữ mờ trên giấy</td><td class="mono">#f3f1ea</td><td class="mono">#5c5f64</td><td class="num">5.67</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#12703f"></span> Nút làm · chữ trắng</td><td class="mono">#12703f</td><td class="mono">#ffffff</td><td class="num">6.15</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#c8271b"></span> Nút huỷ · chữ trắng</td><td class="mono">#c8271b</td><td class="mono">#ffffff</td><td class="num">5.58</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#a15c00"></span> Chip chờ · chữ trắng</td><td class="mono">#a15c00</td><td class="mono">#ffffff</td><td class="num">5.19</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#1b5fbf"></span> Chip thông tin · chữ trắng</td><td class="mono">#1b5fbf</td><td class="mono">#ffffff</td><td class="num">6.11</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#cf3a24"></span> Thương hiệu · chữ trắng</td><td class="mono">#cf3a24</td><td class="mono">#ffffff</td><td class="num">4.90</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td>Khối màu vs nền giấy (thấp nhất: thương hiệu)</td><td class="mono">#f3f1ea</td><td class="mono">#cf3a24</td><td class="num">4.34</td><td class="num">3.0</td><td><span class="pass">đạt</span></td></tr>
+
+          <tr class="grp"><td colspan="6">Chế độ tối · nền #12141a · mặt #1b1e26 · mực sáng #eceef2</td></tr>
+          <tr><td>Mực sáng trên nền tối</td><td class="mono">#12141a</td><td class="mono">#eceef2</td><td class="num">15.85</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td>Chữ phụ trên mặt tối</td><td class="mono">#1b1e26</td><td class="mono">#b6bcc6</td><td class="num">8.73</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td>Chữ mờ trên mặt tối</td><td class="mono">#1b1e26</td><td class="mono">#8b929c</td><td class="num">5.31</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><b>Viền &amp; bóng</b> màu mực sáng vs nền tối</td><td class="mono">#12141a</td><td class="mono">#eceef2</td><td class="num">15.85</td><td class="num">3.0</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#10ad5b"></span> Nút làm tối · chữ đen</td><td class="mono">#10ad5b</td><td class="mono">#111214</td><td class="num">6.38</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#eb746b"></span> Nút huỷ tối · chữ đen</td><td class="mono">#eb746b</td><td class="mono">#111214</td><td class="num">6.46</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#e08000"></span> Chip chờ tối · chữ đen</td><td class="mono">#e08000</td><td class="mono">#111214</td><td class="num">6.48</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td><span class="dot" style="background:#5999f3"></span> Chip thông tin tối · chữ đen</td><td class="mono">#5999f3</td><td class="mono">#111214</td><td class="num">6.49</td><td class="num">4.5</td><td><span class="pass">đạt</span></td></tr>
+          <tr><td>Khối màu vs mặt tối (thấp nhất: làm)</td><td class="mono">#1b1e26</td><td class="mono">#10ad5b</td><td class="num">5.67</td><td class="num">3.0</td><td><span class="pass">đạt</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lbl" style="margin-top:var(--sp-2)">Bảng rút gọn · 20 hàng tiêu biểu trong 29 cặp đã đo · sàn 4.5 chữ · 3.0 khối và viền</p>
+
+    <div class="spec spec--split">
+      <div class="spec__h"><h3>Một đỏ hay hai đỏ</h3><code>--brand vs --stop</code></div>
+      <div class="spec__d">
+        <p class="cap">Hai đỏ — thương hiệu #cf3a24 · huỷ #c8271b</p>
+        <div class="row">
+          <button class="b b--brand" type="button">Thương hiệu</button>
+          <button class="b b--stop" type="button">Huỷ đơn</button>
+        </div>
+        <p class="cap">Ở chế độ tối chúng thành #ee7462 và #eb746b</p>
+        <div class="row">
+          <span class="dot" style="background:#ee7462;width:4rem;height:1.6rem"></span>
+          <span class="dot" style="background:#eb746b;width:4rem;height:1.6rem"></span>
+          <span class="lbl">← hai ô này là hai màu khác nhau</span>
+        </div>
+        <div class="q__o" style="margin-top:var(--sp-2)">
+          <label><input type="radio" name="dored" value="Một đỏ duy nhất — thương hiệu và huỷ dùng chung #c8271b" data-red="mot"><span><b>Một đỏ duy nhất</b> — dùng chung <span class="mono">#c8271b</span> <i>(tôi đề xuất)</i></span></label>
+          <label><input type="radio" name="dored" value="Hai đỏ — gạch #cf3a24 cho thương hiệu, đỏ sẫm #c8271b cho huỷ" data-red="hai" checked><span><b>Hai đỏ</b> — gạch cho thương hiệu, đỏ sẫm cho huỷ</span></label>
+        </div>
+      </div>
+      <div class="spec__n">
+        <p><b>Vấn đề</b>Bạn chốt đỏ gạch làm thương hiệu và đỏ được lên nút. Nhưng đỏ huỷ cũng đỏ, và hai sắc chỉ lệch nhau rất ít — ở chế độ tối thì gần như trùng.</p>
+        <p><b>Nếu chọn một đỏ</b>Ít token hơn, không bao giờ lẫn. Đổi lại: nút thương hiệu và nút huỷ cùng màu, phải phân biệt bằng nhãn chữ và vị trí.</p>
+        <p><b>Nếu chọn hai đỏ</b>Giữ được sắc gạch retro bạn thích cho vỏ app. Đổi lại: <b>cấm dùng đỏ gạch cho nút</b> — nếu không, hai nút đỏ cạnh nhau là lỗi dùng được.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §1 BUTTONS ==================== -->
+  <section class="sec" id="nut">
+    <p class="sec__n">Phần 1</p>
+    <h2>Nút</h2>
+    <p class="sec__p">
+      Luật đã chốt: <b>mọi nút cùng một hình dạng</b> — tô đặc, viền 2px, bóng lệch 4px, chữ in hoa.
+      <b>Nghĩa nằm ở màu.</b> Hover lún 2px, bấm lún hết 4px và bóng về 0, dưới 100ms, không easing mềm.
+    </p>
+
+    <div class="spec spec--split">
+      <div class="spec__h"><h3>Năm màu nút</h3><code>.b--go · .b--stop · .b--ink · mặc định · .b--wait</code></div>
+      <div class="spec__d">
+        <p class="cap">Rê chuột và bấm thử</p>
+        <div class="row">
+          <button class="b b--go" type="button">Xong món</button>
+          <button class="b b--stop" type="button">Huỷ đơn</button>
+          <button class="b b--ink" type="button">Chốt đơn</button>
+          <button class="b" type="button">Để sau</button>
+        </div>
+        <p class="cap">Cỡ lớn cho màn vận hành · cỡ nhỏ cho hàng bảng</p>
+        <div class="row">
+          <button class="b b--go b--lg" type="button">Thanh toán 485.000 ₫</button>
+          <button class="b b--sm" type="button">Sửa</button>
+          <button class="b b--sm" type="button">Xem</button>
+        </div>
+      </div>
+      <div class="spec__n">
+        <p><b>Lục = làm</b>Xong món · thanh toán · lưu · xác nhận. Một màn đúng một nút lục.</p>
+        <p><b>Đỏ = phá</b>Huỷ đơn · xoá · huỷ đặt bàn. Đặt cách nút lục <b>tối thiểu 24px</b>.</p>
+        <p><b>Đen = trung tính mạnh</b>Việc quan trọng nhưng không phải làm hay phá: chốt đơn, in hoá đơn.</p>
+        <p><b>Trắng = phụ</b>Để sau · đóng · quay lại.</p>
+        <p><b>Hổ phách</b>Không dùng cho nút. Chỉ dành cho trạng thái chờ.</p>
+      </div>
+    </div>
+
+    <div class="spec spec--split">
+      <div class="spec__h"><h3>Tám trạng thái</h3><code>default · hover · focus · active · disabled · loading · error · success</code></div>
+      <div class="spec__d">
+        <div class="col">
+          <div class="row"><span class="cap" style="width:5.5rem">nghỉ</span><button class="b b--go" type="button">Xong món</button></div>
+          <div class="row"><span class="cap" style="width:5.5rem">rê chuột</span><button class="b b--go is-hover" type="button">Xong món</button></div>
+          <div class="row"><span class="cap" style="width:5.5rem">focus</span><button class="b b--go is-focus" type="button">Xong món</button></div>
+          <div class="row"><span class="cap" style="width:5.5rem">đang bấm</span><button class="b b--go is-active" type="button">Xong món</button></div>
+          <div class="row"><span class="cap" style="width:5.5rem">vô hiệu</span><button class="b b--go" type="button" disabled>Xong món</button></div>
+          <div class="row"><span class="cap" style="width:5.5rem">đang chạy</span><button class="b b--go" type="button" aria-busy="true"><span class="spin"></span>Đang gửi bếp…</button></div>
+          <div class="row"><span class="cap" style="width:5.5rem">lỗi</span><button class="b b--stop" type="button">✕ Gửi thất bại · thử lại</button></div>
+          <div class="row"><span class="cap" style="width:5.5rem">xong</span><button class="b b--go" type="button">✓ Đã gửi bếp</button></div>
+        </div>
+      </div>
+      <div class="spec__n">
+        <p><b>Vô hiệu</b>Nền xám, viền xám, <b>thêm sọc chéo mờ</b> — không chỉ nhạt màu. Người nhìn kém vẫn đọc ra là không bấm được.</p>
+        <p><b>Focus</b>Vòng <code>3px</code> màu xanh thông tin, cách nút 3px. <b>Hiện tức thì, không bao giờ hoạt hoạ.</b> Viền dày dễ ăn mất vòng focus nên vòng phải nằm ngoài.</p>
+        <p><b>Đang chạy</b>Giữ nhãn cũ + đổi thành thể tiếp diễn + vòng xoay. <code>aria-busy="true"</code>.</p>
+        <p><b>Cảm ứng</b><code>@media (pointer:coarse)</code> nâng mọi nút lên tối thiểu <b>48px</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §2 FIELDS ==================== -->
+  <section class="sec" id="nhap">
+    <p class="sec__n">Phần 2</p>
+    <h2>Nhập liệu</h2>
+    <p class="sec__p">Gõ thử được. Ô lỗi và ô đúng là trạng thái thật, không phải ảnh.</p>
+
+    <div class="grid2">
+      <div class="spec">
+        <div class="spec__h"><h3>Ô nhập &amp; vùng văn bản</h3><code>.i</code></div>
+        <div class="spec__d">
+          <div class="f">
+            <label for="d1">Tên món <span class="req">*</span></label>
+            <input class="i" id="d1" type="text" value="Tonkotsu ramen">
+          </div>
+          <div class="f">
+            <label for="d2">Giá</label>
+            <input class="i mono" id="d2" type="text" value="89.000" inputmode="numeric">
+            <span class="f__hint">Đơn vị đồng. Không cần gõ dấu chấm.</span>
+          </div>
+          <div class="f">
+            <label for="d3">Ghi chú bếp</label>
+            <textarea class="i" id="d3" placeholder="Ít hành, không rau mùi…"></textarea>
+          </div>
+          <div class="f">
+            <label for="d4">Số điện thoại <span class="req">*</span></label>
+            <input class="i mono" id="d4" type="text" value="090123" aria-invalid="true" aria-describedby="e4">
+            <span class="f__err" id="e4"><b>✕</b> Số điện thoại phải có 10 chữ số. Đang có 6.</span>
+          </div>
+          <div class="f">
+            <label for="d5">Email</label>
+            <input class="i" id="d5" type="text" value="tuan@rims.vn" aria-describedby="o5">
+            <span class="f__ok" id="o5"><b>✓</b> Email dùng được.</span>
+          </div>
+          <div class="f">
+            <label for="d6">Mã bàn</label>
+            <input class="i" id="d6" type="text" value="Bàn 04" disabled>
+            <span class="f__hint">Không sửa được khi đơn đang phục vụ.</span>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Nhãn luôn ở trên</b>Không dùng nhãn nổi (floating label) — tiếng Việt có dấu, nhãn nổi cắt mất dấu ở cỡ nhỏ.</p>
+          <p><b>Lỗi</b>Viền đỏ <b>và</b> một dòng chữ đỏ có dấu ✕ bên dưới, nói rõ <b>sai gì và phải làm gì</b>. Không bao giờ chỉ đổi màu viền.</p>
+          <p><b>Bắt buộc</b>Dấu <code>*</code> đỏ cạnh nhãn. Không dùng chữ nhạt “không bắt buộc”.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Chọn · bật tắt · số lượng</h3><code>select · .check · .sw · .qty</code></div>
+        <div class="spec__d">
+          <div class="f">
+            <label for="d7">Danh mục</label>
+            <select class="i" id="d7">
+              <option>Món chính</option><option>Khai vị</option><option>Đồ uống</option><option>Tráng miệng</option>
+            </select>
+          </div>
+          <p class="cap">Hộp kiểm &amp; radio</p>
+          <label class="check"><input type="checkbox" checked><span>Đang bán</span></label>
+          <label class="check"><input type="checkbox"><span>Món nổi bật trên trang chủ</span></label>
+          <label class="check"><input type="radio" name="pm" checked><span>Tiền mặt</span></label>
+          <label class="check"><input type="radio" name="pm"><span>Mã QR</span></label>
+          <p class="cap">Công tắc</p>
+          <label class="sw"><input type="checkbox" checked><span>Nhận đặt bàn trước</span></label>
+          <p class="cap">Số lượng món — dùng ở màn gọi món</p>
+          <div class="qty">
+            <button type="button" aria-label="Giảm">−</button>
+            <output>2</output>
+            <button type="button" aria-label="Tăng">+</button>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Hộp kiểm vuông, radio tròn</b>Ngoại lệ duy nhất của luật bo góc 0 — radio tròn là quy ước quá mạnh để phá.</p>
+          <p><b>Đánh dấu bằng lục</b>Bật = lục, đúng luật “lục là làm”.</p>
+          <p><b>Số lượng</b>Hai nút lớn hơn là ô số, vì ngón tay dùng nút nhiều hơn bàn phím. Trên cảm ứng nút lên 48px.</p>
+          <p><b>Select</b>Mũi tên vẽ bằng gradient, không dùng ảnh, không dùng icon font.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §3 CHIPS ==================== -->
+  <section class="sec" id="chip">
+    <p class="sec__n">Phần 3</p>
+    <h2>Chip trạng thái — 13 trạng thái thật</h2>
+    <p class="sec__p">
+      Đây là <b>toàn bộ</b> trạng thái có trong code, lấy từ bốn enum:
+      <code class="mono">TableStatus</code> · <code class="mono">OrderStatus</code> ·
+      <code class="mono">OrderItemStatus</code> · <code class="mono">ReservationStatus</code>.
+      Không có trạng thái nào tôi bịa thêm.
+    </p>
+    <p class="sec__p">
+      Ký hiệu gán <b>theo nghĩa của trạng thái</b>, không theo màu — vì ở phiếu 03 tôi đã nói
+      <code>✓</code> cho “bàn trống” là sai nghĩa. Bàn trống không phải việc đã xong, nó là chỗ còn rỗng, nên dùng <code>○</code>.
+    </p>
+
+    <div class="audit">
+      <table>
+        <thead><tr><th>Enum · giá trị</th><th>Nhãn tiếng Việt</th><th>Chip</th><th>Màu</th><th>Ký hiệu</th><th>Vì sao ký hiệu đó</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="6">TableStatus — trạng thái bàn</td></tr>
+          <tr><td class="mono">AVAILABLE</td><td>Bàn trống</td><td><span class="chip chip--go"><i>○</i>Bàn trống</span></td><td>lục</td><td class="mono">○</td><td>vòng rỗng = chỗ còn rỗng</td></tr>
+          <tr><td class="mono">RESERVED</td><td>Đã đặt trước</td><td><span class="chip chip--info"><i>★</i>Đã đặt trước</span></td><td>xanh</td><td class="mono">★</td><td>có hẹn, được giữ chỗ</td></tr>
+          <tr><td class="mono">SERVING</td><td>Đang phục vụ</td><td><span class="chip chip--wait"><i>●</i>Đang phục vụ</span></td><td>hổ phách</td><td class="mono">●</td><td>vòng đặc = đang có người</td></tr>
+
+          <tr class="grp"><td colspan="6">OrderStatus — trạng thái đơn</td></tr>
+          <tr><td class="mono">SERVING</td><td>Đang phục vụ</td><td><span class="chip chip--wait"><i>●</i>Đang phục vụ</span></td><td>hổ phách</td><td class="mono">●</td><td>cùng nghĩa với bàn đang phục vụ</td></tr>
+          <tr><td class="mono">LOCKED</td><td>Chờ thanh toán</td><td><span class="chip chip--info"><i>₫</i>Chờ thanh toán</span></td><td>xanh</td><td class="mono">₫</td><td>đơn đã chốt, việc còn lại là tiền</td></tr>
+          <tr><td class="mono">COMPLETED</td><td>Đã thanh toán</td><td><span class="chip chip--go"><i>✓</i>Đã thanh toán</span></td><td>lục</td><td class="mono">✓</td><td>xong thật, không còn việc gì</td></tr>
+
+          <tr class="grp"><td colspan="6">OrderItemStatus — trạng thái từng món trong đơn</td></tr>
+          <tr><td class="mono">PREPARING</td><td>Đang chế biến</td><td><span class="chip chip--wait"><i>…</i>Đang chế biến</span></td><td>hổ phách</td><td class="mono">…</td><td>đang diễn ra, chưa kết thúc</td></tr>
+          <tr><td class="mono">COMPLETED</td><td>Đã xong</td><td><span class="chip chip--go"><i>✓</i>Đã xong</span></td><td>lục</td><td class="mono">✓</td><td>bếp đã làm xong món</td></tr>
+          <tr><td class="mono">CANCELLED</td><td>Đã huỷ</td><td><span class="chip chip--stop"><i>✕</i>Đã huỷ</span></td><td>đỏ</td><td class="mono">✕</td><td>bị bỏ đi</td></tr>
+
+          <tr class="grp"><td colspan="6">ReservationStatus — trạng thái đặt bàn</td></tr>
+          <tr><td class="mono">QUEUED</td><td>Chưa tới giờ</td><td><span class="chip chip--info"><i>▸</i>Chưa tới giờ</span></td><td>xanh</td><td class="mono">▸</td><td>mũi tên = còn ở phía trước</td></tr>
+          <tr><td class="mono">WAITING</td><td>Đang tới giờ</td><td><span class="chip chip--wait"><i>▲</i>Đang tới giờ</span></td><td>hổ phách</td><td class="mono">▲</td><td>tam giác = cần chú ý ngay</td></tr>
+          <tr><td class="mono">COMPLETED</td><td>Đã nhận bàn</td><td><span class="chip chip--go"><i>✓</i>Đã nhận bàn</span></td><td>lục</td><td class="mono">✓</td><td>khách đã tới và có đơn</td></tr>
+          <tr><td class="mono">CANCELLED</td><td>Đã huỷ</td><td><span class="chip chip--stop"><i>✕</i>Đã huỷ</span></td><td>đỏ</td><td class="mono">✕</td><td>quá giờ 15 phút hoặc tự huỷ</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spec spec--split">
+      <div class="spec__h"><h3>Chip phụ · không phải trạng thái</h3><code>.chip--mute</code></div>
+      <div class="spec__d">
+        <div class="row">
+          <span class="chip chip--mute">Tiền mặt</span>
+          <span class="chip chip--mute">Mã QR</span>
+          <span class="chip chip--mute">Ca sáng</span>
+          <span class="chip chip--mute">Ca chiều</span>
+          <span class="chip chip--mute">Ca tối</span>
+          <span class="chip chip--mute">Món chính</span>
+          <span class="chip chip--mute">4 chỗ</span>
+          <span class="chip chip--mute">Tầng 1</span>
+        </div>
+      </div>
+      <div class="spec__n">
+        <p><b>Vì sao xám</b><code>PaymentMethod</code>, <code>OrderShift</code>, danh mục, số chỗ, khu — đều là <b>thuộc tính</b>, không phải trạng thái. Chúng không được tiêu ngân sách 3 màu.</p>
+        <p><b>Luật 4 vẫn giữ</b>Một khung nhìn tối đa 3 màu. Chip xám không tính.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §4 SURFACES ==================== -->
+  <section class="sec" id="matphang">
+    <p class="sec__n">Phần 4</p>
+    <h2>Bề mặt</h2>
+
+    <div class="grid2">
+      <div class="spec">
+        <div class="spec__h"><h3>Thẻ bàn · sơ đồ mặt bằng</h3><code>.tcard</code></div>
+        <div class="spec__d">
+          <div class="row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(6.5rem,100%),1fr))">
+            <div class="tcard"><span class="tcard__n">01</span><span class="chip chip--go"><i>○</i>Trống</span><span class="card__m">4 chỗ</span></div>
+            <div class="tcard"><span class="tcard__n">04</span><span class="chip chip--wait"><i>●</i>Phục vụ</span><span class="card__m mono">312.000 ₫</span></div>
+            <div class="tcard"><span class="tcard__n">05</span><span class="chip chip--info"><i>★</i>19:30</span><span class="card__m">Chị Hiền · 6</span></div>
+            <div class="tcard tcard--dim"><span class="tcard__n">07</span><span class="chip chip--mute">Đang dọn</span><span class="card__m">—</span></div>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Số bàn to nhất</b>Phục vụ tìm bàn bằng số, không bằng chữ. Số dùng mono, <code>tabular-nums</code>.</p>
+          <p><b>Bàn đang dọn</b>Dùng <b>sọc kẻ chéo</b> — thủ pháp retro bạn đã chọn, và nó diễn tả “chưa dùng được” mà không tốn màu nào.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Phiếu bếp</h3><code>.ticket</code></div>
+        <div class="spec__d">
+          <div class="ticket">
+            <div class="ticket__h"><span>#118 · Bàn 04</span><span>18:55</span></div>
+            <div class="ticket__b">
+              <div class="ticket__i"><span>Tonkotsu ramen</span><b>×2</b></div>
+              <div class="ticket__i"><span>Gyoza chiên</span><b>×1</b></div>
+              <div class="ticket__i"><span>Edamame</span><b>×1</b></div>
+              <p class="ticket__note">Ghi chú: một bát không hành, thêm trứng</p>
+            </div>
+            <div class="ticket__f">
+              <button class="b b--go" type="button">✓ Xong món</button>
+              <button class="b b--stop b--sm" type="button">Huỷ món</button>
+            </div>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Kẻ chấm giữa món</b>Gợi phiếu in nhiệt, và nhẹ hơn kẻ liền nên bảng không thành lưới.</p>
+          <p><b>Hành động trên phiếu</b>Đúng lựa chọn của bạn ở phiếu 02: nút nằm ngay trên từng phiếu.</p>
+          <p><b>Nút huỷ nhỏ hơn</b>Cùng màu đỏ, nhưng nhỏ hơn và đặt xa — giảm bấm nhầm khi tay bận.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Thẻ món có ảnh</h3><code>.dish</code></div>
+        <div class="spec__d">
+          <div class="row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(8rem,100%),1fr))">
+            <figure class="dish" style="margin:0"><img src="../../frontend/public/image/tonkotsu-ramen.jpg" alt="Tonkotsu ramen">
+              <div class="dish__b"><span class="dish__n">Tonkotsu ramen</span><span class="dish__p">89.000 ₫</span></div></figure>
+            <figure class="dish" style="margin:0"><img src="../../frontend/public/image/sashimi-ca-hoi.jpg" alt="Sashimi cá hồi">
+              <div class="dish__b"><span class="dish__n">Sashimi cá hồi</span><span class="dish__p">145.000 ₫</span></div></figure>
+            <figure class="dish" style="margin:0"><img src="../../frontend/public/image/gyoza-chien.jpg" alt="Gyoza chiên">
+              <div class="dish__b"><span class="dish__n">Gyoza chiên</span><span class="dish__p">55.000 ₫</span>
+              <span class="chip chip--mute" style="justify-self:start">Hết hàng</span></div></figure>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Ảnh là nhân vật chính</b>Ảnh cao 8rem, viền 2px tách khỏi phần chữ. Cột lưới không nhỏ hơn 15rem ở màn rộng — <b>màn to thì ảnh to hơn, không phải nhiều cột hơn</b> (theo E8a).</p>
+          <p><b>Ảnh thật</b>Ba ảnh này lấy từ <code>frontend/public/image</code>.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Ô thống kê · số kiểu bảng tỉ số</h3><code>.stat · .counter</code></div>
+        <div class="spec__d">
+          <div class="row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(9rem,100%),1fr))">
+            <div class="stat"><span class="stat__l">Doanh thu hôm nay</span>
+              <div class="counter"><b>1</b><b>8</b><b class="sep">,</b><b>4</b></div><span class="card__m">triệu đồng</span></div>
+            <div class="stat"><span class="stat__l">Phiếu chờ bếp</span>
+              <div class="counter"><b>0</b><b>7</b></div></div>
+            <div class="stat"><span class="stat__l">Bàn trống</span>
+              <div class="counter"><b>0</b><b>6</b></div></div>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Mỗi chữ số một ô đen</b>Thủ pháp retro bạn đã chọn. Đọc được từ xa, và không tốn màu nào.</p>
+          <p><b>Đệm số 0</b>“07” thay vì “7” để chiều rộng ô không nhảy khi số đổi.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §5 TABLE ==================== -->
+  <section class="sec" id="bang">
+    <p class="sec__n">Phần 5</p>
+    <h2>Bảng — đã tiết chế</h2>
+    <p class="sec__p">
+      Đây là chỗ hai bài tham chiếu cảnh báo style này làm dở. Cách tiết chế đã chốt ở phiếu 02B:
+      <b>đầu bảng là thanh đen đặc</b>, trong lòng bảng <b>kẻ mảnh 1px</b>,
+      <b>không bóng</b>, <b>ô không in hoa</b>. Viền dày và bóng cứng chỉ ở khung ngoài.
+    </p>
+
+    <div class="spec">
+      <div class="spec__h"><h3>Bảng hoá đơn</h3><code>.tw · sắp xếp được · cuộn ngang ở 320px</code></div>
+      <div class="spec__d">
+        <div class="tw" tabindex="0">
+          <table>
+            <thead><tr>
+              <th><button type="button">Mã hoá đơn ↕</button></th>
+              <th><button type="button">Ngày ↓</button></th>
+              <th>Bàn</th><th>Ca</th>
+              <th class="num"><button type="button">Tổng tiền ↕</button></th>
+              <th>Trạng thái</th><th>Thao tác</th>
+            </tr></thead>
+            <tbody>
+              <tr><td class="code">HD-2409-118</td><td class="mono">27/09 19:12</td><td>04</td><td><span class="chip chip--mute">Ca tối</span></td><td class="num">312.000</td><td><span class="chip chip--info"><i>₫</i>Chờ thanh toán</span></td><td><button class="b b--sm" type="button">Xem</button></td></tr>
+              <tr><td class="code">HD-2409-117</td><td class="mono">27/09 18:44</td><td>06</td><td><span class="chip chip--mute">Ca tối</span></td><td class="num">485.000</td><td><span class="chip chip--go"><i>✓</i>Đã thanh toán</span></td><td><button class="b b--sm" type="button">Xem</button></td></tr>
+              <tr><td class="code">HD-2409-116</td><td class="mono">27/09 12:30</td><td>02</td><td><span class="chip chip--mute">Ca sáng</span></td><td class="num">198.000</td><td><span class="chip chip--go"><i>✓</i>Đã thanh toán</span></td><td><button class="b b--sm" type="button">Xem</button></td></tr>
+              <tr><td class="code">HD-2409-115</td><td class="mono">26/09 20:05</td><td>09</td><td><span class="chip chip--mute">Ca tối</span></td><td class="num">742.000</td><td><span class="chip chip--stop"><i>✕</i>Đã huỷ</span></td><td><button class="b b--sm" type="button">Xem</button></td></tr>
+            </tbody>
+          </table>
+          <div class="pager">
+            <button class="b b--sm" type="button">← Trước</button>
+            <span>Trang 1 / 26</span>
+            <button class="b b--sm" type="button">Sau →</button>
+            <span style="margin-inline-start:auto;color:var(--ink-3)">1.284 hoá đơn</span>
+          </div>
+        </div>
+      </div>
+      <div class="spec__n">
+        <p><b>Hàng rê chuột</b>Đổi nền sang <code>--surface-2</code>, không dùng màu. Nhấn hàng không phải nhấn trạng thái.</p>
+        <p><b>Cuộn ngang</b>Hộp bọc có <code>tabindex="0"</code> để cuộn được bằng bàn phím — nếu không thì người không dùng chuột mất cột cuối.</p>
+        <p><b>Ba màu tối đa</b>Bảng này đang dùng đúng ba: xanh, lục, đỏ. Chip ca là xám nên không tính.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §6 OVERLAY ==================== -->
+  <section class="sec" id="noi">
+    <p class="sec__n">Phần 6</p>
+    <h2>Lớp nổi</h2>
+
+    <div class="grid2">
+      <div class="spec">
+        <div class="spec__h"><h3>Hộp thoại xác nhận</h3><code>.modal</code></div>
+        <div class="spec__d">
+          <div class="modal">
+            <div class="modal__h"><span>✕</span> Huỷ đơn #118</div>
+            <div class="modal__b">
+              <p>Đơn này đã có <b>2 món đang chế biến</b>. Huỷ đơn sẽ huỷ luôn cả hai món đó ở bếp.</p>
+              <p class="f__hint">Việc này không hoàn lại được.</p>
+            </div>
+            <div class="modal__f">
+              <button class="b" type="button">Không huỷ</button>
+              <button class="b b--stop" type="button">Huỷ đơn và 2 món</button>
+            </div>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Chỉ cho việc không đảo được</b>Xoá bản ghi, huỷ đơn đã nấu. Việc đảo được thì <b>làm ngay + cho Hoàn tác</b>, không hỏi lại.</p>
+          <p><b>Nhãn nút nói rõ hậu quả</b>“Huỷ đơn và 2 món”, không phải “OK”. Người đọc nút biết mình đang làm gì.</p>
+          <p><b>Nút an toàn ở bên trái</b>Nút phá huỷ ở xa nhất, cách nút an toàn ≥24px.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Toast</h3><code>.toast</code></div>
+        <div class="spec__d">
+          <div class="toast toast--ok"><span class="toast__k">✓</span><span>Bàn 04 đã chuyển sang <b>Chờ thanh toán</b></span><button class="b b--sm" type="button">Hoàn tác</button></div>
+          <div class="toast toast--info"><span class="toast__k">●</span><span>Bếp vừa xong <b>Gyoza chiên</b> · Bàn 07</span></div>
+          <div class="toast toast--bad"><span class="toast__k">✕</span><span>Gửi bếp thất bại — mất kết nối</span><button class="b b--sm" type="button">Thử lại</button></div>
+        </div>
+        <div class="spec__n">
+          <p><b>Thành công thì im lặng</b>Lưu xong thì dữ liệu đổi tại chỗ, <b>không bắn toast ăn mừng</b>. Toast chỉ dành cho việc xảy ra <b>ngoài tầm mắt</b> — bếp báo món xong, bàn đổi trạng thái do người khác.</p>
+          <p><b>Toast có Hoàn tác thì sống lâu hơn</b>Ít nhất 10 giây, và không tự mất khi đang rê chuột vào.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Panel bay ra từ rail</h3><code>flyout</code></div>
+        <div class="spec__d">
+          <div class="row" style="align-items:flex-start">
+            <div style="background:var(--ink);padding:.3rem;display:grid;gap:.3rem">
+              <span class="ri"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-grid"/></svg><s>Bán</s></span>
+              <span class="ri is-on"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-list"/></svg><s>Thực đơn</s></span>
+            </div>
+            <div class="card" style="gap:.25rem;padding:.4rem">
+              <span class="cap">Thực đơn</span>
+              <button class="b b--sm b--block" type="button" style="background:var(--brand);color:var(--brand-ink)">Món ăn</button>
+              <button class="b b--sm b--block" type="button">Danh mục</button>
+              <button class="b b--sm b--block" type="button">Menu</button>
+            </div>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Chỉ ở vai Quản trị</b>Bốn nhóm trong rail, mục con bay ra. Bốn vai kia không có panel này.</p>
+          <p><b>Đóng bằng</b>Bấm ra ngoài · phím Esc · chọn một mục. Focus trả về đúng nút đã mở nó.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Tooltip</h3><code>.tip</code></div>
+        <div class="spec__d">
+          <div class="row"><span class="tip__t">Ca tối · 17:00 – 22:00</span></div>
+          <p class="f__hint">Rê chuột chờ 800ms mới hiện. Focus bàn phím hiện ngay 0ms.</p>
+        </div>
+        <div class="spec__n">
+          <p><b>Không bao giờ chứa thông tin duy nhất</b>Trên tablet không có trạng thái rê chuột, nên mọi thứ trong tooltip phải có ở chỗ khác.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §7 STATES ==================== -->
+  <section class="sec" id="trangthai">
+    <p class="sec__n">Phần 7</p>
+    <h2>Rỗng · đang tải · lỗi</h2>
+    <p class="sec__p">Ba màn này bị bỏ quên nhiều nhất, và là ba màn nhân viên gặp lúc đang căng nhất.</p>
+
+    <div class="grid2">
+      <div class="spec">
+        <div class="spec__h"><h3>Rỗng</h3><code>EmptyState</code></div>
+        <div class="spec__d">
+          <div class="feed">
+            <div class="stripe" style="width:100%;min-height:1.8rem"></div>
+            <p class="feed__t">Bếp đang trống</p>
+            <p class="feed__p">Không có phiếu nào chờ chế biến. Phiếu mới sẽ tự hiện ở đây.</p>
+          </div>
+          <div class="feed">
+            <p class="feed__t">Chưa có món nào</p>
+            <p class="feed__p">Thêm món đầu tiên để nó xuất hiện trong thực đơn của khách.</p>
+            <button class="b b--go" type="button">Thêm món</button>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Rỗng vì chưa có vs rỗng vì đã xong</b>Hai thứ khác nhau. “Bếp đang trống” là tin tốt nên không có nút. “Chưa có món nào” là việc cần làm nên có nút lục.</p>
+          <p><b>Không dùng hình minh hoạ</b>Viền đứt và một dải sọc là đủ. Màn vận hành không có enrichment.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Đang tải &amp; lỗi</h3><code>LoadingState · ErrorState</code></div>
+        <div class="spec__d">
+          <div class="card card--flat">
+            <div class="skel"><i></i><i></i><i></i></div>
+          </div>
+          <div class="row"><span class="spin" style="width:1.2rem;height:1.2rem;border-color:var(--ink);border-inline-end-color:transparent"></span><span class="cap">Đang tải danh sách bàn…</span></div>
+          <div class="feed" style="border-color:var(--stop);border-style:solid">
+            <p class="feed__t" style="color:var(--stop)">✕ Mất kết nối tới bếp</p>
+            <p class="feed__p">Phiếu bạn vừa gửi <b>chưa tới bếp</b>. Kiểm tra mạng rồi thử lại — phiếu vẫn được giữ.</p>
+            <div class="row"><button class="b b--go" type="button">Thử lại</button><button class="b" type="button">Xem chi tiết lỗi</button></div>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Khung xương thay vì vòng xoay</b>Với bảng và danh sách, khung xương cho biết sắp có gì. Vòng xoay chỉ dùng khi không biết trước hình dạng.</p>
+          <p><b>Lỗi phải nói ba điều</b>Chuyện gì xảy ra · dữ liệu của bạn còn hay mất · làm gì tiếp. Không bao giờ chỉ “Đã có lỗi xảy ra”.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §8 SHELL ==================== -->
+  <section class="sec" id="vo">
+    <p class="sec__n">Phần 8</p>
+    <h2>Vỏ app</h2>
+    <p class="sec__p">
+      Đúng như đã chốt: rail 4.6rem icon kèm nhãn · <b>hàng breadcrumb và đồng hồ ở trên</b> ·
+      băng mục con ở dưới · không hiện tên người dùng · ca làm là icon cạnh đồng hồ.
+    </p>
+
+    <div class="spec">
+      <div class="spec__h"><h3>Vỏ đầy đủ · màn Quản lý món ăn</h3><code>rail + hdr + belt + body</code></div>
+      <div class="spec__d">
+        <div class="shell">
+          <aside class="shell__rail">
+            <span class="ri"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-grid"/></svg><s>Bán</s></span>
+            <span class="ri is-on"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-list"/></svg><s>Thực đơn</s></span>
+            <span class="ri"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"/></svg><s>T.khoản</s></span>
+            <span class="ri"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-sun"/></svg><s>Cài đặt</s></span>
+          </aside>
+          <div>
+            <div class="hdr">
+              <span class="crumb"><a href="#vo">Thực đơn</a> / <b>Món ăn</b></span>
+              <span class="clockbox"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-sun"/></svg>Ca tối · 19:42</span>
+            </div>
+            <div class="belt"><span class="is-on">Món ăn</span><span>Danh mục</span><span>Menu</span></div>
+            <div class="body">
+              <div class="row" style="justify-content:space-between">
+                <h4 style="font-size:1.3em">Quản lý món ăn</h4>
+                <div class="row">
+                  <button class="b b--sm" type="button">▦ Thẻ</button>
+                  <button class="b b--sm" type="button">☰ Bảng</button>
+                  <button class="b b--go b--sm" type="button">+ Thêm món</button>
+                </div>
+              </div>
+              <p class="cap">43 món · 41 đang bán</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="spec__n">
+        <p><b>Cặp nút Thẻ / Bảng</b>Đúng lựa chọn D7a — ba màn có ảnh đổi được chế độ xem, mặc định là thẻ, và nhớ lựa chọn theo từng người dùng.</p>
+        <p><b>Ca làm là icon</b>Mặt trời cho ca sáng và ca chiều, mặt trăng cho ca tối — cạnh đồng hồ, đúng ý bạn.</p>
+        <p><b>Dưới 60rem</b>Rail thu thành ngăn kéo mở bằng nút trên hàng breadcrumb. Băng mục con cuộn ngang.</p>
+      </div>
+    </div>
+
+    <div class="spec spec--split">
+      <div class="spec__h"><h3>Tab trạng thái kanban ở khung hẹp</h3><code>.ktabs · dưới 52rem</code></div>
+      <div class="spec__d">
+        <div class="ktabs">
+          <button class="ktab ktab--wait is-on" type="button">Chờ <b>04</b></button>
+          <button class="ktab ktab--info" type="button">Đang nấu <b>03</b></button>
+          <button class="ktab ktab--go" type="button">Đã xong <b>12</b></button>
+        </div>
+        <p class="f__hint">Trên 52rem thì ba tab này thành ba cột cạnh nhau.</p>
+      </div>
+      <div class="spec__n">
+        <p><b>Số đếm ở lại</b>Đó là thứ giúp nhìn một cái biết bếp nghẽn ở đâu — mất cột thì phải giữ số.</p>
+        <p><b>Tab đang chọn tô màu trạng thái</b>Ba tab ba màu, đúng ba màu của Luật 4.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §9 RETRO ==================== -->
+  <section class="sec" id="retro">
+    <p class="sec__n">Phần 9</p>
+    <h2>Sáu thủ pháp retro — dùng ở đâu</h2>
+    <p class="sec__p">
+      Bạn chọn cả sáu. Vậy thứ còn thiếu là <b>luật dùng ở đâu</b>, nếu không thì Luật 4 (tối đa 3 màu)
+      bị phá ngay ở màn đầu tiên có starburst và halftone cùng lúc. Đây là bảng cho phép tôi đề xuất.
+    </p>
+
+    <div class="audit">
+      <table>
+        <thead><tr><th>Thủ pháp</th><th>Công khai (7 màn)</th><th>Vận hành (20 màn)</th><th>Quản trị (11 màn)</th><th>Tốn màu?</th></tr></thead>
+        <tbody>
+          <tr><td>Sọc kẻ chéo</td><td>được</td><td><b>được</b> — bàn đang dọn, nút vô hiệu, trạng thái rỗng</td><td>được</td><td>không</td></tr>
+          <tr><td>Chữ nét đôi</td><td><b>được</b> — tiêu đề lớn</td><td>chỉ màn kết quả thanh toán</td><td>không</td><td>có, 1 màu</td></tr>
+          <tr><td>Số kiểu bảng tỉ số</td><td>được</td><td><b>được</b> — ô thống kê, số bàn, đồng hồ</td><td><b>được</b> — dải thống kê</td><td>không</td></tr>
+          <tr><td>Chấm halftone</td><td><b>được</b> — dải khối lớn</td><td>không</td><td>không</td><td>có, 1 màu</td></tr>
+          <tr><td>Tia starburst</td><td><b>được</b> — tối đa 1 cái/màn</td><td>không</td><td>không</td><td>có, 1 màu</td></tr>
+          <tr><td>Băng chữ chạy</td><td>được</td><td><b>được</b> — thông báo ca, món hết, bếp nghẽn</td><td>không</td><td>không</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid2">
+      <div class="spec">
+        <div class="spec__h"><h3>Trang khách · đủ bộ retro</h3><code>halftone + starburst + chữ nét đôi</code></div>
+        <div class="spec__d">
+          <p class="dbl">Thực đơn</p>
+          <div class="halftone"><span>Món mới trong tuần</span></div>
+          <div class="row" style="justify-content:center"><div class="burst"><b>Món<br>mới</b></div></div>
+        </div>
+        <div class="spec__n">
+          <p><b>Ba thủ pháp, một màu</b>Cả ba đều dùng đỏ thương hiệu — nên vẫn chỉ tiêu <b>một</b> màu trong ngân sách ba màu.</p>
+          <p><b>Chữ nét đôi chỉ ở cỡ lớn</b>Dưới 24px thì nét viền 2px ăn mất dấu tiếng Việt.</p>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec__h"><h3>Màn vận hành · retro kiệm</h3><code>sọc + số bảng tỉ số + băng chữ chạy</code></div>
+        <div class="spec__d">
+          <div class="ticker"><span class="ticker__t" data-tick>Hết Unadon · Bếp chậm 12 phút · Bàn 09 chờ thanh toán &nbsp;·&nbsp; Hết Unadon · Bếp chậm 12 phút · Bàn 09 chờ thanh toán &nbsp;·&nbsp;</span>
+            <button class="pausebtn" type="button" data-tickbtn aria-pressed="false">⏸</button></div>
+          <div class="row">
+            <div class="stat"><span class="stat__l">Phiếu chờ</span><div class="counter"><b>0</b><b>7</b></div></div>
+            <div class="tcard tcard--dim" style="min-width:6rem"><span class="tcard__n">07</span><span class="chip chip--mute">Đang dọn</span></div>
+          </div>
+        </div>
+        <div class="spec__n">
+          <p><b>Ba thủ pháp, không màu nào</b>Sọc, số, băng chữ đều chỉ dùng mực và giấy. Toàn bộ ngân sách ba màu để dành cho trạng thái.</p>
+          <p><b>Băng chữ phải có nút dừng</b>Cùng luật với băng ảnh: dừng được, dừng khi rê, đứng yên nếu hệ thống bật giảm chuyển động.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <div class="spec__h"><h3>Băng ảnh món · trang chủ</h3><code>B1 · 40 giây một vòng · bấm thì cuộn tới món trong lưới</code></div>
+      <div class="spec__d">
+        <div class="strip" data-strip>
+          <div class="strip__track" data-track>
+            <figure><img src="../../frontend/public/image/tonkotsu-ramen.jpg" alt="Tonkotsu ramen"><figcaption>Tonkotsu ramen <b>89K</b></figcaption></figure>
+            <figure><img src="../../frontend/public/image/sashimi-ca-hoi.jpg" alt="Sashimi cá hồi"><figcaption>Sashimi cá hồi <b>145K</b></figcaption></figure>
+            <figure><img src="../../frontend/public/image/tempura-tom.jpg" alt="Tempura tôm"><figcaption>Tempura tôm <b>95K</b></figcaption></figure>
+            <figure><img src="../../frontend/public/image/katsudon.jpg" alt="Katsudon"><figcaption>Katsudon <b>79K</b></figcaption></figure>
+            <figure><img src="../../frontend/public/image/unadon.jpg" alt="Unadon"><figcaption>Unadon <b>185K</b></figcaption></figure>
+            <figure><img src="../../frontend/public/image/soba-lanh.jpg" alt="Soba lạnh"><figcaption>Soba lạnh <b>72K</b></figcaption></figure>
+            <figure aria-hidden="true"><img src="../../frontend/public/image/tonkotsu-ramen.jpg" alt=""><figcaption>Tonkotsu ramen <b>89K</b></figcaption></figure>
+            <figure aria-hidden="true"><img src="../../frontend/public/image/sashimi-ca-hoi.jpg" alt=""><figcaption>Sashimi cá hồi <b>145K</b></figcaption></figure>
+            <figure aria-hidden="true"><img src="../../frontend/public/image/tempura-tom.jpg" alt=""><figcaption>Tempura tôm <b>95K</b></figcaption></figure>
+            <figure aria-hidden="true"><img src="../../frontend/public/image/katsudon.jpg" alt=""><figcaption>Katsudon <b>79K</b></figcaption></figure>
+            <figure aria-hidden="true"><img src="../../frontend/public/image/unadon.jpg" alt=""><figcaption>Unadon <b>185K</b></figcaption></figure>
+            <figure aria-hidden="true"><img src="../../frontend/public/image/soba-lanh.jpg" alt=""><figcaption>Soba lạnh <b>72K</b></figcaption></figure>
+          </div>
+          <button class="pausebtn" type="button" data-pause aria-pressed="false">⏸ Dừng</button>
+        </div>
+      </div>
+      <div class="spec__n">
+        <p><b>Giá màu đỏ thương hiệu</b>Con số giá là chỗ duy nhất có màu trong băng — đúng vai “đỏ là nhận diện”.</p>
+        <p><b>Nửa sau là bản sao</b>Sáu ảnh đầu lặp lại làm sáu ảnh sau với <code>aria-hidden</code>, để vòng lặp <code>-50%</code> không giật. Bản sao không đọc cho trình đọc màn hình.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §10 QUESTIONS ==================== -->
+  <section class="sec" id="cauhoi">
+    <p class="sec__n">Phần 10</p>
+    <h2>Sáu câu cuối</h2>
+    <p class="sec__p">Hết phần duyệt. Sáu câu này là những chỗ tôi thật sự chưa quyết được thay bạn.</p>
+
+    <div class="qs">
+      <div class="q">
+        <p class="lbl">Câu 1</p>
+        <h3>Việc đảo được thì hỏi hay không</h3>
+        <p class="q__h">Ví dụ: đổi bàn 04 sang “chờ thanh toán”. Đảo lại được trong 10 giây.</p>
+        <div class="q__o">
+          <label><input type="radio" name="undo" value="Làm ngay + toast có nút Hoàn tác, không hỏi lại" checked><span><b>Làm ngay + Hoàn tác</b>, không hỏi lại <i>(đề xuất)</i></span></label>
+          <label><input type="radio" name="undo" value="Luôn hỏi lại bằng hộp thoại cho mọi việc đổi trạng thái"><span>Luôn hỏi lại bằng hộp thoại</span></label>
+          <label><input type="radio" name="undo" value="Hỏi lại chỉ khi đơn đã có món đang nấu"><span>Hỏi lại chỉ khi đã có món đang nấu</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 2</p>
+        <h3>Toast hiện ở đâu</h3>
+        <p class="q__h">Nhớ là màn vận hành có thanh dính đáy ở khung hẹp.</p>
+        <div class="q__o">
+          <label><input type="radio" name="toast" value="Góc trên phải, xếp chồng xuống" checked><span>Góc trên phải, xếp chồng xuống</span></label>
+          <label><input type="radio" name="toast" value="Giữa trên, ngay dưới hàng breadcrumb"><span>Giữa trên, dưới hàng breadcrumb</span></label>
+          <label><input type="radio" name="toast" value="Đáy màn, trên thanh hành động"><span>Đáy màn, trên thanh hành động</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 3</p>
+        <h3>Số lượng món ở màn gọi món</h3>
+        <p class="q__h">Phục vụ gọi 8 bát ramen thì bấm + tám lần hay gõ số?</p>
+        <div class="q__o">
+          <label><input type="radio" name="qty" value="Nút −/+ và bấm vào số thì gõ được" checked><span>Nút <b>−/+</b>, bấm vào số thì gõ được <i>(đề xuất)</i></span></label>
+          <label><input type="radio" name="qty" value="Chỉ nút −/+, không gõ"><span>Chỉ nút −/+</span></label>
+          <label><input type="radio" name="qty" value="Bàn phím số kiểu POS hiện ra khi bấm vào số"><span>Bàn phím số kiểu POS hiện ra</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 4</p>
+        <h3>Tiền hiển thị thế nào</h3>
+        <p class="q__h">Bảng hoá đơn có cột tiền, thẻ món có giá, băng ảnh có giá.</p>
+        <div class="q__o">
+          <label><input type="radio" name="money" value="Đầy đủ có dấu chấm và ký hiệu: 485.000 ₫" checked><span><b>485.000 ₫</b> — đầy đủ <i>(đề xuất)</i></span></label>
+          <label><input type="radio" name="money" value="Rút gọn ở chỗ hẹp: 485K, đầy đủ ở bảng"><span><b>485K</b> ở chỗ hẹp, đầy đủ ở bảng</span></label>
+          <label><input type="radio" name="money" value="Rút gọn khắp nơi: 485K"><span><b>485K</b> khắp nơi</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 5</p>
+        <h3>Bảng ở 320px</h3>
+        <p class="q__h">Bạn đã chọn cuộn ngang ở phiếu 02. Xác nhận lại sau khi thấy bảng thật ở phần 5?</p>
+        <div class="q__o">
+          <label><input type="radio" name="tbl" value="Giữ cuộn ngang như đã chọn" checked><span>Giữ <b>cuộn ngang</b> như đã chọn</span></label>
+          <label><input type="radio" name="tbl" value="Đổi sang: mỗi hàng thành một thẻ xếp dọc ở dưới 30rem"><span>Đổi: mỗi hàng thành <b>một thẻ</b> ở dưới 30rem</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 6</p>
+        <h3>Còn gì phải sửa trong bộ này</h3>
+        <p class="q__h">Sau phiếu này còn phiếu 05 (icon &amp; giọng văn) và 06 (spec tổng hợp để code). Component nào bạn thấy chưa đúng thì nói ở đây.</p>
+          <textarea name="note" placeholder="Ví dụ: nút vô hiệu sọc chéo trông rối, bỏ sọc đi. Phiếu bếp cần to hơn. Thẻ bàn muốn có cả giờ vào. Thiếu component X…"></textarea>
+      </div>
+    </div>
+  </section>
+
+  </form>
+
+  <section class="res" id="ketqua">
+    <h2>Lấy kết quả</h2>
+    <p class="res__p">Sáu câu đã điền sẵn đề xuất. Đổi cái bạn không đồng ý rồi bấm sinh kết quả.</p>
+    <div class="res__box">
+      <div class="res__acts">
+        <button class="b b--go" type="button" id="genBtn">Sinh kết quả</button>
+        <button class="b" type="button" id="copyBtn">Copy</button>
+        <button class="b" type="button" id="dlBtn">Tải .txt</button>
+        <button class="b b--stop" type="button" id="clearBtn">Xoá hết</button>
+        <span class="said" id="said" role="status" aria-live="polite"></span>
+      </div>
+      <textarea class="out" id="out" readonly spellcheck="false" aria-label="Kết quả phiếu 04"></textarea>
+    </div>
+  </section>
+
+  <footer class="ft">
+    RIMS · phiếu 04/06 · 13 chip lấy từ enum thật · 29/29 cặp tương phản đạt ở cả hai chế độ · ảnh thật trong repo
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var form = document.getElementById('sheet');
+  var out  = document.getElementById('out');
+  var said = document.getElementById('said');
+  var root = document.documentElement;
+  var KEY  = 'rims-sheet-04';
+
+  function note(m){ said.textContent=m; setTimeout(function(){ if(said.textContent===m) said.textContent=''; },2600); }
+
+  /* light / dark */
+  var MKEY='rims-04-mode';
+  function setMode(m){ root.setAttribute('data-mode',m); try{ localStorage.setItem(MKEY,m); }catch(e){} }
+  try{ var sm=localStorage.getItem(MKEY); if(sm) root.setAttribute('data-mode',sm); }catch(e){}
+  document.getElementById('modeBtn').addEventListener('click',function(){
+    setMode(root.getAttribute('data-mode')==='dark' ? 'light' : 'dark');
+  });
+
+  /* one-red / two-red live */
+  function applyRed(){
+    var el = form.querySelector('input[name="dored"]:checked');
+    if (el && el.dataset.red) root.setAttribute('data-red', el.dataset.red);
+  }
+
+  function read(){ var d={}; new FormData(form).forEach(function(v,k){ d[k]=v; }); return d; }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(read())); }catch(e){} }
+  function restore(){
+    var raw; try{ raw=localStorage.getItem(KEY); }catch(e){ return; }
+    if(!raw) return;
+    var d; try{ d=JSON.parse(raw); }catch(e){ return; }
+    Object.keys(d).forEach(function(k){
+      var els=form.elements[k]; if(!els) return;
+      if(els.length && els[0] && els[0].type==='radio'){
+        Array.prototype.forEach.call(els,function(el){ if(el.value===d[k]) el.checked=true; });
+      } else if(els.value!==undefined){ els.value=d[k]; }
+    });
+  }
+  form.addEventListener('change',function(){ applyRed(); save(); });
+  form.addEventListener('input',save);
+
+  /* film strip + ticker pause */
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function wire(track, btn, labels){
+    if(!track||!btn) return;
+    if(reduce){
+      track.classList.add('is-paused');
+      btn.textContent = labels[1]; btn.setAttribute('aria-pressed','true');
+      btn.title='Hệ thống đang bật giảm chuyển động — đứng yên từ đầu';
+    }
+    btn.addEventListener('click',function(){
+      var p = track.classList.toggle('is-paused');
+      btn.setAttribute('aria-pressed',String(p));
+      btn.textContent = p ? labels[1] : labels[0];
+    });
+  }
+  document.querySelectorAll('[data-strip]').forEach(function(s){
+    var t=s.querySelector('[data-track]'), b=s.querySelector('[data-pause]');
+    wire(t,b,['⏸ Dừng','▶ Chạy']);
+    s.addEventListener('mouseenter',function(){ if(!reduce) t.style.animationPlayState='paused'; });
+    s.addEventListener('mouseleave',function(){ if(!reduce && !t.classList.contains('is-paused')) t.style.animationPlayState='running'; });
+    s.addEventListener('focusin',function(){ if(!reduce) t.style.animationPlayState='paused'; });
+    s.addEventListener('focusout',function(){ if(!reduce && !t.classList.contains('is-paused')) t.style.animationPlayState='running'; });
+  });
+  wire(document.querySelector('[data-tick]'), document.querySelector('[data-tickbtn]'), ['⏸','▶']);
+
+  /* quantity stepper works for real */
+  document.querySelectorAll('.qty').forEach(function(q){
+    var o=q.querySelector('output'), bs=q.querySelectorAll('button');
+    bs[0].addEventListener('click',function(){ o.textContent=Math.max(0,(+o.textContent||0)-1); });
+    bs[1].addEventListener('click',function(){ o.textContent=(+o.textContent||0)+1; });
+  });
+
+  var Q=[['dored','Một đỏ hay hai đỏ'],['undo','Việc đảo được'],['toast','Vị trí toast'],
+         ['qty','Số lượng món'],['money','Hiển thị tiền'],['tbl','Bảng ở 320px']];
+  function pad(s,n){ while(s.length<n) s+=' '; return s; }
+  function build(){
+    var d=read(), L=[];
+    L.push('=== RIMS · PHIẾU 04/06 — COMPONENT ===');
+    L.push('');
+    Q.forEach(function(q){
+      var v=(d[q[0]]||'').trim();
+      L.push(pad(q[1],22)+' : '+(v||'(bỏ trống — bạn chọn giúp)'));
+    });
+    L.push('');
+    L.push('--- Sửa trong bộ component ---');
+    L.push((d.note||'').trim()||'(duyệt toàn bộ, không sửa gì)');
+    L.push('');
+    L.push('=== HẾT PHIẾU 04 — dựng phiếu 05: icon & giọng văn ===');
+    return L.join('\n');
+  }
+
+  document.getElementById('genBtn').addEventListener('click',function(){
+    out.value=build(); out.scrollIntoView({behavior:'smooth',block:'center'}); note('Xong. Copy dán cho tôi.');
+  });
+  document.getElementById('copyBtn').addEventListener('click',function(){
+    if(!out.value) out.value=build();
+    out.focus(); out.select();
+    var ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+    if(!ok && navigator.clipboard){
+      navigator.clipboard.writeText(out.value).then(function(){note('Đã copy.');},function(){note('Bôi đen rồi Ctrl+C.');});
+      return;
+    }
+    note(ok?'Đã copy.':'Bôi đen rồi Ctrl+C.');
+  });
+  document.getElementById('dlBtn').addEventListener('click',function(){
+    if(!out.value) out.value=build();
+    var b=new Blob([out.value],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');
+    a.href=URL.createObjectURL(b); a.download='rims-phieu-04.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+    note('Đã tải rims-phieu-04.txt');
+  });
+  document.getElementById('clearBtn').addEventListener('click',function(){
+    if(!confirm('Xoá hết câu trả lời của phiếu 04?')) return;
+    form.reset(); out.value='';
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    applyRed(); note('Đã xoá.');
+  });
+
+  restore(); applyRed();
+})();
+</script>
+</body>
+</html>

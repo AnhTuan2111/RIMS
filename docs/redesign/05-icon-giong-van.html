@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="vi" data-mode="light" data-stroke="2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phiếu 05 — Bộ icon &amp; giọng văn RIMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · studied-system · sheet 05/06 (rewritten)
+ * DNA source: the user's own project X:/IdeaProjects/kpi-manage, theme qlcv-aura
+ *   workspace/shared/ui/icons.ts  — 101 icons, one const table of path-only strings
+ *   workspace/shared/ui/Icon.tsx  — one component, viewBox 24, aria-hidden
+ *   workspace/base.css            — stroke-width set once on .i (1.75), .hs.strong .i → 2.6
+ *   workspace/test/themeIcons.test.ts — vitest guarding drift between the TS table and 15 loose .svg files
+ *   the governing law, quoted from their comment: "một nghĩa một icon, một icon một nghĩa"
+ * ADOPTED: the system (registry, one component, viewBox, stroke-on-class, camelCase names,
+ *   collision log in comments, the drift test).
+ * NOT adopted blindly: the geometry. qlcv-aura draws Lucide-family (rx=2, arcs); RIMS locked
+ *   radius 0 and 2px square-cap borders. So geometry is the question, not the system.
+ * Every microcopy number here was counted in frontend/src, not invented.
+ * pre-emit critique: P5 H5 E5 S5 R5 V5
+ */
+
+:root{
+  --paper:#f3f1ea; --surface:#ffffff; --surface-2:#e8e5db; --surface-3:#d8d4c7;
+  --ink:#111214; --ink-2:#3c3e42; --ink-3:#5c5f64; --line:#111214; --sh-col:#111214;
+  --go:#12703f; --go-bg:#dceee4; --go-t:#12703f;
+  --stop:#c8271b; --stop-bg:#f7dedb; --stop-t:#c8271b;
+  --wait:#a15c00; --wait-bg:#f6e9d2; --wait-t:#8a4f00;
+  --info:#1b5fbf; --info-bg:#dde6f6; --info-t:#1b5fbf;
+  --bd:2px; --hair:1px; --off:4px;
+  --sh:var(--off) var(--off) 0 var(--sh-col);
+  --stroke:2;
+  --fd:'Archivo','IBM Plex Sans',system-ui,sans-serif;
+  --fb:'IBM Plex Sans',system-ui,sans-serif;
+  --fm:'JetBrains Mono',ui-monospace,monospace;
+  --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.5rem; --sp-6:2rem; --sp-7:3rem;
+  --dur:90ms;
+}
+:root[data-mode="dark"]{
+  --paper:#131313; --surface:#1b1b1b; --surface-2:#232323; --surface-3:#2e2e2e;
+  --ink:#ececec; --ink-2:#bdbdbd; --ink-3:#a3a3a3; --line:#6b6b6b; --sh-col:#6b6b6b;
+  --off:2px;
+  --go:#167a46; --go-bg:#16281d; --go-t:#5fd08e;
+  --stop:#c8271b; --stop-bg:#2b1512; --stop-t:#ff8a72;
+  --wait:#a15c00; --wait-bg:#2a1f0b; --wait-t:#ffc94a;
+  --info:#2069c9; --info-bg:#141c2e; --info-t:#7aaaff;
+}
+:root[data-stroke="1.75"]{--stroke:1.75}
+:root[data-stroke="2"]{--stroke:2}
+:root[data-stroke="2.5"]{--stroke:2.5}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--fb);line-height:1.5}
+h1,h2,h3,h4{margin:0;font-family:var(--fd);font-weight:800;line-height:1.14;font-style:normal;
+  text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+p{margin:0}
+:focus-visible{outline:3px solid var(--info-t);outline-offset:3px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.wrap{max-width:82rem;margin:0 auto;padding:0 16px}
+.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.lbl{font-family:var(--fm);font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+
+.bar{position:sticky;top:0;z-index:40;background:var(--ink);color:var(--paper)}
+:root[data-mode="dark"] .bar{background:var(--surface-2);border-bottom:var(--bd) solid var(--line)}
+.bar__in{max-width:82rem;margin:0 auto;padding:.5rem 16px;display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.bar__id{font-family:var(--fm);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.bar__id b{background:var(--stop);color:#fff;padding:0 .3em}
+:root[data-mode="dark"] .bar__id b{background:var(--stop-bg);color:var(--stop-t)}
+.bar__nav{display:flex;gap:.25rem;flex-wrap:wrap;margin-inline-start:auto}
+.bar__nav a,.bar__nav button{font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;text-decoration:none;color:var(--paper);background:transparent;
+  border:2px solid var(--paper);padding:.25rem .45rem;white-space:nowrap;cursor:pointer}
+:root[data-mode="dark"] .bar__nav a,:root[data-mode="dark"] .bar__nav button{color:var(--ink);border-color:var(--line)}
+.bar__nav a:hover,.bar__nav button:hover{background:var(--stop);color:#fff;border-color:var(--stop)}
+
+.head{padding:var(--sp-7) 0 var(--sp-5)}
+.head h1{font-size:clamp(1.8rem,1.25rem + 2.5vw,3.2rem)}
+.head__lede{margin-top:var(--sp-4);max-width:70ch;font-size:clamp(.95rem,.9rem + .3vw,1.06rem);color:var(--ink-2)}
+.head__lede b{color:var(--ink)}
+.src{margin-top:var(--sp-5);border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);padding:var(--sp-4);max-width:74ch}
+.src h2{font-size:.9rem;margin-bottom:var(--sp-3)}
+.src dl{margin:0;display:grid;gap:.3rem .9rem;font-size:.84rem}
+@media (min-width:46rem){.src dl{grid-template-columns:auto minmax(0,1fr)}}
+.src dt{font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3)}
+.src dd{margin:0;color:var(--ink-2)}
+.src dd b{color:var(--ink)}
+.quote{margin-top:var(--sp-3);border-inline-start:var(--bd) solid var(--go-t);background:var(--go-bg);
+  padding:.5rem .7rem;font-size:.88rem}
+.quote b{font-family:var(--fm);font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;display:block;color:var(--go-t);margin-bottom:.2rem}
+.split{margin-top:var(--sp-4);display:grid;gap:var(--sp-3)}
+@media (min-width:56rem){.split{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.box{border:var(--bd) solid var(--line);background:var(--surface-2);padding:var(--sp-3);font-size:.84rem}
+.box h3{font-size:.76rem;margin-bottom:.35rem}
+.box ul{margin:0;padding-inline-start:1.2em;display:grid;gap:.25rem;color:var(--ink-2)}
+.box--y{border-color:var(--go-t)} .box--y h3{color:var(--go-t)}
+.box--n{border-color:var(--stop-t)} .box--n h3{color:var(--stop-t)}
+
+.route{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:var(--sp-5)}
+.route span{font-family:var(--fm);font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:2px solid var(--ink-3);color:var(--ink-3);padding:.3rem .5rem}
+.route span.is-now{border-color:var(--line);background:var(--stop);color:#fff}
+.route span.is-done{border-color:var(--line);background:var(--ink);color:var(--paper)}
+:root[data-mode="dark"] .route span.is-done{background:var(--surface-2);color:var(--ink)}
+:root[data-mode="dark"] .route span.is-now{background:var(--stop-bg);color:var(--stop-t);border-color:var(--stop-t)}
+.rule{border:0;border-top:var(--bd) solid var(--line);margin:0}
+.sec{padding:var(--sp-6) 0}
+.sec__n{display:inline-block;font-family:var(--fm);font-size:.7rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;background:var(--ink);color:var(--paper);padding:.2rem .5rem;margin-bottom:var(--sp-3)}
+:root[data-mode="dark"] .sec__n{background:var(--surface-2);color:var(--ink);border:var(--hair) solid var(--line)}
+.sec h2{font-size:clamp(1.25rem,1.05rem + 1vw,1.85rem)}
+.sec__p{margin-top:var(--sp-3);max-width:74ch;font-size:.92rem;color:var(--ink-2)}
+.sec__p + .sec__p{margin-top:var(--sp-2)}
+.sec__p b{color:var(--ink)}
+
+.grid{display:grid;gap:var(--sp-4);margin-top:var(--sp-5)}
+@media (min-width:52rem){.grid--2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:68rem){.grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.pk{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);display:grid;align-content:start}
+.pk:has(input:checked){box-shadow:var(--sh),inset 0 0 0 var(--bd) var(--go-t)}
+.pk__lab{display:block;cursor:pointer;padding:var(--sp-3) var(--sp-4);border-bottom:var(--bd) solid var(--line)}
+.pk__lab:hover{background:var(--surface-2)}
+.pk:has(input:checked) .pk__lab{background:var(--go-bg)}
+.pk__top{display:flex;gap:.55rem;align-items:flex-start}
+.pk__top input{margin:.25rem 0 0;width:1.05rem;height:1.05rem;accent-color:var(--go);flex:none}
+.pk__n{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:.92rem;line-height:1.15}
+.pk__d{font-size:.82rem;color:var(--ink-2);margin-top:.25rem}
+.pk__body{padding:var(--sp-4);display:grid;gap:var(--sp-3)}
+.pk__notes{display:grid;gap:.35rem;font-size:.79rem}
+.pk__notes p{padding-inline-start:1.3em;position:relative;color:var(--ink-2)}
+.pk__notes p::before{position:absolute;inset-inline-start:0;font-family:var(--fm);font-weight:700}
+.pk__notes .y::before{content:'+';color:var(--go-t)}
+.pk__notes .n::before{content:'−';color:var(--wait-t)}
+.pk__notes .w::before{content:'!';color:var(--stop-t)}
+.rec{font-family:var(--fm);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--go);color:#fff;border:1px solid var(--line);padding:.08rem .28rem;margin-inline-start:.3rem;white-space:nowrap}
+:root[data-mode="dark"] .rec{background:var(--go-bg);color:var(--go-t);border-color:var(--go-t)}
+
+/* ---------- icon rendering ---------- */
+.i{width:1.5rem;height:1.5rem;display:block;fill:none;stroke:currentColor;stroke-width:var(--stroke)}
+.i--big{width:2.7rem;height:2.7rem}
+.i--rims{stroke-linecap:square;stroke-linejoin:miter}
+.i--kpi{stroke-linecap:round;stroke-linejoin:round}
+.ib{display:flex;gap:.45rem;flex-wrap:wrap;align-items:flex-start}
+.ic{display:grid;gap:.2rem;justify-items:center;width:3.4rem}
+.ic s{text-decoration:none;font-family:var(--fm);font-size:.55rem;font-weight:700;letter-spacing:.02em;
+  text-transform:uppercase;color:var(--ink-3);text-align:center;line-height:1.15}
+.onrail{background:var(--ink);padding:.4rem;display:flex;gap:.3rem;flex-wrap:wrap}
+:root[data-mode="dark"] .onrail{background:var(--surface-2);border:var(--hair) solid var(--line)}
+.onrail .ic{width:3.1rem;border:var(--bd) solid var(--paper);padding:.25rem .1rem}
+:root[data-mode="dark"] .onrail .ic{border-color:var(--line)}
+.onrail .ic .i,.onrail .ic s{color:var(--paper)}
+:root[data-mode="dark"] .onrail .ic .i{color:var(--ink)}
+:root[data-mode="dark"] .onrail .ic s{color:var(--ink-2)}
+.onrail .ic.is-on{background:var(--stop);border-color:var(--paper)}
+:root[data-mode="dark"] .onrail .ic.is-on{background:var(--stop-bg);border-color:var(--stop-t)}
+:root[data-mode="dark"] .onrail .ic.is-on .i,:root[data-mode="dark"] .onrail .ic.is-on s{color:var(--stop-t)}
+.inbtn{display:inline-flex;gap:.35em;align-items:center}
+.inbtn .i{width:1.05em;height:1.05em}
+
+/* ---------- code block ---------- */
+.code{border:var(--bd) solid var(--line);background:var(--surface-2);padding:var(--sp-3);overflow-x:auto;
+  font-family:var(--fm);font-size:.74rem;line-height:1.65;white-space:pre;margin-top:var(--sp-3)}
+.code b{color:var(--go-t)}
+.code i{color:var(--ink-3);font-style:normal}
+
+/* ---------- tables ---------- */
+.tt{border:var(--bd) solid var(--line);background:var(--surface);overflow-x:auto;margin-top:var(--sp-4)}
+.tt table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:40rem}
+.tt th{text-align:start;background:var(--ink);color:var(--paper);padding:.45rem .6rem;font-family:var(--fm);
+  font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+:root[data-mode="dark"] .tt th{background:var(--surface-2);color:var(--ink);border-bottom:var(--bd) solid var(--line)}
+.tt td{padding:.4rem .6rem;border-bottom:var(--hair) solid var(--surface-3);vertical-align:top}
+.tt tbody tr:last-child td{border-bottom:0}
+.tt .grp td{background:var(--surface-2);font-family:var(--fm);font-size:.66rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em}
+.tt .num{text-align:end;font-family:var(--fm);font-variant-numeric:tabular-nums}
+.tt code{font-family:var(--fm);font-size:.76rem;color:var(--info-t)}
+.tt .ico{width:2.2rem;text-align:center}
+.tt .ico .i{margin-inline:auto;width:1.3rem;height:1.3rem}
+.bad{color:var(--stop-t);font-weight:700}
+.tick{font-family:var(--fm);font-size:.62rem;font-weight:700;border:1px solid var(--line);padding:.05rem .3rem;white-space:nowrap;display:inline-block}
+.tick--x{background:var(--stop-bg);color:var(--stop-t);border-color:var(--stop-t)}
+.tick--k{background:var(--go-bg);color:var(--go-t);border-color:var(--go-t)}
+.tick--w{background:var(--wait-bg);color:var(--wait-t);border-color:var(--wait-t)}
+
+/* ---------- copy demo ---------- */
+.cd{border:var(--bd) solid var(--line);background:var(--surface);box-shadow:var(--sh);display:grid;min-width:0}
+.cd__h{background:var(--surface-2);color:var(--ink);padding:.35rem .5rem;border-bottom:var(--bd) solid var(--line);
+  display:flex;justify-content:space-between;gap:.5rem;font-family:var(--fm);font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em}
+.cd__b{padding:.5rem;display:grid;gap:.3rem;font-size:.86rem}
+.cd__i{display:flex;justify-content:space-between;gap:.5rem;font-weight:600;
+  border-bottom:var(--hair) dashed var(--surface-3);padding-block:.15rem}
+.cd__i:last-of-type{border-bottom:0}
+.cd__f{padding:.5rem;border-top:var(--bd) solid var(--line);display:flex;gap:.4rem;flex-wrap:wrap}
+.b{font-family:var(--fd);font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:.8rem;
+  border:var(--bd) solid var(--line);background:var(--surface);color:var(--ink);padding:.45rem .7rem;
+  box-shadow:var(--sh);cursor:pointer;white-space:nowrap;
+  transition:transform var(--dur) linear,box-shadow var(--dur) linear}
+.b:hover{transform:translate(calc(var(--off)/2),calc(var(--off)/2));box-shadow:calc(var(--off)/2) calc(var(--off)/2) 0 var(--sh-col)}
+.b:active{transform:translate(var(--off),var(--off));box-shadow:0 0 0 var(--sh-col)}
+.b--go{background:var(--go);color:#fff}
+.b--stop{background:var(--stop);color:#fff}
+.b--sm{font-size:.7rem;padding:.3rem .5rem;box-shadow:none}
+.b--sm:hover{transform:none;box-shadow:none}
+:root[data-mode="dark"] .b{background:var(--surface-2);border-color:var(--line)}
+:root[data-mode="dark"] .b--go{background:var(--go-bg);color:var(--go-t);border-color:var(--go-t)}
+:root[data-mode="dark"] .b--stop{background:var(--stop-bg);color:var(--stop-t);border-color:var(--stop-t)}
+.err{border:var(--bd) solid var(--stop-t);background:var(--stop-bg);color:var(--ink);padding:.5rem .6rem;font-size:.85rem;display:grid;gap:.3rem}
+.err b{color:var(--stop-t);font-family:var(--fm);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
+
+/* ---------- questions ---------- */
+.qs{display:grid;gap:var(--sp-4);margin-top:var(--sp-5)}
+@media (min-width:50rem){.qs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.q{border:var(--bd) solid var(--line);background:var(--surface);padding:var(--sp-4);display:grid;gap:.5rem;align-content:start}
+.q h3{font-size:.9rem}
+.q__h{font-size:.79rem;color:var(--ink-3)}
+.q__o{display:grid;gap:.3rem}
+.q__o label{display:flex;gap:.5rem;align-items:flex-start;font-size:.83rem;border:2px solid var(--line);
+  padding:.4rem .5rem;cursor:pointer;background:var(--surface)}
+.q__o label:hover{background:var(--surface-2)}
+.q__o label:has(input:checked){background:var(--go-bg);border-color:var(--go-t);font-weight:600}
+.q__o input{margin:.2rem 0 0;accent-color:var(--go);flex:none}
+.q textarea{width:100%;font:inherit;font-size:.85rem;background:var(--paper);color:var(--ink);
+  border:var(--bd) solid var(--line);padding:.5rem .6rem;min-height:5rem;resize:vertical}
+.pills{display:flex;gap:.25rem;flex-wrap:wrap}
+.pills label{cursor:pointer;position:relative}
+.pills input{position:absolute;opacity:0;width:0;height:0}
+.pills span{display:block;font-family:var(--fm);font-size:.68rem;font-weight:700;text-transform:uppercase;
+  border:2px solid var(--line);padding:.28rem .45rem;background:var(--surface);white-space:nowrap}
+.pills input:checked + span{background:var(--ink);color:var(--paper)}
+:root[data-mode="dark"] .pills input:checked + span{background:var(--surface-2);color:var(--ink);border-color:var(--ink)}
+
+.res{border:var(--bd) solid var(--line);background:var(--ink);box-shadow:var(--sh);padding:var(--sp-5);margin:var(--sp-6) 0}
+:root[data-mode="dark"] .res{background:var(--surface-2)}
+.res h2{font-size:1.2rem;color:var(--paper)}
+:root[data-mode="dark"] .res h2{color:var(--ink)}
+.res__p{color:var(--surface-3);font-size:.88rem;margin-top:.4rem;max-width:64ch}
+:root[data-mode="dark"] .res__p{color:var(--ink-2)}
+.res__box{background:var(--surface);border:var(--bd) solid var(--paper);padding:var(--sp-4);margin-top:var(--sp-4)}
+:root[data-mode="dark"] .res__box{border-color:var(--line)}
+.res__acts{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.out{width:100%;min-height:14rem;margin-top:var(--sp-3);font-family:var(--fm);font-size:.76rem;line-height:1.6;
+  background:var(--paper);color:var(--ink);border:var(--bd) solid var(--line);padding:var(--sp-3);white-space:pre;overflow:auto;resize:vertical}
+.said{font-family:var(--fm);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--go-t)}
+.ft{border-top:var(--bd) solid var(--line);padding:var(--sp-4) 0 var(--sp-7);font-family:var(--fm);font-size:.7rem;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+</style>
+</head>
+<body>
+
+<!-- Bảng ICONS của RIMS, dạng vuông hoá. Path-only, viewBox 24, nét đặt ở .i — đúng cơ chế của qlcv-aura -->
+<svg class="sprite" aria-hidden="true" focusable="false"><defs>
+  <g id="r-check"><path d="M4 13l5 5L20 6"/></g>
+  <g id="r-x"><path d="M5 5l14 14M19 5L5 19"/></g>
+  <g id="r-ban"><rect x="3" y="3" width="18" height="18"/><path d="M5 5l14 14"/></g>
+  <g id="r-plus"><path d="M12 4v16M4 12h16"/></g>
+  <g id="r-pen"><path d="M4 20h5L20 9l-5-5L4 15z"/><path d="M14 5l5 5"/></g>
+  <g id="r-trash"><path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15"/></g>
+  <g id="r-save"><path d="M4 4h12l4 4v12H4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></g>
+  <g id="r-print"><path d="M7 8V3h10v5M7 18H4v-8h16v8h-3"/><path d="M7 14h10v7H7z"/></g>
+  <g id="r-search"><rect x="3" y="3" width="14" height="14"/><path d="M17 17l4 4"/></g>
+  <g id="r-back"><path d="M20 12H5M11 6L5 12l6 6"/></g>
+  <g id="r-prev"><path d="M15 5L8 12l7 7"/></g>
+  <g id="r-next"><path d="M9 5l7 7-7 7"/></g>
+  <g id="r-menu"><path d="M4 6h16M4 12h16M4 18h16"/></g>
+  <g id="r-sort"><path d="M4 6h11M4 12h7M4 18h4"/><path d="M16 15l3 3 3-3M19 18V6"/></g>
+  <g id="r-filter"><path d="M3 4h18l-7 8v8l-4-2v-6z"/></g>
+  <g id="r-clock"><rect x="3" y="3" width="18" height="18"/><path d="M12 7v5l4 3"/></g>
+  <g id="r-clockalert"><rect x="3" y="3" width="14" height="14"/><path d="M10 7v4l3 2"/><path d="M20 12v5M20 20v.01"/></g>
+  <g id="r-sun"><rect x="8" y="8" width="8" height="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></g>
+  <g id="r-moon"><path d="M20 15A9 9 0 0 1 9 4a8 8 0 1 0 11 11z"/></g>
+  <g id="r-contrast"><rect x="3" y="3" width="18" height="18"/><path d="M12 3v18h9V3z" fill="currentColor" stroke="none"/></g>
+  <g id="r-table"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></g>
+  <g id="r-ticket"><rect x="4" y="3" width="16" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/></g>
+  <g id="r-invoice"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-3-2z"/><path d="M9 8h6M9 12h6"/></g>
+  <g id="r-booking"><rect x="3" y="5" width="18" height="16"/><path d="M8 2v5M16 2v5M3 11h18"/><rect x="10" y="14" width="4" height="4" fill="currentColor" stroke="none"/></g>
+  <g id="r-kitchen"><path d="M3 10h18l-2 11H5z"/><path d="M8 6V2M12 6V2M16 6V2"/></g>
+  <g id="r-user"><rect x="8" y="3" width="8" height="8"/><path d="M4 21v-3h16v3"/></g>
+  <g id="r-cards"><rect x="3" y="3" width="18" height="7"/><rect x="3" y="14" width="18" height="7"/></g>
+  <g id="r-rows"><path d="M3 5h18M3 10h18M3 15h18M3 20h18"/></g>
+  <g id="r-gear"><rect x="9" y="9" width="6" height="6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></g>
+  <g id="r-chart"><path d="M4 20V4M4 20h16"/><rect x="7" y="12" width="3" height="8" fill="currentColor" stroke="none"/><rect x="12" y="8" width="3" height="12" fill="currentColor" stroke="none"/><rect x="17" y="14" width="3" height="6" fill="currentColor" stroke="none"/></g>
+  <!-- cùng sáu hình, ba ngôn ngữ hình học — dùng ở phần 2 -->
+  <g id="k-cal"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></g>
+  <g id="k-cards"><rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/></g>
+  <g id="k-clock"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g>
+  <g id="k-check"><path d="M20 6 9 17l-5-5"/></g>
+  <g id="k-ban"><circle cx="12" cy="12" r="9"/><path d="m5.7 5.7 12.6 12.6"/></g>
+  <g id="k-dash"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></g>
+  <g id="s-cal"><rect x="3" y="4" width="18" height="18"/><path d="M16 2v4M8 2v4M3 10h18"/></g>
+  <g id="s-cards"><rect x="3" y="3" width="18" height="8"/><rect x="3" y="13" width="18" height="8"/></g>
+  <g id="s-clock"><rect x="3" y="3" width="18" height="18"/><path d="M12 7v5l4 3"/></g>
+  <g id="s-check"><path d="M4 13l5 5L20 6"/></g>
+  <g id="s-ban"><rect x="3" y="3" width="18" height="18"/><path d="M5 5l14 14"/></g>
+  <g id="s-dash"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></g>
+</defs></svg>
+
+<div class="bar">
+  <div class="bar__in">
+    <span class="bar__id">RIMS · phiếu <b>05/06</b> · icon &amp; giọng văn</span>
+    <nav class="bar__nav" aria-label="Mục lục">
+      <a href="#hoc">Học được gì</a>
+      <a href="#hinhhoc">1 · Hình học</a>
+      <a href="#songhia">2 · Sổ nghĩa</a>
+      <a href="#loi">3 · Lỗi trong code</a>
+      <a href="#giong">4 · Giọng văn</a>
+      <a href="#tuvung">5 · Từ vựng</a>
+      <button type="button" id="modeBtn">◑ Sáng / Tối</button>
+      <a href="#ketqua">Kết quả</a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="head">
+    <p class="lbl">Phỏng vấn thiết kế lại · phiếu 05 trong 06 — dựng lại theo hệ icon của dự án KPI</p>
+    <h1>Icon &amp; giọng văn</h1>
+
+    <div class="src" id="hoc">
+      <h2>Đọc được gì từ dự án KPI của bạn</h2>
+      <dl>
+        <dt>Nguồn</dt><dd><span class="mono">X:/IdeaProjects/kpi-manage</span> · <span class="mono">workspace/shared/ui/icons.ts</span> · <span class="mono">Icon.tsx</span> · <span class="mono">test/themeIcons.test.ts</span></dd>
+        <dt>Quy mô</dt><dd><b>101 icon</b> trong <b>một bảng hằng duy nhất</b>, mỗi icon chỉ là chuỗi <span class="mono">&lt;path&gt;</span></dd>
+        <dt>Cơ chế</dt><dd>một component <span class="mono">&lt;Icon name&gt;</span> · <span class="mono">viewBox 24</span> · <span class="mono">aria-hidden</span> · <b>độ dày nét đặt một lần ở class</b> <span class="mono">.i</span> (1.75), có biến thể <span class="mono">.hs.strong .i → 2.6</span></dd>
+        <dt>Đặt tên</dt><dd>khoá tiếng Anh ngắn, camelCase: <span class="mono">check · chevL · sortPrio · userCheck · clockAlert</span></dd>
+        <dt>Bài test</dt><dd>vitest canh <b>lệch</b> giữa bảng TS và 15 tệp <span class="mono">.svg</span> rời — vì mask trong CSS không đọc được bảng TS</dd>
+      </dl>
+
+      <div class="quote">
+        <b>Luật, trích nguyên văn comment trong icons.ts</b>
+        “Bộ icon chốt 26/09: <b>một nghĩa một icon, một icon một nghĩa</b>”
+      </div>
+
+      <p class="sec__p" style="margin-top:var(--sp-3)">
+        Và cái tôi thấy hay nhất: <b>log gỡ trùng nghĩa ghi ngay trong comment</b>. Khi một icon mới cần
+        một nghĩa đã bị chiếm, icon cũ <b>bị thu hẹp nghĩa</b> và việc đó được viết xuống:
+      </p>
+      <div class="code"><i>// Cập nhật tiến độ; <b>hourglass chỉ còn nghĩa Chờ lãnh đạo</b></i>
+trend: '&lt;path d="m3 17 6-6 4 4 8-8"/&gt;...',
+<i>// Trả lời tin nhắn; <b>undo chỉ còn nghĩa Trả lại</b></i>
+reply: '&lt;path d="M9 17 4 12l5-5"/&gt;...',
+<i>// Sơ đồ Gantt: <b>Không dùng layers: đã là "nhóm chủ đề"</b></i>
+gantt: '&lt;path d="M3 7h9M8 12h10M5 17h8"/&gt;...',
+<i>// Đang thực hiện (nửa vòng tô), <b>tách khỏi vòng tròn Chờ xử lý</b></i>
+half: '&lt;circle cx="12" cy="12" r="9"/&gt;...',</div>
+
+      <div class="split">
+        <div class="box box--y">
+          <h3>✓ Lấy — đây là hệ thống, không phải cái vẻ</h3>
+          <ul>
+            <li>Một bảng hằng <span class="mono">ICONS</span>, chỉ chứa path</li>
+            <li>Một component <span class="mono">&lt;Icon name&gt;</span>, viewBox 24, <span class="mono">aria-hidden</span></li>
+            <li>Độ dày nét đặt <b>một lần</b> ở class, không viết trong từng icon</li>
+            <li>Tên khoá camelCase ngắn, ổn định</li>
+            <li><b>Luật một nghĩa một icon</b> + log gỡ trùng trong comment</li>
+            <li>Bài test canh lệch bộ</li>
+          </ul>
+        </div>
+        <div class="box box--n">
+          <h3>✕ Không lấy — lần trước tôi đã sai đúng chỗ này</h3>
+          <ul>
+            <li><b>Hình học Lucide</b>: <span class="mono">rx="2"</span> ở mọi rect, vòng tròn, cung bo</li>
+            <li>Đầu nét tròn</li>
+            <li>Nét <b>1.75</b> — RIMS viền 2px nên nét icon nên 2</li>
+          </ul>
+          <p style="margin-top:.4rem;color:var(--ink-2)">RIMS đã chốt <b>bo góc 0</b> và <b>viền 2px đầu nét vuông</b>. Bê nguyên hình học Lucide sang là lặp lại đúng lỗi phiếu 04B lần hai.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="head__lede">
+      Nên phần icon của phiếu này <b>không hỏi hệ thống nữa</b> — hệ thống lấy nguyên, nó tốt hơn cái tôi đề ở bản trước.
+      Câu hỏi còn lại là <b>hình học</b>, và <b>sổ nghĩa của RIMS</b>.
+      Bấm <b>◑ Sáng / Tối</b> để soi icon ở cả hai chế độ.
+    </p>
+
+    <div class="route" aria-label="Lộ trình">
+      <span class="is-done">01–03 · Style</span><span class="is-done">04 · Component</span>
+      <span class="is-done">04B · Chế độ tối</span><span class="is-now">05 · Icon &amp; giọng văn</span>
+      <span>06 · Spec</span>
+    </div>
+  </header>
+
+  <hr class="rule">
+  <form id="sheet">
+
+  <!-- ==================== §1 GEOMETRY ==================== -->
+  <section class="sec" id="hinhhoc">
+    <p class="sec__n">Phần 1</p>
+    <h2>Hình học — ba ngôn ngữ, cùng sáu hình</h2>
+    <p class="sec__p">
+      Cùng sáu icon lấy thẳng từ bảng của dự án KPI: <b>lịch · thẻ · đồng hồ · xong · cấm · tổng quan</b>.
+      Ba cột dưới đây khác nhau <b>duy nhất ở hình học</b> — cùng path gốc, cùng viewBox, cùng cơ chế.
+      Mỗi phương án có hàng dựng <b>trên rail ở cỡ thật</b>, vì đó là chỗ icon phải sống.
+    </p>
+
+    <div class="q" style="max-width:34rem;margin-top:var(--sp-4)">
+      <h3>Độ dày nét — xoay thử cả ba cột</h3>
+      <p class="q__h">Hệ KPI dùng <b>1.75</b>. Viền component của RIMS là <b>2px</b>.</p>
+      <div class="pills" role="radiogroup" aria-label="Độ dày nét">
+        <label><input type="radio" name="k_stroke" value="1.75 — y như hệ KPI" data-k="stroke" data-v="1.75"><span>1.75</span></label>
+        <label><input type="radio" name="k_stroke" value="2 — cùng độ dày với viền component RIMS" data-k="stroke" data-v="2" checked><span>2</span></label>
+        <label><input type="radio" name="k_stroke" value="2.5 — dày, đọc xa" data-k="stroke" data-v="2.5"><span>2.5</span></label>
+      </div>
+    </div>
+
+    <div class="grid grid--3">
+
+      <article class="pk">
+        <label class="pk__lab"><span class="pk__top">
+          <input type="radio" name="geo" value="G1 · Nguyên bản KPI — rx 2, vòng tròn, đầu nét tròn">
+          <span><span class="pk__n">G1 · Nguyên bản KPI</span>
+          <span class="pk__d">Lấy y nguyên: <span class="mono">rx="2"</span>, vòng tròn, cung bo, <b>đầu nét tròn</b>. Hai app dùng chung một bộ.</span></span>
+        </span></label>
+        <div class="pk__body">
+          <div class="ib">
+            <span class="ic"><svg class="i i--big i--kpi" viewBox="0 0 24 24"><use href="#k-cal"/></svg><s>Lịch</s></span>
+            <span class="ic"><svg class="i i--big i--kpi" viewBox="0 0 24 24"><use href="#k-cards"/></svg><s>Thẻ</s></span>
+            <span class="ic"><svg class="i i--big i--kpi" viewBox="0 0 24 24"><use href="#k-clock"/></svg><s>Giờ</s></span>
+          </div>
+          <div class="ib">
+            <span class="ic"><svg class="i i--big i--kpi" viewBox="0 0 24 24"><use href="#k-check"/></svg><s>Xong</s></span>
+            <span class="ic"><svg class="i i--big i--kpi" viewBox="0 0 24 24"><use href="#k-ban"/></svg><s>Cấm</s></span>
+            <span class="ic"><svg class="i i--big i--kpi" viewBox="0 0 24 24"><use href="#k-dash"/></svg><s>Tổng quan</s></span>
+          </div>
+          <p class="lbl">Trên rail, cỡ thật</p>
+          <div class="onrail">
+            <span class="ic is-on"><svg class="i i--kpi" viewBox="0 0 24 24"><use href="#k-dash"/></svg><s>Tổng quan</s></span>
+            <span class="ic"><svg class="i i--kpi" viewBox="0 0 24 24"><use href="#k-cal"/></svg><s>Đặt bàn</s></span>
+            <span class="ic"><svg class="i i--kpi" viewBox="0 0 24 24"><use href="#k-check"/></svg><s>Xong</s></span>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Hai app của bạn dùng <b>đúng một bộ icon</b> — sửa một lần, cả hai nơi đổi.</p>
+            <p class="y">101 icon đã vẽ sẵn, RIMS chỉ cần lấy ra 29 cái, <b>không phải vẽ gì</b>.</p>
+            <p class="w"><b>Đâm vào chữ ký RIMS.</b> Bo góc 2px và vòng tròn nằm giữa một màn bo 0 và viền vuông là vật thể lạ — nhìn thấy ngay ở hàng rail bên trên.</p>
+            <p class="n">Đầu nét tròn ngược với viền 2px đầu vuông của mọi component.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab"><span class="pk__top">
+          <input type="radio" name="geo" value="G2 · Vuông hoá — cùng hình, rx về 0, vòng tròn thành vuông, đầu nét vuông" checked>
+          <span><span class="pk__n">G2 · Vuông hoá<span class="rec">đề xuất</span></span>
+          <span class="pk__d">Giữ <b>đúng cấu trúc hình</b> của hệ KPI, chỉ đổi: <span class="mono">rx → 0</span>, vòng tròn → vuông, <b>đầu nét vuông</b>.</span></span>
+        </span></label>
+        <div class="pk__body">
+          <div class="ib">
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#s-cal"/></svg><s>Lịch</s></span>
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#s-cards"/></svg><s>Thẻ</s></span>
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#s-clock"/></svg><s>Giờ</s></span>
+          </div>
+          <div class="ib">
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#s-check"/></svg><s>Xong</s></span>
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#s-ban"/></svg><s>Cấm</s></span>
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#s-dash"/></svg><s>Tổng quan</s></span>
+          </div>
+          <p class="lbl">Trên rail, cỡ thật</p>
+          <div class="onrail">
+            <span class="ic is-on"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#s-dash"/></svg><s>Tổng quan</s></span>
+            <span class="ic"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#s-cal"/></svg><s>Đặt bàn</s></span>
+            <span class="ic"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#s-check"/></svg><s>Xong</s></span>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Cùng một cây bút với viền 2px — không có vật lạ nào trên màn.</p>
+            <p class="y">Vẫn là <b>cùng cấu trúc hình</b> với hệ KPI, nên ai nhìn hai app cũng thấy họ hàng.</p>
+            <p class="y">Chuyển đổi rẻ: sửa <span class="mono">rx</span> và đổi <span class="mono">circle</span> thành <span class="mono">rect</span>, không vẽ lại từ đầu.</p>
+            <p class="n"><b>Không dùng chung bộ được nữa</b> — hai app thành hai bảng ICONS, phải nhớ sửa cả hai khi đổi nghĩa.</p>
+            <p class="n">Đồng hồ vuông trông lạ lúc đầu; đó là cái giá của việc bo 0 tuyệt đối.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab"><span class="pk__top">
+          <input type="radio" name="geo" value="G3 · Nửa đường — giữ hình KPI nguyên vẹn, chỉ đổi đầu nét sang vuông">
+          <span><span class="pk__n">G3 · Nửa đường</span>
+          <span class="pk__d">Giữ <span class="mono">rx="2"</span> và vòng tròn của hệ KPI, <b>chỉ đổi đầu nét sang vuông</b>. Sửa một dòng CSS.</span></span>
+        </span></label>
+        <div class="pk__body">
+          <div class="ib">
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#k-cal"/></svg><s>Lịch</s></span>
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#k-cards"/></svg><s>Thẻ</s></span>
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#k-clock"/></svg><s>Giờ</s></span>
+          </div>
+          <div class="ib">
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#k-check"/></svg><s>Xong</s></span>
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#k-ban"/></svg><s>Cấm</s></span>
+            <span class="ic"><svg class="i i--big i--rims" viewBox="0 0 24 24"><use href="#k-dash"/></svg><s>Tổng quan</s></span>
+          </div>
+          <p class="lbl">Trên rail, cỡ thật</p>
+          <div class="onrail">
+            <span class="ic is-on"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#k-dash"/></svg><s>Tổng quan</s></span>
+            <span class="ic"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#k-cal"/></svg><s>Đặt bàn</s></span>
+            <span class="ic"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#k-check"/></svg><s>Xong</s></span>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Rẻ nhất: <b>một dòng CSS</b>, bảng icon dùng chung y nguyên với hệ KPI.</p>
+            <p class="y">Đầu nét vuông đã gần hơn với giọng RIMS.</p>
+            <p class="w">Đầu nét vuông + góc bo 2px là <b>hai luật ngược nhau trong cùng một hình</b>. Ở cỡ lớn nhìn ra ngay: nét thì thô mà góc thì mềm.</p>
+            <p class="n">Vẫn còn vòng tròn — vẫn còn vật lạ giữa một màn bo 0.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §2 MEANING REGISTRY ==================== -->
+  <section class="sec" id="songhia">
+    <p class="sec__n">Phần 2</p>
+    <h2>Sổ nghĩa của RIMS — 29 icon</h2>
+    <p class="sec__p">
+      Áp luật <b>“một nghĩa một icon, một icon một nghĩa”</b> vào RIMS thì lộ ra <b>bốn chỗ trùng nghĩa</b>.
+      Tôi đã gỡ theo đúng cách hệ KPI làm — thu hẹp nghĩa của icon cũ và ghi lại — và <b>đánh dấu ở cột cuối</b>.
+      Icon dưới đây đã vẽ theo phương án <b>G2 vuông hoá</b>; chọn G1 hoặc G3 thì hình đổi, sổ nghĩa giữ nguyên.
+    </p>
+
+    <div class="tt">
+      <table>
+        <thead><tr><th class="ico"></th><th>Khoá</th><th>Nghĩa duy nhất</th><th>Dùng ở đâu</th><th>Gỡ trùng</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="5">Rail — 4 nhóm của Quản trị + 6 mục của bốn vai kia</td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-chart"/></svg></td><td><code>chart</code></td><td>Bán hàng, thống kê, doanh thu</td><td>rail Quản trị · màn Thống kê</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-kitchen"/></svg></td><td><code>kitchen</code></td><td>Thực đơn, món, bếp</td><td>rail Quản trị · rail Bếp</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-user"/></svg></td><td><code>user</code></td><td>Tài khoản, người, hồ sơ</td><td>rail Quản trị · Hồ sơ của tôi</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-gear"/></svg></td><td><code>gear</code></td><td>Cấu hình nhà hàng</td><td>rail Quản trị</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-table"/></svg></td><td><code>table</code></td><td><b>Bàn ăn</b></td><td>rail Phục vụ · sơ đồ mặt bằng</td><td><span class="tick tick--w">gỡ trùng 1</span></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-ticket"/></svg></td><td><code>ticket</code></td><td><b>Phiếu bếp</b></td><td>rail Bếp · hàng đợi</td><td><span class="tick tick--w">gỡ trùng 2</span></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-invoice"/></svg></td><td><code>invoice</code></td><td>Hoá đơn, chứng từ sau khi trả</td><td>rail Thu ngân · Lịch sử hoá đơn</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-booking"/></svg></td><td><code>booking</code></td><td>Đặt bàn trước</td><td>rail Phục vụ · rail Khách</td><td></td></tr>
+          <tr class="grp"><td colspan="5">Hành động — lặp lại khắp app</td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-check"/></svg></td><td><code>check</code></td><td><b>Xong một việc</b> — không phải “đã xong” trạng thái</td><td>nút Xong món · hộp kiểm</td><td><span class="tick tick--w">gỡ trùng 3</span></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-ban"/></svg></td><td><code>ban</code></td><td><b>Huỷ</b> — bỏ việc đang dở</td><td>nút Huỷ món · Huỷ đơn</td><td><span class="tick tick--w">gỡ trùng 4</span></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-x"/></svg></td><td><code>x</code></td><td><b>Đóng</b> — chỉ đóng, không mang nghĩa huỷ</td><td>hộp thoại · ngăn kéo · chip bỏ lọc</td><td><span class="tick tick--k">đã thu hẹp</span></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-trash"/></svg></td><td><code>trash</code></td><td><b>Xoá</b> — mất hẳn khỏi hệ thống</td><td>Quản trị: xoá món, xoá tài khoản</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-plus"/></svg></td><td><code>plus</code></td><td>Thêm bản ghi mới</td><td>Thêm món · Tạo đơn · Đặt bàn mới</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-pen"/></svg></td><td><code>pen</code></td><td>Sửa</td><td>hàng bảng · thẻ món</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-save"/></svg></td><td><code>save</code></td><td>Lưu biểu mẫu</td><td>form Quản trị · đặt bàn</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-print"/></svg></td><td><code>print</code></td><td>In hoá đơn</td><td>Thu ngân</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-search"/></svg></td><td><code>search</code></td><td>Tìm</td><td>ô tìm ở mọi bảng và lưới</td><td></td></tr>
+          <tr class="grp"><td colspan="5">Điều hướng &amp; bảng</td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-back"/></svg></td><td><code>back</code></td><td>Quay lại màn trước</td><td>breadcrumb ở khung hẹp</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-prev"/></svg></td><td><code>prev</code></td><td>Trang trước</td><td>phân trang</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-next"/></svg></td><td><code>next</code></td><td>Trang sau</td><td>phân trang</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-menu"/></svg></td><td><code>menu</code></td><td>Mở ngăn kéo rail</td><td>dưới 60rem</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-sort"/></svg></td><td><code>sort</code></td><td>Sắp xếp — một icon, ba trạng thái</td><td>đầu bảng 11 màn quản trị</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-filter"/></svg></td><td><code>filter</code></td><td>Lọc</td><td>rail lọc · hàng lọc</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-cards"/></svg></td><td><code>cards</code></td><td><b>Chế độ xem thẻ</b></td><td>cặp nút Thẻ/Bảng ở 3 màn có ảnh</td><td><span class="tick tick--k">tách khỏi table</span></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-rows"/></svg></td><td><code>rows</code></td><td><b>Chế độ xem bảng</b></td><td>cặp nút Thẻ/Bảng</td><td><span class="tick tick--k">tách khỏi ticket</span></td></tr>
+          <tr class="grp"><td colspan="5">Vỏ app</td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-clock"/></svg></td><td><code>clock</code></td><td>Giờ hiện tại</td><td>hàng breadcrumb, mọi màn</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-clockalert"/></svg></td><td><code>clockAlert</code></td><td>Quá hạn — cùng họ đồng hồ</td><td>đặt bàn quá giờ · phiếu chờ quá 15′</td><td><span class="tick tick--k">cùng họ clock</span></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-sun"/></svg></td><td><code>sun</code></td><td>Ca sáng và ca chiều</td><td>cạnh đồng hồ</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-moon"/></svg></td><td><code>moon</code></td><td>Ca tối</td><td>cạnh đồng hồ</td><td></td></tr>
+          <tr><td class="ico"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-contrast"/></svg></td><td><code>contrast</code></td><td>Đổi sáng / tối</td><td>hàng breadcrumb</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box" style="margin-top:var(--sp-4);max-width:74ch;border-color:var(--wait-t)">
+      <h3 style="color:var(--wait-t)">Bốn chỗ trùng nghĩa và cách gỡ</h3>
+      <ul>
+        <li><b>1 · <code>table</code> vs <code>cards</code></b> — hình bốn ô vuông vừa là “Bàn ăn” ở rail, vừa là “xem dạng thẻ”. Gỡ: <code>table</code> giữ nghĩa <b>bàn ăn</b>; chế độ xem thẻ đổi sang <code>cards</code> hai dải ngang.</li>
+        <li><b>2 · <code>ticket</code> vs <code>rows</code></b> — hình khung có ba dòng vừa là “Phiếu bếp”, vừa là “xem dạng bảng”. Gỡ: <code>ticket</code> có <b>khung</b>, <code>rows</code> chỉ có <b>bốn vạch trần</b>, không khung.</li>
+        <li><b>3 · <code>check</code></b> — đang phải làm ba việc: nút “Xong món”, chip “Đã xong”, hộp kiểm. Gỡ: icon <code>check</code> chỉ dùng cho <b>nút và hộp kiểm</b>; chip trạng thái dùng <b>ký hiệu chữ ✓</b> đã chốt ở phiếu 04, không dùng icon.</li>
+        <li><b>4 · <code>ban</code> vs <code>x</code> vs <code>trash</code></b> — ba nghĩa khác nhau từng dùng lẫn nhau. Gỡ theo đúng bảng từ vựng: <code>ban</code> = <b>huỷ</b> (đổi trạng thái) · <code>x</code> = <b>đóng</b> · <code>trash</code> = <b>xoá</b> (mất hẳn). Đây là lý do <code>x</code> bị <b>thu hẹp nghĩa</b>, ghi vào comment đúng như hệ KPI làm.</li>
+      </ul>
+    </div>
+
+    <div class="qs">
+      <div class="q">
+        <h3>Duyệt sổ nghĩa</h3>
+        <p class="q__h">29 icon, bốn chỗ trùng đã gỡ.</p>
+        <div class="q__o">
+          <label><input type="radio" name="reg" value="Đồng ý — 29 icon, bốn chỗ trùng gỡ như trên" checked><span>Đồng ý toàn bộ</span></label>
+          <label><input type="radio" name="reg" value="Đồng ý nhưng muốn đổi vài nghĩa (ghi ở ô cuối)"><span>Đồng ý, muốn đổi vài nghĩa</span></label>
+          <label><input type="radio" name="reg" value="Lấy thẳng 101 icon của hệ KPI, không rút còn 29"><span>Lấy thẳng <b>101 icon</b> của hệ KPI, không rút</span></label>
+        </div>
+      </div>
+      <div class="q">
+        <h3>Có làm bài test canh lệch bộ không</h3>
+        <p class="q__h">Hệ KPI có vitest canh lệch giữa bảng TS và file <span class="mono">.svg</span> rời. RIMS là React thuần, không có mask CSS đọc file SVG.</p>
+        <div class="q__o">
+          <label><input type="radio" name="test" value="Có — test canh: mọi icon trong sổ nghĩa phải có trong bảng ICONS và ngược lại, không có icon mồ côi" checked><span><b>Có</b> — canh sổ nghĩa ↔ bảng ICONS, bắt icon mồ côi <i>(đề xuất)</i></span></label>
+          <label><input type="radio" name="test" value="Có, và canh thêm: mọi icon phải dùng ít nhất một chỗ trong code"><span>Có, <b>và</b> canh icon không ai dùng</span></label>
+          <label><input type="radio" name="test" value="Không cần test cho icon"><span>Không cần</span></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §3 CODE ERRORS ==================== -->
+  <section class="sec" id="loi">
+    <p class="sec__n">Phần 3</p>
+    <h2>Sáu chỗ không nhất quán trong code — đã đếm</h2>
+    <p class="sec__p">
+      Không phải ví dụ. Tôi đếm trong <span class="mono">frontend/src</span>. Mỗi dòng cần một quyết định,
+      và quyết định đó thành luật trong spec.
+    </p>
+
+    <div class="tt">
+      <table>
+        <thead><tr><th>Chỗ không nhất quán</th><th class="num">Đang có</th><th>Quyết định</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Chính tả “huỷ”</b><br><code>Huỷ đặt bàn</code> · <code>Hủy món</code> · <code>Đang huỷ…</code> · <code>Đang hủy…</code></td>
+            <td class="num"><code>huỷ</code> 22<br><code>hủy</code> 27</td>
+            <td><div class="q__o">
+              <label><input type="radio" name="huy" value="huỷ" checked><span><code>huỷ</code></span></label>
+              <label><input type="radio" name="huy" value="hủy"><span><code>hủy</code></span></label>
+            </div></td>
+          </tr>
+          <tr>
+            <td><b>Dấu ba chấm</b><br><code>Đang lưu…</code> vs <code>Đang tải lịch đặt...</code></td>
+            <td class="num"><code>…</code> 83<br><code>...</code> 123</td>
+            <td><div class="q__o">
+              <label><input type="radio" name="dots" value="… một ký tự ellipsis" checked><span><code>…</code> một ký tự</span></label>
+              <label><input type="radio" name="dots" value="... ba dấu chấm"><span><code>...</code> ba dấu</span></label>
+            </div></td>
+          </tr>
+          <tr>
+            <td><b>Hai từ một thứ</b><br><code>Trạng thái</code> vs <code>Tình trạng</code></td>
+            <td class="num">14<br>1</td>
+            <td><div class="q__o">
+              <label><input type="radio" name="tt" value="Trạng thái — sửa 1 chỗ lệch" checked><span>Dùng <code>Trạng thái</code></span></label>
+              <label><input type="radio" name="tt" value="Tình trạng — sửa 14 chỗ"><span>Dùng <code>Tình trạng</code></span></label>
+            </div></td>
+          </tr>
+          <tr>
+            <td><b>“… thành công!”</b><br><code>Đặt bàn thành công!</code> · <code>Cập nhật hồ sơ thành công!</code> · 8 chỗ nữa<br>
+              <span class="bad">Trái luật “thành công thì im lặng” đã chốt ở phiếu 04.</span></td>
+            <td class="num">10 chỗ</td>
+            <td><div class="q__o">
+              <label><input type="radio" name="succ" value="Bỏ hẳn — dữ liệu đổi tại chỗ là đủ" checked><span><b>Bỏ hẳn</b></span></label>
+              <label><input type="radio" name="succ" value="Đổi thành toast ngắn có Hoàn tác, bỏ dấu than"><span>Toast có <b>Hoàn tác</b></span></label>
+              <label><input type="radio" name="succ" value="Chỉ giữ ở màn kết quả thanh toán"><span>Chỉ ở màn <b>thanh toán</b></span></label>
+            </div></td>
+          </tr>
+          <tr>
+            <td><b>Viết hoa từng từ</b><br><code>Sửa Đặt Bàn</code> — tiếng Việt không dùng Title Case</td>
+            <td class="num">1 chỗ</td>
+            <td><div class="q__o">
+              <label><input type="radio" name="tcase" value="Sửa thành 'Sửa đặt bàn'" checked><span><code>Sửa đặt bàn</code></span></label>
+              <label><input type="radio" name="tcase" value="In hoa toàn bộ vì nút dùng Archivo in hoa"><span>In hoa toàn bộ</span></label>
+            </div></td>
+          </tr>
+          <tr>
+            <td><b>Gạch chéo</b><br><code>VNPay/QR</code> vs <code>VNPay / QR</code></td>
+            <td class="num">1 vs 1</td>
+            <td><div class="q__o">
+              <label><input type="radio" name="slash" value="Bỏ gạch chéo — dùng 'Mã QR', khớp enum PaymentMethod" checked><span>Dùng <code>Mã QR</code>, khớp enum</span></label>
+              <label><input type="radio" name="slash" value="VNPay/QR"><span><code>VNPay/QR</code></span></label>
+            </div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §4 VOICE ==================== -->
+  <section class="sec" id="giong">
+    <p class="sec__n">Phần 4</p>
+    <h2>Giọng văn</h2>
+    <p class="sec__p">Dựng thật trên phiếu bếp thật và lỗi thật, có icon theo phương án đang chọn.</p>
+
+    <div class="grid grid--3">
+      <article class="pk">
+        <label class="pk__lab"><span class="pk__top">
+          <input type="radio" name="btnvoice" value="Động từ + tân ngữ ngắn: Xong món · Huỷ món" checked>
+          <span><span class="pk__n">Động từ + tân ngữ<span class="rec">đề xuất</span></span>
+          <span class="pk__d">Nhãn nói rõ <b>làm gì với cái gì</b>.</span></span>
+        </span></label>
+        <div class="pk__body">
+          <div class="cd">
+            <div class="cd__h"><span>#118 · Bàn 04</span><span>18:55</span></div>
+            <div class="cd__b">
+              <span class="cd__i"><span>Tonkotsu ramen</span><b>×2</b></span>
+              <span class="cd__i"><span>Gyoza chiên</span><b>×1</b></span>
+            </div>
+            <div class="cd__f">
+              <button class="b b--go" type="button"><span class="inbtn"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-check"/></svg>Xong món</span></button>
+              <button class="b b--stop b--sm" type="button"><span class="inbtn"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-ban"/></svg>Huỷ món</span></button>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Bấm mà không cần nhớ mình đang ở màn nào.</p>
+            <p class="y">Đọc nút là biết hậu quả — cần thiết khi nút huỷ cũng tô màu.</p>
+            <p class="n">Nhãn dài hơn nên nút to hơn.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab"><span class="pk__top">
+          <input type="radio" name="btnvoice" value="Động từ đơn: Xong · Huỷ">
+          <span><span class="pk__n">Động từ đơn</span>
+          <span class="pk__d">Ngắn nhất, ngữ cảnh do màn gánh.</span></span>
+        </span></label>
+        <div class="pk__body">
+          <div class="cd">
+            <div class="cd__h"><span>#118 · Bàn 04</span><span>18:55</span></div>
+            <div class="cd__b">
+              <span class="cd__i"><span>Tonkotsu ramen</span><b>×2</b></span>
+              <span class="cd__i"><span>Gyoza chiên</span><b>×1</b></span>
+            </div>
+            <div class="cd__f">
+              <button class="b b--go" type="button"><span class="inbtn"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-check"/></svg>Xong</span></button>
+              <button class="b b--stop b--sm" type="button"><span class="inbtn"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-ban"/></svg>Huỷ</span></button>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Nút nhỏ nhất, vừa cả 320px.</p>
+            <p class="w"><b>“Huỷ” tối nghĩa:</b> huỷ món, huỷ đơn, hay đóng hộp thoại? Cùng một chữ cho ba việc là chỗ dễ bấm sai nhất — và đúng chỗ luật “một nghĩa một icon” cấm.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab"><span class="pk__top">
+          <input type="radio" name="btnvoice" value="Chỉ icon, không chữ">
+          <span><span class="pk__n">Chỉ icon</span>
+          <span class="pk__d">Không nhãn, chỉ icon — gọn nhất trên phiếu.</span></span>
+        </span></label>
+        <div class="pk__body">
+          <div class="cd">
+            <div class="cd__h"><span>#118 · Bàn 04</span><span>18:55</span></div>
+            <div class="cd__b">
+              <span class="cd__i"><span>Tonkotsu ramen</span><b>×2</b></span>
+              <span class="cd__i"><span>Gyoza chiên</span><b>×1</b></span>
+            </div>
+            <div class="cd__f">
+              <button class="b b--go" type="button" aria-label="Xong món"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-check"/></svg></button>
+              <button class="b b--stop b--sm" type="button" aria-label="Huỷ món"><svg class="i i--rims" viewBox="0 0 24 24"><use href="#r-ban"/></svg></button>
+            </div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Phiếu gọn nhất, vừa nhiều phiếu trên một màn.</p>
+            <p class="w"><b>Nút không nhãn chữ là nút phải học.</b> Với hành động phá huỷ thì rủi ro cao — bấm nhầm không đảo được.</p>
+            <p class="n">Phải có <span class="mono">aria-label</span> cho từng nút, dễ quên khi thêm màn mới.</p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="grid grid--2" style="margin-top:var(--sp-5)">
+      <article class="pk">
+        <label class="pk__lab"><span class="pk__top">
+          <input type="radio" name="errvoice" value="Ba phần: chuyện gì · dữ liệu còn hay mất · làm gì tiếp" checked>
+          <span><span class="pk__n">Lỗi ba phần<span class="rec">đề xuất</span></span>
+          <span class="pk__d">Chuyện gì · dữ liệu còn hay mất · làm gì tiếp.</span></span>
+        </span></label>
+        <div class="pk__body">
+          <div class="err">
+            <b>Không gửi được xuống bếp</b>
+            <p>Mất kết nối với máy chủ. <b>Phiếu vẫn được giữ</b>, chưa có món nào bị mất.</p>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap"><button class="b b--go b--sm" type="button">Thử lại</button><button class="b b--sm" type="button">Xem chi tiết</button></div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Câu giữa là câu hay bị bỏ nhất, mà lại là câu người ta lo nhất.</p>
+            <p class="y">Có nút nên không phải đi tìm cách sửa.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="pk">
+        <label class="pk__lab"><span class="pk__top">
+          <input type="radio" name="errvoice" value="Một câu ngắn, có nút thử lại">
+          <span><span class="pk__n">Một câu ngắn</span>
+          <span class="pk__d">Ngắn, không giải thích.</span></span>
+        </span></label>
+        <div class="pk__body">
+          <div class="err">
+            <b>Gửi bếp thất bại</b>
+            <div><button class="b b--go b--sm" type="button">Thử lại</button></div>
+          </div>
+          <div class="pk__notes">
+            <p class="y">Gọn, đọc trong một nhịp.</p>
+            <p class="w">Không trả lời câu người dùng lo nhất: <b>phiếu mình vừa gõ còn không?</b></p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="qs">
+      <div class="q">
+        <h3>Gọi người dùng là gì</h3>
+        <p class="q__h">Hiện code có cả “bạn” và câu không chủ ngữ.</p>
+        <div class="q__o">
+          <label><input type="radio" name="addr" value="Không gọi ai — câu không chủ ngữ" checked><span><b>Không gọi ai</b> — “Phiếu vẫn được giữ” <i>(đề xuất)</i></span></label>
+          <label><input type="radio" name="addr" value="Gọi 'bạn'"><span>Gọi <b>“bạn”</b></span></label>
+          <label><input type="radio" name="addr" value="Gọi 'anh/chị'"><span>Gọi <b>“anh/chị”</b></span></label>
+        </div>
+      </div>
+      <div class="q">
+        <h3>Ngày và giờ</h3>
+        <p class="q__h">Bảng hoá đơn, phiếu bếp, thẻ đặt bàn.</p>
+        <div class="q__o">
+          <label><input type="radio" name="date" value="27/09 19:42 — bỏ năm nếu là năm nay" checked><span><span class="mono">27/09 19:42</span> <i>(đề xuất)</i></span></label>
+          <label><input type="radio" name="date" value="27/09/2026 19:42 — luôn đủ năm"><span><span class="mono">27/09/2026 19:42</span></span></label>
+          <label><input type="radio" name="date" value="Hôm nay 19:42 / Hôm qua 19:42 / 25/09 19:42"><span><span class="mono">Hôm nay 19:42</span> rồi mới tới ngày</span></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ==================== §5 GLOSSARY ==================== -->
+  <section class="sec" id="tuvung">
+    <p class="sec__n">Phần 5</p>
+    <h2>Bảng từ vựng</h2>
+    <p class="sec__p">
+      Cùng một luật với icon, áp cho chữ: <b>một nghĩa một từ, một từ một nghĩa</b>.
+      Cột bên phải là những từ <b>không dùng nữa</b>, kể cả khi nghe hay hơn.
+    </p>
+
+    <div class="tt">
+      <table>
+        <thead><tr><th>Khái niệm</th><th>Từ dùng</th><th>Icon</th><th>Không dùng</th><th>Vì sao</th></tr></thead>
+        <tbody>
+          <tr><td>Một lần khách gọi món</td><td><b>đơn</b></td><td><code>ticket</code></td><td>order · bill</td><td>“hoá đơn” là thứ khác, sinh ra sau khi trả tiền</td></tr>
+          <tr><td>Giấy bếp nhận để nấu</td><td><b>phiếu</b></td><td><code>ticket</code></td><td>vé · đơn bếp</td><td>một đơn có thể ra nhiều phiếu</td></tr>
+          <tr><td>Chứng từ sau khi trả tiền</td><td><b>hoá đơn</b></td><td><code>invoice</code></td><td>bill · biên lai</td><td>khớp <span class="mono">Invoice</span></td></tr>
+          <tr><td>Khách giữ chỗ trước</td><td><b>đặt bàn</b></td><td><code>booking</code></td><td>reservation · đặt chỗ</td><td>khớp <span class="mono">Reservation</span></td></tr>
+          <tr><td>Một thứ trong thực đơn</td><td><b>món</b></td><td>— ảnh thật</td><td>sản phẩm · mặt hàng</td><td>“sản phẩm” là giọng bán lẻ</td></tr>
+          <tr><td>Nhóm món</td><td><b>danh mục</b></td><td><code>kitchen</code></td><td>loại · phân loại</td><td>khớp <span class="mono">Category</span></td></tr>
+          <tr><td>Tình trạng bản ghi</td><td><b>trạng thái</b></td><td>— ký hiệu chữ</td><td>tình trạng</td><td>đã đếm: 14 chỗ đúng, 1 chỗ lệch</td></tr>
+          <tr><td>Khoảng giờ làm</td><td><b>ca</b></td><td><code>sun</code> / <code>moon</code></td><td>kíp · phiên</td><td>khớp <span class="mono">OrderShift</span></td></tr>
+          <tr><td>Người phục vụ bàn</td><td><b>phục vụ</b></td><td><code>user</code></td><td>bồi bàn · waiter</td><td>khớp <span class="mono">ROLE_LABELS</span></td></tr>
+          <tr><td>Bỏ việc đang dở</td><td><b>huỷ</b></td><td><code>ban</code></td><td>xoá · bỏ</td><td>đổi trạng thái, bản ghi vẫn còn</td></tr>
+          <tr><td>Bỏ bản ghi khỏi hệ thống</td><td><b>xoá</b></td><td><code>trash</code></td><td>huỷ · gỡ</td><td>mất hẳn — khác “huỷ”</td></tr>
+          <tr><td>Đóng lớp nổi</td><td><b>đóng</b></td><td><code>x</code></td><td>huỷ · thoát</td><td>lý do <code>x</code> bị thu hẹp nghĩa</td></tr>
+          <tr><td>Bếp làm xong một món</td><td><b>xong món</b></td><td><code>check</code></td><td>hoàn thành · hoàn tất</td><td>giọng bếp, là nhãn nút chính</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="qs">
+      <div class="q">
+        <h3>Duyệt bảng từ vựng</h3>
+        <div class="q__o">
+          <label><input type="radio" name="gloss" value="Đồng ý toàn bộ" checked><span>Đồng ý toàn bộ</span></label>
+          <label><input type="radio" name="gloss" value="Đồng ý phần lớn, vài từ muốn đổi"><span>Đồng ý phần lớn, vài từ muốn đổi</span></label>
+        </div>
+      </div>
+      <div class="q">
+        <h3>Ghi chú cuối</h3>
+        <p class="q__h">Sau phiếu này là <b>phiếu 06 — spec tổng hợp</b>: một file HTML đầy đủ + <span class="mono">design.md</span> + <span class="mono">tokens.css</span> + bảng <span class="mono">ICONS</span> để code lại.</p>
+        <textarea name="note" placeholder="Ví dụ: icon table vuông 4 ô vẫn giống cards quá, đổi thành hình bàn có chân. 'phiếu' nghe lạ, bếp gọi là 'đơn bếp'. Lấy 101 icon nhưng vuông hoá dần…"></textarea>
+      </div>
+    </div>
+  </section>
+
+  </form>
+
+  <section class="res" id="ketqua">
+    <h2>Lấy kết quả</h2>
+    <p class="res__p">Mọi câu đã điền sẵn đề xuất. Phiếu áp cuối — trả lời xong là tôi lắp spec.</p>
+    <div class="res__box">
+      <div class="res__acts">
+        <button class="b b--go" type="button" id="genBtn">Sinh kết quả</button>
+        <button class="b" type="button" id="copyBtn">Copy</button>
+        <button class="b" type="button" id="dlBtn">Tải .txt</button>
+        <button class="b b--stop" type="button" id="clearBtn">Xoá hết</button>
+        <span class="said" id="said" role="status" aria-live="polite"></span>
+      </div>
+      <textarea class="out" id="out" readonly spellcheck="false" aria-label="Kết quả phiếu 05"></textarea>
+    </div>
+  </section>
+
+  <footer class="ft">
+    RIMS · phiếu 05/06 · hệ icon học từ kpi-manage theme qlcv-aura · sáu lỗi giọng văn là số đếm thật trong frontend/src
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var form=document.getElementById('sheet'), out=document.getElementById('out'),
+      said=document.getElementById('said'), root=document.documentElement;
+  var KEY='rims-sheet-05', MKEY='rims-05-mode';
+  function note(m){ said.textContent=m; setTimeout(function(){ if(said.textContent===m) said.textContent=''; },2600); }
+
+  try{ var sm=localStorage.getItem(MKEY); if(sm) root.setAttribute('data-mode',sm); }catch(e){}
+  document.getElementById('modeBtn').addEventListener('click',function(){
+    var next=root.getAttribute('data-mode')==='dark'?'light':'dark';
+    root.setAttribute('data-mode',next);
+    try{ localStorage.setItem(MKEY,next); }catch(e){}
+  });
+
+  function applyKnobs(){
+    form.querySelectorAll('input[data-k]:checked').forEach(function(el){
+      root.setAttribute('data-'+el.dataset.k, el.dataset.v);
+    });
+  }
+  function read(){ var d={}; new FormData(form).forEach(function(v,k){ d[k]=v; }); return d; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(read())); }catch(e){} }
+  function restore(){
+    var raw; try{ raw=localStorage.getItem(KEY); }catch(e){ return; }
+    if(!raw) return;
+    var d; try{ d=JSON.parse(raw); }catch(e){ return; }
+    Object.keys(d).forEach(function(k){
+      var els=form.elements[k]; if(!els) return;
+      if(els.length && els[0] && els[0].type==='radio'){
+        Array.prototype.forEach.call(els,function(el){ if(el.value===d[k]) el.checked=true; });
+      } else if(els.value!==undefined){ els.value=d[k]; }
+    });
+  }
+  form.addEventListener('change',function(){ applyKnobs(); save(); });
+  form.addEventListener('input',save);
+
+  var Q=[['geo','HÌNH HỌC ICON'],['k_stroke','Độ dày nét'],['reg','Sổ nghĩa 29 icon'],['test','Bài test canh lệch'],
+         ['huy','Chính tả huỷ/hủy'],['dots','Dấu ba chấm'],['tt','Trạng thái/Tình trạng'],
+         ['succ','10 chỗ "thành công!"'],['tcase','Sửa Đặt Bàn'],['slash','VNPay/QR'],
+         ['btnvoice','Giọng nhãn nút'],['errvoice','Giọng thông báo lỗi'],
+         ['addr','Gọi người dùng'],['date','Ngày và giờ'],['gloss','Bảng từ vựng']];
+  function pad(s,n){ while(s.length<n) s+=' '; return s; }
+  function build(){
+    var d=read(), L=[];
+    L.push('=== RIMS · PHIẾU 05/06 — ICON & GIỌNG VĂN ===');
+    L.push('');
+    Q.forEach(function(q){
+      var v=(d[q[0]]||'').trim();
+      L.push(pad(q[1],24)+' : '+(v||'(bỏ trống — bạn chọn giúp)'));
+    });
+    L.push('');
+    L.push('--- Ghi chú ---');
+    L.push((d.note||'').trim()||'(không có)');
+    L.push('');
+    L.push('=== HẾT PHIẾU 05 — dựng phiếu 06: spec tổng hợp + design.md + tokens.css + bảng ICONS ===');
+    return L.join('\n');
+  }
+  document.getElementById('genBtn').addEventListener('click',function(){
+    out.value=build(); out.scrollIntoView({behavior:'smooth',block:'center'}); note('Xong. Copy dán cho tôi.');
+  });
+  document.getElementById('copyBtn').addEventListener('click',function(){
+    if(!out.value) out.value=build();
+    out.focus(); out.select();
+    var ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+    if(!ok && navigator.clipboard){
+      navigator.clipboard.writeText(out.value).then(function(){note('Đã copy.');},function(){note('Bôi đen rồi Ctrl+C.');});
+      return;
+    }
+    note(ok?'Đã copy.':'Bôi đen rồi Ctrl+C.');
+  });
+  document.getElementById('dlBtn').addEventListener('click',function(){
+    if(!out.value) out.value=build();
+    var b=new Blob([out.value],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');
+    a.href=URL.createObjectURL(b); a.download='rims-phieu-05.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+    note('Đã tải rims-phieu-05.txt');
+  });
+  document.getElementById('clearBtn').addEventListener('click',function(){
+    if(!confirm('Xoá hết câu trả lời của phiếu 05?')) return;
+    form.reset(); out.value=''; try{ localStorage.removeItem(KEY); }catch(e){}
+    applyKnobs(); note('Đã xoá.');
+  });
+  restore(); applyKnobs();
+})();
+</script>
+</body>
+</html>

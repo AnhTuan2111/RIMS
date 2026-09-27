@@ -1,0 +1,1161 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phiếu 01 — Hướng thiết kế RIMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · instrument: design-interview sheet 01/05 · genre: modern-minimal
+ * macrostructure: Catalogue (uniform index of variations) · nav: none (single sheet) · footer: Ft1 one-line
+ * theme: neutral lab chrome — deliberately quiet so it does not bias the six options
+ * pre-emit critique: P5 H5 E4 S5 R5 V4
+ * colours in hex by project decision (design.md § Theme) — not oklch drift
+ */
+
+/* ---------- chrome tokens ---------- */
+:root{
+  --paper:#f7f7f6;
+  --surface:#ffffff;
+  --surface-2:#eeefee;
+  --line:#dededc;
+  --line-strong:#8e908c;
+  --ink:#16181a;
+  --ink-2:#4a4d50;
+  --ink-3:#6b6e71;
+  --accent:#1b4fa8;
+  --accent-ink:#ffffff;
+  --ok:#156b45;
+  --warn:#8a5a12;
+  --font-body:'Be Vietnam Pro',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --sp-1:.25rem; --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem;
+  --sp-5:1.5rem; --sp-6:2rem; --sp-7:3rem; --sp-8:4.5rem;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --dur:160ms;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131517; --surface:#1a1d20; --surface-2:#22262a;
+    --line:#2e3338; --line-strong:#787d82;
+    --ink:#e9ecee; --ink-2:#b3b9bd; --ink-3:#8c9297;
+    --accent:#7aa8ff; --accent-ink:#0b1420;
+    --ok:#4fb383; --warn:#d9a344;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131517; --surface:#1a1d20; --surface-2:#22262a;
+  --line:#2e3338; --line-strong:#787d82;
+  --ink:#e9ecee; --ink-2:#b3b9bd; --ink-3:#8c9297;
+  --accent:#7aa8ff; --accent-ink:#0b1420;
+  --ok:#4fb383; --warn:#d9a344;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--font-body);font-size:1rem;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;font-weight:700;line-height:1.15;font-style:normal;overflow-wrap:anywhere}
+p{margin:0}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:1px}
+@media (prefers-reduced-motion: reduce){*{transition-duration:60ms!important;animation:none!important}}
+
+.wrap{max-width:74rem;margin:0 auto;padding:0 16px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+/* ---------- sticky bar ---------- */
+.bar{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.bar__in{max-width:74rem;margin:0 auto;padding:.6rem 16px;display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.bar__id{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.bar__pick{font-weight:600;font-size:.82rem;white-space:nowrap;margin-inline-end:auto}
+.bar__pick b{color:var(--accent)}
+.bar__links{display:flex;gap:.3rem;flex-wrap:wrap}
+.bar__links a{
+  font-family:var(--font-mono);font-size:.7rem;font-weight:500;text-decoration:none;
+  color:var(--ink-2);border:1px solid var(--line);padding:.3rem .5rem;white-space:nowrap;
+}
+.bar__links a:hover{border-color:var(--line-strong);color:var(--ink)}
+.tbtn{
+  font:inherit;font-size:.72rem;font-weight:600;cursor:pointer;white-space:nowrap;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);padding:.35rem .6rem;
+}
+
+/* ---------- head ---------- */
+.head{padding:var(--sp-7) 0 var(--sp-6)}
+.head__step{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:var(--sp-3)}
+.head h1{font-size:clamp(1.75rem,1.3rem + 2.2vw,3rem);letter-spacing:-.015em;max-width:30ch}
+.head__lede{margin-top:var(--sp-4);max-width:62ch;color:var(--ink-2);font-size:clamp(.95rem,.9rem + .3vw,1.08rem)}
+.head__how{
+  margin-top:var(--sp-5);border:1px solid var(--line);background:var(--surface);
+  padding:var(--sp-4);display:grid;gap:var(--sp-3);max-width:62ch;
+}
+.head__how ol{margin:0;padding-inline-start:1.3em;display:grid;gap:.4rem;color:var(--ink-2);font-size:.9rem}
+.head__how b{color:var(--ink)}
+.route{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:var(--sp-5);font-family:var(--font-mono);font-size:.7rem}
+.route span{border:1px solid var(--line);padding:.3rem .5rem;color:var(--ink-3)}
+.route span.is-now{border-color:var(--accent);color:var(--accent);font-weight:700}
+
+.rule{border:0;border-top:1px solid var(--line);margin:var(--sp-6) 0}
+.sect__h{font-size:clamp(1.15rem,1.05rem + .5vw,1.45rem);letter-spacing:-.01em}
+.sect__p{margin-top:var(--sp-2);color:var(--ink-2);font-size:.92rem;max-width:66ch}
+
+/* ---------- option card ---------- */
+.opt{border:1px solid var(--line);background:var(--surface);margin-bottom:var(--sp-6)}
+.opt:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.opt__pick{display:block;cursor:pointer;padding:var(--sp-4);border-bottom:1px solid var(--line)}
+.opt__pick:hover{background:var(--surface-2)}
+.opt__row{display:flex;gap:var(--sp-3);align-items:flex-start}
+.opt__radio{margin:.35rem 0 0;width:1.1rem;height:1.1rem;accent-color:var(--accent);flex:none}
+.opt__key{
+  font-family:var(--font-mono);font-weight:700;font-size:.8rem;
+  border:1px solid var(--line-strong);padding:.15rem .4rem;flex:none;margin-top:.15rem;
+}
+.opt__name{font-size:clamp(1.1rem,1rem + .5vw,1.4rem);letter-spacing:-.01em}
+.opt__tag{color:var(--ink-2);font-size:.88rem;margin-top:.2rem}
+.opt__mock{padding:var(--sp-4);background:var(--surface-2)}
+.opt__cap{
+  font-family:var(--font-mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:.5rem;
+}
+.opt__spec{display:grid;gap:var(--sp-4);padding:var(--sp-4);border-top:1px solid var(--line)}
+@media (min-width:56rem){.opt__spec{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.spec h4{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.45rem}
+.spec dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:.2rem .6rem;font-size:.82rem}
+.spec dt{color:var(--ink-3)}
+.spec dd{margin:0;color:var(--ink)}
+.spec ul{margin:0;padding-inline-start:1.1em;font-size:.82rem;color:var(--ink-2);display:grid;gap:.25rem}
+.sw{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.5rem}
+.sw i{
+  width:2.4rem;height:1.5rem;display:block;border:1px solid var(--line-strong);
+  font-style:normal;
+}
+.verdict{display:grid;gap:.5rem;font-size:.82rem}
+.verdict p{padding-inline-start:1.4em;position:relative;color:var(--ink-2)}
+.verdict p::before{position:absolute;inset-inline-start:0;font-family:var(--font-mono);font-weight:700}
+.verdict .yes::before{content:'+';color:var(--ok)}
+.verdict .no::before{content:'−';color:var(--warn)}
+
+/* ================= THE MOCKUP ================= */
+.mk{
+  --mk-fs:13px;
+  --mk-radius:0px; --mk-radius-sm:0px; --mk-chip-radius:0px;
+  --mk-border:2px; --mk-hair:1px;
+  --mk-shadow:none; --mk-card-shadow:none;
+  --mk-pad:.85em; --mk-gap:.7em;
+  --mk-label-tr:uppercase; --mk-label-ls:.07em; --mk-label-w:600;
+  --mk-title-ls:-.01em;
+  --mk-chip-fill:100%; --mk-chip-ink:#fff;
+  --mk-row:2.2em;
+  font-size:var(--mk-fs);
+  font-family:var(--mk-fb);
+  background:var(--mk-paper);color:var(--mk-ink);
+  border:var(--mk-hair) solid var(--mk-line);
+  display:grid;grid-template-columns:minmax(0,1fr);
+  line-height:1.4;
+}
+@media (min-width:52rem){.mk{grid-template-columns:11.5em minmax(0,1fr)}}
+
+.mk-rail{
+  display:none;border-inline-end:var(--mk-hair) solid var(--mk-line);
+  background:var(--mk-surface);padding:var(--mk-pad);
+  grid-template-rows:auto 1fr auto;gap:1.2em;
+}
+@media (min-width:52rem){.mk-rail{display:grid}}
+.mk-brand{font-family:var(--mk-fd);font-weight:800;letter-spacing:.02em;font-size:1.15em}
+.mk-nav{display:grid;gap:.15em;align-content:start}
+.mk-navitem{
+  padding:.5em .6em;border-radius:var(--mk-radius-sm);color:var(--mk-ink-2);
+  font-size:.92em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mk-navitem.is-active{background:var(--mk-accent);color:var(--mk-accent-ink);font-weight:600}
+.mk-who{display:flex;gap:.5em;align-items:center;border-top:var(--mk-hair) solid var(--mk-line);padding-top:.7em}
+.mk-ava{
+  width:2em;height:2em;flex:none;display:grid;place-items:center;border-radius:var(--mk-radius-sm);
+  background:var(--mk-surface-2);border:var(--mk-hair) solid var(--mk-line);
+  font-family:var(--mk-fm);font-size:.78em;font-weight:700;
+}
+.mk-role{font-size:.8em;color:var(--mk-ink-3);text-transform:var(--mk-label-tr);letter-spacing:var(--mk-label-ls)}
+
+.mk-main{min-width:0;padding:var(--mk-pad);display:grid;gap:var(--mk-gap);align-content:start}
+.mk-top{display:flex;gap:var(--mk-gap);align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.mk-eyebrow{
+  font-family:var(--mk-fm);font-size:.72em;text-transform:var(--mk-label-tr);
+  letter-spacing:var(--mk-label-ls);color:var(--mk-ink-3);margin-bottom:.15em;
+}
+.mk-title{font-family:var(--mk-fd);font-size:1.7em;letter-spacing:var(--mk-title-ls)}
+.mk-topright{display:flex;gap:.5em;align-items:center}
+.mk-clock{font-family:var(--mk-fm);font-size:.95em;font-weight:500;color:var(--mk-ink-2);font-variant-numeric:tabular-nums}
+.mk-btn{
+  font:inherit;font-family:var(--mk-fb);font-weight:600;font-size:.92em;white-space:nowrap;
+  padding:.55em .9em;border-radius:var(--mk-radius-sm);cursor:default;
+  border:var(--mk-border) solid var(--mk-accent);background:var(--mk-accent);color:var(--mk-accent-ink);
+  box-shadow:var(--mk-shadow);
+}
+.mk-btn--ghost{background:transparent;color:var(--mk-ink);border-color:var(--mk-line-strong);box-shadow:none}
+
+.mk-stats{display:grid;gap:var(--mk-gap);grid-template-columns:repeat(3,minmax(0,1fr))}
+.mk-stat{
+  background:var(--mk-surface);border:var(--mk-hair) solid var(--mk-line);
+  border-radius:var(--mk-radius);padding:var(--mk-pad);box-shadow:var(--mk-card-shadow);
+}
+.mk-stat span{
+  display:block;font-family:var(--mk-fm);font-size:.7em;text-transform:var(--mk-label-tr);
+  letter-spacing:var(--mk-label-ls);color:var(--mk-ink-3);
+}
+.mk-stat b{display:block;font-family:var(--mk-fd);font-size:1.7em;font-variant-numeric:tabular-nums;margin-top:.1em}
+
+.mk-filters{display:flex;gap:.35em;flex-wrap:wrap}
+.mk-f{
+  font-size:.82em;padding:.4em .7em;border-radius:var(--mk-chip-radius);
+  border:var(--mk-hair) solid var(--mk-line-strong);color:var(--mk-ink-2);white-space:nowrap;
+}
+.mk-f.is-on{background:var(--mk-ink);color:var(--mk-paper);border-color:var(--mk-ink);font-weight:600}
+
+.mk-cards{display:grid;gap:var(--mk-gap);grid-template-columns:repeat(auto-fit,minmax(min(9.5em,100%),1fr))}
+.mk-card{
+  background:var(--mk-surface);border:var(--mk-border) solid var(--mk-line);
+  border-radius:var(--mk-radius);padding:var(--mk-pad);box-shadow:var(--mk-card-shadow);
+  display:grid;gap:.35em;
+}
+.mk-card b{font-family:var(--mk-fd);font-size:1.25em}
+.mk-card small{color:var(--mk-ink-3);font-size:.8em}
+.mk-chip{
+  justify-self:start;font-size:.74em;font-weight:600;padding:.25em .55em;
+  border-radius:var(--mk-chip-radius);white-space:nowrap;
+  background:color-mix(in srgb,var(--c) var(--mk-chip-fill),var(--mk-surface));
+  color:var(--mk-chip-ink);
+  border:var(--mk-hair) solid transparent;
+  text-transform:var(--mk-label-tr);letter-spacing:var(--mk-label-ls);
+}
+.mk-chip::before{content:'● ';font-size:.8em}
+.c-ok{--c:var(--mk-ok)} .c-busy{--c:var(--mk-busy)} .c-alert{--c:var(--mk-alert)} .c-brand{--c:var(--mk-accent)}
+/* tinted chips: text carries the status colour instead of a solid fill */
+[data-mk="dem"] .mk-chip,[data-mk="mem"] .mk-chip,[data-mk="bangso"] .mk-chip{
+  color:var(--c);border-color:color-mix(in srgb,var(--c) 35%,transparent);
+}
+.mk-money{font-family:var(--mk-fm);font-weight:700;font-variant-numeric:tabular-nums}
+
+.mk-tablewrap{border:var(--mk-hair) solid var(--mk-line);border-radius:var(--mk-radius);background:var(--mk-surface);overflow-x:auto}
+.mk-table{width:100%;border-collapse:collapse;font-size:.84em;min-width:24em}
+.mk-table th{
+  text-align:start;font-family:var(--mk-fm);font-size:.82em;font-weight:var(--mk-label-w);
+  text-transform:var(--mk-label-tr);letter-spacing:var(--mk-label-ls);color:var(--mk-ink-3);
+  background:var(--mk-surface-2);padding:.6em .7em;border-bottom:var(--mk-hair) solid var(--mk-line);
+}
+.mk-table td{padding:.5em .7em;border-bottom:var(--mk-hair) solid var(--mk-line);height:var(--mk-row)}
+.mk-table tr:last-child td{border-bottom:0}
+.mk-table .num{text-align:end;font-family:var(--mk-fm);font-variant-numeric:tabular-nums}
+
+/* ---- A · Thép ---- */
+[data-mk="thep"]{
+  --mk-paper:#f6f7f9; --mk-surface:#ffffff; --mk-surface-2:#eceff3;
+  --mk-line:#dde1e7; --mk-line-strong:#7d8894;
+  --mk-ink:#14181d; --mk-ink-2:#444c55; --mk-ink-3:#5e6772;
+  --mk-accent:#1f5fbf; --mk-accent-ink:#ffffff;
+  --mk-ok:#16704a; --mk-busy:#8a5a12; --mk-alert:#b02532;
+  --mk-fd:'Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fb:'Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fm:'JetBrains Mono',ui-monospace,monospace;
+  --mk-radius:0px; --mk-radius-sm:0px; --mk-chip-radius:0px;
+  --mk-border:2px; --mk-fs:13px;
+}
+
+/* ---- B · Bếp giấy ---- */
+[data-mk="giay"]{
+  --mk-paper:#f7f2e8; --mk-surface:#fffdf7; --mk-surface-2:#efe7d8;
+  --mk-line:#ded2bd; --mk-line-strong:#8d7c62;
+  --mk-ink:#221c14; --mk-ink-2:#4d4235; --mk-ink-3:#6b5f4e;
+  --mk-accent:#a8341f; --mk-accent-ink:#fffaf5;
+  --mk-ok:#2f6b3f; --mk-busy:#8a5a12; --mk-alert:#99231c;
+  --mk-fd:'Source Serif 4','Be Vietnam Pro',Georgia,serif;
+  --mk-fb:'Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fm:'JetBrains Mono',ui-monospace,monospace;
+  --mk-radius:0px; --mk-radius-sm:2px; --mk-chip-radius:0px;
+  --mk-border:1px; --mk-fs:13.5px; --mk-pad:1em;
+  --mk-label-tr:none; --mk-label-ls:.04em;
+  --mk-chip-ink:#fffaf5;
+}
+[data-mk="giay"] .mk-title{font-weight:700}
+[data-mk="giay"] .mk-table td{border-bottom-style:dotted}
+[data-mk="giay"] .mk-card b{font-weight:600}
+
+/* ---- C · Phiếu bếp ---- */
+[data-mk="phieu"]{
+  --mk-paper:#f2f2ef; --mk-surface:#ffffff; --mk-surface-2:#e6e6e1;
+  --mk-line:#17181a; --mk-line-strong:#17181a;
+  --mk-ink:#0d0e10; --mk-ink-2:#3a3c40; --mk-ink-3:#55585c;
+  --mk-accent:#d92b1f; --mk-accent-ink:#ffffff;
+  --mk-ok:#0f6b3c; --mk-busy:#a25f00; --mk-alert:#d92b1f;
+  --mk-fd:'Archivo','Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fb:'IBM Plex Sans',system-ui,sans-serif;
+  --mk-fm:'JetBrains Mono',ui-monospace,monospace;
+  --mk-radius:0px; --mk-radius-sm:0px; --mk-chip-radius:0px;
+  --mk-border:2px; --mk-hair:2px; --mk-fs:13px;
+  --mk-label-tr:uppercase; --mk-label-ls:.08em; --mk-label-w:700;
+  --mk-card-shadow:4px 4px 0 #17181a; --mk-shadow:3px 3px 0 #17181a;
+}
+[data-mk="phieu"] .mk-title,[data-mk="phieu"] .mk-brand{text-transform:uppercase;font-weight:800;letter-spacing:.01em}
+[data-mk="phieu"] .mk-card b{text-transform:uppercase;font-weight:800}
+[data-mk="phieu"] .mk-table td{border-bottom:2px dashed var(--mk-line)}
+[data-mk="phieu"] .mk-stat b{font-weight:800}
+
+/* ---- D · Ca đêm ---- */
+[data-mk="dem"]{
+  --mk-paper:#0e1116; --mk-surface:#171b22; --mk-surface-2:#1f252e;
+  --mk-line:#2a323c; --mk-line-strong:#4a545f;
+  --mk-ink:#e8ecf1; --mk-ink-2:#aab4c0; --mk-ink-3:#828d99;
+  --mk-accent:#8b7bff; --mk-accent-ink:#0d0a1f;
+  --mk-ok:#46c08a; --mk-busy:#e0a33e; --mk-alert:#ff7a86;
+  --mk-fd:'Manrope','Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fb:'Inter','Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fm:'JetBrains Mono',ui-monospace,monospace;
+  --mk-radius:8px; --mk-radius-sm:6px; --mk-chip-radius:6px;
+  --mk-border:1px; --mk-hair:1px; --mk-fs:13px;
+  --mk-card-shadow:0 10px 24px -14px rgba(0,0,0,.8);
+  --mk-chip-fill:18%;
+  --mk-label-tr:uppercase; --mk-label-ls:.06em;
+}
+[data-mk="dem"] .mk-f.is-on{background:var(--mk-accent);color:var(--mk-accent-ink);border-color:var(--mk-accent)}
+
+/* ---- E · Mềm ---- */
+[data-mk="mem"]{
+  --mk-paper:#f6f5f2; --mk-surface:#ffffff; --mk-surface-2:#eef1ef;
+  --mk-line:#e4e6e3; --mk-line-strong:#b0b6b1;
+  --mk-ink:#1c211e; --mk-ink-2:#4d554f; --mk-ink-3:#6c746d;
+  --mk-accent:#0d8a80; --mk-accent-ink:#f0fffd;
+  --mk-ok:#14875f; --mk-busy:#a66a10; --mk-alert:#c5344a;
+  --mk-fd:'Plus Jakarta Sans','Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fb:'Plus Jakarta Sans','Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fm:'JetBrains Mono',ui-monospace,monospace;
+  --mk-radius:14px; --mk-radius-sm:10px; --mk-chip-radius:999px;
+  --mk-border:1px; --mk-hair:1px; --mk-fs:13.5px;
+  --mk-pad:1.05em; --mk-gap:.85em;
+  --mk-card-shadow:0 1px 2px rgba(20,25,20,.05),0 12px 24px -18px rgba(20,25,20,.35);
+  --mk-chip-fill:16%;
+  --mk-label-tr:none; --mk-label-ls:0;
+}
+[data-mk="mem"] .mk-f{border-radius:999px;border-color:var(--mk-line)}
+[data-mk="mem"] .mk-f.is-on{background:var(--mk-accent);border-color:var(--mk-accent);color:var(--mk-accent-ink)}
+[data-mk="mem"] .mk-table th{text-transform:none;letter-spacing:0;font-family:var(--mk-fb);font-weight:600}
+
+/* ---- F · Bảng số ---- */
+[data-mk="bangso"]{
+  --mk-paper:#fbfbfc; --mk-surface:#ffffff; --mk-surface-2:#f4f4f6;
+  --mk-line:#e4e4e8; --mk-line-strong:#9a9aa4;
+  --mk-ink:#17171b; --mk-ink-2:#46464f; --mk-ink-3:#6b6b76;
+  --mk-accent:#4f46e5; --mk-accent-ink:#ffffff;
+  --mk-ok:#0f7a4a; --mk-busy:#9a6400; --mk-alert:#c62a3a;
+  --mk-fd:'Inter','Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fb:'Inter','Be Vietnam Pro',system-ui,sans-serif;
+  --mk-fm:'JetBrains Mono',ui-monospace,monospace;
+  --mk-radius:6px; --mk-radius-sm:5px; --mk-chip-radius:4px;
+  --mk-border:1px; --mk-hair:1px; --mk-fs:12px;
+  --mk-pad:.6em; --mk-gap:.5em; --mk-row:1.9em;
+  --mk-card-shadow:0 1px 2px rgba(0,0,0,.04);
+  --mk-chip-fill:14%;
+  --mk-label-tr:none; --mk-label-ls:0; --mk-title-ls:-.02em;
+}
+[data-mk="bangso"] .mk-title{font-size:1.35em;font-weight:600}
+[data-mk="bangso"] .mk-stat b{font-size:1.5em;font-weight:600}
+[data-mk="bangso"] .mk-card b{font-size:1.05em;font-weight:600}
+
+/* ---------- question blocks ---------- */
+.qs{display:grid;gap:var(--sp-4)}
+@media (min-width:52rem){.qs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.q{border:1px solid var(--line);background:var(--surface);padding:var(--sp-4)}
+.q__id{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.q__t{font-size:.98rem;font-weight:600;margin:.25rem 0 .2rem}
+.q__h{font-size:.82rem;color:var(--ink-3);margin-bottom:.7rem}
+.q__opts{display:grid;gap:.3rem}
+.q__opts label{
+  display:flex;gap:.55rem;align-items:flex-start;font-size:.87rem;
+  border:1px solid var(--line);padding:.5rem .6rem;cursor:pointer;
+}
+.q__opts label:hover{background:var(--surface-2)}
+.q__opts input{margin:.2rem 0 0;accent-color:var(--accent);flex:none}
+.q__opts input:checked ~ span{font-weight:600}
+.q__opts label:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.q textarea,.q input[type=text]{
+  width:100%;font:inherit;font-size:.87rem;background:var(--paper);color:var(--ink);
+  border:1px solid var(--line-strong);padding:.5rem .6rem;border-radius:0;
+}
+.q textarea{min-height:5.5rem;resize:vertical}
+
+/* ---------- result ---------- */
+.res{border:2px solid var(--accent);background:var(--surface);padding:var(--sp-5);margin-top:var(--sp-5)}
+.res h2{font-size:1.2rem}
+.res p{color:var(--ink-2);font-size:.9rem;margin-top:.4rem}
+.res__out{
+  width:100%;min-height:15rem;margin-top:var(--sp-4);font-family:var(--font-mono);font-size:.78rem;
+  line-height:1.6;background:var(--paper);color:var(--ink);border:1px solid var(--line-strong);padding:var(--sp-3);
+  white-space:pre;overflow:auto;resize:vertical;
+}
+.res__acts{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:var(--sp-3);align-items:center}
+.btn{
+  font:inherit;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;
+  padding:.6rem 1rem;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);
+  transition:transform var(--dur) var(--ease-out);
+}
+.btn:active{transform:translateY(1px)}
+.btn--ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.said{font-size:.8rem;color:var(--ok);font-weight:600}
+
+footer.ft{border-top:1px solid var(--line);margin-top:var(--sp-7);padding:var(--sp-4) 0 var(--sp-7);color:var(--ink-3);font-size:.78rem}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar__in">
+    <span class="bar__id">RIMS · phiếu 01/05</span>
+    <span class="bar__pick">Đang chọn: <b id="pickLabel">chưa chọn</b></span>
+    <nav class="bar__links" aria-label="Nhảy tới hướng">
+      <a href="#A">A</a><a href="#B">B</a><a href="#C">C</a><a href="#D">D</a><a href="#E">E</a><a href="#F">F</a>
+      <a href="#ketqua">Kết quả</a>
+    </nav>
+    <button class="tbtn" id="themeBtn" type="button">Sáng / Tối</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="head">
+    <p class="head__step">Phỏng vấn thiết kế lại · phiếu 01 trong 05</p>
+    <h1>Giao diện RIMS nên trông ra sao?</h1>
+    <p class="head__lede">
+      Sáu hướng thiết kế dưới đây, mỗi hướng dựng lại <b>cùng một màn hình thật của app</b> —
+      màn “Danh sách bàn” của Phục vụ, kèm một bảng hoá đơn thu nhỏ. Cùng nội dung, cùng số liệu,
+      chỉ khác hệ thiết kế. Bạn so sánh táo với táo, không phải đọc mô tả suông.
+    </p>
+
+    <div class="head__how">
+      <ol>
+        <li>Cuộn qua sáu hướng <b>A → F</b>, bấm chọn đúng một hướng bạn muốn app đi theo.</li>
+        <li>Trả lời <b>8 câu</b> ở phần dưới — mấy cái núm mà hướng nào cũng phải chốt.</li>
+        <li>Bấm <b>“Sinh kết quả”</b> ở cuối trang, copy khối chữ đó dán lại cho tôi trong Claude Code.</li>
+      </ol>
+      <p style="font-size:.84rem;color:var(--ink-3)">
+        Chọn tới đâu trang tự lưu tới đó trong máy bạn — tắt tab mở lại vẫn còn.
+        Chưa chắc thì cứ chọn cái gần nhất, phiếu 02 đi sâu hơn và vẫn đổi được.
+      </p>
+    </div>
+
+    <div class="route" aria-label="Lộ trình 5 phiếu">
+      <span class="is-now">01 · Hướng thiết kế tổng thể</span>
+      <span>02 · Khung màn &amp; điều hướng</span>
+      <span>03 · Toàn bộ component</span>
+      <span>04 · Bộ icon &amp; giọng văn</span>
+      <span>05 · Spec tổng hợp</span>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <section>
+    <h2 class="sect__h">Sáu hướng</h2>
+    <p class="sect__p">
+      Mọi bản dựng đều là giao diện thật, gõ tay bằng CSS, không phải ảnh. Chữ trong bản dựng có dấu đầy đủ —
+      nếu hướng nào bạn thấy dấu bị lệch hoặc mất, nói tôi biết, đó là lỗi mặt chữ không đủ tiếng Việt và
+      tôi sẽ đổi mặt chữ chứ không đổi hướng.
+    </p>
+  </section>
+
+  <form id="sheet">
+
+  <!-- ============ A ============ -->
+  <article class="opt" id="A">
+    <label class="opt__pick">
+      <span class="opt__row">
+        <input class="opt__radio" type="radio" name="huong" value="A · Thép — cái đang có, làm cho nét hơn">
+        <span class="opt__key">A</span>
+        <span>
+          <span class="opt__name">Thép</span>
+          <span class="opt__tag">Cái đang có, siết cho nét hơn. Xám lạnh, vuông tuốt, viền 2px, một màu xanh dương duy nhất.</span>
+        </span>
+      </span>
+    </label>
+    <div class="opt__mock">
+      <p class="opt__cap">Màn “Danh sách bàn” · dữ liệu mẫu</p>
+      <div class="mk" data-mk="thep" data-mock></div>
+    </div>
+    <div class="opt__spec">
+      <div class="spec">
+        <h4>Bảng màu</h4>
+        <div class="sw" aria-hidden="true">
+          <i style="background:#f6f7f9"></i><i style="background:#eceff3"></i><i style="background:#14181d"></i>
+          <i style="background:#1f5fbf"></i><i style="background:#16704a"></i><i style="background:#8a5a12"></i><i style="background:#b02532"></i>
+        </div>
+        <dl>
+          <dt>Nền</dt><dd class="mono">#f6f7f9</dd>
+          <dt>Chữ</dt><dd class="mono">#14181d</dd>
+          <dt>Nhấn</dt><dd class="mono">#1f5fbf</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Hình khối &amp; chữ</h4>
+        <dl>
+          <dt>Bo góc</dt><dd>0px tất cả</dd>
+          <dt>Viền</dt><dd>2px đặc</dd>
+          <dt>Bóng</dt><dd>không có</dd>
+          <dt>Tiêu đề</dt><dd>Be Vietnam Pro 700</dd>
+          <dt>Số</dt><dd>JetBrains Mono</dd>
+          <dt>Mật độ</dt><dd>vừa</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Được &amp; mất</h4>
+        <div class="verdict">
+          <p class="yes">Không phải viết lại từ đầu — 153 class <span class="mono">rk-*</span> hiện tại dùng lại gần hết.</p>
+          <p class="yes">Trung tính nên ảnh món ăn là thứ duy nhất có màu trên màn.</p>
+          <p class="no">Đây chính là giao diện bạn đang muốn làm lại. Chọn A nghĩa là vấn đề nằm ở chi tiết, không ở hướng.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ B ============ -->
+  <article class="opt" id="B">
+    <label class="opt__pick">
+      <span class="opt__row">
+        <input class="opt__radio" type="radio" name="huong" value="B · Bếp giấy — giấy kem, serif, đỏ đất">
+        <span class="opt__key">B</span>
+        <span>
+          <span class="opt__name">Bếp giấy</span>
+          <span class="opt__tag">Giấy kem, chữ serif cho tiêu đề, đỏ đất. Đọc như tờ thực đơn in và phiếu gọi món viết tay.</span>
+        </span>
+      </span>
+    </label>
+    <div class="opt__mock">
+      <p class="opt__cap">Màn “Danh sách bàn” · dữ liệu mẫu</p>
+      <div class="mk" data-mk="giay" data-mock></div>
+    </div>
+    <div class="opt__spec">
+      <div class="spec">
+        <h4>Bảng màu</h4>
+        <div class="sw" aria-hidden="true">
+          <i style="background:#f7f2e8"></i><i style="background:#efe7d8"></i><i style="background:#221c14"></i>
+          <i style="background:#a8341f"></i><i style="background:#2f6b3f"></i><i style="background:#8a5a12"></i><i style="background:#99231c"></i>
+        </div>
+        <dl>
+          <dt>Nền</dt><dd class="mono">#f7f2e8</dd>
+          <dt>Chữ</dt><dd class="mono">#221c14</dd>
+          <dt>Nhấn</dt><dd class="mono">#a8341f</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Hình khối &amp; chữ</h4>
+        <dl>
+          <dt>Bo góc</dt><dd>0px bề mặt · 2px nút</dd>
+          <dt>Viền</dt><dd>1px mảnh, kẻ chấm trong bảng</dd>
+          <dt>Bóng</dt><dd>không có</dd>
+          <dt>Tiêu đề</dt><dd>Source Serif 4 700</dd>
+          <dt>Thân</dt><dd>Be Vietnam Pro</dd>
+          <dt>Mật độ</dt><dd>thoáng</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Được &amp; mất</h4>
+        <div class="verdict">
+          <p class="yes">Có mùi nhà hàng thật, không phải phần mềm kế toán. Khác biệt nhất so với mọi app cùng loại.</p>
+          <p class="yes">Serif cho tiêu đề làm thứ bậc rõ mà không cần to hay đậm quá.</p>
+          <p class="no">Nền kem làm ảnh món hơi ngả vàng, phải bù bằng viền ảnh.</p>
+          <p class="no">Đầu bếp nhìn màn trong bếp sáng gắt: nền kem tương phản thấp hơn nền trắng.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ C ============ -->
+  <article class="opt" id="C">
+    <label class="opt__pick">
+      <span class="opt__row">
+        <input class="opt__radio" type="radio" name="huong" value="C · Phiếu bếp — đen dày, bóng cứng, in hoa">
+        <span class="opt__key">C</span>
+        <span>
+          <span class="opt__name">Phiếu bếp</span>
+          <span class="opt__tag">Viền đen 2px, bóng cứng lệch 4px, nhãn in hoa, số to. Như phiếu in nhiệt và máy POS.</span>
+        </span>
+      </span>
+    </label>
+    <div class="opt__mock">
+      <p class="opt__cap">Màn “Danh sách bàn” · dữ liệu mẫu</p>
+      <div class="mk" data-mk="phieu" data-mock></div>
+    </div>
+    <div class="opt__spec">
+      <div class="spec">
+        <h4>Bảng màu</h4>
+        <div class="sw" aria-hidden="true">
+          <i style="background:#f2f2ef"></i><i style="background:#e6e6e1"></i><i style="background:#0d0e10"></i>
+          <i style="background:#d92b1f"></i><i style="background:#0f6b3c"></i><i style="background:#a25f00"></i>
+        </div>
+        <dl>
+          <dt>Nền</dt><dd class="mono">#f2f2ef</dd>
+          <dt>Chữ &amp; viền</dt><dd class="mono">#0d0e10</dd>
+          <dt>Nhấn</dt><dd class="mono">#d92b1f</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Hình khối &amp; chữ</h4>
+        <dl>
+          <dt>Bo góc</dt><dd>0px tuyệt đối</dd>
+          <dt>Viền</dt><dd>2px đen khắp nơi</dd>
+          <dt>Bóng</dt><dd>4px 4px 0 đen, cứng</dd>
+          <dt>Tiêu đề</dt><dd>Archivo 800 in hoa</dd>
+          <dt>Thân</dt><dd>IBM Plex Sans</dd>
+          <dt>Mật độ</dt><dd>vừa, chữ to</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Được &amp; mất</h4>
+        <div class="verdict">
+          <p class="yes">Đọc được từ xa 2 mét, trên tablet rẻ, dưới đèn bếp. Mạnh nhất cho màn vận hành.</p>
+          <p class="yes">Tương phản cao nên gần như không thể sai WCAG.</p>
+          <p class="no">Màn quản trị 11 bảng dữ liệu sẽ rất ồn — viền đen dày nhân lên thành lưới rối.</p>
+          <p class="no">Trang công khai cho khách sẽ trông thô, không mời gọi.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ D ============ -->
+  <article class="opt" id="D">
+    <label class="opt__pick">
+      <span class="opt__row">
+        <input class="opt__radio" type="radio" name="huong" value="D · Ca đêm — tối là mặc định, tím làm nhấn">
+        <span class="opt__key">D</span>
+        <span>
+          <span class="opt__name">Ca đêm</span>
+          <span class="opt__tag">Tối là mặc định chứ không phải chế độ phụ. Đá đen, bề mặt nổi nhẹ, tím làm nhấn, bo 8px.</span>
+        </span>
+      </span>
+    </label>
+    <div class="opt__mock">
+      <p class="opt__cap">Màn “Danh sách bàn” · dữ liệu mẫu</p>
+      <div class="mk" data-mk="dem" data-mock></div>
+    </div>
+    <div class="opt__spec">
+      <div class="spec">
+        <h4>Bảng màu</h4>
+        <div class="sw" aria-hidden="true">
+          <i style="background:#0e1116"></i><i style="background:#171b22"></i><i style="background:#e8ecf1"></i>
+          <i style="background:#8b7bff"></i><i style="background:#46c08a"></i><i style="background:#e0a33e"></i><i style="background:#ff7a86"></i>
+        </div>
+        <dl>
+          <dt>Nền</dt><dd class="mono">#0e1116</dd>
+          <dt>Chữ</dt><dd class="mono">#e8ecf1</dd>
+          <dt>Nhấn</dt><dd class="mono">#8b7bff</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Hình khối &amp; chữ</h4>
+        <dl>
+          <dt>Bo góc</dt><dd>8px thẻ · 6px nút</dd>
+          <dt>Viền</dt><dd>1px, phân lớp bằng độ sáng nền</dd>
+          <dt>Bóng</dt><dd>mềm, chỉ để tách lớp</dd>
+          <dt>Tiêu đề</dt><dd>Manrope 700</dd>
+          <dt>Thân</dt><dd>Inter</dd>
+          <dt>Mật độ</dt><dd>vừa</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Được &amp; mất</h4>
+        <div class="verdict">
+          <p class="yes">Đỡ mỏi mắt cho ca 8 tiếng và cho quán ánh sáng vàng thấp.</p>
+          <p class="yes">Ảnh món nổi bật hẳn lên trên nền tối — mạnh nhất cho màn có ảnh.</p>
+          <p class="no">Phải làm tử tế cả bản sáng cho trang công khai — khách mở web ban ngày không muốn nền đen.</p>
+          <p class="no">Chip trạng thái tô nhạt trên nền tối kém nổi hơn tô đặc trên nền sáng.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ E ============ -->
+  <article class="opt" id="E">
+    <label class="opt__pick">
+      <span class="opt__row">
+        <input class="opt__radio" type="radio" name="huong" value="E · Mềm — bo 14px, bóng mềm, xanh mòng két">
+        <span class="opt__key">E</span>
+        <span>
+          <span class="opt__name">Mềm</span>
+          <span class="opt__tag">Bo 14px, bóng mềm, chip viên thuốc, không in hoa. Thân thiện kiểu app tiêu dùng.</span>
+        </span>
+      </span>
+    </label>
+    <div class="opt__mock">
+      <p class="opt__cap">Màn “Danh sách bàn” · dữ liệu mẫu</p>
+      <div class="mk" data-mk="mem" data-mock></div>
+    </div>
+    <div class="opt__spec">
+      <div class="spec">
+        <h4>Bảng màu</h4>
+        <div class="sw" aria-hidden="true">
+          <i style="background:#f6f5f2"></i><i style="background:#eef1ef"></i><i style="background:#1c211e"></i>
+          <i style="background:#0d8a80"></i><i style="background:#14875f"></i><i style="background:#a66a10"></i><i style="background:#c5344a"></i>
+        </div>
+        <dl>
+          <dt>Nền</dt><dd class="mono">#f6f5f2</dd>
+          <dt>Chữ</dt><dd class="mono">#1c211e</dd>
+          <dt>Nhấn</dt><dd class="mono">#0d8a80</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Hình khối &amp; chữ</h4>
+        <dl>
+          <dt>Bo góc</dt><dd>14px thẻ · chip tròn hẳn</dd>
+          <dt>Viền</dt><dd>1px rất nhạt</dd>
+          <dt>Bóng</dt><dd>mềm hai lớp</dd>
+          <dt>Tiêu đề</dt><dd>Plus Jakarta Sans 700</dd>
+          <dt>Nhãn</dt><dd>chữ thường, không in hoa</dd>
+          <dt>Mật độ</dt><dd>thoáng</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Được &amp; mất</h4>
+        <div class="verdict">
+          <p class="yes">Nhân viên mới học nhanh nhất — mọi thứ trông bấm được, không có gì trông “hệ thống”.</p>
+          <p class="yes">Vùng chạm to sẵn, hợp tablet cảm ứng mà không cần luật riêng.</p>
+          <p class="no">Thoáng thì ít dữ liệu mỗi màn hơn. Màn thống kê phải cuộn nhiều.</p>
+          <p class="no">Bo tròn + bóng mềm + tím/mòng két là đúng cái “trông như AI sinh ra” nếu làm hời hợt. Chọn E thì phải chi tiết thật kỹ.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ============ F ============ -->
+  <article class="opt" id="F">
+    <label class="opt__pick">
+      <span class="opt__row">
+        <input class="opt__radio" type="radio" name="huong" value="F · Bảng số — dày, chữ nhỏ, bàn phím trước">
+        <span class="opt__key">F</span>
+        <span>
+          <span class="opt__name">Bảng số</span>
+          <span class="opt__tag">Dày và chặt. Chữ 12px, hàng bảng thấp, bo 6px, tím chàm. Tối đa dữ liệu mỗi màn.</span>
+        </span>
+      </span>
+    </label>
+    <div class="opt__mock">
+      <p class="opt__cap">Màn “Danh sách bàn” · dữ liệu mẫu</p>
+      <div class="mk" data-mk="bangso" data-mock></div>
+    </div>
+    <div class="opt__spec">
+      <div class="spec">
+        <h4>Bảng màu</h4>
+        <div class="sw" aria-hidden="true">
+          <i style="background:#fbfbfc"></i><i style="background:#f4f4f6"></i><i style="background:#17171b"></i>
+          <i style="background:#4f46e5"></i><i style="background:#0f7a4a"></i><i style="background:#9a6400"></i><i style="background:#c62a3a"></i>
+        </div>
+        <dl>
+          <dt>Nền</dt><dd class="mono">#fbfbfc</dd>
+          <dt>Chữ</dt><dd class="mono">#17171b</dd>
+          <dt>Nhấn</dt><dd class="mono">#4f46e5</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Hình khối &amp; chữ</h4>
+        <dl>
+          <dt>Bo góc</dt><dd>6px</dd>
+          <dt>Viền</dt><dd>1px nhạt</dd>
+          <dt>Bóng</dt><dd>1px gần như không thấy</dd>
+          <dt>Tiêu đề</dt><dd>Inter 600, siết chữ</dd>
+          <dt>Nhãn</dt><dd>chữ thường, cỡ nhỏ</dd>
+          <dt>Mật độ</dt><dd>dày</dd>
+        </dl>
+      </div>
+      <div class="spec">
+        <h4>Được &amp; mất</h4>
+        <div class="verdict">
+          <p class="yes">Màn quản trị và thống kê sẽ gọn nhất trong sáu hướng — nhiều hàng hiện cùng lúc, ít cuộn.</p>
+          <p class="yes">Quen tay với ai đã dùng Linear, Vercel, Stripe.</p>
+          <p class="no">Chữ 12px là quá nhỏ cho bếp và cho tablet cầm tay. Sẽ phải có một cỡ riêng cho họ vận hành.</p>
+          <p class="no">Hướng này bị dùng nhiều nhất trong ngành — dễ trông giống mọi dashboard khác.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <hr class="rule">
+
+  <!-- ============ questions ============ -->
+  <section>
+    <h2 class="sect__h">Tám câu còn lại</h2>
+    <p class="sect__p">
+      Mấy cái này hướng nào cũng phải chốt, và chốt xong thì phiếu 02 mới hỏi đúng chỗ được.
+      Câu nào không quan tâm cứ bỏ trống — tôi sẽ chọn giúp và ghi rõ là tôi chọn.
+    </p>
+
+    <div class="qs" style="margin-top:var(--sp-5)">
+
+      <div class="q">
+        <p class="q__id">Câu 1</p>
+        <p class="q__t">Sáng hay tối là chính?</p>
+        <p class="q__h">Hiện app có nút đổi chế độ. Cái nào là bản “thật”, cái nào là bản phụ?</p>
+        <div class="q__opts">
+          <label><input type="radio" name="q_theme" value="Sáng là chính, tối là bản phụ"><span>Sáng là chính, tối là bản phụ</span></label>
+          <label><input type="radio" name="q_theme" value="Tối là chính, sáng là bản phụ"><span>Tối là chính, sáng là bản phụ</span></label>
+          <label><input type="radio" name="q_theme" value="Cả hai đều hạng nhất, chăm ngang nhau"><span>Cả hai đều hạng nhất, chăm ngang nhau</span></label>
+          <label><input type="radio" name="q_theme" value="Bỏ nút đổi, theo hệ điều hành"><span>Bỏ nút đổi, cứ theo hệ điều hành</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 2</p>
+        <p class="q__t">Mật độ thông tin</p>
+        <p class="q__h">Dày thì nhiều dữ liệu một màn, thoáng thì đọc nhanh hơn khi đang bận tay.</p>
+        <div class="q__opts">
+          <label><input type="radio" name="q_density" value="Thoáng — đọc từ xa, ít dữ liệu mỗi màn"><span>Thoáng — đọc từ xa</span></label>
+          <label><input type="radio" name="q_density" value="Vừa — như hiện tại"><span>Vừa — như hiện tại</span></label>
+          <label><input type="radio" name="q_density" value="Dày — tối đa dữ liệu mỗi màn"><span>Dày — tối đa dữ liệu mỗi màn</span></label>
+          <label><input type="radio" name="q_density" value="Khác nhau theo họ: vận hành thoáng, quản trị dày"><span>Khác theo họ màn: vận hành thoáng, quản trị dày</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 3</p>
+        <p class="q__t">Màn vận hành chạy trên máy gì?</p>
+        <p class="q__h">18 màn của Phục vụ, Bếp, Thu ngân. Cái này quyết cỡ chữ và vùng chạm.</p>
+        <div class="q__opts">
+          <label><input type="radio" name="q_device" value="Tablet cảm ứng, nằm ngang"><span>Tablet cảm ứng, nằm ngang</span></label>
+          <label><input type="radio" name="q_device" value="Laptop hoặc máy tính quầy"><span>Laptop / máy tính quầy</span></label>
+          <label><input type="radio" name="q_device" value="Điện thoại nhân viên"><span>Điện thoại nhân viên</span></label>
+          <label><input type="radio" name="q_device" value="Cả ba, không ưu tiên cái nào"><span>Cả ba, không ưu tiên cái nào</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 4</p>
+        <p class="q__t">Một giọng hay nhiều giọng?</p>
+        <p class="q__h">Trang cho khách và màn cho bếp có cần trông cùng một hệ không?</p>
+        <div class="q__opts">
+          <label><input type="radio" name="q_voice" value="Một hệ duy nhất cho tất cả"><span>Một hệ duy nhất cho tất cả</span></label>
+          <label><input type="radio" name="q_voice" value="Trang công khai được khác giọng với màn nội bộ"><span>Trang công khai được khác giọng với màn nội bộ</span></label>
+          <label><input type="radio" name="q_voice" value="Mỗi vai trò một sắc màu riêng để nhận biết"><span>Mỗi vai trò một sắc riêng để nhận biết</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 5</p>
+        <p class="q__t">Bo góc</p>
+        <p class="q__h">Núm này lệch khỏi hướng đã chọn được, nói riêng ra thì tôi làm riêng.</p>
+        <div class="q__opts">
+          <label><input type="radio" name="q_radius" value="Theo hướng đã chọn"><span>Theo hướng đã chọn</span></label>
+          <label><input type="radio" name="q_radius" value="0px — vuông tuốt"><span>0px — vuông tuốt</span></label>
+          <label><input type="radio" name="q_radius" value="4px — chỉ bớt gai"><span>4px — chỉ bớt gai</span></label>
+          <label><input type="radio" name="q_radius" value="8px — bo rõ"><span>8px — bo rõ</span></label>
+          <label><input type="radio" name="q_radius" value="14px+ — bo mềm"><span>14px+ — bo mềm</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 6</p>
+        <p class="q__t">Độ nổi của bề mặt</p>
+        <p class="q__h">Thẻ tách khỏi nền bằng gì?</p>
+        <div class="q__opts">
+          <label><input type="radio" name="q_depth" value="Theo hướng đã chọn"><span>Theo hướng đã chọn</span></label>
+          <label><input type="radio" name="q_depth" value="Viền dày, không bóng"><span>Viền dày, không bóng</span></label>
+          <label><input type="radio" name="q_depth" value="Bóng cứng lệch, kiểu in"><span>Bóng cứng lệch, kiểu in</span></label>
+          <label><input type="radio" name="q_depth" value="Bóng mềm nhẹ"><span>Bóng mềm nhẹ</span></label>
+          <label><input type="radio" name="q_depth" value="Chỉ khác nền, không viền không bóng"><span>Chỉ khác nền, không viền không bóng</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 7</p>
+        <p class="q__t">Ảnh món ăn đóng vai gì?</p>
+        <p class="q__h">Repo vừa thêm 43 ảnh món thật. Chúng nên chiếm bao nhiêu màn?</p>
+        <div class="q__opts">
+          <label><input type="radio" name="q_photo" value="Nhân vật chính — ảnh to, màn xoay quanh ảnh"><span>Nhân vật chính — ảnh to</span></label>
+          <label><input type="radio" name="q_photo" value="Chỉ để nhận diện — ảnh nhỏ cạnh tên món"><span>Chỉ để nhận diện — ảnh nhỏ</span></label>
+          <label><input type="radio" name="q_photo" value="To ở trang khách, nhỏ ở màn nội bộ"><span>To ở trang khách, nhỏ ở màn nội bộ</span></label>
+          <label><input type="radio" name="q_photo" value="Màn vận hành không cần ảnh, chỉ tên món"><span>Màn vận hành bỏ ảnh, chỉ tên món</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 8</p>
+        <p class="q__t">Giao diện hiện tại: giữ gì, bỏ gì?</p>
+        <p class="q__h">Câu quan trọng nhất phiếu này. Cứ viết thoải mái, tiếng Việt, gạch đầu dòng cũng được.</p>
+        <textarea name="q_keep" placeholder="Ví dụ: giữ thanh bên và nút đổi sáng/tối. Bỏ cái màn thống kê rối. Bàn của Phục vụ nhìn không ra bàn nào đang có khách. Chữ trong bếp nhỏ quá…"></textarea>
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 9 · không bắt buộc</p>
+        <p class="q__t">Có app nào bạn muốn nó trông giống?</p>
+        <p class="q__h">Tên app, đường link, hay chỉ cần “giống cái máy gọi món ở quán X”. Có mẫu thật thì tôi mổ ra học được.</p>
+        <input type="text" name="q_ref" placeholder="Ví dụ: iPad POS của Highlands, Notion, Grab Merchant…">
+      </div>
+
+      <div class="q">
+        <p class="q__id">Câu 10 · không bắt buộc</p>
+        <p class="q__t">Có trộn không?</p>
+        <p class="q__h">Kiểu “lấy C cho bếp, lấy F cho quản trị”. Được, nhưng nói rõ ở đây để tôi dựng cho nó vẫn là một hệ.</p>
+        <input type="text" name="q_mix" placeholder="Ví dụ: xương của F, màu của B, nút của C">
+      </div>
+
+    </div>
+  </section>
+
+  </form>
+
+  <!-- ============ result ============ -->
+  <section class="res" id="ketqua">
+    <h2>Xong rồi thì lấy kết quả ở đây</h2>
+    <p>
+      Bấm “Sinh kết quả”, rồi copy toàn bộ khối chữ bên dưới dán vào Claude Code.
+      Tôi đọc xong sẽ dựng phiếu 02 — khung màn và điều hướng — theo đúng hướng bạn chọn.
+    </p>
+    <div class="res__acts">
+      <button class="btn" type="button" id="genBtn">Sinh kết quả</button>
+      <button class="btn btn--ghost" type="button" id="copyBtn">Copy</button>
+      <button class="btn btn--ghost" type="button" id="dlBtn">Tải file .txt</button>
+      <button class="btn btn--ghost" type="button" id="clearBtn">Xoá hết, làm lại</button>
+      <span class="said" id="said" role="status" aria-live="polite"></span>
+    </div>
+    <textarea class="res__out mono" id="out" readonly spellcheck="false" aria-label="Kết quả phiếu 01"></textarea>
+  </section>
+
+  <footer class="ft">
+    RIMS · phiếu phỏng vấn thiết kế 01/05 · bản dựng trong trang là giao diện thật bằng CSS, dữ liệu là mẫu
+  </footer>
+</main>
+
+<!-- ======== the one mockup, cloned into every option ======== -->
+<template id="tpl">
+  <aside class="mk-rail">
+    <div class="mk-brand">RIMS</div>
+    <nav class="mk-nav">
+      <span class="mk-navitem is-active">Danh sách bàn</span>
+      <span class="mk-navitem">Đặt bàn</span>
+      <span class="mk-navitem">Hoá đơn</span>
+      <span class="mk-navitem">Hồ sơ của tôi</span>
+    </nav>
+    <div class="mk-who"><span class="mk-ava">TA</span><span class="mk-role">Phục vụ</span></div>
+  </aside>
+  <div class="mk-main">
+    <header class="mk-top">
+      <div>
+        <p class="mk-eyebrow">Ca chiều · 27/09</p>
+        <h3 class="mk-title">Danh sách bàn</h3>
+      </div>
+      <div class="mk-topright">
+        <span class="mk-clock">19:42</span>
+        <span class="mk-btn mk-btn--ghost">Lọc</span>
+        <span class="mk-btn">Tạo đơn</span>
+      </div>
+    </header>
+
+    <div class="mk-stats">
+      <div class="mk-stat"><span>Bàn trống</span><b>6</b></div>
+      <div class="mk-stat"><span>Đang phục vụ</span><b>5</b></div>
+      <div class="mk-stat"><span>Chờ thanh toán</span><b>2</b></div>
+    </div>
+
+    <div class="mk-filters">
+      <span class="mk-f is-on">Tất cả</span>
+      <span class="mk-f">Trống</span>
+      <span class="mk-f">Đang phục vụ</span>
+      <span class="mk-f">Đã đặt trước</span>
+    </div>
+
+    <div class="mk-cards">
+      <div class="mk-card">
+        <b>Bàn 03</b>
+        <span class="mk-chip c-ok">Trống</span>
+        <small>4 chỗ · tầng 1</small>
+      </div>
+      <div class="mk-card">
+        <b>Bàn 04</b>
+        <span class="mk-chip c-busy">Đang phục vụ</span>
+        <small>2 món chờ bếp · 18:55</small>
+      </div>
+      <div class="mk-card">
+        <b>Bàn 05</b>
+        <span class="mk-chip c-brand">Đã đặt 19:30</span>
+        <small>Chị Hiền · 6 khách</small>
+      </div>
+      <div class="mk-card">
+        <b>Bàn 06</b>
+        <span class="mk-chip c-alert">Chờ thanh toán</span>
+        <small class="mk-money">485.000 ₫</small>
+      </div>
+    </div>
+
+    <div class="mk-tablewrap" tabindex="0">
+      <table class="mk-table">
+        <thead>
+          <tr><th>Mã đơn</th><th>Bàn</th><th>Món</th><th class="num">Tổng tiền</th><th>Trạng thái</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mk-money">HD-2409-118</td><td>04</td><td>Phở bò, Nem cuốn</td><td class="num">312.000</td><td><span class="mk-chip c-busy">Đang nấu</span></td></tr>
+          <tr><td class="mk-money">HD-2409-117</td><td>06</td><td>Cơm gà, Trà đá</td><td class="num">485.000</td><td><span class="mk-chip c-alert">Chờ trả</span></td></tr>
+          <tr><td class="mk-money">HD-2409-116</td><td>02</td><td>Bún chả, Chè</td><td class="num">198.000</td><td><span class="mk-chip c-ok">Đã xong</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---- clone the single mockup into every option ---- */
+  var tpl = document.getElementById('tpl');
+  document.querySelectorAll('[data-mock]').forEach(function(slot){
+    slot.appendChild(tpl.content.cloneNode(true));
+  });
+
+  var form  = document.getElementById('sheet');
+  var out   = document.getElementById('out');
+  var said  = document.getElementById('said');
+  var label = document.getElementById('pickLabel');
+  var KEY   = 'rims-sheet-01';
+
+  function note(msg){
+    said.textContent = msg;
+    setTimeout(function(){ if (said.textContent === msg) said.textContent = ''; }, 2600);
+  }
+
+  /* ---- state ---- */
+  function read(){
+    var d = {};
+    new FormData(form).forEach(function(v,k){ d[k] = v; });
+    return d;
+  }
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(read())); } catch(e){}
+  }
+  function restore(){
+    var raw;
+    try { raw = localStorage.getItem(KEY); } catch(e){ return; }
+    if (!raw) return;
+    var d;
+    try { d = JSON.parse(raw); } catch(e){ return; }
+    Object.keys(d).forEach(function(k){
+      var els = form.elements[k];
+      if (!els) return;
+      if (els.length && els[0] && els[0].type === 'radio'){
+        Array.prototype.forEach.call(els, function(el){ if (el.value === d[k]) el.checked = true; });
+      } else if (els.value !== undefined){
+        els.value = d[k];
+      }
+    });
+  }
+
+  function syncLabel(){
+    var picked = form.querySelector('input[name="huong"]:checked');
+    label.textContent = picked ? picked.value.split(' — ')[0] : 'chưa chọn';
+  }
+
+  form.addEventListener('input', function(){ save(); syncLabel(); });
+  form.addEventListener('change', function(){ save(); syncLabel(); });
+
+  /* ---- build the answer block ---- */
+  var Q = [
+    ['huong',     'HƯỚNG THIẾT KẾ'],
+    ['q_theme',   'Sáng / tối'],
+    ['q_density', 'Mật độ'],
+    ['q_device',  'Máy của màn vận hành'],
+    ['q_voice',   'Một giọng hay nhiều giọng'],
+    ['q_radius',  'Bo góc'],
+    ['q_depth',   'Độ nổi bề mặt'],
+    ['q_photo',   'Vai của ảnh món'],
+    ['q_ref',     'App tham chiếu'],
+    ['q_mix',     'Trộn hướng']
+  ];
+
+  function pad(s, n){ while (s.length < n) s += ' '; return s; }
+
+  function build(){
+    var d = read();
+    var L = [];
+    L.push('=== RIMS · PHIẾU 01/05 — HƯỚNG THIẾT KẾ ===');
+    L.push('');
+    Q.forEach(function(q){
+      var v = (d[q[0]] || '').trim();
+      L.push(pad(q[1], 26) + ' : ' + (v || '(bỏ trống — bạn chọn giúp)'));
+    });
+    L.push('');
+    L.push('--- Giữ gì / bỏ gì ---');
+    var keep = (d.q_keep || '').trim();
+    L.push(keep || '(bỏ trống)');
+    L.push('');
+    L.push('=== HẾT PHIẾU 01 — dựng phiếu 02: khung màn & điều hướng ===');
+    return L.join('\n');
+  }
+
+  document.getElementById('genBtn').addEventListener('click', function(){
+    out.value = build();
+    out.scrollIntoView({behavior:'smooth', block:'center'});
+    if (!form.querySelector('input[name="huong"]:checked')){
+      note('Chưa chọn hướng A–F — vẫn sinh được, nhưng nên chọn.');
+    } else {
+      note('Xong. Copy khối dưới dán cho tôi.');
+    }
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    if (!out.value) out.value = build();
+    out.focus(); out.select();
+    var done = false;
+    try { done = document.execCommand('copy'); } catch(e){}
+    if (!done && navigator.clipboard){
+      navigator.clipboard.writeText(out.value).then(
+        function(){ note('Đã copy.'); },
+        function(){ note('Không copy tự động được — bôi đen rồi Ctrl+C.'); }
+      );
+      return;
+    }
+    note(done ? 'Đã copy.' : 'Không copy tự động được — bôi đen rồi Ctrl+C.');
+  });
+
+  document.getElementById('dlBtn').addEventListener('click', function(){
+    if (!out.value) out.value = build();
+    var blob = new Blob([out.value], {type:'text/plain;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'rims-phieu-01.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+    note('Đã tải rims-phieu-01.txt');
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    if (!confirm('Xoá hết câu trả lời của phiếu 01?')) return;
+    form.reset();
+    out.value = '';
+    try { localStorage.removeItem(KEY); } catch(e){}
+    syncLabel();
+    note('Đã xoá.');
+  });
+
+  /* ---- light / dark for the sheet chrome itself ---- */
+  var TKEY = 'rims-sheet-theme';
+  function applyTheme(t){
+    if (t) document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  try { applyTheme(localStorage.getItem(TKEY)); } catch(e){}
+  document.getElementById('themeBtn').addEventListener('click', function(){
+    var cur = document.documentElement.getAttribute('data-theme');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(TKEY, next); } catch(e){}
+  });
+
+  restore();
+  syncLabel();
+})();
+</script>
+</body>
+</html>

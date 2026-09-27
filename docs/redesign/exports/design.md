@@ -424,11 +424,6 @@ Và một việc frontend thuần:
 
 ## Exports
 
-| File | Ở đâu |
-|---|---|
-| Bản token | `docs/redesign/exports/tokens.css` → đích: `frontend/src/styles/tokens.css` |
-| Bảng icon | `docs/redesign/exports/icons.ts` → đích: `frontend/src/shared/ui/icons.ts` |
-| Spec dựng thật | `docs/redesign/06-spec.html` — mở bằng trình duyệt, xem được cả hai chế độ |
-| Sổ quyết định | `docs/redesign/00-quyet-dinh.md` — đầy đủ lý do, kể cả những chỗ làm sai rồi sửa |
-| Kế hoạch áp vào code | `docs/redesign/07-ke-hoach.md` |
-| Bảy phiếu phỏng vấn | `docs/redesign/0*.html` |
+- `tokens.css` — toàn bộ biến, sáng và tối, kèm nền tảng và luật `.rims-i`
+- `icons.ts` — bảng `ICONS` 30 icon + `ICON_MEANING` làm nguồn cho bài test
+- `06-spec.html` — spec dựng thật, xem được cả hai chế độ

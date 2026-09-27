@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="vi" data-line="4" data-temp="am" data-btn="fill" data-chip="tint" data-sh="4">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phiếu 04B — Chế độ tối RIMS, có núm xoay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · instrument: design-interview sheet 04B/06 (rewritten twice)
+ * Attempt 1 failed: white borders + white hard shadows on near-black → stickers.
+ * Attempt 2 failed differently: adopted the KPI project's LOOK (Lora serif, lacquer, gold, 2px radius,
+ *   no shadow) instead of only its TECHNIQUE → turned RIMS into a government admin app.
+ * This attempt takes only the technique and keeps every locked RIMS decision:
+ *   radius 0 · border 2px · hard offset shadow 4px · hover sinks into shadow · Archivo caps
+ *   · P2 palette (same hues) · all six retro devices present
+ * Technique borrowed from qlcv-aura: warm dark surfaces · structure by a MID-TONE line, never white
+ *   · chips = dark tint background + bright coloured text, not a bright solid block
+ * The dial is live and the WCAG readout is computed in the page, so any setting is provably safe.
+ * pre-emit critique: P5 H5 E5 S5 R5 V5
+ */
+
+:root{
+  --paper:#f3f1ea; --surface:#ffffff; --surface-2:#e8e5db; --surface-3:#d8d4c7;
+  --ink:#111214; --ink-2:#3c3e42; --ink-3:#5c5f64; --line:#111214;
+  --go:#12703f; --stop:#c8271b; --wait:#a15c00; --info:#1b5fbf;
+  --bd:2px; --hair:1px; --off:4px;
+  --sh:var(--off) var(--off) 0 var(--line);
+  --fd:'Archivo','IBM Plex Sans',system-ui,sans-serif;
+  --fb:'IBM Plex Sans',system-ui,sans-serif;
+  --fm:'JetBrains Mono',ui-monospace,monospace;
+  --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.5rem; --sp-6:2rem; --sp-7:3rem;
+  --dur:90ms;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--fb);line-height:1.5}
+h1,h2,h3,h4{margin:0;font-family:var(--fd);font-weight:800;line-height:1.14;font-style:normal;
+  text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+p{margin:0}
+:focus-visible{outline:3px solid var(--info);outline-offset:3px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+
+.wrap{max-width:82rem;margin:0 auto;padding:0 16px}
+.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.lbl{font-family:var(--fm);font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+
+.bar{position:sticky;top:0;z-index:40;background:var(--ink);color:var(--paper)}
+.bar__in{max-width:82rem;margin:0 auto;padding:.5rem 16px;display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.bar__id{font-family:var(--fm);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.bar__id b{background:var(--stop);color:#fff;padding:0 .3em}
+.bar__nav{display:flex;gap:.25rem;flex-wrap:wrap;margin-inline-start:auto}
+.bar__nav a{font-family:var(--fm);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  text-decoration:none;color:var(--paper);border:2px solid var(--paper);padding:.25rem .45rem;white-space:nowrap}
+.bar__nav a:hover{background:var(--stop);border-color:var(--stop)}
+
+.head{padding:var(--sp-7) 0 var(--sp-5)}
+.head h1{font-size:clamp(1.8rem,1.25rem + 2.5vw,3.2rem)}
+.head__lede{margin-top:var(--sp-4);max-width:70ch;font-size:clamp(.95rem,.9rem + .3vw,1.06rem);color:var(--ink-2)}
+.head__lede b{color:var(--ink)}
+.mea{margin-top:var(--sp-5);border:var(--bd) solid var(--ink);background:var(--surface);box-shadow:var(--sh);padding:var(--sp-4);max-width:72ch}
+.mea h2{font-size:.9rem;margin-bottom:var(--sp-2)}
+.mea p{font-size:.88rem;color:var(--ink-2)}
+.mea p + p{margin-top:.5rem}
+.mea b{color:var(--ink)}
+.mea ol{margin:var(--sp-3) 0 0;padding-inline-start:1.4em;display:grid;gap:.45rem;font-size:.88rem;color:var(--ink-2)}
+.mea ol b{color:var(--ink)}
+.keep{margin-top:var(--sp-4);display:flex;flex-wrap:wrap;gap:.3rem}
+.keep span{font-family:var(--fm);font-size:.64rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  border:2px solid var(--go);color:var(--go);padding:.2rem .4rem}
+.route{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:var(--sp-5)}
+.route span{font-family:var(--fm);font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:2px solid var(--ink-3);color:var(--ink-3);padding:.3rem .5rem}
+.route span.is-now{border-color:var(--ink);background:var(--stop);color:#fff}
+.route span.is-done{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.rule{border:0;border-top:var(--bd) solid var(--ink);margin:0}
+.sec{padding:var(--sp-6) 0}
+.sec__n{display:inline-block;font-family:var(--fm);font-size:.7rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;background:var(--ink);color:var(--paper);padding:.2rem .5rem;margin-bottom:var(--sp-3)}
+.sec h2{font-size:clamp(1.25rem,1.05rem + 1vw,1.85rem)}
+.sec__p{margin-top:var(--sp-3);max-width:72ch;font-size:.92rem;color:var(--ink-2)}
+.sec__p b{color:var(--ink)}
+
+/* ---------- studio layout: dial + mock + readout ---------- */
+.studio{display:grid;gap:var(--sp-4);margin-top:var(--sp-5)}
+@media (min-width:72rem){.studio{grid-template-columns:17rem minmax(0,1fr)}}
+.dial{border:var(--bd) solid var(--ink);background:var(--surface);box-shadow:var(--sh);
+  padding:var(--sp-4);display:grid;gap:var(--sp-4);align-content:start}
+@media (min-width:72rem){.dial{position:sticky;top:4rem}}
+.knob h3{font-size:.8rem}
+.knob p{font-size:.76rem;color:var(--ink-3);margin-top:.2rem}
+.pills{display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.45rem}
+.pills label{cursor:pointer;position:relative}
+.pills input{position:absolute;opacity:0;width:0;height:0}
+.pills span{display:block;font-family:var(--fm);font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;border:2px solid var(--ink);padding:.28rem .45rem;background:var(--surface);white-space:nowrap}
+.pills input:checked + span{background:var(--ink);color:var(--paper)}
+.pills input:focus-visible + span{outline:3px solid var(--info);outline-offset:2px}
+.pills .warnpill{border-color:var(--stop);color:var(--stop)}
+.pills input:checked + .warnpill{background:var(--stop);color:#fff;border-color:var(--stop)}
+
+/* live readout */
+.read{border:var(--bd) solid var(--ink);background:var(--surface-2);padding:var(--sp-3);display:grid;gap:.2rem}
+.read h3{font-size:.76rem;margin-bottom:.2rem}
+.read div{display:flex;justify-content:space-between;gap:.4rem;font-family:var(--fm);font-size:.7rem;align-items:baseline}
+.read div span{color:var(--ink-2)}
+.read b{font-variant-numeric:tabular-nums}
+.read .p{color:var(--go)}
+.read .f{color:var(--stop);font-weight:700}
+.score{margin-top:.3rem;border-top:var(--hair) solid var(--surface-3);padding-top:.35rem;
+  font-family:var(--fm);font-size:.74rem;font-weight:700;display:flex;justify-content:space-between}
+.score.good{color:var(--go)} .score.bad{color:var(--stop)}
+
+/* ================================================================
+   DARK MOCK — every locked RIMS decision kept, dark technique applied
+   ================================================================ */
+.dk{
+  /* nhiệt độ nền */
+  --d-page:#15130e; --d-surf:#1e1b15; --d-s2:#262118;
+  --d-ink:#f0ebe0; --d-ink2:#c4bdaa; --d-ink3:#a89f8b;
+  /* viền + bóng: trung tính vừa, KHÔNG phải trắng */
+  --d-line:#8f8674;
+  --d-off:4px;
+  --d-sh:var(--d-off) var(--d-off) 0 var(--d-line);
+  /* P2 nâng nhẹ — cùng hue, chỉ đủ để khối đạt 3:1 */
+  --d-go:#167a46;  --d-go-ink:#ffffff; --d-go-t:#5fd08e; --d-go-bg:#16281d;
+  --d-stop:#c8271b;--d-stop-ink:#ffffff;--d-stop-t:#ff8a72;--d-stop-bg:#2b1512;
+  --d-wait:#a15c00;--d-wait-ink:#ffffff;--d-wait-t:#ffc94a;--d-wait-bg:#2a1f0b;
+  --d-info:#2069c9;--d-info-ink:#ffffff;--d-info-t:#7aaaff;--d-info-bg:#141c2e;
+  font-size:12.5px;font-family:var(--fb);
+  background:var(--d-page);color:var(--d-ink);
+  border:var(--bd) solid var(--d-line);
+  box-shadow:var(--d-sh);
+  display:grid;grid-template-columns:4.6rem minmax(0,1fr);min-width:0;
+}
+/* --- nhiệt độ nền --- */
+:root[data-temp="trung"] .dk{--d-page:#131313;--d-surf:#1b1b1b;--d-s2:#232323;
+  --d-ink:#ececec;--d-ink2:#bdbdbd;--d-ink3:#a3a3a3;--d-line:#8a8a8a}
+:root[data-temp="lanh"] .dk{--d-page:#111318;--d-surf:#181b22;--d-s2:#20242c;
+  --d-ink:#e8ebf1;--d-ink2:#bbc0ca;--d-ink3:#9ea4b0;--d-line:#868d99}
+/* --- độ sáng viền + bóng --- */
+:root[data-line="1"] .dk{--d-line:#3b362b}
+:root[data-line="2"] .dk{--d-line:#57503f}
+:root[data-line="3"] .dk{--d-line:#6e6654}
+:root[data-line="4"] .dk{--d-line:#8f8674}
+:root[data-line="5"] .dk{--d-line:#f0ebe0}
+:root[data-temp="trung"][data-line="1"] .dk{--d-line:#383838}
+:root[data-temp="trung"][data-line="2"] .dk{--d-line:#525252}
+:root[data-temp="trung"][data-line="3"] .dk{--d-line:#6b6b6b}
+:root[data-temp="trung"][data-line="4"] .dk{--d-line:#8a8a8a}
+:root[data-temp="trung"][data-line="5"] .dk{--d-line:#ececec}
+:root[data-temp="lanh"][data-line="1"] .dk{--d-line:#343841}
+:root[data-temp="lanh"][data-line="2"] .dk{--d-line:#4e545f}
+:root[data-temp="lanh"][data-line="3"] .dk{--d-line:#68707c}
+:root[data-temp="lanh"][data-line="4"] .dk{--d-line:#868d99}
+:root[data-temp="lanh"][data-line="5"] .dk{--d-line:#e8ebf1}
+/* --- độ lệch bóng --- */
+:root[data-sh="0"] .dk{--d-off:0px;--d-sh:none}
+:root[data-sh="2"] .dk{--d-off:2px}
+:root[data-sh="4"] .dk{--d-off:4px}
+
+.dk-rail{background:var(--d-page);border-inline-end:var(--bd) solid var(--d-line);
+  padding:.4em .3em;display:grid;gap:.3em;align-content:start}
+.dk-ri{display:grid;gap:.1em;justify-items:center;padding:.35em .15em;
+  border:var(--bd) solid var(--d-line);color:var(--d-ink2)}
+.dk-ri svg{width:1.1rem;height:1.1rem}
+.dk-ri s{text-decoration:none;font-family:var(--fm);font-size:.55rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+.dk-ri.is-on{background:var(--d-stop);color:#fff;border-color:var(--d-line)}
+
+.dk-main{min-width:0;display:grid;align-content:start}
+.dk-hdr{display:flex;gap:.5em;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  padding:.5em .6em;border-bottom:var(--bd) solid var(--d-line);background:var(--d-surf)}
+.dk-crumb{font-family:var(--fm);font-size:.76em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--d-ink3)}
+.dk-crumb b{color:var(--d-ink)}
+.dk-clock{display:flex;gap:.3em;align-items:center;font-family:var(--fm);font-size:.84em;font-weight:700;font-variant-numeric:tabular-nums}
+.dk-clock svg{width:1.05em;height:1.05em}
+.dk-body{padding:.65em;display:grid;gap:.55em;align-content:start}
+.dk-body h4{font-family:var(--fd);font-size:1.35em;font-weight:800;text-transform:uppercase}
+
+/* nút — tô đặc (mặc định) hoặc nền tint + viền màu */
+.dkb{font-family:var(--fd);font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:.84em;
+  border:var(--bd) solid var(--d-line);background:var(--d-s2);color:var(--d-ink);
+  padding:.5em .78em;box-shadow:var(--d-sh);cursor:pointer;white-space:nowrap;
+  transition:transform var(--dur) linear,box-shadow var(--dur) linear}
+.dkb:hover{transform:translate(calc(var(--d-off)/2),calc(var(--d-off)/2));
+  box-shadow:calc(var(--d-off)/2) calc(var(--d-off)/2) 0 var(--d-line)}
+.dkb:active{transform:translate(var(--d-off),var(--d-off));box-shadow:0 0 0 var(--d-line)}
+.dkb:focus-visible{outline:3px solid var(--d-info-t);outline-offset:3px}
+.dkb--go{background:var(--d-go);color:var(--d-go-ink)}
+.dkb--stop{background:var(--d-stop);color:var(--d-stop-ink)}
+.dkb--ink{background:var(--d-ink);color:var(--d-page)}
+:root[data-btn="tint"] .dkb--go{background:var(--d-go-bg);color:var(--d-go-t);border-color:var(--d-go-t)}
+:root[data-btn="tint"] .dkb--stop{background:var(--d-stop-bg);color:var(--d-stop-t);border-color:var(--d-stop-t)}
+:root[data-btn="tint"] .dkb--ink{background:var(--d-s2);color:var(--d-ink);border-color:var(--d-ink2)}
+
+/* chip — nền tint + chữ sáng (mặc định) hoặc tô đặc */
+.dkc{display:inline-flex;gap:.3em;align-items:center;font-family:var(--fm);font-size:.7em;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;border:var(--hair) solid currentColor;padding:.2em .45em;white-space:nowrap}
+.dkc i{font-style:normal;font-size:1.05em;line-height:1}
+.dkc--go{color:var(--d-go-t);background:var(--d-go-bg)}
+.dkc--stop{color:var(--d-stop-t);background:var(--d-stop-bg)}
+.dkc--wait{color:var(--d-wait-t);background:var(--d-wait-bg)}
+.dkc--info{color:var(--d-info-t);background:var(--d-info-bg)}
+.dkc--mute{color:var(--d-ink2);background:var(--d-s2);border-color:var(--d-ink3)}
+:root[data-chip="fill"] .dkc--go{background:var(--d-go);color:var(--d-go-ink);border-color:var(--d-line)}
+:root[data-chip="fill"] .dkc--stop{background:var(--d-stop);color:var(--d-stop-ink);border-color:var(--d-line)}
+:root[data-chip="fill"] .dkc--wait{background:var(--d-wait);color:var(--d-wait-ink);border-color:var(--d-line)}
+:root[data-chip="fill"] .dkc--info{background:var(--d-info);color:var(--d-info-ink);border-color:var(--d-line)}
+
+/* bề mặt */
+.dk-card{border:var(--bd) solid var(--d-line);background:var(--d-surf);box-shadow:var(--d-sh);display:grid;min-width:0}
+.dk-th{background:var(--d-s2);color:var(--d-ink);padding:.35em .55em;display:flex;justify-content:space-between;gap:.5em;
+  border-bottom:var(--bd) solid var(--d-line);
+  font-family:var(--fm);font-size:.74em;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.dk-tb{padding:.45em .55em;display:grid;gap:.2em}
+.dk-ti{display:flex;justify-content:space-between;gap:.5em;font-size:.9em;font-weight:600;
+  border-bottom:var(--hair) dashed var(--d-ink3);padding-block:.2em}
+.dk-ti:last-child{border-bottom:0}
+.dk-ti b{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.dk-tf{padding:.45em .55em;border-top:var(--bd) solid var(--d-line);display:flex;gap:.4em;flex-wrap:wrap}
+.dk-stat{border:var(--bd) solid var(--d-line);background:var(--d-surf);box-shadow:var(--d-sh);padding:.45em .6em;display:grid;gap:.25em}
+.dk-stat > span{font-family:var(--fm);font-size:.66em;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--d-ink3)}
+.dk-cnt{display:flex;gap:.18em}
+.dk-cnt b{font-family:var(--fm);font-weight:700;font-size:1.65em;line-height:1;background:var(--d-s2);color:var(--d-ink);
+  border:var(--bd) solid var(--d-line);padding:.06em .22em;font-variant-numeric:tabular-nums}
+.dk-ktabs{display:flex;gap:.3em;flex-wrap:wrap}
+.dk-kt{border:var(--bd) solid var(--d-line);background:var(--d-surf);padding:.3em .55em;font-family:var(--fm);
+  font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:inline-flex;gap:.35em;align-items:center;color:var(--d-ink2)}
+.dk-kt b{font-variant-numeric:tabular-nums}
+.dk-kt.on-wait{color:var(--d-wait-t);background:var(--d-wait-bg);border-color:var(--d-wait-t)}
+.dk-kt.on-info{color:var(--d-info-t);background:var(--d-info-bg);border-color:var(--d-info-t)}
+.dk-kt.on-go{color:var(--d-go-t);background:var(--d-go-bg);border-color:var(--d-go-t)}
+.dk-tw{border:var(--bd) solid var(--d-line);background:var(--d-surf);overflow-x:auto}
+.dk-tw table{width:100%;border-collapse:collapse;font-size:.84em;min-width:20rem}
+.dk-tw th{text-align:start;background:var(--d-s2);color:var(--d-ink);padding:.35em .5em;font-family:var(--fm);
+  font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  border-bottom:var(--bd) solid var(--d-line);white-space:nowrap}
+.dk-tw td{padding:.35em .5em;border-bottom:var(--hair) solid var(--d-ink3)}
+.dk-tw tbody tr:last-child td{border-bottom:0}
+.dk-tw .num{text-align:end;font-family:var(--fm);font-variant-numeric:tabular-nums}
+
+/* retro devices — phải còn nguyên ở chế độ tối */
+.dk-stripe{background:repeating-linear-gradient(45deg,var(--d-line) 0 5px,transparent 5px 10px);
+  border:var(--bd) solid var(--d-line);min-height:1.9em;display:grid;place-items:center}
+.dk-stripe span{background:var(--d-surf);border:var(--bd) solid var(--d-line);padding:.12em .45em;
+  font-family:var(--fm);font-size:.68em;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--d-ink2)}
+.dk-tick{border:var(--bd) solid var(--d-line);background:var(--d-s2);overflow:hidden;padding:.28em 0;position:relative}
+.dk-tick span{display:inline-block;white-space:nowrap;font-family:var(--fm);font-size:.74em;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--d-ink);animation:sl 22s linear infinite}
+.dk-tick span.is-paused{animation-play-state:paused}
+@keyframes sl{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.dk-tick button{position:absolute;inset-block-start:50%;inset-inline-end:.3em;transform:translateY(-50%);
+  font-family:var(--fm);font-size:.66em;font-weight:700;border:var(--bd) solid var(--d-line);
+  background:var(--d-surf);color:var(--d-ink);padding:.1em .3em;cursor:pointer}
+.dk-dbl{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:1.9em;line-height:1;
+  color:var(--d-page);-webkit-text-stroke:2px var(--d-line);text-shadow:3px 3px 0 var(--d-stop)}
+.dk-row{display:flex;gap:.4em;flex-wrap:wrap;align-items:center}
+.dk-cap{font-family:var(--fm);font-size:.64em;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--d-ink3);width:100%}
+
+/* ---------- questions ---------- */
+.qs{display:grid;gap:var(--sp-4);margin-top:var(--sp-5)}
+@media (min-width:50rem){.qs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.q{border:var(--bd) solid var(--ink);background:var(--surface);padding:var(--sp-4);display:grid;gap:.5rem;align-content:start}
+.q h3{font-size:.92rem}
+.q__h{font-size:.8rem;color:var(--ink-3)}
+.q__o{display:grid;gap:.3rem}
+.q__o label{display:flex;gap:.5rem;align-items:flex-start;font-size:.84rem;border:2px solid var(--ink);
+  padding:.4rem .5rem;cursor:pointer;background:var(--surface)}
+.q__o label:hover{background:var(--surface-2)}
+.q__o label:has(input:checked){background:var(--ink);color:var(--paper);font-weight:600}
+.q__o input{margin:.2rem 0 0;accent-color:var(--ink);flex:none}
+.q textarea{width:100%;font:inherit;font-size:.85rem;background:var(--paper);color:var(--ink);
+  border:var(--bd) solid var(--ink);padding:.5rem .6rem;min-height:5rem;resize:vertical}
+
+.res{border:var(--bd) solid var(--ink);background:var(--ink);box-shadow:var(--sh);padding:var(--sp-5);margin:var(--sp-6) 0}
+.res h2{font-size:1.2rem;color:var(--paper)}
+.res__p{color:var(--surface-3);font-size:.88rem;margin-top:.4rem;max-width:64ch}
+.res__box{background:var(--surface);border:var(--bd) solid var(--paper);padding:var(--sp-4);margin-top:var(--sp-4)}
+.res__acts{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.b{font-family:var(--fd);font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:.82rem;
+  border:var(--bd) solid var(--ink);background:var(--surface);color:var(--ink);padding:.5rem .8rem;
+  box-shadow:var(--sh);cursor:pointer;transition:transform var(--dur) linear,box-shadow var(--dur) linear}
+.b:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.b:active{transform:translate(var(--off),var(--off));box-shadow:0 0 0 var(--ink)}
+.b--go{background:var(--go);color:#fff}
+.b--stop{background:var(--stop);color:#fff}
+.out{width:100%;min-height:13rem;margin-top:var(--sp-3);font-family:var(--fm);font-size:.76rem;line-height:1.6;
+  background:var(--paper);color:var(--ink);border:var(--bd) solid var(--ink);padding:var(--sp-3);white-space:pre;overflow:auto;resize:vertical}
+.said{font-family:var(--fm);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--go)}
+.ft{border-top:var(--bd) solid var(--ink);padding:var(--sp-4) 0 var(--sp-7);font-family:var(--fm);font-size:.7rem;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+</style>
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true" focusable="false"><defs>
+  <g id="ic-grid" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square">
+    <rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></g>
+  <g id="ic-list" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square">
+    <rect x="3" y="4" width="18" height="16"/><path d="M7 9h10M7 13h10M7 17h6"/></g>
+  <g id="ic-check" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square"><path d="M4 13l5 5L20 6"/></g>
+  <g id="ic-moon" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="square">
+    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></g>
+</defs></svg>
+
+<div class="bar">
+  <div class="bar__in">
+    <span class="bar__id">RIMS · phiếu <b>04B</b> · núm xoay chế độ tối</span>
+    <nav class="bar__nav" aria-label="Mục lục">
+      <a href="#sai">Tôi sai gì</a><a href="#xuong">Xưởng</a><a href="#cauhoi">Câu hỏi</a><a href="#ketqua">Kết quả</a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="head">
+    <p class="lbl">Phỏng vấn thiết kế lại · phiếu 04B — lần ba</p>
+    <h1>Chế độ tối, tự xoay núm</h1>
+
+    <div class="mea" id="sai">
+      <h2>Hai lần trước tôi sai hai kiểu khác nhau</h2>
+      <p>
+        <b>Lần một:</b> viền trắng, bóng trắng trên nền gần-đen → mỗi nút thành một miếng sticker.
+      </p>
+      <p>
+        <b>Lần hai:</b> tôi bê cả <b>cái vẻ</b> của hệ KPI sang — Lora serif, sơn mài, chỉ vàng,
+        bo 2px, bỏ bóng. Bạn nói đúng: thành app hành chính. Bạn chỉ nhờ tôi học <b>cái kỹ thuật</b>.
+      </p>
+      <p>Kỹ thuật đó, bóc ra khỏi cái vẻ, chỉ còn ba điều:</p>
+      <ol>
+        <li><b>Nền tối phải ấm</b> — cùng nhiệt độ với giấy <span class="mono">#f3f1ea</span> của bản sáng, không phải đen lạnh.</li>
+        <li><b>Viền và bóng là trung tính VỪA, không bao giờ trắng.</b> Đây là gốc của vụ sticker.</li>
+        <li><b>Chip là nền tint tối + chữ màu sáng</b>, không phải một khối màu rực.</li>
+      </ol>
+      <p>
+        Ngoài ba điều đó, <b>không lấy gì khác</b>. Mọi thứ RIMS đã chốt vẫn nguyên:
+      </p>
+      <div class="keep">
+        <span>bo 0px</span><span>viền 2px</span><span>bóng lệch 4px</span><span>hover lún vào bóng</span>
+        <span>Archivo in hoa</span><span>P2 cùng hue</span><span>một đỏ duy nhất</span>
+        <span>sọc chéo</span><span>số bảng tỉ số</span><span>băng chữ chạy</span><span>chữ nét đôi</span>
+      </div>
+      <p style="margin-top:var(--sp-3)">
+        Và lần này tôi không đưa bốn phương án nữa. Tôi đưa <b>cái núm</b>, cùng <b>số WCAG chạy theo</b>
+        ngay khi bạn xoay. Bạn tự dừng ở chỗ bạn thấy đúng, và số bên cạnh bảo đảm nó vẫn đọc được.
+      </p>
+    </div>
+
+    <div class="route" aria-label="Lộ trình">
+      <span class="is-done">01–03 · Style</span>
+      <span class="is-done">04 · Component</span>
+      <span class="is-now">04B · Chế độ tối</span>
+      <span>05 · Icon &amp; giọng văn</span>
+      <span>06 · Spec</span>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <form id="sheet">
+
+  <!-- ==================== STUDIO ==================== -->
+  <section class="sec" id="xuong">
+    <p class="sec__n">Xưởng</p>
+    <h2>Năm núm, một màn hình thật</h2>
+    <p class="sec__p">
+      Bên phải là màn <b>hàng đợi bếp ca đêm</b> — có đủ rail, breadcrumb, đồng hồ, tab trạng thái,
+      phiếu bếp, bốn nút, chip, ô thống kê kiểu bảng tỉ số, bảng, dải sọc, băng chữ chạy và chữ nét đôi.
+      Nút bấm được thật. Xoay núm bên trái, mọi thứ đổi ngay, và bảng số dưới núm tính lại tức thì.
+    </p>
+
+    <div class="studio">
+      <div class="dial">
+
+        <div class="knob">
+          <h3>1 · Độ sáng viền &amp; bóng</h3>
+          <p>Đây là cái núm quan trọng nhất. Xoay tới <b>5</b> để thấy đúng lỗi sticker của tôi lần một.</p>
+          <div class="pills" role="radiogroup" aria-label="Độ sáng viền và bóng">
+            <label><input type="radio" name="k_line" value="1 · rất tối" data-k="line" data-v="1"><span>1</span></label>
+            <label><input type="radio" name="k_line" value="2 · tối" data-k="line" data-v="2"><span>2</span></label>
+            <label><input type="radio" name="k_line" value="3 · vừa (ngưỡng đạt 3:1)" data-k="line" data-v="3"><span>3</span></label>
+            <label><input type="radio" name="k_line" value="4 · sáng vừa (đề xuất)" data-k="line" data-v="4" checked><span>4</span></label>
+            <label><input type="radio" name="k_line" value="5 · trắng — lỗi sticker" data-k="line" data-v="5"><span class="warnpill">5</span></label>
+          </div>
+        </div>
+
+        <div class="knob">
+          <h3>2 · Nhiệt độ nền</h3>
+          <p>Bản sáng của RIMS là giấy ấm, nên nền tối ấm sẽ liền mạch hơn.</p>
+          <div class="pills" role="radiogroup" aria-label="Nhiệt độ nền">
+            <label><input type="radio" name="k_temp" value="Ấm — cùng nhiệt với giấy bản sáng" data-k="temp" data-v="am" checked><span>Ấm</span></label>
+            <label><input type="radio" name="k_temp" value="Trung tính" data-k="temp" data-v="trung"><span>Trung tính</span></label>
+            <label><input type="radio" name="k_temp" value="Hơi lạnh" data-k="temp" data-v="lanh"><span>Hơi lạnh</span></label>
+          </div>
+        </div>
+
+        <div class="knob">
+          <h3>3 · Nút mang màu thế nào</h3>
+          <p>Tô đặc thì mạnh, dễ thấy. Nền tint thì êm mắt hơn trong ca dài.</p>
+          <div class="pills" role="radiogroup" aria-label="Kiểu nút">
+            <label><input type="radio" name="k_btn" value="Tô đặc — như bản sáng" data-k="btn" data-v="fill" checked><span>Tô đặc</span></label>
+            <label><input type="radio" name="k_btn" value="Nền tint tối + viền màu + chữ màu" data-k="btn" data-v="tint"><span>Nền tint</span></label>
+          </div>
+        </div>
+
+        <div class="knob">
+          <h3>4 · Chip trạng thái</h3>
+          <p>Kỹ thuật lấy từ hệ KPI là nền tint. Tô đặc thì giống bản sáng hơn.</p>
+          <div class="pills" role="radiogroup" aria-label="Kiểu chip">
+            <label><input type="radio" name="k_chip" value="Nền tint tối + chữ sáng" data-k="chip" data-v="tint" checked><span>Nền tint</span></label>
+            <label><input type="radio" name="k_chip" value="Tô đặc — giống bản sáng" data-k="chip" data-v="fill"><span>Tô đặc</span></label>
+          </div>
+        </div>
+
+        <div class="knob">
+          <h3>5 · Bóng lệch</h3>
+          <p>RIMS chốt 4px. Ở chế độ tối có muốn nhẹ hơn không.</p>
+          <div class="pills" role="radiogroup" aria-label="Độ lệch bóng">
+            <label><input type="radio" name="k_sh" value="4px — như bản sáng" data-k="sh" data-v="4" checked><span>4px</span></label>
+            <label><input type="radio" name="k_sh" value="2px — nhẹ hơn ở chế độ tối" data-k="sh" data-v="2"><span>2px</span></label>
+            <label><input type="radio" name="k_sh" value="Không bóng ở chế độ tối" data-k="sh" data-v="0"><span>Không</span></label>
+          </div>
+        </div>
+
+        <div class="read" id="read" aria-live="polite">
+          <h3>Đo ngay, theo núm hiện tại</h3>
+          <div><span>mực trên mặt</span><b id="r1">—</b></div>
+          <div><span>mực phụ trên mặt</span><b id="r2">—</b></div>
+          <div><span>viền vs mặt</span><b id="r3">—</b></div>
+          <div><span>viền vs nền</span><b id="r4">—</b></div>
+          <div><span>nút chính: chữ trên nền</span><b id="r5">—</b></div>
+          <div><span>nút chính: khối vs mặt</span><b id="r6">—</b></div>
+          <div><span>nút huỷ: chữ trên nền</span><b id="r7">—</b></div>
+          <div><span>chip chờ: chữ trên nền</span><b id="r8">—</b></div>
+          <div><span>chip chờ: chữ vs mặt</span><b id="r9">—</b></div>
+          <div class="score" id="score"><span>Tổng</span><span id="scoretxt">—</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="dk" data-mock></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="sec" id="cauhoi">
+    <p class="sec__n">Ba câu</p>
+    <h2>Chốt</h2>
+
+    <div class="qs">
+      <div class="q">
+        <p class="lbl">Câu 1</p>
+        <h3>Nền tối dùng ở đâu</h3>
+        <p class="q__h">Bạn chốt "sáng là chính, tối là bản phụ" từ phiếu 01.</p>
+        <div class="q__o">
+          <label><input type="radio" name="scope" value="Chỉ màn vận hành có chế độ tối; trang khách và quản trị luôn sáng" checked><span><b>Chỉ màn vận hành</b> — trang khách và quản trị luôn sáng <i>(đề xuất)</i></span></label>
+          <label><input type="radio" name="scope" value="Cả 37 màn đều có chế độ tối"><span>Cả 37 màn</span></label>
+          <label><input type="radio" name="scope" value="Chỉ bếp và thu ngân, vì họ làm ca đêm"><span>Chỉ <b>bếp và thu ngân</b></span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 2</p>
+        <h3>Đổi chế độ bằng gì</h3>
+        <p class="q__h">App đang có <span class="mono">ThemeToggle.tsx</span> và <span class="mono">ThemeProvider.tsx</span>.</p>
+        <div class="q__o">
+          <label><input type="radio" name="how" value="Nút trên hàng breadcrumb, nhớ lựa chọn theo người dùng" checked><span><b>Nút</b> trên hàng breadcrumb, nhớ theo người dùng</span></label>
+          <label><input type="radio" name="how" value="Tự theo hệ điều hành, có nút để đè lại"><span><b>Theo hệ điều hành</b>, có nút đè lại</span></label>
+          <label><input type="radio" name="how" value="Tự theo giờ: sau 18:00 thì tối"><span>Theo <b>giờ</b> — sau 18:00 thì tối</span></label>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="lbl">Câu 3</p>
+        <h3>Ghi chú</h3>
+        <p class="q__h">Nếu đã đúng thì chỉ cần nói "ok" cộng vị trí núm. Nếu chưa, nói chỗ nào.</p>
+        <textarea name="note" placeholder="Ví dụ: núm 1 để bậc 3 thôi, bậc 4 vẫn hơi sáng. Nền ấm đúng rồi. Nút tô đặc nhưng chip nền tint…"></textarea>
+      </div>
+    </div>
+  </section>
+
+  </form>
+
+  <section class="res" id="ketqua">
+    <h2>Lấy kết quả</h2>
+    <p class="res__p">Kết quả sẽ ghi lại <b>đúng vị trí năm núm</b> cộng bảng số đo tại vị trí đó, nên tôi dựng lại được chính xác.</p>
+    <div class="res__box">
+      <div class="res__acts">
+        <button class="b b--go" type="button" id="genBtn">Sinh kết quả</button>
+        <button class="b" type="button" id="copyBtn">Copy</button>
+        <button class="b" type="button" id="dlBtn">Tải .txt</button>
+        <button class="b b--stop" type="button" id="clearBtn">Về mặc định</button>
+        <span class="said" id="said" role="status" aria-live="polite"></span>
+      </div>
+      <textarea class="out" id="out" readonly spellcheck="false" aria-label="Kết quả phiếu 04B"></textarea>
+    </div>
+  </section>
+
+  <footer class="ft">
+    RIMS · phiếu 04B/06 · chỉ lấy kỹ thuật chế độ tối, không lấy cái vẻ · số WCAG tính ngay trong trang
+  </footer>
+</main>
+
+<template id="tpl">
+  <aside class="dk-rail">
+    <span class="dk-ri"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-grid"/></svg><s>Bàn</s></span>
+    <span class="dk-ri is-on"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-list"/></svg><s>Đơn</s></span>
+    <span class="dk-ri"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"/></svg><s>Xong</s></span>
+  </aside>
+  <div class="dk-main">
+    <div class="dk-hdr">
+      <span class="dk-crumb">Bếp / <b>Cần chế biến</b></span>
+      <span class="dk-clock"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-moon"/></svg>Ca tối · 21:14</span>
+    </div>
+    <div class="dk-body">
+      <h4>Đơn cần chế biến</h4>
+
+      <div class="dk-tick"><span data-tick>Hết Unadon · Bếp chậm 12 phút · Bàn 09 chờ thanh toán &nbsp;·&nbsp; Hết Unadon · Bếp chậm 12 phút · Bàn 09 chờ thanh toán &nbsp;·&nbsp;</span><button type="button" data-tickbtn>⏸</button></div>
+
+      <div class="dk-ktabs">
+        <span class="dk-kt on-wait">Chờ <b>04</b></span>
+        <span class="dk-kt on-info">Đang nấu <b>03</b></span>
+        <span class="dk-kt on-go">Đã xong <b>12</b></span>
+      </div>
+
+      <div class="dk-card">
+        <div class="dk-th"><span>#118 · Bàn 04</span><span>18:55</span></div>
+        <div class="dk-tb">
+          <div class="dk-ti"><span>Tonkotsu ramen</span><b>×2</b></div>
+          <div class="dk-ti"><span>Gyoza chiên</span><b>×1</b></div>
+        </div>
+        <div class="dk-tf">
+          <button class="dkb dkb--go" type="button">✓ Xong món</button>
+          <button class="dkb dkb--stop" type="button">Huỷ món</button>
+        </div>
+      </div>
+
+      <span class="dk-cap">Bốn nút — rê chuột và bấm để cảm chuyển động lún</span>
+      <div class="dk-row">
+        <button class="dkb dkb--go" type="button">Thanh toán</button>
+        <button class="dkb dkb--ink" type="button">Chốt đơn</button>
+        <button class="dkb" type="button">Để sau</button>
+        <button class="dkb dkb--stop" type="button">Huỷ đơn</button>
+      </div>
+
+      <span class="dk-cap">Chip trạng thái</span>
+      <div class="dk-row">
+        <span class="dkc dkc--go"><i>○</i>Bàn trống</span>
+        <span class="dkc dkc--wait"><i>…</i>Đang chế biến</span>
+        <span class="dkc dkc--stop"><i>✕</i>Đã huỷ</span>
+        <span class="dkc dkc--info"><i>★</i>Đã đặt trước</span>
+        <span class="dkc dkc--mute">Ca tối</span>
+      </div>
+
+      <span class="dk-cap">Số kiểu bảng tỉ số · chữ nét đôi · dải sọc — ba thủ pháp retro phải còn nguyên</span>
+      <div class="dk-row">
+        <span class="dk-stat"><span>Phiếu chờ</span><span class="dk-cnt"><b>0</b><b>4</b></span></span>
+        <span class="dk-stat"><span>Doanh thu</span><span class="dk-cnt"><b>1</b><b>8</b><b>,</b><b>4</b></span></span>
+        <span class="dk-dbl">Ca đêm</span>
+      </div>
+
+      <div class="dk-tw">
+        <table>
+          <thead><tr><th>Mã</th><th>Bàn</th><th class="num">Tiền</th><th>Trạng thái</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">HD-118</td><td>04</td><td class="num">312K</td><td><span class="dkc dkc--info"><i>₫</i>Chờ trả</span></td></tr>
+            <tr><td class="mono">HD-117</td><td>06</td><td class="num">485K</td><td><span class="dkc dkc--go"><i>✓</i>Đã trả</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dk-stripe"><span>Bàn 07 · đang dọn</span></div>
+    </div>
+  </div>
+</template>
+
+<script>
+(function(){
+  'use strict';
+  var tpl=document.getElementById('tpl');
+  document.querySelectorAll('[data-mock]').forEach(function(s){ s.appendChild(tpl.content.cloneNode(true)); });
+
+  var form=document.getElementById('sheet'), out=document.getElementById('out'),
+      said=document.getElementById('said'), root=document.documentElement;
+  var KEY='rims-sheet-04b';
+  function note(m){ said.textContent=m; setTimeout(function(){ if(said.textContent===m) said.textContent=''; },2600); }
+
+  /* ---- WCAG maths, done in the page ---- */
+  function lin(c){ c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4); }
+  function relL(hex){
+    hex=hex.trim();
+    var m=hex.match(/^#?([0-9a-f]{6})$/i);
+    if(!m) return null;
+    var n=parseInt(m[1],16);
+    return 0.2126*lin((n>>16)&255)+0.7152*lin((n>>8)&255)+0.0722*lin(n&255);
+  }
+  function ratio(a,b){
+    var la=relL(a), lb=relL(b);
+    if(la===null||lb===null) return null;
+    return (Math.max(la,lb)+0.05)/(Math.min(la,lb)+0.05);
+  }
+  var mock=document.querySelector('.dk');
+  function v(name){ return getComputedStyle(mock).getPropertyValue(name).trim(); }
+
+  var ROWS=[
+    ['r1', function(){ return [v('--d-ink'), v('--d-surf'), 4.5]; }],
+    ['r2', function(){ return [v('--d-ink2'), v('--d-surf'), 4.5]; }],
+    ['r3', function(){ return [v('--d-line'), v('--d-surf'), 3.0]; }],
+    ['r4', function(){ return [v('--d-line'), v('--d-page'), 3.0]; }],
+    ['r5', function(){ var t=root.getAttribute('data-btn')==='tint';
+                       return t ? [v('--d-go-t'), v('--d-go-bg'), 4.5] : [v('--d-go-ink'), v('--d-go'), 4.5]; }],
+    ['r6', function(){ var t=root.getAttribute('data-btn')==='tint';
+                       return t ? [v('--d-go-t'), v('--d-surf'), 3.0] : [v('--d-go'), v('--d-surf'), 3.0]; }],
+    ['r7', function(){ var t=root.getAttribute('data-btn')==='tint';
+                       return t ? [v('--d-stop-t'), v('--d-stop-bg'), 4.5] : [v('--d-stop-ink'), v('--d-stop'), 4.5]; }],
+    ['r8', function(){ var t=root.getAttribute('data-chip')==='tint';
+                       return t ? [v('--d-wait-t'), v('--d-wait-bg'), 4.5] : [v('--d-wait-ink'), v('--d-wait'), 4.5]; }],
+    ['r9', function(){ var t=root.getAttribute('data-chip')==='tint';
+                       return t ? [v('--d-wait-t'), v('--d-surf'), 4.5] : [v('--d-wait'), v('--d-surf'), 3.0]; }]
+  ];
+
+  var lastReport='';
+  function measure(){
+    var pass=0, total=0, lines=[];
+    ROWS.forEach(function(r){
+      var spec=r[1](), el=document.getElementById(r[0]);
+      var val=ratio(spec[0],spec[1]);
+      if(val===null){ el.textContent='—'; el.className=''; return; }
+      total++;
+      var ok=val>=spec[2];
+      if(ok) pass++;
+      el.textContent=val.toFixed(2)+(ok?' ✓':' ✕ sàn '+spec[2].toFixed(1));
+      el.className=ok?'p':'f';
+      lines.push(el.parentNode.querySelector('span').textContent+': '+val.toFixed(2)+(ok?' đạt':' TRƯỢT (sàn '+spec[2].toFixed(1)+')'));
+    });
+    var sc=document.getElementById('score'), st=document.getElementById('scoretxt');
+    st.textContent=pass+'/'+total+' đạt';
+    sc.className='score '+(pass===total?'good':'bad');
+    lastReport=lines.join('\n');
+  }
+
+  function applyKnobs(){
+    form.querySelectorAll('input[data-k]:checked').forEach(function(el){
+      root.setAttribute('data-'+el.dataset.k, el.dataset.v);
+    });
+    requestAnimationFrame(measure);
+  }
+
+  function read(){ var d={}; new FormData(form).forEach(function(v2,k){ d[k]=v2; }); return d; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(read())); }catch(e){} }
+  function restore(){
+    var raw; try{ raw=localStorage.getItem(KEY); }catch(e){ return; }
+    if(!raw) return;
+    var d; try{ d=JSON.parse(raw); }catch(e){ return; }
+    Object.keys(d).forEach(function(k){
+      var els=form.elements[k]; if(!els) return;
+      if(els.length && els[0] && els[0].type==='radio'){
+        Array.prototype.forEach.call(els,function(el){ if(el.value===d[k]) el.checked=true; });
+      } else if(els.value!==undefined){ els.value=d[k]; }
+    });
+  }
+  form.addEventListener('change',function(){ applyKnobs(); save(); });
+  form.addEventListener('input',save);
+
+  /* ticker pause + reduced motion */
+  var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-tickbtn]').forEach(function(btn){
+    var t=btn.parentNode.querySelector('[data-tick]');
+    if(reduce){ t.classList.add('is-paused'); btn.textContent='▶'; }
+    btn.addEventListener('click',function(){
+      var p=t.classList.toggle('is-paused');
+      btn.textContent=p?'▶':'⏸'; btn.setAttribute('aria-pressed',String(p));
+    });
+  });
+
+  var Q=[['k_line','Núm 1 · viền & bóng'],['k_temp','Núm 2 · nhiệt độ nền'],
+         ['k_btn','Núm 3 · kiểu nút'],['k_chip','Núm 4 · kiểu chip'],['k_sh','Núm 5 · bóng lệch'],
+         ['scope','Nền tối dùng ở đâu'],['how','Đổi chế độ bằng gì']];
+  function pad(s,n){ while(s.length<n) s+=' '; return s; }
+  function build(){
+    var d=read(), L=[];
+    L.push('=== RIMS · PHIẾU 04B — CHẾ ĐỘ TỐI, VỊ TRÍ NÚM ===');
+    L.push('');
+    Q.forEach(function(q){
+      var val=(d[q[0]]||'').trim();
+      L.push(pad(q[1],24)+' : '+(val||'(bỏ trống — bạn chọn giúp)'));
+    });
+    L.push('');
+    L.push('--- Mã màu tại vị trí núm này ---');
+    ['--d-page','--d-surf','--d-s2','--d-ink','--d-ink2','--d-line',
+     '--d-go','--d-stop','--d-wait','--d-info'].forEach(function(n){
+      L.push('  '+pad(n,10)+' '+v(n));
+    });
+    L.push('');
+    L.push('--- Đo tại vị trí núm này ---');
+    L.push(lastReport);
+    L.push('  TỔNG: '+document.getElementById('scoretxt').textContent);
+    L.push('');
+    L.push('--- Ghi chú ---');
+    L.push((d.note||'').trim()||'(không có)');
+    L.push('');
+    L.push('=== HẾT PHIẾU 04B — dựng phiếu 05: icon & giọng văn ===');
+    return L.join('\n');
+  }
+
+  document.getElementById('genBtn').addEventListener('click',function(){
+    measure(); out.value=build(); out.scrollIntoView({behavior:'smooth',block:'center'}); note('Xong. Copy dán cho tôi.');
+  });
+  document.getElementById('copyBtn').addEventListener('click',function(){
+    if(!out.value){ measure(); out.value=build(); }
+    out.focus(); out.select();
+    var ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+    if(!ok && navigator.clipboard){
+      navigator.clipboard.writeText(out.value).then(function(){note('Đã copy.');},function(){note('Bôi đen rồi Ctrl+C.');});
+      return;
+    }
+    note(ok?'Đã copy.':'Bôi đen rồi Ctrl+C.');
+  });
+  document.getElementById('dlBtn').addEventListener('click',function(){
+    if(!out.value){ measure(); out.value=build(); }
+    var b=new Blob([out.value],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');
+    a.href=URL.createObjectURL(b); a.download='rims-phieu-04b.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+    note('Đã tải rims-phieu-04b.txt');
+  });
+  document.getElementById('clearBtn').addEventListener('click',function(){
+    form.reset(); out.value=''; try{ localStorage.removeItem(KEY); }catch(e){}
+    applyKnobs(); note('Đã về mặc định.');
+  });
+
+  restore(); applyKnobs();
+})();
+</script>
+</body>
+</html>
