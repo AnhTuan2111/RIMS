@@ -31,7 +31,7 @@ export const ROLE_LABELS: Record<string, string> = {
 /**
  * Điều hướng theo vai trò.
  *
- * <p>Quản trị có MƯỜI màn. Xếp mười ô dọc trong một rail 4,6rem thì rail phải
+ * <p>Quản trị có MƯỜI MỘT màn. Xếp mười ô dọc trong một rail 4,6rem thì rail phải
  * cuộn, và rail cuộn là thứ tệ nhất trong điều hướng: người ta không biết còn
  * gì phía dưới. Nên mười màn gộp thành BỐN NHÓM, mục con nằm ở băng ngang.
  *
@@ -75,6 +75,7 @@ export const roleMenus: Record<string, MenuEntry[]> = {
             icon: 'gear',
             items: [
                 {label: 'Bàn', path: '/admin/tables'},
+                {label: 'Mặt bằng', path: '/admin/floor'},
                 {label: 'Nhà hàng', path: '/admin/restaurant'},
             ],
         },

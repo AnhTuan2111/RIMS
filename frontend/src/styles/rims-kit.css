@@ -3414,6 +3414,238 @@ textarea.rk-input {
     min-width: 0;
 }
 
+/* ---------- Sơ đồ mặt bằng ----------
+   Bàn đứng đúng chỗ của nó trong quán, không xếp theo số thứ tự.
+
+   Toạ độ tính bằng Ô LƯỚI, và cả sơ đồ nở co bằng cách đổi DUY NHẤT một biến:
+   --rims-floor-cell. Nhờ vậy mặt bằng giữ nguyên hình dạng ở mọi cỡ màn thay
+   vì bị méo — một quán vẽ trên máy tính bàn mở ra trên điện thoại vẫn là đúng
+   cái quán đó, chỉ nhỏ hơn. */
+
+.rk-floor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-3);
+}
+
+.rk-floor__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+}
+
+.rk-floor__zoomlabel {
+    margin-inline-end: auto;
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    color: var(--rims-ink-2);
+}
+
+.rk-floor__zoom {
+    min-width: 4ch;
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.rk-floor__view {
+    --rims-floor-cell: 3rem;
+    --rims-floor-cols: 12;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-5);
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: var(--rims-space-4);
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface-2);
+    box-shadow: var(--rims-shadow-raised);
+
+    /* Hai ngón phóng to được trên màn cảm ứng. Nút bấm ở thanh trên vẫn phải
+       có: chúng là cách duy nhất dùng được bằng chuột và bàn phím. */
+    touch-action: pinch-zoom pan-x pan-y;
+}
+
+.rk-floor__zonename {
+    margin: 0 0 var(--rims-space-3);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    color: var(--rims-ink-2);
+}
+
+.rk-floor__grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--rims-floor-cols), var(--rims-floor-cell));
+    grid-auto-rows: var(--rims-floor-cell);
+    gap: 2px;
+    /* width: max-content — lưới KHÔNG co vừa khung.
+       Co vừa thì mặt bằng méo đi mỗi lần đổi cỡ cửa sổ, mà cả điểm của sơ đồ
+       là nó giống cái quán thật. Hẹp thì cuộn, đó là việc của khung cuộn. */
+    width: max-content;
+}
+
+.rk-floor__slot {
+    display: flex;
+    min-width: 0;
+}
+
+/* Bàn chưa xếp: một hàng thường, không nằm trên lưới. */
+.rk-floor__loose {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rims-space-3);
+}
+
+.rk-floor__loose .rk-floor__slot {
+    width: calc(var(--rims-floor-cell) * 3);
+    height: calc(var(--rims-floor-cell) * 2);
+}
+
+/* Ô bàn trong sơ đồ phải LẤP ĐẦY chỗ được chia: thẻ co theo nội dung thì hai
+   bàn cùng kích thước lại to nhỏ khác nhau, và sơ đồ hết giống mặt bằng. */
+.rk-floor__slot > * {
+    width: 100%;
+    height: 100%;
+}
+
+/* ---------- Thẻ bàn KHI NẰM TRÊN MẶT BẰNG ----------
+   Thẻ bàn bình thường là một thẻ DANH SÁCH: số bàn, số chỗ, chip, giờ đặt
+   trước, tiền tạm tính, dòng báo có cập nhật. Sáu dòng đó cao hơn một ô bàn
+   3x2, và vì ô bị ép đúng khổ nên phần thừa TRÀN RA ĐÈ lên bàn bên cạnh và
+   lên cả tiêu đề khu vực.
+
+   Trên mặt bằng, một cái bàn chỉ cần nói ba điều: bàn số mấy, mấy chỗ, đang
+   thế nào. Mọi thứ còn lại nằm trong hộp thoại mở ra khi bấm vào — chỗ vốn đã
+   hiện đủ chúng. Đây không phải cắt bớt thông tin mà là đặt nó đúng chỗ. */
+.rk-floor__slot > .rk-tablecard {
+    justify-content: center;
+    gap: var(--rims-space-1);
+    padding: var(--rims-space-2);
+    overflow: hidden;
+}
+
+.rk-floor__slot > .rk-tablecard .rk-tablecard__no {
+    font-size: var(--rims-text-lg);
+}
+
+.rk-floor__slot > .rk-tablecard .rk-tablecard__top {
+    flex-wrap: wrap;
+}
+
+/* Bàn hẹp (2 ô = 6rem) không chứa nổi "ĐÃ ĐẶT TRƯỚC". Cắt bằng dấu ba chấm
+   chứ không cắt giữa chữ: "ĐÃ ĐẶT T" đọc ra như một lỗi, còn "ĐÃ ĐẶT…" thì
+   đọc ra là còn nữa. Màu viền vẫn nói đủ trạng thái, chip chỉ là lời xác nhận
+   bằng chữ cho người không phân biệt được màu. */
+.rk-floor__slot > .rk-tablecard .rk-chip {
+    min-width: 0;
+    max-width: 100%;
+    padding: 0 var(--rims-space-2);
+    font-size: 0.625rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rk-floor__slot > .rk-tablecard .rk-tablecard__hint,
+.rk-floor__slot > .rk-tablecard .rk-tablecard__amount {
+    display: none;
+}
+
+/* Dòng "Có cập nhật món" thu lại thành một VUÔNG ĐỎ ở góc. Chữ thì không vừa,
+   nhưng dấu hiệu thì phải còn: đó là thứ bảo phục vụ chạy tới bàn nào. */
+.rk-floor__slot > .rk-tablecard .rk-tablecard__alert {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0.75rem;
+    height: 0.75rem;
+    padding: 0;
+    overflow: hidden;
+    background: var(--rims-alert-fill);
+    /* Chữ vẫn nằm đó cho trình đọc màn hình, chỉ đẩy ra ngoài tầm nhìn. */
+    text-indent: 2rem;
+    white-space: nowrap;
+}
+
+.rk-floor__slot > .rk-tablecard .rk-tablecard__alert-dot {
+    display: none;
+}
+
+.rk-floor__slot > .rk-tablecard {
+    position: relative;
+}
+
+/* Ô bàn trên mặt bằng lúc đang vẽ.
+   Vuông đặc, số bàn to, không có gì khác — lúc kéo thả người ta nhìn HÌNH
+   DẠNG của mặt bằng, không đọc chi tiết từng bàn. Chi tiết nằm ở bảng bên
+   phải, cho đúng một bàn đang chọn. */
+.rk-planbtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+    height: 100%;
+    padding: var(--rims-space-2);
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    cursor: grab;
+    /* Kéo bàn KHÔNG được làm trang cuộn theo. */
+    touch-action: none;
+    /* Kéo một nút trên Chrome mặc định sẽ bôi đen chữ trong nó. */
+    user-select: none;
+}
+
+.rk-planbtn:hover {
+    border-color: var(--rims-ink);
+    background: var(--rims-surface-2);
+}
+
+.rk-planbtn__no {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-black);
+    line-height: 1;
+}
+
+.rk-planbtn__seats {
+    font-size: var(--rims-text-xs);
+    color: var(--rims-ink-3);
+    white-space: nowrap;
+}
+
+/* Lưới chấm chỉ hiện lúc đang vẽ mặt bằng, để biết ô nằm ở đâu. */
+.rk-floor__dots {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(var(--rims-line-strong) 1px, transparent 1px);
+    background-size: var(--rims-floor-cell) var(--rims-floor-cell);
+    opacity: 0.35;
+}
+
+/* Bàn đang được kéo: nhấc khỏi mặt giấy bằng bóng dài hơn, không bằng xoay
+   hay phóng to — hệ này không có chuyển động mềm. */
+.rk-floor__slot.is-dragging {
+    opacity: 0.85;
+    cursor: grabbing;
+}
+
+.rk-floor__slot.is-selected > * {
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
+    outline-offset: 2px;
+}
+
 /* ---------- Màn đặt món ----------
    Hai màn Tạo đơn và Sửa đơn dựng như MỘT THỰC ĐƠN, không như một biểu mẫu:
    lưới ảnh món to bên trái, giỏ đơn là cột DÍNH bên phải.

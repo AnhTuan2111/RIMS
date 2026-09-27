@@ -72,7 +72,8 @@ const ALL_ROUTES = [
     {g: 'quan-tri', n: '12-mon-an', p: '/admin/dishes', as: 'ADMIN'},
     {g: 'quan-tri', n: '13-nhan-su', p: '/admin/users', as: 'ADMIN'},
     {g: 'quan-tri', n: '14-ban', p: '/admin/tables', as: 'ADMIN'},
-    {g: 'quan-tri', n: '15-nha-hang', p: '/admin/restaurant', as: 'ADMIN'},
+    {g: 'quan-tri', n: '15-mat-bang', p: '/admin/floor', as: 'ADMIN'},
+    {g: 'quan-tri', n: '16-nha-hang', p: '/admin/restaurant', as: 'ADMIN'},
 
     // Bếp · 6 màn phẳng
     {g: 'bep', n: '16-bep-tong-quan', p: '/chef/dashboard', as: 'CHEF'},

@@ -7,6 +7,7 @@ import {useNavigate} from 'react-router-dom'
 import * as waiterApi from '@/shared/api/waiter'
 import type {ReservationResponse, TableDetailResponse} from '@/shared/api/waiter'
 import {WaiterTableCard} from './components'
+import {FloorPlan} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
@@ -475,32 +476,36 @@ export default function WaiterTableListPage() {
                         description="Quản trị viên chưa thêm bàn nào vào hệ thống."
                     />
                 ) : (
-                    <div className="rk-tablegrid">
-                        {displayTables.map((table) => {
+                    /* Sơ đồ mặt bằng, không phải lưới thẻ xếp theo số bàn.
+                       Phục vụ nhìn màn này để tìm một cái bàn NGOÀI ĐỜI: bàn 7
+                       cạnh bàn 8 trên lưới nhưng có thể ở hai đầu quán.
+
+                       Quán chưa vẽ mặt bằng thì mọi bàn đều chưa có toạ độ, và
+                       FloorPlan xếp chúng thành hàng ở cuối — nghĩa là màn vẫn
+                       đúng như lưới cũ, chỉ kèm một tiêu đề nói rõ vì sao. */
+                    <FloorPlan
+                        label="Sơ đồ bàn"
+                        tables={displayTables}
+                        renderTable={(table) => {
                             const status =
                                 (table.status as WaiterTableStatus) in STATUS_META
                                     ? (table.status as WaiterTableStatus)
                                     : 'AVAILABLE'
 
-                            const statusLabel = STATUS_META[status].label
-
-                            const nextReservationTime = resTimes[table.tableId]
-
                             return (
                                 <WaiterTableCard
-                                    key={table.tableId}
                                     table={table}
                                     status={status}
-                                    statusLabel={statusLabel}
-                                    nextReservationTime={nextReservationTime}
+                                    statusLabel={STATUS_META[status].label}
+                                    nextReservationTime={resTimes[table.tableId]}
                                     hasStatusNotification={Boolean(
                                         tableStatusNotifications[table.tableId],
                                     )}
                                     onClick={handleTableClick}
                                 />
                             )
-                        })}
-                    </div>
+                        }}
+                    />
                 )}
             </div>
 

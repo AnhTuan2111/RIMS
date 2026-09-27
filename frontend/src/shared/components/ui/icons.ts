@@ -50,6 +50,11 @@ export const ICONS = {
     save: '<path d="M4 4h12l4 4v12H4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/>',
     print: '<path d="M7 8V3h10v5M7 18H4v-8h16v8h-3"/><path d="M7 14h10v7H7z"/>',
     search: '<rect x="3" y="3" width="14" height="14"/><path d="M17 17l4 4"/>',
+    // Thu phóng sơ đồ mặt bằng. CÙNG HỌ với `search` — kính lúp vuông, thêm
+    // dấu bên trong. KHÔNG mượn `plus`/`minus`: `plus` đã mang nghĩa "thêm một
+    // bản ghi", và một icon hai nghĩa là thứ luật gốc cấm.
+    zoomIn: '<rect x="3" y="3" width="14" height="14"/><path d="M10 6v8M6 10h8"/><path d="M17 17l4 4"/>',
+    zoomOut: '<rect x="3" y="3" width="14" height="14"/><path d="M6 10h8"/><path d="M17 17l4 4"/>',
 
     // ---- Điều hướng ----
     back: '<path d="M20 12H5M11 6L5 12l6 6"/>',
@@ -107,6 +112,8 @@ export const ICON_MEANING: Record<IconName, string> = {
     save: 'Lưu biểu mẫu',
     print: 'In hoá đơn',
     search: 'Tìm',
+    zoomIn: 'Phóng to sơ đồ mặt bằng',
+    zoomOut: 'Thu nhỏ sơ đồ mặt bằng',
     back: 'Quay lại màn trước',
     prev: 'Trang trước',
     next: 'Trang sau',
@@ -142,6 +149,5 @@ export const ICON_PLANNED: Partial<Record<IconName, string>> = {
     clockAlert: 'P7 — đặt bàn quá giờ, phiếu chờ quá 15 phút',
     sort: 'P7 — sắp xếp ở đầu bảng 11 màn quản trị',
     filter: 'P7 — lọc ở rail lọc và hàng lọc',
-    save: 'P7 — nút Lưu ở màn biểu mẫu quản trị',
     print: 'P7 — nút In hoá đơn ở màn thu ngân',
 }

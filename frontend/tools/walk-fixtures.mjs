@@ -85,6 +85,60 @@ const TABLES = Array.from({length: 12}, (_, i) => ({
     upcomingCustomerName: i % 3 === 2 ? 'Trần Thị Bích' : undefined,
 }))
 
+/** Gắn toạ độ mặt bằng vào danh sách bàn của Phục vụ. */
+function withFloor(list) {
+    return list.map((t, i) => {
+        const slot = FLOOR_SLOTS[i]
+
+        return {
+            ...t,
+            layoutX: slot ? slot[0] : null,
+            layoutY: slot ? slot[1] : null,
+            layoutW: slot ? slot[2] : null,
+            layoutH: slot ? slot[3] : null,
+            zone: slot ? slot[4] : null,
+        }
+    })
+}
+
+/**
+ * admin.ts · AdminTable — hình dạng của màn Quản lý bàn và màn Mặt bằng.
+ *
+ * <p>Chín bàn đầu đã có chỗ trên mặt bằng, chia hai khu; ba bàn cuối để trống
+ * toạ độ, để walk chụp được cả hàng "Chưa xếp vào mặt bằng".
+ */
+const FLOOR_SLOTS = [
+    [0, 0, 3, 2, 'Tầng 1'],
+    [4, 0, 3, 2, 'Tầng 1'],
+    [8, 0, 3, 2, 'Tầng 1'],
+    [0, 3, 3, 2, 'Tầng 1'],
+    [4, 3, 4, 3, 'Tầng 1'],
+    [9, 3, 2, 2, 'Tầng 1'],
+    [0, 0, 3, 2, 'Sân vườn'],
+    [4, 0, 3, 2, 'Sân vườn'],
+    [8, 0, 5, 2, 'Sân vườn'],
+]
+
+const ADMIN_TABLES = TABLES.map((t, i) => {
+    const slot = FLOOR_SLOTS[i]
+
+    return {
+        id: t.tableId,
+        tableNumber: t.tableNumber,
+        capacity: t.capacity,
+        status: t.status,
+        active: true,
+        orderCount: i % 3,
+        reservationCount: i % 2,
+        deletable: i % 3 === 0 && i % 2 === 0,
+        layoutX: slot ? slot[0] : null,
+        layoutY: slot ? slot[1] : null,
+        layoutW: slot ? slot[2] : null,
+        layoutH: slot ? slot[3] : null,
+        zone: slot ? slot[4] : null,
+    }
+})
+
 /** order.ts · OrderItemStatus */
 const ITEM_STATUSES = ['PREPARING', 'COMPLETED', 'CANCELLED']
 
@@ -451,8 +505,11 @@ export const FIXTURES = [
         })),
         allPausedDishesList: DISH_SUMMARIES.filter((d) => d.status === 'PAUSED'),
     })],
-    ['/admin/table/all', () => TABLES],
-    ['/admin/table/:id', (m) => TABLES[Number(m[0]) - 1] ?? TABLES[0]],
+    // AdminTable KHÁC TableDetailResponse: khoá là `id`, và có active,
+    // orderCount, reservationCount, deletable. Bản đầu tôi trả TableDetail ở
+    // đây nên màn Mặt bằng lọc `active` ra rỗng và vẽ một sơ đồ trống.
+    ['/admin/table/all', () => ADMIN_TABLES],
+    ['/admin/table/:id', (m) => ADMIN_TABLES[Number(m[0]) - 1] ?? ADMIN_TABLES[0]],
 
     ['/chef/dashboard', () => ({
         preparingCount: 7,
@@ -471,7 +528,7 @@ export const FIXTURES = [
         {start: '2026-09-28T12:00:00', end: '2026-09-28T13:30:00'},
         {start: '2026-09-28T19:00:00', end: '2026-09-28T20:30:00'},
     ]],
-    ['/waiter/tables', () => TABLES],
+    ['/waiter/tables', () => withFloor(TABLES)],
     ['/waiter/menu', () => MENU_ITEMS],
     // MẢNG, không phải một đơn: một bàn có thể có nhiều đơn đang phục vụ, và
     // màn Chi tiết đơn gộp chúng bằng flatMap.

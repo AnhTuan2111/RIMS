@@ -19,6 +19,29 @@ export interface AdminTable {
     reservationCount: number
     /** Chưa từng dùng thì mới xoá hẳn được; đã dùng rồi thì chỉ cất đi. */
     deletable: boolean
+
+    /**
+     * Chỗ đứng trên sơ đồ mặt bằng, tính bằng ô lưới.
+     *
+     * <p>null nghĩa là bàn CHƯA được xếp, không phải ô (0,0). Sơ đồ xếp những
+     * bàn đó thành hàng riêng ở cuối kèm tiêu đề nói rõ.
+     */
+    layoutX: number | null
+    layoutY: number | null
+    layoutW: number | null
+    layoutH: number | null
+
+    /** Khu vực do quản lý đặt tên: "Tầng 1", "Sân vườn". */
+    zone: string | null
+}
+
+export interface TableSlot {
+    tableId: number
+    x: number
+    y: number
+    w: number
+    h: number
+    zone?: string | null
 }
 
 export interface TableFormData {
@@ -50,3 +73,13 @@ export const updateTable = (id: number, data: TableFormData & {active: boolean})
  */
 export const deleteTable = (id: number) =>
     apiClient.delete<TableRemovalResponse>(`/admin/table/${id}`)
+
+/**
+ * Lưu cả sơ đồ mặt bằng trong MỘT lần gọi.
+ *
+ * <p>Không gửi từng bàn: kéo thả sinh hàng chục lần đổi chỗ trong vài giây, và
+ * gửi lẻ thì thứ tự tới nơi không còn chắc chắn — sơ đồ lưu xong có thể khác
+ * sơ đồ đang nhìn. Bàn KHÔNG có trong danh sách sẽ bị xoá chỗ.
+ */
+export const saveTableLayout = (tables: TableSlot[]) =>
+    apiClient.put<AdminTable[]>('/admin/table/layout', {tables})
