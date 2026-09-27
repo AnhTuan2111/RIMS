@@ -472,6 +472,19 @@ public class WaiterServiceImpl implements WaiterService
 
     @Override
     @Transactional(readOnly = true)
+    public List<ReservationDetailResponse> viewReservationsByDate(LocalDate date)
+    {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        return reservationRepository
+                .findByReservationTimeBetweenAndStatusInOrderByReservationTimeAsc(start, end,
+                        List.of(ReservationStatus.QUEUED, ReservationStatus.WAITING))
+                .stream().map(this::toReservationResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ReservationDetailResponse> viewReservationsByTableAndTime(int tableId, LocalDate date)
     {
         LocalDateTime start = date.atStartOfDay();

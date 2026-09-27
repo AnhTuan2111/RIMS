@@ -13,12 +13,28 @@ test.describe('Đặt bàn', () => {
         const day = tomorrow.toISOString().slice(0, 10)
 
         const tables = await api(ACCOUNTS.waiter, '/waiter/tables')
-        const target = tables[0]
 
-        const before = await api(
-            ACCOUNTS.waiter,
-            `/waiter/reservation/${target.tableId}/${day}`,
-        )
+        // Chọn một bàn CHƯA CÓ LƯỢT NÀO hôm đó. App buộc hai lượt trên cùng
+        // một bàn phải cách nhau 2,5 tiếng — luật đúng, nhưng nghĩa là chạy
+        // bài này nhiều lần trên cùng một bàn sẽ kín giờ và đỏ vì lý do không
+        // liên quan tới thứ đang kiểm.
+        let target = null
+        let before: unknown[] = []
+
+        for (const table of tables) {
+            const list = await api(
+                ACCOUNTS.waiter,
+                `/waiter/reservation/${table.tableId}/${day}`,
+            )
+
+            if (list.length === 0) {
+                target = table
+                before = list
+                break
+            }
+        }
+
+        expect(target, 'mọi bàn đều đã kín lịch hôm đó').toBeTruthy()
 
         await login(page, ACCOUNTS.waiter)
         await page.goto('/waiter/reservations')
@@ -33,9 +49,11 @@ test.describe('Đặt bàn', () => {
         await page.fill('#waitercreatereservationpage-ten-khach-hang', name)
         await page.fill('#waitercreatereservationpage-so-dien-thoai', phone)
         await page.fill('#waitercreatereservationpage-ngay-dat', day)
-        // Ô ngày của trình duyệt mở lịch ngay khi được điền, và cái lịch đó
-        // nằm đè lên nút Lưu. Đóng nó lại trước khi bấm tiếp.
-        await page.keyboard.press('Escape')
+
+        // Rời khỏi ô để đóng lịch của trình duyệt. KHÔNG dùng Escape: ở ô
+        // input[type=date], Escape huỷ luôn giá trị vừa nhập và trả về ngày
+        // cũ — bài kiểm đặt bàn cho ngày mai nhưng lại lưu vào hôm nay.
+        await page.locator('#waitercreatereservationpage-ten-khach-hang').click()
 
         // selectOption nhận chuỗi chính xác, không nhận biểu thức chính quy.
         // Lấy đúng nhãn của mục chứa số bàn rồi chọn theo nhãn đó.
@@ -57,7 +75,7 @@ test.describe('Đặt bàn', () => {
                 async () => {
                     const now = await api(
                         ACCOUNTS.waiter,
-                        `/waiter/reservation/${target.tableId}/${day}`,
+                        `/waiter/reservation/${target!.tableId}/${day}`,
                     )
                     return now.length
                 },

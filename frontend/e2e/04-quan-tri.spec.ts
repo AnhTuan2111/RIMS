@@ -84,6 +84,10 @@ test.describe('Quản trị', () => {
         // BÀN PHÍM, không chỉ bằng kéo thả.
         const tile = page.locator('.rk-planbtn').first()
         await tile.click()
+
+        // Đặt focus tường minh rồi mới gõ phím: không có focus thì phím mũi
+        // tên đi thẳng vào trình duyệt và CUỘN TRANG, còn bàn thì đứng yên.
+        await tile.focus()
         await tile.press('ArrowRight')
 
         await expect(save).toBeEnabled()

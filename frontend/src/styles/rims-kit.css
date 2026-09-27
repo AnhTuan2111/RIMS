@@ -3227,8 +3227,30 @@ textarea.rk-input {
     padding-bottom: var(--rims-space-12);
 }
 
+/* CHỪA CHỖ CHO THANH DÍNH khi trình duyệt cuộn tới một phần tử.
+   Thiếu luật này thì mọi lần `scrollIntoView` — bấm neo trong trang, đi bằng
+   phím Tab, hoặc trình duyệt tự cuộn tới ô đang nhập — đều dừng ngay dưới mép
+   trên cửa sổ, tức là NẰM LỌT dưới hàng breadcrumb. Phần tử vẫn ở đó nhưng
+   thanh dính che mất, và cú bấm rơi vào thanh chứ không vào nó.
+
+   Đặt trên phần tử CUỘN THẬT (cả trang) chứ không trên vùng nội dung: vùng nội
+   dung không tự cuộn, nó cao theo nội dung và cả trang mới là thứ trượt. */
+html {
+    scroll-padding-top: calc(var(--rims-topbar-height) + var(--rims-space-4));
+}
+
+/* Neo trong trang cũng phải chừa chỗ — các mục thực đơn ở trang công khai và
+   băng mục con của Quản trị đều nhảy bằng neo. */
+:target {
+    scroll-margin-top: calc(var(--rims-topbar-height) + var(--rims-space-4));
+}
+
 /* ---- Hàng breadcrumb ---- */
 
+/* Hàng breadcrumb DÍNH ở đỉnh vùng nội dung.
+   Nó phải dính: đồng hồ, ca làm và nút đổi sáng/tối là thứ người dùng với tới
+   bất cứ lúc nào, và cuộn lên đầu để bấm một cái nút là một bước thừa ở mọi
+   lần bấm. */
 .rk-top {
     position: sticky;
     top: 0;
@@ -3977,6 +3999,19 @@ textarea.rk-input {
 .rk-floor__slot.is-dragging {
     opacity: 0.85;
     cursor: grabbing;
+}
+
+/* Ô bàn ĐÈ LÊN ô khác: viền đỏ và sọc chéo.
+   Dấu hiệu là HÌNH DẠNG chứ không chỉ là màu — người không phân biệt được màu
+   vẫn thấy cái sọc. */
+.rk-floor__slot.is-overlap > * {
+    border-color: var(--rims-alert);
+    box-shadow: var(--rims-offset) var(--rims-offset) 0 var(--rims-alert);
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent 0 6px,
+        rgb(var(--rims-tint-ink) / 12%) 6px 8px
+    );
 }
 
 .rk-floor__slot.is-selected > * {

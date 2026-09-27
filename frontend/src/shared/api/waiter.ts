@@ -126,6 +126,19 @@ export const getServingOrders = (tableId: number, signal?: AbortSignal) =>
 export const createReservation = (data: CreateReservationRequest) =>
     apiClient.post<string>('/waiter/reservations', data)
 
+/**
+ * Lịch đặt của CẢ NGÀY, mọi bàn, sắp theo giờ.
+ *
+ * <p>Bản theo từng bàn ở dưới vẫn giữ — màn chọn bàn cần biết bàn đó đã kín
+ * giờ nào. Nhưng câu hỏi thường gặp hơn là "tối nay ai đặt", và trả lời nó
+ * bằng cách mở lần lượt mười bốn bàn thì không ai làm.
+ */
+export const getReservationsByDate = (date: string, signal?: AbortSignal) =>
+    apiClient.get<ReservationResponse[]>('/waiter/reservations', {
+        params: {date},
+        signal,
+    })
+
 export const getReservationsByTableAndDate = (
     tableId: number,
     date: string,

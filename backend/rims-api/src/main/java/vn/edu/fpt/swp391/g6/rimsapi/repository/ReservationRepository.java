@@ -31,6 +31,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>
 
     // Lấy các reservation QUEUED sắp tới trong vòng 30 phút (để chuyển sang WAITING)
     // WHERE status = QUEUED AND reservation_time BETWEEN :from AND :to
+    /**
+     * Lịch đặt của CẢ NGÀY, mọi bàn, sắp theo giờ.
+     *
+     * <p>Trước đây chỉ có bản theo TỪNG BÀN. Nghĩa là phục vụ muốn biết "tối
+     * nay ai đặt" phải mở lần lượt cả mười bốn bàn, và không có chỗ nào nhìn
+     * ra hai lượt đặt trùng giờ.
+     *
+     * <p>Chỉ lấy lượt còn hiệu lực — đã huỷ và đã vào bàn thì không còn là
+     * việc phải chuẩn bị.
+     */
+    List<Reservation> findByReservationTimeBetweenAndStatusInOrderByReservationTimeAsc(
+            LocalDateTime start, LocalDateTime end, List<ReservationStatus> statuses);
+
     List<Reservation> findByStatusAndReservationTimeBetween(
             ReservationStatus status,
             LocalDateTime from,

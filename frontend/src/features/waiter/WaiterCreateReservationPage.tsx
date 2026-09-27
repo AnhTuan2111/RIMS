@@ -159,11 +159,14 @@ export default function WaiterCreateReservationPage() {
         showFullLoading = true,
         override?: Partial<Pick<ReservationForm, 'tableId' | 'date'>>,
     ) {
-        const tableId = override?.tableId ?? resForm.tableId
-
+        // Lịch bên phải nay theo NGÀY, không theo bàn — nên không còn đọc
+        // tableId ở đây nữa.
         const date = override?.date ?? resForm.date
 
-        if (!tableId || !date) {
+        // CHỈ cần ngày. Trước đây phải có cả bàn, nên bảng bên phải im lặng
+        // cho tới khi người dùng chọn một cái bàn — trong khi thứ họ muốn biết
+        // trước tiên là hôm đó đã có ai đặt chưa.
+        if (!date) {
             setRightReservations([])
             return
         }
@@ -173,11 +176,7 @@ export default function WaiterCreateReservationPage() {
                 setIsReservationsLoading(true)
             }
 
-            const response = await waiterApi.getReservationsByTableAndDate(
-                tableId,
-                date,
-                signal,
-            )
+            const response = await waiterApi.getReservationsByDate(date, signal)
 
             if (signal?.aborted) {
                 return
@@ -203,6 +202,8 @@ export default function WaiterCreateReservationPage() {
         signal?: AbortSignal,
         override?: Partial<Pick<ReservationForm, 'tableId' | 'date'>>,
     ) {
+        // Khung giờ đã kín thì VẪN theo từng bàn — bàn này kín 19h không nói
+        // gì về bàn kia. Chỉ bảng lịch bên phải mới đổi sang xem cả ngày.
         const tableId = override?.tableId ?? resForm.tableId
 
         const date = override?.date ?? resForm.date
@@ -362,9 +363,6 @@ export default function WaiterCreateReservationPage() {
             setSubmitting(false)
         }
     }
-
-    const selectedTableNumber =
-        tables.find((table) => table.tableId === resForm.tableId)?.tableNumber ?? '...'
 
     return (
         <div className="rk-stack">
@@ -549,13 +547,16 @@ export default function WaiterCreateReservationPage() {
 
                     <div className="rk-card rk-card--pad">
                         <div className="rk-card__head-inline">
-                            Lịch đặt cùng ngày (Bàn {selectedTableNumber})
+                            <h3 className="rk-sectiontitle">Lịch đặt trong ngày</h3>
+                            <span className="rk-chip rk-chip--info">
+                                {rightReservations.length} lượt
+                            </span>
                         </div>
 
                         <div className="rk-rowlist">
-                            {!resForm.tableId || !resForm.date ? (
+                            {!resForm.date ? (
                                 <p className="rk-text--muted">
-                                    Chọn bàn và ngày để xem lịch đặt.
+                                    Chọn ngày để xem lịch đặt.
                                 </p>
                             ) : isReservationsLoading ? (
                                 <p className="rk-text--muted">Đang tải lịch đặt...</p>

@@ -29,6 +29,24 @@ const RECENT_LIMIT = 20
 
 const NEW_ORDER_MESSAGE_DURATION_MS = 6_000
 
+/**
+ * N phiếu GẦN NHẤT, mới nhất đứng đầu.
+ *
+ * <p>API trả theo thứ tự TĂNG DẦN theo giờ tạo, nên `slice(0, N)` giữ lại N
+ * phiếu CŨ NHẤT — đúng ngược với việc của hai cột này. Bếp ngó sang đây để xem
+ * món vừa xong, chứ không phải món xong từ đầu ca.
+ */
+function recent<T>(list: T[]): T[] {
+    return list.slice(-RECENT_LIMIT).reverse()
+}
+
+/** Cột cắt bớt thì phải nói rõ, nếu không người đọc tưởng đó là tất cả. */
+function cutNote(total: number, screen: string) {
+    return total > RECENT_LIMIT
+        ? `Chỉ hiện ${RECENT_LIMIT} phiếu gần nhất. Xem đủ ở màn ${screen}.`
+        : undefined
+}
+
 type BrowserWindow = Window & {
     webkitAudioContext?: typeof AudioContext
 }
@@ -631,14 +649,18 @@ export default function KitchenQueuePage() {
                 key: 'COMPLETED',
                 label: 'Đã xong',
                 tone: 'ok',
-                items: completedItems.slice(0, RECENT_LIMIT),
+                items: recent(completedItems),
+                total: completedItems.length,
+                note: cutNote(completedItems.length, 'Đã xong'),
                 empty: 'Chưa có món nào xong trong hôm nay.',
             },
             {
                 key: 'CANCELLED',
                 label: 'Đã huỷ',
                 tone: 'alert',
-                items: cancelledItems.slice(0, RECENT_LIMIT),
+                items: recent(cancelledItems),
+                total: cancelledItems.length,
+                note: cutNote(cancelledItems.length, 'Đã huỷ'),
                 empty: 'Không có món nào bị huỷ.',
             },
         ],

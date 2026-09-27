@@ -7,6 +7,7 @@ import java.util.List;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -67,6 +68,22 @@ public class WaiterController
     public ResponseEntity<List<OrderDetailResponse>> getOrderDetailByTableId(@PathVariable int tableId)
     {
         return ResponseEntity.ok(waiterService.getServingOrders(tableId));
+    }
+
+    /**
+     * Lịch đặt của cả ngày, mọi bàn.
+     *
+     * <p>Trước đây chỉ có bản theo TỪNG BÀN, nghĩa là phục vụ muốn biết "tối
+     * nay ai đặt" phải mở lần lượt cả mười bốn bàn.
+     *
+     * <p>Đặt ở "/reservations" (số nhiều) cho khớp với POST cùng đường dẫn —
+     * nhánh "/reservation" số ít là của những bản theo từng bàn.
+     */
+    @GetMapping("/reservations")
+    public ResponseEntity<List<ReservationDetailResponse>> getReservationsByDate(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)
+    {
+        return ResponseEntity.ok(waiterService.viewReservationsByDate(date == null ? LocalDate.now() : date));
     }
 
     @GetMapping("/reservation/{tableId}/{date}")

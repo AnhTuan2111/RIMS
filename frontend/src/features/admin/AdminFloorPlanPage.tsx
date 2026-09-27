@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback, useEffect, useMemo, useState} from 'react'
 
 import * as adminApi from '@/shared/api/admin'
 import type {AdminTable, TableSlot} from '@/shared/api/admin'
@@ -272,6 +272,51 @@ export default function AdminFloorPlanPage() {
         }
     }
 
+    /**
+     * Những bàn đang ĐÈ LÊN NHAU.
+     *
+     * <p>Cố ý KHÔNG chặn: mặt bằng thật có bàn kê sát, bàn gộp, bàn kê chéo,
+     * và bắt chúng rời nhau tuyệt đối là áp một luật hình học lên việc mà
+     * người kê bàn biết rõ hơn máy.
+     *
+     * <p>Nhưng CHE HẲN nhau thì không phải là kê sát — đó là một nhầm lẫn, và
+     * cái bàn nằm dưới sẽ không bấm được ở màn Phục vụ. Nên báo, không cấm.
+     */
+    const overlaps = useMemo(() => {
+        const placed = Object.entries(draft).map(([id, slot]) => ({
+            id: Number(id),
+            ...slot,
+        }))
+
+        const pairs: [number, number][] = []
+
+        for (let i = 0; i < placed.length; i++) {
+            for (let k = i + 1; k < placed.length; k++) {
+                const a = placed[i]
+                const b = placed[k]
+
+                // Khác khu thì không thể đè nhau — mỗi khu là một lưới riêng.
+                if ((a.zone || '') !== (b.zone || '')) {
+                    continue
+                }
+
+                const apart =
+                    a.x + a.w <= b.x ||
+                    b.x + b.w <= a.x ||
+                    a.y + a.h <= b.y ||
+                    b.y + b.h <= a.y
+
+                if (!apart) {
+                    pairs.push([a.id, b.id])
+                }
+            }
+        }
+
+        return pairs
+    }, [draft])
+
+    const overlapIds = useMemo(() => new Set(overlaps.flat()), [overlaps])
+
     if (isLoading) {
         return (
             <LoadingState
@@ -309,6 +354,10 @@ export default function AdminFloorPlanPage() {
         }
     })
 
+
+    const numberOf = (id: number) =>
+        tables.find((table) => table.id === id)?.tableNumber ?? String(id)
+
     const current = selected == null ? null : draft[selected]
     const currentTable = tables.find((table) => table.id === selected)
 
@@ -332,6 +381,28 @@ export default function AdminFloorPlanPage() {
                 />
             </PageCard>
 
+            {overlaps.length > 0 && (
+                <div className="rk-note rk-note--alert" role="status">
+                    <Icon name="alert" className="rk-icon" />
+                    <div>
+                        <strong>
+                            {overlaps.length} chỗ bàn đè lên nhau
+                        </strong>
+                        <p>
+                            {overlaps
+                                .slice(0, 4)
+                                .map(([a, b]) => `${numberOf(a)} · ${numberOf(b)}`)
+                                .join(' — ')}
+                            {overlaps.length > 4 ? ' — và nữa' : ''}
+                        </p>
+                        <p>
+                            Bàn nằm dưới sẽ không bấm được ở màn Phục vụ. Vẫn
+                            lưu được nếu quán thật sự kê như vậy.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             <div className={current ? 'rk-two rk-two--wideleft' : 'rk-stack'}>
                 <PageCard>
                     <FloorPlan
@@ -341,7 +412,9 @@ export default function AdminFloorPlanPage() {
                         tableProps={(table) => ({
                             className: `rk-floor__slot${
                                 dragging === table.tableId ? ' is-dragging' : ''
-                            }${selected === table.tableId ? ' is-selected' : ''}`,
+                            }${selected === table.tableId ? ' is-selected' : ''}${
+                                overlapIds.has(table.tableId) ? ' is-overlap' : ''
+                            }`,
                         })}
                         renderTable={(table) => (
                             <button

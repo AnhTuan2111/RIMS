@@ -35,6 +35,9 @@ public interface WaiterService
     String createReservation(CreateReservationRequest request);
 
     // để waiter xem các đơn đặt tương ứng vói số bàn và ngày
+    /** Lịch đặt của cả ngày, mọi bàn, sắp theo giờ. */
+    List<ReservationDetailResponse> viewReservationsByDate(LocalDate date);
+
     List<ReservationDetailResponse> viewReservationsByTableAndTime(int tableId, LocalDate date);
 
     // view reservation detail ứng với số bàn (chỉ queued và waiting status)

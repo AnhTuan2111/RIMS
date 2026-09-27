@@ -17,6 +17,10 @@ import {defineConfig} from '@playwright/test'
  *   - dữ liệu nền     (cd frontend && node tools/seed-demo.mjs Rims@2026)
  */
 export default defineConfig({
+    // Dọn về trạng thái đã biết trước khi chạy: các bài kiểm gọi món thật, và
+    // món đã gọi thì bàn không còn trống. Không có bước này thì chạy vài lần
+    // là hết bàn, và mọi lần chạy sau đều đỏ vì một lý do không liên quan.
+    globalSetup: './e2e/global-setup.ts',
     testDir: './e2e',
     timeout: 45_000,
     expect: {timeout: 10_000},

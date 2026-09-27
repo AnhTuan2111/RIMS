@@ -12,8 +12,19 @@ export type BoardColumn<T> = {
     label: string
     tone: 'ok' | 'busy' | 'alert' | 'info' | 'idle'
     items: T[]
+    /**
+     * Số phiếu THẬT của cột, khi nó khác số phiếu đang hiện.
+     *
+     * <p>Cột "Đã xong" chỉ giữ vài chục phiếu gần nhất — nó để ngó lại, không
+     * để tra cứu. Nhưng con số trên đầu cột phải nói SỐ THẬT: ghi "20" trong
+     * khi bếp đã làm xong 47 món là nói sai, và bếp dùng đúng con số đó để
+     * biết ca hôm nay chạy tới đâu.
+     */
+    total?: number
     /** Câu hiện khi cột rỗng. Cột rỗng vẫn giữ chỗ, không biến mất. */
     empty: string
+    /** Dòng chân cột, ví dụ "chỉ hiện 20 phiếu gần nhất". */
+    note?: string
 }
 
 type StatusBoardProps<T> = {
@@ -69,7 +80,9 @@ export function StatusBoard<T>({
                         onClick={() => setActive(column.key)}
                     >
                         {column.label}
-                        <span className="rk-board__tabcount">{column.items.length}</span>
+                        <span className="rk-board__tabcount">
+                            {column.total ?? column.items.length}
+                        </span>
                     </button>
                 ))}
             </div>
@@ -84,7 +97,9 @@ export function StatusBoard<T>({
                 >
                     <h2 className="rk-board__head" id={`${id}-head-${column.key}`}>
                         {column.label}
-                        <span className="rk-board__count">{column.items.length}</span>
+                        <span className="rk-board__count">
+                            {column.total ?? column.items.length}
+                        </span>
                     </h2>
 
                     {column.items.length === 0 ? (
@@ -96,6 +111,10 @@ export function StatusBoard<T>({
                                     {renderItem(item, column.key)}
                                 </div>
                             ))}
+
+                            {column.note && (
+                                <p className="rk-board__note">{column.note}</p>
+                            )}
                         </div>
                     )}
                 </section>
