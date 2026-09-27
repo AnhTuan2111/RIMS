@@ -78,7 +78,7 @@ export default function AdminPaymentDetailPage() {
         async (showFullLoading = true) => {
             if (!hasValidInvoiceId) {
                 setIsLoading(false)
-                setError('Mã hóa đơn không hợp lệ.')
+                setError('Mã hoá đơn không hợp lệ.')
                 return
             }
 
@@ -105,7 +105,7 @@ export default function AdminPaymentDetailPage() {
 
                 console.error('[ADMIN_PAYMENT_DETAIL_FETCH_ERROR]', requestError)
 
-                setError('Không thể tải chi tiết hóa đơn.')
+                setError('Không thể tải chi tiết hoá đơn.')
             } finally {
                 if (requestId === requestIdRef.current && showFullLoading) {
                     setIsLoading(false)
@@ -133,7 +133,7 @@ export default function AdminPaymentDetailPage() {
         return (
             <ErrorState
                 title="Không thể tải dữ liệu"
-                message="Mã hóa đơn không hợp lệ."
+                message="Mã hoá đơn không hợp lệ."
             />
         )
     }
@@ -141,8 +141,8 @@ export default function AdminPaymentDetailPage() {
     if (isLoading) {
         return (
             <LoadingState
-                title="Đang tải chi tiết hóa đơn..."
-                description="Hệ thống đang lấy thông tin hóa đơn và danh sách món ăn."
+                title="Đang tải chi tiết hoá đơn..."
+                description="Hệ thống đang lấy thông tin hoá đơn và danh sách món ăn."
             />
         )
     }
@@ -151,7 +151,7 @@ export default function AdminPaymentDetailPage() {
         return (
             <ErrorState
                 title="Không thể tải dữ liệu"
-                message={error ?? 'Không tìm thấy hóa đơn.'}
+                message={error ?? 'Không tìm thấy hoá đơn.'}
                 onRetry={() => {
                     loadPaymentDetail(true).catch((requestError) => {
                         console.error(requestError)

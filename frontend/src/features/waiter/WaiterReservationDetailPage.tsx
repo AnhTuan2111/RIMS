@@ -196,7 +196,7 @@ export default function WaiterReservationDetailPage() {
                             )
                         }
                     >
-                        Bắt đầu Order
+                        Bắt đầu gọi món
                     </button>
                 </div>
 

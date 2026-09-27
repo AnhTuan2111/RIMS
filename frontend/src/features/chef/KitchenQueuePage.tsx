@@ -264,7 +264,7 @@ export default function KitchenQueuePage() {
                 console.error('[CHEF_KITCHEN_QUEUE_FETCH_ERROR]', requestError)
 
                 setError(
-                    'Không thể tải danh sách món cần chế biến. Hãy kiểm tra backend hoặc đăng nhập bằng tài khoản Chef.',
+                    'Không thể tải danh sách món cần chế biến. Kiểm tra kết nối mạng rồi bấm Làm mới.',
                 )
             } finally {
                 if (showFullLoading) {
@@ -465,7 +465,7 @@ export default function KitchenQueuePage() {
 
             notify(
                 normalizedNote
-                    ? 'Đã gửi ghi chú nội bộ cho Waiter.'
+                    ? 'Đã gửi ghi chú nội bộ cho phục vụ.'
                     : 'Đã xoá ghi chú nội bộ.',
                 {tone: 'alert'},
             )
@@ -1017,10 +1017,10 @@ export default function KitchenQueuePage() {
                             <div className="rk-field">
                                 <div className="rk-field__label">
                                     <div>
-                                        <h3>Ghi chú nội bộ cho Waiter</h3>
+                                        <h3>Ghi chú nội bộ cho phục vụ</h3>
 
                                         <p>
-                                            Dùng để báo tình trạng bếp trước khi Waiter
+                                            Dùng để báo tình trạng bếp trước khi phục vụ
                                             trao đổi với khách.
                                         </p>
                                     </div>
@@ -1034,7 +1034,7 @@ export default function KitchenQueuePage() {
                                             }
                                         >
                                             {selectedDish.chefInternalNoteAcknowledgedAt
-                                                ? 'Waiter đã xem'
+                                                ? 'Phục vụ đã xem'
                                                 : 'Chờ Waiter xem'}
                                         </span>
                                     )}
@@ -1105,7 +1105,7 @@ export default function KitchenQueuePage() {
                                 <h3>Huỷ món</h3>
 
                                 <p>
-                                    Món sẽ bị huỷ ngay. Waiter chỉ nhận thông báo để báo
+                                    Món sẽ bị huỷ ngay. Phục vụ chỉ nhận thông báo để báo
                                     lại với khách.
                                 </p>
 

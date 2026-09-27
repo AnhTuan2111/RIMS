@@ -481,7 +481,7 @@ export default function OrderPanel({
                                 disabled={isLocking}
                                 onClick={() => void handleCheckoutClick()}
                             >
-                                {isLocking ? 'Đang khóa đơn...' : 'Thanh toán'}
+                                {isLocking ? 'Đang khoá đơn...' : 'Thanh toán'}
                             </button>
                         )}
                     </div>

@@ -384,7 +384,7 @@ a {
 
 /* Mobile-first: xếp dọc, mỗi ô một dòng.
    Từ 48rem mới xếp ngang, và khi xếp ngang thì PHẢI wrap — bản cũ không
-   wrap nên nút "Xóa bộ lọc" bị đẩy ra ngoài khung 146px ở màn Danh sách
+   wrap nên nút "Xoá bộ lọc" bị đẩy ra ngoài khung 146px ở màn Danh sách
    món ăn của Bếp. */
 .rk-filterbar {
     display: flex;

@@ -174,7 +174,7 @@ export default function CompletedOrdersPage() {
             <PageCard>
                 <PageHeader
                     title="Món đã hoàn thành hôm nay"
-                    description="Chỉ hiển thị món hoàn thành trong ngày hôm nay. Tìm theo tên món, bàn, mã đơn hoặc mã item."
+                    description="Chỉ hiển thị món hoàn thành trong ngày hôm nay. Tìm theo tên món, bàn, mã đơn hoặc mã món."
                     actions={
                         <div className="rk-actions">
                             <span className="rk-chip rk-chip--ok">
@@ -258,7 +258,7 @@ export default function CompletedOrdersPage() {
             {filteredItems.length === 0 ? (
                 <EmptyState
                     title="Không tìm thấy món phù hợp"
-                    description="Hãy thay đổi từ khóa hoặc xoá bộ lọc."
+                    description="Hãy thay đổi từ khoá hoặc xoá bộ lọc."
                     action={
                         <button
                             type="button"
@@ -281,9 +281,9 @@ export default function CompletedOrdersPage() {
                                     <div className="rk-media">
                                         <div>
                                             <span className="rk-rowlist__title">
-                                                Order #{item.orderId}
+                                                Đơn #{item.orderId}
                                                 {' · '}
-                                                Item #{item.orderItemId}
+                                                Món #{item.orderItemId}
                                             </span>
 
                                             <h3>{item.dishName}</h3>
@@ -294,7 +294,11 @@ export default function CompletedOrdersPage() {
                                         </span>
                                     </div>
 
-                                    <div className="rk-rowlist__main">
+                                    {/* .rk-metarow: nhãn TRÊN, giá trị DƯỚI. Bản trước để
+                                        <small> và <strong> đứng cạnh nhau trong một
+                                        khối thường, JSX nuốt khoảng trắng giữa chúng,
+                                        và màn hiện "BànB01", "Số lượngx2". */}
+                                    <div className="rk-metarow">
                                         <div>
                                             <small>Bàn</small>
 

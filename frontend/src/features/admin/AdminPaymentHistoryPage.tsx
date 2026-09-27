@@ -81,7 +81,7 @@ export default function AdminPaymentHistoryPage() {
             })
             .catch(() => {
                 // Không lấy được danh sách bàn thì bỏ lọc theo bàn, chứ không chặn
-                // cả màn: hóa đơn vẫn xem được.
+                // cả màn: hoá đơn vẫn xem được.
             })
 
         return () => controller.abort()
@@ -191,7 +191,7 @@ export default function AdminPaymentHistoryPage() {
         return (
             <LoadingState
                 title="Đang tải lịch sử thanh toán..."
-                description="Hệ thống đang lấy danh sách hóa đơn đã thanh toán."
+                description="Hệ thống đang lấy danh sách hoá đơn đã thanh toán."
             />
         )
     }

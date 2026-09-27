@@ -380,7 +380,7 @@ export default function GroupedKitchenPage() {
             {filteredGroups.length === 0 ? (
                 <EmptyState
                     title="Không có nhóm món phù hợp"
-                    description="Hãy thay đổi từ khóa hoặc bộ lọc."
+                    description="Hãy thay đổi từ khoá hoặc bộ lọc."
                     action={
                         <button
                             type="button"
@@ -473,7 +473,7 @@ export default function GroupedKitchenPage() {
                                                     </div>
 
                                                     <p className="rk-rowlist__meta">
-                                                        Order #{item.orderId} · Item #
+                                                        Đơn #{item.orderId} · Món #
                                                         {item.orderItemId}
                                                     </p>
                                                 </div>

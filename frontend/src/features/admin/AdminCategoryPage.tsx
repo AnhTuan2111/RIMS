@@ -532,7 +532,7 @@ export default function AdminCategoryPage() {
                     {filteredCategories.length === 0 && (
                         <EmptyState
                             title="Không tìm thấy danh mục phù hợp"
-                            description="Hãy thay đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái."
+                            description="Hãy thay đổi từ khoá tìm kiếm hoặc bộ lọc trạng thái."
                             action={
                                 <button
                                     type="button"

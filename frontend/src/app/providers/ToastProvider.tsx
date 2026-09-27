@@ -16,7 +16,7 @@ const DURATION_WITH_ACTION = 8000
 /**
  * Thông báo trong trang, thay cho alert() của trình duyệt.
  *
- * <p>App đang dùng 40 alert() và 5 confirm(). Chúng chặn cả trang, không tùy biến
+ * <p>App đang dùng 40 alert() và 5 confirm(). Chúng chặn cả trang, không tuỳ biến
  * được, và tệ nhất là dùng cho THÀNH CÔNG — bắt người dùng bấm OK để xác nhận
  * một việc họ đã nhìn thấy kết quả.
  *

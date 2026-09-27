@@ -1,6 +1,6 @@
 import {expect, test} from '@playwright/test'
 
-import {ACCOUNTS, api, expectRendered, login} from './helpers'
+import {ACCOUNTS, PW, api, expectRendered, login} from './helpers'
 
 test.describe.configure({mode: 'serial'})
 
@@ -258,5 +258,131 @@ test.describe('Hồ sơ', () => {
         const alert = page.getByRole('alert')
         await expect(alert).toBeVisible({timeout: 15_000})
         await expect(alert).toContainText(/mật khẩu/i)
+    })
+})
+
+test.describe('Phục vụ · gọi lại món bếp đã huỷ', () => {
+    // Lỗi mất món: món bị bếp huỷ nạp vào màn Sửa đơn với số lượng GỐC, nên
+    // bấm + tăng số lượng trên CHÍNH DÒNG ĐÃ HUỶ. Backend đổi con số nhưng
+    // dòng vẫn huỷ — phục vụ thấy "gửi thành công", bếp không bao giờ thấy món.
+    let tableId: number
+    let tableNumber: string
+    let dish: {dishId: number; name: string}
+    let cancelledItemId: number
+    let orderId: number
+
+    test.beforeAll(async () => {
+        const tables = await api(ACCOUNTS.waiter, '/waiter/tables')
+        const free = tables.find((t: {status: string}) => t.status === 'AVAILABLE')
+        expect(free, 'không còn bàn trống nào để kiểm').toBeTruthy()
+        tableId = free.tableId
+        tableNumber = free.tableNumber
+
+        const menu = await api(ACCOUNTS.waiter, '/waiter/menu')
+        dish = menu.find((d: {available: boolean}) => d.available)
+
+        // Gọi hai món: một món để bếp huỷ, một món giữ cho bàn còn phục vụ.
+        const other = menu.find(
+            (d: {available: boolean; dishId: number}) =>
+                d.available && d.dishId !== dish.dishId,
+        )
+        await api(ACCOUNTS.waiter, '/waiter/orders', {
+            method: 'POST',
+            body: JSON.stringify({
+                tableId,
+                items: [
+                    {dishId: dish.dishId, quantity: 1},
+                    {dishId: other.dishId, quantity: 1},
+                ],
+            }),
+        })
+
+        const queue = await api(ACCOUNTS.chef, '/chef/orders')
+        const line = queue.find(
+            (item: {tableNumber: string; dishName: string}) =>
+                item.tableNumber === tableNumber && item.dishName === dish.name,
+        )
+        cancelledItemId = line.orderItemId
+        orderId = line.orderId
+
+        await api(ACCOUNTS.chef, `/chef/orders/${cancelledItemId}/cancel`, {
+            method: 'PUT',
+            body: JSON.stringify({reason: 'Hết nguyên liệu'}),
+        })
+    })
+
+    test('món đã huỷ không hiện như đang gọi, và bấm + gọi lại thành món mới', async ({
+        page,
+    }) => {
+        await login(page, ACCOUNTS.waiter)
+        await page.goto(`/waiter/tables/${tableId}/order/edit`)
+        await expectRendered(page)
+
+        const card = page.locator('.rk-menucard', {
+            has: page.locator('.rk-menucard__name', {hasText: dish.name}),
+        })
+        await expect(card).toContainText(/đã huỷ/i)
+
+        // Bàn không nhận món này: không viền "đã gọi", không số phần trên ảnh.
+        await expect(card).not.toHaveClass(/is-picked/)
+        await expect(card.locator('.rk-menucard__count')).toHaveCount(0)
+
+        await card.getByRole('button', {name: 'Thêm một phần ' + dish.name}).click()
+
+        // Giỏ phải nói đây là MÓN MỚI, không phải "gọi thêm" trên dòng cũ.
+        const cart = page.locator('.rk-cart')
+        await expect(cart).toContainText(dish.name)
+        await expect(cart).toContainText(/món mới/i)
+
+        await cart.getByRole('button', {name: /gửi cập nhật/i}).click()
+        await page
+            .locator('.rk-modal')
+            .getByRole('button', {name: /gửi cập nhật/i})
+            .click()
+
+        // Bếp phải thấy món đó — đây mới là điều duy nhất quan trọng.
+        await expect
+            .poll(
+                async () => {
+                    const queue = await api(ACCOUNTS.chef, '/chef/orders')
+                    return queue.some(
+                        (item: {
+                            tableNumber: string
+                            dishName: string
+                            orderItemId: number
+                        }) =>
+                            item.tableNumber === tableNumber &&
+                            item.dishName === dish.name &&
+                            item.orderItemId !== cancelledItemId,
+                    )
+                },
+                {timeout: 15_000, message: 'bếp không nhận được món gọi lại'},
+            )
+            .toBe(true)
+    })
+
+    test('backend từ chối sửa số lượng trên dòng đã huỷ', async () => {
+        const base = process.env.E2E_API ?? 'http://localhost:8080/rims'
+        const auth = await fetch(`${base}/auth/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: ACCOUNTS.waiter, rawPassword: PW}),
+        })
+        const {accessToken} = await auth.json()
+
+        const res = await fetch(`${base}/waiter/orders/${orderId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+                items: [{orderItemId: cancelledItemId, dishId: dish.dishId, quantity: 2}],
+            }),
+        })
+
+        expect(res.status).toBeGreaterThanOrEqual(400)
+        expect(res.status).toBeLessThan(500)
+        expect(await res.text()).toMatch(/đã bị huỷ/)
     })
 })

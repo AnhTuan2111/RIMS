@@ -218,7 +218,7 @@ export default function AdminUsersPage() {
         try {
             await adminApi.setAccountStatus(user.id, newStatus)
             showSuccess(
-                `Đã ${newStatus ? 'kích hoạt' : 'khóa'} tài khoản ${user.username}`,
+                `Đã ${newStatus ? 'kích hoạt' : 'khoá'} tài khoản ${user.username}`,
             )
         } catch (err: unknown) {
             // Revert nếu server lỗi
@@ -462,7 +462,7 @@ export default function AdminUsersPage() {
                     }
                     description={
                         search || filterStatus !== 'all'
-                            ? 'Hãy đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái.'
+                            ? 'Hãy đổi từ khoá tìm kiếm hoặc bộ lọc trạng thái.'
                             : 'Tạo tài khoản mới để bắt đầu quản lý người dùng.'
                     }
                     action={
@@ -861,7 +861,7 @@ export default function AdminUsersPage() {
                     )}
                     <DR
                         label="Trạng thái"
-                        value={selectedUser.isActive ? 'Đang hoạt động' : 'Đã khóa'}
+                        value={selectedUser.isActive ? 'Đang hoạt động' : 'Đã khoá'}
                         tone={selectedUser.isActive ? 'ok' : 'alert'}
                     />
                     <DR

@@ -27,7 +27,7 @@ export interface UsePollingOptions {
     pauseWhenHidden?: boolean
 
     /**
-     * Hàm xử lý lỗi tùy chọn.
+     * Hàm xử lý lỗi tuỳ chọn.
      */
     onError?: (error: unknown) => void
 }

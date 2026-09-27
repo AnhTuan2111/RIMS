@@ -342,7 +342,7 @@ export function PresetButtonGroup({
                     type="button"
                     onClick={() => onChange('CUSTOM_WEEK')}
                 >
-                    Tùy chọn
+                    Tuỳ chọn
                 </button>
             </div>
 
@@ -453,7 +453,7 @@ export function RevenueDashboard({
             </div>
 
             <PageCard>
-                <h3 className="rk-sectiontitle">Khoảng ngày tùy chọn</h3>
+                <h3 className="rk-sectiontitle">Khoảng ngày tuỳ chọn</h3>
 
                 <form
                     className="rk-stack"

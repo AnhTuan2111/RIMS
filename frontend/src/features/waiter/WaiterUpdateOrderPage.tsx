@@ -65,6 +65,16 @@ function formatChefNoteTime(value?: string | null) {
     })
 }
 
+/**
+ * Dòng nào đại diện cho một món khi món đó có NHIỀU dòng trong đơn.
+ *
+ * <p>Nhiều dòng là chuyện thường: gọi thêm một món đã xong thì backend tạo dòng
+ * mới; món bị bếp huỷ rồi gọi lại cũng thành hai dòng. Nháp khoá theo món, nên
+ * trước đây dòng nào đến SAU thì đè dòng trước — có lúc dòng bị đè lại chính là
+ * dòng đang nấu, thứ duy nhất phục vụ còn sửa được. Nay dòng sửa được thắng.
+ */
+const LINE_PRIORITY: Record<string, number> = {PREPARING: 3, COMPLETED: 2, CANCELLED: 1}
+
 function buildDraftFromOrders(menu: MenuItemResponse[], orders: OrderDetailResponse[]) {
     const draft: Record<number, DraftItem> = {}
 
@@ -76,9 +86,26 @@ function buildDraftFromOrders(menu: MenuItemResponse[], orders: OrderDetailRespo
                 return
             }
 
+            const existing = draft[dish.dishId]
+
+            if (
+                existing &&
+                (LINE_PRIORITY[existing.status ?? ''] ?? 0) >=
+                    (LINE_PRIORITY[item.status ?? ''] ?? 0)
+            ) {
+                return
+            }
+
+            // Dòng ĐÃ HUỶ vào nháp với số lượng 0. Nạp số lượng gốc thì thẻ món
+            // hiện viền "đã gọi" cho một món bàn không hề nhận, và bấm + sẽ
+            // tăng số lượng trên CHÍNH DÒNG ĐÃ HUỶ — backend đổi con số nhưng
+            // dòng vẫn huỷ, bếp không bao giờ thấy, món coi như mất. Từ 0 thì
+            // bấm + đi đúng nhánh "gọi lại như món mới".
+            const cancelled = item.status === 'CANCELLED'
+
             draft[dish.dishId] = {
-                qty: item.quantity,
-                originalQty: item.quantity,
+                qty: cancelled ? 0 : item.quantity,
+                originalQty: cancelled ? 0 : item.quantity,
                 originalNote: item.note ?? '',
                 note: item.note ?? '',
                 orderItemId: item.orderItemId,
@@ -685,6 +712,9 @@ export default function WaiterUpdateOrderPage() {
                                                 <button
                                                     type="button"
                                                     className="rk-stepper__btn"
+                                                    aria-label={
+                                                        'Bớt một phần ' + dish.name
+                                                    }
                                                     disabled={draft.qty <= minQty}
                                                     onClick={() =>
                                                         changeDraftQty(dish.dishId, -1)
@@ -700,6 +730,9 @@ export default function WaiterUpdateOrderPage() {
                                                 <button
                                                     type="button"
                                                     className="rk-stepper__btn"
+                                                    aria-label={
+                                                        'Thêm một phần ' + dish.name
+                                                    }
                                                     disabled={isUnavailable}
                                                     onClick={() =>
                                                         changeDraftQty(dish.dishId, 1)

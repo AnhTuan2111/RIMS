@@ -65,7 +65,7 @@ export default function PaymentResultManager({
 
                 <h1 className="rk-paid__title">Thanh toán thành công</h1>
 
-                <p className="rk-paid__code">Mã hóa đơn: INV-{invoiceId}</p>
+                <p className="rk-paid__code">Mã hoá đơn: INV-{invoiceId}</p>
 
                 {customerName && (
                     <div className="rk-paid__customer">
@@ -112,7 +112,7 @@ export default function PaymentResultManager({
         >
             <div>
                 {itemsList.length === 0 ? (
-                    <p className="rk-note">Không có món ăn trong hóa đơn.</p>
+                    <p className="rk-note">Không có món ăn trong hoá đơn.</p>
                 ) : (
                     <div className="rk-tablewrap rk-tablewrap--scroll">
                         <table className="rk-table rk-table--compact">

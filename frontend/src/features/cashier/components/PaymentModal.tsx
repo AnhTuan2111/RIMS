@@ -283,7 +283,7 @@ export default function PaymentModal({
 
                             <p className="rk-text--muted">
                                 Hệ thống sẽ chuyển hướng sang VNPay để nhập thông tin thẻ.
-                                Hóa đơn sẽ được in sau khi thanh toán thành công.
+                                Hoá đơn sẽ được in sau khi thanh toán thành công.
                             </p>
                         </div>
 

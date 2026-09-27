@@ -50,7 +50,7 @@ export default function CancelledOrdersPage() {
 
             setError(
                 'Không thể tải danh sách món đã huỷ. ' +
-                    'Hãy kiểm tra backend hoặc tài khoản Chef.',
+                    'Kiểm tra kết nối mạng rồi bấm Làm mới.',
             )
         } finally {
             setIsLoading(false)
@@ -118,7 +118,7 @@ export default function CancelledOrdersPage() {
             <PageCard>
                 <PageHeader
                     title="Món đã huỷ hôm nay"
-                    description="Danh sách món Chef huỷ trực tiếp hoặc tự động bị huỷ khi món được đánh dấu tạm hết, trong ngày hôm nay."
+                    description="Danh sách món bếp huỷ trực tiếp hoặc tự động bị huỷ khi món được đánh dấu tạm hết, trong ngày hôm nay."
                     actions={
                         <div className="rk-actions">
                             <span className="rk-chip rk-chip--alert">
@@ -177,7 +177,7 @@ export default function CancelledOrdersPage() {
                             {items.length === 0
                                 ? 'Các món có trạng thái CANCELLED ' +
                                   'sẽ xuất hiện tại đây.'
-                                : 'Hãy thử thay đổi từ khóa tìm kiếm.'}
+                                : 'Hãy thử thay đổi từ khoá tìm kiếm.'}
                         </p>
                     </div>
                 ) : (
@@ -187,9 +187,9 @@ export default function CancelledOrdersPage() {
                                 <div className="rk-media">
                                     <div>
                                         <span className="rk-rowlist__title">
-                                            Order #{item.orderId}
+                                            Đơn #{item.orderId}
                                             {' · '}
-                                            Item #{item.orderItemId}
+                                            Món #{item.orderItemId}
                                         </span>
 
                                         <h3>{item.dishName}</h3>

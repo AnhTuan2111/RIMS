@@ -71,7 +71,15 @@ export async function api(username: string, path: string, init?: RequestInit) {
         )
     }
 
-    return text ? JSON.parse(text) : null
+    // Vài endpoint trả CHUỖI THUẦN (huỷ món trả "Hủy món thành công"), không
+    // phải JSON. Đọc theo content-type thay vì đoán.
+    if (!text) {
+        return null
+    }
+
+    return (res.headers.get('content-type') ?? '').includes('json')
+        ? JSON.parse(text)
+        : text
 }
 
 /** Không màn nào được phép rỗng: React gỡ sạch cây DOM khi gặp lỗi lúc vẽ. */

@@ -131,7 +131,7 @@ export default function CashierInvoicesPage() {
 
                 console.error('[CASHIER_INVOICES_FETCH_ERROR]', requestError)
 
-                setError('Không thể tải danh sách hóa đơn.')
+                setError('Không thể tải danh sách hoá đơn.')
             } finally {
                 if (showFullLoading && !signal?.aborted) {
                     setIsLoading(false)
@@ -227,7 +227,7 @@ export default function CashierInvoicesPage() {
 
             console.error('[CASHIER_INVOICE_DETAIL_ERROR]', requestError)
 
-            notify('Không thể tải chi tiết hóa đơn.', {tone: 'alert'})
+            notify('Không thể tải chi tiết hoá đơn.', {tone: 'alert'})
         } finally {
             setLoadingDetail(false)
         }
@@ -267,8 +267,8 @@ export default function CashierInvoicesPage() {
     return (
         <PageCard>
             <PageHeader
-                title="Hóa đơn hôm nay"
-                description={`Danh sách hóa đơn đã thanh toán trong ngày (${totalElements} hóa đơn)`}
+                title="Hoá đơn hôm nay"
+                description={`Danh sách hoá đơn đã thanh toán trong ngày (${totalElements} hoá đơn)`}
             />
 
             <div className="rk-filterbar">
@@ -309,7 +309,7 @@ export default function CashierInvoicesPage() {
                 <input
                     aria-label="Tìm theo mã hoá đơn"
                     value={invoiceCode}
-                    placeholder="Mã hóa đơn..."
+                    placeholder="Mã hoá đơn..."
                     className="rk-input"
                     onChange={(event) => handleInvoiceCodeChange(event.target.value)}
                 />
@@ -321,13 +321,13 @@ export default function CashierInvoicesPage() {
 
             {isLoading ? (
                 <LoadingState
-                    title="Đang tải lịch sử hóa đơn..."
-                    description="Hệ thống đang lấy danh sách hóa đơn mới nhất."
+                    title="Đang tải lịch sử hoá đơn..."
+                    description="Hệ thống đang lấy danh sách hoá đơn mới nhất."
                 />
             ) : invoices.length === 0 ? (
                 <EmptyState
-                    title="Không có hóa đơn"
-                    description="Không có hóa đơn nào khớp bộ lọc hiện tại."
+                    title="Không có hoá đơn"
+                    description="Không có hoá đơn nào khớp bộ lọc hiện tại."
                 />
             ) : (
                 <div className="rk-tablewrap">
@@ -378,14 +378,20 @@ export default function CashierInvoicesPage() {
                                     </td>
 
                                     <td>
+                                        {/* Nút biểu tượng như ở màn Hoá đơn quản trị.
+                                            Nút chữ "Xem chi tiết" làm bảng rộng hơn 768px
+                                            và bị cắt ở mép phải trên máy tính bảng —
+                                            đúng khổ màn của quầy thu ngân. */}
                                         <button
                                             type="button"
-                                            className="rk-btn"
+                                            className="rk-iconbtn"
+                                            title="Xem chi tiết hoá đơn"
+                                            aria-label={`Xem chi tiết hoá đơn INV-${invoice.invoiceId}`}
                                             onClick={() =>
                                                 void openDetail(invoice.invoiceId)
                                             }
                                         >
-                                            Xem chi tiết
+                                            <Icon name="eye" className="rk-icon" />
                                         </button>
                                     </td>
                                 </tr>

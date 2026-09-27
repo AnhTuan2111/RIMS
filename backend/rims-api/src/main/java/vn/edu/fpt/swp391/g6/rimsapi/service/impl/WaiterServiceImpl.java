@@ -259,6 +259,16 @@ public class WaiterServiceImpl implements WaiterService
                             + " không được thiếu số lượng hoặc món ăn");
                 }
 
+                // Dòng ĐÃ HUỶ là lịch sử, không sửa được. Trước đây nó rơi vào nhánh
+                // "món đang làm" bên dưới: số lượng đổi nhưng trạng thái vẫn là
+                // CANCELLED, nên bếp không bao giờ thấy — phục vụ báo gọi thêm thành
+                // công mà món không bao giờ được nấu. Gọi lại thì gửi như món MỚI.
+                if (existedItem.getStatus() == OrderItemStatus.CANCELLED)
+                {
+                    throw new IllegalArgumentException("Món \"" + existedItem.getDishNameSnapshot()
+                            + "\" đã bị huỷ, không sửa được. Hãy gọi lại như một món mới.");
+                }
+
                 if (existedItem.getStatus().equals(OrderItemStatus.COMPLETED)) // chỉ có thể thêm số lượng chứ không bớt đi được. nếu thêm số lượng thì sẽ tạo order item mới với số lượng bằng phần dư khi trừ (để không bị trùng)
                 {
                     if (itemRequest.getQuantity() < existedItem.getQuantity())

@@ -204,7 +204,7 @@ export default function WaiterOrderDetailPage() {
 
                                                     {item.chefInternalNote && (
                                                         <div className="rk-subnote rk-subnote--busy">
-                                                            Chef: {item.chefInternalNote}
+                                                            Bếp: {item.chefInternalNote}
                                                         </div>
                                                     )}
                                                 </div>

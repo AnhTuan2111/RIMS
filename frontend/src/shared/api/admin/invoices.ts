@@ -29,7 +29,7 @@ export interface InvoiceHistoryFilters {
     customerKeyword?: string
 }
 
-/** Returns paginated payment history, có filter tùy chọn */
+/** Returns paginated payment history, có filter tuỳ chọn */
 export const getPaymentHistory = (
     page = 1,
     pageSize = 10,

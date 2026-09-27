@@ -573,7 +573,7 @@ export default function AdminDishesPage() {
             {filteredDishes.length === 0 && (
                 <EmptyState
                     title="Không tìm thấy món ăn phù hợp"
-                    description="Hãy thay đổi từ khóa, danh mục hoặc trạng thái để tìm món ăn."
+                    description="Hãy thay đổi từ khoá, danh mục hoặc trạng thái để tìm món ăn."
                     action={
                         <button
                             type="button"
