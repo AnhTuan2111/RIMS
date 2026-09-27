@@ -4,7 +4,7 @@ import {useNavigate, useParams} from 'react-router-dom'
 import * as waiterApi from '@/shared/api/waiter'
 import type {ReservationResponse} from '@/shared/api/waiter'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
-import {BackArrow} from './components'
+import {BackArrow, useTableNumber} from './components'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {LoadingState} from '@/shared/components/feedback'
@@ -34,6 +34,9 @@ export default function WaiterReservationDetailPage() {
     const {tableId} = useParams()
 
     const tableIdNumber = Number.parseInt(tableId ?? '0', 10)
+
+    // SỐ BÀN thật ("B03"), không phải khoá chính trong đường dẫn.
+    const tableNumber = useTableNumber(tableIdNumber)
 
     const [reservation, setReservation] = useState<ReservationResponse | null>(null)
 
@@ -183,7 +186,7 @@ export default function WaiterReservationDetailPage() {
                     <BackArrow onClick={() => navigate('/waiter/tables')} />
 
                     <h2 className="rk-sectiontitle">
-                        Chi tiết đặt bàn — Bàn {tableIdNumber}
+                        Chi tiết đặt bàn — Bàn {tableNumber ?? '—'}
                     </h2>
 
                     <button
@@ -201,35 +204,45 @@ export default function WaiterReservationDetailPage() {
                 </div>
 
                 <div className="rk-card rk-card--pad rk-card--narrow">
-                    <div className="rk-card__head-inline">Thông tin đặt bàn</div>
+                    <div className="rk-card__head-inline">
+                        <h3 className="rk-sectiontitle">Thông tin đặt bàn</h3>
+                    </div>
 
                     <div className="rk-stack">
                         <div className="rk-detailrow">
-                            <span>Mã đặt bàn</span>
-                            <strong>{reservationId ?? '—'}</strong>
+                            <span className="rk-detailrow__label">Mã đặt bàn</span>
+                            <strong className="rk-detailrow__value">
+                                {reservationId ?? '—'}
+                            </strong>
                         </div>
 
                         <div className="rk-detailrow">
-                            <span>Thời gian</span>
-                            <strong>
+                            <span className="rk-detailrow__label">Thời gian</span>
+                            <strong className="rk-detailrow__value">
                                 {date} — {time}
                             </strong>
                         </div>
 
                         <div className="rk-detailrow">
-                            <span>Khách hàng</span>
-                            <strong>{reservation.customerName}</strong>
+                            <span className="rk-detailrow__label">Khách hàng</span>
+                            <strong className="rk-detailrow__value">
+                                {reservation.customerName}
+                            </strong>
                         </div>
 
                         <div className="rk-detailrow">
-                            <span>Số điện thoại</span>
-                            <strong>{reservation.phone}</strong>
+                            <span className="rk-detailrow__label">Số điện thoại</span>
+                            <strong className="rk-detailrow__value">
+                                {reservation.phone}
+                            </strong>
                         </div>
 
                         {reservation.note && (
                             <div className="rk-detailrow">
-                                <span>Ghi chú</span>
-                                <strong>{reservation.note}</strong>
+                                <span className="rk-detailrow__label">Ghi chú</span>
+                                <strong className="rk-detailrow__value">
+                                    {reservation.note}
+                                </strong>
                             </div>
                         )}
                     </div>

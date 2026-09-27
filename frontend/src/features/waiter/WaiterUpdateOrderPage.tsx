@@ -856,7 +856,7 @@ export default function WaiterUpdateOrderPage() {
             <Modal
                 open={showConfirm}
                 title="Xác nhận cập nhật đơn hàng"
-                description={`Bàn ${tableIdNumber} — bạn đang gửi yêu cầu cập nhật các món sau:`}
+                description={`Bàn ${tableNumber ?? '—'} — bạn đang gửi yêu cầu cập nhật các món sau:`}
                 onClose={() => {
                     if (!submitting) {
                         setShowConfirm(false)
