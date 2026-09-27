@@ -174,7 +174,7 @@ a {
 .rk-chip:focus-visible,
 .rk-tablecard:focus-visible,
 .rk-ticket:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 2px;
 }
 
@@ -220,21 +220,21 @@ a {
 }
 
 .rk-btn--primary {
-    background: var(--rims-brand);
-    color: var(--rims-ink-on-brand);
+    background: var(--rims-ok-fill);
+    color: var(--rims-ink-on-ok);
 }
 
 .rk-btn--primary:hover:not(:disabled) {
-    background: var(--rims-brand-hover);
+    background: var(--rims-ok-hover);
 }
 
 .rk-btn--primary:active:not(:disabled) {
-    background: var(--rims-brand-active);
+    background: var(--rims-ok-active);
 }
 
 /* Hành động xác nhận tích cực: xong món, thanh toán. */
 .rk-btn--go {
-    background: var(--rims-ok);
+    background: var(--rims-ok-fill);
     color: var(--rims-ink-on-brand);
 }
 
@@ -320,7 +320,7 @@ a {
 }
 
 .rk-textarea:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 1px;
 }
 
@@ -395,7 +395,7 @@ a {
 }
 
 .rk-iconbtn:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 1px;
 }
 
@@ -406,7 +406,7 @@ a {
 
 .rk-iconbtn--brand:hover:not(:disabled) {
     background: var(--rims-brand-soft);
-    color: var(--rims-brand);
+    color: var(--rims-info);
 }
 
 .rk-iconbtn--danger {
@@ -458,17 +458,17 @@ a {
 }
 
 .rk-chip--ok {
-    background: var(--rims-ok);
+    background: var(--rims-ok-fill);
     color: var(--rims-ink-on-ok);
 }
 
 .rk-chip--busy {
-    background: var(--rims-busy);
+    background: var(--rims-busy-fill);
     color: var(--rims-ink-on-busy);
 }
 
 .rk-chip--alert {
-    background: var(--rims-alert);
+    background: var(--rims-alert-fill);
     color: var(--rims-ink-on-alert);
 }
 
@@ -506,7 +506,7 @@ button.rk-chip:hover {
 }
 
 .rk-chip--brand {
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
 }
 
@@ -541,7 +541,7 @@ button.rk-chip:hover {
     min-width: 72px;
     padding: var(--rims-space-3) var(--rims-space-2);
     border-radius: var(--rims-radius-md);
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
 }
 
@@ -820,7 +820,7 @@ table {
     width: 8px;
     height: 8px;
     border-radius: var(--rims-radius-pill);
-    background: var(--rims-alert);
+    background: var(--rims-alert-fill);
     flex: none;
 }
 
@@ -848,7 +848,7 @@ table {
 }
 
 .rk-stat--tab:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: -2px;
 }
 
@@ -961,11 +961,11 @@ table {
 
 .rk-passwordfield__toggle:hover {
     background: var(--rims-brand-soft);
-    color: var(--rims-brand);
+    color: var(--rims-info);
 }
 
 .rk-passwordfield__toggle:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 2px;
 }
 
@@ -1060,7 +1060,7 @@ textarea.rk-input {
 }
 
 .rk-pager__btn:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 2px;
 }
 
@@ -1070,7 +1070,7 @@ textarea.rk-input {
 }
 
 .rk-pager__btn--current {
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     border-color: var(--rims-brand);
     color: var(--rims-ink-on-brand);
     font-weight: var(--rims-weight-bold);
@@ -1261,7 +1261,7 @@ textarea.rk-input {
 }
 
 .rk-modal__close:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 2px;
 }
 
@@ -1319,7 +1319,7 @@ textarea.rk-input {
 
 /* Nút phá huỷ dạng đặc, dùng trong hộp xác nhận. */
 .rk-btn--danger-solid {
-    background: var(--rims-alert);
+    background: var(--rims-alert-fill);
     color: var(--rims-ink-on-brand);
 }
 
@@ -1391,7 +1391,7 @@ textarea.rk-input {
     overflow-x: auto;
     /* Cuon ngang trong hop thi phai co diem tua cho ngon tay va cho ban phim. */
     overscroll-behavior-x: contain;
-    border: var(--rims-border) solid var(--rims-line);
+    border: var(--rims-border) solid var(--rims-line-strong);
     border-radius: var(--rims-radius-lg);
     background: var(--rims-surface);
 }
@@ -1723,7 +1723,7 @@ textarea.rk-input {
     display: flex;
     flex-direction: column;
     /* Giọng V4: viền dày dựng độ nổi, thay cho bóng. */
-    border: var(--rims-border) solid var(--rims-line);
+    border: var(--rims-border) solid var(--rims-line-strong);
     border-radius: var(--rims-radius-lg);
     background: var(--rims-surface);
 }
@@ -1848,7 +1848,7 @@ textarea.rk-input {
 }
 
 .rk-summary__row--total .rk-summary__value {
-    color: var(--rims-brand);
+    color: var(--rims-ink);
     font-size: var(--rims-text-xl);
     font-weight: var(--rims-weight-black);
 }
@@ -1899,7 +1899,7 @@ textarea.rk-input {
 .rk-bar__fill {
     height: 100%;
     border-radius: inherit;
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
 }
 
 /* ---------- Dấu bắt buộc trong biểu mẫu ---------- */
@@ -1971,7 +1971,7 @@ textarea.rk-input {
     align-items: center;
     gap: var(--rims-space-2);
     margin-bottom: var(--rims-space-5);
-    color: var(--rims-brand);
+    color: var(--rims-info);
     font-size: var(--rims-text-sm);
     font-weight: var(--rims-weight-semibold);
     text-decoration: none;
@@ -1982,7 +1982,7 @@ textarea.rk-input {
 }
 
 .rk-link {
-    color: var(--rims-brand);
+    color: var(--rims-info);
     font-weight: var(--rims-weight-semibold);
     text-decoration: none;
 }
@@ -2026,12 +2026,12 @@ textarea.rk-input {
 }
 
 .rk-steps__item--active .rk-steps__mark {
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
 }
 
 .rk-steps__item--done .rk-steps__mark {
-    background: var(--rims-ok);
+    background: var(--rims-ok-fill);
     color: var(--rims-ink-on-brand);
 }
 
@@ -2123,7 +2123,7 @@ textarea.rk-input {
     width: 18px;
     height: 18px;
     flex: none;
-    accent-color: var(--rims-brand);
+    accent-color: var(--rims-ok);
     cursor: pointer;
 }
 
@@ -2145,7 +2145,7 @@ textarea.rk-input {
 }
 
 .rk-radiorow input[type='radio'] {
-    accent-color: var(--rims-brand);
+    accent-color: var(--rims-ok);
     cursor: pointer;
 }
 
@@ -2404,7 +2404,7 @@ textarea.rk-input {
 }
 
 .rk-segment__btn:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 1px;
 }
 
@@ -2445,7 +2445,7 @@ textarea.rk-input {
 }
 
 .rk-rank--1 {
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
 }
 
@@ -2614,7 +2614,7 @@ textarea.rk-input {
 
 .rk-datefield__shell:focus-within {
     border-color: var(--rims-brand);
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 1px;
 }
 
@@ -2636,7 +2636,7 @@ textarea.rk-input {
 }
 
 .rk-datefield__trigger:hover {
-    color: var(--rims-brand);
+    color: var(--rims-info);
 }
 
 /* ---------- Lịch ---------- */
@@ -2737,7 +2737,7 @@ textarea.rk-input {
 }
 
 .rk-calendar__day.is-selected {
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
     font-weight: var(--rims-weight-bold);
 }
@@ -2752,7 +2752,7 @@ textarea.rk-input {
 }
 
 .rk-calendar__foot button {
-    color: var(--rims-brand);
+    color: var(--rims-info);
     font-size: var(--rims-text-sm);
     font-weight: var(--rims-weight-semibold);
     cursor: pointer;
@@ -2798,11 +2798,11 @@ textarea.rk-input {
 
 .rk-stepper__btn:hover:not(:disabled) {
     border-color: var(--rims-brand);
-    color: var(--rims-brand);
+    color: var(--rims-info);
 }
 
 .rk-stepper__btn:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 1px;
 }
 
@@ -3198,7 +3198,7 @@ body.rk-drawer-open {
     height: 8px;
     flex: none;
     border-radius: var(--rims-radius-pill);
-    background: var(--rims-ok);
+    background: var(--rims-ok-fill);
 }
 
 .rk-shell__user strong {
@@ -3228,7 +3228,7 @@ body.rk-drawer-open {
     gap: var(--rims-space-3);
     padding: var(--rims-space-3) var(--rims-gutter);
     padding-top: max(var(--rims-space-3), env(safe-area-inset-top));
-    border-bottom: var(--rims-border) solid var(--rims-line);
+    border-bottom: var(--rims-border) solid var(--rims-line-strong);
     background: var(--rims-surface);
 }
 
@@ -3313,7 +3313,7 @@ body.rk-drawer-open {
     width: 7px;
     height: 7px;
     border-radius: var(--rims-radius-pill);
-    background: var(--rims-ok);
+    background: var(--rims-ok-fill);
 }
 
 .rk-shell__top h1 {
@@ -3356,7 +3356,7 @@ body.rk-drawer-open {
 }
 
 .rk-tabs__btn:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: -2px;
 }
 
@@ -3376,7 +3376,7 @@ body.rk-drawer-open {
     height: 48px;
     flex: none;
     border-radius: var(--rims-radius-pill);
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
     font-size: var(--rims-text-xl);
     font-weight: var(--rims-weight-bold);
@@ -3467,15 +3467,15 @@ body.rk-drawer-open {
 
 /* Chấm chú giải theo trạng thái bàn: khỏi phải tô màu trong JSX. */
 .rk-legend__dot--ok {
-    background: var(--rims-ok);
+    background: var(--rims-ok-fill);
 }
 
 .rk-legend__dot--busy {
-    background: var(--rims-busy);
+    background: var(--rims-busy-fill);
 }
 
 .rk-legend__dot--brand {
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
 }
 
 /* Giá trị chỉ đọc trong hồ sơ: nhạt hơn để phân biệt với ô nhập được. */
@@ -3741,7 +3741,7 @@ a.rk-statcard:hover {
 }
 
 a.rk-statcard:focus-visible {
-    outline: 2px solid var(--rims-brand);
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
     outline-offset: 2px;
 }
 

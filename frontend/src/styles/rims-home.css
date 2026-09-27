@@ -58,7 +58,7 @@
 .rk-home__logo--letter {
     display: grid;
     place-items: center;
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
     font-size: var(--rims-text-xl);
     font-weight: var(--rims-weight-black);
@@ -175,7 +175,7 @@
     height: 30px;
     padding: 0 var(--rims-space-2);
     border-radius: var(--rims-radius-sm);
-    background: var(--rims-brand);
+    background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
     font-size: var(--rims-text-sm);
     font-weight: var(--rims-weight-bold);

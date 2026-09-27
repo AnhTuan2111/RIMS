@@ -1,148 +1,170 @@
 /* =========================================================================
    RIMS — token nền của toàn bộ giao diện
-   Hệ: "Thép" (bảng màu C) + giọng component "Đậm & nét" (V4).
-   Nguồn thật: design.md ở gốc repo.
+   Hệ: "Phiếu bếp" — neo-brutalist POS, retro.
+   Nguồn thật: design.md ở gốc repo · bản dựng: docs/redesign/06-spec.html
    =========================================================================
 
-   BẢNG MÀU: xám lạnh gần trung tính, một màu xanh dương duy nhất làm nhấn.
-   Không sắc ấm nào cả — nền là xám ngả lam rất nhạt, mực gần đen ngả lam.
+   BỐN MÀU MANG NGHĨA. Màu LÀ nghĩa, không phải trang trí:
+     LÀM  lục     xong · lưu · thanh toán · bàn trống
+     BỎ   đỏ      huỷ · xoá · lỗi · quá hạn — KIÊM luôn màu thương hiệu
+     CHỜ  hổ phách  đang nấu · đang phục vụ · cần chú ý
+     TIN  xanh     đã đặt trước · chờ thanh toán · liên kết · vòng focus
 
-   VÌ SAO BỎ HAI BẢNG TRƯỚC: bản vang rồi bản xanh dầu đều gắn app vào một
-   nền ẩm thực cụ thể; bản giấy kem "Phiếu bếp" thì ngả vàng và lấy vạch trái
-   3px làm chữ ký — đúng tell "side-stripe card", thứ đọc ra rất 2018-SaaS.
-   Bảng này trung tính, để màu của MÓN ĂN trong ảnh là thứ có sắc duy nhất
-   trên màn.
+   MỘT ĐỎ DUY NHẤT. Thương hiệu và phá huỷ dùng chung một mã. Phân biệt bằng
+   VỊ TRÍ: ở vỏ app nó là nhận diện, trên nút nó là phá huỷ.
 
-   GIỌNG V4: vuông tuốt kể cả nút và ô nhập, viền 2px, nhãn nhỏ in hoa, chip
-   trạng thái tô đặc. Độ nổi do viền dày tạo ra, không do bóng. Đọc được từ xa
-   — màn treo trong bếp cũng dùng được.
+   LUẬT: nút chính LUÔN lục, mọi màn. Tối đa 3 màu một khung nhìn, chưa kể
+   mực và giấy. Chip xám (ca, phương thức trả, danh mục) không tính.
+
+   TÁCH MÀU-CHỮ KHỎI MÀU-NỀN. Đây là chỗ dễ sai nhất:
+     --rims-ok        màu CHỮ và VIỀN. Đọc được trên nền trang ở cả hai chế độ.
+     --rims-ok-fill   màu NỀN của khối tô đặc.
+     --rims-ink-on-ok màu chữ NẰM TRÊN khối đó.
+   Ở chế độ sáng hai cái đầu trùng nhau. Ở chế độ tối chúng tách hẳn: chữ là
+   sắc sáng, nền là sắc tint rất tối. Gộp làm một thì chế độ tối hoặc mất chữ,
+   hoặc thành khối màu rực chói mắt.
 
    LUẬT DUY NHẤT: file component KHÔNG được viết mã màu, cỡ chữ, khoảng cách
    hay bo góc trực tiếp. Mọi giá trị đi qua var(--rims-*). Muốn một giá trị
    chưa có thì thêm token ở đây trước rồi mới dùng.
 
-   Màu ngữ nghĩa tách nhau bằng ĐỘ SÁNG chứ không chỉ bằng sắc, để người mù
-   màu vẫn phân biệt được trạng thái bàn và trạng thái món.
+   Tương phản đo bằng công thức WCAG, không phỏng:
+   chế độ sáng 29/29 cặp đạt · chế độ tối 9/9. Sàn 4.5:1 chữ, 3.0:1 khối và viền.
    ========================================================================= */
 
 :root {
     /* ---------- Nền và bề mặt ---------- */
-    /* Giấy ấm ngả kem. Không trắng tinh — chói khi nhìn suốt ca. */
-    --rims-paper: #f6f7f9;
-    --rims-surface: #fdfefe;
-    --rims-surface-2: #eceff3;
-    --rims-surface-3: #e3e8ee;
+    /* Giấy ấm. Không trắng tinh — chói khi nhìn suốt ca. */
+    --rims-paper: #f3f1ea;
+    --rims-surface: #ffffff;
+    --rims-surface-2: #e8e5db;
+    --rims-surface-3: #d8d4c7;
 
-    --rims-line: #dde1e7;
-    /* Viền ô nhập phải đạt 3:1 với mặt thẻ mới nhìn ra được cạnh ô. */
-    --rims-line-strong: #7d8894;
+    /* Kẻ MẢNH trong lòng bảng và danh sách. Không phải viền component. */
+    --rims-line: #d8d4c7;
+    /* Viền DÀY 2px của thẻ, nút, ô nhập — mực đặc. Đây là chữ ký của hệ. */
+    --rims-line-strong: #111214;
 
     /* ---------- Chữ ---------- */
-    --rims-ink: #14181d;
-    --rims-ink-2: #444c55;
-    /* Phải đạt 4.5:1 cả trên --rims-surface-2 (nền dòng tiêu đề bảng) chứ
-       không chỉ trên --rims-paper — nền bảng tối hơn nền trang. */
-    --rims-ink-3: #5e6772;
-    --rims-ink-on-brand: #f5f9ff;
+    --rims-ink: #111214;
+    --rims-ink-2: #3c3e42;
+    --rims-ink-3: #5c5f64;
+    --rims-ink-on-brand: #ffffff;
 
-    /* Thanh bên luôn tối kể cả ở chế độ sáng, nên chữ phụ trên nó không dùng
-       được --rims-ink-3 (màu đó tính cho nền sáng). */
-    --rims-ink-on-dark: #eef1f5;
-    --rims-ink-on-dark-2: #9aa5b1;
+    /* Thanh bên luôn tối kể cả ở chế độ sáng. KHÔNG đảo theo chủ đề. */
+    --rims-ink-on-dark: #f3f1ea;
+    --rims-ink-on-dark-2: #b6b2a6;
 
-    /* Nền khung luôn tối: thanh bên, màn đăng nhập, trang công khai. Đây là
-       khối mực của tờ phiếu. KHÔNG đảo theo chủ đề — dùng --rims-ink thì ở
-       chế độ tối nó lật thành nền sáng, và chữ sáng trên đó không đọc được. */
-    --rims-shell: #14181d;
-    --rims-shell-2: #1b2129;
+    --rims-shell: #111214;
+    --rims-shell-2: #1b1b1b;
 
-    /* Màu nhấn DÙNG TRÊN khung tối. KHÔNG đảo theo chủ đề: --rims-brand ở chế
-       độ tối được nâng sáng để đọc trên nền tối của TRANG, nhưng thanh bên
-       thì luôn tối — lấy bản sáng đó làm nền cho mục đang chọn thì tương phản
-       với chữ sáng tụt xuống dưới ngưỡng. */
-    --rims-shell-accent: #1f5fbf;
-    --rims-shell-accent-2: #2464c4;
-    --rims-shell-accent-3: #184c9b;
+    /* Màu nhấn DÙNG TRÊN khung tối. Không đảo theo chủ đề. */
+    --rims-shell-accent: #c8271b;
+    --rims-shell-accent-2: #d63324;
+    --rims-shell-accent-3: #a81f15;
+    --rims-shell-accent-rgb: 200 39 27;
 
-    /* Bản "R G B" để dùng được trong rgb(var(--x) / N%) cho các mảng sáng mờ. */
-    --rims-shell-accent-rgb: 31 95 191;
+    /* Màn báo thanh toán xong phủ kín màn hình nên tự quyết màu nền. Giữ lục
+       vì đây là tín hiệu NGỮ NGHĨA (xong), không phải màu thương hiệu. */
+    --rims-paid: #12703f;
+    --rims-ink-on-paid: #ffffff;
 
-    /* Màn báo thanh toán xong phủ kín màn hình nên nó tự quyết màu nền, không
-       theo nền trang — cùng lý do với thanh bên. Giữ màu xanh lá vì đây là
-       tín hiệu NGỮ NGHĨA (xong), không phải màu thương hiệu. */
-    --rims-paid: #16704a;
-    --rims-ink-on-paid: #f2f9f5;
+    /* ---------- Thương hiệu = màu BỎ ----------
+       Một đỏ duy nhất. Ở rail và băng mục con nó là nhận diện; trên nút nó là
+       phá huỷ. Không bao giờ dùng cho nút chính — nút chính luôn lục. */
+    --rims-brand: #c8271b;
+    --rims-brand-fill: #c8271b;
+    --rims-brand-hover: #b02217;
+    --rims-brand-active: #971d14;
+    --rims-brand-soft: #f7dedb;
+    --rims-brand-line: #e8b5af;
 
-    /* ---------- Thương hiệu ---------- */
-    /* Đỏ son là màu hành động chính: nút, điều hướng đang chọn, vòng tiêu
-       điểm, liên kết. Đạt 6.10:1 trên nền giấy và 6.15:1 khi làm nền nút. */
-    --rims-brand: #1f5fbf;
-    --rims-brand-hover: #184c9b;
-    --rims-brand-active: #133d7d;
-    --rims-brand-soft: #e8effa;
-    --rims-brand-line: #c3d6f2;
-
-    /* Nâu đồng CHỈ dùng cho nhận diện và nét trang trí trên nền tối. Tương
-       phản với nền sáng quá thấp nên KHÔNG BAO GIỜ dùng cho chữ hay viền cần
-       nhìn rõ — chỗ đó dùng --rims-gold-deep. */
+    /* Nâu đồng: giữ token để không vỡ chỗ đang tham chiếu. Hệ mới không dùng
+       vàng làm nét nhấn — gỡ hẳn ở pha dọn dẹp. */
     --rims-gold: #8a6b3a;
     --rims-gold-deep: #6b5129;
     --rims-gold-soft: #f1ece2;
 
-    /* ---------- Màu ngữ nghĩa ---------- */
-    /* Bàn trống · món xong */
-    --rims-ok: #16704a;
-    --rims-ok-soft: #e5efe9;
-    --rims-ok-line: #bed6c8;
+    /* ---------- Màu ngữ nghĩa ----------
+       -           : màu CHỮ và VIỀN
+       -fill       : màu NỀN khối tô đặc
+       --rims-ink-on-* : màu chữ nằm TRÊN khối đó */
 
-    /* Đang phục vụ · đang nấu · đã đặt trước */
-    --rims-busy: #8a5a12;
-    --rims-busy-soft: #f4eddd;
-    --rims-busy-line: #e2d3ac;
+    /* LÀM — bàn trống · món xong · nút chính */
+    --rims-ok: #12703f;
+    --rims-ok-fill: #12703f;
+    --rims-ok-hover: #0f6035;
+    --rims-ok-active: #0c4f2b;
+    --rims-ok-soft: #dceee4;
+    --rims-ok-line: #b9d9c7;
 
-    /* Quá giờ · lỗi · huỷ */
-    --rims-alert: #b02532;
-    --rims-alert-soft: #f8e8ea;
-    --rims-alert-line: #ecc7cc;
+    /* CHỜ — đang phục vụ · đang nấu */
+    --rims-busy: #8a4f00;
+    --rims-busy-fill: #a15c00;
+    --rims-busy-soft: #f6e9d2;
+    --rims-busy-line: #e5cfa4;
 
-    /* Chữ trên nền chip tô đặc (giọng V4). */
-    --rims-ink-on-ok: #f2f9f5;
-    --rims-ink-on-busy: #fdf8ef;
-    --rims-ink-on-alert: #fdf3f4;
-    --rims-ink-on-idle: #f2f4f6;
+    /* BỎ — quá giờ · lỗi · huỷ. Cùng mã với thương hiệu. */
+    --rims-alert: #c8271b;
+    --rims-alert-fill: #c8271b;
+    --rims-alert-soft: #f7dedb;
+    --rims-alert-line: #e8b5af;
 
-    /* Không hoạt động */
-    --rims-idle: #5e6772;
-    --rims-idle-soft: #edeff2;
-    --rims-idle-line: #d8dde3;
+    /* TIN — đã đặt trước · chờ thanh toán · liên kết · vòng focus.
+       Vai này trước đây do --rims-brand gánh, nên đổi brand sang đỏ mà không
+       tách TIN ra thì mọi liên kết và vòng focus đều đỏ, đọc ra là lỗi. */
+    --rims-info: #1b5fbf;
+    --rims-info-fill: #1b5fbf;
+    --rims-info-soft: #dde6f6;
+    --rims-info-line: #b8cdec;
+    --rims-ink-on-info: #ffffff;
+
+    /* Vòng focus. Viền 2px dễ ăn mất vòng focus nên vòng nằm NGOÀI và dùng
+       màu TIN để không lẫn với đỏ phá huỷ. */
+    --rims-focus: #1b5fbf;
+
+    /* Chữ trên nền chip và nút tô đặc. */
+    --rims-ink-on-ok: #ffffff;
+    --rims-ink-on-busy: #ffffff;
+    --rims-ink-on-alert: #ffffff;
+    --rims-ink-on-idle: #3c3e42;
+
+    /* Không hoạt động · thuộc tính (ca, phương thức trả, danh mục, số chỗ).
+       Chip xám KHÔNG tiêu ngân sách 3 màu. */
+    --rims-idle: #5c5f64;
+    --rims-idle-fill: #e8e5db;
+    --rims-idle-soft: #e8e5db;
+    --rims-idle-line: #d8d4c7;
 
     /* ---------- Sắc nền của lớp phủ mờ ----------
-       Quầng tiêu điểm và các mảng sáng nền đều là màu trong suốt. Ghi dưới
-       dạng ba số "R G B" để dùng được rgb(var(--x) / 12%). */
-    --rims-tint-ink: 20 24 29;
-    --rims-tint-brand: 31 95 191;
-    --rims-tint-hi: 253 254 254;
+       Ghi dưới dạng ba số "R G B" để dùng được rgb(var(--x) / 12%). */
+    --rims-tint-ink: 17 18 20;
+    --rims-tint-brand: 200 39 27;
+    --rims-tint-hi: 255 255 255;
     --rims-tint-gold: 138 107 58;
-    --rims-tint-busy: 138 90 18;
-    --rims-tint-ok: 22 112 74;
-    --rims-tint-alert: 176 37 50;
+    --rims-tint-busy: 161 92 0;
+    --rims-tint-ok: 18 112 63;
+    --rims-tint-alert: 200 39 27;
 
     /* ---------- Màu biểu đồ ----------
-       Bốn ca trong ngày là bốn mốc NỐI TIẾP nhau, nên dùng thang một sắc
-       đậm dần chứ không phải bốn màu rời. */
-    --rims-chart-1: #c3d6f2;
-    --rims-chart-2: #7aa5e0;
-    --rims-chart-3: #3f7ccb;
-    --rims-chart-4: #1f5fbf;
-    --rims-chart-empty: #dde1e7;
+       Bốn ca trong ngày là bốn mốc NỐI TIẾP nhau, nên dùng thang một sắc đậm
+       dần chứ không phải bốn màu rời. Thang lấy màu TIN, không lấy đỏ — biểu
+       đồ là thông tin, không phải cảnh báo. */
+    --rims-chart-1: #b8cdec;
+    --rims-chart-2: #7ba0da;
+    --rims-chart-3: #3d76c8;
+    --rims-chart-4: #1b5fbf;
+    --rims-chart-empty: #d8d4c7;
 
     /* ---------- Chữ ----------
        Ràng buộc cứng: giao diện toàn tiếng Việt, mặt chữ phải đủ dấu ở mọi
-       cân nặng. Be Vietnam Pro do người Việt thiết kế. */
+       cân nặng. Cả ba đều có subset vietnamese.
+       Archivo áp vào h1..h6 và nhãn nút ở pha P3; token khai sẵn từ đây. */
+    --rims-font-display: 'Archivo', 'IBM Plex Sans', system-ui, sans-serif;
     --rims-font-sans: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    /* Be Vietnam Pro đứng ngay sau JetBrains Mono để hứng ký hiệu ₫ (U+20AB)
-       và các dấu tiếng Việt mà subset mono đang nạp không có — nếu không, ký
-       hiệu tiền rơi sang font hệ thống và lệch hẳn cỡ so với chữ số. */
+    /* Mặt chữ thân đứng ngay sau JetBrains Mono để hứng ký hiệu ₫ (U+20AB) và
+       các dấu tiếng Việt mà subset mono đang nạp không có — nếu không, ký hiệu
+       tiền rơi sang font hệ thống và lệch hẳn cỡ so với chữ số. */
     --rims-font-mono: 'JetBrains Mono', 'Be Vietnam Pro', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
     --rims-text-xs: 12px;
@@ -152,12 +174,10 @@
     --rims-text-xl: 20px;
     --rims-text-2xl: 26px;
     --rims-text-3xl: 34px;
-    /* Tiêu đề màn co giãn theo bề rộng thay vì nhảy bậc ở điểm ngắt. */
     --rims-text-display: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
 
-    /* Cỡ riêng cho SỐ LƯỢNG MÓN — chữ ký của app này.
-       Đầu bếp đọc con số này từ cách màn hình một sải tay, nên nó phải to
-       hơn cả tên món. */
+    /* Cỡ riêng cho SỐ LƯỢNG MÓN — chữ ký của app này. Đầu bếp đọc con số này
+       từ cách màn hình một sải tay, nên nó phải to hơn cả tên món. */
     --rims-text-qty: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
     --rims-text-qty-lg: clamp(2.25rem, 1.8rem + 2vw, 3.25rem);
 
@@ -187,45 +207,54 @@
     --rims-space-12: 48px;
     --rims-space-16: 64px;
 
-    /* Lề ngang của trang: hẹp ở điện thoại, rộng dần lên desktop. */
     --rims-gutter: clamp(1rem, 0.5rem + 2vw, 2rem);
 
+    /* ---------- Chiều rộng theo LOẠI nội dung ----------
+       Bảng, kanban và sơ đồ mặt bằng giãn hết màn. Ba loại dưới đây thì không:
+       ô nhập dài hai mét là lỗi dùng được, không phải phong cách. */
+    --rims-w-form: 46rem;
+    --rims-w-prose: 68ch;
+    /* Cột lưới ảnh không hẹp hơn mức này: màn rộng thì ẢNH TO HƠN, không phải
+       nhiều cột hơn. */
+    --rims-w-tile: 15rem;
+
     /* ---------- Bo góc ----------
-       Giọng V4 "Đậm & nét": VUÔNG TUỐT, kể cả nút và ô nhập. Độ nổi đến từ
-       viền dày chứ không từ góc bo. */
+       VUÔNG TUỐT, kể cả nút và ô nhập. Ngoại lệ duy nhất: radio tròn. */
     --rims-radius-none: 0;
     --rims-radius-sm: 0;
     --rims-radius-md: 0;
     --rims-radius-lg: 0;
-    /* Chỉ dành cho ảnh đại diện và chấm trạng thái — những thứ vốn tròn. */
     --rims-radius-pill: 999px;
 
-    /* ---------- Độ dày viền ----------
-       V4 dựng độ nổi bằng viền dày, không bằng bóng. Viền đậm cho khung có
-       thể bấm hoặc khung chứa dữ liệu; viền mảnh cho kẻ trong bảng. */
+    /* ---------- Độ dày viền ---------- */
     --rims-border: 2px;
     --rims-hairline: 1px;
 
     /* ---------- Đổ bóng ----------
-       KHÔNG CÓ. Độ sâu do kẻ và nền tạo ra. Hai token giữ lại để không phải
-       sửa hàng trăm chỗ tham chiếu; giá trị là none. */
-    --rims-shadow-raised: none;
-    /* Lop noi (hop thoai, menu tha, toast) van can tach khoi nen dang sau.
-       Tach bang MOT VONG VIEN 1px chu khong phai bong mo — dung nguyen tac
-       "do sau do ke tao ra". */
-    --rims-shadow-overlay: 0 0 0 1px var(--rims-line-strong);
+       Bóng OFFSET CỨNG, blur 0 — đọc như bóng in hoặc sticker, không phải
+       chiều sâu. Đây là chữ ký của hệ, cùng với bo góc 0 và viền 2px.
+       Hover lún nửa khoảng, bấm lún hết và bóng về 0.
+
+       CHỈ ở: thẻ · nút · modal · phiếu · ô thống kê.
+       KHÔNG BAO GIỜ trong lòng bảng, trên hàng danh sách, hay trên ô nhập —
+       hai bài tham chiếu đều cảnh báo style này tệ với bảng dữ liệu dày. */
+    --rims-offset: 4px;
+    --rims-shadow-raised: var(--rims-offset) var(--rims-offset) 0 var(--rims-line-strong);
+    --rims-shadow-pressed: calc(var(--rims-offset) / 2) calc(var(--rims-offset) / 2) 0
+        var(--rims-line-strong);
+    --rims-shadow-overlay: var(--rims-offset) var(--rims-offset) 0 var(--rims-line-strong);
 
     /* ---------- Chuyển động ----------
-       Dự án motion-cut: không thư viện animation nào. Chỉ transform và
-       opacity, ba easing đặt tên, không nảy, không vọt quá. */
-    --rims-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --rims-ease-in: cubic-bezier(0.6, 0, 0.8, 0.4);
-    --rims-ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
+       Dự án motion-cut: không thư viện animation nào. Brutalism dùng chuyển
+       động DỨT KHOÁT — gần như không easing, dưới 100ms. */
+    --rims-ease-out: linear;
+    --rims-ease-in: linear;
+    --rims-ease-in-out: linear;
 
     --rims-dur-instant: 90ms;
-    --rims-dur-short: 140ms;
-    --rims-dur-medium: 200ms;
-    --rims-dur-drawer: 220ms;
+    --rims-dur-short: 90ms;
+    --rims-dur-medium: 160ms;
+    --rims-dur-drawer: 200ms;
 
     /* ---------- Lớp chồng ---------- */
     --rims-z-base: 0;
@@ -235,152 +264,236 @@
     --rims-z-overlay: 40;
     --rims-z-toast: 50;
 
-    /* ---------- Kích thước khung ---------- */
+    /* ---------- Kích thước khung ----------
+       Rail thu từ 264px xuống 4.6rem ở pha P6: icon một nét kèm nhãn chữ nhỏ. */
     --rims-sidebar-width: 264px;
+    --rims-rail-width: 4.6rem;
     --rims-topbar-height: 56px;
-    --rims-focus-ring: 2px;
-    /* Vùng chạm tối thiểu trên thiết bị cảm ứng. */
+    --rims-focus-ring: 3px;
     --rims-touch-min: 48px;
+
+    /* ---------- Icon ----------
+       Độ dày nét và cỡ đặt MỘT LẦN ở đây, không viết trong từng icon. Đổi nét
+       toàn app là sửa một dòng. */
+    --rims-icon-stroke: 2;
+    --rims-icon-size: 1.5rem;
 
     /* ---------- Điểm ngắt ----------
        Ghi ở đây để tra; CSS không đọc được biến trong @media.
-       Bằng REM để tôn trọng cỡ chữ người dùng đặt, và đặt ở chỗ NỘI DUNG vỡ
-       chứ không phải chỗ một thiết bị nằm:
 
+         30rem (480px)  bảng đổi cách xuống dòng
          36rem (576px)  hai cột cho biểu mẫu
          48rem (768px)  bảng đủ rộng để không cuộn
-         60rem (960px)  thanh bên cố định thay cho ngăn kéo
+         52rem (832px)  kanban ba cột thay cho một cột và băng tab
+         60rem (960px)  rail cố định thay cho ngăn kéo
          90rem (1440px) nới lề, giới hạn bề rộng đọc
 
-       Chỉ dùng đúng bốn mốc này, và chỉ dùng min-width. */
+       Chỉ dùng min-width. */
+}
+
+/* ---------- Icon ----------
+   Một luật cho cả bộ. Xem shared/components/ui/icons.ts. */
+.rims-i {
+    width: var(--rims-icon-size);
+    height: var(--rims-icon-size);
+    display: block;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--rims-icon-stroke);
+    /* Vuông hoá: cùng cây bút với viền 2px. */
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+}
+
+.rims-i--lg {
+    --rims-icon-size: 2.2rem;
+}
+
+.rims-i--sm {
+    --rims-icon-size: 1.05em;
 }
 
 /* =========================================================================
    Chế độ tối — không phải để trang trí.
-   Bếp và sàn nhà hàng buổi tối thường để đèn mờ; màn hình nền sáng chói
-   vào mắt nhân viên suốt ca.
+   Bếp và sàn nhà hàng buổi tối thường để đèn mờ; màn hình nền sáng chói vào
+   mắt nhân viên suốt ca.
 
-   Giấy ấm lật thành mực ấm: nền nâu đen chứ không phải xám lạnh, để giữ
-   đúng giọng của hệ.
+   BA LUẬT, rút từ theme qlcv-aura của dự án kpi-manage. Đây là KỸ THUẬT, không
+   phải cái vẻ — hình khối, mặt chữ và bóng của RIMS giữ nguyên:
+
+   1. Viền và bóng là trung tính VỪA (#6b6b6b), KHÔNG BAO GIỜ trắng. Viền trắng
+      cộng bóng trắng trên nền gần-đen làm mỗi nút thành một miếng sticker dán.
+   2. Chip và nút là nền tint tối + chữ màu sáng, không tô đặc khối màu rực.
+   3. Bóng nhẹ hơn bản sáng: 2px thay vì 4px.
+
+   LUẬT NỀN TẢNG, đo được: mặt #1b1b1b so với nền #131313 chỉ đạt 1.08. Không
+   sắc tối nào tách nổi 3:1 khỏi một nền tối. Nên ở chế độ tối CẤU TRÚC DO
+   ĐƯỜNG KẺ TẠO RA, KHÔNG DO NỀN.
+
+   Giữ nguyên HUE của bốn màu nghĩa, chỉ nâng độ sáng vừa đủ đạt 3:1 — đỏ và
+   hổ phách không phải đổi gì.
    ========================================================================= */
+
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
-        --rims-paper: #0f1216;
-        --rims-surface: #161b21;
-        --rims-surface-2: #1e242b;
-        --rims-surface-3: #262e36;
+        --rims-paper: #131313;
+        --rims-surface: #1b1b1b;
+        --rims-surface-2: #232323;
+        --rims-surface-3: #2e2e2e;
 
-        --rims-line: #2c343d;
-        --rims-line-strong: #78838f;
+        --rims-line: #2e2e2e;
+        --rims-line-strong: #6b6b6b;
 
-        --rims-ink: #e6eaef;
-        --rims-ink-2: #b2bcc6;
-        --rims-ink-3: #8b96a2;
-        /* Nền nhấn ở chủ đề tối đã được nâng sáng, nên chữ trên nút phải TỐI. */
-        --rims-ink-on-brand: #071426;
+        --rims-ink: #ececec;
+        --rims-ink-2: #bdbdbd;
+        --rims-ink-3: #a3a3a3;
+        --rims-ink-on-brand: #ff8a72;
 
-        /* Đỏ son nguyên bản quá tối trên nền tối — nâng sáng để giữ tương phản */
-        --rims-brand: #6aa6ff;
-        --rims-brand-hover: #86b8ff;
-        --rims-brand-active: #4f8ee6;
-        --rims-brand-soft: #12233a;
-        --rims-brand-line: #1e3c60;
+        --rims-ink-on-dark: #ececec;
+        --rims-ink-on-dark-2: #bdbdbd;
+
+        --rims-brand: #ff8a72;
+        --rims-brand-fill: #2b1512;
+        --rims-brand-hover: #3a1c18;
+        --rims-brand-active: #47221d;
+        --rims-brand-soft: #2b1512;
+        --rims-brand-line: #ff8a72;
 
         --rims-gold: #c8a86a;
         --rims-gold-deep: #b08f52;
         --rims-gold-soft: #26210f;
 
-        --rims-ok: #57b98a;
-        --rims-ok-soft: #14261d;
-        --rims-ok-line: #26402f;
+        --rims-ok: #5fd08e;
+        --rims-ok-fill: #16281d;
+        --rims-ok-hover: #1d3427;
+        --rims-ok-active: #244030;
+        --rims-ok-soft: #16281d;
+        --rims-ok-line: #5fd08e;
 
-        --rims-busy: #dda548;
-        --rims-busy-soft: #2a2214;
-        --rims-busy-line: #47391f;
+        --rims-busy: #ffc94a;
+        --rims-busy-fill: #2a1f0b;
+        --rims-busy-soft: #2a1f0b;
+        --rims-busy-line: #ffc94a;
 
-        --rims-alert: #f0808b;
-        --rims-alert-soft: #2e1a1d;
-        --rims-alert-line: #4d2a2f;
+        --rims-alert: #ff8a72;
+        --rims-alert-fill: #2b1512;
+        --rims-alert-soft: #2b1512;
+        --rims-alert-line: #ff8a72;
 
-        --rims-ink-on-ok: #0a1c13;
-        --rims-ink-on-busy: #241a08;
-        --rims-ink-on-alert: #2a0f13;
-        --rims-ink-on-idle: #12171c;
-        --rims-idle: #8b96a2;
-        --rims-idle-soft: #1b2128;
-        --rims-idle-line: #2f373f;
+        --rims-info: #7aaaff;
+        --rims-info-fill: #141c2e;
+        --rims-info-soft: #141c2e;
+        --rims-info-line: #7aaaff;
+        --rims-ink-on-info: #7aaaff;
+
+        --rims-focus: #7aaaff;
+
+        --rims-ink-on-ok: #5fd08e;
+        --rims-ink-on-busy: #ffc94a;
+        --rims-ink-on-alert: #ff8a72;
+        --rims-ink-on-idle: #bdbdbd;
+
+        --rims-idle: #a3a3a3;
+        --rims-idle-fill: #232323;
+        --rims-idle-soft: #232323;
+        --rims-idle-line: #2e2e2e;
 
         --rims-tint-ink: 0 0 0;
-        --rims-tint-brand: 106 166 255;
-        --rims-tint-hi: 230 234 239;
+        --rims-tint-brand: 255 138 114;
+        --rims-tint-hi: 236 236 236;
         --rims-tint-gold: 200 168 106;
-        --rims-tint-busy: 221 165 72;
-        --rims-tint-ok: 87 185 138;
-        --rims-tint-alert: 240 128 139;
+        --rims-tint-busy: 255 201 74;
+        --rims-tint-ok: 95 208 142;
+        --rims-tint-alert: 255 138 114;
 
-        --rims-chart-1: #1e3c60;
-        --rims-chart-2: #3f7ccb;
-        --rims-chart-3: #6aa6ff;
-        --rims-chart-4: #9cc5ff;
-        --rims-chart-empty: #2c343d;
+        --rims-chart-1: #1e3050;
+        --rims-chart-2: #3d6bb0;
+        --rims-chart-3: #5b8bd9;
+        --rims-chart-4: #7aaaff;
+        --rims-chart-empty: #2e2e2e;
+
+        /* Bóng nhẹ hơn ở chế độ tối. */
+        --rims-offset: 2px;
     }
 }
 
 :root[data-theme='dark'] {
-    --rims-paper: #0f1216;
-    --rims-surface: #161b21;
-    --rims-surface-2: #1e242b;
-    --rims-surface-3: #262e36;
+    --rims-paper: #131313;
+    --rims-surface: #1b1b1b;
+    --rims-surface-2: #232323;
+    --rims-surface-3: #2e2e2e;
 
-    --rims-line: #2c343d;
-    --rims-line-strong: #78838f;
+    --rims-line: #2e2e2e;
+    --rims-line-strong: #6b6b6b;
 
-    --rims-ink: #e6eaef;
-    --rims-ink-2: #b2bcc6;
-    --rims-ink-3: #8b96a2;
-    --rims-ink-on-brand: #071426;
+    --rims-ink: #ececec;
+    --rims-ink-2: #bdbdbd;
+    --rims-ink-3: #a3a3a3;
+    --rims-ink-on-brand: #ff8a72;
 
-    --rims-brand: #6aa6ff;
-    --rims-brand-hover: #86b8ff;
-    --rims-brand-active: #4f8ee6;
-    --rims-brand-soft: #12233a;
-    --rims-brand-line: #1e3c60;
+    --rims-ink-on-dark: #ececec;
+    --rims-ink-on-dark-2: #bdbdbd;
+
+    --rims-brand: #ff8a72;
+    --rims-brand-fill: #2b1512;
+    --rims-brand-hover: #3a1c18;
+    --rims-brand-active: #47221d;
+    --rims-brand-soft: #2b1512;
+    --rims-brand-line: #ff8a72;
 
     --rims-gold: #c8a86a;
     --rims-gold-deep: #b08f52;
     --rims-gold-soft: #26210f;
 
-    --rims-ok: #57b98a;
-    --rims-ok-soft: #14261d;
-    --rims-ok-line: #26402f;
+    --rims-ok: #5fd08e;
+    --rims-ok-fill: #16281d;
+    --rims-ok-hover: #1d3427;
+    --rims-ok-active: #244030;
+    --rims-ok-soft: #16281d;
+    --rims-ok-line: #5fd08e;
 
-    --rims-busy: #dda548;
-    --rims-busy-soft: #2a2214;
-    --rims-busy-line: #47391f;
+    --rims-busy: #ffc94a;
+    --rims-busy-fill: #2a1f0b;
+    --rims-busy-soft: #2a1f0b;
+    --rims-busy-line: #ffc94a;
 
-    --rims-alert: #f0808b;
-    --rims-alert-soft: #2e1a1d;
-    --rims-alert-line: #4d2a2f;
+    --rims-alert: #ff8a72;
+    --rims-alert-fill: #2b1512;
+    --rims-alert-soft: #2b1512;
+    --rims-alert-line: #ff8a72;
 
-    --rims-ink-on-ok: #0a1c13;
-    --rims-ink-on-busy: #241a08;
-    --rims-ink-on-alert: #2a0f13;
-    --rims-ink-on-idle: #12171c;
-    --rims-idle: #8b96a2;
-    --rims-idle-soft: #1b2128;
-    --rims-idle-line: #2f373f;
+    --rims-info: #7aaaff;
+    --rims-info-fill: #141c2e;
+    --rims-info-soft: #141c2e;
+    --rims-info-line: #7aaaff;
+    --rims-ink-on-info: #7aaaff;
+
+    --rims-focus: #7aaaff;
+
+    --rims-ink-on-ok: #5fd08e;
+    --rims-ink-on-busy: #ffc94a;
+    --rims-ink-on-alert: #ff8a72;
+    --rims-ink-on-idle: #bdbdbd;
+
+    --rims-idle: #a3a3a3;
+    --rims-idle-fill: #232323;
+    --rims-idle-soft: #232323;
+    --rims-idle-line: #2e2e2e;
 
     --rims-tint-ink: 0 0 0;
-    --rims-tint-brand: 106 166 255;
-    --rims-tint-hi: 230 234 239;
+    --rims-tint-brand: 255 138 114;
+    --rims-tint-hi: 236 236 236;
     --rims-tint-gold: 200 168 106;
-    --rims-tint-busy: 221 165 72;
-    --rims-tint-ok: 87 185 138;
-    --rims-tint-alert: 240 128 139;
+    --rims-tint-busy: 255 201 74;
+    --rims-tint-ok: 95 208 142;
+    --rims-tint-alert: 255 138 114;
 
-    --rims-chart-1: #1e3c60;
-    --rims-chart-2: #3f7ccb;
-    --rims-chart-3: #6aa6ff;
-    --rims-chart-4: #9cc5ff;
-    --rims-chart-empty: #2c343d;
+    --rims-chart-1: #1e3050;
+    --rims-chart-2: #3d6bb0;
+    --rims-chart-3: #5b8bd9;
+    --rims-chart-4: #7aaaff;
+    --rims-chart-empty: #2e2e2e;
+
+    --rims-offset: 2px;
 }
