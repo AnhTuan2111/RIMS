@@ -210,11 +210,40 @@ export default async function globalSetup() {
         }
     }
 
+    // BƯỚC 6 — xoá bàn thử còn sót (tên "KT" + số) từ lần chạy đỏ giữa chừng.
+    let removedTables = 0
+
+    for (const table of await call(admin, '/admin/table/all')) {
+        if (/^KT\d+$/.test(table.tableNumber ?? '')) {
+            await call(admin, `/admin/table/${table.id}`, {method: 'DELETE'})
+                .then(() => removedTables++)
+                .catch((error) =>
+                    log(
+                        `  [dọn] không xoá được bàn ${table.tableNumber}: ${error.message}`,
+                    ),
+                )
+        }
+    }
+
+    // BƯỚC 7 — mở khoá tài khoản mà bài "khoá tài khoản" dùng, phòng khi lần
+    // chạy trước đỏ giữa chừng và bỏ nó ở trạng thái khoá.
+    const staff = await call(admin, '/admin/user/staff?page=0&size=100')
+
+    for (const user of staff.content ?? []) {
+        if (user.username === 'waiter02' && !user.isActive) {
+            await call(admin, `/admin/user/${user.id}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({active: true}),
+            })
+            log('  [dọn] mở khoá waiter02')
+        }
+    }
+
     const after = await call(waiter, '/waiter/tables')
     const free = after.filter((t: {status: string}) => t.status === 'AVAILABLE').length
 
     log(
-        `  [dọn] đã thu ${closed} đơn · huỷ ${cancelled} lượt đặt thử · xoá ${removedDishes} món thử · còn ${free}/${after.length} bàn trống`,
+        `  [dọn] đã thu ${closed} đơn · huỷ ${cancelled} lượt đặt thử · xoá ${removedDishes} món thử · ${removedTables} bàn thử · còn ${free}/${after.length} bàn trống`,
     )
 
     if (free < MIN_FREE) {

@@ -34,6 +34,9 @@ export default function AdminUsersPage() {
     const [modal, setModal] = useState<ModalType>(null)
 
     const [resetTarget, setResetTarget] = useState<UserResponse | null>(null)
+    // Tài khoản đang chờ xác nhận KHOÁ. Mở khoá thì không cần hỏi — cùng luật
+    // bất đối xứng với bật/tắt bán món: việc làm gián đoạn người khác mới hỏi.
+    const [lockTarget, setLockTarget] = useState<UserResponse | null>(null)
     const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null)
 
     const [form, setForm] = useState({
@@ -523,8 +526,22 @@ export default function AdminUsersPage() {
                                                         ? 'rk-chip--ok'
                                                         : 'rk-chip--alert'
                                                 }`}
+                                                // Khoá phải hỏi lại: một lần bấm nhầm
+                                                // vào cái chip là một nhân viên bị đẩy
+                                                // khỏi hệ thống giữa ca.
                                                 onClick={() =>
-                                                    void handleStatusToggle(user)
+                                                    user.isActive
+                                                        ? setLockTarget(user)
+                                                        : void handleStatusToggle(user)
+                                                }
+                                                // Tên trợ năng GỒM chữ đang hiện
+                                                // ("Hoạt động") và nói bấm vào làm gì —
+                                                // trước đây trình đọc chỉ đọc "Hoạt
+                                                // động, nút".
+                                                aria-label={
+                                                    user.isActive
+                                                        ? `Hoạt động — khoá tài khoản ${user.username}`
+                                                        : `Đã khoá — mở khoá tài khoản ${user.username}`
                                                 }
                                                 title={
                                                     user.isActive
@@ -602,6 +619,26 @@ export default function AdminUsersPage() {
                 destructive
                 onConfirm={() => void handleResetPassword()}
                 onCancel={() => setResetTarget(null)}
+            />
+
+            <ConfirmDialog
+                open={Boolean(lockTarget)}
+                title="Khoá tài khoản này?"
+                description={
+                    lockTarget
+                        ? `${lockTarget.fullName} (${lockTarget.username}) sẽ không đăng nhập được cho tới khi được mở khoá.`
+                        : undefined
+                }
+                confirmLabel="Khoá tài khoản"
+                destructive
+                onConfirm={() => {
+                    const target = lockTarget
+                    setLockTarget(null)
+                    if (target) {
+                        void handleStatusToggle(target)
+                    }
+                }}
+                onCancel={() => setLockTarget(null)}
             />
 
             {/* ── Pagination ── */}

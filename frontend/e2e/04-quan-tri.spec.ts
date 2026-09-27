@@ -1,6 +1,6 @@
 import {expect, test} from '@playwright/test'
 
-import {ACCOUNTS, api, expectRendered, login} from './helpers'
+import {ACCOUNTS, PW, api, expectRendered, login} from './helpers'
 
 test.describe.configure({mode: 'serial'})
 
@@ -122,5 +122,149 @@ test.describe('Quản trị', () => {
                 timeout: 10_000,
             })
             .toBeGreaterThan(0)
+    })
+})
+
+test.describe('Quản trị · vòng đời bàn', () => {
+    const number = 'KT' + String(Date.now()).slice(-4)
+
+    test('thêm bàn, sửa số chỗ, phục vụ thấy bàn mới, rồi xoá', async ({page}) => {
+        await login(page, ACCOUNTS.admin)
+        await page.goto('/admin/tables')
+        await expectRendered(page)
+
+        // THÊM
+        await page
+            .getByRole('button', {name: /thêm bàn/i})
+            .first()
+            .click()
+        const modal = page.locator('.rk-modal')
+        await expect(modal).toBeVisible()
+        await modal.locator('#table-number').fill(number)
+        await modal.locator('#table-capacity').fill('4')
+        await modal.getByRole('button', {name: 'Lưu'}).click()
+        await expect(modal).toHaveCount(0)
+
+        const find = async () => {
+            const tables = await api(ACCOUNTS.admin, '/admin/table/all')
+            return tables.find((t: {tableNumber: string}) => t.tableNumber === number)
+        }
+
+        await expect.poll(async () => (await find())?.capacity, {timeout: 15_000}).toBe(4)
+
+        // Bàn mới chưa có chỗ trên mặt bằng — phục vụ vẫn phải thấy nó, ở
+        // hàng "Chưa xếp vào mặt bằng", không được biến mất.
+        const waiterTables = await api(ACCOUNTS.waiter, '/waiter/tables')
+        expect(
+            waiterTables.some((t: {tableNumber: string}) => t.tableNumber === number),
+            'phục vụ không thấy bàn mới',
+        ).toBe(true)
+
+        // Bảng có phân trang: bàn mới nằm ở trang cuối.
+        const row = page.locator('tbody tr', {hasText: number})
+        for (let i = 0; i < 5 && (await row.count()) === 0; i++) {
+            await page.getByRole('button', {name: 'Trang sau'}).click()
+        }
+        await expect(row).toBeVisible()
+
+        // SỬA
+        await row.getByRole('button', {name: 'Sửa bàn'}).click()
+        await expect(modal).toBeVisible()
+        await modal.locator('#table-capacity').fill('6')
+        await modal.getByRole('button', {name: 'Lưu'}).click()
+        await expect.poll(async () => (await find())?.capacity, {timeout: 15_000}).toBe(6)
+        await expect(row).toContainText('6')
+
+        // XOÁ — bàn chưa từng có đơn thì xoá hẳn được, và phải hỏi lại.
+        await row.getByRole('button', {name: 'Xoá bàn'}).click()
+        await page.getByRole('button', {name: 'Xoá vĩnh viễn'}).click()
+        await expect.poll(async () => await find(), {timeout: 15_000}).toBeUndefined()
+    })
+})
+
+test.describe('Quản trị · tài khoản', () => {
+    // Không có xoá tài khoản, nên bài kiểm KHÔNG tạo nhân viên mới — mỗi lần
+    // chạy sẽ để lại một người lạ trong danh sách nhân sự thật. Thay vào đó:
+    // đi hết biểu mẫu tạo với một tên đã có (backend phải từ chối), và khoá /
+    // mở khoá một tài khoản có sẵn rồi trả nó về như cũ.
+
+    test('tạo tài khoản trùng tên đăng nhập thì bị từ chối, và báo rõ', async ({
+        page,
+    }) => {
+        await login(page, ACCOUNTS.admin)
+        await page.goto('/admin/users')
+        await expectRendered(page)
+
+        await page.getByRole('button', {name: /thêm nhân viên/i}).click()
+        const modal = page.locator('.rk-modal')
+        await modal.getByLabel(/họ tên/i).fill('Người kiểm thử')
+        await modal.getByLabel(/tên đăng nhập/i).fill(ACCOUNTS.waiter)
+        await modal.getByLabel(/email/i).fill('kiemthu.trung@example.com')
+        await modal.getByLabel(/số điện thoại/i).fill('0900000001')
+        await modal
+            .getByLabel(/mật khẩu/i)
+            .first()
+            .fill('Rims@2026')
+        await modal.getByRole('button', {name: /tạo tài khoản/i}).click()
+
+        await expect(modal.locator('.rk-formerror')).toBeVisible({timeout: 15_000})
+        await expect(modal).toBeVisible()
+
+        const staff = await api(ACCOUNTS.admin, '/admin/user/staff?page=0&size=100')
+        const list = staff.content ?? staff
+        expect(
+            list.filter((u: {username: string}) => u.username === ACCOUNTS.waiter),
+            'tài khoản trùng đã bị tạo',
+        ).toHaveLength(1)
+    })
+
+    test('khoá tài khoản phải hỏi lại; khoá rồi thì không đăng nhập được', async ({
+        page,
+    }) => {
+        const target = 'waiter02'
+
+        await login(page, ACCOUNTS.admin)
+        await page.goto('/admin/users')
+        await expectRendered(page)
+
+        const chip = page.getByRole('button', {
+            name: `Hoạt động — khoá tài khoản ${target}`,
+        })
+        await chip.click()
+
+        // Hỏi lại — huỷ thì không có gì thay đổi.
+        const dialog = page.getByRole('dialog')
+        await expect(dialog).toContainText(target)
+        await dialog
+            .getByRole('button', {name: /huỷ|quay lại|không/i})
+            .first()
+            .click()
+        await expect(chip).toBeVisible()
+
+        try {
+            await chip.click()
+            await dialog.getByRole('button', {name: 'Khoá tài khoản', exact: true}).click()
+            await expect(
+                page.getByRole('button', {name: `Đã khoá — mở khoá tài khoản ${target}`}),
+            ).toBeVisible()
+
+            // Khoá thật ở backend: đăng nhập phải bị từ chối.
+            const base = process.env.E2E_API ?? 'http://localhost:8080/rims'
+            const res = await fetch(`${base}/auth/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: target, rawPassword: PW}),
+            })
+            expect(res.ok, 'tài khoản đã khoá vẫn đăng nhập được').toBe(false)
+        } finally {
+            // Mở khoá — không hỏi lại, và trả tài khoản về như cũ.
+            const unlock = page.getByRole('button', {
+                name: `Đã khoá — mở khoá tài khoản ${target}`,
+            })
+            if (await unlock.isVisible()) {
+                await unlock.click()
+            }
+            await expect(chip).toBeVisible()
+        }
     })
 })
