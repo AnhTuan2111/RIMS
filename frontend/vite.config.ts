@@ -3,6 +3,9 @@ import path from 'node:path'
 import {defineConfig, loadEnv} from 'vite'
 import react from '@vitejs/plugin-react'
 
+// @ts-expect-error — plugin thuần JS, không có khai báo kiểu.
+import {mockApi} from './tools/mock-api-plugin.mjs'
+
 // .env nằm ở gốc repo để backend và frontend dùng chung một file.
 const envDir = path.resolve(__dirname, '..')
 
@@ -14,7 +17,10 @@ export default defineConfig(({mode}) => {
     const apiTarget = env.VITE_API_BASE_URL || 'http://localhost:8080'
 
     return {
-        plugins: [react()],
+        // mockApi chỉ gắn ở `vite --mode mock`. Mọi mode khác nó trả về một
+        // plugin rỗng và dev server proxy sang backend thật như cũ, nên không
+        // có đường nào để chế độ giả lọt vào bản build.
+        plugins: [react(), mockApi(mode === 'mock')],
         envDir,
         resolve: {
             alias: {

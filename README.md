@@ -254,6 +254,13 @@ Frontend gọi API qua `axios` (`frontend/src/shared/api/client.ts`) và kết n
    (xem mục 3.1). Không sửa `application.yaml` — file đó chỉ có placeholder.
 3. Chạy backend (`./mvnw spring-boot:run`) → API sẵn sàng tại `:8080`.
 4. Chạy frontend (`npm run dev`) → mở trình duyệt theo địa chỉ Vite in ra.
+
+**Chỉ muốn xem giao diện, chưa dựng được CSDL?** `npm run dev:mock` chạy app
+**không cần backend**: mọi lời gọi `/rims/**` được trả bằng dữ liệu giả cố định
+trong `frontend/tools/walk-fixtures.mjs` — cùng bảng mà công cụ chụp màn dùng.
+Đăng nhập bằng mật khẩu bất kỳ; tên đăng nhập quyết định vai: `admin`,
+`chef01`, `waiter01`, `cashier01`, `kh001`. Đây **không phải backend** — nó chỉ
+đọc, nên bấm Lưu sẽ không lưu gì.
 5. Đăng nhập/đăng ký thử để kiểm tra luồng Auth → Order → Payment → Realtime (WebSocket).
 
 ## 6. Công nghệ sử dụng
