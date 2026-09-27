@@ -436,7 +436,7 @@ export default function CustomerReservations() {
             </div>
 
             {activeTab === 'book' && (
-                <div className="rk-card rk-card--pad">
+                <div className="rk-card rk-card--pad rk-formpage">
                     <div>
                         <h2 className="rk-sectiontitle">Đặt bàn mới</h2>
 
@@ -628,8 +628,8 @@ export default function CustomerReservations() {
                                     !tableError &&
                                     availableTables.length === 0 && (
                                         <span className="rk-field__hint">
-                                            <Icon name="alert" className="rk-icon" />{' '}
-                                            Hiện không có bàn trống
+                                            <Icon name="alert" className="rk-icon" /> Hiện
+                                            không có bàn trống
                                         </span>
                                     )}
                             </div>

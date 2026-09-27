@@ -441,7 +441,6 @@ export default function WaiterTableListPage() {
 
     return (
         <div className="rk-stack">
-
             <div className="rk-stack">
                 <div className="rk-legend">
                     <span className="rk-legend__item">
@@ -562,9 +561,9 @@ export default function WaiterTableListPage() {
                             <div className="rk-note rk-note--busy">
                                 <p>
                                     <strong>
-                                        <Icon name="alert" className="rk-icon" />{' '}
-                                        Bàn này đã có {modalReservations.length} lịch đặt
-                                        trong hôm nay:
+                                        <Icon name="alert" className="rk-icon" /> Bàn này
+                                        đã có {modalReservations.length} lịch đặt trong
+                                        hôm nay:
                                     </strong>
                                 </p>
 

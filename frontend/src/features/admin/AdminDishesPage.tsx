@@ -118,7 +118,9 @@ export default function AdminDishesPage() {
 
         const catIdParsed = parseInt(formData.categoryId)
         if (isNaN(catIdParsed) || catIdParsed <= 0) {
-            notify('Chưa chọn danh mục. Mỗi món phải thuộc đúng một danh mục.', {tone: 'alert'})
+            notify('Chưa chọn danh mục. Mỗi món phải thuộc đúng một danh mục.', {
+                tone: 'alert',
+            })
             return
         }
 
@@ -149,7 +151,10 @@ export default function AdminDishesPage() {
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
         } catch (err: unknown) {
-            const errMsg = getErrorMessage(err, 'Không thêm được món. Dữ liệu vừa nhập vẫn được giữ.')
+            const errMsg = getErrorMessage(
+                err,
+                'Không thêm được món. Dữ liệu vừa nhập vẫn được giữ.',
+            )
             notify(errMsg, {tone: 'alert'})
         } finally {
             setIsSubmitting(false)
@@ -162,7 +167,9 @@ export default function AdminDishesPage() {
 
         const catIdParsed = parseInt(formData.categoryId)
         if (isNaN(catIdParsed) || catIdParsed <= 0) {
-            notify('Chưa chọn danh mục. Mỗi món phải thuộc đúng một danh mục.', {tone: 'alert'})
+            notify('Chưa chọn danh mục. Mỗi món phải thuộc đúng một danh mục.', {
+                tone: 'alert',
+            })
             return
         }
 
@@ -193,7 +200,10 @@ export default function AdminDishesPage() {
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
         } catch (err: unknown) {
-            const errMsg = getErrorMessage(err, 'Không cập nhật được món. Thay đổi chưa được lưu.')
+            const errMsg = getErrorMessage(
+                err,
+                'Không cập nhật được món. Thay đổi chưa được lưu.',
+            )
             notify(errMsg, {tone: 'alert'})
         } finally {
             setIsSubmitting(false)
@@ -207,7 +217,10 @@ export default function AdminDishesPage() {
             setActiveModal('NONE')
             await loadAllData(undefined, true, true)
         } catch (err: unknown) {
-            const errMsg = getErrorMessage(err, 'Không xoá được món. Món vẫn còn trong thực đơn.')
+            const errMsg = getErrorMessage(
+                err,
+                'Không xoá được món. Món vẫn còn trong thực đơn.',
+            )
             notify(errMsg, {tone: 'alert'})
         }
     }
@@ -368,7 +381,6 @@ export default function AdminDishesPage() {
                 <StatCard
                     label="Món tìm thấy"
                     value={filteredDishes.length}
-                    tone="brand"
                     icon={<Icon name="kitchen" className="rk-icon" />}
                 />
             </div>
@@ -390,10 +402,14 @@ export default function AdminDishesPage() {
                                     />
                                     <span
                                         className={`rk-chip rk-dishcard__flag ${
-                                            dish.isHidden ? 'rk-chip--idle' : 'rk-chip--ok'
+                                            dish.isHidden
+                                                ? 'rk-chip--idle'
+                                                : 'rk-chip--ok'
                                         }`}
                                     >
-                                        {dish.isHidden ? 'Đã ẩn khỏi thực đơn' : 'Đang hiển thị'}
+                                        {dish.isHidden
+                                            ? 'Đã ẩn khỏi thực đơn'
+                                            : 'Đang hiển thị'}
                                     </span>
                                 </div>
 
@@ -445,125 +461,129 @@ export default function AdminDishesPage() {
                     })}
                 </div>
             ) : (
-            <div className="rk-tablewrap">
-                <table className="rk-table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Hình ảnh</th>
-                            <th scope="col">Tên món ăn</th>
-                            <th scope="col">Danh mục</th>
-                            <th scope="col" className="rk-th--num">
-                                Giá niêm yết
-                            </th>
-                            <th scope="col">Trạng thái</th>
-                            <th scope="col">Ngày tạo</th>
-                            <th scope="col">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentItems.map((dish) => {
-                            const isParentCategoryHidden =
-                                categories.find((c) => c.name === dish.categoryName)
-                                    ?.isAvailable === false
+                <div className="rk-tablewrap">
+                    <table className="rk-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Hình ảnh</th>
+                                <th scope="col">Tên món ăn</th>
+                                <th scope="col">Danh mục</th>
+                                <th scope="col" className="rk-th--num">
+                                    Giá niêm yết
+                                </th>
+                                <th scope="col">Trạng thái</th>
+                                <th scope="col">Ngày tạo</th>
+                                <th scope="col">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {currentItems.map((dish) => {
+                                const isParentCategoryHidden =
+                                    categories.find((c) => c.name === dish.categoryName)
+                                        ?.isAvailable === false
 
-                            return (
-                                <tr key={dish.id}>
-                                    <td>
-                                        <span className="rk-thumb">
-                                            <img
-                                                src={duongDanAnh(dish.imageUrl)}
-                                                alt={dish.name}
-                                                onError={dungAnhThayThe}
-                                            />
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="rk-rowlist__title">
-                                            {dish.name}
-                                        </div>
-                                        <small className="rk-rowlist__meta">
-                                            ID-{String(dish.id).padStart(2, '0')}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <span
-                                            className={`rk-tag${isParentCategoryHidden ? ' rk-tag--muted' : ''}`}
-                                        >
-                                            {dish.categoryName}{' '}
-                                            {isParentCategoryHidden ? '(Ẩn)' : ''}
-                                        </span>
-                                    </td>
-                                    <td className="rk-td--num">
-                                        {dish.price.toLocaleString('vi-VN')}đ
-                                    </td>
-                                    <td>
-                                        <span
-                                            className={`rk-chip ${dish.isHidden ? 'rk-chip--idle' : 'rk-chip--ok'}`}
-                                        >
-                                            {dish.isHidden
-                                                ? 'Đã ẩn khỏi thực đơn'
-                                                : 'Đang hiển thị'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {new Date(dish.createdAt).toLocaleDateString(
-                                            'vi-VN',
-                                        )}
-                                    </td>
-                                    <td>
-                                        <button
-                                            onClick={() => openFormWithDish(dish, 'VIEW')}
-                                            className="rk-iconbtn"
-                                            title="Xem chi tiết"
-                                        >
-                                            <Icon name="eye" className="rk-icon" />
-                                        </button>
-                                        <button
-                                            onClick={() => openFormWithDish(dish, 'EDIT')}
-                                            className="rk-iconbtn rk-iconbtn--brand"
-                                            title="Chỉnh sửa"
-                                        >
-                                            <Icon name="pen" className="rk-icon" />
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setSelectedDish(dish)
-                                                setActiveModal('DELETE')
-                                            }}
-                                            className="rk-iconbtn rk-iconbtn--danger"
-                                            title="Xoá món"
-                                        >
-                                            <Icon name="trash" className="rk-icon" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                                return (
+                                    <tr key={dish.id}>
+                                        <td>
+                                            <span className="rk-thumb">
+                                                <img
+                                                    src={duongDanAnh(dish.imageUrl)}
+                                                    alt={dish.name}
+                                                    onError={dungAnhThayThe}
+                                                />
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="rk-rowlist__title">
+                                                {dish.name}
+                                            </div>
+                                            <small className="rk-rowlist__meta">
+                                                ID-{String(dish.id).padStart(2, '0')}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span
+                                                className={`rk-tag${isParentCategoryHidden ? ' rk-tag--muted' : ''}`}
+                                            >
+                                                {dish.categoryName}{' '}
+                                                {isParentCategoryHidden ? '(Ẩn)' : ''}
+                                            </span>
+                                        </td>
+                                        <td className="rk-td--num">
+                                            {dish.price.toLocaleString('vi-VN')}đ
+                                        </td>
+                                        <td>
+                                            <span
+                                                className={`rk-chip ${dish.isHidden ? 'rk-chip--idle' : 'rk-chip--ok'}`}
+                                            >
+                                                {dish.isHidden
+                                                    ? 'Đã ẩn khỏi thực đơn'
+                                                    : 'Đang hiển thị'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {new Date(dish.createdAt).toLocaleDateString(
+                                                'vi-VN',
+                                            )}
+                                        </td>
+                                        <td>
+                                            <button
+                                                onClick={() =>
+                                                    openFormWithDish(dish, 'VIEW')
+                                                }
+                                                className="rk-iconbtn"
+                                                title="Xem chi tiết"
+                                            >
+                                                <Icon name="eye" className="rk-icon" />
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    openFormWithDish(dish, 'EDIT')
+                                                }
+                                                className="rk-iconbtn rk-iconbtn--brand"
+                                                title="Chỉnh sửa"
+                                            >
+                                                <Icon name="pen" className="rk-icon" />
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedDish(dish)
+                                                    setActiveModal('DELETE')
+                                                }}
+                                                className="rk-iconbtn rk-iconbtn--danger"
+                                                title="Xoá món"
+                                            >
+                                                <Icon name="trash" className="rk-icon" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             )}
 
             {filteredDishes.length === 0 && (
-                    <EmptyState
-                        title="Không tìm thấy món ăn phù hợp"
-                        description="Hãy thay đổi từ khóa, danh mục hoặc trạng thái để tìm món ăn."
-                        action={
-                            <button
-                                type="button"
-                                className="rk-btn rk-btn--quiet"
-                                onClick={() => {
-                                    setSearchKeyword('')
-                                    setSelectedCategory('ALL')
-                                    setSelectedStatus('ALL')
-                                    setCurrentPage(1)
-                                }}
-                            >
-                                Xoá bộ lọc
-                            </button>
-                        }
-                    />
-                )}
+                <EmptyState
+                    title="Không tìm thấy món ăn phù hợp"
+                    description="Hãy thay đổi từ khóa, danh mục hoặc trạng thái để tìm món ăn."
+                    action={
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--quiet"
+                            onClick={() => {
+                                setSearchKeyword('')
+                                setSelectedCategory('ALL')
+                                setSelectedStatus('ALL')
+                                setCurrentPage(1)
+                            }}
+                        >
+                            Xoá bộ lọc
+                        </button>
+                    }
+                />
+            )}
 
             {filteredDishes.length > 0 && (
                 <Pagination
@@ -707,8 +727,7 @@ export default function AdminDishesPage() {
                                         <img src={formData.imageUrl} alt="Preview" />
                                     ) : (
                                         <div className="rk-thumb rk-thumb--lg">
-                                            <span>
-                                                </span>
+                                            <span></span>
                                             <small>Chưa có hình ảnh</small>
                                         </div>
                                     )}

@@ -1,7 +1,7 @@
 import {Icon} from '@/shared/components/ui/Icon'
 import {DR, ErrBox, Field, FieldGroup} from '@/features/admin/users/UserFormControls'
 import {ConfirmDialog, Modal, PasswordInput} from '@/shared/components/ui'
-import {ROLE_LABELS, ROLE_TAG_CLASS, STAFF_ROLES} from '@/features/admin/users/constants'
+import {ROLE_LABELS, STAFF_ROLES} from '@/features/admin/users/constants'
 import type {ModalType, Tab} from '@/features/admin/users/constants'
 import {
     isValidEmail,
@@ -509,12 +509,7 @@ export default function AdminUsersPage() {
                                         <td className="rk-td--num">{user.phone}</td>
 
                                         <td>
-                                            <span
-                                                className={`rk-tag ${
-                                                    ROLE_TAG_CLASS[user.role] ??
-                                                    'rk-tag--idle'
-                                                }`}
-                                            >
+                                            <span className="rk-tag">
                                                 {ROLE_LABELS[user.role] ?? user.role}
                                             </span>
                                         </td>
@@ -548,7 +543,10 @@ export default function AdminUsersPage() {
                                                     title="Xem chi tiết"
                                                     onClick={() => void openDetail(user)}
                                                 >
-                                                    <Icon name="eye" className="rk-icon" />
+                                                    <Icon
+                                                        name="eye"
+                                                        className="rk-icon"
+                                                    />
                                                 </button>
 
                                                 <button
@@ -557,7 +555,10 @@ export default function AdminUsersPage() {
                                                     title="Chỉnh sửa"
                                                     onClick={() => openEdit(user)}
                                                 >
-                                                    <Icon name="pen" className="rk-icon" />
+                                                    <Icon
+                                                        name="pen"
+                                                        className="rk-icon"
+                                                    />
                                                 </button>
 
                                                 {/* Nhân viên không tự đổi được mật khẩu
@@ -572,7 +573,10 @@ export default function AdminUsersPage() {
                                                             setResetTarget(user)
                                                         }
                                                     >
-                                                        <Icon name="key" className="rk-icon" />
+                                                        <Icon
+                                                            name="key"
+                                                            className="rk-icon"
+                                                        />
                                                     </button>
                                                 )}
                                             </div>

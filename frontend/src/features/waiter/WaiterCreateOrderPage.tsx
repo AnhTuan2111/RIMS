@@ -244,7 +244,6 @@ export default function WaiterCreateOrderPage() {
 
     return (
         <div className="rk-stack">
-
             {/* Nút Quay lại đứng CẠNH tiêu đề, không phải hai đầu một hàng:
                 rk-card__head-inline là space-between, nên hai phần tử đơn độc
                 bị đẩy ra hai mép cách nhau cả nghìn pixel. */}
@@ -297,7 +296,10 @@ export default function WaiterCreateOrderPage() {
                     ) : (
                         <div className="rk-menugrid">
                             {visibleMenu.map((dish) => {
-                                const draft = orderDraft[dish.dishId] ?? {qty: 0, note: ''}
+                                const draft = orderDraft[dish.dishId] ?? {
+                                    qty: 0,
+                                    note: '',
+                                }
                                 const isUnavailable = !dish.available
                                 const picked = draft.qty > 0
 
@@ -316,7 +318,10 @@ export default function WaiterCreateOrderPage() {
                                                     onError={dungAnhThayThe}
                                                 />
                                             ) : (
-                                                <Icon name="kitchen" className="rk-icon" />
+                                                <Icon
+                                                    name="kitchen"
+                                                    className="rk-icon"
+                                                />
                                             )}
 
                                             {isUnavailable && (
@@ -336,7 +341,9 @@ export default function WaiterCreateOrderPage() {
                                         </div>
 
                                         <div className="rk-menucard__body">
-                                            <h3 className="rk-menucard__name">{dish.name}</h3>
+                                            <h3 className="rk-menucard__name">
+                                                {dish.name}
+                                            </h3>
                                             <span className="rk-menucard__price">
                                                 {fmtPrice(dish.price)}
                                             </span>
@@ -347,9 +354,13 @@ export default function WaiterCreateOrderPage() {
                                                 <button
                                                     type="button"
                                                     className="rk-stepper__btn"
-                                                    aria-label={'Bớt một phần ' + dish.name}
+                                                    aria-label={
+                                                        'Bớt một phần ' + dish.name
+                                                    }
                                                     disabled={draft.qty <= 0}
-                                                    onClick={() => changeDraftQty(dish.dishId, -1)}
+                                                    onClick={() =>
+                                                        changeDraftQty(dish.dishId, -1)
+                                                    }
                                                 >
                                                     −
                                                 </button>
@@ -361,9 +372,13 @@ export default function WaiterCreateOrderPage() {
                                                 <button
                                                     type="button"
                                                     className="rk-stepper__btn"
-                                                    aria-label={'Thêm một phần ' + dish.name}
+                                                    aria-label={
+                                                        'Thêm một phần ' + dish.name
+                                                    }
                                                     disabled={isUnavailable}
-                                                    onClick={() => changeDraftQty(dish.dishId, 1)}
+                                                    onClick={() =>
+                                                        changeDraftQty(dish.dishId, 1)
+                                                    }
                                                 >
                                                     +
                                                 </button>

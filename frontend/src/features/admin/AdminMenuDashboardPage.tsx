@@ -367,61 +367,61 @@ export default function AdminMenuDashboardPage() {
                                 ))}
                             </div>
                         ) : (
-                        <div className="rk-tablewrap">
-                            <table className="rk-table rk-table--compact">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Món ăn</th>
-                                        <th scope="col">Danh mục</th>
-                                        <th scope="col" className="rk-th--num">
-                                            Giá niêm yết
-                                        </th>
-                                        <th scope="col">Trạng thái</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {data.latestDishes.map((dish) => (
-                                        <tr key={dish.id}>
-                                            <td>
-                                                <div className="rk-media">
-                                                    <DishThumb
-                                                        imageUrl={dish.imageUrl}
-                                                        name={dish.name}
-                                                    />
-
-                                                    <span>{dish.name}</span>
-                                                </div>
-                                            </td>
-
-                                            <td>
-                                                <span className="rk-tag">
-                                                    {dish.categoryName}
-                                                </span>
-                                            </td>
-
-                                            <td className="rk-td--num">
-                                                {dish.price.toLocaleString('vi-VN')}đ
-                                            </td>
-
-                                            <td>
-                                                <span
-                                                    className={`rk-chip ${
-                                                        dish.status === 'AVAILABLE'
-                                                            ? 'rk-chip--ok'
-                                                            : 'rk-chip--idle'
-                                                    }`}
-                                                >
-                                                    {dish.status === 'AVAILABLE'
-                                                        ? 'Đang bán'
-                                                        : 'Tạm dừng'}
-                                                </span>
-                                            </td>
+                            <div className="rk-tablewrap">
+                                <table className="rk-table rk-table--compact">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Món ăn</th>
+                                            <th scope="col">Danh mục</th>
+                                            <th scope="col" className="rk-th--num">
+                                                Giá niêm yết
+                                            </th>
+                                            <th scope="col">Trạng thái</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+
+                                    <tbody>
+                                        {data.latestDishes.map((dish) => (
+                                            <tr key={dish.id}>
+                                                <td>
+                                                    <div className="rk-media">
+                                                        <DishThumb
+                                                            imageUrl={dish.imageUrl}
+                                                            name={dish.name}
+                                                        />
+
+                                                        <span>{dish.name}</span>
+                                                    </div>
+                                                </td>
+
+                                                <td>
+                                                    <span className="rk-tag">
+                                                        {dish.categoryName}
+                                                    </span>
+                                                </td>
+
+                                                <td className="rk-td--num">
+                                                    {dish.price.toLocaleString('vi-VN')}đ
+                                                </td>
+
+                                                <td>
+                                                    <span
+                                                        className={`rk-chip ${
+                                                            dish.status === 'AVAILABLE'
+                                                                ? 'rk-chip--ok'
+                                                                : 'rk-chip--idle'
+                                                        }`}
+                                                    >
+                                                        {dish.status === 'AVAILABLE'
+                                                            ? 'Đang bán'
+                                                            : 'Tạm dừng'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </PageCard>
 

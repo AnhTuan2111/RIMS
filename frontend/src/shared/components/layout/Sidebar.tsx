@@ -47,7 +47,11 @@ export function Sidebar({open, onClose}: SidebarProps) {
                 <Icon name="x" className="rk-icon" />
             </button>
 
-            <NavLink to="/" className="rk-rail__brand" aria-label={profile?.name ?? 'Trang chủ'}>
+            <NavLink
+                to="/"
+                className="rk-rail__brand"
+                aria-label={profile?.name ?? 'Trang chủ'}
+            >
                 {brandInitial}
             </NavLink>
 
@@ -58,7 +62,9 @@ export function Sidebar({open, onClose}: SidebarProps) {
                         to={entry.path}
                         onClick={onClose}
                         className={
-                            entry === activeEntry ? 'rk-rail__item is-on' : 'rk-rail__item'
+                            entry === activeEntry
+                                ? 'rk-rail__item is-on'
+                                : 'rk-rail__item'
                         }
                         // Nhóm có nhiều màn con: chỉ ô rail của NHÓM được tô, việc
                         // chọn màn nào trong nhóm là của băng mục con bên dưới.

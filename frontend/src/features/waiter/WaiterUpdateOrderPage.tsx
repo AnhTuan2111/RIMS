@@ -487,7 +487,6 @@ export default function WaiterUpdateOrderPage() {
 
     return (
         <div className="rk-stack">
-
             <div className="rk-titlerow">
                 <BackArrow
                     onClick={() =>
@@ -502,238 +501,256 @@ export default function WaiterUpdateOrderPage() {
 
             <div className="rk-order">
                 <div className="rk-order__menu">
-                <input
-                    type="text"
-                    placeholder="Tìm theo tên món hoặc danh mục..."
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    className="rk-input"
-                />
+                    <input
+                        type="text"
+                        placeholder="Tìm theo tên món hoặc danh mục..."
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        className="rk-input"
+                    />
 
-                <div className="rk-segment">
-                    {categories.map((category) => (
-                        <button
-                            key={category}
-                            type="button"
-                            className={`rk-segment__btn${activeCategory === category ? ' is-active' : ''}`}
-                            onClick={() => setActiveCategory(category)}
-                        >
-                            {category}
-                        </button>
-                    ))}
-                </div>
-
-                {pageError && (
-                    <div className="rk-formerror">
-                        {pageError}
-
-                        <button
-                            type="button"
-                            className="rk-btn rk-btn--quiet rk-btn--sm"
-                            onClick={() => void loadOrderData(undefined, true)}
-                        >
-                            Thử lại
-                        </button>
+                    <div className="rk-segment">
+                        {categories.map((category) => (
+                            <button
+                                key={category}
+                                type="button"
+                                className={`rk-segment__btn${activeCategory === category ? ' is-active' : ''}`}
+                                onClick={() => setActiveCategory(category)}
+                            >
+                                {category}
+                            </button>
+                        ))}
                     </div>
-                )}
 
-                {isLoading ? (
-                    <LoadingState
-                        title="Đang tải dữ liệu đơn hàng"
-                        description="Hệ thống đang lấy thực đơn và các món đã gọi."
-                    />
-                ) : visibleMenu.length === 0 ? (
-                    <EmptyState
-                        title="Không có món nào"
-                        description="Danh mục này chưa có món, hãy chọn danh mục khác."
-                    />
-                ) : (
-                    <div className="rk-menugrid">
-                        {visibleMenu.map((dish) => {
-                            const draft = orderDraft[dish.dishId] ?? {
-                                qty: 0,
-                                note: '',
-                            }
+                    {pageError && (
+                        <div className="rk-formerror">
+                            {pageError}
 
-                            const minQty = getMinQty(dish.dishId)
+                            <button
+                                type="button"
+                                className="rk-btn rk-btn--quiet rk-btn--sm"
+                                onClick={() => void loadOrderData(undefined, true)}
+                            >
+                                Thử lại
+                            </button>
+                        </div>
+                    )}
 
-                            const hasExisting = Boolean(draft.status)
+                    {isLoading ? (
+                        <LoadingState
+                            title="Đang tải dữ liệu đơn hàng"
+                            description="Hệ thống đang lấy thực đơn và các món đã gọi."
+                        />
+                    ) : visibleMenu.length === 0 ? (
+                        <EmptyState
+                            title="Không có món nào"
+                            description="Danh mục này chưa có món, hãy chọn danh mục khác."
+                        />
+                    ) : (
+                        <div className="rk-menugrid">
+                            {visibleMenu.map((dish) => {
+                                const draft = orderDraft[dish.dishId] ?? {
+                                    qty: 0,
+                                    note: '',
+                                }
 
-                            const noteAcknowledged = Boolean(
-                                draft.chefInternalNoteAcknowledgedAt,
-                            )
+                                const minQty = getMinQty(dish.dishId)
 
-                            const isUnavailable = !dish.available
+                                const hasExisting = Boolean(draft.status)
 
-                            return (
-                                <article
-                                    key={dish.dishId}
-                                    className={`rk-menucard${draft.qty > 0 ? ' is-picked' : ''}${
-                                        isUnavailable ? ' is-unavailable' : ''
-                                    }`}
-                                >
-                                    <div className="rk-menucard__figure">
-                                        {dish.imageUrl ? (
-                                            <img
-                                                src={duongDanAnh(dish.imageUrl)}
-                                                alt={dish.name}
-                                                onError={dungAnhThayThe}
-                                            />
-                                        ) : (
-                                            <Icon name="kitchen" className="rk-icon" />
-                                        )}
+                                const noteAcknowledged = Boolean(
+                                    draft.chefInternalNoteAcknowledgedAt,
+                                )
 
-                                        {draft.qty > 0 && (
-                                            <span className="rk-menucard__count">
-                                                {draft.qty}
-                                            </span>
-                                        )}
-                                    </div>
+                                const isUnavailable = !dish.available
 
-                                    <div className="rk-menucard__body">
-                                        <div className="rk-menucard__head">
-                                            <h3 className="rk-menucard__name">{dish.name}</h3>
-                                            <span className="rk-menucard__price">
-                                                {fmtPrice(dish.price)}
-                                            </span>
-
-                                            {hasExisting && draft.status && (
-                                                <span
-                                                    className={`rk-chip ${statusChipClass(draft.status)}`}
-                                                >
-                                                    {statusLabel(draft.status)}
-                                                </span>
+                                return (
+                                    <article
+                                        key={dish.dishId}
+                                        className={`rk-menucard${draft.qty > 0 ? ' is-picked' : ''}${
+                                            isUnavailable ? ' is-unavailable' : ''
+                                        }`}
+                                    >
+                                        <div className="rk-menucard__figure">
+                                            {dish.imageUrl ? (
+                                                <img
+                                                    src={duongDanAnh(dish.imageUrl)}
+                                                    alt={dish.name}
+                                                    onError={dungAnhThayThe}
+                                                />
+                                            ) : (
+                                                <Icon
+                                                    name="kitchen"
+                                                    className="rk-icon"
+                                                />
                                             )}
 
-                                            {!hasExisting && isUnavailable && (
-                                                <span className="rk-chip rk-chip--alert">
-                                                    Hết hàng
+                                            {draft.qty > 0 && (
+                                                <span className="rk-menucard__count">
+                                                    {draft.qty}
                                                 </span>
                                             )}
                                         </div>
-                                    </div>
 
-                                    <div className="rk-menucard__foot">
-                                    {draft.chefInternalNote && (
-                                        <div
-                                            className={`rk-chefnote${
-                                                noteAcknowledged ? ' is-acknowledged' : ''
-                                            }`}
-                                        >
-                                            <div className="rk-chefnote__head">
-                                                <strong> Bếp nhắn</strong>
+                                        <div className="rk-menucard__body">
+                                            <div className="rk-menucard__head">
+                                                <h3 className="rk-menucard__name">
+                                                    {dish.name}
+                                                </h3>
+                                                <span className="rk-menucard__price">
+                                                    {fmtPrice(dish.price)}
+                                                </span>
 
-                                                {draft.chefInternalNoteCreatedAt && (
-                                                    <span className="rk-chefnote__time">
-                                                        {formatChefNoteTime(
-                                                            draft.chefInternalNoteCreatedAt,
-                                                        )}
+                                                {hasExisting && draft.status && (
+                                                    <span
+                                                        className={`rk-chip ${statusChipClass(draft.status)}`}
+                                                    >
+                                                        {statusLabel(draft.status)}
+                                                    </span>
+                                                )}
+
+                                                {!hasExisting && isUnavailable && (
+                                                    <span className="rk-chip rk-chip--alert">
+                                                        Hết hàng
                                                     </span>
                                                 )}
                                             </div>
-
-                                            <p className="rk-chefnote__body">
-                                                {draft.chefInternalNote}
-                                            </p>
-
-                                            {noteAcknowledged ? (
-                                                <small className="rk-chefnote__seen">
-                                                    <Icon name="check" className="rk-icon" />{' '}
-                                                    Đã xem
-                                                </small>
-                                            ) : (
-                                                draft.orderItemId && (
-                                                    <button
-                                                        type="button"
-                                                        className="rk-btn rk-btn--quiet rk-btn--sm"
-                                                        disabled={
-                                                            acknowledgingItemId ===
-                                                            draft.orderItemId
-                                                        }
-                                                        onClick={() =>
-                                                            void handleAcknowledgeChefNote(
-                                                                dish.dishId,
-                                                                draft.orderItemId!,
-                                                            )
-                                                        }
-                                                    >
-                                                        {acknowledgingItemId ===
-                                                        draft.orderItemId
-                                                            ? 'Đang xác nhận...'
-                                                            : 'Xác nhận đã xem'}
-                                                    </button>
-                                                )
-                                            )}
                                         </div>
-                                    )}
 
-                                    <div className="rk-stepper">
-                                        <button
-                                            type="button"
-                                            className="rk-stepper__btn"
-                                            disabled={draft.qty <= minQty}
-                                            onClick={() =>
-                                                changeDraftQty(dish.dishId, -1)
-                                            }
-                                        >
-                                            -
-                                        </button>
+                                        <div className="rk-menucard__foot">
+                                            {draft.chefInternalNote && (
+                                                <div
+                                                    className={`rk-chefnote${
+                                                        noteAcknowledged
+                                                            ? ' is-acknowledged'
+                                                            : ''
+                                                    }`}
+                                                >
+                                                    <div className="rk-chefnote__head">
+                                                        <strong> Bếp nhắn</strong>
 
-                                        <span className="rk-stepper__value">
-                                            {draft.qty}
-                                        </span>
+                                                        {draft.chefInternalNoteCreatedAt && (
+                                                            <span className="rk-chefnote__time">
+                                                                {formatChefNoteTime(
+                                                                    draft.chefInternalNoteCreatedAt,
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </div>
 
-                                        <button
-                                            type="button"
-                                            className="rk-stepper__btn"
-                                            disabled={isUnavailable}
-                                            onClick={() => changeDraftQty(dish.dishId, 1)}
-                                        >
-                                            +
-                                        </button>
-                                    </div>
+                                                    <p className="rk-chefnote__body">
+                                                        {draft.chefInternalNote}
+                                                    </p>
 
-                                    <input
-                                        placeholder="Ghi chú (ít cay, ...)"
-                                        value={draft.note}
-                                        className="rk-input"
-                                        onChange={(event) =>
-                                            setDraftNote(dish.dishId, event.target.value)
-                                        }
-                                    />
+                                                    {noteAcknowledged ? (
+                                                        <small className="rk-chefnote__seen">
+                                                            <Icon
+                                                                name="check"
+                                                                className="rk-icon"
+                                                            />{' '}
+                                                            Đã xem
+                                                        </small>
+                                                    ) : (
+                                                        draft.orderItemId && (
+                                                            <button
+                                                                type="button"
+                                                                className="rk-btn rk-btn--quiet rk-btn--sm"
+                                                                disabled={
+                                                                    acknowledgingItemId ===
+                                                                    draft.orderItemId
+                                                                }
+                                                                onClick={() =>
+                                                                    void handleAcknowledgeChefNote(
+                                                                        dish.dishId,
+                                                                        draft.orderItemId!,
+                                                                    )
+                                                                }
+                                                            >
+                                                                {acknowledgingItemId ===
+                                                                draft.orderItemId
+                                                                    ? 'Đang xác nhận...'
+                                                                    : 'Xác nhận đã xem'}
+                                                            </button>
+                                                        )
+                                                    )}
+                                                </div>
+                                            )}
 
-                                    {isUnavailable && (
-                                        <p className="rk-field__hint">
-                                            Món hiện đang tạm hết — không thể gọi thêm.
-                                        </p>
-                                    )}
+                                            <div className="rk-stepper">
+                                                <button
+                                                    type="button"
+                                                    className="rk-stepper__btn"
+                                                    disabled={draft.qty <= minQty}
+                                                    onClick={() =>
+                                                        changeDraftQty(dish.dishId, -1)
+                                                    }
+                                                >
+                                                    -
+                                                </button>
 
-                                    {draft.status === 'COMPLETED' && (
-                                        <p className="rk-field__hint">
-                                            Món đã hoàn thành — không thể giảm số lượng
-                                            dưới {minQty}.
-                                        </p>
-                                    )}
+                                                <span className="rk-stepper__value">
+                                                    {draft.qty}
+                                                </span>
 
-                                    {draft.status === 'CANCELLED' && (
-                                        <>
-                                            <p className="rk-field__hint">
-                                                Món đã huỷ — nhấn + để thêm mới từ đầu.
-                                            </p>
+                                                <button
+                                                    type="button"
+                                                    className="rk-stepper__btn"
+                                                    disabled={isUnavailable}
+                                                    onClick={() =>
+                                                        changeDraftQty(dish.dishId, 1)
+                                                    }
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
 
-                                            {draft.cancelReason && (
-                                                <p className="rk-subnote rk-subnote--alert">
-                                                    Lý do huỷ: {draft.cancelReason}
+                                            <input
+                                                placeholder="Ghi chú (ít cay, ...)"
+                                                value={draft.note}
+                                                className="rk-input"
+                                                onChange={(event) =>
+                                                    setDraftNote(
+                                                        dish.dishId,
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+
+                                            {isUnavailable && (
+                                                <p className="rk-field__hint">
+                                                    Món hiện đang tạm hết — không thể gọi
+                                                    thêm.
                                                 </p>
                                             )}
-                                        </>
-                                    )}
-                                    </div>
-                                </article>
-                            )
-                        })}
-                    </div>
-                )}
+
+                                            {draft.status === 'COMPLETED' && (
+                                                <p className="rk-field__hint">
+                                                    Món đã hoàn thành — không thể giảm số
+                                                    lượng dưới {minQty}.
+                                                </p>
+                                            )}
+
+                                            {draft.status === 'CANCELLED' && (
+                                                <>
+                                                    <p className="rk-field__hint">
+                                                        Món đã huỷ — nhấn + để thêm mới từ
+                                                        đầu.
+                                                    </p>
+
+                                                    {draft.cancelReason && (
+                                                        <p className="rk-subnote rk-subnote--alert">
+                                                            Lý do huỷ:{' '}
+                                                            {draft.cancelReason}
+                                                        </p>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    </article>
+                                )
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 <aside className="rk-cart" aria-label="Thay đổi sắp gửi">

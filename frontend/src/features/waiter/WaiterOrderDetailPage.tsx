@@ -106,7 +106,6 @@ export default function WaiterOrderDetailPage() {
 
     return (
         <div className="rk-stack">
-
             <div className="rk-stack">
                 <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />

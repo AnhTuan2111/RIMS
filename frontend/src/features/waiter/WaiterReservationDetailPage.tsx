@@ -110,7 +110,6 @@ export default function WaiterReservationDetailPage() {
     if (isLoading) {
         return (
             <div className="rk-stack">
-
                 <div className="rk-stack">
                     <LoadingState title="Đang tải thông tin đặt bàn" description="" />
                 </div>
@@ -121,7 +120,6 @@ export default function WaiterReservationDetailPage() {
     if (error) {
         return (
             <div className="rk-stack">
-
                 <div className="rk-stack">
                     <div className="rk-card__head-inline">
                         <BackArrow onClick={() => navigate('/waiter/tables')} />
@@ -150,7 +148,6 @@ export default function WaiterReservationDetailPage() {
     if (!reservation) {
         return (
             <div className="rk-stack">
-
                 <div className="rk-stack">
                     <div className="rk-card__head-inline">
                         <BackArrow onClick={() => navigate('/waiter/tables')} />
@@ -181,7 +178,6 @@ export default function WaiterReservationDetailPage() {
 
     return (
         <div className="rk-stack">
-
             <div className="rk-stack">
                 <div className="rk-card__head-inline">
                     <BackArrow onClick={() => navigate('/waiter/tables')} />

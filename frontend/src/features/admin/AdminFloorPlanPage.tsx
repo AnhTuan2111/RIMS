@@ -355,7 +355,9 @@ export default function AdminFloorPlanPage() {
                                 onKeyDown={(event) => handleKeyDown(table.tableId, event)}
                                 onClick={() => setSelected(table.tableId)}
                             >
-                                <span className="rk-planbtn__no">{table.tableNumber}</span>
+                                <span className="rk-planbtn__no">
+                                    {table.tableNumber}
+                                </span>
                                 <span className="rk-planbtn__seats">
                                     {table.capacity} chỗ
                                 </span>
@@ -366,7 +368,9 @@ export default function AdminFloorPlanPage() {
 
                 {current && currentTable && (
                     <aside className="rk-card rk-card--pad" aria-label="Bàn đang chọn">
-                        <h2 className="rk-sectiontitle">Bàn {currentTable.tableNumber}</h2>
+                        <h2 className="rk-sectiontitle">
+                            Bàn {currentTable.tableNumber}
+                        </h2>
 
                         <dl className="rk-details">
                             <div>

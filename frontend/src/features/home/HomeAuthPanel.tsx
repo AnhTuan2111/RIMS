@@ -33,7 +33,10 @@ export function HomeAuthPanel() {
 
             {error && <p className="rk-formerror">{error}</p>}
 
-            <form className="rk-fieldgroup" onSubmit={(event) => void handleSubmit(event)}>
+            <form
+                className="rk-fieldgroup"
+                onSubmit={(event) => void handleSubmit(event)}
+            >
                 <div className="rk-field">
                     <label className="rk-field__label" htmlFor="home-username">
                         Tên đăng nhập

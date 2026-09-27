@@ -607,7 +607,9 @@ export default function KitchenQueuePage() {
      * <p>Bộ lọc và sắp xếp chỉ áp cho cột ĐANG LÀM. Hai cột kia là việc đã
      * xong, lọc chúng không giúp nấu nhanh hơn.
      */
-    const columns = useMemo<BoardColumn<KitchenOrderItemResponse | CancelledOrderResponse>[]>(
+    const columns = useMemo<
+        BoardColumn<KitchenOrderItemResponse | CancelledOrderResponse>[]
+    >(
         () => [
             {
                 key: 'PREPARING',
@@ -780,7 +782,9 @@ export default function KitchenQueuePage() {
                             {/* Số lượng đứng trước tên món và to gấp đôi: đầu bếp
                                 nhìn từ xa cần thấy "mấy phần" trước tiên. */}
                             <div className="rk-ticket__qty">
-                                <span className="rk-ticket__qty-num">{item.quantity}</span>
+                                <span className="rk-ticket__qty-num">
+                                    {item.quantity}
+                                </span>
                                 <span className="rk-ticket__qty-unit">phần</span>
                             </div>
 
@@ -795,25 +799,33 @@ export default function KitchenQueuePage() {
                                     <span className="rk-num">
                                         {formatTime(
                                             cancelled
-                                                ? (item as CancelledOrderResponse).cancelledAt
-                                                : (item as KitchenOrderItemResponse).createdAt,
+                                                ? (item as CancelledOrderResponse)
+                                                      .cancelledAt
+                                                : (item as KitchenOrderItemResponse)
+                                                      .createdAt,
                                         )}
                                     </span>
                                 </div>
 
                                 {/* Chip trạng thái BỎ ĐI ở bảng: cột đã nói trạng
                                     thái rồi, chip chỉ lặp lại cùng một tin. */}
-                                {cancelled && (item as CancelledOrderResponse).cancelReason && (
-                                    <p className="rk-ticket__note rk-ticket__note--void">
-                                        Lý do: {(item as CancelledOrderResponse).cancelReason}
-                                    </p>
-                                )}
+                                {cancelled &&
+                                    (item as CancelledOrderResponse).cancelReason && (
+                                        <p className="rk-ticket__note rk-ticket__note--void">
+                                            Lý do:{' '}
+                                            {
+                                                (item as CancelledOrderResponse)
+                                                    .cancelReason
+                                            }
+                                        </p>
+                                    )}
 
-                                {!cancelled && (item as KitchenOrderItemResponse).note && (
-                                    <p className="rk-ticket__note">
-                                        {(item as KitchenOrderItemResponse).note}
-                                    </p>
-                                )}
+                                {!cancelled &&
+                                    (item as KitchenOrderItemResponse).note && (
+                                        <p className="rk-ticket__note">
+                                            {(item as KitchenOrderItemResponse).note}
+                                        </p>
+                                    )}
 
                                 {/* Chỉ cột ĐANG LÀM có nút. Món đã xong hoặc đã
                                     huỷ thì không còn việc gì để làm với nó. */}
@@ -822,7 +834,9 @@ export default function KitchenQueuePage() {
                                         <button
                                             type="button"
                                             className="rk-btn rk-btn--go"
-                                            disabled={completingItemId === item.orderItemId}
+                                            disabled={
+                                                completingItemId === item.orderItemId
+                                            }
                                             onClick={() => {
                                                 handleComplete(item.orderItemId).catch(
                                                     (requestError) => {

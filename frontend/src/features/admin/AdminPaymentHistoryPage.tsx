@@ -333,7 +333,10 @@ export default function AdminPaymentHistoryPage() {
                                                         )
                                                     }
                                                 >
-                                                    <Icon name="eye" className="rk-icon" />
+                                                    <Icon
+                                                        name="eye"
+                                                        className="rk-icon"
+                                                    />
                                                 </button>
                                             </td>
                                         </tr>

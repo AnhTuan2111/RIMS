@@ -170,7 +170,10 @@ export default function AdminCategoryPage() {
             notify(res.data.message)
         } catch (err: unknown) {
             console.error('Lỗi khi xoá danh mục:', err)
-            const errMsg = getErrorMessage(err, 'Không xoá được danh mục. Danh mục còn món thì phải chuyển món đi trước.')
+            const errMsg = getErrorMessage(
+                err,
+                'Không xoá được danh mục. Danh mục còn món thì phải chuyển món đi trước.',
+            )
             notify(errMsg, {tone: 'alert'})
             setDeleteTarget(null)
         }
@@ -324,7 +327,6 @@ export default function AdminCategoryPage() {
                         <StatCard
                             label="Tổng danh mục"
                             value={categories.length}
-                            tone="brand"
                             icon={<Icon name="kitchen" className="rk-icon" />}
                         />
 
@@ -409,126 +411,141 @@ export default function AdminCategoryPage() {
                             ))}
                         </div>
                     ) : (
-                    <div className="rk-tablewrap">
-                        <table className="rk-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Danh mục</th>
-                                    <th scope="col" className="rk-th--num">
-                                        Số món
-                                    </th>
-                                    <th scope="col">Trạng thái</th>
-                                    <th scope="col">Ngày tạo</th>
-                                    <th scope="col">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentItems.map((item) => (
-                                    <tr key={item.id}>
-                                        <td>{String(item.id).padStart(2, '0')}</td>
-                                        <td>
-                                            <div className="rk-media">
-                                                <span className="rk-thumb">
-                                                    <Icon name="kitchen" className="rk-icon" />
-                                                </span>
-                                                <div>
-                                                    <strong className="rk-rowlist__title">
-                                                        {item.name}
-                                                    </strong>
-                                                    <div className="rk-rowlist__meta">
-                                                        {item.description ||
-                                                            'Không có mô tả'}
+                        <div className="rk-tablewrap">
+                            <table className="rk-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Danh mục</th>
+                                        <th scope="col" className="rk-th--num">
+                                            Số món
+                                        </th>
+                                        <th scope="col">Trạng thái</th>
+                                        <th scope="col">Ngày tạo</th>
+                                        <th scope="col">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentItems.map((item) => (
+                                        <tr key={item.id}>
+                                            <td>{String(item.id).padStart(2, '0')}</td>
+                                            <td>
+                                                <div className="rk-media">
+                                                    <span className="rk-thumb">
+                                                        <Icon
+                                                            name="kitchen"
+                                                            className="rk-icon"
+                                                        />
+                                                    </span>
+                                                    <div>
+                                                        <strong className="rk-rowlist__title">
+                                                            {item.name}
+                                                        </strong>
+                                                        <div className="rk-rowlist__meta">
+                                                            {item.description ||
+                                                                'Không có mô tả'}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span className="rk-tag">
-                                                {item.dishCount || 0} món
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                className={`rk-chip ${item.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
-                                            >
-                                                {item.isAvailable ? 'Hoạt động' : 'Đã ẩn'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {item.createdAt
-                                                ? new Date(
-                                                      item.createdAt,
-                                                  ).toLocaleDateString('vi-VN')
-                                                : '---'}
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedCategory(item)
-                                                    setDishPage(1) // Reset dish page khi mở detail
-                                                    setView('DETAIL')
-                                                }}
-                                                className="rk-iconbtn"
-                                                title="Xem chi tiết"
-                                            >
-                                                <Icon name="eye" className="rk-icon" />
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedCategory(item)
-                                                    setFormData({
-                                                        name: item.name,
-                                                        description: item.description,
-                                                        isAvailable: item.isAvailable,
-                                                    })
-                                                    setView('EDIT')
-                                                }}
-                                                className="rk-iconbtn rk-iconbtn--brand"
-                                                title="Chỉnh sửa"
-                                            >
-                                                <Icon name="pen" className="rk-icon" />
-                                            </button>
-                                            <button
-                                                onClick={() =>
-                                                    setDeleteTarget({
-                                                        id: item.id,
-                                                        name: item.name,
-                                                        dishCount: item.dishCount || 0,
-                                                    })
-                                                }
-                                                className="rk-iconbtn rk-iconbtn--danger"
-                                                title="Xoá"
-                                            >
-                                                <Icon name="trash" className="rk-icon" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                            </td>
+                                            <td>
+                                                <span className="rk-tag">
+                                                    {item.dishCount || 0} món
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    className={`rk-chip ${item.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
+                                                >
+                                                    {item.isAvailable
+                                                        ? 'Hoạt động'
+                                                        : 'Đã ẩn'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {item.createdAt
+                                                    ? new Date(
+                                                          item.createdAt,
+                                                      ).toLocaleDateString('vi-VN')
+                                                    : '---'}
+                                            </td>
+                                            <td>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedCategory(item)
+                                                        setDishPage(1) // Reset dish page khi mở detail
+                                                        setView('DETAIL')
+                                                    }}
+                                                    className="rk-iconbtn"
+                                                    title="Xem chi tiết"
+                                                >
+                                                    <Icon
+                                                        name="eye"
+                                                        className="rk-icon"
+                                                    />
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedCategory(item)
+                                                        setFormData({
+                                                            name: item.name,
+                                                            description: item.description,
+                                                            isAvailable: item.isAvailable,
+                                                        })
+                                                        setView('EDIT')
+                                                    }}
+                                                    className="rk-iconbtn rk-iconbtn--brand"
+                                                    title="Chỉnh sửa"
+                                                >
+                                                    <Icon
+                                                        name="pen"
+                                                        className="rk-icon"
+                                                    />
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        setDeleteTarget({
+                                                            id: item.id,
+                                                            name: item.name,
+                                                            dishCount:
+                                                                item.dishCount || 0,
+                                                        })
+                                                    }
+                                                    className="rk-iconbtn rk-iconbtn--danger"
+                                                    title="Xoá"
+                                                >
+                                                    <Icon
+                                                        name="trash"
+                                                        className="rk-icon"
+                                                    />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
 
                     {filteredCategories.length === 0 && (
                         <EmptyState
-                                title="Không tìm thấy danh mục phù hợp"
-                                description="Hãy thay đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái."
-                                action={
-                                    <button
-                                        type="button"
-                                        className="rk-btn rk-btn--quiet"
-                                        onClick={() => {
-                                            setSearchTerm('')
-                                            setFilterStatus('ALL')
-                                            setCurrentPage(1)
-                                        }}
-                                    >
-                                        Xoá bộ lọc
-                                    </button>
-                                }
-                            />
-                        )}
+                            title="Không tìm thấy danh mục phù hợp"
+                            description="Hãy thay đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái."
+                            action={
+                                <button
+                                    type="button"
+                                    className="rk-btn rk-btn--quiet"
+                                    onClick={() => {
+                                        setSearchTerm('')
+                                        setFilterStatus('ALL')
+                                        setCurrentPage(1)
+                                    }}
+                                >
+                                    Xoá bộ lọc
+                                </button>
+                            }
+                        />
+                    )}
 
                     {filteredCategories.length > 0 && (
                         <Pagination
@@ -568,8 +585,7 @@ export default function AdminCategoryPage() {
                                 }}
                                 className="rk-btn rk-btn--quiet"
                             >
-                                <Icon name="pen" className="rk-icon" /> Sửa danh
-                                mục
+                                <Icon name="pen" className="rk-icon" /> Sửa danh mục
                             </button>
                             <button
                                 onClick={() =>
@@ -581,8 +597,7 @@ export default function AdminCategoryPage() {
                                 }
                                 className="rk-btn rk-btn--danger"
                             >
-                                <Icon name="trash" className="rk-icon" /> Xoá danh
-                                mục
+                                <Icon name="trash" className="rk-icon" /> Xoá danh mục
                             </button>
                         </div>
                     </div>
@@ -651,8 +666,8 @@ export default function AdminCategoryPage() {
                     <PageCard>
                         <div className="rk-card__head-inline">
                             <h4 className="rk-sectiontitle">
-                                <Icon name="kitchen" className="rk-icon" />{' '}
-                                Món trong danh mục ({categoryDishes.length})
+                                <Icon name="kitchen" className="rk-icon" /> Món trong danh
+                                mục ({categoryDishes.length})
                             </h4>
                         </div>
 

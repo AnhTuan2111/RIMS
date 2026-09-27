@@ -33,7 +33,8 @@ export const ICONS = {
     // duy nhất phân biệt hai hình ở cỡ 17px.
     ticket: '<rect x="4" y="3" width="16" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/>',
     invoice: '<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-3-2z"/><path d="M9 8h6M9 12h6"/>',
-    booking: '<rect x="3" y="5" width="18" height="16"/><path d="M8 2v5M16 2v5M3 11h18"/><rect x="10" y="14" width="4" height="4" fill="currentColor" stroke="none"/>',
+    booking:
+        '<rect x="3" y="5" width="18" height="16"/><path d="M8 2v5M16 2v5M3 11h18"/><rect x="10" y="14" width="4" height="4" fill="currentColor" stroke="none"/>',
 
     // ---- Hành động ----
     // Gỡ trùng 3: `check` TỪNG mang ba nghĩa — nút "Xong món", chip "Đã xong",
@@ -54,7 +55,8 @@ export const ICONS = {
     // dấu bên trong. KHÔNG mượn `plus`/`minus`: `plus` đã mang nghĩa "thêm một
     // bản ghi", và một icon hai nghĩa là thứ luật gốc cấm.
     zoomIn: '<rect x="3" y="3" width="14" height="14"/><path d="M10 6v8M6 10h8"/><path d="M17 17l4 4"/>',
-    zoomOut: '<rect x="3" y="3" width="14" height="14"/><path d="M6 10h8"/><path d="M17 17l4 4"/>',
+    zoomOut:
+        '<rect x="3" y="3" width="14" height="14"/><path d="M6 10h8"/><path d="M17 17l4 4"/>',
 
     // ---- Điều hướng ----
     back: '<path d="M20 12H5M11 6L5 12l6 6"/>',
@@ -74,10 +76,12 @@ export const ICONS = {
     clock: '<rect x="3" y="3" width="18" height="18"/><path d="M12 7v5l4 3"/>',
     // Quá hạn. Cùng họ đồng hồ với `clock` — đúng cách qlcv-aura làm clockAlert,
     // để mọi nhãn về hạn đọc ra là cùng một họ.
-    clockAlert: '<rect x="3" y="3" width="14" height="14"/><path d="M10 7v4l3 2"/><path d="M20 12v5M20 20v.01"/>',
+    clockAlert:
+        '<rect x="3" y="3" width="14" height="14"/><path d="M10 7v4l3 2"/><path d="M20 12v5M20 20v.01"/>',
     sun: '<rect x="8" y="8" width="8" height="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
     moon: '<path d="M20 15A9 9 0 0 1 9 4a8 8 0 1 0 11 11z"/>',
-    contrast: '<rect x="3" y="3" width="18" height="18"/><path d="M12 3v18h9V3z" fill="currentColor" stroke="none"/>',
+    contrast:
+        '<rect x="3" y="3" width="18" height="18"/><path d="M12 3v18h9V3z" fill="currentColor" stroke="none"/>',
     // ---- Thêm ở pha P4, sau khi soát 56 icon lucide đang vẽ trong app ----
     // Mỗi cái dưới đây là một nghĩa THẬT mà bộ 30 ban đầu chưa có. Cái nào trùng
     // nghĩa với icon sẵn có thì đã ánh xạ chứ không thêm — xem design.md.
@@ -88,10 +92,11 @@ export const ICONS = {
     logout: '<path d="M10 21H4V3h6"/><path d="M15 7l5 5-5 5M20 12H9"/>',
     key: '<rect x="3" y="8" width="8" height="8"/><path d="M11 12h10M18 12v4M21 12v3"/>',
     bell: '<path d="M5 18h14l-2-4V9a5 5 0 0 0-10 0v5z"/><path d="M10 21h4"/>',
-    refresh: '<path d="M21 12a9 9 0 0 1-15 6.7"/><path d="M3 21v-6h6"/><path d="M3 12a9 9 0 0 1 15-6.7"/><path d="M21 3v6h-6"/>',
-} as const;
+    refresh:
+        '<path d="M21 12a9 9 0 0 1-15 6.7"/><path d="M3 21v-6h6"/><path d="M3 12a9 9 0 0 1 15-6.7"/><path d="M21 3v6h-6"/>',
+} as const
 
-export type IconName = keyof typeof ICONS;
+export type IconName = keyof typeof ICONS
 
 // Sổ nghĩa — nguồn thật cho bài test. Mỗi icon đúng một nghĩa, mỗi nghĩa đúng một icon.
 export const ICON_MEANING: Record<IconName, string> = {
@@ -135,7 +140,7 @@ export const ICON_MEANING: Record<IconName, string> = {
     key: 'Đổi mật khẩu',
     bell: 'Chuông báo món mới ở bếp',
     refresh: 'Làm mới dữ liệu trên màn',
-};
+}
 
 /**
  * Icon đã khai nhưng CHƯA có chỗ dùng, kèm pha sẽ dùng.

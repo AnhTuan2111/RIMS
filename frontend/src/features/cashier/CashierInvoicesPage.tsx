@@ -431,8 +431,7 @@ export default function CashierInvoicesPage() {
                                     void handleDownloadPdf(selectedInvoice.invoiceId)
                                 }
                             >
-                                <Icon name="download" className="rk-icon" /> Tải
-                                PDF
+                                <Icon name="download" className="rk-icon" /> Tải PDF
                             </button>
                         </>
                     ) : undefined

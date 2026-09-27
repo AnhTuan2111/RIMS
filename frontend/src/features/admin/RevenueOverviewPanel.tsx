@@ -518,7 +518,6 @@ function WeeklyRevenueOverviewDashboard({
                     label="Doanh thu tuần"
                     value={formatRevenueCurrency(revenue)}
                     textValue
-                    tone="brand"
                     icon={<Icon name="invoice" className="rk-icon" />}
                 />
 

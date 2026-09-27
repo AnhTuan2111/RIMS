@@ -456,7 +456,6 @@ export default function WaiterEditReservationPage() {
 
     return (
         <div className="rk-stack">
-
             <div className="rk-stack">
                 <div className="rk-card__head-inline">
                     <h2 className="rk-sectiontitle">Sửa đặt bàn</h2>

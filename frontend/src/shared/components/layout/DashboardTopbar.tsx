@@ -84,7 +84,13 @@ export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
                     }
                 >
                     <Icon
-                        name={preference === 'auto' ? 'contrast' : resolved === 'dark' ? 'moon' : 'sun'}
+                        name={
+                            preference === 'auto'
+                                ? 'contrast'
+                                : resolved === 'dark'
+                                  ? 'moon'
+                                  : 'sun'
+                        }
                         className="rk-icon"
                     />
                 </button>

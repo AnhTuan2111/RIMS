@@ -365,7 +365,10 @@ export default function AdminTablesPage() {
                                                         title="Sửa bàn"
                                                         onClick={() => openEdit(table)}
                                                     >
-                                                        <Icon name="pen" className="rk-icon" />
+                                                        <Icon
+                                                            name="pen"
+                                                            className="rk-icon"
+                                                        />
                                                     </button>
 
                                                     <button
@@ -386,9 +389,15 @@ export default function AdminTablesPage() {
                                                         }
                                                     >
                                                         {table.active ? (
-                                                            <Icon name="eyeOff" className="rk-icon" />
+                                                            <Icon
+                                                                name="eyeOff"
+                                                                className="rk-icon"
+                                                            />
                                                         ) : (
-                                                            <Icon name="refresh" className="rk-icon" />
+                                                            <Icon
+                                                                name="refresh"
+                                                                className="rk-icon"
+                                                            />
                                                         )}
                                                     </button>
 
@@ -406,7 +415,10 @@ export default function AdminTablesPage() {
                                                             setRemoveTarget(table)
                                                         }
                                                     >
-                                                        <Icon name="trash" className="rk-icon" />
+                                                        <Icon
+                                                            name="trash"
+                                                            className="rk-icon"
+                                                        />
                                                     </button>
                                                 </td>
                                             </tr>

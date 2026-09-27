@@ -3414,6 +3414,21 @@ textarea.rk-input {
     min-width: 0;
 }
 
+/* ---------- Màn biểu mẫu ----------
+   Biểu mẫu tối đa 46rem, căn giữa.
+
+   Một biểu mẫu trải hết 1440px thì nhãn và ô nhập cách nhau cả gang tay, mắt
+   phải quét ngang một quãng dài cho mỗi dòng, và ô nhập dài 1200px cho một số
+   điện thoại mười chữ số là nói sai về thứ cần gõ vào.
+
+   KHÁC với bảng, kanban và sơ đồ mặt bằng — ba thứ đó giãn hết khung, vì càng
+   rộng càng so sánh được nhiều. */
+.rk-formpage {
+    width: 100%;
+    max-width: 46rem;
+    margin-inline: auto;
+}
+
 /* ---------- Sơ đồ mặt bằng ----------
    Bàn đứng đúng chỗ của nó trong quán, không xếp theo số thứ tự.
 
@@ -4252,12 +4267,6 @@ textarea.rk-input {
 
 /* ---------- Biến thể nhãn theo ngữ nghĩa ---------- */
 
-.rk-tag--brand {
-    border-color: var(--rims-brand-line);
-    background: var(--rims-brand-soft);
-    color: var(--rims-brand);
-}
-
 .rk-tag--ok {
     border-color: var(--rims-ok-line);
     background: var(--rims-ok-soft);
@@ -4268,12 +4277,6 @@ textarea.rk-input {
     border-color: var(--rims-busy-line);
     background: var(--rims-busy-soft);
     color: var(--rims-busy);
-}
-
-.rk-tag--gold {
-    border-color: var(--rims-gold);
-    background: var(--rims-gold-soft);
-    color: var(--rims-gold-deep);
 }
 
 .rk-tag--idle {

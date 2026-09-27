@@ -201,9 +201,12 @@ export default function OrderPanel({
 
             console.error('[CASHIER_CUSTOMER_CREATE_ERROR]', requestError)
 
-            notify('Không tạo được khách hàng. Số điện thoại này có thể đã có tài khoản.', {
-                tone: 'alert',
-            })
+            notify(
+                'Không tạo được khách hàng. Số điện thoại này có thể đã có tài khoản.',
+                {
+                    tone: 'alert',
+                },
+            )
         } finally {
             setProcessingCreate(false)
         }
@@ -363,8 +366,7 @@ export default function OrderPanel({
                             </p>
 
                             <p className="rk-rowlist__meta">
-                                Điểm hiện
-                                có:{' '}
+                                Điểm hiện có:{' '}
                                 <strong className="rk-num">
                                     {formatNumber(customer.rewardPoints)}
                                 </strong>

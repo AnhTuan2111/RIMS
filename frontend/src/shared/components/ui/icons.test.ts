@@ -78,10 +78,9 @@ describe('Bộ icon', () => {
     it('mọi icon khai trước đều ghi rõ pha sẽ dùng', () => {
         const stale = Object.keys(ICON_PLANNED).filter((name) => isUsed(name))
 
-        expect(
-            stale,
-            `đã dùng rồi, xoá khỏi ICON_PLANNED: ${stale.join(', ')}`,
-        ).toEqual([])
+        expect(stale, `đã dùng rồi, xoá khỏi ICON_PLANNED: ${stale.join(', ')}`).toEqual(
+            [],
+        )
     })
 
     it('không có icon nào không ai dùng', () => {

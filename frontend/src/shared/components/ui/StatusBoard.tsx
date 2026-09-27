@@ -39,13 +39,20 @@ type StatusBoardProps<T> = {
  * <p>Trên 52rem cả ba cột đều hiện, và thuộc tính `hidden` bị CSS vô hiệu hoá
  * thay vì gỡ khỏi DOM: đổi cỡ cửa sổ không làm mất cột nào.
  */
-export function StatusBoard<T>({columns, renderItem, itemKey, label}: StatusBoardProps<T>) {
+export function StatusBoard<T>({
+    columns,
+    renderItem,
+    itemKey,
+    label,
+}: StatusBoardProps<T>) {
     const [active, setActive] = useState(columns[0]?.key ?? '')
     const id = useId()
 
     // Cột đang chọn có thể biến mất nếu nguồn dữ liệu đổi. Quay về cột đầu
     // thay vì hiện một bảng không có cột nào.
-    const current = columns.some((c) => c.key === active) ? active : (columns[0]?.key ?? '')
+    const current = columns.some((c) => c.key === active)
+        ? active
+        : (columns[0]?.key ?? '')
 
     return (
         <div className="rk-board" role="group" aria-label={label}>
@@ -85,7 +92,9 @@ export function StatusBoard<T>({columns, renderItem, itemKey, label}: StatusBoar
                     ) : (
                         <div className="rk-board__body">
                             {column.items.map((item) => (
-                                <div key={itemKey(item)}>{renderItem(item, column.key)}</div>
+                                <div key={itemKey(item)}>
+                                    {renderItem(item, column.key)}
+                                </div>
                             ))}
                         </div>
                     )}

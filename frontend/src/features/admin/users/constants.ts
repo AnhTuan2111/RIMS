@@ -21,13 +21,19 @@ export const ROLE_LABELS: Record<string, string> = {
  * ở màn Quản lý tài khoản — nơi không có trạng thái bàn hay món nào để lẫn
  * với. Mỗi huy hiệu luôn mang tên vai trò bằng chữ.
  */
-export const ROLE_TAG_CLASS: Record<string, string> = {
-    ADMIN: 'rk-tag--brand',
-    CHEF: 'rk-tag--busy',
-    WAITER: 'rk-tag--ok',
-    CASHIER: 'rk-tag--gold',
-    CUSTOMER: 'rk-tag--idle',
-}
+/*
+ * VAI TRÒ KHÔNG CÓ MÀU RIÊNG.
+ *
+ * Bản cũ có ROLE_TAG_CLASS gán cho mỗi vai một màu: Quản trị đỏ, Bếp hổ phách,
+ * Phục vụ lục, Thu ngân vàng. Năm màu đó mượn nguyên bảng màu ngữ nghĩa của hệ
+ * — thứ chỉ có BỐN nghĩa: LÀM lục, BỎ đỏ, CHỜ hổ phách, TIN xanh.
+ *
+ * Hậu quả đọc thấy ngay trong bảng Nhân sự: nhãn "Phục vụ" lục nằm ngay cạnh
+ * chip "Hoạt động" lục, và hai thứ hoàn toàn khác nhau lại trông như một. Tệ
+ * hơn, "Quản trị viên" tô đỏ đọc ra là tài khoản có vấn đề.
+ *
+ * Vai trò là một cái TÊN, không phải một trạng thái. Tên thì đọc bằng chữ.
+ */
 
 export const STAFF_ROLES = [RoleType.CHEF, RoleType.WAITER, RoleType.CASHIER]
 

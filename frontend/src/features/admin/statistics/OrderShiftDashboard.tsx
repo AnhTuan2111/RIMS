@@ -78,7 +78,6 @@ export function OrderShiftDashboard({
                     label="Ca có nhiều đơn nhất"
                     value={highestShift?.displayName ?? 'Chưa có dữ liệu'}
                     textValue
-                    tone="brand"
                 />
 
                 <StatCard

@@ -307,7 +307,7 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="rk-card rk-card--pad">
+        <div className="rk-card rk-card--pad rk-formpage">
             <div className="rk-card__head-inline">
                 <div>
                     <h2>Hồ sơ cá nhân</h2>
@@ -333,9 +333,7 @@ export default function ProfilePage() {
                 <div className="rk-note rk-note--ok">Đã cập nhật hồ sơ</div>
             )}
 
-            {pwSuccess && (
-                <div className="rk-note rk-note--ok">Đã đổi mật khẩu</div>
-            )}
+            {pwSuccess && <div className="rk-note rk-note--ok">Đã đổi mật khẩu</div>}
 
             <div className="rk-card rk-card--soft rk-card--pad">
                 <div className="rk-idcard">
@@ -346,7 +344,7 @@ export default function ProfilePage() {
                     <div>
                         <h3 className="rk-idcard__name">{currentUser.fullName}</h3>
 
-                        <span className="rk-tag rk-tag--brand">
+                        <span className="rk-tag">
                             {ROLE_LABELS[currentUser.role] ?? currentUser.role}
                         </span>
                     </div>
@@ -506,7 +504,9 @@ export default function ProfilePage() {
                                     disabled={pwLoading}
                                     onClick={() => void handleChangePassword()}
                                 >
-                                    {pwLoading ? 'Đang xử lý...' : 'Xác nhận đổi mật khẩu'}
+                                    {pwLoading
+                                        ? 'Đang xử lý...'
+                                        : 'Xác nhận đổi mật khẩu'}
                                 </button>
                             </div>
                         </div>

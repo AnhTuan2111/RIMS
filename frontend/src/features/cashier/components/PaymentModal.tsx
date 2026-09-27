@@ -120,7 +120,11 @@ export default function PaymentModal({
                 return
             }
 
-            notify(response?.data?.message ?? 'Máy chủ không phản hồi. Dữ liệu chưa được lưu, thử lại sau ít phút.', {tone: 'alert'})
+            notify(
+                response?.data?.message ??
+                    'Máy chủ không phản hồi. Dữ liệu chưa được lưu, thử lại sau ít phút.',
+                {tone: 'alert'},
+            )
         } catch (requestError: unknown) {
             if (isRequestCanceled(requestError)) {
                 return
@@ -128,7 +132,10 @@ export default function PaymentModal({
 
             console.error('[CASHIER_CASH_PAYMENT_ERROR]', requestError)
 
-            notify('Không gửi được yêu cầu thanh toán. Đơn vẫn giữ nguyên, kiểm tra mạng rồi thử lại.', {tone: 'alert'})
+            notify(
+                'Không gửi được yêu cầu thanh toán. Đơn vẫn giữ nguyên, kiểm tra mạng rồi thử lại.',
+                {tone: 'alert'},
+            )
         } finally {
             setProcessing(false)
         }
@@ -270,8 +277,7 @@ export default function PaymentModal({
                 {method === 'QRCODE' && (
                     <div>
                         <div className="rk-panel rk-panel--center">
-                            <span className="rk-feedback__icon">
-                                </span>
+                            <span className="rk-feedback__icon"></span>
 
                             <h3 className="rk-sectiontitle">Cổng thanh toán VNPay</h3>
 

@@ -264,8 +264,7 @@ export default function DishListPage() {
 
                 {routeStatus === 'unavailable' && (
                     <Link className="rk-btn rk-btn--quiet" to="/chef/dishes">
-                        <Icon name="back" className="rk-icon" /> Xem tất cả
-                        món
+                        <Icon name="back" className="rk-icon" /> Xem tất cả món
                     </Link>
                 )}
             </PageCard>
@@ -391,7 +390,7 @@ export default function DishListPage() {
                                                     className={
                                                         dishItem.available
                                                             ? 'rk-chip rk-chip--ok'
-                                                            : 'rk-chip rk-chip--alert'
+                                                            : 'rk-chip rk-chip--idle'
                                                     }
                                                 >
                                                     {dishItem.available

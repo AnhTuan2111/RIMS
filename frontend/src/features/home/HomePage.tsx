@@ -42,8 +42,12 @@ export default function HomePage() {
         // Hai lời gọi độc lập: băng ảnh hỏng thì thực đơn vẫn hiện, và ngược
         // lại. Không có món nào thì trang rơi về dáng "Bảng hiệu", đó là một
         // trạng thái hợp lệ chứ không phải lỗi cần báo.
-        getPublicBestSellingDishes(controller.signal).then(setStrip).catch(() => {})
-        getPublicMenu(controller.signal).then(setMenu).catch(() => {})
+        getPublicBestSellingDishes(controller.signal)
+            .then(setStrip)
+            .catch(() => {})
+        getPublicMenu(controller.signal)
+            .then(setMenu)
+            .catch(() => {})
 
         return () => controller.abort()
     }, [])

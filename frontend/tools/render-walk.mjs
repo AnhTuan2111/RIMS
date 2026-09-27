@@ -76,30 +76,30 @@ const ALL_ROUTES = [
     {g: 'quan-tri', n: '16-nha-hang', p: '/admin/restaurant', as: 'ADMIN'},
 
     // Bếp · 6 màn phẳng
-    {g: 'bep', n: '16-bep-tong-quan', p: '/chef/dashboard', as: 'CHEF'},
-    {g: 'bep', n: '17-can-che-bien', p: '/chef/orders', as: 'CHEF'},
-    {g: 'bep', n: '18-gom-mon', p: '/chef/grouped-orders', as: 'CHEF'},
-    {g: 'bep', n: '19-bep-mon-an', p: '/chef/dishes', as: 'CHEF'},
-    {g: 'bep', n: '20-da-xong', p: '/chef/completed-orders', as: 'CHEF'},
-    {g: 'bep', n: '21-da-huy', p: '/chef/cancelled-orders', as: 'CHEF'},
+    {g: 'bep', n: '17-bep-tong-quan', p: '/chef/dashboard', as: 'CHEF'},
+    {g: 'bep', n: '18-can-che-bien', p: '/chef/orders', as: 'CHEF'},
+    {g: 'bep', n: '19-gom-mon', p: '/chef/grouped-orders', as: 'CHEF'},
+    {g: 'bep', n: '20-bep-mon-an', p: '/chef/dishes', as: 'CHEF'},
+    {g: 'bep', n: '21-da-xong', p: '/chef/completed-orders', as: 'CHEF'},
+    {g: 'bep', n: '22-da-huy', p: '/chef/cancelled-orders', as: 'CHEF'},
 
     // Phục vụ · 7 màn
-    {g: 'phuc-vu', n: '22-so-do-ban', p: '/waiter/tables', as: 'WAITER'},
-    {g: 'phuc-vu', n: '23-dat-mon-moi', p: '/waiter/tables/1/order/new', as: 'WAITER'},
-    {g: 'phuc-vu', n: '24-don-chi-tiet', p: '/waiter/tables/2/order/detail', as: 'WAITER'},
-    {g: 'phuc-vu', n: '25-sua-don', p: '/waiter/tables/2/order/edit', as: 'WAITER'},
-    {g: 'phuc-vu', n: '26-dat-ban-chi-tiet', p: '/waiter/tables/3/reservation', as: 'WAITER'},
-    {g: 'phuc-vu', n: '27-dat-ban', p: '/waiter/reservations', as: 'WAITER'},
-    {g: 'phuc-vu', n: '28-sua-dat-ban', p: '/waiter/reservations/501/edit', as: 'WAITER'},
+    {g: 'phuc-vu', n: '23-so-do-ban', p: '/waiter/tables', as: 'WAITER'},
+    {g: 'phuc-vu', n: '24-dat-mon-moi', p: '/waiter/tables/1/order/new', as: 'WAITER'},
+    {g: 'phuc-vu', n: '25-don-chi-tiet', p: '/waiter/tables/2/order/detail', as: 'WAITER'},
+    {g: 'phuc-vu', n: '26-sua-don', p: '/waiter/tables/2/order/edit', as: 'WAITER'},
+    {g: 'phuc-vu', n: '27-dat-ban-chi-tiet', p: '/waiter/tables/3/reservation', as: 'WAITER'},
+    {g: 'phuc-vu', n: '28-dat-ban', p: '/waiter/reservations', as: 'WAITER'},
+    {g: 'phuc-vu', n: '29-sua-dat-ban', p: '/waiter/reservations/501/edit', as: 'WAITER'},
 
     // Thu ngân · 4 màn
-    {g: 'thu-ngan', n: '29-thanh-toan', p: '/cashier/payments', as: 'CASHIER'},
-    {g: 'thu-ngan', n: '30-thu-ngan-hoa-don', p: '/cashier/invoices', as: 'CASHIER'},
-    {g: 'thu-ngan', n: '31-tra-tien-xong', p: '/payment-success', as: 'CASHIER'},
-    {g: 'thu-ngan', n: '32-tra-tien-loi', p: '/payment-failed', as: 'CASHIER'},
+    {g: 'thu-ngan', n: '30-thanh-toan', p: '/cashier/payments', as: 'CASHIER'},
+    {g: 'thu-ngan', n: '31-thu-ngan-hoa-don', p: '/cashier/invoices', as: 'CASHIER'},
+    {g: 'thu-ngan', n: '32-tra-tien-xong', p: '/payment-success', as: 'CASHIER'},
+    {g: 'thu-ngan', n: '33-tra-tien-loi', p: '/payment-failed', as: 'CASHIER'},
 
     // Khách · 1 màn
-    {g: 'khach', n: '33-khach-dat-ban', p: '/customer/reservations', as: 'CUSTOMER'},
+    {g: 'khach', n: '34-khach-dat-ban', p: '/customer/reservations', as: 'CUSTOMER'},
 ]
 
 const args = Object.fromEntries(
