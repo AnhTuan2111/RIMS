@@ -13,7 +13,7 @@ import {
     parseReservationWindow,
 } from '@/shared/utils/reservationTime'
 import {useRestaurant} from '@/app/providers/useRestaurant'
-import {PageCard, PageHeader} from '@/shared/components/ui'
+import {ConfirmDialog, PageCard, PageHeader} from '@/shared/components/ui'
 import {EmptyState, LoadingState} from '@/shared/components/feedback'
 
 import type {
@@ -134,6 +134,14 @@ export default function CustomerReservations() {
     const [tableError, setTableError] = useState<string | null>(null)
 
     const [cancelingId, setCancelingId] = useState<number | null>(null)
+
+    // Lượt đặt đang chờ xác nhận HUỶ. Huỷ không lùi được: khung giờ mở ra cho
+    // khách khác ngay lập tức. Trước đây một lần bấm là huỷ luôn.
+    const [confirmCancel, setConfirmCancel] = useState<{
+        id: number
+        tableNumber: string
+        reservationTime: string
+    } | null>(null)
 
     const [cancelError, setCancelError] = useState('')
 
@@ -431,7 +439,10 @@ export default function CustomerReservations() {
                         void loadCurrentReservation(undefined, true)
                     }}
                 >
-                    Huỷ đặt bàn
+                    {/* Tên theo NỘI DUNG của tab. Trước đây là "Huỷ đặt bàn":
+                        muốn xem mình đã đặt gì thì phải bấm vào một cái nhãn
+                        mang tên hành động phá huỷ. */}
+                    Lượt đặt của tôi
                 </button>
             </div>
 
@@ -718,7 +729,7 @@ export default function CustomerReservations() {
             {activeTab === 'cancel' && (
                 <div className="rk-card rk-card--pad">
                     <div>
-                        <h2 className="rk-sectiontitle">Huỷ đặt bàn</h2>
+                        <h2 className="rk-sectiontitle">Lượt đặt của tôi</h2>
 
                         <p className="rk-field__hint">
                             Danh sách đặt bàn đang hoạt động của bạn, có thể ở nhiều ngày
@@ -759,19 +770,17 @@ export default function CustomerReservations() {
                     ) : (
                         <div className="rk-rowlist">
                             {currentReservations.map((reservation) => (
-                                <div
-                                    key={reservation.id}
-                                    className="rk-note rk-note--busy"
-                                >
+                                // Dòng danh sách, không phải khối cảnh báo: một
+                                // lượt đặt bình thường không phải lời cảnh báo,
+                                // và nền hổ phách là màu CHỜ của cả hệ.
+                                <div key={reservation.id} className="rk-rowlist__item">
                                     <div className="rk-rowlist__main">
                                         <span className="rk-rowlist__title">
-                                            Đặt bàn:
+                                            {formatDateTime(reservation.reservationTime)}
                                         </span>
 
                                         <span>
                                             Bàn <strong>{reservation.tableNumber}</strong>
-                                            {' - '}
-                                            {formatDateTime(reservation.reservationTime)}
                                         </span>
 
                                         <span
@@ -790,15 +799,20 @@ export default function CustomerReservations() {
 
                                     <button
                                         type="button"
-                                        className="rk-btn rk-btn--danger"
+                                        className="rk-btn rk-btn--danger rk-btn--sm"
                                         disabled={cancelingId !== null}
                                         onClick={() =>
-                                            void handleCancelReservation(reservation.id)
+                                            setConfirmCancel({
+                                                id: reservation.id,
+                                                tableNumber: reservation.tableNumber,
+                                                reservationTime:
+                                                    reservation.reservationTime,
+                                            })
                                         }
                                     >
                                         {cancelingId === reservation.id
-                                            ? 'Đang xử lý...'
-                                            : 'Huỷ đặt bàn'}
+                                            ? 'Đang huỷ...'
+                                            : 'Huỷ lượt này'}
                                     </button>
                                 </div>
                             ))}
@@ -820,6 +834,28 @@ export default function CustomerReservations() {
                     </div>
                 </div>
             )}
+            <ConfirmDialog
+                open={Boolean(confirmCancel)}
+                title="Huỷ lượt đặt này?"
+                description={
+                    confirmCancel
+                        ? `Bàn ${confirmCancel.tableNumber} — ${formatDateTime(confirmCancel.reservationTime)}. Khung giờ này mở cho khách khác ngay, và không giữ lại được.`
+                        : undefined
+                }
+                confirmLabel="Huỷ lượt đặt"
+                // "Giữ lượt đặt" chứ không phải "Huỷ bỏ": hai nút cạnh nhau mà
+                // cùng bắt đầu bằng chữ "Huỷ" thì bấm nhầm là chuyện sớm muộn.
+                cancelLabel="Giữ lượt đặt"
+                destructive
+                onConfirm={() => {
+                    const target = confirmCancel
+                    setConfirmCancel(null)
+                    if (target) {
+                        void handleCancelReservation(target.id)
+                    }
+                }}
+                onCancel={() => setConfirmCancel(null)}
+            />
         </div>
     )
 }

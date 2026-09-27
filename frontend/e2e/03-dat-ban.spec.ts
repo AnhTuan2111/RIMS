@@ -84,13 +84,88 @@ test.describe('Đặt bàn', () => {
             .toBeGreaterThan(before.length)
     })
 
-    test('khách xem được lượt đặt của chính mình', async ({page}) => {
+    test('khách đặt bàn, thấy lượt đó trong "Lượt đặt của tôi", rồi huỷ có hỏi lại', async ({
+        page,
+    }) => {
+        // Bản đầu của bài này mang đúng cái tên "khách xem được lượt đặt của
+        // chính mình" nhưng chỉ kiểm biểu mẫu có hiện — không đặt, không xem,
+        // không huỷ gì.
+        const tomorrow = new Date(Date.now() + 86_400_000).toLocaleDateString('sv-SE')
+
         await login(page, ACCOUNTS.customer)
         await page.goto('/customer/reservations')
         await expectRendered(page)
 
-        // Màn của khách phải dựng được biểu mẫu đặt bàn, không phải một màn lỗi.
-        await expect(page.locator('form, .rk-field').first()).toBeVisible()
+        await page.locator('#khach-ten-khach-hang').fill('Khách kiểm thử')
+        await page.locator('#khach-so-dien-thoai').fill('0912345678')
+        await page.locator('#customerreservations-ngay-dat').fill(tomorrow)
+        // Rời ô ngày bằng một cú bấm — Escape ở input[type=date] huỷ giá trị.
+        await page.locator('#khach-ten-khach-hang').click()
+
+        // Giờ cuối ngày: ít đụng lượt của các bài khác nhất.
+        const time = page.locator('#customerreservations-gio-dat')
+        const slots = await time.locator('option').allTextContents()
+        await time.selectOption({index: slots.length - 1})
+
+        const table = page.locator('#customerreservations-chon-ban')
+        await expect(table.locator('option').nth(1)).toBeAttached({timeout: 10_000})
+        await table.selectOption({index: 1})
+        const tableText = (await table.locator('option:checked').textContent())!
+        const tableNumber = tableText.match(/B\d+/)?.[0] ?? tableText.trim()
+
+        const allTables = await api(ACCOUNTS.waiter, '/waiter/tables')
+        const tableId = allTables.find(
+            (t: {tableNumber: string}) => t.tableNumber === tableNumber,
+        )?.tableId
+        expect(tableId, `không tìm được id của bàn ${tableNumber}`).toBeTruthy()
+
+        // Lịch ngày của phục vụ trả tableId, không trả số bàn.
+        const openOnWaiterSide = async () => {
+            const day = await api(
+                ACCOUNTS.waiter,
+                `/waiter/reservations?date=${tomorrow}`,
+            )
+            return day.some(
+                (r: {customerName: string; tableId: number; status: string}) =>
+                    r.customerName === 'Khách kiểm thử' &&
+                    r.tableId === tableId &&
+                    r.status !== 'CANCELLED',
+            )
+        }
+
+        await page.locator('button[type="submit"]').click()
+
+        // Đặt xong thì tự chuyển sang tab xem — và lượt vừa đặt phải ở đó.
+        const mine = page.getByRole('button', {name: 'Lượt đặt của tôi'})
+        await expect(
+            page.locator('.rk-sectiontitle', {hasText: 'Lượt đặt của tôi'}),
+        ).toBeVisible({timeout: 15_000})
+        const row = page.locator('.rk-rowlist__item', {hasText: tableNumber}).first()
+        await expect(row).toBeVisible()
+        await expect(mine).toBeVisible()
+
+        // Chiều THUẬN: vừa đặt thì phục vụ phải thấy. Không có bước này thì
+        // phép so "không còn thấy" ở cuối có thể xanh vì so với một thứ rỗng.
+        await expect.poll(openOnWaiterSide, {timeout: 15_000}).toBe(true)
+
+        // Huỷ phải hỏi lại; "Giữ lượt đặt" thì không có gì thay đổi.
+        await row.getByRole('button', {name: 'Huỷ lượt này'}).click()
+        const dialog = page.getByRole('dialog')
+        await expect(dialog).toContainText(tableNumber)
+        await dialog.getByRole('button', {name: 'Giữ lượt đặt'}).click()
+        await expect(row).toBeVisible()
+
+        await row.getByRole('button', {name: 'Huỷ lượt này'}).click()
+        await dialog.getByRole('button', {name: 'Huỷ lượt đặt'}).click()
+        await expect(page.locator('.rk-note--ok')).toContainText(/đã huỷ/i)
+
+        // Phía phục vụ không còn thấy lượt đó trong lịch ngày mai.
+        await expect
+            .poll(openOnWaiterSide, {
+                timeout: 15_000,
+                message: 'lượt đã huỷ vẫn còn trong lịch của phục vụ',
+            })
+            .toBe(false)
     })
 })
 

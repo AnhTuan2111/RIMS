@@ -18,6 +18,7 @@ import {usePolling} from '@/shared/hooks/usePolling'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 import {LoadingState} from '@/shared/components/feedback'
+import {ConfirmDialog} from '@/shared/components/ui'
 
 type ReservationForm = {
     customerName: string
@@ -84,6 +85,10 @@ export default function WaiterEditReservationPage() {
     const [submitting, setSubmitting] = useState(false)
 
     const [canceling, setCanceling] = useState(false)
+
+    // Huỷ phải hỏi lại: nút nằm ngay cạnh "Lưu thay đổi", và huỷ thì không lùi
+    // được — khung giờ mở cho khách khác ngay.
+    const [confirmCancel, setConfirmCancel] = useState(false)
 
     const hasLoadedDetailRef = useRef(false)
 
@@ -643,7 +648,7 @@ export default function WaiterEditReservationPage() {
                                             type="button"
                                             className="rk-btn rk-btn--danger"
                                             disabled={submitting || canceling}
-                                            onClick={() => void handleCancelReservation()}
+                                            onClick={() => setConfirmCancel(true)}
                                         >
                                             {canceling ? 'Đang huỷ...' : 'Huỷ đặt bàn'}
                                         </button>
@@ -727,6 +732,19 @@ export default function WaiterEditReservationPage() {
                     </div>
                 </div>
             </div>
+            <ConfirmDialog
+                open={confirmCancel}
+                title="Huỷ lượt đặt này?"
+                description={`${resForm.customerName || 'Khách'} — ${resForm.date} ${resForm.time}. Khung giờ này mở cho khách khác ngay, và không giữ lại được.`}
+                confirmLabel="Huỷ lượt đặt"
+                cancelLabel="Giữ lượt đặt"
+                destructive
+                onConfirm={() => {
+                    setConfirmCancel(false)
+                    void handleCancelReservation()
+                }}
+                onCancel={() => setConfirmCancel(false)}
+            />
         </div>
     )
 }
