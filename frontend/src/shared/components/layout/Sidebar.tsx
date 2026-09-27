@@ -1,161 +1,74 @@
-import {Icon} from '@/shared/components/ui/Icon'
-import {Fragment} from 'react'
-import {NavLink} from 'react-router-dom'
-import {ROLE_LABELS, roleMenus} from '@/app/config/roleMenus'
+import {NavLink, useLocation} from 'react-router-dom'
+
+import {matchMenu, roleMenus} from '@/app/config/roleMenus'
 import {useActor} from '@/app/providers/ActorContext'
 import {useRestaurant} from '@/app/providers/useRestaurant'
-import {ThemeToggle} from '@/shared/components/ui'
-
-/**
- * Icon cho từng mục menu.
- *
- * <p>Trước đây hàm này trả về ký tự Unicode nhặt ngẫu nhiên (▦ ⌁ ◉ ▤ ◷ ₫ ▧ ❏ 🞖 🛈 ♙)
- * cộng một SVG vẽ tay — mỗi icon một nét vẽ, một cỡ, và hiển thị khác nhau trên từng
- * hệ điều hành. Nay dùng chung bảng ICONS của hệ "Phiếu bếp".
- */
-function MenuIcon({path}: {path: string}) {
-    const props = {className: 'rk-icon', 'aria-hidden': true} as const
-
-    if (path.includes('restaurant')) return <Icon name="gear" {...props} />
-    if (path.includes('dashboard')) return <Icon name="chart" {...props} />
-    if (path.includes('completed')) return <Icon name="check" {...props} />
-    if (path.includes('cancelled')) return <Icon name="ban" {...props} />
-    if (path.includes('grouped')) return <Icon name="ticket" {...props} />
-    if (path.includes('orders')) return <Icon name="kitchen" {...props} />
-    if (path.includes('dishes')) return <Icon name="kitchen" {...props} />
-    if (path.includes('tables')) return <Icon name="table" {...props} />
-    if (path.includes('reservations')) return <Icon name="booking" {...props} />
-    if (path.includes('payments')) return <Icon name="invoice" {...props} />
-    if (path.includes('invoices')) return <Icon name="invoice" {...props} />
-    if (path.includes('menu')) return <Icon name="kitchen" {...props} />
-    if (path.includes('categories')) return <Icon name="kitchen" {...props} />
-    if (path.includes('statistics')) return <Icon name="chart" {...props} />
-    if (path.includes('users')) return <Icon name="user" {...props} />
-    if (path.includes('profile')) return <Icon name="user" {...props} />
-
-    return <Icon name="rows" {...props} />
-}
+import {Icon} from '@/shared/components/ui/Icon'
 
 type SidebarProps = {
-    /** Dưới 60rem thanh bên là ngăn kéo; cờ này quyết định nó đang trượt ra hay ẩn. */
+    /** Dưới 60rem rail là ngăn kéo; cờ này quyết định nó đang trượt ra hay ẩn. */
     open: boolean
     onClose: () => void
 }
 
+/**
+ * Rail điều hướng — dải dọc 4,6rem bên trái.
+ *
+ * <p>Bản cũ là thanh bên 264px chứa tên quán, khẩu hiệu, nhãn vai trò, danh sách
+ * menu, nút đổi chế độ và tên người dùng. Sáu khối cho một việc duy nhất là đi
+ * tới màn khác.
+ *
+ * <p>Nay rail chỉ làm đúng việc đó: icon một nét kèm nhãn chữ ngắn bên dưới.
+ * Những thứ kia chuyển sang hàng breadcrumb, hoặc bỏ hẳn — tên người dùng không
+ * giúp gì cho việc đang làm.
+ *
+ * <p>Ô đang mở tô ĐỎ. Đỏ ở vỏ app là nhận diện; đỏ trên nút là phá huỷ. Cùng một
+ * mã màu, phân biệt bằng vị trí.
+ */
 export function Sidebar({open, onClose}: SidebarProps) {
     const {actor} = useActor()
     const {profile} = useRestaurant()
-    const menus = roleMenus[actor] ?? []
+    const location = useLocation()
+    const entries = roleMenus[actor] ?? []
+    const {entry: activeEntry} = matchMenu(actor, location.pathname)
 
-    /*
-     * Ai cũng nhìn thấy tên NHÀ HÀNG, kể cả nhân viên.
-     *
-     * Bản cũ cho nhân viên thấy "RIMS / Vận hành nhà hàng" — tên sản phẩm, thứ
-     * họ không cần biết — còn khách thấy tên quán. Một app chạy cho một nhà
-     * hàng thì chỉ có một danh tính.
-     *
-     * Không có chuỗi dự phòng gõ cứng: hồ sơ chưa tải xong thì để trống,
-     * còn chưa cấu hình thì service đã tự tạo bản mặc định trung tính.
-     */
-    const restaurantName = profile?.name ?? ''
-    const restaurantTagline = profile?.tagline ?? ''
-    const brandInitial = restaurantName.trim().charAt(0).toUpperCase()
-
-    const stored = localStorage.getItem('currentUser')
-    const currentUser = stored
-        ? (JSON.parse(stored) as {fullName: string; username: string})
-        : null
+    // Chữ cái đầu tên quán làm dấu nhận diện. Hồ sơ chưa tải xong thì để trống —
+    // không gõ cứng chuỗi dự phòng, vì app chạy cho một nhà hàng có tên thật.
+    const brandInitial = (profile?.name ?? '').trim().charAt(0).toUpperCase()
 
     return (
-        <aside className={`rk-shell__side${open ? ' is-open' : ''}`}>
+        <aside className={`rk-rail${open ? ' is-open' : ''}`}>
             <button
                 type="button"
-                className="rk-shell__close"
+                className="rk-rail__close"
                 aria-label="Đóng menu"
                 onClick={onClose}
             >
                 <Icon name="x" className="rk-icon" />
             </button>
 
-            <div className="rk-shell__brand">
-                <div className="rk-shell__logo">{brandInitial}</div>
-                <div>
-                    <h2>{restaurantName}</h2>
-                    <p>{restaurantTagline}</p>
-                </div>
-            </div>
+            <NavLink to="/" className="rk-rail__brand" aria-label={profile?.name ?? 'Trang chủ'}>
+                {brandInitial}
+            </NavLink>
 
-            <div className="rk-shell__role">
-                <div className="rk-shell__role-icon">
-                    </div>
-                <div>
-                    <small>Không gian làm việc</small>
-                    <strong>{ROLE_LABELS[actor]}</strong>
-                </div>
-            </div>
-
-            <nav className="rk-shell__nav">
-                {menus.map((item) => (
-                    <Fragment key={item.path}>
-                        <NavLink
-                            to={item.path}
-                            className={({isActive}) =>
-                                isActive ? 'rk-shell__link active' : 'rk-shell__link'
-                            }
-                        >
-                            <span className="rk-shell__linkicon">
-                                <MenuIcon path={item.path} />
-                            </span>
-
-                            <span className="rk-shell__linklabel">{item.label}</span>
-
-                            <span className="rk-shell__linkarrow">›</span>
-                        </NavLink>
-
-                        {item.quickLinks && item.quickLinks.length > 0 && (
-                            <div className="rk-shell__nav">
-                                {item.quickLinks.map((quickLink) => (
-                                    <NavLink
-                                        key={quickLink.path}
-                                        to={quickLink.path}
-                                        className={({isActive}) =>
-                                            [
-                                                'rk-shell__link',
-                                                `quick-${quickLink.variant}`,
-                                                isActive ? 'active' : '',
-                                            ]
-                                                .filter(Boolean)
-                                                .join(' ')
-                                        }
-                                    >
-                                        <span className="rk-shell__linkicon">
-                                            {quickLink.icon}
-                                        </span>
-
-                                        <span className="rk-shell__linklabel">
-                                            {quickLink.label}
-                                        </span>
-
-                                        <span className="rk-shell__linkarrow">›</span>
-                                    </NavLink>
-                                ))}
-                            </div>
-                        )}
-                    </Fragment>
+            <nav className="rk-rail__nav" aria-label="Điều hướng chính">
+                {entries.map((entry) => (
+                    <NavLink
+                        key={entry.path}
+                        to={entry.path}
+                        onClick={onClose}
+                        className={
+                            entry === activeEntry ? 'rk-rail__item is-on' : 'rk-rail__item'
+                        }
+                        // Nhóm có nhiều màn con: chỉ ô rail của NHÓM được tô, việc
+                        // chọn màn nào trong nhóm là của băng mục con bên dưới.
+                        aria-current={entry === activeEntry ? 'page' : undefined}
+                    >
+                        <Icon name={entry.icon} className="rk-icon" />
+                        <span className="rk-rail__label">{entry.label}</span>
+                    </NavLink>
                 ))}
             </nav>
-
-            <ThemeToggle />
-
-            <div className="rk-shell__user">
-                <span className="rk-shell__dot" />
-                <div>
-                    <strong>
-                        {currentUser?.fullName ?? currentUser?.username ?? 'Người dùng'}
-                    </strong>
-                    <small>Hệ thống hoạt động</small>
-                </div>
-            </div>
         </aside>
     )
 }

@@ -33,6 +33,17 @@ const sources = walk(SRC)
     .filter((file) => !file.endsWith('icons.ts') && !file.endsWith('icons.test.ts'))
     .map((file) => readFileSync(file, 'utf8'))
 
+/**
+ * Icon được dùng theo hai lối: <Icon name="x" /> trong JSX dùng nháy KÉP, còn
+ * bảng cấu hình như roleMenus viết icon: 'x' dùng nháy ĐƠN. Cổng chỉ dò một lối
+ * thì báo nhầm là không ai dùng — đã xảy ra đúng thế ở pha P6.
+ */
+function isUsed(name: string) {
+    return sources.some(
+        (source) => source.includes(`"${name}"`) || source.includes(`'${name}'`),
+    )
+}
+
 describe('Bộ icon', () => {
     it('mọi icon đều có nghĩa được ghi', () => {
         const missing = Object.keys(ICONS).filter((name) => !(name in ICON_MEANING))
@@ -65,9 +76,7 @@ describe('Bộ icon', () => {
     })
 
     it('mọi icon khai trước đều ghi rõ pha sẽ dùng', () => {
-        const stale = Object.keys(ICON_PLANNED).filter((name) =>
-            sources.some((source) => source.includes(`"${name}"`)),
-        )
+        const stale = Object.keys(ICON_PLANNED).filter((name) => isUsed(name))
 
         expect(
             stale,
@@ -89,9 +98,7 @@ describe('Bộ icon', () => {
         }
 
         const unused = Object.keys(ICONS).filter(
-            (name) =>
-                !(name in ICON_PLANNED) &&
-                !sources.some((source) => source.includes(`"${name}"`)),
+            (name) => !(name in ICON_PLANNED) && !isUsed(name),
         )
 
         expect(unused, `icon không ai dùng: ${unused.join(', ')}`).toEqual([])

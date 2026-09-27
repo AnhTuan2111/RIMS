@@ -225,12 +225,24 @@
     --rims-w-tile: 15rem;
 
     /* ---------- Bo góc ----------
-       VUÔNG TUỐT, kể cả nút và ô nhập. Ngoại lệ duy nhất: radio tròn. */
+       VUÔNG TUỐT, kể cả nút và ô nhập.
+
+       Đợt P1 đã đưa sm/md/lg về 0 nhưng BỎ SÓT `pill`, nên 12 chỗ vẫn bo tròn
+       999px: chip, thẻ nhãn, chấm trạng thái, thanh tỉ lệ, số thứ hạng, ảnh
+       đại diện. Render walk ở màn Món ăn bắt được — thẻ danh mục nằm giữa một
+       bảng vuông tuyệt đối mà vẫn là viên thuốc. */
     --rims-radius-none: 0;
     --rims-radius-sm: 0;
     --rims-radius-md: 0;
     --rims-radius-lg: 0;
-    --rims-radius-pill: 999px;
+    --rims-radius-pill: 0;
+
+    /* Hình TRÒN, không phải góc bo.
+       Luật "bo góc 0" nói về GÓC CỦA HỘP. Ba chỗ dưới đây vòng tròn chính là
+       nét vẽ: nút radio, biểu đồ vành khuyên, con quay chờ. Bắt chúng vuông
+       không phải là giữ luật mà là vẽ sai hình. Token riêng để chỗ nào tròn
+       thì đếm được, không lẫn vào bo góc. */
+    --rims-shape-round: 50%;
 
     /* ---------- Độ dày viền ---------- */
     --rims-border: 2px;

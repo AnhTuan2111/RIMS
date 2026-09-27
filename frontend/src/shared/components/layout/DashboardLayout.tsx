@@ -1,6 +1,8 @@
 import {useCallback, useEffect, useState} from 'react'
-import {Outlet, useLocation, useNavigate} from 'react-router-dom'
+import {NavLink, Outlet, useLocation, useNavigate} from 'react-router-dom'
 
+import {matchMenu} from '@/app/config/roleMenus'
+import {useActor} from '@/app/providers/ActorContext'
 import {useAuth} from '@/app/providers/AuthContext'
 import {Sidebar} from '@/shared/components/layout/Sidebar'
 
@@ -9,9 +11,12 @@ import {DashboardTopbar} from './DashboardTopbar'
 /**
  * Khung của mọi màn sau đăng nhập.
  *
- * <p>Dưới 60rem thanh bên là một ngăn kéo trượt từ mép trái. Bản cũ chỉ xếp
- * thanh bên lên trên nội dung ở màn hẹp, nên trên điện thoại mỗi trang đều bắt
- * người dùng cuộn qua toàn bộ menu mới tới việc cần làm.
+ * <p>Ba tầng: rail dọc bên trái · hàng breadcrumb kèm đồng hồ · băng mục con
+ * (chỉ ở Quản trị) · nội dung.
+ *
+ * <p>Dưới 60rem rail là một ngăn kéo trượt từ mép trái. Bản cũ chỉ xếp thanh bên
+ * lên trên nội dung ở màn hẹp, nên trên điện thoại mỗi trang đều bắt người dùng
+ * cuộn qua toàn bộ menu mới tới việc cần làm.
  *
  * <p>Ngăn kéo tự đóng khi đổi đường dẫn — bấm một mục menu là vào màn đó, giữ
  * ngăn kéo mở thêm chỉ che mất màn vừa mở.
@@ -20,6 +25,12 @@ export default function DashboardLayout() {
     const navigate = useNavigate()
     const location = useLocation()
     const {logout} = useAuth()
+    const {actor} = useActor()
+
+    // Băng mục con chỉ hiện ở vai có NHÓM — tức là Quản trị. Bốn vai kia để menu
+    // phẳng nên không có băng, và hàng breadcrumb dính luôn vào nội dung.
+    const {entry: activeEntry, item: activeItem} = matchMenu(actor, location.pathname)
+    const belt = activeEntry?.items ?? []
 
     /*
      * Ngăn kéo không lưu "đang mở" mà lưu "mở ở đường dẫn nào".
@@ -79,6 +90,20 @@ export default function DashboardLayout() {
                     onLogout={handleLogout}
                     onOpenMenu={() => setOpenedAt(location.pathname)}
                 />
+
+                {belt.length > 0 && (
+                    <nav className="rk-belt" aria-label="Màn trong nhóm">
+                        {belt.map((sub) => (
+                            <NavLink
+                                key={sub.path}
+                                to={sub.path}
+                                className={sub === activeItem ? 'is-on' : undefined}
+                            >
+                                {sub.label}
+                            </NavLink>
+                        ))}
+                    </nav>
+                )}
 
                 <main className="rk-shell__content">
                     <Outlet />

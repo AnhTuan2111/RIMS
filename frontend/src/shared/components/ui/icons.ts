@@ -139,11 +139,7 @@ export const ICON_MEANING: Record<IconName, string> = {
  * XOÁ dòng tương ứng ở đây.
  */
 export const ICON_PLANNED: Partial<Record<IconName, string>> = {
-    clock: 'P6 — đồng hồ trên hàng breadcrumb',
     clockAlert: 'P7 — đặt bàn quá giờ, phiếu chờ quá 15 phút',
-    sun: 'P6 — ca sáng và ca chiều, cạnh đồng hồ',
-    moon: 'P6 — ca tối, cạnh đồng hồ',
-    contrast: 'P6 — nút đổi sáng/tối trên hàng breadcrumb',
     sort: 'P7 — sắp xếp ở đầu bảng 11 màn quản trị',
     filter: 'P7 — lọc ở rail lọc và hàng lọc',
     cards: 'P7 — nút đổi chế độ xem Thẻ ở ba màn có ảnh',

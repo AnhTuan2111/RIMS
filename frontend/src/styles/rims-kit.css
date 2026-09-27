@@ -375,24 +375,14 @@ a {
     gap: var(--rims-space-3);
 }
 
-.rk-filterbar > .rk-input {
-    flex: 1.5 1 0;
-}
-
-.rk-filterbar > .rk-select {
-    flex: 0 1 220px;
-}
-
-/* Ô nhập nằm trong .rk-field (có nhãn riêng) cũng phải ăn phần rộng. */
 .rk-filterbar > .rk-field {
-    flex: 1 1 0;
     min-width: 0;
 }
 
-.rk-filterbar > .rk-field:has(.rk-segment) {
-    flex: 0 0 auto;
-}
-
+/* Chia phần rộng CHỈ khi đã xếp ngang.
+   `flex-basis` đo theo trục chính, nên ở bố cục dọc `flex: 0 1 220px` không
+   cho ô chọn rộng 220px mà cho nó CAO 220px. Render walk ở 375px bắt được:
+   hai ô chọn cao bằng nửa màn hình. */
 @media (min-width: 48rem) {
     .rk-filterbar {
         flex-direction: row;
@@ -400,6 +390,23 @@ a {
         align-items: center;
         gap: var(--rims-space-4);
         height: 100%;
+    }
+
+    .rk-filterbar > .rk-input {
+        flex: 1.5 1 0;
+    }
+
+    .rk-filterbar > .rk-select {
+        flex: 0 1 220px;
+    }
+
+    /* Ô nhập nằm trong .rk-field (có nhãn riêng) cũng phải ăn phần rộng. */
+    .rk-filterbar > .rk-field {
+        flex: 1 1 0;
+    }
+
+    .rk-filterbar > .rk-field:has(.rk-segment) {
+        flex: 0 0 auto;
     }
 }
 
@@ -1744,7 +1751,7 @@ textarea.rk-input {
     height: 24px;
     border: 2px solid var(--rims-brand-line);
     border-top-color: var(--rims-brand);
-    border-radius: var(--rims-radius-pill);
+    border-radius: var(--rims-shape-round);
     animation: rk-spin 720ms linear infinite;
 }
 
@@ -2541,7 +2548,7 @@ textarea.rk-input {
     width: 180px;
     height: 180px;
     flex: none;
-    border-radius: var(--rims-radius-pill);
+    border-radius: var(--rims-shape-round);
 }
 
 .rk-donut__hole {
@@ -2549,7 +2556,7 @@ textarea.rk-input {
     place-items: center;
     width: 58%;
     height: 58%;
-    border-radius: var(--rims-radius-pill);
+    border-radius: var(--rims-shape-round);
     background: var(--rims-surface);
     text-align: center;
 }
@@ -2924,11 +2931,13 @@ textarea.rk-input {
    định nghĩa hai lần ở hai chỗ khác nhau trong cùng một file.
    ========================================================================= */
 
-/* ---------- Khung ứng dụng ----------
-   Mobile-first. Dưới 60rem thanh bên là NGĂN KÉO trượt từ mép trái, mở bằng
-   nút trên thanh đầu trang. Bản cũ chỉ xếp thanh bên LÊN TRÊN nội dung, nên
-   trên điện thoại mỗi trang đều bắt người dùng cuộn qua toàn bộ menu mới tới
-   việc cần làm. */
+/* ---------- Vỏ ứng dụng ----------
+   Ba tầng: RAIL dọc 4,6rem · hàng BREADCRUMB kèm đồng hồ · BĂNG mục con (chỉ ở
+   Quản trị) · nội dung.
+
+   Mobile-first. Dưới 60rem rail là NGĂN KÉO trượt từ mép trái, mở bằng nút trên
+   hàng breadcrumb. Bản cũ chỉ xếp thanh bên LÊN TRÊN nội dung, nên trên điện
+   thoại mỗi trang đều bắt người dùng cuộn qua toàn bộ menu mới tới việc cần làm. */
 
 .rk-shell {
     display: flex;
@@ -2936,38 +2945,114 @@ textarea.rk-input {
     min-height: 100dvh;
 }
 
-.rk-shell__side {
+/* ---- Rail ---- */
+
+.rk-rail {
     position: fixed;
     inset-block: 0;
     inset-inline-start: 0;
     z-index: var(--rims-z-drawer);
     display: flex;
     flex-direction: column;
-    gap: var(--rims-space-4);
+    gap: var(--rims-space-2);
     width: min(var(--rims-sidebar-width), 84vw);
-    padding: var(--rims-space-5) var(--rims-space-4);
-    padding-inline-start: max(var(--rims-space-4), env(safe-area-inset-left));
+    padding: var(--rims-space-4) var(--rims-space-3);
+    padding-inline-start: max(var(--rims-space-3), env(safe-area-inset-left));
     overflow-y: auto;
     overscroll-behavior: contain;
     color: var(--rims-ink-on-dark);
     background: var(--rims-shell);
-    border-inline-end: 1px solid var(--rims-shell-2);
+    border-inline-end: var(--rims-border) solid var(--rims-shell-2);
     transform: translateX(-100%);
     /* visibility chứ không phải chỉ transform: ngăn kéo đóng mà vẫn "nhìn thấy"
-       thì bàn phím vẫn tab được vào từng mục menu nằm ngoài màn hình, và trình
-       đọc màn hình vẫn đọc chúng. Đổi trễ để chờ trượt xong mới ẩn. */
+       thì bàn phím vẫn tab được vào từng mục nằm ngoài màn hình. */
     visibility: hidden;
     transition:
         transform var(--rims-dur-drawer) var(--rims-ease-out),
         visibility 0s linear var(--rims-dur-drawer);
 }
 
-.rk-shell__side.is-open {
+.rk-rail.is-open {
     transform: none;
     visibility: visible;
     transition:
         transform var(--rims-dur-drawer) var(--rims-ease-out),
         visibility 0s;
+}
+
+.rk-rail__close {
+    align-self: flex-end;
+    display: grid;
+    place-items: center;
+    width: var(--rims-touch-min);
+    height: var(--rims-touch-min);
+    border: var(--rims-border) solid var(--rims-ink-on-dark);
+    border-radius: var(--rims-radius-md);
+    background: transparent;
+    color: var(--rims-ink-on-dark);
+    cursor: pointer;
+}
+
+/* Chữ cái đầu tên quán. Khối đỏ trên dải mực là dấu nhận diện duy nhất của vỏ. */
+.rk-rail__brand {
+    display: grid;
+    place-items: center;
+    min-height: 2.6rem;
+    margin-bottom: var(--rims-space-2);
+    border: var(--rims-border) solid var(--rims-ink-on-dark);
+    background: var(--rims-shell-accent);
+    color: var(--rims-ink-on-brand);
+    font-family: var(--rims-font-display);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-black);
+    text-decoration: none;
+}
+
+.rk-rail__nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-2);
+}
+
+/* Icon một nét kèm nhãn chữ ngắn BÊN DƯỚI. Nhãn chữ là thứ giữ cho rail hẹp
+   dùng được: nhân viên mới không phải đoán icon. */
+.rk-rail__item {
+    display: grid;
+    justify-items: center;
+    gap: var(--rims-space-1);
+    padding: var(--rims-space-2) var(--rims-space-1);
+    min-height: var(--rims-touch-min);
+    border: var(--rims-border) solid var(--rims-ink-on-dark);
+    border-radius: var(--rims-radius-md);
+    color: var(--rims-ink-on-dark);
+    text-decoration: none;
+}
+
+.rk-rail__item:hover {
+    background: var(--rims-shell-2);
+}
+
+.rk-rail__item:focus-visible {
+    outline: var(--rims-focus-ring) solid var(--rims-focus);
+    outline-offset: 2px;
+}
+
+/* Ô đang mở tô ĐỎ. Đỏ ở vỏ app là nhận diện; đỏ trên nút là phá huỷ. Cùng một
+   mã màu, phân biệt bằng vị trí. */
+.rk-rail__item.is-on {
+    background: var(--rims-shell-accent);
+    color: var(--rims-ink-on-brand);
+    border-color: var(--rims-ink-on-dark);
+}
+
+.rk-rail__label {
+    font-family: var(--rims-font-mono);
+    font-size: 0.62rem;
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.15;
 }
 
 /* Nền mờ sau ngăn kéo. Là <button> để bấm ra ngoài đóng được và để trình đọc
@@ -2982,80 +3067,6 @@ textarea.rk-input {
     cursor: pointer;
 }
 
-/* Nút đóng nằm trong ngăn kéo; ở bố cục thanh bên cố định thì không cần. */
-.rk-shell__close {
-    position: absolute;
-    top: var(--rims-space-4);
-    inset-inline-end: var(--rims-space-4);
-    display: grid;
-    place-items: center;
-    width: var(--rims-touch-min);
-    height: var(--rims-touch-min);
-    border: 1px solid var(--rims-shell-2);
-    border-radius: var(--rims-radius-md);
-    background: transparent;
-    color: var(--rims-ink-on-dark);
-    cursor: pointer;
-}
-
-/* Nút mở ngăn kéo, nằm ở thanh đầu trang. */
-.rk-shell__menubtn {
-    display: grid;
-    place-items: center;
-    width: var(--rims-touch-min);
-    height: var(--rims-touch-min);
-    flex: none;
-    border: 1px solid var(--rims-line);
-    border-radius: var(--rims-radius-md);
-    background: var(--rims-surface);
-    color: var(--rims-ink);
-    cursor: pointer;
-}
-
-.rk-shell__menubtn:hover {
-    border-color: var(--rims-line-strong);
-}
-
-/* Khoá cuộn nền khi ngăn kéo đang mở. */
-body.rk-drawer-open {
-    overflow: hidden;
-}
-
-@media (min-width: 60rem) {
-    .rk-shell {
-        flex-direction: row;
-    }
-
-    .rk-shell__side {
-        position: sticky;
-        top: 0;
-        z-index: var(--rims-z-sticky);
-        height: 100dvh;
-        width: var(--rims-sidebar-width);
-        flex: none;
-        transform: none;
-        visibility: visible;
-        transition: none;
-        border-inline-end: 1px solid var(--rims-shell-2);
-    }
-
-    .rk-shell__scrim,
-    .rk-shell__close,
-    .rk-shell__menubtn {
-        display: none;
-    }
-
-    body.rk-drawer-open {
-        overflow: visible;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .rk-shell__side {
-        transition: none;
-    }
-}
-
 .rk-shell__main {
     display: flex;
     flex-direction: column;
@@ -3066,308 +3077,157 @@ body.rk-drawer-open {
 .rk-shell__content {
     flex: 1;
     min-width: 0;
-    padding: var(--rims-space-4) var(--rims-gutter);
-    padding-bottom: max(var(--rims-space-6), env(safe-area-inset-bottom));
-    background: var(--rims-paper);
+    padding: var(--rims-gutter);
+    padding-bottom: var(--rims-space-12);
 }
 
-@media (min-width: 60rem) {
-    .rk-shell__content {
-        padding-block: var(--rims-space-6);
-    }
-}
+/* ---- Hàng breadcrumb ---- */
 
-/* ---------- Nhận diện ---------- */
-
-.rk-shell__brand {
-    display: flex;
-    align-items: center;
-    gap: var(--rims-space-3);
-}
-
-.rk-shell__logo {
-    display: grid;
-    place-items: center;
-    width: 52px;
-    height: 52px;
-    flex: none;
-    border-radius: var(--rims-radius-lg);
-    background: var(--rims-shell-accent);
-    color: var(--rims-ink-on-dark);
-    font-size: var(--rims-text-xl);
-    font-weight: var(--rims-weight-black);
-}
-
-.rk-shell__brand h2 {
-    margin: 0;
-    color: var(--rims-ink-on-dark);
-    font-size: var(--rims-text-lg);
-    font-weight: var(--rims-weight-black);
-}
-
-.rk-shell__brand p {
-    margin: 0;
-    color: var(--rims-ink-on-dark-2);
-    font-size: var(--rims-text-xs);
-}
-
-/* ---------- Thẻ vai trò ---------- */
-
-.rk-shell__role {
-    display: flex;
-    align-items: center;
-    gap: var(--rims-space-3);
-    padding: var(--rims-space-3);
-    border: 1px solid rgb(var(--rims-tint-hi) / 12%);
-    border-radius: var(--rims-radius-lg);
-    background: rgb(var(--rims-shell-accent-rgb) / 30%);
-}
-
-.rk-shell__role-icon {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    flex: none;
-    border-radius: var(--rims-radius-md);
-    background: rgb(var(--rims-tint-hi) / 10%);
-    color: var(--rims-gold);
-}
-
-.rk-shell__role small {
-    display: block;
-    color: var(--rims-ink-on-dark-2);
-    font-size: var(--rims-text-xs);
-}
-
-.rk-shell__role strong {
-    display: block;
-    color: var(--rims-ink-on-dark);
-    font-size: var(--rims-text-sm);
-}
-
-/* ---------- Điều hướng ---------- */
-
-.rk-shell__nav {
-    display: flex;
-    flex-direction: column;
-    gap: var(--rims-space-1);
-    flex: 1;
-
-    /* Danh sách menu cuộn riêng khi nhiều mục hơn chiều cao màn hình. */
-    min-height: 0;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgb(var(--rims-tint-hi) / 18%) transparent;
-}
-
-.rk-shell__link {
-    display: grid;
-    grid-template-columns: 36px 1fr 16px;
-    align-items: center;
-    gap: var(--rims-space-3);
-    min-height: 48px;
-    padding: var(--rims-space-2) var(--rims-space-3);
-    border: 1px solid transparent;
-    border-radius: var(--rims-radius-lg);
-    color: var(--rims-ink-on-dark-2);
-    font-size: var(--rims-text-sm);
-    font-weight: var(--rims-weight-semibold);
-    text-decoration: none;
-    transition:
-        background-color var(--rims-dur-short) var(--rims-ease-out),
-        color var(--rims-dur-short) var(--rims-ease-out);
-}
-
-.rk-shell__link:hover {
-    border-color: rgb(var(--rims-tint-hi) / 14%);
-    color: var(--rims-ink-on-dark);
-}
-
-.rk-shell__link:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-gold);
-    outline-offset: 1px;
-}
-
-.rk-shell__link.active {
-    border-color: var(--rims-shell-accent-2);
-    background: var(--rims-shell-accent);
-    color: var(--rims-ink-on-dark);
-}
-
-.rk-shell__linkicon {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: var(--rims-radius-md);
-    background: rgb(var(--rims-tint-hi) / 8%);
-    color: inherit;
-}
-
-.rk-shell__link.active .rk-shell__linkicon {
-    background: rgb(var(--rims-tint-hi) / 18%);
-}
-
-.rk-shell__linklabel {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.rk-shell__linkarrow {
-    color: currentcolor;
-    opacity: 0.55;
-}
-
-/* ---------- Người dùng đang đăng nhập ---------- */
-
-.rk-shell__user {
-    display: flex;
-    align-items: center;
-    gap: var(--rims-space-3);
-    padding: var(--rims-space-3);
-    border-radius: var(--rims-radius-lg);
-    background: rgb(var(--rims-tint-hi) / 8%);
-}
-
-.rk-shell__dot {
-    width: 8px;
-    height: 8px;
-    flex: none;
-    border-radius: var(--rims-radius-pill);
-    background: var(--rims-ok-fill);
-}
-
-.rk-shell__user strong {
-    display: block;
-    color: var(--rims-ink-on-dark);
-    font-size: var(--rims-text-sm);
-}
-
-.rk-shell__user small {
-    display: block;
-    color: var(--rims-ink-on-dark-2);
-    font-size: var(--rims-text-xs);
-}
-
-/* ---------- Thanh trên ---------- */
-
-/* Thanh đầu trang — măng sét của tờ phiếu.
-   Trên di động chỉ còn một hàng: nút menu, tiêu đề rút gọn, nút đăng xuất.
-   Khối tiêu đề ba dòng của bản cũ chiếm gần một phần ba màn hình điện thoại
-   trước khi tới việc cần làm. */
-.rk-shell__top {
+.rk-top {
     position: sticky;
     top: 0;
     z-index: var(--rims-z-sticky);
     display: flex;
     align-items: center;
     gap: var(--rims-space-3);
-    padding: var(--rims-space-3) var(--rims-gutter);
-    padding-top: max(var(--rims-space-3), env(safe-area-inset-top));
+    flex-wrap: wrap;
+    padding: var(--rims-space-2) var(--rims-gutter);
     border-bottom: var(--rims-border) solid var(--rims-line-strong);
     background: var(--rims-surface);
 }
 
-.rk-shell__topheading {
-    min-width: 0;
-    flex: 1;
+.rk-top__menubtn {
+    display: grid;
+    place-items: center;
+    width: var(--rims-touch-min);
+    height: var(--rims-touch-min);
+    border: var(--rims-border) solid var(--rims-line-strong);
+    border-radius: var(--rims-radius-md);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    cursor: pointer;
 }
 
-/* Dưới 48rem chỉ giữ dòng tiêu đề; con mắt cần biết mình đang ở đâu, không
-   cần đọc lại khẩu hiệu hệ thống ở mọi màn. */
-.rk-shell__topheading > .rk-shell__eyebrow,
-.rk-shell__topheading > p {
-    display: none;
+.rk-top__menubtn:hover {
+    background: var(--rims-surface-2);
 }
 
-.rk-shell__topheading h1 {
-    margin: 0;
-    font-size: var(--rims-text-base);
-    line-height: var(--rims-leading-snug);
-    /* Một dòng, cắt bằng dấu ba chấm. Cho nó xuống dòng thì tiêu đề dài như
-       "Hệ thống quản lý nhà hàng" thành ba dòng và đẩy nội dung xuống. */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Nút Đăng xuất trên di động chỉ còn biểu tượng — nhãn chữ chiếm gần một
-   phần ba hàng măng sét. aria-label trong markup vẫn gọi tên đủ. */
-.rk-shell__top .rk-actions .rk-btn {
-    gap: 0;
-    padding-inline: var(--rims-space-3);
-}
-
-.rk-shell__top .rk-actions .rk-btn > span {
-    display: none;
-}
-
-@media (min-width: 48rem) {
-    .rk-shell__top {
-        gap: var(--rims-space-5);
-        flex-wrap: wrap;
-        padding-block: var(--rims-space-4);
-    }
-
-    .rk-shell__topheading > .rk-shell__eyebrow,
-    .rk-shell__topheading > p {
-        display: block;
-    }
-
-    .rk-shell__topheading > .rk-shell__eyebrow {
-        display: inline-flex;
-    }
-
-    .rk-shell__topheading h1 {
-        font-size: var(--rims-text-2xl);
-        white-space: normal;
-        overflow: visible;
-    }
-
-    .rk-shell__top .rk-actions .rk-btn {
-        gap: var(--rims-space-2);
-        padding-inline: var(--rims-space-5);
-    }
-
-    .rk-shell__top .rk-actions .rk-btn > span {
-        display: inline;
-    }
-}
-
-.rk-shell__eyebrow {
-    display: inline-flex;
+.rk-top__right {
+    display: flex;
     align-items: center;
     gap: var(--rims-space-2);
-    color: var(--rims-brand);
+    margin-inline-start: auto;
+}
+
+.rk-crumb {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rims-space-2);
+    min-width: 0;
+    font-family: var(--rims-font-mono);
     font-size: var(--rims-text-xs);
     font-weight: var(--rims-weight-bold);
     letter-spacing: var(--rims-tracking-label);
     text-transform: uppercase;
+    color: var(--rims-ink-3);
 }
 
-.rk-shell__livedot {
-    width: 7px;
-    height: 7px;
-    border-radius: var(--rims-radius-pill);
-    background: var(--rims-ok-fill);
-}
-
-.rk-shell__top h1 {
-    margin: var(--rims-space-1) 0 2px;
+.rk-crumb b {
     color: var(--rims-ink);
-    font-size: var(--rims-text-2xl);
-    font-weight: var(--rims-weight-black);
-    letter-spacing: var(--rims-tracking-tight);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.rk-shell__top p {
-    margin: 0;
+/* Cấp trên và dấu gạch ẩn ở khung hẹp — chỗ đó để dành cho tên màn đang mở. */
+@media (max-width: 29.999rem) {
+    .rk-crumb__up,
+    .rk-crumb__sep {
+        display: none;
+    }
+}
+
+.rk-clock {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    font-variant-numeric: tabular-nums;
     color: var(--rims-ink-2);
+    white-space: nowrap;
+}
+
+.rk-clock__time {
+    color: var(--rims-ink);
     font-size: var(--rims-text-sm);
 }
+
+/* Tên ca và nhãn Đăng xuất ẩn ở khung hẹp; icon vẫn nói đủ, và aria-label giữ
+   nguyên cho trình đọc màn hình. */
+@media (max-width: 47.999rem) {
+    .rk-clock__shift,
+    .rk-top__logoutlabel {
+        display: none;
+    }
+}
+
+/* ---- Băng mục con, chỉ ở Quản trị ---- */
+
+.rk-belt {
+    display: flex;
+    overflow-x: auto;
+    border-bottom: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface-2);
+}
+
+.rk-belt a {
+    padding: var(--rims-space-3) var(--rims-space-5);
+    border-inline-end: var(--rims-border) solid var(--rims-line-strong);
+    color: var(--rims-ink-2);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.rk-belt a:hover {
+    background: var(--rims-surface-3);
+    color: var(--rims-ink);
+}
+
+.rk-belt a.is-on {
+    background: var(--rims-shell-accent);
+    color: var(--rims-ink-on-brand);
+}
+
+/* Từ 60rem: rail cố định, không còn là ngăn kéo. */
+@media (min-width: 60rem) {
+    .rk-shell {
+        flex-direction: row;
+    }
+
+    .rk-rail {
+        position: sticky;
+        top: 0;
+        height: 100dvh;
+        width: var(--rims-rail-width);
+        transform: none;
+        visibility: visible;
+        transition: none;
+    }
+
+    .rk-rail__close,
+    .rk-top__menubtn,
+    .rk-shell__scrim {
+        display: none;
+    }
+}
+
 
 /* ---------- Tab gạch chân ----------
    Khác rk-segment ở chỗ: segment dùng cho bộ lọc phụ, tab dùng khi chuyển
