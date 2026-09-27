@@ -30,7 +30,9 @@ const STATUS_MODIFIER: Record<TableStatus, string> = {
 }
 
 const CHIP_MODIFIER: Record<TableStatus, string> = {
-    AVAILABLE: 'rk-chip--ok',
+    // Bàn trống mang màu LÀM nhưng dấu RỖNG: một cái bàn chưa ai ngồi thì
+    // không có việc gì vừa hoàn thành cả, nên dấu `✓` ở đây là sai nghĩa.
+    AVAILABLE: 'rk-chip--ok rk-chip--empty',
     SERVING: 'rk-chip--busy',
     RESERVED: 'rk-chip--info',
 }

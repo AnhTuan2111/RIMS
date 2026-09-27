@@ -42,7 +42,10 @@ const PRICE = (i) => 45000 + i * 15000
 const CATEGORIES = CATEGORY_NAMES.map((name, i) => ({
     id: i + 1,
     name,
-    description: i === 4 ? 'Nhóm đang tạm ẩn khỏi thực đơn trong mùa này.' : 'Nhóm món trong thực đơn.',
+    description:
+        i === 4
+            ? 'Nhóm đang tạm ẩn khỏi thực đơn trong mùa này.'
+            : 'Nhóm món trong thực đơn.',
     isAvailable: i !== 4,
     createdAt: `${NOW}T08:00:00`,
     updatedAt: `${NOW}T08:00:00`,
@@ -155,7 +158,8 @@ function orderItems(seed, n) {
             unitPrice: PRICE(i),
             subTotal: PRICE(i) * quantity,
             note: k === 0 ? 'Không hành, ít cay' : null,
-            cancelReason: ITEM_STATUSES[(seed + k) % 3] === 'CANCELLED' ? 'Hết nguyên liệu' : null,
+            cancelReason:
+                ITEM_STATUSES[(seed + k) % 3] === 'CANCELLED' ? 'Hết nguyên liệu' : null,
             chefInternalNote: k === 1 ? 'Bếp đã đổi sang cá basa, đã báo phục vụ.' : null,
             chefInternalNoteCreatedAt: k === 1 ? `${NOW}T11:42:00` : null,
             chefInternalNoteAcknowledgedAt: null,
@@ -199,7 +203,13 @@ const CANCELLED = Array.from({length: 5}, (_, i) => ({
     tableNumber: String((i % 12) + 1),
     dishName: DISHES[(i + 3) % DISHES.length].name,
     quantity: 1 + (i % 2),
-    cancelReason: ['Hết nguyên liệu', 'Khách đổi ý', 'Gọi nhầm món', 'Bếp báo quá tải', 'Khách huỷ bàn'][i],
+    cancelReason: [
+        'Hết nguyên liệu',
+        'Khách đổi ý',
+        'Gọi nhầm món',
+        'Bếp báo quá tải',
+        'Khách huỷ bàn',
+    ][i],
     cancelledAt: `${NOW}T${String(12 + i).padStart(2, '0')}:18:00`,
 }))
 
@@ -247,7 +257,9 @@ const RESERVATION_STATUSES = ['QUEUED', 'WAITING', 'COMPLETED', 'CANCELLED']
 const RESERVATIONS = Array.from({length: 6}, (_, i) => ({
     id: 501 + i,
     reservationId: 501 + i,
-    customerName: ['Nguyễn Văn An', 'Trần Thị Bích', 'Đặng Quốc Cường Hoàng Gia Bảo'][i % 3],
+    customerName: ['Nguyễn Văn An', 'Trần Thị Bích', 'Đặng Quốc Cường Hoàng Gia Bảo'][
+        i % 3
+    ],
     phone: `090${1234567 + i}`,
     note: i === 1 ? 'Sinh nhật, cần bánh và nến' : null,
     tableId: i + 1,
@@ -369,7 +381,15 @@ const RESTAURANT = {
 
 /** admin.ts · DailyRevenueItem */
 const DAILY_ITEMS = Array.from({length: 7}, (_, i) => ({
-    dayLabel: ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'][i],
+    dayLabel: [
+        'Thứ hai',
+        'Thứ ba',
+        'Thứ tư',
+        'Thứ năm',
+        'Thứ sáu',
+        'Thứ bảy',
+        'Chủ nhật',
+    ][i],
     date: `2026-09-${String(21 + i).padStart(2, '0')}`,
     revenue: 4_200_000 + Math.round(Math.sin(i) * 1_800_000) + i * 320_000,
 }))
@@ -421,69 +441,95 @@ export const FIXTURES = [
     ['/me/profile', () => USERS[0]],
 
     ['/public/restaurant', () => RESTAURANT],
-    ['/public/menu/best-selling', () =>
-        DISHES.slice(0, 6).map((d, i) => ({rank: i + 1, dishName: d.name, imageUrl: ''}))],
-    // Thực đơn công khai đã gom sẵn theo danh mục ở backend.
-    ['/public/menu', () =>
-        CATEGORIES.filter((c) => c.isAvailable).map((c) => ({
-            categoryId: c.id,
-            categoryName: c.name,
-            description: c.description,
-            dishes: DISHES.filter((d) => d.categoryName === c.name && !d.isHidden && d.isAvailable).map((d) => ({
-                dishId: d.id,
-                name: d.name,
-                description: d.description,
-                price: d.price,
-                imageUrl: d.imageUrl || null,
+    [
+        '/public/menu/best-selling',
+        () =>
+            DISHES.slice(0, 6).map((d, i) => ({
+                rank: i + 1,
+                dishName: d.name,
+                imageUrl: '',
             })),
-        })).filter((s) => s.dishes.length > 0)],
+    ],
+    // Thực đơn công khai đã gom sẵn theo danh mục ở backend.
+    [
+        '/public/menu',
+        () =>
+            CATEGORIES.filter((c) => c.isAvailable)
+                .map((c) => ({
+                    categoryId: c.id,
+                    categoryName: c.name,
+                    description: c.description,
+                    dishes: DISHES.filter(
+                        (d) => d.categoryName === c.name && !d.isHidden && d.isAvailable,
+                    ).map((d) => ({
+                        dishId: d.id,
+                        name: d.name,
+                        description: d.description,
+                        price: d.price,
+                        imageUrl: d.imageUrl || null,
+                    })),
+                }))
+                .filter((s) => s.dishes.length > 0),
+    ],
 
     ['/admin/restaurant', () => RESTAURANT],
     ['/admin/revenue/today', () => ({revenue: 5_840_000, period: 'Hôm nay'})],
     ['/admin/revenue/total', () => ({revenue: 68_430_000, period: 'Tất cả'})],
     ['/admin/revenue/daily', () => ({revenue: 5_840_000, period: NOW})],
-    ['/admin/revenue/weekly', () => ({fromDate: '2026-09-21', toDate: '2026-09-27', items: DAILY_ITEMS})],
+    [
+        '/admin/revenue/weekly',
+        () => ({fromDate: '2026-09-21', toDate: '2026-09-27', items: DAILY_ITEMS}),
+    ],
     ['/admin/revenue/monthly', () => ({revenue: 68_430_000, period: 'Tháng 9/2026'})],
     ['/admin/revenue/yearly', () => ({revenue: 742_100_000, period: 'Năm 2026'})],
-    ['/admin/revenue/custom', () => ({fromDate: '2026-09-21', toDate: '2026-09-27', items: DAILY_ITEMS})],
+    [
+        '/admin/revenue/custom',
+        () => ({fromDate: '2026-09-21', toDate: '2026-09-27', items: DAILY_ITEMS}),
+    ],
     ['/admin/revenue/best-selling', () => BEST_SELLING],
     ['/admin/revenue/order-shifts', () => ORDER_SHIFTS],
 
-    ['/admin/invoice/history', () => ({
-        items: INVOICE_SUMMARIES.map((s, i) => ({
-            invoiceId: s.invoiceId,
-            orderId: 101 + i,
-            tableNumber: s.tableNumber,
-            paymentMethod: s.paymentMethod,
-            amount: s.finalAmount,
-            paymentDate: s.invoiceDate,
-        })),
-        page: 0,
-        pageSize: 20,
-        totalItems: INVOICE_SUMMARIES.length,
-        totalPages: 1,
-    })],
-    ['/admin/invoice/:id', (m) => {
-        const d = invoiceDetail(Number(m[0]))
-        return {
-            invoiceId: d.invoiceId,
-            orderId: 101,
-            tableNumber: d.tableNumber,
-            paymentMethod: d.paymentMethod,
-            totalBeforeVat: d.totalBeforeVat,
-            vatAmount: d.vatAmount,
-            finalAmount: d.finalAmount,
-            amountPaid: d.amountPaid,
-            excessAmount: d.excessAmount,
-            invoiceDate: d.invoiceDate,
-            items: d.items.map((it) => ({
-                dishName: it.dishName,
-                quantity: it.quantity,
-                unitPrice: it.unitPrice,
-                amount: it.subTotal,
+    [
+        '/admin/invoice/history',
+        () => ({
+            items: INVOICE_SUMMARIES.map((s, i) => ({
+                invoiceId: s.invoiceId,
+                orderId: 101 + i,
+                tableNumber: s.tableNumber,
+                paymentMethod: s.paymentMethod,
+                amount: s.finalAmount,
+                paymentDate: s.invoiceDate,
             })),
-        }
-    }],
+            page: 0,
+            pageSize: 20,
+            totalItems: INVOICE_SUMMARIES.length,
+            totalPages: 1,
+        }),
+    ],
+    [
+        '/admin/invoice/:id',
+        (m) => {
+            const d = invoiceDetail(Number(m[0]))
+            return {
+                invoiceId: d.invoiceId,
+                orderId: 101,
+                tableNumber: d.tableNumber,
+                paymentMethod: d.paymentMethod,
+                totalBeforeVat: d.totalBeforeVat,
+                vatAmount: d.vatAmount,
+                finalAmount: d.finalAmount,
+                amountPaid: d.amountPaid,
+                excessAmount: d.excessAmount,
+                invoiceDate: d.invoiceDate,
+                items: d.items.map((it) => ({
+                    dishName: it.dishName,
+                    quantity: it.quantity,
+                    unitPrice: it.unitPrice,
+                    amount: it.subTotal,
+                })),
+            }
+        },
+    ],
 
     ['/admin/user/staff', () => page(USERS.filter((u) => u.role !== 'CUSTOMER'))],
     ['/admin/user/customer', () => page(USERS.filter((u) => u.role === 'CUSTOMER'))],
@@ -492,89 +538,118 @@ export const FIXTURES = [
     ['/admin/category/all', () => CATEGORIES],
     ['/admin/category/:id', (m) => CATEGORIES[Number(m[0]) - 1] ?? CATEGORIES[0]],
     ['/admin/dish/all', () => DISHES],
-    ['/admin/menu', () => ({
-        totalDishes: DISHES.length,
-        totalCategories: CATEGORIES.length,
-        totalPausedDishes: DISH_SUMMARIES.filter((d) => d.status === 'PAUSED').length,
-        totalHiddenDishes: DISH_SUMMARIES.filter((d) => d.status === 'HIDDEN').length,
-        latestDishes: DISH_SUMMARIES.slice(0, 5),
-        categoryStats: CATEGORIES.map((c) => ({
-            categoryName: c.name,
-            status: c.isAvailable ? 'ACTIVE' : 'HIDDEN',
-            dishCount: c.dishCount,
-        })),
-        allPausedDishesList: DISH_SUMMARIES.filter((d) => d.status === 'PAUSED'),
-    })],
+    [
+        '/admin/menu',
+        () => ({
+            totalDishes: DISHES.length,
+            totalCategories: CATEGORIES.length,
+            totalPausedDishes: DISH_SUMMARIES.filter((d) => d.status === 'PAUSED').length,
+            totalHiddenDishes: DISH_SUMMARIES.filter((d) => d.status === 'HIDDEN').length,
+            latestDishes: DISH_SUMMARIES.slice(0, 5),
+            categoryStats: CATEGORIES.map((c) => ({
+                categoryName: c.name,
+                status: c.isAvailable ? 'ACTIVE' : 'HIDDEN',
+                dishCount: c.dishCount,
+            })),
+            allPausedDishesList: DISH_SUMMARIES.filter((d) => d.status === 'PAUSED'),
+        }),
+    ],
     // AdminTable KHÁC TableDetailResponse: khoá là `id`, và có active,
     // orderCount, reservationCount, deletable. Bản đầu tôi trả TableDetail ở
     // đây nên màn Mặt bằng lọc `active` ra rỗng và vẽ một sơ đồ trống.
     ['/admin/table/all', () => ADMIN_TABLES],
     ['/admin/table/:id', (m) => ADMIN_TABLES[Number(m[0]) - 1] ?? ADMIN_TABLES[0]],
 
-    ['/chef/dashboard', () => ({
-        preparingCount: 7,
-        completedCount: 96,
-        cancelledCount: 2,
-        unavailableDishCount: 3,
-    })],
+    [
+        '/chef/dashboard',
+        () => ({
+            preparingCount: 7,
+            completedCount: 96,
+            cancelledCount: 2,
+            unavailableDishCount: 3,
+        }),
+    ],
     ['/chef/orders/grouped', () => GROUPED],
-    ['/chef/orders/completed', () =>
-        KITCHEN_ITEMS.map((it) => ({...it, status: 'COMPLETED'}))],
+    [
+        '/chef/orders/completed',
+        () => KITCHEN_ITEMS.map((it) => ({...it, status: 'COMPLETED'})),
+    ],
     ['/chef/orders/cancelled', () => CANCELLED],
     ['/chef/orders', () => KITCHEN_ITEMS],
     ['/chef/dishes', () => CHEF_DISHES],
 
-    ['/waiter/tables/:id/blocked-slots', () => [
-        {start: '2026-09-28T12:00:00', end: '2026-09-28T13:30:00'},
-        {start: '2026-09-28T19:00:00', end: '2026-09-28T20:30:00'},
-    ]],
+    [
+        '/waiter/tables/:id/blocked-slots',
+        () => [
+            {start: '2026-09-28T12:00:00', end: '2026-09-28T13:30:00'},
+            {start: '2026-09-28T19:00:00', end: '2026-09-28T20:30:00'},
+        ],
+    ],
     ['/waiter/tables', () => withFloor(TABLES)],
     ['/waiter/menu', () => MENU_ITEMS],
     // MẢNG, không phải một đơn: một bàn có thể có nhiều đơn đang phục vụ, và
     // màn Chi tiết đơn gộp chúng bằng flatMap.
-    ['/waiter/detail/:tableId', (m) => [
-        orderDetail(101, m[0], Number(m[0])),
-        orderDetail(102, m[0], Number(m[0]) + 4),
-    ]],
+    [
+        '/waiter/detail/:tableId',
+        (m) => [
+            orderDetail(101, m[0], Number(m[0])),
+            orderDetail(102, m[0], Number(m[0]) + 4),
+        ],
+    ],
     ['/waiter/orders/:id', (m) => orderDetail(Number(m[0]), 2, 2)],
-    ['/waiter/reservation/detail/:tableId', (m) =>
-        RESERVATIONS.find((r) => String(r.tableId) === m[0]) ?? RESERVATIONS[0]],
+    [
+        '/waiter/reservation/detail/:tableId',
+        (m) => RESERVATIONS.find((r) => String(r.tableId) === m[0]) ?? RESERVATIONS[0],
+    ],
     ['/waiter/reservation/:tableId/:date', () => RESERVATIONS.slice(0, 3)],
     ['/waiter/reservations/:id/orders', () => [orderDetail(101, 2, 2)]],
-    ['/waiter/reservations/:id', (m) =>
-        RESERVATIONS.find((r) => String(r.id) === m[0]) ?? RESERVATIONS[0]],
+    [
+        '/waiter/reservations/:id',
+        (m) => RESERVATIONS.find((r) => String(r.id) === m[0]) ?? RESERVATIONS[0],
+    ],
     ['/waiter/reservations', () => RESERVATIONS],
 
     ['/cashier/tables', () => CASHIER_TABLES],
     ['/cashier/payment-methods', () => ['CASH', 'QRCODE']],
     ['/cashier/customers/search', () => USERS.filter((u) => u.role === 'CUSTOMER')],
-    ['/cashier/invoices/today', () => ({
-        content: INVOICE_SUMMARIES,
-        page: 0,
-        size: 20,
-        totalElements: INVOICE_SUMMARIES.length,
-        totalPages: 1,
-    })],
+    [
+        '/cashier/invoices/today',
+        () => ({
+            content: INVOICE_SUMMARIES,
+            page: 0,
+            size: 20,
+            totalElements: INVOICE_SUMMARIES.length,
+            totalPages: 1,
+        }),
+    ],
     ['/cashier/invoices/:id', (m) => invoiceDetail(Number(m[0]))],
     ['/cashier/orders/:id', (m) => orderDetail(Number(m[0]), 4, 2)],
 
     ['/customer/reservations/current', () => CUSTOMER_RESERVATIONS[0]],
     ['/customer/reservations', () => CUSTOMER_RESERVATIONS],
-    ['/customer/tables/available', () =>
-        TABLES.map((t) => ({
-            id: t.tableId,
-            tableNumber: t.tableNumber,
-            capacity: t.capacity,
-            status: t.status === 'SERVING' ? 'OCCUPIED' : t.status,
-        }))],
-    ['/customer/tables/:id/blocked-slots', () => [
-        {start: '2026-09-28T12:00:00', end: '2026-09-28T13:30:00'},
-    ]],
+    [
+        '/customer/tables/available',
+        () =>
+            TABLES.map((t) => ({
+                id: t.tableId,
+                tableNumber: t.tableNumber,
+                capacity: t.capacity,
+                status: t.status === 'SERVING' ? 'OCCUPIED' : t.status,
+            })),
+    ],
+    [
+        '/customer/tables/:id/blocked-slots',
+        () => [{start: '2026-09-28T12:00:00', end: '2026-09-28T13:30:00'}],
+    ],
 ]
 
 /** Khớp một đường dẫn với bảng trên. Trả về dữ liệu, hoặc `undefined` nếu không khớp. */
 export function match(path) {
-    const clean = path.replace(/^\/rims/, '').split('?')[0].replace(/\/$/, '') || '/'
+    const clean =
+        path
+            .replace(/^\/rims/, '')
+            .split('?')[0]
+            .replace(/\/$/, '') || '/'
 
     for (const [pattern, build] of FIXTURES) {
         const parts = pattern.split('/')

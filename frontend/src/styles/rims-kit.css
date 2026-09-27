@@ -499,15 +499,58 @@ a {
     white-space: nowrap;
 }
 
-/* Chấm dẫn: giữ lại vì trạng thái không bao giờ chỉ mang màu — chấm cộng
-   chữ cộng nền là ba tầng dấu hiệu. */
+/* ---------- Dấu mang nghĩa (quyết định S2, phiếu 03) ----------
+   Trạng thái không bao giờ chỉ mang màu. Nhưng một CHẤM CHUNG cho mọi trạng
+   thái cũng không đủ: nó chỉ lặp lại cái màu bằng một hình khác, nên người
+   không phân biệt được màu vẫn không đọc ra trạng thái nếu chữ bị cắt.
+
+   Mỗi trạng thái nhận một dấu theo NGHĨA của nó, không theo màu — phiếu 03 nói
+   rõ: `✓` cho "bàn trống" là sai nghĩa.
+
+     ▫  rỗng, chưa có gì      → bàn trống
+     ▸  đang chạy             → đang phục vụ · đang chế biến · chờ
+     ▪  chỗ đã bị giữ         → đã đặt trước · chờ thanh toán
+     ✓  xong                  → đã hoàn thành · đã trả tiền
+     ✕  dừng hẳn              → đã huỷ · lỗi
+     ‖  tạm dừng              → tạm hết · đã ẩn
+
+   Dấu là CHỮ chứ không phải hình vẽ, nên nó co giãn theo cỡ chữ và không cần
+   thêm một tài sản nào. */
+.rk-chip {
+    --rims-chip-mark: '\25AA';
+}
+
 .rk-chip::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: var(--rims-radius-pill);
-    background: currentcolor;
+    content: var(--rims-chip-mark);
     flex: none;
+    font-size: 1em;
+    line-height: 1;
+}
+
+.rk-chip--ok {
+    --rims-chip-mark: '\2713';
+}
+
+.rk-chip--busy {
+    --rims-chip-mark: '\25B8';
+}
+
+.rk-chip--alert {
+    --rims-chip-mark: '\2715';
+}
+
+.rk-chip--info {
+    --rims-chip-mark: '\25AA';
+}
+
+.rk-chip--idle {
+    --rims-chip-mark: '\2016';
+}
+
+/* Bàn trống dùng dấu RỖNG, không dùng dấu "xong": một cái bàn chưa ai ngồi thì
+   không có việc gì vừa hoàn thành cả. Màn Sơ đồ bàn gắn thêm lớp này. */
+.rk-chip--empty {
+    --rims-chip-mark: '\25AB';
 }
 
 .rk-chip--ok {
@@ -3757,6 +3800,9 @@ textarea.rk-input {
    hiện đủ chúng. Đây không phải cắt bớt thông tin mà là đặt nó đúng chỗ. */
 .rk-floor__slot > .rk-tablecard {
     justify-content: center;
+    /* Nội dung không bao giờ tràn lên trên: ô bàn nhỏ nhất chỉ cao 6rem, và
+       một dòng thừa ở đó là cắt mất đầu chữ chứ không phải đẩy xuống dưới. */
+    align-items: stretch;
     gap: var(--rims-space-1);
     padding: var(--rims-space-2);
     overflow: hidden;
@@ -3770,10 +3816,22 @@ textarea.rk-input {
     flex-wrap: wrap;
 }
 
-/* Bàn hẹp (2 ô = 6rem) không chứa nổi "ĐÃ ĐẶT TRƯỚC". Cắt bằng dấu ba chấm
-   chứ không cắt giữa chữ: "ĐÃ ĐẶT T" đọc ra như một lỗi, còn "ĐÃ ĐẶT…" thì
-   đọc ra là còn nữa. Màu viền vẫn nói đủ trạng thái, chip chỉ là lời xác nhận
-   bằng chữ cho người không phân biệt được màu. */
+/* Hàng dưới của thẻ phải CO ĐƯỢC.
+   min-width mặc định của một flex item là `auto` — nghĩa là "không bao giờ
+   nhỏ hơn nội dung". Nên dù chip đã có max-width: 100% và text-overflow, hàng
+   chứa nó vẫn nở ra theo chữ và đẩy chip tràn qua viền thẻ. Phải mở khoá ở
+   CHÍNH HÀNG ĐÓ, không chỉ ở chip. */
+.rk-floor__slot > .rk-tablecard .rk-tablecard__foot {
+    min-width: 0;
+}
+
+/* Bàn hẹp trên mặt bằng: giữ DẤU, giấu CHỮ.
+   Một bàn hai ô rộng 6rem không chứa nổi "ĐANG PHỤC VỤ" ở bất kỳ cỡ chữ nào
+   còn đọc được. Cắt bằng ba chấm thì đọc ra "ĐANG P…", tức là không đọc ra gì.
+
+   Nay dưới 9rem thì chỉ còn dấu — mà dấu MANG NGHĨA chứ không chỉ mang màu,
+   nên luật "trạng thái không bao giờ chỉ mang màu" vẫn được giữ. Chữ vẫn nằm
+   trong cây trợ năng: font-size 0 giấu nó khỏi mắt, không khỏi trình đọc. */
 .rk-floor__slot > .rk-tablecard .rk-chip {
     min-width: 0;
     max-width: 100%;
@@ -3781,6 +3839,30 @@ textarea.rk-input {
     font-size: 0.625rem;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Ngưỡng 12rem: một bàn ba ô rộng 9rem, và "ĐANG PHỤC VỤ" ở cỡ 10px vẫn cần
+   hơn thế. Trên 12rem mới đủ chỗ cho cả chữ.
+
+   Bộ chọn phải viết ĐẦY ĐỦ như luật ở trên. @container KHÔNG cộng thêm độ ưu
+   tiên nào, nên `.rk-tablecard .rk-chip` (0,2,0) thua
+   `.rk-floor__slot > .rk-tablecard .rk-chip` (0,3,0) và luật này bị bỏ qua —
+   đúng cái đã xảy ra ở lần dựng đầu. */
+@container rk-tile (max-width: 12rem) {
+    .rk-floor__slot > .rk-tablecard .rk-chip {
+        font-size: 0;
+        padding: var(--rims-space-1);
+        gap: 0;
+    }
+
+    .rk-floor__slot > .rk-tablecard .rk-chip::before {
+        font-size: 0.8rem;
+    }
+}
+
+.rk-floor__slot {
+    container-type: inline-size;
+    container-name: rk-tile;
 }
 
 .rk-floor__slot > .rk-tablecard .rk-tablecard__hint,
@@ -4465,6 +4547,13 @@ textarea.rk-input {
 
 .rk-legend__dot--brand {
     background: var(--rims-brand-fill);
+}
+
+/* TIN — đã đặt trước, chờ thanh toán. Thiếu biến thể này nên màn Sơ đồ bàn
+   phải mượn --brand, và chú giải nói ĐỎ trong khi thẻ bàn nói XANH cho cùng
+   một trạng thái. */
+.rk-legend__dot--info {
+    background: var(--rims-info-fill);
 }
 
 /* Giá trị chỉ đọc trong hồ sơ: nhạt hơn để phân biệt với ô nhập được. */

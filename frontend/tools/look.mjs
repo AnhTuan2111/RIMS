@@ -58,7 +58,9 @@ let name = (path.replace(/\W+/g, '-').replace(/^-|-$/g, '') || 'root') + '__' + 
 if (hover) {
     const target = page.locator(hover).first()
     await target.scrollIntoViewIfNeeded().catch(() => {})
-    await target.hover({timeout: 5000}).catch(() => console.log('  (không rê được vào', hover, ')'))
+    await target
+        .hover({timeout: 5000})
+        .catch(() => console.log('  (không rê được vào', hover, ')'))
     await page.waitForTimeout(300)
     name += '__hover'
 }

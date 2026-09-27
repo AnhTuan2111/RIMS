@@ -86,9 +86,19 @@ const ALL_ROUTES = [
     // Phục vụ · 7 màn
     {g: 'phuc-vu', n: '23-so-do-ban', p: '/waiter/tables', as: 'WAITER'},
     {g: 'phuc-vu', n: '24-dat-mon-moi', p: '/waiter/tables/1/order/new', as: 'WAITER'},
-    {g: 'phuc-vu', n: '25-don-chi-tiet', p: '/waiter/tables/2/order/detail', as: 'WAITER'},
+    {
+        g: 'phuc-vu',
+        n: '25-don-chi-tiet',
+        p: '/waiter/tables/2/order/detail',
+        as: 'WAITER',
+    },
     {g: 'phuc-vu', n: '26-sua-don', p: '/waiter/tables/2/order/edit', as: 'WAITER'},
-    {g: 'phuc-vu', n: '27-dat-ban-chi-tiet', p: '/waiter/tables/3/reservation', as: 'WAITER'},
+    {
+        g: 'phuc-vu',
+        n: '27-dat-ban-chi-tiet',
+        p: '/waiter/tables/3/reservation',
+        as: 'WAITER',
+    },
     {g: 'phuc-vu', n: '28-dat-ban', p: '/waiter/reservations', as: 'WAITER'},
     {g: 'phuc-vu', n: '29-sua-dat-ban', p: '/waiter/reservations/501/edit', as: 'WAITER'},
 
@@ -219,7 +229,9 @@ function fulfilFor(path) {
 async function main() {
     const browser = findBrowser()
     if (!browser) {
-        console.error('Không tìm thấy Edge hoặc Chrome. Đặt đường dẫn trong EDGE_CANDIDATES.')
+        console.error(
+            'Không tìm thấy Edge hoặc Chrome. Đặt đường dẫn trong EDGE_CANDIDATES.',
+        )
         process.exit(1)
     }
 
@@ -227,7 +239,9 @@ async function main() {
         const probe = await fetch(BASE)
         if (!probe.ok) throw new Error(String(probe.status))
     } catch (error) {
-        console.error(`Không với được ${BASE} — chạy: npx vite preview --port 4200 --strictPort`)
+        console.error(
+            `Không với được ${BASE} — chạy: npx vite preview --port 4200 --strictPort`,
+        )
         console.error(String(error))
         process.exit(1)
     }
@@ -261,7 +275,10 @@ async function main() {
         cdp = new Cdp(ws)
 
         const {targetId} = await cdp.send('Target.createTarget', {url: 'about:blank'})
-        const {sessionId} = await cdp.send('Target.attachToTarget', {targetId, flatten: true})
+        const {sessionId} = await cdp.send('Target.attachToTarget', {
+            targetId,
+            flatten: true,
+        })
         await cdp.send('Page.enable', {}, sessionId)
         await cdp.send('Runtime.enable', {}, sessionId)
 
@@ -283,14 +300,18 @@ async function main() {
         // chặn cả CSS và font, và ảnh chụp sẽ ra trang không định kiểu.
         await cdp.send('Fetch.enable', {patterns: [{urlPattern: '*/rims/*'}]}, sessionId)
         cdp.on('Fetch.requestPaused', async (params, sid) => {
-            const path = new URL(params.request.url).pathname + (new URL(params.request.url).search ?? '')
+            const path =
+                new URL(params.request.url).pathname +
+                (new URL(params.request.url).search ?? '')
             try {
                 await cdp.send(
                     'Fetch.fulfillRequest',
                     {
                         requestId: params.requestId,
                         responseCode: 200,
-                        responseHeaders: [{name: 'Content-Type', value: 'application/json'}],
+                        responseHeaders: [
+                            {name: 'Content-Type', value: 'application/json'},
+                        ],
                         body: jsonBody(fulfilFor(path)),
                     },
                     sid,

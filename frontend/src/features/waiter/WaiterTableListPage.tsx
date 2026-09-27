@@ -454,7 +454,7 @@ export default function WaiterTableListPage() {
                     </span>
 
                     <span className="rk-legend__item">
-                        <span className="rk-legend__dot rk-legend__dot--brand" />
+                        <span className="rk-legend__dot rk-legend__dot--info" />
                         Đã đặt trước
                     </span>
                 </div>
@@ -493,6 +493,7 @@ export default function WaiterTableListPage() {
 
                             return (
                                 <WaiterTableCard
+                                    compact
                                     table={table}
                                     status={status}
                                     statusLabel={STATUS_META[status].label}

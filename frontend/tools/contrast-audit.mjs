@@ -277,7 +277,10 @@ async function main() {
         cdp = new Cdp(ws)
 
         const {targetId} = await cdp.send('Target.createTarget', {url: 'about:blank'})
-        const {sessionId} = await cdp.send('Target.attachToTarget', {targetId, flatten: true})
+        const {sessionId} = await cdp.send('Target.attachToTarget', {
+            targetId,
+            flatten: true,
+        })
         await cdp.send('Page.enable', {}, sessionId)
         await cdp.send('Fetch.enable', {patterns: [{urlPattern: '*/rims/*'}]}, sessionId)
 
@@ -291,7 +294,9 @@ async function main() {
                     {
                         requestId: params.requestId,
                         responseCode: 200,
-                        responseHeaders: [{name: 'Content-Type', value: 'application/json'}],
+                        responseHeaders: [
+                            {name: 'Content-Type', value: 'application/json'},
+                        ],
                         body: jsonBody(data === undefined ? [] : data),
                     },
                     sid,

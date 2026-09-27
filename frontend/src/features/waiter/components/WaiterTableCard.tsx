@@ -2,6 +2,14 @@ import type {TableDetailResponse} from '@/shared/api/waiter'
 import {TableCard, type TableStatus} from '@/shared/components/ui'
 
 interface WaiterTableCardProps {
+    /**
+     * Ô nằm trên SƠ ĐỒ MẶT BẰNG, không nằm trong danh sách.
+     *
+     * <p>Bỏ chữ "Bàn" khỏi nhãn: trên một mặt bằng thì mọi ô đều là bàn, nên
+     * chữ đó chỉ ăn mất một dòng — và ở ô hai-nhân-hai thì đúng một dòng là
+     * khác biệt giữa đọc được và bị cắt mất đầu.
+     */
+    compact?: boolean
     table: TableDetailResponse
     status: TableStatus
     statusLabel: string
@@ -18,6 +26,7 @@ interface WaiterTableCardProps {
  * vẽ cùng 12 cái bàn theo hai kiểu khác nhau.
  */
 export function WaiterTableCard({
+    compact = false,
     table,
     status,
     statusLabel,
@@ -34,7 +43,7 @@ export function WaiterTableCard({
 
     return (
         <TableCard
-            tableNumber={`Bàn ${table.tableNumber}`}
+            tableNumber={compact ? table.tableNumber : `Bàn ${table.tableNumber}`}
             capacity={table.capacity}
             status={status}
             statusLabel={statusLabel}
