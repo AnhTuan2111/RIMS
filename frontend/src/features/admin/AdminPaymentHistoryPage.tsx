@@ -46,7 +46,7 @@ function PaymentMethodBadge({method}: {method: AdminPaymentMethod}) {
     const isCash = method === 'CASH'
 
     return (
-        <span className={`rk-chip ${isCash ? 'rk-chip--ok' : 'rk-chip--brand'}`}>
+        <span className={`rk-chip ${isCash ? 'rk-chip--ok' : 'rk-chip--info'}`}>
             {isCash ? 'Tiền mặt' : 'Mã QR'}
         </span>
     )

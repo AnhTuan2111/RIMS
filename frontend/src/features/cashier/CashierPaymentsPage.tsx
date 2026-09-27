@@ -1,9 +1,15 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback, useEffect, useMemo, useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
 import {REALTIME_CONFIG} from '@/app/config/realtime'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader, TableCard} from '@/shared/components/ui'
+import {
+    PageCard,
+    PageHeader,
+    StatusBoard,
+    TableCard,
+    type BoardColumn,
+} from '@/shared/components/ui'
 import {usePolling} from '@/shared/hooks/usePolling'
 import {useCashierSocket} from '@/realtime'
 import type {
@@ -245,6 +251,46 @@ export default function CashierPaymentsPage() {
         }
     }
 
+    /**
+     * Ba cột là ba giá trị của enum TableStatus.
+     *
+     * <p>Bản thiết kế ghi ba cột thu ngân là "Chờ trả · Đang xử lý · Đã trả".
+     * Ba giai đoạn đó thuộc `OrderStatus` (SERVING/LOCKED/COMPLETED), mà
+     * `/cashier/tables` không trả trạng thái đơn — nó trả trạng thái BÀN. Nên
+     * cột lấy đúng thứ có thật.
+     *
+     * <p>Đang phục vụ đứng đầu vì đó là chỗ có tiền phải thu. Bàn trống đứng
+     * cuối vì thu ngân không có việc gì với nó.
+     */
+    const boardColumns = useMemo<BoardColumn<TableDashboardResponse>[]>(() => {
+        const of = (status: TableDashboardResponse['status']) =>
+            tables.filter((table) => table.status === status)
+
+        return [
+            {
+                key: 'SERVING',
+                label: 'Đang phục vụ',
+                tone: 'busy',
+                items: of('SERVING'),
+                empty: 'Không có bàn nào đang phục vụ.',
+            },
+            {
+                key: 'RESERVED',
+                label: 'Đã đặt trước',
+                tone: 'info',
+                items: of('RESERVED'),
+                empty: 'Không có bàn nào được đặt trước.',
+            },
+            {
+                key: 'AVAILABLE',
+                label: 'Bàn trống',
+                tone: 'ok',
+                items: of('AVAILABLE'),
+                empty: 'Quán đang kín bàn.',
+            },
+        ]
+    }, [tables])
+
     if (isLoading) {
         return (
             <LoadingState
@@ -275,10 +321,12 @@ export default function CashierPaymentsPage() {
                     description="Chọn bàn để xem đơn và thanh toán. Dữ liệu tự cập nhật theo thời gian thực."
                 />
 
-                <div className="rk-tablegrid">
-                    {tables.map((table) => (
+                <StatusBoard
+                    label="Bàn theo trạng thái"
+                    columns={boardColumns}
+                    itemKey={(table) => table.tableId}
+                    renderItem={(table) => (
                         <TableCard
-                            key={table.tableId}
                             tableNumber={table.tableNumber}
                             status={table.status}
                             statusLabel={getTableStatusLabel(table.status)}
@@ -288,8 +336,8 @@ export default function CashierPaymentsPage() {
                                 void handleSelectTable(table)
                             }}
                         />
-                    ))}
-                </div>
+                    )}
+                />
             </PageCard>
 
             {selectedTable && (

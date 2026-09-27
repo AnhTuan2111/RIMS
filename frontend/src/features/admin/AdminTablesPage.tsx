@@ -27,7 +27,7 @@ const STATUS_LABEL: Record<TableStatus, string> = {
 /** Chip trạng thái của bộ kit: màu đi kèm chấm dẫn và nhãn chữ. */
 const STATUS_CHIP: Record<TableStatus, string> = {
     AVAILABLE: 'rk-chip rk-chip--ok',
-    RESERVED: 'rk-chip rk-chip--brand',
+    RESERVED: 'rk-chip rk-chip--info',
     SERVING: 'rk-chip rk-chip--busy',
 }
 

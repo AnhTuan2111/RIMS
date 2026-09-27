@@ -25,13 +25,13 @@ interface TableCardProps {
 const STATUS_MODIFIER: Record<TableStatus, string> = {
     AVAILABLE: 'rk-tablecard--ok',
     SERVING: 'rk-tablecard--busy',
-    RESERVED: 'rk-tablecard--brand',
+    RESERVED: 'rk-tablecard--info',
 }
 
 const CHIP_MODIFIER: Record<TableStatus, string> = {
     AVAILABLE: 'rk-chip--ok',
     SERVING: 'rk-chip--busy',
-    RESERVED: 'rk-chip--brand',
+    RESERVED: 'rk-chip--info',
 }
 
 function formatAmount(value: number) {

@@ -366,7 +366,7 @@ export default function CashierInvoicesPage() {
                                             className={
                                                 invoice.paymentMethod === 'CASH'
                                                     ? 'rk-chip rk-chip--ok'
-                                                    : 'rk-chip rk-chip--brand'
+                                                    : 'rk-chip rk-chip--info'
                                             }
                                         >
                                             {methodLabel(invoice.paymentMethod)}

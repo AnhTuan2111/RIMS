@@ -548,6 +548,15 @@ button.rk-chip:hover {
     color: var(--rims-ink-on-idle);
 }
 
+/* TIN — đã đặt trước, chờ thanh toán, phương thức mã QR.
+   Sáu chỗ này trước đây dùng `--brand`. Khi P1 đổi brand sang đỏ thì "đã đặt
+   trước" hoá đỏ, tức là đọc ra "hỏng". Chúng không bao giờ mang nghĩa phá huỷ
+   nên chúng thuộc TIN, không thuộc thương hiệu. */
+.rk-chip--info {
+    background: var(--rims-info-fill);
+    color: var(--rims-ink-on-info);
+}
+
 .rk-chip--brand {
     background: var(--rims-brand-fill);
     color: var(--rims-ink-on-brand);
@@ -639,6 +648,24 @@ button.rk-chip:hover {
     font-weight: var(--rims-weight-medium);
 }
 
+/* Phiếu chỉ để NGÓ LẠI — đã xong hoặc đã huỷ.
+   Khối số vẫn đỏ ở cả ba cột thì đỏ không còn nghĩa: đỏ trên phiếu đã xong đọc
+   ra là lỗi. Đỏ giữ lại cho cột ĐANG LÀM, tức là việc còn phải làm. Hai cột kia
+   dùng mực trung tính: số lượng vẫn to và đọc được, nhưng không kêu. */
+.rk-ticket--done .rk-ticket__qty,
+.rk-ticket--void .rk-ticket__qty {
+    background: var(--rims-surface-3);
+    color: var(--rims-ink-2);
+}
+
+/* Lý do huỷ mang màu BỎ, không mang màu CHỜ.
+   Ghi chú của phục vụ là việc đang chờ bếp xử lý nên nền hổ phách đúng. Lý do
+   huỷ là việc đã dừng hẳn — cùng một nền hổ phách sẽ nói sai. */
+.rk-ticket__note--void {
+    background: var(--rims-alert-soft);
+    color: var(--rims-alert);
+}
+
 .rk-ticket__actions {
     display: flex;
     gap: var(--rims-space-2);
@@ -659,6 +686,10 @@ button.rk-chip:hover {
 .rk-tablecard {
     display: flex;
     flex-direction: column;
+    /* Thẻ là <button>, mà button co theo nội dung chứ không giãn theo khung
+       dù đã display:flex. Trong .rk-tablegrid ô lưới tự giãn nên không ai thấy;
+       xếp vào cột của bảng trạng thái thì thẻ thụt vào một khoảng rõ rệt. */
+    width: 100%;
     gap: var(--rims-space-3);
     padding: var(--rims-space-5);
     border: var(--rims-border) solid var(--rims-line-strong);
@@ -873,6 +904,11 @@ table {
 .rk-tablecard--brand {
     background: var(--rims-brand-soft);
     border-color: var(--rims-brand-line);
+}
+
+.rk-tablecard--info {
+    background: var(--rims-info-soft);
+    border-color: var(--rims-info-line);
 }
 
 /* Ô số liệu khi dùng làm nút chọn báo cáo */
@@ -2353,8 +2389,20 @@ textarea.rk-input {
     align-items: center;
     justify-content: space-between;
     gap: var(--rims-space-3);
-    flex-wrap: wrap;
     margin-bottom: var(--rims-space-4);
+}
+
+/* Khối chữ co được, con số thì không.
+   Bản cũ để cả hàng `flex-wrap: wrap`, nên thẻ nào có nhãn dài hơn là con số
+   tổng rơi xuống hàng dưới — sáu thẻ cạnh nhau mà ba thẻ đặt số ở một chỗ, ba
+   thẻ ở chỗ khác. Nay tên món xuống dòng, vị trí con số cố định. */
+.rk-card__head-inline > :first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.rk-card__head-inline > .rk-qty {
+    flex: 0 0 auto;
 }
 
 .rk-card__head-inline .rk-sectiontitle {
@@ -2880,8 +2928,21 @@ textarea.rk-input {
     gap: var(--rims-space-4);
 }
 
-/* Thẻ có cờ: vạch đậm bên trái. Dùng cho nhóm món có ghi chú riêng —
-   dấu hiệu là HÌNH DẠNG chứ không chỉ là màu. */
+/* Lưới kéo mọi thẻ cao bằng thẻ cao nhất, nên thẻ ngắn thừa chỗ ở đáy và hàng
+   nút trôi lên giữa thẻ. Đẩy hàng nút xuống đáy để sáu thẻ có nút thẳng hàng. */
+.rk-cardgrid > .rk-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.rk-cardgrid > .rk-card > .rk-actions:last-child {
+    margin-top: auto;
+}
+
+/* Thẻ có cờ: ĐỔI MÀU CẢ BỐN CẠNH. Dùng cho nhóm món có ghi chú riêng.
+   Comment cũ ghi "vạch đậm bên trái", nhưng vạch trái đậm một cạnh là thứ
+   design.md liệt kê thẳng vào danh sách cấm. Luật CSS vốn đã làm đúng —
+   chỉ có comment nói sai. */
 .rk-card--flagged {
     border-color: var(--rims-alert);
 }
@@ -3228,6 +3289,179 @@ textarea.rk-input {
     }
 }
 
+
+/* ---------- Bảng cột trạng thái (kanban) ----------
+   Dùng cho màn CÓ DÒNG TRẠNG THÁI THẬT, không dùng cho mọi màn vận hành.
+
+   Phiếu bếp: ba cột là ba chồng phiếu cắm trên ba cái kẹp. Mỗi cột có một đầu
+   cột dính, mang tên trạng thái và SỐ ĐẾM — số đếm là thứ nói bếp đang nghẽn ở
+   đâu, nên nó không bao giờ bị giấu đi.
+
+   Dưới 52rem ba cột cạnh nhau còn ~100px mỗi cột, không đọc được. Khi đó chỉ
+   một cột hiện, và ba nút tab ở trên chuyển cột. Tab vẫn mang số đếm nên cái
+   hay nhất của kanban không mất. */
+
+.rk-board {
+    display: grid;
+    gap: var(--rims-space-4);
+    align-items: start;
+}
+
+/* Băng tab chỉ tồn tại ở khung hẹp. */
+.rk-board__tabs {
+    display: flex;
+    overflow-x: auto;
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface-2);
+}
+
+.rk-board__tab {
+    flex: 1 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border: 0;
+    border-inline-end: var(--rims-border) solid var(--rims-line-strong);
+    background: transparent;
+    color: var(--rims-ink-2);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.rk-board__tab:last-child {
+    border-inline-end: 0;
+}
+
+.rk-board__tab:hover {
+    background: var(--rims-surface-3);
+    color: var(--rims-ink);
+}
+
+.rk-board__tab[aria-selected='true'] {
+    background: var(--rims-ink);
+    color: var(--rims-paper);
+}
+
+/* Số đếm trên tab. Chữ số dùng bảng tỉ số để ba tab không nhảy khi số đổi. */
+.rk-board__tabcount {
+    font-variant-numeric: tabular-nums;
+}
+
+.rk-board__col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface-2);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+/* Đầu cột DÍNH: cuộn một chồng phiếu dài mà vẫn biết đang ở cột nào. */
+.rk-board__head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border-bottom: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-tablehead);
+    color: var(--rims-ink-on-tablehead);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+}
+
+/* Số đếm là một ô vuông tô đặc mang màu của chính trạng thái đó. */
+.rk-board__count {
+    min-width: 2.25rem;
+    padding: 0 var(--rims-space-2);
+    background: var(--rims-ink-on-tablehead);
+    color: var(--rims-tablehead);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.rk-board__col--ok .rk-board__count {
+    background: var(--rims-ok-fill);
+    color: var(--rims-ink-on-ok);
+}
+
+.rk-board__col--busy .rk-board__count {
+    background: var(--rims-busy-fill);
+    color: var(--rims-ink-on-busy);
+}
+
+.rk-board__col--alert .rk-board__count {
+    background: var(--rims-alert-fill);
+    color: var(--rims-ink-on-alert);
+}
+
+.rk-board__col--info .rk-board__count {
+    background: var(--rims-info-fill);
+    color: var(--rims-ink-on-info);
+}
+
+.rk-board__col--idle .rk-board__count {
+    background: var(--rims-idle);
+    color: var(--rims-ink-on-idle);
+}
+
+.rk-board__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-3);
+    padding: var(--rims-space-3);
+}
+
+/* Chồng phiếu cao thì cuộn trong lòng cột, không kéo dài cả trang — ba cột
+   lệch chiều cao nhau là lúc kanban mất tác dụng so sánh. */
+@media (min-width: 52rem) {
+    .rk-board__body {
+        max-height: 68dvh;
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+    }
+}
+
+/* Cột rỗng vẫn phải giữ chỗ, nếu không ba cột nhảy vị trí mỗi lần một phiếu
+   chuyển cột. */
+.rk-board__empty {
+    padding: var(--rims-space-5) var(--rims-space-4);
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    text-align: center;
+}
+
+/* Khung hẹp: một cột, tab chọn cột nào hiện. */
+.rk-board__col[hidden] {
+    display: none;
+}
+
+@media (min-width: 52rem) {
+    .rk-board {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .rk-board__tabs {
+        display: none;
+    }
+
+    /* Trên 52rem cả ba cột đều hiện, kể cả cột mà tab đang không chọn. */
+    .rk-board__col[hidden] {
+        display: flex;
+    }
+}
 
 /* ---------- Tab gạch chân ----------
    Khác rk-segment ở chỗ: segment dùng cho bộ lọc phụ, tab dùng khi chuyển

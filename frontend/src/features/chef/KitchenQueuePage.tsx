@@ -1,22 +1,32 @@
 import {Icon} from '@/shared/components/ui/Icon'
-import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
+import {ErrorState, LoadingState} from '@/shared/components/feedback'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useKitchenSocket} from '@/realtime'
 
 import {
     getDishDetail,
     getKitchenOrders,
+    getCompletedOrders,
+    getCancelledOrders,
     cancelDish,
     updateOrderItemStatus,
     updateChefInternalNote,
+    type CancelledOrderResponse,
     type DishDetailResponse,
     type KitchenOrderItemResponse,
 } from '@/shared/api/chef'
-import {ConfirmDialog, Modal, Pagination} from '@/shared/components/ui'
+import {ConfirmDialog, Modal, StatusBoard, type BoardColumn} from '@/shared/components/ui'
 import {useToast} from '@/app/providers/useToast'
 import {ORDER_ITEM_STATUS_LABELS, type OrderItemStatus} from '@/shared/types/order'
 
-const ITEMS_PER_PAGE = 6
+/**
+ * Số phiếu đã xong và đã huỷ giữ lại trên bảng.
+ *
+ * <p>Hai cột đó là để bếp NGÓ LẠI việc vừa làm, không phải để tra cứu. Lịch sử
+ * đầy đủ có màn riêng — Đã xong và Đã huỷ — với bảng dày và bộ lọc.
+ */
+const RECENT_LIMIT = 20
+
 const NEW_ORDER_MESSAGE_DURATION_MS = 6_000
 
 type BrowserWindow = Window & {
@@ -60,7 +70,10 @@ export default function KitchenQueuePage() {
     const [searchText, setSearchText] = useState('')
     const [selectedTable, setSelectedTable] = useState('ALL')
     const [sortOrder, setSortOrder] = useState<SortOrder>('OLDEST')
-    const [currentPage, setCurrentPage] = useState(1)
+    // Hai cột phải của bảng. Chúng chỉ để ngó lại, nên không có bộ lọc và
+    // không chặn màn khi tải lỗi — bếp vẫn nấu được nếu chỉ cột Đang làm về.
+    const [completedItems, setCompletedItems] = useState<KitchenOrderItemResponse[]>([])
+    const [cancelledItems, setCancelledItems] = useState<CancelledOrderResponse[]>([])
 
     const [selectedDish, setSelectedDish] = useState<DishDetailResponse | null>(null)
     const [isDetailLoading, setIsDetailLoading] = useState(false)
@@ -190,7 +203,7 @@ export default function KitchenQueuePage() {
     }, [])
 
     const fetchKitchenOrders = useCallback(
-        async (showFullLoading: boolean, resetPage: boolean, signal?: AbortSignal) => {
+        async (showFullLoading: boolean, signal?: AbortSignal) => {
             try {
                 if (showFullLoading) {
                     setIsLoading(true)
@@ -218,10 +231,6 @@ export default function KitchenQueuePage() {
 
                 setItems(data)
                 setError(null)
-
-                if (resetPage) {
-                    setCurrentPage(1)
-                }
             } catch (requestError) {
                 if (signal?.aborted) {
                     return
@@ -240,6 +249,36 @@ export default function KitchenQueuePage() {
         },
         [playNewOrderSound, showNewOrderMessage],
     )
+
+    /**
+     * Hai cột phải của bảng.
+     *
+     * <p>Tải RIÊNG khỏi cột Đang làm và nuốt lỗi: chúng chỉ để ngó lại. Nếu
+     * chúng cũng dựng màn lỗi thì một lần mạng chập ở lịch sử sẽ chặn bếp
+     * không nấu được, mà bếp chỉ cần cột trái.
+     */
+    const fetchRecentOrders = useCallback(async (signal?: AbortSignal) => {
+        const [completed, cancelled] = await Promise.allSettled([
+            getCompletedOrders(signal),
+            getCancelledOrders(signal),
+        ])
+
+        if (signal?.aborted) {
+            return
+        }
+
+        if (completed.status === 'fulfilled') {
+            setCompletedItems(completed.value)
+        } else {
+            console.error('[CHEF_COMPLETED_FETCH_ERROR]', completed.reason)
+        }
+
+        if (cancelled.status === 'fulfilled') {
+            setCancelledItems(cancelled.value)
+        } else {
+            console.error('[CHEF_CANCELLED_FETCH_ERROR]', cancelled.reason)
+        }
+    }, [])
 
     useEffect(() => {
         const originalTitle = originalDocumentTitleRef.current
@@ -261,16 +300,23 @@ export default function KitchenQueuePage() {
 
     // Initial load on mount
     useEffect(() => {
+        const controller = new AbortController()
+
         const timer = window.setTimeout(() => {
-            void fetchKitchenOrders(true, false)
+            void fetchKitchenOrders(true)
+            void fetchRecentOrders(controller.signal)
         }, 0)
 
-        return () => window.clearTimeout(timer)
-    }, [fetchKitchenOrders])
+        return () => {
+            window.clearTimeout(timer)
+            controller.abort()
+        }
+    }, [fetchKitchenOrders, fetchRecentOrders])
 
     // WebSocket: refresh when backend broadcasts a kitchen update
     useKitchenSocket(() => {
-        void fetchKitchenOrders(false, false)
+        void fetchKitchenOrders(false)
+        void fetchRecentOrders()
 
         // Nếu đang mở modal chi tiết, refetch để cập nhật trạng thái ghi chú/huỷ...
         if (selectedDish) {
@@ -283,7 +329,8 @@ export default function KitchenQueuePage() {
     })
 
     async function loadKitchenOrders() {
-        await fetchKitchenOrders(true, true)
+        await fetchKitchenOrders(true)
+        await fetchRecentOrders()
     }
 
     async function handleSoundToggle() {
@@ -507,7 +554,6 @@ export default function KitchenQueuePage() {
         setSearchText('')
         setSelectedTable('ALL')
         setSortOrder('OLDEST')
-        setCurrentPage(1)
     }
 
     const tableNumbers = useMemo<string[]>(() => {
@@ -549,13 +595,44 @@ export default function KitchenQueuePage() {
             })
     }, [items, searchText, selectedTable, sortOrder])
 
-    const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE))
-
-    const safeCurrentPage = Math.min(currentPage, totalPages)
-
-    const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE
-
-    const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+    /**
+     * Ba cột là ba giá trị của enum OrderItemStatus, không phải ba giai đoạn do
+     * tôi nghĩ ra.
+     *
+     * <p>Lúc phỏng vấn tôi ghi dòng bếp là "Chờ → Đang nấu → Xong". Dòng đó
+     * KHÔNG có trong dự án: `OrderItemStatus` chỉ có PREPARING, COMPLETED,
+     * CANCELLED — món vào bếp là đã đang làm, không có bậc chờ. Ba cột lấy đúng
+     * ba giá trị thật.
+     *
+     * <p>Bộ lọc và sắp xếp chỉ áp cho cột ĐANG LÀM. Hai cột kia là việc đã
+     * xong, lọc chúng không giúp nấu nhanh hơn.
+     */
+    const columns = useMemo<BoardColumn<KitchenOrderItemResponse | CancelledOrderResponse>[]>(
+        () => [
+            {
+                key: 'PREPARING',
+                label: 'Đang làm',
+                tone: 'busy',
+                items: filteredItems,
+                empty: 'Bếp trống. Chưa có món nào cần làm.',
+            },
+            {
+                key: 'COMPLETED',
+                label: 'Đã xong',
+                tone: 'ok',
+                items: completedItems.slice(0, RECENT_LIMIT),
+                empty: 'Chưa có món nào xong trong hôm nay.',
+            },
+            {
+                key: 'CANCELLED',
+                label: 'Đã huỷ',
+                tone: 'alert',
+                items: cancelledItems.slice(0, RECENT_LIMIT),
+                empty: 'Không có món nào bị huỷ.',
+            },
+        ],
+        [filteredItems, completedItems, cancelledItems],
+    )
 
     if (isLoading) {
         return (
@@ -647,7 +724,6 @@ export default function KitchenQueuePage() {
                         placeholder="Tìm theo tên món, bàn hoặc mã đơn..."
                         onChange={(event) => {
                             setSearchText(event.target.value)
-                            setCurrentPage(1)
                         }}
                     />
 
@@ -655,7 +731,6 @@ export default function KitchenQueuePage() {
                         value={selectedTable}
                         onChange={(event) => {
                             setSelectedTable(event.target.value)
-                            setCurrentPage(1)
                         }}
                     >
                         <option value="ALL">Tất cả bàn</option>
@@ -671,7 +746,6 @@ export default function KitchenQueuePage() {
                         value={sortOrder}
                         onChange={(event) => {
                             setSortOrder(event.target.value as SortOrder)
-                            setCurrentPage(1)
                         }}
                     >
                         <option value="OLDEST">Cũ nhất trước</option>
@@ -689,64 +763,66 @@ export default function KitchenQueuePage() {
                 </div>
             </section>
 
-            {filteredItems.length === 0 ? (
-                <EmptyState
-                    title="Không tìm thấy món phù hợp"
-                    description="Hãy thay đổi từ khóa hoặc xoá bộ lọc."
-                    action={
-                        <button
-                            type="button"
-                            className="rk-btn rk-btn--quiet"
-                            onClick={clearFilters}
+            <StatusBoard
+                label="Món theo trạng thái"
+                columns={columns}
+                itemKey={(item) => item.orderItemId}
+                renderItem={(item, columnKey) => {
+                    const cancelled = columnKey === 'CANCELLED'
+                    const done = columnKey === 'COMPLETED'
+
+                    return (
+                        <article
+                            className={`rk-ticket${done ? ' rk-ticket--done' : ''}${
+                                cancelled ? ' rk-ticket--void' : ''
+                            }`}
                         >
-                            Xoá bộ lọc
-                        </button>
-                    }
-                />
-            ) : (
-                <>
-                    <div className="rk-grid">
-                        {paginatedItems.map((item) => (
-                            <article className="rk-ticket" key={item.orderItemId}>
-                                {/* Số lượng đứng trước tên món và to gấp đôi: đầu bếp
-                                    nhìn từ xa cần thấy "mấy phần" trước tiên. */}
-                                <div className="rk-ticket__qty">
-                                    <span className="rk-ticket__qty-num">
-                                        {item.quantity}
+                            {/* Số lượng đứng trước tên món và to gấp đôi: đầu bếp
+                                nhìn từ xa cần thấy "mấy phần" trước tiên. */}
+                            <div className="rk-ticket__qty">
+                                <span className="rk-ticket__qty-num">{item.quantity}</span>
+                                <span className="rk-ticket__qty-unit">phần</span>
+                            </div>
+
+                            <div className="rk-ticket__main">
+                                <h3 className="rk-ticket__dish">{item.dishName}</h3>
+
+                                <div className="rk-ticket__meta">
+                                    <span>
+                                        Bàn <strong>{item.tableNumber}</strong>
                                     </span>
-                                    <span className="rk-ticket__qty-unit">phần</span>
+                                    <span aria-hidden="true">·</span>
+                                    <span className="rk-num">
+                                        {formatTime(
+                                            cancelled
+                                                ? (item as CancelledOrderResponse).cancelledAt
+                                                : (item as KitchenOrderItemResponse).createdAt,
+                                        )}
+                                    </span>
                                 </div>
 
-                                <div className="rk-ticket__main">
-                                    <h3 className="rk-ticket__dish">{item.dishName}</h3>
+                                {/* Chip trạng thái BỎ ĐI ở bảng: cột đã nói trạng
+                                    thái rồi, chip chỉ lặp lại cùng một tin. */}
+                                {cancelled && (item as CancelledOrderResponse).cancelReason && (
+                                    <p className="rk-ticket__note rk-ticket__note--void">
+                                        Lý do: {(item as CancelledOrderResponse).cancelReason}
+                                    </p>
+                                )}
 
-                                    <div className="rk-ticket__meta">
-                                        <span className="rk-chip rk-chip--busy">
-                                            Đang làm
-                                        </span>
-                                        <span>
-                                            Bàn <strong>{item.tableNumber}</strong>
-                                        </span>
-                                        <span aria-hidden="true">·</span>
-                                        <span className="rk-num">
-                                            {formatTime(item.createdAt)}
-                                        </span>
-                                    </div>
+                                {!cancelled && (item as KitchenOrderItemResponse).note && (
+                                    <p className="rk-ticket__note">
+                                        {(item as KitchenOrderItemResponse).note}
+                                    </p>
+                                )}
 
-                                    {item.note && (
-                                        <p className="rk-ticket__note">
-                                            {' '}
-                                            {item.note}
-                                        </p>
-                                    )}
-
+                                {/* Chỉ cột ĐANG LÀM có nút. Món đã xong hoặc đã
+                                    huỷ thì không còn việc gì để làm với nó. */}
+                                {!cancelled && !done && (
                                     <div className="rk-ticket__actions">
                                         <button
                                             type="button"
                                             className="rk-btn rk-btn--go"
-                                            disabled={
-                                                completingItemId === item.orderItemId
-                                            }
+                                            disabled={completingItemId === item.orderItemId}
                                             onClick={() => {
                                                 handleComplete(item.orderItemId).catch(
                                                     (requestError) => {
@@ -775,20 +851,12 @@ export default function KitchenQueuePage() {
                                             Chi tiết
                                         </button>
                                     </div>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
-
-                    <Pagination
-                        page={safeCurrentPage}
-                        totalPages={totalPages}
-                        totalItems={filteredItems.length}
-                        pageSize={ITEMS_PER_PAGE}
-                        onPageChange={setCurrentPage}
-                    />
-                </>
-            )}
+                                )}
+                            </div>
+                        </article>
+                    )
+                }}
+            />
 
             <Modal
                 open={isDetailLoading || Boolean(detailError) || Boolean(selectedDish)}

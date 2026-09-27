@@ -109,10 +109,15 @@ export default function ChefDashboardPage() {
             </PageCard>
 
             <div className="rk-statgrid">
+                {/* Ba ô đầu là ba giá trị của OrderItemStatus, và chúng mang
+                    ĐÚNG màu của ba cột bên màn Cần chế biến: hổ phách đang làm,
+                    lục đã xong, đỏ đã huỷ. Cùng một con số ở hai màn thì phải
+                    cùng một màu, nếu không màu thôi không còn nói được gì. */}
                 <StatCard
                     label="Đang chế biến"
                     value={dashboard.preparingCount}
                     description="Món đang nằm trong hàng đợi bếp."
+                    tone="busy"
                     to="/chef/orders"
                 />
 
@@ -132,11 +137,13 @@ export default function ChefDashboardPage() {
                     to="/chef/cancelled-orders"
                 />
 
+                {/* Ô thứ tư KHÔNG thuộc dòng trạng thái món — nó nói về thực
+                    đơn. Để nó màu trung tính, vì dùng lại hổ phách sẽ khiến nó
+                    trông như một bậc thứ tư của cùng một dòng. */}
                 <StatCard
                     label="Món đang tắt bán"
                     value={dashboard.unavailableDishCount}
                     description="Món hiện không khả dụng trên thực đơn."
-                    tone="busy"
                     to="/chef/dishes"
                 />
             </div>

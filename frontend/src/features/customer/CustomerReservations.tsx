@@ -94,7 +94,7 @@ function reservationChipClass(status: string): string {
         case 'WAITING':
             return 'rk-chip--busy'
         case 'QUEUED':
-            return 'rk-chip--brand'
+            return 'rk-chip--info'
         case 'COMPLETED':
             return 'rk-chip--ok'
         case 'CANCELLED':
