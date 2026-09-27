@@ -3,11 +3,13 @@ import React, {useCallback, useEffect, useState} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {CategoryResponse, DishResponse, CategoryFormData} from '@/shared/api/admin'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
+import {useViewMode} from '@/shared/hooks/useViewMode'
 import {
     ConfirmDialog,
     PageCard,
     PageHeader,
     Pagination,
+    ViewToggle,
     StatCard,
 } from '@/shared/components/ui'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
@@ -31,6 +33,10 @@ export default function AdminCategoryPage() {
     const [error, setError] = useState<string | null>(null)
 
     const [view, setView] = useState<ViewMode>('LIST')
+
+    // Tên `listView`, không phải `viewMode`: `ViewMode` ở file này đã mang
+    // nghĩa khác — nó là bốn màn con Danh sách / Tạo / Sửa / Chi tiết.
+    const [listView, setListView] = useViewMode('admin-categories')
     const [selectedCategory, setSelectedCategory] = useState<CategoryResponse | null>(
         null,
     )
@@ -307,6 +313,11 @@ export default function AdminCategoryPage() {
                                         className="rk-input"
                                     />
                                 </div>
+
+                                <div className="rk-field">
+                                    <span className="rk-field__label">Hiển thị</span>
+                                    <ViewToggle value={listView} onChange={setListView} />
+                                </div>
                             </div>
                         </PageCard>
 
@@ -326,6 +337,78 @@ export default function AdminCategoryPage() {
                     </div>
 
                     {/* Table */}
+                    {listView === 'cards' ? (
+                        <div className="rk-dishgrid">
+                            {currentItems.map((item) => (
+                                <article className="rk-dishcard" key={item.id}>
+                                    {/* Danh mục KHÔNG có ảnh trong CategoryResponse, nên
+                                        thẻ dùng ô số: số món là thứ người ta thực sự
+                                        muốn biết về một danh mục. */}
+                                    <div className="rk-dishcard__body">
+                                        <h3 className="rk-dishcard__name">{item.name}</h3>
+
+                                        <p className="rk-rowlist__meta">
+                                            {item.description || 'Không có mô tả'}
+                                        </p>
+
+                                        <div className="rk-dishcard__meta">
+                                            <span
+                                                className={`rk-chip ${item.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
+                                            >
+                                                {item.isAvailable ? 'Hoạt động' : 'Đã ẩn'}
+                                            </span>
+
+                                            <span className="rk-dishcard__price">
+                                                {item.dishCount || 0} món
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="rk-dishcard__actions">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedCategory(item)
+                                                setDishPage(1)
+                                                setView('DETAIL')
+                                            }}
+                                            className="rk-iconbtn"
+                                            title="Xem chi tiết"
+                                        >
+                                            <Icon name="eye" className="rk-icon" />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedCategory(item)
+                                                setFormData({
+                                                    name: item.name,
+                                                    description: item.description,
+                                                    isAvailable: item.isAvailable,
+                                                })
+                                                setView('EDIT')
+                                            }}
+                                            className="rk-iconbtn rk-iconbtn--brand"
+                                            title="Chỉnh sửa"
+                                        >
+                                            <Icon name="pen" className="rk-icon" />
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                setDeleteTarget({
+                                                    id: item.id,
+                                                    name: item.name,
+                                                    dishCount: item.dishCount || 0,
+                                                })
+                                            }
+                                            className="rk-iconbtn rk-iconbtn--danger"
+                                            title="Xoá"
+                                        >
+                                            <Icon name="trash" className="rk-icon" />
+                                        </button>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    ) : (
                     <div className="rk-tablewrap">
                         <table className="rk-table">
                             <thead>
@@ -424,8 +507,11 @@ export default function AdminCategoryPage() {
                                 ))}
                             </tbody>
                         </table>
-                        {filteredCategories.length === 0 && (
-                            <EmptyState
+                    </div>
+                    )}
+
+                    {filteredCategories.length === 0 && (
+                        <EmptyState
                                 title="Không tìm thấy danh mục phù hợp"
                                 description="Hãy thay đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái."
                                 action={
@@ -444,17 +530,15 @@ export default function AdminCategoryPage() {
                             />
                         )}
 
-                        {/* Pagination for Categories */}
-                        {filteredCategories.length > 0 && (
-                            <Pagination
-                                page={currentPage}
-                                totalPages={totalPages}
-                                totalItems={totalItems}
-                                pageSize={ITEMS_PER_PAGE}
-                                onPageChange={goToPage}
-                            />
-                        )}
-                    </div>
+                    {filteredCategories.length > 0 && (
+                        <Pagination
+                            page={currentPage}
+                            totalPages={totalPages}
+                            totalItems={totalItems}
+                            pageSize={ITEMS_PER_PAGE}
+                            onPageChange={goToPage}
+                        />
+                    )}
                 </div>
             )}
 

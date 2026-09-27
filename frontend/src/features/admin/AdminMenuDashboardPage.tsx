@@ -5,7 +5,8 @@ import {useNavigate} from 'react-router-dom'
 import * as adminApi from '@/shared/api/admin'
 import type {MenuDashboardData} from '@/shared/api/admin'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
+import {PageCard, PageHeader, StatCard, ViewToggle} from '@/shared/components/ui'
+import {useViewMode} from '@/shared/hooks/useViewMode'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {dungAnhThayThe, duongDanAnh} from '@/shared/utils/image'
 
@@ -32,6 +33,7 @@ function DishThumb({imageUrl, name}: {imageUrl?: string | null; name: string}) {
 }
 
 export default function AdminMenuDashboardPage() {
+    const [listView, setListView] = useViewMode('admin-menu')
     const [data, setData] = useState<MenuDashboardData | null>(null)
 
     const [loading, setLoading] = useState<boolean>(true)
@@ -303,16 +305,68 @@ export default function AdminMenuDashboardPage() {
                         <div className="rk-card__head-inline">
                             <h3 className="rk-sectiontitle">Món ăn mới cập nhật</h3>
 
-                            <button
-                                type="button"
-                                className="rk-btn rk-btn--quiet"
-                                onClick={() => navigate('/admin/dishes')}
-                            >
-                                Quản lý món
-                                <Icon name="next" className="rk-icon" />
-                            </button>
+                            <div className="rk-actions">
+                                <ViewToggle value={listView} onChange={setListView} />
+
+                                <button
+                                    type="button"
+                                    className="rk-btn rk-btn--quiet"
+                                    onClick={() => navigate('/admin/dishes')}
+                                >
+                                    Quản lý món
+                                    <Icon name="next" className="rk-icon" />
+                                </button>
+                            </div>
                         </div>
 
+                        {listView === 'cards' ? (
+                            <div className="rk-dishgrid">
+                                {data.latestDishes.map((dish) => (
+                                    <article className="rk-dishcard" key={dish.id}>
+                                        <div className="rk-dishcard__figure">
+                                            {/* Ảnh THẬT, không dùng DishThumb:
+                                                DishThumb là ô thu nhỏ 40px cho
+                                                ô đầu bảng. Nhét nó vào khung
+                                                ảnh 4/3 thì khung rỗng còn ảnh
+                                                bé tí nằm góc trên trái. */}
+                                            <img
+                                                src={duongDanAnh(dish.imageUrl)}
+                                                alt={dish.name}
+                                                onError={dungAnhThayThe}
+                                            />
+
+                                            <span
+                                                className={`rk-chip rk-dishcard__flag ${
+                                                    dish.status === 'AVAILABLE'
+                                                        ? 'rk-chip--ok'
+                                                        : 'rk-chip--idle'
+                                                }`}
+                                            >
+                                                {dish.status === 'AVAILABLE'
+                                                    ? 'Đang bán'
+                                                    : 'Tạm dừng'}
+                                            </span>
+                                        </div>
+
+                                        <div className="rk-dishcard__body">
+                                            <h4 className="rk-dishcard__name">
+                                                {dish.name}
+                                            </h4>
+
+                                            <div className="rk-dishcard__meta">
+                                                <span className="rk-tag">
+                                                    {dish.categoryName}
+                                                </span>
+
+                                                <span className="rk-dishcard__price">
+                                                    {dish.price.toLocaleString('vi-VN')}đ
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        ) : (
                         <div className="rk-tablewrap">
                             <table className="rk-table rk-table--compact">
                                 <thead>
@@ -368,6 +422,7 @@ export default function AdminMenuDashboardPage() {
                                 </tbody>
                             </table>
                         </div>
+                        )}
                     </PageCard>
 
                     <PageCard>

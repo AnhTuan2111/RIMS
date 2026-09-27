@@ -2507,10 +2507,19 @@ textarea.rk-input {
     outline-offset: 1px;
 }
 
+/* Nút đang chọn: nền mực đặc.
+   Bản cũ chỉ đổi nền sang `--rims-surface` và đổi màu chữ — cạnh nền
+   `--rims-surface-2` của khay thì hai sắc đó gần nhau, phải nhìn kỹ mới biết
+   nút nào đang bật. Đây là hệ vuông và tương phản mạnh, nên nút bật tô đặc. */
 .rk-segment__btn.is-active {
-    background: var(--rims-surface);
-    color: var(--rims-brand);
+    background: var(--rims-ink);
+    color: var(--rims-paper);
     box-shadow: var(--rims-shadow-raised);
+}
+
+.rk-segment__btn.is-active:hover {
+    background: var(--rims-ink);
+    color: var(--rims-paper);
 }
 
 /* Bảng thuộc tính: dùng <dl> để nhãn và giá trị gắn với nhau về mặt ngữ
@@ -3289,6 +3298,102 @@ textarea.rk-input {
     }
 }
 
+
+/* ---------- Thẻ món có ảnh ----------
+   Khung THẺ của ba màn thực đơn: Món ăn, Danh mục, Tổng quan thực đơn.
+
+   Thẻ để NHẬN RA, bảng để SO SÁNH. Ảnh là nhân vật chính ở đây, nên cột không
+   bao giờ hẹp hơn 15rem: màn rộng thì ẢNH TO HƠN, không phải nhiều cột hơn.
+   Đó là luật đã chốt, và nó khác hẳn với lưới thẻ của màn vận hành. */
+
+.rk-dishgrid {
+    display: grid;
+    /* Nhiều nhất BỐN cột, và cột không bao giờ hẹp hơn 15rem.
+       `auto-fill` với một đáy cố định làm ngược điều đã chốt: nó nhét thêm cột
+       cho tới khi hết chỗ, nên ở 1440px ta có năm cột ảnh 250px thay vì bốn
+       cột ảnh 300px. Luật là màn rộng thì ẢNH TO HƠN.
+
+       `100%` ở đây là bề rộng KHUNG CHỨA, không phải bề rộng cửa sổ — nên luật
+       vẫn đúng khi lưới nằm trong cột phải hẹp của màn Tổng quan thực đơn.
+       Media query không làm được việc đó, và @container cũng không: một phần
+       tử không phải là container của chính nó. */
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(max(15rem, (100% - 3 * var(--rims-space-4)) / 4), 1fr)
+    );
+    gap: var(--rims-space-4);
+}
+
+.rk-dishcard {
+    display: flex;
+    flex-direction: column;
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+/* Khung ảnh giữ tỉ lệ cố định để lưới không so le khi ảnh về muộn hoặc hỏng. */
+.rk-dishcard__figure {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-bottom: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface-3);
+}
+
+.rk-dishcard__figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Chip trạng thái nằm ĐÈ lên ảnh, góc trên trái — đọc được trước cả tên món,
+   vì "món này còn bán không" là câu hỏi hay gặp hơn "món này tên gì". */
+.rk-dishcard__flag {
+    position: absolute;
+    top: var(--rims-space-2);
+    left: var(--rims-space-2);
+}
+
+.rk-dishcard__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-4);
+}
+
+.rk-dishcard__name {
+    margin: 0;
+    font-size: var(--rims-text-base);
+    font-weight: var(--rims-weight-bold);
+    /* Tên món dài phải xuống dòng TRONG từ, nếu không một từ dài đẩy thẻ rộng
+       ra và cả hàng lưới lệch theo. */
+    overflow-wrap: anywhere;
+}
+
+.rk-dishcard__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rims-space-3);
+    flex-wrap: wrap;
+}
+
+.rk-dishcard__price {
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--rims-weight-bold);
+}
+
+/* Hàng nút dính đáy thẻ, vì lưới kéo mọi thẻ cao bằng thẻ cao nhất. */
+.rk-dishcard__actions {
+    display: flex;
+    gap: var(--rims-space-2);
+    margin-top: auto;
+    padding: var(--rims-space-3) var(--rims-space-4);
+    border-top: 1px solid var(--rims-line);
+}
 
 /* ---------- Bảng cột trạng thái (kanban) ----------
    Dùng cho màn CÓ DÒNG TRẠNG THÁI THẬT, không dùng cho mọi màn vận hành.

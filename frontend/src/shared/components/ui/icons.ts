@@ -142,7 +142,6 @@ export const ICON_PLANNED: Partial<Record<IconName, string>> = {
     clockAlert: 'P7 — đặt bàn quá giờ, phiếu chờ quá 15 phút',
     sort: 'P7 — sắp xếp ở đầu bảng 11 màn quản trị',
     filter: 'P7 — lọc ở rail lọc và hàng lọc',
-    cards: 'P7 — nút đổi chế độ xem Thẻ ở ba màn có ảnh',
     save: 'P7 — nút Lưu ở màn biểu mẫu quản trị',
     print: 'P7 — nút In hoá đơn ở màn thu ngân',
 }

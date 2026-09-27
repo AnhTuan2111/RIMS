@@ -10,7 +10,9 @@ import {
     PageHeader,
     Pagination,
     StatCard,
+    ViewToggle,
 } from '@/shared/components/ui'
+import {useViewMode} from '@/shared/hooks/useViewMode'
 import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
@@ -31,6 +33,7 @@ export default function AdminDishesPage() {
     const [error, setError] = useState<string | null>(null)
 
     // Filters
+    const [viewMode, setViewMode] = useViewMode('admin-dishes')
     const [searchKeyword, setSearchKeyword] = useState<string>('')
     const [selectedCategory, setSelectedCategory] = useState<string>('ALL')
     const [selectedStatus, setSelectedStatus] = useState<string>('ALL')
@@ -311,6 +314,8 @@ export default function AdminDishesPage() {
             <div className="rk-filterrow">
                 <PageCard>
                     <div className="rk-filterbar">
+                        {/* Nút đổi khung đứng CUỐI hàng lọc, vì nó không phải
+                            bộ lọc: nó đổi cách nhìn, không đổi cái được nhìn. */}
                         <input
                             type="text"
                             placeholder="Tìm theo tên món hoặc mã món..."
@@ -355,6 +360,8 @@ export default function AdminDishesPage() {
                             <option value="VISIBLE">Đang hiển thị</option>
                             <option value="HIDDEN">Đã ẩn</option>
                         </select>
+
+                        <ViewToggle value={viewMode} onChange={setViewMode} />
                     </div>
                 </PageCard>
 
@@ -366,7 +373,78 @@ export default function AdminDishesPage() {
                 />
             </div>
 
-            {/* Table */}
+            {viewMode === 'cards' ? (
+                <div className="rk-dishgrid">
+                    {currentItems.map((dish) => {
+                        const isParentCategoryHidden =
+                            categories.find((c) => c.name === dish.categoryName)
+                                ?.isAvailable === false
+
+                        return (
+                            <article className="rk-dishcard" key={dish.id}>
+                                <div className="rk-dishcard__figure">
+                                    <img
+                                        src={duongDanAnh(dish.imageUrl)}
+                                        alt={dish.name}
+                                        onError={dungAnhThayThe}
+                                    />
+                                    <span
+                                        className={`rk-chip rk-dishcard__flag ${
+                                            dish.isHidden ? 'rk-chip--idle' : 'rk-chip--ok'
+                                        }`}
+                                    >
+                                        {dish.isHidden ? 'Đã ẩn khỏi thực đơn' : 'Đang hiển thị'}
+                                    </span>
+                                </div>
+
+                                <div className="rk-dishcard__body">
+                                    <h3 className="rk-dishcard__name">{dish.name}</h3>
+
+                                    <div className="rk-dishcard__meta">
+                                        <span
+                                            className={`rk-tag${isParentCategoryHidden ? ' rk-tag--muted' : ''}`}
+                                        >
+                                            {dish.categoryName}{' '}
+                                            {isParentCategoryHidden ? '(Ẩn)' : ''}
+                                        </span>
+
+                                        <span className="rk-dishcard__price">
+                                            {dish.price.toLocaleString('vi-VN')}đ
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="rk-dishcard__actions">
+                                    <button
+                                        onClick={() => openFormWithDish(dish, 'VIEW')}
+                                        className="rk-iconbtn"
+                                        title="Xem chi tiết"
+                                    >
+                                        <Icon name="eye" className="rk-icon" />
+                                    </button>
+                                    <button
+                                        onClick={() => openFormWithDish(dish, 'EDIT')}
+                                        className="rk-iconbtn rk-iconbtn--brand"
+                                        title="Chỉnh sửa"
+                                    >
+                                        <Icon name="pen" className="rk-icon" />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedDish(dish)
+                                            setActiveModal('DELETE')
+                                        }}
+                                        className="rk-iconbtn rk-iconbtn--danger"
+                                        title="Xoá món"
+                                    >
+                                        <Icon name="trash" className="rk-icon" />
+                                    </button>
+                                </div>
+                            </article>
+                        )
+                    })}
+                </div>
+            ) : (
             <div className="rk-tablewrap">
                 <table className="rk-table">
                     <thead>
@@ -463,7 +541,10 @@ export default function AdminDishesPage() {
                         })}
                     </tbody>
                 </table>
-                {filteredDishes.length === 0 && (
+            </div>
+            )}
+
+            {filteredDishes.length === 0 && (
                     <EmptyState
                         title="Không tìm thấy món ăn phù hợp"
                         description="Hãy thay đổi từ khóa, danh mục hoặc trạng thái để tìm món ăn."
@@ -484,17 +565,15 @@ export default function AdminDishesPage() {
                     />
                 )}
 
-                {/* Pagination */}
-                {filteredDishes.length > 0 && (
-                    <Pagination
-                        page={currentPage}
-                        totalPages={totalPages}
-                        totalItems={totalItems}
-                        pageSize={ITEMS_PER_PAGE}
-                        onPageChange={goToPage}
-                    />
-                )}
-            </div>
+            {filteredDishes.length > 0 && (
+                <Pagination
+                    page={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    pageSize={ITEMS_PER_PAGE}
+                    onPageChange={goToPage}
+                />
+            )}
 
             {/* ========================================================= */}
             {/* CREATE MODAL */}
