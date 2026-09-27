@@ -1,5 +1,4 @@
-import {Eye, Image, Pencil, Trash2, Utensils} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useCallback, useEffect, useState, type FormEvent} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {DishResponse, CategoryResponse, DishFormData} from '@/shared/api/admin'
@@ -363,7 +362,7 @@ export default function AdminDishesPage() {
                     label="Món tìm thấy"
                     value={filteredDishes.length}
                     tone="brand"
-                    icon={<Utensils className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="kitchen" className="rk-icon" />}
                 />
             </div>
 
@@ -439,17 +438,14 @@ export default function AdminDishesPage() {
                                             className="rk-iconbtn"
                                             title="Xem chi tiết"
                                         >
-                                            <Eye className="rk-icon" aria-hidden="true" />
+                                            <Icon name="eye" className="rk-icon" />
                                         </button>
                                         <button
                                             onClick={() => openFormWithDish(dish, 'EDIT')}
                                             className="rk-iconbtn rk-iconbtn--brand"
                                             title="Chỉnh sửa"
                                         >
-                                            <Pencil
-                                                className="rk-icon"
-                                                aria-hidden="true"
-                                            />
+                                            <Icon name="pen" className="rk-icon" />
                                         </button>
                                         <button
                                             onClick={() => {
@@ -459,10 +455,7 @@ export default function AdminDishesPage() {
                                             className="rk-iconbtn rk-iconbtn--danger"
                                             title="Xóa món"
                                         >
-                                            <Trash2
-                                                className="rk-icon"
-                                                aria-hidden="true"
-                                            />
+                                            <Icon name="trash" className="rk-icon" />
                                         </button>
                                     </td>
                                 </tr>
@@ -636,11 +629,7 @@ export default function AdminDishesPage() {
                                     ) : (
                                         <div className="rk-thumb rk-thumb--lg">
                                             <span>
-                                                <Image
-                                                    className="rk-icon"
-                                                    aria-hidden="true"
-                                                />
-                                            </span>
+                                                </span>
                                             <small>Chưa có hình ảnh</small>
                                         </div>
                                     )}
@@ -699,7 +688,7 @@ export default function AdminDishesPage() {
                                 className="rk-btn rk-btn--danger"
                                 onClick={() => setActiveModal('DELETE')}
                             >
-                                <Trash2 className="rk-icon" aria-hidden="true" /> Xoá món
+                                <Icon name="trash" className="rk-icon" /> Xoá món
                             </button>
 
                             <button

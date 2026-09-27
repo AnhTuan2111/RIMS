@@ -776,13 +776,12 @@ button.rk-chip:hover {
 }
 
 /* ---------- Icon ----------
-   Toàn bộ icon lấy từ lucide-react, cùng một nét vẽ. Không dùng emoji. */
+   Toàn bộ icon lấy từ bảng ICONS, cùng một nét vẽ. Không dùng emoji. */
 
+/* Chỉ đặt CỠ. Độ dày nét, kiểu đầu nét và màu do .rims-i trong tokens.css lo —
+   đặt một lần cho cả bộ. Ghi stroke-width ở đây sẽ đè lên luật đó. */
 .rk-icon {
-    flex: none;
-    width: 18px;
-    height: 18px;
-    stroke-width: 1.75;
+    --rims-icon-size: 18px;
 }
 
 /* ---------- Tôn trọng người tắt hiệu ứng ---------- */

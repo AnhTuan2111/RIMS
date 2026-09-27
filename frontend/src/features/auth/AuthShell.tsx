@@ -1,7 +1,6 @@
 import type {ReactNode} from 'react'
 import {Link} from 'react-router-dom'
-import {ArrowLeft} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 type AuthShellProps = {
     title: ReactNode
     description?: ReactNode
@@ -36,7 +35,7 @@ export function AuthShell({
             <section className={`rk-auth__card${wide ? ' rk-auth__card--wide' : ''}`}>
                 {backTo && (
                     <Link className="rk-backlink" to={backTo}>
-                        <ArrowLeft className="rk-icon" aria-hidden="true" />
+                        <Icon name="back" className="rk-icon" />
                         {backLabel}
                     </Link>
                 )}

@@ -1,5 +1,4 @@
-import {UtensilsCrossed} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import {useNavigate, useParams, useSearchParams} from 'react-router-dom'
 
@@ -328,10 +327,7 @@ export default function WaiterCreateOrderPage() {
                                             />
                                         ) : (
                                             <span className="rk-thumb">
-                                                <UtensilsCrossed
-                                                    className="rk-icon"
-                                                    aria-hidden="true"
-                                                />
+                                                <Icon name="kitchen" className="rk-icon" />
                                             </span>
                                         )}
 

@@ -1,5 +1,4 @@
-import {Globe, User} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useEffect, useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
@@ -182,7 +181,7 @@ export default function PaymentModal({
             <div>
                 {customer && (
                     <div className="rk-note rk-note--ok">
-                        <User className="rk-icon" aria-hidden="true" /> Khách:{' '}
+                        <Icon name="user" className="rk-icon" /> Khách:{' '}
                         <strong>{customer.fullName}</strong>
                         {pointsUsed > 0 && (
                             <span className="rk-text--ok">
@@ -272,8 +271,7 @@ export default function PaymentModal({
                     <div>
                         <div className="rk-panel rk-panel--center">
                             <span className="rk-feedback__icon">
-                                <Globe className="rk-icon" aria-hidden="true" />
-                            </span>
+                                </span>
 
                             <h3 className="rk-sectiontitle">Cổng thanh toán VNPay</h3>
 

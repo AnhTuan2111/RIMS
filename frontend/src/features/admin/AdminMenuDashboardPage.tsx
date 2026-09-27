@@ -1,13 +1,4 @@
-import {
-    ArrowRight,
-    BookOpen,
-    EyeOff,
-    FolderOpen,
-    PauseCircle,
-    Soup,
-    Utensils,
-} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useCallback, useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 
@@ -28,7 +19,7 @@ function DishThumb({imageUrl, name}: {imageUrl?: string | null; name: string}) {
     if (!imageUrl) {
         return (
             <span className="rk-thumb">
-                <Soup className="rk-icon" aria-hidden="true" />
+                <Icon name="kitchen" className="rk-icon" />
             </span>
         )
     }
@@ -189,7 +180,7 @@ export default function AdminMenuDashboardPage() {
                     eyebrow="Quản trị"
                     title="Tổng quan thực đơn"
                     description="Theo dõi nhanh danh mục, món ăn mới cập nhật và các món đang tạm dừng bán."
-                    icon={<BookOpen className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="kitchen" className="rk-icon" />}
                 />
             </PageCard>
 
@@ -197,27 +188,26 @@ export default function AdminMenuDashboardPage() {
                 <StatCard
                     label="Tổng số món"
                     value={data.totalDishes}
-                    icon={<Utensils className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="kitchen" className="rk-icon" />}
                 />
 
                 <StatCard
                     label="Danh mục"
                     value={data.totalCategories}
-                    icon={<FolderOpen className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="kitchen" className="rk-icon" />}
                 />
 
                 <StatCard
                     label="Tạm dừng bán"
                     value={data.totalPausedDishes}
                     tone="busy"
-                    icon={<PauseCircle className="rk-icon" aria-hidden="true" />}
                 />
 
                 <StatCard
                     label="Danh mục ẩn"
                     value={data.totalHiddenDishes}
                     tone="alert"
-                    icon={<EyeOff className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="eyeOff" className="rk-icon" />}
                 />
             </div>
 
@@ -233,7 +223,7 @@ export default function AdminMenuDashboardPage() {
                                 onClick={() => navigate('/admin/categories')}
                             >
                                 Quản lý danh mục
-                                <ArrowRight className="rk-icon" aria-hidden="true" />
+                                <Icon name="next" className="rk-icon" />
                             </button>
                         </div>
 
@@ -319,7 +309,7 @@ export default function AdminMenuDashboardPage() {
                                 onClick={() => navigate('/admin/dishes')}
                             >
                                 Quản lý món
-                                <ArrowRight className="rk-icon" aria-hidden="true" />
+                                <Icon name="next" className="rk-icon" />
                             </button>
                         </div>
 

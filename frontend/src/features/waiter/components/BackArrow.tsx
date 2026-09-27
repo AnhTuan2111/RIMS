@@ -1,6 +1,5 @@
 import {useNavigate} from 'react-router-dom'
-import {ArrowLeft} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 export function BackArrow({onClick}: {onClick?: () => void}) {
     const navigate = useNavigate()
 
@@ -11,7 +10,7 @@ export function BackArrow({onClick}: {onClick?: () => void}) {
             title="Quay lại"
             onClick={onClick ?? (() => navigate(-1))}
         >
-            <ArrowLeft className="rk-icon" aria-hidden="true" />
+            <Icon name="back" className="rk-icon" />
         </button>
     )
 }

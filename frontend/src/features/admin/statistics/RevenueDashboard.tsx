@@ -1,4 +1,4 @@
-import {CalendarDays, ChevronLeft, ChevronRight} from 'lucide-react'
+import {Icon} from '@/shared/components/ui/Icon'
 import {
     formatDateForApi,
     formatDisplayDate,
@@ -140,7 +140,7 @@ export function RevenueDateInput({
                     type="button"
                     onClick={openCalendar}
                 >
-                    <CalendarDays className="rk-icon" aria-hidden="true" />
+                    <Icon name="booking" className="rk-icon" />
                 </button>
             </span>
 
@@ -167,7 +167,7 @@ export function RevenueDateInput({
                                 )
                             }
                         >
-                            <ChevronLeft className="rk-icon" aria-hidden="true" />
+                            <Icon name="prev" className="rk-icon" />
                         </button>
 
                         <div className="rk-calendar__title">
@@ -217,7 +217,7 @@ export function RevenueDateInput({
                                 )
                             }
                         >
-                            <ChevronRight className="rk-icon" aria-hidden="true" />
+                            <Icon name="next" className="rk-icon" />
                         </button>
                     </div>
 

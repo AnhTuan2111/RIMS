@@ -269,7 +269,7 @@ sách 3 màu cho trạng thái.
 
 ## Icon
 
-30 icon. Cơ chế học từ theme `qlcv-aura`: **một bảng hằng `ICONS`**, mỗi icon chỉ
+38 icon. Cơ chế học từ theme `qlcv-aura`: **một bảng hằng `ICONS`**, mỗi icon chỉ
 là chuỗi `<path>`; **một component `<Icon name>`**; `viewBox="0 0 24 24"`;
 `aria-hidden="true"`; **độ dày nét đặt một lần ở class `.rims-i`**, không viết
 trong từng icon. Tên khoá camelCase tiếng Anh, ngắn, ổn định.
@@ -294,6 +294,58 @@ Bốn chỗ trùng nghĩa của RIMS đã gỡ:
 > **Vì sao 30 mà không phải 29** — con số 29 ở phiếu 05 tính trước khi gỡ trùng nghĩa.
 > Việc thu hẹp `x` xuống đúng nghĩa **đóng** đã tách nó ra khỏi `ban` (huỷ), nên bộ tăng
 > thêm một icon. Đó là cái giá đúng của luật "một nghĩa một icon".
+
+### Ánh xạ từ lucide-react — chốt ở pha P4
+
+App cũ dùng **lucide-react: 61 icon import, 56 có vẽ ra, 5 import chết**, trải trên
+39 file. Bộ mới có **38**. Chênh lệch không phải do cắt bớt tuỳ tiện mà do hai luật:
+
+**Gộp về một khi cùng nghĩa.** Luật "một nghĩa một icon" buộc phải gộp:
+
+| Lucide | Về | Vì sao |
+|---|---|---|
+| `Soup` `Utensils` `UtensilsCrossed` `ChefHat` `Flame` `BookOpen` `FolderTree` `FolderOpen` | `kitchen` | tám hình khác nhau cho cùng một nghĩa "thực đơn · món · bếp" |
+| `User` `CircleUser` `Users` | `user` | một người hay nhiều người vẫn là "tài khoản" |
+| `Check` `CheckCheck` | `check` | "xong" không có hai mức |
+| `AlertTriangle` `TriangleAlert` | `alert` | lucide đổi tên giữa chừng, hai tên một hình |
+| `ReceiptText` `FileText` `Wallet` | `invoice` | đều là hoá đơn hoặc tiền đã thu |
+| `CalendarDays` `CalendarClock` | `booking` | đều là đặt bàn |
+| `Grid2x2` | `table` | bàn ăn |
+| `LayoutGrid` `ChartColumn` | `chart` | tổng quan và thống kê |
+| `ArrowRight` `ChevronRight` | `next` | đều là "đi tiếp" |
+| `Store` | `gear` | cấu hình nhà hàng |
+| `Layers` | `ticket` | gom món để nấu vẫn là phiếu |
+| `Dot` | `rows` | icon mặc định của mục điều hướng chưa khớp |
+
+**Bỏ hẳn, dùng chữ hoặc thủ pháp khác** — 15 icon:
+
+| Lucide | Thay bằng |
+|---|---|
+| `Trophy` `Crown` | **số hạng** đã có sẵn kiểu dáng `rk-rank` |
+| `Wallet` `Coins` `TrendingUp` `FileText` `Soup` `BookOpen` `FolderOpen` `PauseCircle` *(ở ô thống kê)* | **không gì cả** — ô số kiểu bảng tỉ số đã đủ |
+| `QrCode` `Globe` | **chip chữ** "Mã QR", "Tiền mặt" |
+| `Inbox` | **dải sọc kẻ chéo** của trạng thái rỗng |
+| `Info` `MessageSquare` | **chữ** trong khối ghi chú |
+| `Image` | **ảnh món thật** |
+| `MapPin` `Phone` | **nhãn chữ** "Địa chỉ", "Điện thoại" đã có ngay cạnh |
+| `Monitor` `Sun` `Moon` *(ở nút đổi chế độ)* | **nhãn chữ** "Sáng · Tối · Theo máy" — bộ icon không có cái nào mang đúng nghĩa "Theo máy", đặt bừa một cái là phá luật |
+
+**Thêm mới 8 icon**, mỗi cái là một nghĩa thật mà bộ 30 ban đầu chưa có:
+`alert` · `eye` · `eyeOff` · `download` · `logout` · `key` · `bell` · `refresh`.
+
+> **Vì sao con số nhảy từ 29 lên 38.** 29 là đếm ở phiếu 05, trước khi gỡ trùng
+> nghĩa — việc thu hẹp `x` xuống nghĩa **đóng** tách nó khỏi `ban` (huỷ) nên thành
+> 30. Rồi soát code thật mới thấy 8 nghĩa nữa chưa có. Đó là cái giá đúng của
+> việc đọc code trước khi chốt, thay vì chốt rồi ép code theo.
+
+### Khai icon trước khi dùng
+
+`ICON_PLANNED` trong `icons.ts` liệt kê icon đã vẽ nhưng chưa có chỗ dùng, **kèm
+pha sẽ dùng**. Cổng test bỏ qua danh sách này, và có một cổng thứ hai bắt những
+dòng đã lỗi thời — icon đã dùng rồi mà còn nằm trong danh sách.
+
+Không có danh sách này thì cổng chặn mọi việc khai trước; có nó mà không bắt buộc
+ghi lý do thì cổng mất tác dụng.
 
 ### Không vẽ icon cho
 
@@ -427,7 +479,7 @@ Và một việc frontend thuần:
 | File | Ở đâu |
 |---|---|
 | Bản token | `docs/redesign/exports/tokens.css` → đích: `frontend/src/styles/tokens.css` |
-| Bảng icon | `docs/redesign/exports/icons.ts` → đích: `frontend/src/shared/ui/icons.ts` |
+| Bảng icon | `frontend/src/shared/components/ui/icons.ts` — đã vào code ở pha P4 |
 | Spec dựng thật | `docs/redesign/06-spec.html` — mở bằng trình duyệt, xem được cả hai chế độ |
 | Sổ quyết định | `docs/redesign/00-quyet-dinh.md` — đầy đủ lý do, kể cả những chỗ làm sai rồi sửa |
 | Kế hoạch áp vào code | `docs/redesign/07-ke-hoach.md` |

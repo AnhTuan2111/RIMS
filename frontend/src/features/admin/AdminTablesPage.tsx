@@ -1,7 +1,6 @@
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import type {FormEvent} from 'react'
-import {EyeOff, Grid2x2, Pencil, Plus, RotateCcw, Trash2} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useToast} from '@/app/providers/useToast'
 import * as adminApi from '@/shared/api/admin'
 import type {AdminTable, TableStatus} from '@/shared/api/admin'
@@ -253,14 +252,14 @@ export default function AdminTablesPage() {
                     eyebrow="Vận hành"
                     title="Quản lý bàn"
                     description={`${stats.active} bàn đang dùng · ${stats.seats} chỗ ngồi. Bàn đã cất vẫn giữ nguyên lịch sử đơn cho báo cáo.`}
-                    icon={<Grid2x2 className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="table" className="rk-icon" />}
                     actions={
                         <button
                             type="button"
                             className="rk-btn rk-btn--primary"
                             onClick={openCreate}
                         >
-                            <Plus className="rk-icon" aria-hidden="true" />
+                            <Icon name="plus" className="rk-icon" />
                             Thêm bàn
                         </button>
                     }
@@ -366,10 +365,7 @@ export default function AdminTablesPage() {
                                                         title="Sửa bàn"
                                                         onClick={() => openEdit(table)}
                                                     >
-                                                        <Pencil
-                                                            className="rk-icon"
-                                                            aria-hidden="true"
-                                                        />
+                                                        <Icon name="pen" className="rk-icon" />
                                                     </button>
 
                                                     <button
@@ -390,15 +386,9 @@ export default function AdminTablesPage() {
                                                         }
                                                     >
                                                         {table.active ? (
-                                                            <EyeOff
-                                                                className="rk-icon"
-                                                                aria-hidden="true"
-                                                            />
+                                                            <Icon name="eyeOff" className="rk-icon" />
                                                         ) : (
-                                                            <RotateCcw
-                                                                className="rk-icon"
-                                                                aria-hidden="true"
-                                                            />
+                                                            <Icon name="refresh" className="rk-icon" />
                                                         )}
                                                     </button>
 
@@ -416,10 +406,7 @@ export default function AdminTablesPage() {
                                                             setRemoveTarget(table)
                                                         }
                                                     >
-                                                        <Trash2
-                                                            className="rk-icon"
-                                                            aria-hidden="true"
-                                                        />
+                                                        <Icon name="trash" className="rk-icon" />
                                                     </button>
                                                 </td>
                                             </tr>

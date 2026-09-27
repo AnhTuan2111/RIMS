@@ -1,6 +1,5 @@
 import {useState} from 'react'
-import {Eye, EyeOff} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 interface PasswordInputProps {
     /** Gắn với thuộc tính htmlFor của nhãn, để bấm vào nhãn là nhảy vào ô. */
     id?: string
@@ -46,9 +45,9 @@ export function PasswordInput({
                 onClick={() => setVisible((current) => !current)}
             >
                 {visible ? (
-                    <EyeOff className="rk-icon" aria-hidden="true" />
+                    <Icon name="eyeOff" className="rk-icon" />
                 ) : (
-                    <Eye className="rk-icon" aria-hidden="true" />
+                    <Icon name="eye" className="rk-icon" />
                 )}
             </button>
         </div>

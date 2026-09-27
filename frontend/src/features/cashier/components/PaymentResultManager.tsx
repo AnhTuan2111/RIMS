@@ -1,5 +1,4 @@
-import {Check, Download} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useState} from 'react'
 
 import type {OrderDetailResponse, PaymentResponse} from '@/shared/types/cashier'
@@ -61,7 +60,7 @@ export default function PaymentResultManager({
         return (
             <button type="button" className="rk-paid" onClick={() => setStep('BILL')}>
                 <div className="rk-paid__icon">
-                    <Check className="rk-icon" aria-hidden="true" />
+                    <Icon name="check" className="rk-icon" />
                 </div>
 
                 <h1 className="rk-paid__title">Thanh toán thành công</h1>
@@ -98,7 +97,7 @@ export default function PaymentResultManager({
                         className="rk-btn rk-btn--quiet"
                         onClick={() => void onDownload(invoiceId)}
                     >
-                        <Download className="rk-icon" aria-hidden="true" /> Tải PDF
+                        <Icon name="download" className="rk-icon" /> Tải PDF
                     </button>
 
                     <button

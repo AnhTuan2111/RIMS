@@ -1,7 +1,6 @@
 import {useEffect, useRef} from 'react'
 import type {ReactNode} from 'react'
-import {X} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 interface ModalProps {
     open: boolean
     title: string
@@ -90,7 +89,7 @@ export function Modal({
                         aria-label="Đóng"
                         onClick={onClose}
                     >
-                        <X className="rk-icon" aria-hidden="true" />
+                        <Icon name="x" className="rk-icon" />
                     </button>
                 </header>
 

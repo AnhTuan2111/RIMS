@@ -1,5 +1,4 @@
-import {Download} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useCallback, useRef, useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
@@ -432,7 +431,7 @@ export default function CashierInvoicesPage() {
                                     void handleDownloadPdf(selectedInvoice.invoiceId)
                                 }
                             >
-                                <Download className="rk-icon" aria-hidden="true" /> Tải
+                                <Icon name="download" className="rk-icon" /> Tải
                                 PDF
                             </button>
                         </>

@@ -1,5 +1,4 @@
-import {ArrowLeft, Check, X} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useState, type KeyboardEvent} from 'react'
 import {useNavigate} from 'react-router-dom'
 
@@ -152,7 +151,7 @@ export default function ForgotPasswordPage() {
                         <li className={`rk-steps__item${state}`} key={stepItem}>
                             <span className="rk-steps__mark">
                                 {index < currentStepIdx ? (
-                                    <Check className="rk-icon" aria-hidden="true" />
+                                    <Icon name="check" className="rk-icon" />
                                 ) : (
                                     index + 1
                                 )}
@@ -176,7 +175,7 @@ export default function ForgotPasswordPage() {
                         aria-label="Đóng thông báo lỗi"
                         onClick={() => setError(null)}
                     >
-                        <X className="rk-icon" aria-hidden="true" />
+                        <Icon name="x" className="rk-icon" />
                     </button>
                 </p>
             )}
@@ -222,7 +221,7 @@ export default function ForgotPasswordPage() {
             {step === 'otp' && (
                 <div className="rk-fieldgroup">
                     <p className="rk-note rk-note--ok">
-                        <Check className="rk-icon" aria-hidden="true" />
+                        <Icon name="check" className="rk-icon" />
 
                         <span>
                             Đã gửi mã OTP đến <strong>{email}</strong>
@@ -300,7 +299,7 @@ export default function ForgotPasswordPage() {
                         className="rk-btn rk-btn--block"
                         onClick={goBackToEmailStep}
                     >
-                        <ArrowLeft className="rk-icon" aria-hidden="true" />
+                        <Icon name="back" className="rk-icon" />
                         Quay lại / Gửi lại OTP
                     </button>
                 </div>
@@ -309,7 +308,7 @@ export default function ForgotPasswordPage() {
             {step === 'done' && (
                 <div className="rk-feedback rk-feedback--sm">
                     <div className="rk-feedback__icon rk-feedback__icon--ok">
-                        <Check className="rk-icon" aria-hidden="true" />
+                        <Icon name="check" className="rk-icon" />
                     </div>
 
                     <div>

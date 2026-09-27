@@ -1,5 +1,4 @@
-import {Eye, KeyRound, Pencil, X} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {DR, ErrBox, Field, FieldGroup} from '@/features/admin/users/UserFormControls'
 import {ConfirmDialog, Modal, PasswordInput} from '@/shared/components/ui'
 import {ROLE_LABELS, ROLE_TAG_CLASS, STAFF_ROLES} from '@/features/admin/users/constants'
@@ -388,7 +387,7 @@ export default function AdminUsersPage() {
                         className="rk-iconbtn"
                         onClick={() => setError(null)}
                     >
-                        <X className="rk-icon" aria-hidden="true" />
+                        <Icon name="x" className="rk-icon" />
                     </button>
                 </div>
             )}
@@ -549,10 +548,7 @@ export default function AdminUsersPage() {
                                                     title="Xem chi tiết"
                                                     onClick={() => void openDetail(user)}
                                                 >
-                                                    <Eye
-                                                        className="rk-icon"
-                                                        aria-hidden="true"
-                                                    />
+                                                    <Icon name="eye" className="rk-icon" />
                                                 </button>
 
                                                 <button
@@ -561,10 +557,7 @@ export default function AdminUsersPage() {
                                                     title="Chỉnh sửa"
                                                     onClick={() => openEdit(user)}
                                                 >
-                                                    <Pencil
-                                                        className="rk-icon"
-                                                        aria-hidden="true"
-                                                    />
+                                                    <Icon name="pen" className="rk-icon" />
                                                 </button>
 
                                                 {/* Nhân viên không tự đổi được mật khẩu
@@ -579,10 +572,7 @@ export default function AdminUsersPage() {
                                                             setResetTarget(user)
                                                         }
                                                     >
-                                                        <KeyRound
-                                                            className="rk-icon"
-                                                            aria-hidden="true"
-                                                        />
+                                                        <Icon name="key" className="rk-icon" />
                                                     </button>
                                                 )}
                                             </div>

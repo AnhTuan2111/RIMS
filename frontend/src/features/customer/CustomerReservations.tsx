@@ -1,5 +1,4 @@
-import {AlertTriangle} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react'
 
 import {
@@ -629,10 +628,7 @@ export default function CustomerReservations() {
                                     !tableError &&
                                     availableTables.length === 0 && (
                                         <span className="rk-field__hint">
-                                            <AlertTriangle
-                                                className="rk-icon"
-                                                aria-hidden="true"
-                                            />{' '}
+                                            <Icon name="alert" className="rk-icon" />{' '}
                                             Hiện không có bàn trống
                                         </span>
                                     )}

@@ -3,8 +3,7 @@ import {useNavigate, useParams} from 'react-router-dom'
 
 import * as adminApi from '@/shared/api/admin'
 import type {AdminPaymentDetail} from '@/shared/api/admin'
-import {ArrowLeft, ReceiptText} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {PageCard, PageHeader} from '@/shared/components/ui'
 
@@ -174,14 +173,14 @@ export default function AdminPaymentDetailPage() {
                     description={`Bàn ${formatTableName(payment.tableNumber)} · ${formatTime(
                         payment.invoiceDate,
                     )} ${formatDate(payment.invoiceDate)}`}
-                    icon={<ReceiptText className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="invoice" className="rk-icon" />}
                     actions={
                         <button
                             type="button"
                             className="rk-btn"
                             onClick={() => navigate(-1)}
                         >
-                            <ArrowLeft className="rk-icon" aria-hidden="true" />
+                            <Icon name="back" className="rk-icon" />
                             Quay lại
                         </button>
                     }

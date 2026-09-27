@@ -3,7 +3,7 @@ import {join} from 'node:path'
 
 import {describe, expect, it} from 'vitest'
 
-import {ICONS, ICON_MEANING} from './icons'
+import {ICONS, ICON_MEANING, ICON_PLANNED} from './icons'
 
 /**
  * Canh bộ icon khỏi trôi.
@@ -64,6 +64,17 @@ describe('Bộ icon', () => {
         expect(clashes, clashes.join(' · ')).toEqual([])
     })
 
+    it('mọi icon khai trước đều ghi rõ pha sẽ dùng', () => {
+        const stale = Object.keys(ICON_PLANNED).filter((name) =>
+            sources.some((source) => source.includes(`"${name}"`)),
+        )
+
+        expect(
+            stale,
+            `đã dùng rồi, xoá khỏi ICON_PLANNED: ${stale.join(', ')}`,
+        ).toEqual([])
+    })
+
     it('không có icon nào không ai dùng', () => {
         // Bộ icon chưa được gắn vào màn nào thì chưa có gì để canh. Cổng này tự bật
         // khi màn đầu tiên dùng <Icon name="…" />, tức là lúc pha P4 bắt đầu.
@@ -78,7 +89,9 @@ describe('Bộ icon', () => {
         }
 
         const unused = Object.keys(ICONS).filter(
-            (name) => !sources.some((source) => source.includes(`"${name}"`)),
+            (name) =>
+                !(name in ICON_PLANNED) &&
+                !sources.some((source) => source.includes(`"${name}"`)),
         )
 
         expect(unused, `icon không ai dùng: ${unused.join(', ')}`).toEqual([])

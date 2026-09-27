@@ -1,4 +1,4 @@
-import {LogOut, Menu} from 'lucide-react'
+import {Icon} from '@/shared/components/ui/Icon'
 import {useActor} from '@/app/providers/ActorContext'
 import {useRestaurant} from '@/app/providers/useRestaurant'
 import {RoleType} from '@/shared/types/auth'
@@ -37,7 +37,7 @@ export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
                 aria-label="Mở menu điều hướng"
                 onClick={onOpenMenu}
             >
-                <Menu className="rk-icon" aria-hidden="true" />
+                <Icon name="menu" className="rk-icon" />
             </button>
 
             <div className="rk-shell__topheading">
@@ -82,7 +82,7 @@ export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
                     aria-label="Đăng xuất"
                     onClick={onLogout}
                 >
-                    <LogOut className="rk-icon" aria-hidden="true" />
+                    <Icon name="logout" className="rk-icon" />
                     {/* Bọc trong span để CSS ẩn được nhãn chữ trên di động mà vẫn giữ
                         biểu tượng. aria-label ở trên vẫn gọi tên đủ cho trình đọc màn hình. */}
                     <span>Đăng xuất</span>

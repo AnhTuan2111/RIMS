@@ -1,4 +1,4 @@
-import {FileText, TrendingUp, Trophy} from 'lucide-react'
+import {Icon} from '@/shared/components/ui/Icon'
 import {PresetButtonGroup} from './RevenueDashboard'
 import {LoadingState} from '@/shared/components/feedback'
 import {PageCard, StatCard} from '@/shared/components/ui'
@@ -71,7 +71,7 @@ export function OrderShiftDashboard({
                     label="Tổng đơn đã thanh toán"
                     value={`${formatNumber(totalOrders)} đơn`}
                     textValue
-                    icon={<FileText className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="invoice" className="rk-icon" />}
                 />
 
                 <StatCard
@@ -79,14 +79,12 @@ export function OrderShiftDashboard({
                     value={highestShift?.displayName ?? 'Chưa có dữ liệu'}
                     textValue
                     tone="brand"
-                    icon={<Trophy className="rk-icon" aria-hidden="true" />}
                 />
 
                 <StatCard
                     label="Trung bình mỗi ngày"
                     value={`${formatDecimal(averageOrdersPerDay)} đơn`}
                     textValue
-                    icon={<TrendingUp className="rk-icon" aria-hidden="true" />}
                 />
             </div>
 

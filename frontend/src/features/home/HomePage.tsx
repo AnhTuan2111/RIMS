@@ -1,7 +1,5 @@
 import {Link} from 'react-router-dom'
 import {useEffect, useState} from 'react'
-import {CalendarClock, Clock, MapPin, Phone} from 'lucide-react'
-
 import {useRestaurant} from '@/app/providers/useRestaurant'
 import {getPublicBestSellingDishes, type PublicBestSellingDish} from '@/shared/api/public'
 import {duongDanAnh} from '@/shared/utils/image'
@@ -50,10 +48,9 @@ export default function HomePage() {
     const coThucDon = dishes.length > 0
 
     const contacts = [
-        profile?.address && {icon: MapPin, label: 'Địa chỉ', value: profile.address},
-        profile?.phone && {icon: Phone, label: 'Điện thoại', value: profile.phone},
+        profile?.address && {label: 'Địa chỉ', value: profile.address},
+        profile?.phone && {label: 'Điện thoại', value: profile.phone},
         profile?.openingHours && {
-            icon: Clock,
             label: 'Giờ mở cửa',
             value: profile.openingHours,
         },
@@ -61,11 +58,10 @@ export default function HomePage() {
         // tới 22:30 nhưng hệ thống chỉ nhận đặt tới 20:00. Nói rõ cả hai để
         // khách không chọn giờ rồi mới bị từ chối.
         profile?.reservationHours && {
-            icon: CalendarClock,
             label: 'Nhận đặt bàn',
             value: profile.reservationHours,
         },
-    ].filter(Boolean) as {icon: typeof MapPin; label: string; value: string}[]
+    ].filter(Boolean) as {label: string; value: string}[]
 
     return (
         <main className="rk-home">
@@ -166,12 +162,9 @@ export default function HomePage() {
                     <h2 className="rk-home__h2">Ghé quán</h2>
 
                     <dl className="rk-home__contacts">
-                        {contacts.map(({icon: Icon, label, value}) => (
+                        {contacts.map(({label, value}) => (
                             <div className="rk-home__contact" key={label}>
-                                <dt>
-                                    <Icon className="rk-icon" aria-hidden="true" />
-                                    {label}
-                                </dt>
+                                <dt>{label}</dt>
                                 <dd>{value}</dd>
                             </div>
                         ))}

@@ -1,4 +1,3 @@
-import {Crown} from 'lucide-react'
 import {PresetButtonGroup} from './RevenueDashboard'
 import {
     formatNumber,
@@ -144,14 +143,7 @@ export function BestSellersReport({
                                     <span
                                         className={`rk-rank${rank <= 3 ? ` rk-rank--${rank}` : ''}`}
                                     >
-                                        {rank === 1 ? (
-                                            <Crown
-                                                className="rk-icon"
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            rank
-                                        )}
+                                        {rank}
                                     </span>
 
                                     <BestSellerDishImage

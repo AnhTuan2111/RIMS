@@ -1,11 +1,11 @@
-import {Monitor, Moon, Sun} from 'lucide-react'
-
 import {useTheme, type ThemePreference} from '@/app/providers/useTheme'
 
-const OPTIONS: {value: ThemePreference; label: string; Icon: typeof Sun}[] = [
-    {value: 'light', label: 'Sáng', Icon: Sun},
-    {value: 'dark', label: 'Tối', Icon: Moon},
-    {value: 'auto', label: 'Theo máy', Icon: Monitor},
+// Nhãn chữ đã rõ nghĩa nên không đeo icon: bộ icon không có cái nào mang đúng
+// nghĩa "Theo máy", mà đặt bừa một cái là phá luật một-nghĩa-một-icon.
+const OPTIONS: {value: ThemePreference; label: string}[] = [
+    {value: 'light', label: 'Sáng'},
+    {value: 'dark', label: 'Tối'},
+    {value: 'auto', label: 'Theo máy'},
 ]
 
 /**
@@ -19,7 +19,7 @@ export function ThemeToggle() {
 
     return (
         <div className="rk-themetoggle" role="group" aria-label="Chế độ hiển thị">
-            {OPTIONS.map(({value, label, Icon}) => (
+            {OPTIONS.map(({value, label}) => (
                 <button
                     key={value}
                     type="button"
@@ -28,7 +28,6 @@ export function ThemeToggle() {
                     title={label}
                     onClick={() => setPreference(value)}
                 >
-                    <Icon className="rk-icon" aria-hidden="true" />
                     <span className="rk-themetoggle__label">{label}</span>
                 </button>
             ))}

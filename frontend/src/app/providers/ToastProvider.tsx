@@ -1,7 +1,6 @@
 import {useCallback, useRef, useState} from 'react'
 import type {ReactNode} from 'react'
-import {AlertTriangle, Check, X} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {ToastContext, type ToastOptions, type ToastTone} from '@/app/providers/useToast'
 
 interface Toast {
@@ -77,9 +76,9 @@ export function ToastProvider({children}: {children: ReactNode}) {
                         role={toast.tone === 'alert' ? 'alert' : 'status'}
                     >
                         {toast.tone === 'alert' ? (
-                            <AlertTriangle className="rk-icon" aria-hidden="true" />
+                            <Icon name="alert" className="rk-icon" />
                         ) : (
-                            <Check className="rk-icon" aria-hidden="true" />
+                            <Icon name="check" className="rk-icon" />
                         )}
 
                         <span className="rk-toast__msg">{toast.message}</span>
@@ -103,7 +102,7 @@ export function ToastProvider({children}: {children: ReactNode}) {
                             aria-label="Đóng thông báo"
                             onClick={() => dismiss(toast.id)}
                         >
-                            <X className="rk-icon" aria-hidden="true" />
+                            <Icon name="x" className="rk-icon" />
                         </button>
                     </div>
                 ))}

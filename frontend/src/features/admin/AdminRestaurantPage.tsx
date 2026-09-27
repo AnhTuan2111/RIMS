@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useState} from 'react'
-import {Check, Store} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useRestaurant} from '@/app/providers/useRestaurant'
 import * as restaurantApi from '@/shared/api/restaurant'
 import type {RestaurantProfile} from '@/shared/api/restaurant'
@@ -248,14 +247,14 @@ export default function AdminRestaurantPage() {
                         disabled={isSaving || form.name.trim().length === 0}
                         type="submit"
                     >
-                        <Store className="rk-icon" aria-hidden="true" />
+                        <Icon name="gear" className="rk-icon" />
                         {isSaving ? 'Đang lưu…' : 'Lưu cấu hình'}
                     </button>
 
                     {/* Báo thành công lặng lẽ, không dùng toast ăn mừng. */}
                     {savedAt !== null && !isSaving && (
                         <span className="rk-savedhint">
-                            <Check className="rk-icon" aria-hidden="true" />
+                            <Icon name="check" className="rk-icon" />
                             Đã lưu
                         </span>
                     )}

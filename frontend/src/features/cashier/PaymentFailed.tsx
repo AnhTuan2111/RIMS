@@ -1,5 +1,4 @@
-import {X} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useNavigate} from 'react-router-dom'
 
 /**
@@ -15,7 +14,7 @@ export default function PaymentFailed() {
         <div className="rk-result">
             <div className="rk-feedback rk-feedback--lg">
                 <div className="rk-feedback__icon rk-feedback__icon--alert">
-                    <X className="rk-icon" aria-hidden="true" />
+                    <Icon name="x" className="rk-icon" />
                 </div>
 
                 <div>

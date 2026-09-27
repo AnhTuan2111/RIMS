@@ -1,13 +1,4 @@
-import {
-    ArrowLeft,
-    ChefHat,
-    Eye,
-    FolderOpen,
-    Pencil,
-    Trash2,
-    UtensilsCrossed,
-} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import React, {useCallback, useEffect, useState} from 'react'
 import * as adminApi from '@/shared/api/admin'
 import type {CategoryResponse, DishResponse, CategoryFormData} from '@/shared/api/admin'
@@ -323,14 +314,14 @@ export default function AdminCategoryPage() {
                             label="Tổng danh mục"
                             value={categories.length}
                             tone="brand"
-                            icon={<FolderOpen className="rk-icon" aria-hidden="true" />}
+                            icon={<Icon name="kitchen" className="rk-icon" />}
                         />
 
                         <StatCard
                             label="Tổng món ăn"
                             value={totalDishes}
                             tone="busy"
-                            icon={<ChefHat className="rk-icon" aria-hidden="true" />}
+                            icon={<Icon name="kitchen" className="rk-icon" />}
                         />
                     </div>
 
@@ -356,10 +347,7 @@ export default function AdminCategoryPage() {
                                         <td>
                                             <div className="rk-media">
                                                 <span className="rk-thumb">
-                                                    <FolderOpen
-                                                        className="rk-icon"
-                                                        aria-hidden="true"
-                                                    />
+                                                    <Icon name="kitchen" className="rk-icon" />
                                                 </span>
                                                 <div>
                                                     <strong className="rk-rowlist__title">
@@ -401,10 +389,7 @@ export default function AdminCategoryPage() {
                                                 className="rk-iconbtn"
                                                 title="Xem chi tiết"
                                             >
-                                                <Eye
-                                                    className="rk-icon"
-                                                    aria-hidden="true"
-                                                />
+                                                <Icon name="eye" className="rk-icon" />
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -419,10 +404,7 @@ export default function AdminCategoryPage() {
                                                 className="rk-iconbtn rk-iconbtn--brand"
                                                 title="Chỉnh sửa"
                                             >
-                                                <Pencil
-                                                    className="rk-icon"
-                                                    aria-hidden="true"
-                                                />
+                                                <Icon name="pen" className="rk-icon" />
                                             </button>
                                             <button
                                                 onClick={() =>
@@ -435,10 +417,7 @@ export default function AdminCategoryPage() {
                                                 className="rk-iconbtn rk-iconbtn--danger"
                                                 title="Xóa"
                                             >
-                                                <Trash2
-                                                    className="rk-icon"
-                                                    aria-hidden="true"
-                                                />
+                                                <Icon name="trash" className="rk-icon" />
                                             </button>
                                         </td>
                                     </tr>
@@ -489,7 +468,7 @@ export default function AdminCategoryPage() {
                                 title="Quay lại danh sách"
                                 onClick={() => setView('LIST')}
                             >
-                                <ArrowLeft className="rk-icon" aria-hidden="true" />
+                                <Icon name="back" className="rk-icon" />
                             </button>
                             <h3 className="rk-sectiontitle">Chi tiết danh mục</h3>
                         </div>
@@ -505,7 +484,7 @@ export default function AdminCategoryPage() {
                                 }}
                                 className="rk-btn rk-btn--quiet"
                             >
-                                <Pencil className="rk-icon" aria-hidden="true" /> Sửa danh
+                                <Icon name="pen" className="rk-icon" /> Sửa danh
                                 mục
                             </button>
                             <button
@@ -518,7 +497,7 @@ export default function AdminCategoryPage() {
                                 }
                                 className="rk-btn rk-btn--danger"
                             >
-                                <Trash2 className="rk-icon" aria-hidden="true" /> Xóa danh
+                                <Icon name="trash" className="rk-icon" /> Xóa danh
                                 mục
                             </button>
                         </div>
@@ -588,7 +567,7 @@ export default function AdminCategoryPage() {
                     <PageCard>
                         <div className="rk-card__head-inline">
                             <h4 className="rk-sectiontitle">
-                                <UtensilsCrossed className="rk-icon" aria-hidden="true" />{' '}
+                                <Icon name="kitchen" className="rk-icon" />{' '}
                                 Món trong danh mục ({categoryDishes.length})
                             </h4>
                         </div>
@@ -693,7 +672,7 @@ export default function AdminCategoryPage() {
                                 title="Quay lại danh sách"
                                 onClick={() => setView('LIST')}
                             >
-                                <ArrowLeft className="rk-icon" aria-hidden="true" />
+                                <Icon name="back" className="rk-icon" />
                             </button>
 
                             <h3 className="rk-sectiontitle">

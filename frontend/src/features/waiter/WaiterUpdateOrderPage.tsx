@@ -1,4 +1,4 @@
-import {Check, UtensilsCrossed} from 'lucide-react'
+import {Icon} from '@/shared/components/ui/Icon'
 import {statusChipClass, statusLabel} from './statusChip'
 
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
@@ -591,10 +591,7 @@ export default function WaiterUpdateOrderPage() {
                                             />
                                         ) : (
                                             <span className="rk-thumb">
-                                                <UtensilsCrossed
-                                                    className="rk-icon"
-                                                    aria-hidden="true"
-                                                />
+                                                <Icon name="kitchen" className="rk-icon" />
                                             </span>
                                         )}
 
@@ -642,10 +639,7 @@ export default function WaiterUpdateOrderPage() {
 
                                             {noteAcknowledged ? (
                                                 <small className="rk-chefnote__seen">
-                                                    <Check
-                                                        className="rk-icon"
-                                                        aria-hidden="true"
-                                                    />{' '}
+                                                    <Icon name="check" className="rk-icon" />{' '}
                                                     Đã xem
                                                 </small>
                                             ) : (

@@ -1,25 +1,4 @@
-import {
-    Ban,
-    BookOpen,
-    CalendarClock,
-    ChartColumn,
-    CheckCheck,
-    CircleUser,
-    Dot,
-    Flame,
-    FolderTree,
-    Grid2x2,
-    Layers,
-    LayoutGrid,
-    ReceiptText,
-    Sparkles,
-    Store,
-    Users,
-    Utensils,
-    Wallet,
-    X,
-} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {Fragment} from 'react'
 import {NavLink} from 'react-router-dom'
 import {ROLE_LABELS, roleMenus} from '@/app/config/roleMenus'
@@ -32,29 +11,29 @@ import {ThemeToggle} from '@/shared/components/ui'
  *
  * <p>Trước đây hàm này trả về ký tự Unicode nhặt ngẫu nhiên (▦ ⌁ ◉ ▤ ◷ ₫ ▧ ❏ 🞖 🛈 ♙)
  * cộng một SVG vẽ tay — mỗi icon một nét vẽ, một cỡ, và hiển thị khác nhau trên từng
- * hệ điều hành. Nay dùng chung một bộ lucide.
+ * hệ điều hành. Nay dùng chung bảng ICONS của hệ "Phiếu bếp".
  */
 function MenuIcon({path}: {path: string}) {
     const props = {className: 'rk-icon', 'aria-hidden': true} as const
 
-    if (path.includes('restaurant')) return <Store {...props} />
-    if (path.includes('dashboard')) return <LayoutGrid {...props} />
-    if (path.includes('completed')) return <CheckCheck {...props} />
-    if (path.includes('cancelled')) return <Ban {...props} />
-    if (path.includes('grouped')) return <Layers {...props} />
-    if (path.includes('orders')) return <Flame {...props} />
-    if (path.includes('dishes')) return <Utensils {...props} />
-    if (path.includes('tables')) return <Grid2x2 {...props} />
-    if (path.includes('reservations')) return <CalendarClock {...props} />
-    if (path.includes('payments')) return <Wallet {...props} />
-    if (path.includes('invoices')) return <ReceiptText {...props} />
-    if (path.includes('menu')) return <BookOpen {...props} />
-    if (path.includes('categories')) return <FolderTree {...props} />
-    if (path.includes('statistics')) return <ChartColumn {...props} />
-    if (path.includes('users')) return <Users {...props} />
-    if (path.includes('profile')) return <CircleUser {...props} />
+    if (path.includes('restaurant')) return <Icon name="gear" {...props} />
+    if (path.includes('dashboard')) return <Icon name="chart" {...props} />
+    if (path.includes('completed')) return <Icon name="check" {...props} />
+    if (path.includes('cancelled')) return <Icon name="ban" {...props} />
+    if (path.includes('grouped')) return <Icon name="ticket" {...props} />
+    if (path.includes('orders')) return <Icon name="kitchen" {...props} />
+    if (path.includes('dishes')) return <Icon name="kitchen" {...props} />
+    if (path.includes('tables')) return <Icon name="table" {...props} />
+    if (path.includes('reservations')) return <Icon name="booking" {...props} />
+    if (path.includes('payments')) return <Icon name="invoice" {...props} />
+    if (path.includes('invoices')) return <Icon name="invoice" {...props} />
+    if (path.includes('menu')) return <Icon name="kitchen" {...props} />
+    if (path.includes('categories')) return <Icon name="kitchen" {...props} />
+    if (path.includes('statistics')) return <Icon name="chart" {...props} />
+    if (path.includes('users')) return <Icon name="user" {...props} />
+    if (path.includes('profile')) return <Icon name="user" {...props} />
 
-    return <Dot {...props} />
+    return <Icon name="rows" {...props} />
 }
 
 type SidebarProps = {
@@ -95,7 +74,7 @@ export function Sidebar({open, onClose}: SidebarProps) {
                 aria-label="Đóng menu"
                 onClick={onClose}
             >
-                <X className="rk-icon" aria-hidden="true" />
+                <Icon name="x" className="rk-icon" />
             </button>
 
             <div className="rk-shell__brand">
@@ -108,8 +87,7 @@ export function Sidebar({open, onClose}: SidebarProps) {
 
             <div className="rk-shell__role">
                 <div className="rk-shell__role-icon">
-                    <Sparkles className="rk-icon" aria-hidden="true" />
-                </div>
+                    </div>
                 <div>
                     <small>Không gian làm việc</small>
                     <strong>{ROLE_LABELS[actor]}</strong>

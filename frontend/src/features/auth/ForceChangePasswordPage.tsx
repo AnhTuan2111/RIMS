@@ -1,7 +1,6 @@
 import {useState, type FormEvent} from 'react'
 import {Navigate, useNavigate} from 'react-router-dom'
-import {KeyRound} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useAuth} from '@/app/providers/AuthContext'
 import * as meApi from '@/shared/api/me'
 import {PasswordInput} from '@/shared/components/ui'
@@ -115,7 +114,7 @@ export default function ForceChangePasswordPage() {
             }
         >
             <p className="rk-note">
-                <KeyRound className="rk-icon" aria-hidden="true" />
+                <Icon name="key" className="rk-icon" />
 
                 <span>
                     Mật khẩu hiện tại là mật khẩu được cấp khi tạo tài khoản hoặc khi Quản

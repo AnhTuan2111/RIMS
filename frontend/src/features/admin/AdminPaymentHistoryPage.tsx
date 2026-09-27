@@ -1,8 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {useNavigate} from 'react-router-dom'
-import {Eye, QrCode, ReceiptText, Wallet} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import * as adminApi from '@/shared/api/admin'
 import type {AdminPaymentHistoryItem, AdminPaymentMethod} from '@/shared/api/admin'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
@@ -48,12 +47,6 @@ function PaymentMethodBadge({method}: {method: AdminPaymentMethod}) {
 
     return (
         <span className={`rk-chip ${isCash ? 'rk-chip--ok' : 'rk-chip--brand'}`}>
-            {isCash ? (
-                <Wallet className="rk-icon" aria-hidden="true" />
-            ) : (
-                <QrCode className="rk-icon" aria-hidden="true" />
-            )}
-
             {isCash ? 'Tiền mặt' : 'VNPay / QR'}
         </span>
     )
@@ -226,7 +219,7 @@ export default function AdminPaymentHistoryPage() {
                     eyebrow="Quản trị"
                     title="Lịch sử hoá đơn"
                     description={`${totalItems} hoá đơn đã thanh toán được ghi nhận`}
-                    icon={<ReceiptText className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="invoice" className="rk-icon" />}
                 />
             </PageCard>
 
@@ -340,10 +333,7 @@ export default function AdminPaymentHistoryPage() {
                                                         )
                                                     }
                                                 >
-                                                    <Eye
-                                                        className="rk-icon"
-                                                        aria-hidden="true"
-                                                    />
+                                                    <Icon name="eye" className="rk-icon" />
                                                 </button>
                                             </td>
                                         </tr>

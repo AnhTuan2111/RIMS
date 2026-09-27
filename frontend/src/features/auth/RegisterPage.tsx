@@ -1,4 +1,3 @@
-import {Info} from 'lucide-react'
 import {useState, type FormEvent} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
 
@@ -210,8 +209,6 @@ export default function RegisterPage() {
                 </div>
 
                 <p className="rk-note">
-                    <Info className="rk-icon" aria-hidden="true" />
-
                     <span>
                         Mật khẩu sẽ hiện ra sau khi đăng ký xong. Đổi mật khẩu ngay sau
                         khi đăng nhập lần đầu.

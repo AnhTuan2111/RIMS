@@ -1,4 +1,4 @@
-import {CalendarDays, Crown, FileText, Soup, Trophy, Wallet} from 'lucide-react'
+import {Icon} from '@/shared/components/ui/Icon'
 import {useEffect, useState} from 'react'
 import {useAdminSocket} from '@/realtime/useAdminSocket'
 import * as adminApi from '@/shared/api/admin'
@@ -479,7 +479,7 @@ function WeeklyRevenueOverviewDashboard({
                     </div>
 
                     <div className="rk-datefield__shell">
-                        <CalendarDays className="rk-icon" aria-hidden="true" />
+                        <Icon name="booking" className="rk-icon" />
 
                         <select
                             aria-label="Chọn khoảng thời gian"
@@ -519,7 +519,7 @@ function WeeklyRevenueOverviewDashboard({
                     value={formatRevenueCurrency(revenue)}
                     textValue
                     tone="brand"
-                    icon={<Wallet className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="invoice" className="rk-icon" />}
                 />
 
                 <StatCard
@@ -527,14 +527,14 @@ function WeeklyRevenueOverviewDashboard({
                     value={`${formatNumber(totalOrders)} đơn`}
                     textValue
                     tone="ok"
-                    icon={<FileText className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="invoice" className="rk-icon" />}
                 />
 
                 <StatCard
                     label="Món bán chạy nhất"
                     value={topDish?.dishName ?? 'Chưa có dữ liệu'}
                     textValue
-                    icon={<Soup className="rk-icon" aria-hidden="true" />}
+                    icon={<Icon name="kitchen" className="rk-icon" />}
                 />
 
                 <StatCard
@@ -542,7 +542,6 @@ function WeeklyRevenueOverviewDashboard({
                     value={featuredShift?.displayName ?? 'Chưa có dữ liệu'}
                     textValue
                     tone="busy"
-                    icon={<Trophy className="rk-icon" aria-hidden="true" />}
                 />
             </div>
 
@@ -574,14 +573,7 @@ function WeeklyRevenueOverviewDashboard({
                                             <span
                                                 className={`rk-rank${rank <= 3 ? ` rk-rank--${rank}` : ''}`}
                                             >
-                                                {rank === 1 ? (
-                                                    <Crown
-                                                        className="rk-icon"
-                                                        aria-hidden="true"
-                                                    />
-                                                ) : (
-                                                    rank
-                                                )}
+                                                {rank}
                                             </span>
 
                                             <WeeklyBestSellerImage

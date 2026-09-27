@@ -1,6 +1,5 @@
 import type {ReactNode} from 'react'
-import {TriangleAlert} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 type ErrorStateProps = {
     title?: string
     message?: string
@@ -23,7 +22,7 @@ export function ErrorState({
     return (
         <div className="rk-feedback">
             <div className="rk-feedback__icon rk-feedback__icon--alert">
-                <TriangleAlert className="rk-icon" aria-hidden="true" />
+                <Icon name="alert" className="rk-icon" />
             </div>
 
             <div>

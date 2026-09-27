@@ -1,5 +1,4 @@
-import {Check, Download} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useNavigate, useSearchParams} from 'react-router-dom'
 
 import * as cashierApi from '@/shared/api/cashier'
@@ -62,7 +61,7 @@ export default function PaymentSuccess() {
         <div className="rk-result">
             <div className="rk-feedback rk-feedback--lg">
                 <div className="rk-feedback__icon rk-feedback__icon--ok">
-                    <Check className="rk-icon" aria-hidden="true" />
+                    <Icon name="check" className="rk-icon" />
                 </div>
 
                 <div>
@@ -87,7 +86,7 @@ export default function PaymentSuccess() {
                             disabled={!invoiceId}
                             onClick={() => void handleDownloadPdf()}
                         >
-                            <Download className="rk-icon" aria-hidden="true" />
+                            <Icon name="download" className="rk-icon" />
                             Tải PDF hoá đơn
                         </button>
 

@@ -1,4 +1,4 @@
-import {AlertTriangle} from 'lucide-react'
+import {Icon} from '@/shared/components/ui/Icon'
 import {Modal} from '@/shared/components/ui'
 
 import {useCallback, useEffect, useRef, useState} from 'react'
@@ -558,10 +558,7 @@ export default function WaiterTableListPage() {
                             <div className="rk-note rk-note--busy">
                                 <p>
                                     <strong>
-                                        <AlertTriangle
-                                            className="rk-icon"
-                                            aria-hidden="true"
-                                        />{' '}
+                                        <Icon name="alert" className="rk-icon" />{' '}
                                         Bàn này đã có {modalReservations.length} lịch đặt
                                         trong hôm nay:
                                     </strong>

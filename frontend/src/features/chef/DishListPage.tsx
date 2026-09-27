@@ -1,4 +1,4 @@
-import {ArrowLeft} from 'lucide-react'
+import {Icon} from '@/shared/components/ui/Icon'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import {Link, useSearchParams} from 'react-router-dom'
 
@@ -264,7 +264,7 @@ export default function DishListPage() {
 
                 {routeStatus === 'unavailable' && (
                     <Link className="rk-btn rk-btn--quiet" to="/chef/dishes">
-                        <ArrowLeft className="rk-icon" aria-hidden="true" /> Xem tất cả
+                        <Icon name="back" className="rk-icon" /> Xem tất cả
                         món
                     </Link>
                 )}

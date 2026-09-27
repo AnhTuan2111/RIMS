@@ -1,5 +1,4 @@
-import {Coins, User, X} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {useState} from 'react'
 
 import * as cashierApi from '@/shared/api/cashier'
@@ -267,7 +266,7 @@ export default function OrderPanel({
     return (
         <div className="rk-card rk-card--pad">
             <button type="button" className="rk-iconbtn" onClick={onClose}>
-                <X className="rk-icon" aria-hidden="true" />
+                <Icon name="x" className="rk-icon" />
             </button>
 
             <h2>Chi tiết đơn hàng</h2>
@@ -359,12 +358,12 @@ export default function OrderPanel({
                     {customer && (
                         <div className="rk-note rk-note--ok">
                             <p className="rk-rowlist__meta">
-                                <User className="rk-icon" aria-hidden="true" /> Khách:{' '}
+                                <Icon name="user" className="rk-icon" /> Khách:{' '}
                                 <strong>{customer.fullName}</strong>
                             </p>
 
                             <p className="rk-rowlist__meta">
-                                <Coins className="rk-icon" aria-hidden="true" /> Điểm hiện
+                                Điểm hiện
                                 có:{' '}
                                 <strong className="rk-num">
                                     {formatNumber(customer.rewardPoints)}

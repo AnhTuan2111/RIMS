@@ -1,5 +1,4 @@
-import {Bell, Check, MessageSquare} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useKitchenSocket} from '@/realtime'
@@ -630,7 +629,7 @@ export default function KitchenQueuePage() {
             {newOrderMessage && (
                 <div className="rk-note rk-note--busy" role="status" aria-live="polite">
                     <span className="rk-icon">
-                        <Bell className="rk-icon" aria-hidden="true" />
+                        <Icon name="bell" className="rk-icon" />
                     </span>
 
                     <div>
@@ -736,10 +735,7 @@ export default function KitchenQueuePage() {
 
                                     {item.note && (
                                         <p className="rk-ticket__note">
-                                            <MessageSquare
-                                                className="rk-icon"
-                                                aria-hidden="true"
-                                            />{' '}
+                                            {' '}
                                             {item.note}
                                         </p>
                                     )}
@@ -759,10 +755,7 @@ export default function KitchenQueuePage() {
                                                 )
                                             }}
                                         >
-                                            <Check
-                                                className="rk-icon"
-                                                aria-hidden="true"
-                                            />
+                                            <Icon name="check" className="rk-icon" />
                                             {completingItemId === item.orderItemId
                                                 ? 'Đang cập nhật…'
                                                 : 'Xong món'}

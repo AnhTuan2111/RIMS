@@ -1,5 +1,4 @@
-import {ChevronLeft, ChevronRight} from 'lucide-react'
-
+import {Icon} from '@/shared/components/ui/Icon'
 interface PaginationProps {
     /** Trang hiện tại, đếm từ 1. */
     page: number
@@ -86,7 +85,7 @@ export function Pagination({
                         aria-label="Trang trước"
                         onClick={() => onPageChange(page - 1)}
                     >
-                        <ChevronLeft className="rk-icon" aria-hidden="true" />
+                        <Icon name="prev" className="rk-icon" />
                     </button>
 
                     {pages.map((entry, index) =>
@@ -116,7 +115,7 @@ export function Pagination({
                         aria-label="Trang sau"
                         onClick={() => onPageChange(page + 1)}
                     >
-                        <ChevronRight className="rk-icon" aria-hidden="true" />
+                        <Icon name="next" className="rk-icon" />
                     </button>
                 </div>
             )}
