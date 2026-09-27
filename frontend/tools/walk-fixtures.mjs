@@ -369,6 +369,20 @@ export const FIXTURES = [
     ['/public/restaurant', () => RESTAURANT],
     ['/public/menu/best-selling', () =>
         DISHES.slice(0, 6).map((d, i) => ({rank: i + 1, dishName: d.name, imageUrl: ''}))],
+    // Thực đơn công khai đã gom sẵn theo danh mục ở backend.
+    ['/public/menu', () =>
+        CATEGORIES.filter((c) => c.isAvailable).map((c) => ({
+            categoryId: c.id,
+            categoryName: c.name,
+            description: c.description,
+            dishes: DISHES.filter((d) => d.categoryName === c.name && !d.isHidden && d.isAvailable).map((d) => ({
+                dishId: d.id,
+                name: d.name,
+                description: d.description,
+                price: d.price,
+                imageUrl: d.imageUrl || null,
+            })),
+        })).filter((s) => s.dishes.length > 0)],
 
     ['/admin/restaurant', () => RESTAURANT],
     ['/admin/revenue/today', () => ({revenue: 5_840_000, period: 'Hôm nay'})],

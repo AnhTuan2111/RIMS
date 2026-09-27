@@ -20,8 +20,8 @@
 
    Gộp vào một chỗ thì khối thêm sau chỉ cần có mặt trong danh sách này. */
 .rk-home__masthead,
-.rk-home__hero,
-.rk-home__lead,
+.rk-home__top,
+.rk-strip,
 .rk-home__section,
 .rk-home__footer {
     max-width: 1120px;
@@ -30,14 +30,211 @@
 
 /* ---------- Masthead ---------- */
 
+/* Masthead DÍNH cả khối: hàng nhận diện và băng danh mục đi cùng nhau.
+   Chỉ dính riêng băng danh mục thì lúc cuộn nó tách khỏi hàng tên quán và trôi
+   một mình giữa trang như một thanh lạc chỗ. */
 .rk-home__masthead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-5) var(--rims-space-6);
+    border-bottom: var(--rims-border) solid var(--rims-line-strong);
+    /* Nền ĐẶC, không trong suốt: chữ và ảnh của thực đơn chạy ngay bên dưới. */
+    background: var(--rims-paper);
+}
+
+/* ---------- Băng danh mục ---------- */
+
+.rk-home__cats {
+    display: flex;
+    gap: var(--rims-space-2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+}
+
+.rk-home__cats::-webkit-scrollbar {
+    display: none;
+}
+
+.rk-home__cat {
+    flex: none;
+    padding: var(--rims-space-2) var(--rims-space-4);
+    border: 1px solid var(--rims-line-strong);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.rk-home__cat:hover {
+    background: var(--rims-ink);
+    color: var(--rims-paper);
+}
+
+/* ---------- Đầu trang: giới thiệu và ô đăng nhập ---------- */
+
+.rk-home__top {
+    display: grid;
+    gap: var(--rims-space-6);
+    padding: var(--rims-space-8) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+/* Ô đăng nhập xuống DƯỚI ở khung hẹp, không nằm cạnh.
+   Hai cột ở 375px thì mỗi cột còn ~150px, không gõ nổi tên đăng nhập. */
+@media (min-width: 60rem) {
+    .rk-home__top {
+        grid-template-columns: minmax(0, 1fr) 22rem;
+        align-items: start;
+    }
+}
+
+.rk-home__topmain {
+    min-width: 0;
+}
+
+.rk-homeauth {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rims-space-4);
+    padding: var(--rims-space-5);
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+.rk-homeauth__title {
+    margin: 0;
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-tight);
+}
+
+.rk-homeauth__foot {
+    margin: 0;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+}
+
+/* ---------- Băng ảnh chạy ----------
+   Bốn mươi giây một vòng. Chậm là cố ý: nhanh hơn thì không đọc kịp tên món,
+   và một băng chạy nhanh ngay dưới đầu trang là thứ người ta cuộn qua chứ
+   không phải thứ người ta nhìn. */
+
+.rk-strip {
+    padding: var(--rims-space-8) var(--rims-space-6);
+    border-bottom: 1px solid var(--rims-line);
+}
+
+.rk-strip__head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--rims-space-5);
+    gap: var(--rims-space-4);
     flex-wrap: wrap;
-    padding: var(--rims-space-5) var(--rims-space-6);
-    border-bottom: 1px solid var(--rims-line);
+    margin-bottom: var(--rims-space-5);
+}
+
+.rk-strip__title {
+    margin: 0;
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+    color: var(--rims-ink-2);
+}
+
+.rk-strip__view {
+    overflow: hidden;
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface-2);
+    box-shadow: var(--rims-shadow-raised);
+}
+
+.rk-strip__run {
+    display: flex;
+    gap: var(--rims-space-4);
+    margin: 0;
+    padding: var(--rims-space-4);
+    list-style: none;
+    /* Danh sách nhân đôi, nên chạy hết 50% là về đúng chỗ cũ. */
+    width: max-content;
+    animation: rk-strip-run 40s linear infinite;
+}
+
+/* Dừng bằng animation-play-state, KHÔNG bằng cách gỡ animation: gỡ thì băng
+   nhảy về đầu, còn ở đây nó đứng lại đúng chỗ đang nhìn. */
+.rk-strip__view.is-paused .rk-strip__run,
+.rk-strip__view:focus-within .rk-strip__run {
+    animation-play-state: paused;
+}
+
+@keyframes rk-strip-run {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+/* Máy đã nói không muốn chuyển động thì băng đứng yên NGAY, không đợi ai bấm
+   và không phụ thuộc vào JavaScript có chạy hay không. */
+@media (prefers-reduced-motion: reduce) {
+    .rk-strip__run {
+        animation: none;
+    }
+
+    .rk-strip__view {
+        overflow-x: auto;
+    }
+}
+
+.rk-strip__item {
+    position: relative;
+    flex: none;
+    width: 13rem;
+}
+
+.rk-strip__img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    display: block;
+    border: 1px solid var(--rims-line-strong);
+    background: var(--rims-surface-3);
+}
+
+.rk-strip__rank {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 1.75rem;
+    padding: var(--rims-space-1) var(--rims-space-2);
+    background: var(--rims-brand-fill);
+    color: var(--rims-ink-on-brand);
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--rims-weight-bold);
+    text-align: center;
+}
+
+.rk-strip__name {
+    display: block;
+    margin-top: var(--rims-space-2);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-semibold);
+    line-height: var(--rims-leading-snug);
 }
 
 .rk-home__brand {
@@ -82,12 +279,6 @@
     color: var(--rims-ink-3);
 }
 
-/* ---------- Hero ---------- */
-
-.rk-home__hero {
-    padding: var(--rims-space-16) var(--rims-space-6) var(--rims-space-12);
-}
-
 .rk-home__title {
     margin: 0;
     max-width: 16ch;
@@ -115,19 +306,22 @@
     color: var(--rims-ink-2);
 }
 
-.rk-home__actions {
-    display: flex;
-    gap: var(--rims-space-3);
-    flex-wrap: wrap;
-    margin-top: var(--rims-space-8);
-}
-
 /* ---------- Khối nội dung ----------
    Mỗi khối có nhịp khác nhau, không lặp đúng một mức đệm như trước. */
 
 .rk-home__section {
     padding: var(--rims-space-12) var(--rims-space-6);
     border-top: 1px solid var(--rims-line);
+}
+
+/* Mô tả danh mục: chữ đọc, không phải khẩu hiệu.
+   Dùng lại .rk-home__lede thì mỗi danh mục có một dòng đỏ đậm cỡ xl — năm
+   dòng khẩu hiệu trong một trang thì không dòng nào còn là khẩu hiệu. */
+.rk-home__catdesc {
+    margin: calc(var(--rims-space-6) * -1) 0 var(--rims-space-6);
+    max-width: 68ch;
+    color: var(--rims-ink-2);
+    line-height: var(--rims-leading-normal);
 }
 
 .rk-home__h2 {
@@ -142,7 +336,12 @@
 
 .rk-home__dishes {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+    /* Nhiều nhất BỐN cột, cột không hẹp hơn 15rem — cùng luật với lưới thẻ
+       trong app: màn rộng thì ẢNH TO HƠN, không phải nhiều cột hơn. */
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(max(15rem, (100% - 3 * var(--rims-space-5)) / 4), 1fr)
+    );
     gap: var(--rims-space-5);
     margin: 0;
     padding: 0;
@@ -160,31 +359,33 @@
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
-    border-radius: var(--rims-radius-lg);
+    border: 1px solid var(--rims-line-strong);
     background: var(--rims-surface-2);
-}
-
-/* Thứ hạng nằm đè lên góc ảnh, không chiếm thêm một dòng riêng. */
-.rk-home__dishrank {
-    position: absolute;
-    top: var(--rims-space-3);
-    left: var(--rims-space-3);
-    display: grid;
-    place-items: center;
-    min-width: 30px;
-    height: 30px;
-    padding: 0 var(--rims-space-2);
-    border-radius: var(--rims-radius-sm);
-    background: var(--rims-brand-fill);
-    color: var(--rims-ink-on-brand);
-    font-size: var(--rims-text-sm);
-    font-weight: var(--rims-weight-bold);
 }
 
 .rk-home__dishname {
     font-size: var(--rims-text-base);
     font-weight: var(--rims-weight-semibold);
     line-height: var(--rims-leading-snug);
+}
+
+.rk-home__dishdesc {
+    /* Mô tả xuống hàng thứ hai và DỪNG: ba dòng mô tả dưới mỗi món làm cả
+       lưới so le, vì mỗi món dài ngắn khác nhau. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: var(--rims-ink-3);
+    font-size: var(--rims-text-sm);
+    line-height: var(--rims-leading-snug);
+}
+
+.rk-home__dishprice {
+    margin-top: auto;
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--rims-weight-bold);
 }
 
 /* ---------- Liên hệ ---------- */
@@ -225,30 +426,6 @@
     margin: 0;
 }
 
-@media (max-width: 480px) {
-    .rk-home__hero {
-        padding-top: var(--rims-space-10);
-    }
-}
-
-/* ---------- Dáng "Thực đơn ngay" ----------
-   Khi quán đã có món bán chạy, món ăn chính là trang bìa. Đầu trang thu gọn
-   thành một hàng: tên quán bên trái, nút đặt bàn bên phải — nhường hết chỗ
-   còn lại cho lưới món. */
-
-.rk-home__lead {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--rims-space-4);
-    padding: var(--rims-space-6);
-    border-bottom: var(--rims-border) solid var(--rims-line);
-}
-
-.rk-home__leadtext {
-    min-width: 0;
-}
-
 .rk-home__eyebrow {
     margin: 0;
     color: var(--rims-brand);
@@ -262,11 +439,3 @@
     font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
 }
 
-@media (min-width: 48rem) {
-    .rk-home__lead {
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: var(--rims-space-6);
-    }
-}

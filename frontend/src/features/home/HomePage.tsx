@@ -1,8 +1,16 @@
-import {Link} from 'react-router-dom'
 import {useEffect, useState} from 'react'
+
 import {useRestaurant} from '@/app/providers/useRestaurant'
-import {getPublicBestSellingDishes, type PublicBestSellingDish} from '@/shared/api/public'
-import {duongDanAnh} from '@/shared/utils/image'
+import {
+    getPublicBestSellingDishes,
+    getPublicMenu,
+    type PublicBestSellingDish,
+    type PublicMenuSection,
+} from '@/shared/api/public'
+import {duongDanAnh, dungAnhThayThe} from '@/shared/utils/image'
+
+import {DishStrip} from './DishStrip'
+import {HomeAuthPanel} from './HomeAuthPanel'
 
 /**
  * Trang công khai của nhà hàng.
@@ -15,27 +23,27 @@ import {duongDanAnh} from '@/shared/utils/image'
  * <p>Trang có HAI dáng, tự chọn theo dữ liệu:
  *
  * <ul>
- *   <li><b>Thực đơn ngay</b> — khi đã có món bán chạy. Món ăn chính là trang
- *       bìa: khách thấy đồ ăn và giá trước khi đọc chữ giới thiệu.</li>
- *   <li><b>Bảng hiệu</b> — khi chưa có món nào. Tên quán chiếm phần trên, hai
- *       nút. Quán mới cài app chưa nhập thực đơn thì rơi vào dáng này, và nó
- *       vẫn là một trang tử tế chứ không phải một lưới rỗng.</li>
+ *   <li><b>Thực đơn ngay</b> — khi đã có món. Món ăn chính là trang bìa: khách
+ *       thấy đồ ăn và giá trước khi đọc chữ giới thiệu.</li>
+ *   <li><b>Bảng hiệu</b> — khi chưa có món nào. Tên quán chiếm phần trên. Quán
+ *       mới cài app chưa nhập thực đơn thì rơi vào dáng này, và nó vẫn là một
+ *       trang tử tế chứ không phải một lưới rỗng.</li>
  * </ul>
  */
 export default function HomePage() {
     const {profile} = useRestaurant()
 
-    const [dishes, setDishes] = useState<PublicBestSellingDish[]>([])
+    const [strip, setStrip] = useState<PublicBestSellingDish[]>([])
+    const [menu, setMenu] = useState<PublicMenuSection[]>([])
 
     useEffect(() => {
         const controller = new AbortController()
 
-        getPublicBestSellingDishes(controller.signal)
-            .then(setDishes)
-            .catch(() => {
-                // Im lặng: không có món thì trang rơi về dáng "Bảng hiệu",
-                // đó là một trạng thái hợp lệ chứ không phải lỗi cần báo.
-            })
+        // Hai lời gọi độc lập: băng ảnh hỏng thì thực đơn vẫn hiện, và ngược
+        // lại. Không có món nào thì trang rơi về dáng "Bảng hiệu", đó là một
+        // trạng thái hợp lệ chứ không phải lỗi cần báo.
+        getPublicBestSellingDishes(controller.signal).then(setStrip).catch(() => {})
+        getPublicMenu(controller.signal).then(setMenu).catch(() => {})
 
         return () => controller.abort()
     }, [])
@@ -45,7 +53,7 @@ export default function HomePage() {
     const description = profile?.description
     const initial = name.trim().charAt(0).toUpperCase()
 
-    const coThucDon = dishes.length > 0
+    const coThucDon = menu.length > 0
 
     const contacts = [
         profile?.address && {label: 'Địa chỉ', value: profile.address},
@@ -87,75 +95,86 @@ export default function HomePage() {
                     </span>
                 </div>
 
-                <Link className="rk-btn rk-btn--quiet" to="/login">
-                    Đăng nhập
-                </Link>
+                {/* Băng danh mục DÍNH ngay dưới hàng nhận diện. Thực đơn dài hơn
+                    màn hình, và khách tìm "đồ uống" không nên phải cuộn qua bốn
+                    mươi món chính để tới đó. */}
+                {coThucDon && (
+                    <nav className="rk-home__cats" aria-label="Danh mục thực đơn">
+                        {menu.map((section) => (
+                            <a
+                                key={section.categoryId}
+                                className="rk-home__cat"
+                                href={`#dm-${section.categoryId}`}
+                            >
+                                {section.categoryName}
+                            </a>
+                        ))}
+                    </nav>
+                )}
             </header>
 
-            {coThucDon ? (
-                <>
-                    {/* Dáng "Thực đơn ngay": đầu trang gọn, nhường chỗ cho món. */}
-                    <section className="rk-home__lead">
-                        <div className="rk-home__leadtext">
-                            <p className="rk-home__eyebrow">
-                                Được gọi nhiều nhất tuần này
-                            </p>
+            <div className="rk-home__top">
+                <div className="rk-home__topmain">
+                    <p className="rk-home__eyebrow">Thực đơn hôm nay</p>
 
-                            <h1 className="rk-home__title rk-home__title--sm">{name}</h1>
+                    <h1 className="rk-home__title rk-home__title--sm">{name}</h1>
 
-                            {tagline && (
-                                <p className="rk-home__lede">
-                                    {tagline}
-                                    {profile?.openingHours &&
-                                        ` · ${profile.openingHours}`}
-                                </p>
-                            )}
-                        </div>
+                    {tagline && (
+                        <p className="rk-home__lede">
+                            {tagline}
+                            {profile?.openingHours && ` · ${profile.openingHours}`}
+                        </p>
+                    )}
 
-                        <Link className="rk-btn rk-btn--primary rk-btn--lg" to="/login">
-                            Đặt bàn
-                        </Link>
-                    </section>
+                    {!coThucDon && description && (
+                        <p className="rk-home__desc">{description}</p>
+                    )}
+                </div>
 
-                    <section className="rk-home__section" id="thuc-don">
-                        <ol className="rk-home__dishes">
-                            {dishes.map((dish) => (
-                                <li className="rk-home__dish" key={dish.rank}>
-                                    <img
-                                        className="rk-home__dishimg"
-                                        src={duongDanAnh(dish.imageUrl)}
-                                        alt=""
-                                        loading="lazy"
-                                    />
+                <HomeAuthPanel />
+            </div>
 
-                                    <span className="rk-home__dishrank rk-num">
-                                        {dish.rank}
+            <DishStrip dishes={strip} />
+
+            {menu.map((section) => (
+                <section
+                    className="rk-home__section"
+                    id={`dm-${section.categoryId}`}
+                    key={section.categoryId}
+                >
+                    <h2 className="rk-home__h2">{section.categoryName}</h2>
+
+                    {section.description && (
+                        <p className="rk-home__catdesc">{section.description}</p>
+                    )}
+
+                    <ul className="rk-home__dishes">
+                        {section.dishes.map((dish) => (
+                            <li className="rk-home__dish" key={dish.dishId}>
+                                <img
+                                    className="rk-home__dishimg"
+                                    src={duongDanAnh(dish.imageUrl)}
+                                    alt=""
+                                    loading="lazy"
+                                    onError={dungAnhThayThe}
+                                />
+
+                                <span className="rk-home__dishname">{dish.name}</span>
+
+                                {dish.description && (
+                                    <span className="rk-home__dishdesc">
+                                        {dish.description}
                                     </span>
+                                )}
 
-                                    <span className="rk-home__dishname">
-                                        {dish.dishName}
-                                    </span>
-                                </li>
-                            ))}
-                        </ol>
-                    </section>
-                </>
-            ) : (
-                /* Dáng "Bảng hiệu": chưa có món thì tên quán gánh cả trang. */
-                <section className="rk-home__hero">
-                    <h1 className="rk-home__title">{name}</h1>
-
-                    {tagline && <p className="rk-home__lede">{tagline}</p>}
-
-                    {description && <p className="rk-home__desc">{description}</p>}
-
-                    <div className="rk-home__actions">
-                        <Link className="rk-btn rk-btn--primary rk-btn--lg" to="/login">
-                            Đặt bàn
-                        </Link>
-                    </div>
+                                <span className="rk-home__dishprice">
+                                    {dish.price.toLocaleString('vi-VN')}đ
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
                 </section>
-            )}
+            ))}
 
             {contacts.length > 0 && (
                 <section className="rk-home__section" id="lien-he">

@@ -1,30 +1,18 @@
 import {useState, type FormEvent} from 'react'
-import {Link, useLocation, useNavigate} from 'react-router-dom'
+import {Link, useLocation} from 'react-router-dom'
 
 import {AuthShell} from './AuthShell'
+import {useLoginSubmit} from './useLoginSubmit'
 
-import {useActor} from '@/app/providers/ActorContext'
-import {useAuth} from '@/app/providers/AuthContext'
-import {RoleType} from '@/shared/types/auth'
-import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useRestaurant} from '@/app/providers/useRestaurant'
-import {getHomePathForRole} from '@/app/routes/homePath'
 
 export default function LoginPage() {
     const {profile} = useRestaurant()
     const restaurantName = profile?.name ?? 'RIMS'
 
-    const navigate = useNavigate()
-    const {setActor} = useActor()
-
-    /*
-     * Đăng nhập qua AuthContext chứ không gọi thẳng authApi.login.
-     *
-     * Bản cũ gọi thẳng rồi tự ghi localStorage, nên AuthContext vẫn giữ
-     * user = null cho đến lần tải trang sau. Mọi chốt chặn đọc user từ context
-     * đều thấy chưa đăng nhập và đá người dùng ngược về đây.
-     */
-    const {login} = useAuth()
+    // Một lần đăng nhập nay nằm ở useLoginSubmit, dùng chung với ô đăng nhập ở
+    // trang chủ. Hai chỗ đăng nhập mà hai đoạn mã thì chúng sẽ lệch nhau.
+    const {submit, error, isLoading} = useLoginSubmit()
 
     // Màn đổi mật khẩu bắt buộc đẩy người dùng về đây kèm một dòng báo. Không
     // có dòng đó thì họ vừa đổi xong lại thấy mình ở trang đăng nhập, không
@@ -36,51 +24,9 @@ export default function LoginPage() {
 
     const [rawPassword, setRawPassword] = useState('')
 
-    const [error, setError] = useState<string | null>(null)
-
-    const [isLoading, setIsLoading] = useState(false)
-
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-
-        setIsLoading(true)
-        setError(null)
-
-        try {
-            const user = await login({
-                username,
-                rawPassword,
-            })
-
-            const role = user.role as RoleType
-
-            setActor(role)
-
-            localStorage.setItem('selectedActor', role)
-
-            // Tài khoản còn dùng mật khẩu do người khác đặt thì đi thẳng màn đổi
-            // mật khẩu. Vào màn làm việc trước cũng chỉ thấy một màn lỗi, vì
-            // backend chặn hết các endpoint khác.
-            navigate(
-                user.mustChangePassword ? '/change-password' : getHomePathForRole(role),
-                {
-                    replace: true,
-                },
-            )
-        } catch (requestError: unknown) {
-            if (isRequestCanceled(requestError)) {
-                return
-            }
-
-            console.error('[LOGIN_ERROR]', requestError)
-
-            setError(
-                getErrorMessage(requestError) ||
-                    'Đăng nhập thất bại. Vui lòng kiểm tra tài khoản hoặc mật khẩu.',
-            )
-        } finally {
-            setIsLoading(false)
-        }
+        await submit(username, rawPassword)
     }
 
     return (
