@@ -481,10 +481,14 @@ export default function WaiterEditReservationPage() {
                             ) : (
                                 <>
                                     <div className="rk-field">
-                                        <label className="rk-field__label">
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="waitereditreservationpage-ten-khach-hang"
+                                        >
                                             Tên khách hàng
                                         </label>
                                         <input
+                                            id="waitereditreservationpage-ten-khach-hang"
                                             value={resForm.customerName}
                                             className="rk-input"
                                             maxLength={50}
@@ -497,10 +501,14 @@ export default function WaiterEditReservationPage() {
                                     </div>
 
                                     <div className="rk-field">
-                                        <label className="rk-field__label">
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="waitereditreservationpage-so-dien-thoai"
+                                        >
                                             Số điện thoại
                                         </label>
                                         <input
+                                            id="waitereditreservationpage-so-dien-thoai"
                                             value={resForm.phone}
                                             pattern="0[0-9]{9}"
                                             className="rk-input"
@@ -516,10 +524,14 @@ export default function WaiterEditReservationPage() {
 
                                     <div className="rk-formgrid">
                                         <div className="rk-field rk-field--grow">
-                                            <label className="rk-field__label">
+                                            <label
+                                                className="rk-field__label"
+                                                htmlFor="waitereditreservationpage-ngay-dat"
+                                            >
                                                 Ngày đặt
                                             </label>
                                             <input
+                                                id="waitereditreservationpage-ngay-dat"
                                                 type="date"
                                                 value={resForm.date}
                                                 className="rk-input"
@@ -532,10 +544,14 @@ export default function WaiterEditReservationPage() {
                                         </div>
 
                                         <div className="rk-field rk-field--grow">
-                                            <label className="rk-field__label">
+                                            <label
+                                                className="rk-field__label"
+                                                htmlFor="waitereditreservationpage-gio-dat"
+                                            >
                                                 Giờ đặt
                                             </label>
                                             <select
+                                                id="waitereditreservationpage-gio-dat"
                                                 value={resForm.time}
                                                 className="rk-select"
                                                 onChange={(event) =>
@@ -554,8 +570,14 @@ export default function WaiterEditReservationPage() {
                                     </div>
 
                                     <div className="rk-field">
-                                        <label className="rk-field__label">Bàn</label>
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="waitereditreservationpage-ban"
+                                        >
+                                            Bàn
+                                        </label>
                                         <select
+                                            id="waitereditreservationpage-ban"
                                             value={resForm.tableId}
                                             className="rk-select"
                                             disabled={isTablesLoading}
@@ -587,8 +609,14 @@ export default function WaiterEditReservationPage() {
                                     </div>
 
                                     <div className="rk-field">
-                                        <label className="rk-field__label">Ghi chú</label>
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="waitereditreservationpage-ghi-chu"
+                                        >
+                                            Ghi chú
+                                        </label>
                                         <textarea
+                                            id="waitereditreservationpage-ghi-chu"
                                             value={resForm.note}
                                             className="rk-input"
                                             rows={3}

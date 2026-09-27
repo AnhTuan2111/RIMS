@@ -20,8 +20,9 @@ type ViewMode = 'LIST' | 'CREATE' | 'EDIT' | 'DETAIL'
 type FilterStatus = 'ALL' | 'ACTIVE' | 'HIDDEN'
 
 // --- Pagination Config ---
-const ITEMS_PER_PAGE = 5
-const DISH_ITEMS_PER_PAGE = 5 // THÊM: config cho số món hiển thị mỗi trang
+/* Bội của 4 — số cột lớn nhất của lưới thẻ. */
+const ITEMS_PER_PAGE = 12
+const DISH_ITEMS_PER_PAGE = 10
 
 export default function AdminCategoryPage() {
     const {notify} = useToast()
@@ -784,10 +785,14 @@ export default function AdminCategoryPage() {
 
                     <form className="rk-fieldgroup" onSubmit={handleSave}>
                         <div className="rk-field">
-                            <label className="rk-field__label">
+                            <label
+                                className="rk-field__label"
+                                htmlFor="admincategorypage-ten-danh-muc"
+                            >
                                 Tên danh mục <span className="rk-field__required">*</span>
                             </label>
                             <input
+                                id="admincategorypage-ten-danh-muc"
                                 type="text"
                                 required
                                 placeholder="Ví dụ: Hải Sản, Món Nướng, Đồ Tráng Miệng..."
@@ -802,7 +807,7 @@ export default function AdminCategoryPage() {
 
                         <div className="rk-field">
                             <div className="rk-barrow__head">
-                                <label className="rk-field__label">Mô tả chi tiết</label>
+                                <span className="rk-field__label">Mô tả chi tiết</span>
                                 <span className="rk-field__hint">
                                     {formData.description.length}/100
                                 </span>

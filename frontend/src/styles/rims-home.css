@@ -267,8 +267,12 @@
 /* Chữ nét đôi TRÊN NỀN ĐỎ: ruột giấy, viền mực, bóng lệch cũng mực.
    Luật chung .rk-outline đổ bóng màu thương hiệu, nhưng ở đây nền ĐÃ là màu
    thương hiệu nên bóng đó sẽ tàng hình. */
+/* Ruột chữ là một giá trị SÁNG CỐ ĐỊNH, không đảo theo chế độ.
+   Bản cũ lấy --rims-paper làm ruột; ở chế độ tối paper là #131313, và trên nền
+   hero #2b1512 nó đo được 1.08:1 — chữ rỗng ruột, chỉ còn cái viền. Hero là
+   khối màu đậm ở CẢ HAI chế độ, nên ruột chữ phải sáng ở cả hai. */
 .rk-hero__title.rk-outline {
-    color: var(--rims-paper);
+    color: #f3f1ea;
     -webkit-text-stroke: 3px var(--rims-ink);
     text-shadow: var(--rims-offset) var(--rims-offset) 0 var(--rims-ink);
 }

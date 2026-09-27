@@ -2549,6 +2549,12 @@ textarea.rk-input {
 }
 
 .rk-segment__btn {
+    /* Icon và chữ NẰM CÙNG HÀNG. Thiếu inline-flex thì icon là một khối riêng
+       và chữ rơi xuống dòng dưới — nút "Thẻ" cao gấp đôi và vi phạm luật
+       "nhãn bấm được không bao giờ xuống hai dòng". */
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rims-space-2);
     flex: none;
     scroll-snap-align: start;
     padding: var(--rims-space-2) var(--rims-space-4);

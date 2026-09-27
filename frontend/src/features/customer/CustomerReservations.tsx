@@ -477,12 +477,16 @@ export default function CustomerReservations() {
                     >
                         <div className="rk-formgrid">
                             <div className="rk-field">
-                                <label className="rk-field__label">
+                                <label
+                                    className="rk-field__label"
+                                    htmlFor="khach-ten-khach-hang"
+                                >
                                     Tên khách hàng{' '}
                                     <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    id="khach-ten-khach-hang"
                                     className="rk-input"
                                     type="text"
                                     value={bookForm.customerName}
@@ -499,12 +503,16 @@ export default function CustomerReservations() {
                             </div>
 
                             <div className="rk-field">
-                                <label className="rk-field__label">
+                                <label
+                                    className="rk-field__label"
+                                    htmlFor="khach-so-dien-thoai"
+                                >
                                     Số điện thoại{' '}
                                     <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    id="khach-so-dien-thoai"
                                     className="rk-input"
                                     type="tel"
                                     value={bookForm.phone}
@@ -525,11 +533,15 @@ export default function CustomerReservations() {
 
                         <div className="rk-formgrid">
                             <div className="rk-field">
-                                <label className="rk-field__label">
+                                <label
+                                    className="rk-field__label"
+                                    htmlFor="customerreservations-ngay-dat"
+                                >
                                     Ngày đặt <span className="rk-field__required">*</span>
                                 </label>
 
                                 <input
+                                    id="customerreservations-ngay-dat"
                                     className="rk-input"
                                     type="date"
                                     value={bookForm.reservationTime.split('T')[0]}
@@ -554,11 +566,15 @@ export default function CustomerReservations() {
                             </div>
 
                             <div className="rk-field">
-                                <label className="rk-field__label">
+                                <label
+                                    className="rk-field__label"
+                                    htmlFor="customerreservations-gio-dat"
+                                >
                                     Giờ đặt <span className="rk-field__required">*</span>
                                 </label>
 
                                 <select
+                                    id="customerreservations-gio-dat"
                                     className="rk-select"
                                     value={selectedTime}
                                     required
@@ -580,11 +596,15 @@ export default function CustomerReservations() {
 
                         <div className="rk-formgrid">
                             <div className="rk-field">
-                                <label className="rk-field__label">
+                                <label
+                                    className="rk-field__label"
+                                    htmlFor="customerreservations-chon-ban"
+                                >
                                     Chọn bàn <span className="rk-field__required">*</span>
                                 </label>
 
                                 <select
+                                    id="customerreservations-chon-ban"
                                     className="rk-select"
                                     value={bookForm.tableId}
                                     required
@@ -635,9 +655,15 @@ export default function CustomerReservations() {
                             </div>
 
                             <div className="rk-field">
-                                <label className="rk-field__label">Ghi chú</label>
+                                <label
+                                    className="rk-field__label"
+                                    htmlFor="customerreservations-ghi-chu"
+                                >
+                                    Ghi chú
+                                </label>
 
                                 <input
+                                    id="customerreservations-ghi-chu"
                                     className="rk-input"
                                     type="text"
                                     value={bookForm.note}

@@ -40,8 +40,26 @@ public interface OrderRepository extends JpaRepository<Order, Long>
             """)
     List<Order> findServingOrdersWithDetails(@Param("tableID") int tableID);
 
+    /**
+     * Khoá đơn hàng để ghi tiền.
+     *
+     * <p>KHÔNG có JOIN FETCH ở đây, dù tên hàm nói "WithItems". Khoá bi quan
+     * cộng với join fetch một collection là tổ hợp Hibernate không dựng nổi:
+     * nó phải xác định bảng cho MỌI quan hệ của Order để trải khoá ra, kể cả
+     * quan hệ một-một {@code invoice} — thứ vốn EAGER theo mặc định của JPA khi
+     * dùng {@code mappedBy} — và nó ném
+     * "Unable to determine TableReference (`invoices`) for `orders.invoice`".
+     * Hậu quả: MỌI lần thanh toán tiền mặt đều trả 500.
+     *
+     * <p>Không mất gì khi bỏ join fetch: hàm gọi nó đang ở trong một giao dịch,
+     * nên {@code order.getOrderItems()} nạp bình thường ngay sau đó. Đổi lại
+     * một truy vấn nữa, lấy về một luồng thanh toán chạy được.
+     *
+     * <p>Giữ nguyên tên hàm để không phải sửa nơi gọi, và vì nó vẫn đúng với
+     * thứ người gọi nhận được.
+     */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :id")
+    @Query("SELECT o FROM Order o WHERE o.id = :id")
     Optional<Order> findOrderForUpdateWithItems(@Param("id") Long orderId);
 
     List<Order> findByStatusAndLockedAtBefore(OrderStatus status, LocalDateTime deadline);

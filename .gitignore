@@ -41,3 +41,8 @@ frontend/tools/shots/
 # Ảnh render walk: sinh lại được bằng `node tools/render-walk.mjs`, và 204 file
 # PNG sẽ làm kho phình ra mà không nói thêm điều gì so với chính mã nguồn.
 frontend/tools/shots/
+
+# Kết quả chạy Playwright: sinh lại được, và ảnh/trace của lần chạy hỏng thì
+# chỉ có nghĩa với đúng lần chạy đó.
+frontend/test-results/
+frontend/playwright-report/

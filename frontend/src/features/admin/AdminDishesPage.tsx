@@ -22,7 +22,9 @@ import {formatCurrency, formatCurrencyShort} from '@/shared/utils/format'
 type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE'
 
 // --- Pagination Config ---
-const ITEMS_PER_PAGE = 5
+/* Bội của 4 — số cột lớn nhất của lưới thẻ. Cỡ 5 cho ra một hàng bốn
+   cộng một món lẻ, và 43 món thành chín trang. */
+const ITEMS_PER_PAGE = 12
 
 export default function AdminDishesPage() {
     const {notify} = useToast()
@@ -610,10 +612,14 @@ export default function AdminDishesPage() {
                         <div>
                             <div className="rk-fieldgroup">
                                 <div>
-                                    <label className="rk-field__label">
+                                    <label
+                                        className="rk-field__label"
+                                        htmlFor="admindishespage-ten-mon-an"
+                                    >
                                         Tên món ăn *
                                     </label>
                                     <input
+                                        id="admindishespage-ten-mon-an"
                                         type="text"
                                         required
                                         placeholder="Ví dụ: Phở Bò Tái Lăn"
@@ -631,10 +637,14 @@ export default function AdminDishesPage() {
 
                                 <div className="rk-formgrid">
                                     <div>
-                                        <label className="rk-field__label">
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="admindishespage-danh-muc-thuc-don"
+                                        >
                                             Danh mục thực đơn
                                         </label>
                                         <select
+                                            id="admindishespage-danh-muc-thuc-don"
                                             value={formData.categoryId}
                                             onChange={(e) =>
                                                 setFormData({
@@ -657,10 +667,14 @@ export default function AdminDishesPage() {
                                         )}
                                     </div>
                                     <div>
-                                        <label className="rk-field__label">
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="admindishespage-gia-ban-vnd"
+                                        >
                                             Giá bán (VNĐ) *
                                         </label>
                                         <input
+                                            id="admindishespage-gia-ban-vnd"
                                             type="number"
                                             required
                                             value={formData.price || ''}
@@ -677,10 +691,14 @@ export default function AdminDishesPage() {
                                 </div>
 
                                 <div>
-                                    <label className="rk-field__label">
+                                    <label
+                                        className="rk-field__label"
+                                        htmlFor="admindishespage-mo-ta-mon-an"
+                                    >
                                         Mô tả món ăn
                                     </label>
                                     <textarea
+                                        id="admindishespage-mo-ta-mon-an"
                                         rows={4}
                                         placeholder="Mô tả tóm tắt hương vị, các thành phần nguyên liệu đặc biệt..."
                                         maxLength={100}
@@ -720,9 +738,7 @@ export default function AdminDishesPage() {
 
                         <div>
                             <div>
-                                <label className="rk-field__label">
-                                    Hình ảnh minh hoạ
-                                </label>
+                                <span className="rk-field__label">Hình ảnh minh hoạ</span>
                                 <div className="rk-thumb rk-thumb--lg">
                                     {formData.imageUrl ? (
                                         <img src={formData.imageUrl} alt="Preview" />
@@ -860,10 +876,14 @@ export default function AdminDishesPage() {
                             <div className="rk-fieldgroup">
                                 <div className="rk-formgrid">
                                     <div>
-                                        <label className="rk-field__label">
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="admindishespage-ten-mon-an-2"
+                                        >
                                             Tên món ăn
                                         </label>
                                         <input
+                                            id="admindishespage-ten-mon-an-2"
                                             type="text"
                                             maxLength={50}
                                             value={formData.name}
@@ -877,10 +897,14 @@ export default function AdminDishesPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="rk-field__label">
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="admindishespage-danh-muc"
+                                        >
                                             Danh mục
                                         </label>
                                         <select
+                                            id="admindishespage-danh-muc"
                                             value={formData.categoryId}
                                             onChange={(e) =>
                                                 setFormData({
@@ -902,10 +926,14 @@ export default function AdminDishesPage() {
 
                                 <div className="rk-formgrid">
                                     <div>
-                                        <label className="rk-field__label">
+                                        <label
+                                            className="rk-field__label"
+                                            htmlFor="admindishespage-gia-ban-vnd-2"
+                                        >
                                             Giá bán (VNĐ)
                                         </label>
                                         <input
+                                            id="admindishespage-gia-ban-vnd-2"
                                             type="number"
                                             value={formData.price}
                                             onChange={(e) =>
@@ -918,9 +946,9 @@ export default function AdminDishesPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="rk-field__label">
+                                        <span className="rk-field__label">
                                             Trạng thái HIỂN THỊ
-                                        </label>
+                                        </span>
                                         <div className="rk-radiorow">
                                             <label>
                                                 <input
@@ -955,10 +983,14 @@ export default function AdminDishesPage() {
                                 </div>
 
                                 <div>
-                                    <label className="rk-field__label">
+                                    <label
+                                        className="rk-field__label"
+                                        htmlFor="admindishespage-mo-ta-chi-tiet"
+                                    >
                                         Mô tả chi tiết
                                     </label>
                                     <textarea
+                                        id="admindishespage-mo-ta-chi-tiet"
                                         rows={4}
                                         maxLength={100}
                                         value={formData.description}
@@ -973,9 +1005,9 @@ export default function AdminDishesPage() {
                                 </div>
 
                                 <div>
-                                    <label className="rk-field__label">
+                                    <span className="rk-field__label">
                                         ĐƯỜNG DẪN HÌNH ANH (URL)
-                                    </label>
+                                    </span>
                                     <div className="rk-actions">
                                         <input
                                             type="text"

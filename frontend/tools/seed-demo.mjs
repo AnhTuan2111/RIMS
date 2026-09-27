@@ -311,11 +311,29 @@ async function main() {
         try {
             const detail = await call('GET', `/cashier/orders/${target.orderId}`)
 
+            const amountPaid = Math.ceil(detail.finalAmount / 10000) * 10000
+
+            // HAI BƯỚC, không phải một. `/payment` chỉ KHOÁ đơn để số tiền
+            // không đổi giữa chừng; `/complete-cash` mới thật sự thu tiền và
+            // sinh hoá đơn. Bản đầu của script chỉ gọi bước một rồi in ra "đã
+            // thu" — nên màn Lịch sử hoá đơn trống trơn mà không ai biết vì sao.
             await call('POST', `/cashier/orders/${target.orderId}/payment`, {
                 paymentMethod: 'CASH',
-                amountPaid: Math.ceil(detail.finalAmount / 10000) * 10000,
+                amountPaid,
             })
-            console.log('   ✓ đã thu bàn', target.tableNumber)
+
+            const paid = await call(
+                'POST',
+                `/cashier/orders/${target.orderId}/complete-cash`,
+                {paymentMethod: 'CASH', amountPaid},
+            )
+
+            console.log(
+                '   ✓ đã thu bàn',
+                target.tableNumber,
+                '· hoá đơn',
+                paid.invoiceId,
+            )
         } catch (error) {
             console.log('   ·', String(error.message).slice(0, 140))
         }

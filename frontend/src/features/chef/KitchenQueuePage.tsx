@@ -495,6 +495,12 @@ export default function KitchenQueuePage() {
                 currentItems.filter((item) => item.orderItemId !== orderItemId),
             )
 
+            // Tải lại hai cột phải. Thiếu dòng này thì phiếu BIẾN MẤT khỏi cột
+            // Đang làm mà không hiện sang cột Đã xong — bếp bấm xong một món và
+            // thấy nó bốc hơi, không có cách nào biết việc đã được ghi nhận hay
+            // chưa cho tới khi bấm Làm mới.
+            void fetchRecentOrders()
+
             if (selectedDish?.orderItemId === orderItemId) {
                 closeDishDetail()
             }
@@ -540,6 +546,9 @@ export default function KitchenQueuePage() {
             setItems((currentItems) =>
                 currentItems.filter((item) => item.orderItemId !== cancelledOrderItemId),
             )
+
+            // Như trên: cột Đã huỷ phải nhận ngay phiếu vừa huỷ.
+            void fetchRecentOrders()
 
             closeDishDetail()
         } catch (requestError) {
