@@ -2,6 +2,7 @@ import {BestSellersReport} from '@/features/admin/statistics/BestSellersReport'
 import {OrderShiftDashboard} from '@/features/admin/statistics/OrderShiftDashboard'
 import {RevenueDashboard} from '@/features/admin/statistics/RevenueDashboard'
 import {StatisticsReportSelector} from '@/features/admin/statistics/StatisticsReportSelector'
+import {buildShiftRows, pickBusiestShift} from '@/features/admin/statistics/format'
 import {
     buildWeekOptions,
     getDefaultWeek,
@@ -457,7 +458,10 @@ export default function AdminStatisticsPage() {
             <StatisticsReportSelector
                 activeReport={activeReport}
                 bestSellerCount={bestSellers.length}
-                highestShiftName={orderShiftReport?.highestOrderShift?.displayName}
+                categoryCount={categories.length}
+                highestShiftName={
+                    pickBusiestShift(buildShiftRows(orderShiftReport))?.displayName
+                }
                 totalRevenue={revenueData.totalRevenue?.revenue}
                 onSelectReport={setActiveReport}
             />

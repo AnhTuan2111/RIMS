@@ -10,7 +10,7 @@ import type {BestSellingDishItem, CategoryResponse} from '@/shared/api/admin'
 import {useState} from 'react'
 
 import {EmptyState, LoadingState} from '@/shared/components/feedback'
-import {PageCard} from '@/shared/components/ui'
+import {PageCard, PageHeader} from '@/shared/components/ui'
 export function BestSellerDishImage({
     dishName,
     imageUrl,
@@ -71,24 +71,26 @@ export function BestSellersReport({
 
     return (
         <PageCard>
-            <div className="rk-card__head-inline">
-                <div>
-                    <h2 className="rk-sectiontitle">{title}</h2>
-                    <p className="rk-pagehead__desc">{subtitle}</p>
-                </div>
-
-                <PresetButtonGroup
-                    activePreset={preset}
-                    isLoading={isLoading}
-                    selectedWeek={selectedWeek}
-                    selectedYear={selectedYear}
-                    weekOptions={weekOptions}
-                    yearOptions={yearOptions}
-                    onChange={onPresetChange}
-                    onWeekChange={onWeekChange}
-                    onYearChange={onYearChange}
-                />
-            </div>
+            {/* PageHeader thay cho hàng ngang tự dựng: ở 375px hàng ngang ép
+                tiêu đề còn ~40px và vỡ từng âm tiết ("THỐ / NG / KÊ"), còn cụm
+                nút khoảng thời gian tràn ra ngoài màn. */}
+            <PageHeader
+                title={title}
+                description={subtitle}
+                actions={
+                    <PresetButtonGroup
+                        activePreset={preset}
+                        isLoading={isLoading}
+                        selectedWeek={selectedWeek}
+                        selectedYear={selectedYear}
+                        weekOptions={weekOptions}
+                        yearOptions={yearOptions}
+                        onChange={onPresetChange}
+                        onWeekChange={onWeekChange}
+                        onYearChange={onYearChange}
+                    />
+                }
+            />
 
             {categories && selectedCategoryId && onCategoryChange && (
                 <div className="rk-field">

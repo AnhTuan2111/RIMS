@@ -114,3 +114,45 @@ test.describe('Điện thoại · phục vụ', () => {
         await expect(total).not.toHaveText(/^0\s/)
     })
 })
+
+test.describe('Điện thoại · quản trị', () => {
+    test('mọi báo cáo thống kê không tràn ngang và tiêu đề không vỡ chữ', async ({
+        page,
+    }) => {
+        // Bài tràn ngang chung chỉ mở TAB MẶC ĐỊNH của mỗi màn. Tab "Đơn hàng
+        // theo ca" từng in tiêu đề thành "THỐ / NG / KÊ" và đẩy trang rộng ra
+        // 389px trên màn 375 — bài chung không bao giờ nhìn thấy.
+        await login(page, ACCOUNTS.admin)
+        await page.goto('/admin/statistics')
+        await expectRendered(page)
+
+        const tabs = page.locator('.rk-stat--tab')
+        const count = await tabs.count()
+        expect(count).toBeGreaterThan(1)
+
+        const problems: string[] = []
+
+        for (let i = 0; i < count; i++) {
+            const tab = tabs.nth(i)
+            const name = (await tab.locator('.rk-stat__label').textContent())!.trim()
+            await tab.click()
+            await page.waitForLoadState('networkidle')
+
+            const overflow = await page.evaluate(
+                () =>
+                    document.documentElement.scrollWidth -
+                    document.documentElement.clientWidth,
+            )
+            if (overflow > 1) problems.push(`${name}: tràn ${overflow}px`)
+
+            // Tiêu đề báo cáo: mỗi dòng phải chứa được ít nhất một từ trọn vẹn.
+            const title = page.locator('.rk-pagehead__title').last()
+            const box = await title.boundingBox()
+            if (box && box.width < 120) {
+                problems.push(`${name}: tiêu đề chỉ rộng ${Math.round(box.width)}px`)
+            }
+        }
+
+        expect(problems, problems.join(String.fromCharCode(10))).toHaveLength(0)
+    })
+})

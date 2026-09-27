@@ -22,12 +22,14 @@ export function StatisticsReportSelector({
     activeReport,
     totalRevenue,
     bestSellerCount,
+    categoryCount,
     highestShiftName,
     onSelectReport,
 }: {
     activeReport: ReportKey
     totalRevenue?: number | null
     bestSellerCount: number
+    categoryCount: number
     highestShiftName?: string | null
     onSelectReport: (report: ReportKey) => void
 }) {
@@ -40,6 +42,9 @@ export function StatisticsReportSelector({
         {
             key: 'categoryBestsellers',
             label: 'Bán chạy theo danh mục',
+            // Bản trước không có giá trị nào — ô duy nhất trong bốn ô trống
+            // trơn, trông như dữ liệu chưa tải xong.
+            value: categoryCount > 0 ? `${categoryCount} danh mục` : '—',
         },
         {
             key: 'bestsellers',

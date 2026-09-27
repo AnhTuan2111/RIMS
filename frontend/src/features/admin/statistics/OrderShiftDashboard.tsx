@@ -1,9 +1,15 @@
 import {Icon} from '@/shared/components/ui/Icon'
 import {PresetButtonGroup} from './RevenueDashboard'
 import {LoadingState} from '@/shared/components/feedback'
-import {PageCard, StatCard} from '@/shared/components/ui'
+import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
 import {getOrderShiftRangeLabel} from './dateUtils'
-import {buildDonutGradient, buildShiftRows, formatDecimal, formatNumber} from './format'
+import {
+    buildDonutGradient,
+    buildShiftRows,
+    formatDecimal,
+    formatNumber,
+    pickBusiestShift,
+} from './format'
 import type {RangePreset, WeekOption} from './types'
 import type {OrderShiftReportResponse} from '@/shared/api/admin'
 export function OrderShiftDashboard({
@@ -35,33 +41,31 @@ export function OrderShiftDashboard({
     const donutGradient = buildDonutGradient(rows)
     const totalOrders = report?.totalPaidOrders ?? 0
     const averageOrdersPerDay = report?.averageOrdersPerDay ?? 0
-    const highestShift = rows.find(
-        (row) => row.shiftName === report?.highestOrderShift?.shiftName,
-    )
+    const highestShift = pickBusiestShift(rows)
 
     return (
         <div className="rk-stack">
             <PageCard>
-                <div className="rk-card__head-inline">
-                    <div>
-                        <h2 className="rk-sectiontitle">Thống kê đơn hàng theo ca</h2>
-                        <p className="rk-pagehead__desc">
-                            Báo cáo đơn hàng đã thanh toán theo từng ca.
-                        </p>
-                    </div>
-
-                    <PresetButtonGroup
-                        activePreset={preset}
-                        isLoading={isLoading}
-                        selectedWeek={selectedWeek}
-                        selectedYear={selectedYear}
-                        weekOptions={weekOptions}
-                        yearOptions={yearOptions}
-                        onChange={onPresetChange}
-                        onWeekChange={onWeekChange}
-                        onYearChange={onYearChange}
-                    />
-                </div>
+                {/* PageHeader thay cho hàng ngang tự dựng: ở 375px hàng ngang ép
+                    tiêu đề còn ~40px và vỡ từng âm tiết ("THỐ / NG / KÊ"), còn cụm
+                    nút khoảng thời gian tràn ra ngoài màn. */}
+                <PageHeader
+                    title="Thống kê đơn hàng theo ca"
+                    description="Báo cáo đơn hàng đã thanh toán theo từng ca."
+                    actions={
+                        <PresetButtonGroup
+                            activePreset={preset}
+                            isLoading={isLoading}
+                            selectedWeek={selectedWeek}
+                            selectedYear={selectedYear}
+                            weekOptions={weekOptions}
+                            yearOptions={yearOptions}
+                            onChange={onPresetChange}
+                            onWeekChange={onWeekChange}
+                            onYearChange={onYearChange}
+                        />
+                    }
+                />
 
                 {error && <p className="rk-note rk-note--alert">{error}</p>}
             </PageCard>
@@ -76,7 +80,7 @@ export function OrderShiftDashboard({
 
                 <StatCard
                     label="Ca có nhiều đơn nhất"
-                    value={highestShift?.displayName ?? 'Chưa có dữ liệu'}
+                    value={highestShift?.displayName ?? 'Chưa có đơn trong ca'}
                     textValue
                 />
 

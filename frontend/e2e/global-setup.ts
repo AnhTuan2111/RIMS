@@ -192,11 +192,29 @@ export default async function globalSetup() {
         }
     }
 
+    // BƯỚC 5 — xoá món kiểm thử còn sót.
+    //
+    // Bài "thêm, sửa giá, rồi xoá" tự dọn khi chạy trọn; nhưng một lần chạy
+    // đỏ giữa chừng vẫn để lại món, và món đó hiện ngay trên TRANG CHỦ CÔNG
+    // KHAI. Món chưa từng vào đơn thì backend cho xoá hẳn.
+    let removedDishes = 0
+    const dishes = await call(admin, '/admin/dish/all')
+
+    for (const dish of dishes) {
+        if (/^Món kiểm thử \d+$/.test(dish.name ?? '')) {
+            await call(admin, `/admin/dish/delete/${dish.id}`, {method: 'DELETE'})
+                .then(() => removedDishes++)
+                .catch((error) =>
+                    log(`  [dọn] không xoá được ${dish.name}: ${error.message}`),
+                )
+        }
+    }
+
     const after = await call(waiter, '/waiter/tables')
     const free = after.filter((t: {status: string}) => t.status === 'AVAILABLE').length
 
     log(
-        `  [dọn] đã thu ${closed} đơn · huỷ ${cancelled} lượt đặt thử · còn ${free}/${after.length} bàn trống`,
+        `  [dọn] đã thu ${closed} đơn · huỷ ${cancelled} lượt đặt thử · xoá ${removedDishes} món thử · còn ${free}/${after.length} bàn trống`,
     )
 
     if (free < MIN_FREE) {

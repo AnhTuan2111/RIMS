@@ -1,17 +1,21 @@
 import {Icon} from '@/shared/components/ui/Icon'
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {useAdminSocket} from '@/realtime/useAdminSocket'
 import * as adminApi from '@/shared/api/admin'
 import {EmptyState} from '@/shared/components/feedback'
-import {PageCard, StatCard} from '@/shared/components/ui'
+import {PageCard, PageHeader, StatCard} from '@/shared/components/ui'
 import type {
     BestSellingDishItem,
-    OrderShiftItem,
     OrderShiftReportResponse,
     RevenueReportResponse,
     WeeklyRevenueChartResponse,
 } from '@/shared/api/admin'
 import {getErrorMessage} from '@/shared/utils/error'
+import {
+    buildDonutGradient,
+    buildShiftRows,
+    pickBusiestShift,
+} from '@/features/admin/statistics/format'
 import {formatCurrencyShort, formatNumber} from '@/shared/utils/format'
 
 interface WeekOption {
@@ -19,10 +23,6 @@ interface WeekOption {
     label: string
     fromDate: string
     toDate: string
-}
-
-interface ShiftViewItem extends OrderShiftItem {
-    color: string
 }
 
 interface WeeklyRevenueOverviewData {
@@ -38,37 +38,6 @@ const emptyWeeklyRevenueOverviewData: WeeklyRevenueOverviewData = {
     bestSellers: [],
     orderShiftReport: null,
 }
-
-const shiftCatalog = [
-    {
-        shiftName: 'MORNING',
-        displayName: 'Ca sáng',
-        startTime: '08:00',
-        endTime: '10:59',
-        color: 'var(--rims-chart-1)',
-    },
-    {
-        shiftName: 'NOON',
-        displayName: 'Ca trưa',
-        startTime: '11:00',
-        endTime: '13:59',
-        color: 'var(--rims-chart-2)',
-    },
-    {
-        shiftName: 'AFTERNOON',
-        displayName: 'Ca chiều',
-        startTime: '14:00',
-        endTime: '16:59',
-        color: 'var(--rims-chart-3)',
-    },
-    {
-        shiftName: 'EVENING',
-        displayName: 'Ca tối',
-        startTime: '17:00',
-        endTime: '22:00',
-        color: 'var(--rims-chart-4)',
-    },
-]
 
 function formatDateForApi(date: Date) {
     const year = date.getFullYear()
@@ -253,52 +222,6 @@ function WeeklyBestSellerImage({
     )
 }
 
-function buildShiftRows(report: OrderShiftReportResponse | null): ShiftViewItem[] {
-    return shiftCatalog.map((shift) => {
-        const apiShift = report?.shifts?.find(
-            (item) => item.shiftName === shift.shiftName,
-        )
-        const fallbackShift =
-            report?.highestOrderShift?.shiftName === shift.shiftName
-                ? report.highestOrderShift
-                : null
-
-        return {
-            ...shift,
-            displayName: apiShift?.displayName ?? shift.displayName,
-            startTime: apiShift?.startTime ?? shift.startTime,
-            endTime: apiShift?.endTime ?? shift.endTime,
-            orderCount: apiShift?.orderCount ?? fallbackShift?.orderCount ?? 0,
-            percentage: apiShift?.percentage ?? fallbackShift?.percentage ?? 0,
-        }
-    })
-}
-
-function buildDonutGradient(rows: ShiftViewItem[]) {
-    const totalOrders = rows.reduce((sum, row) => sum + row.orderCount, 0)
-
-    if (totalOrders === 0) {
-        return 'var(--rims-line)'
-    }
-
-    let cursor = 0
-
-    return rows
-        .map((row, index) => {
-            const degrees =
-                index === rows.length - 1
-                    ? 360 - cursor
-                    : (row.orderCount / totalOrders) * 360
-            const nextCursor = cursor + degrees
-            const segment = `${row.color} ${cursor}deg ${nextCursor}deg`
-
-            cursor = nextCursor
-
-            return segment
-        })
-        .join(', ')
-}
-
 function buildWeeklyRevenueRows(
     selectedWeek: WeekOption,
     dailyRevenue: WeeklyRevenueChartResponse | null,
@@ -331,12 +254,38 @@ function WeeklyRevenueLineChart({
 }: {
     rows: ReturnType<typeof buildWeeklyRevenueRows>
 }) {
-    const width = 760
-    const height = 160
-    const left = 92
-    const right = 28
+    // Vẽ theo BỀ NGANG THẬT của khung, tỉ lệ 1:1.
+    //
+    // Bản trước vẽ trên viewBox cố định 760 rồi để trình duyệt co lại. Ở 375px
+    // khung chỉ còn ~305px, mọi thứ nhân 0,4: chữ trục 11px còn 4,4px, cả biểu
+    // đồ cao 64px — có đó mà không đọc được. Nay chữ luôn đúng 11px, và màn
+    // hẹp thì biểu đồ cao hơn thay vì dẹt đi.
+    const shellRef = useRef<HTMLDivElement>(null)
+    const [width, setWidth] = useState(760)
+
+    useEffect(() => {
+        const shell = shellRef.current
+
+        if (!shell) {
+            return
+        }
+
+        const measure = () => setWidth(Math.max(280, Math.round(shell.clientWidth)))
+
+        measure()
+
+        const observer = new ResizeObserver(measure)
+        observer.observe(shell)
+
+        return () => observer.disconnect()
+    }, [])
+
+    const narrow = width < 480
+    const height = narrow ? 200 : 180
+    const left = narrow ? 52 : 92
+    const right = narrow ? 12 : 28
     const top = 10
-    const bottom = 126
+    const bottom = height - 34
     const plotWidth = width - left - right
     const plotHeight = bottom - top
     const maxRevenue = Math.max(1_500_000, ...rows.map((row) => row.revenue))
@@ -365,11 +314,13 @@ function WeeklyRevenueLineChart({
             : ''
 
     return (
-        <div className="rk-chart__shell">
+        <div className="rk-chart__shell" ref={shellRef}>
             <svg
                 aria-label="Biểu đồ doanh thu trong tuần"
                 className="rk-chart"
                 role="img"
+                width={width}
+                height={height}
                 viewBox={`0 0 ${width} ${height}`}
             >
                 <defs>
@@ -402,7 +353,7 @@ function WeeklyRevenueLineChart({
                             <text
                                 className="rk-chart__axis"
                                 textAnchor="end"
-                                x={left - 14}
+                                x={left - (narrow ? 8 : 14)}
                                 y={y + 4}
                             >
                                 {formatRevenueAxis(tick)}
@@ -426,7 +377,7 @@ function WeeklyRevenueLineChart({
                             className="rk-chart__axis"
                             textAnchor="middle"
                             x={point.x}
-                            y={bottom + 29}
+                            y={bottom + 24}
                         >
                             {point.label}
                         </text>
@@ -459,14 +410,7 @@ function WeeklyRevenueOverviewDashboard({
     const topDish = bestSellers[0]
     const maxQuantity = Math.max(1, ...bestSellers.map((item) => item.totalQuantity))
     const shiftRows = buildShiftRows(data.orderShiftReport)
-    const highestShift = shiftRows.find(
-        (row) => row.shiftName === data.orderShiftReport?.highestOrderShift?.shiftName,
-    )
-    const fallbackHighestShift = shiftRows.reduce(
-        (bestShift, row) => (row.orderCount > bestShift.orderCount ? row : bestShift),
-        shiftRows[0],
-    )
-    const featuredShift = highestShift ?? fallbackHighestShift
+    const featuredShift = pickBusiestShift(shiftRows)
     const totalOrders =
         data.orderShiftReport?.totalPaidOrders ??
         shiftRows.reduce((sum, row) => sum + row.orderCount, 0)
@@ -476,33 +420,31 @@ function WeeklyRevenueOverviewDashboard({
     return (
         <div aria-busy={isLoading} className="rk-stack">
             <PageCard>
-                <div className="rk-card__head-inline">
-                    <div>
-                        <h2 className="rk-sectiontitle">Tổng quan tuần</h2>
-                        <p className="rk-pagehead__desc">
-                            Doanh thu, đơn hàng, món bán chạy và biến động kinh doanh
-                            trong tuần.
-                        </p>
-                    </div>
+                {/* PageHeader thay cho hàng ngang tự dựng: ở 375px hàng ngang ép
+                    ô chọn tuần còn "28/(", và tiêu đề vỡ thành bốn dòng. */}
+                <PageHeader
+                    title="Tổng quan tuần"
+                    description="Doanh thu, đơn hàng, món bán chạy và biến động kinh doanh trong tuần."
+                    actions={
+                        <div className="rk-datefield__shell rk-weekpick">
+                            <Icon name="booking" className="rk-icon" />
 
-                    <div className="rk-datefield__shell">
-                        <Icon name="booking" className="rk-icon" />
-
-                        <select
-                            aria-label="Chọn khoảng thời gian"
-                            className="rk-select"
-                            disabled={isLoading}
-                            value={selectedWeek.value}
-                            onChange={(event) => onWeekChange(event.target.value)}
-                        >
-                            {weekOptions.map((week) => (
-                                <option key={week.value} value={week.value}>
-                                    {formatWeekRangeLabel(week)}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+                            <select
+                                aria-label="Chọn khoảng thời gian"
+                                className="rk-select"
+                                disabled={isLoading}
+                                value={selectedWeek.value}
+                                onChange={(event) => onWeekChange(event.target.value)}
+                            >
+                                {weekOptions.map((week) => (
+                                    <option key={week.value} value={week.value}>
+                                        {formatWeekRangeLabel(week)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    }
+                />
 
                 {error && (
                     <p className="rk-note rk-note--alert">
@@ -545,7 +487,7 @@ function WeeklyRevenueOverviewDashboard({
 
                 <StatCard
                     label="Ca nhiều đơn nhất"
-                    value={featuredShift?.displayName ?? 'Chưa có dữ liệu'}
+                    value={featuredShift?.displayName ?? 'Chưa có đơn trong ca'}
                     textValue
                     tone="busy"
                 />

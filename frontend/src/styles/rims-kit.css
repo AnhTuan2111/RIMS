@@ -410,8 +410,12 @@ a {
         height: 100%;
     }
 
+    /* Cơ sở 14rem, KHÔNG phải 0. Với cơ sở 0 ô tìm kiếm chỉ nhận phần thừa,
+       và vì flex-wrap đo theo cơ sở nên nó không bao giờ xuống hàng — cứ thế
+       bị bóp. Ở 768px màn Danh mục, ô tìm còn 30px và nhãn của nó đè lên nhãn
+       bên cạnh. Nay không đủ 14rem thì ô xuống hàng riêng và giãn hết bề ngang. */
     .rk-filterbar > .rk-input {
-        flex: 1.5 1 0;
+        flex: 1.5 1 14rem;
     }
 
     .rk-filterbar > .rk-select {
@@ -420,7 +424,7 @@ a {
 
     /* Ô nhập nằm trong .rk-field (có nhãn riêng) cũng phải ăn phần rộng. */
     .rk-filterbar > .rk-field {
-        flex: 1 1 0;
+        flex: 1 1 14rem;
     }
 
     .rk-filterbar > .rk-field:has(.rk-segment) {
@@ -1951,6 +1955,15 @@ textarea.rk-input {
     flex-wrap: wrap;
 }
 
+/* Hàng nút trong Ô BẢNG không xuống dòng.
+   Bảng hẹp hơn nội dung thì trình duyệt bóp cột về bề ngang tối thiểu — và
+   với flex-wrap, tối thiểu là MỘT nút. Ở màn Nhân sự 375px ba nút biểu tượng
+   xếp thành ba tầng, mỗi hàng cao 146px. Bảng vốn đã cuộn ngang được, nên
+   giữ các nút trên một hàng chỉ làm bảng rộng thêm vài chục điểm ảnh. */
+.rk-table .rk-actions {
+    flex-wrap: nowrap;
+}
+
 .rk-actions--end {
     justify-content: flex-end;
 }
@@ -2546,10 +2559,20 @@ textarea.rk-input {
 /* Tiêu đề mục có nút ở cuối dòng. */
 .rk-card__head-inline {
     display: flex;
+    /* Xuống hàng khi không đủ chỗ. Không có dòng này thì khối chữ bị bóp về bề
+       ngang của MỘT âm tiết — màn Thống kê ở 375px in tiêu đề thành "THỐ / NG
+       / KÊ / ĐƠ / N". flex-wrap đo khối chữ theo bề ngang TỰ NHIÊN của nó, nên
+       thứ rơi xuống hàng dưới là cụm nút, không phải từng chữ. */
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--rims-space-3);
     margin-bottom: var(--rims-space-4);
+}
+
+/* …trừ hàng có Ô SỐ: ở đó con số phải đứng cố định bên phải (xem dưới). */
+.rk-card__head-inline:has(> .rk-qty) {
+    flex-wrap: nowrap;
 }
 
 /* Khối chữ co được, con số thì không.
@@ -2589,9 +2612,19 @@ textarea.rk-input {
     flex-wrap: wrap;
 }
 
-/* Khối lọc ăn phần rộng còn lại; các thẻ số chỉ lấy vừa đủ. */
+/* Khối lọc ăn phần rộng còn lại; các thẻ số lấy phần còn lại của HÀNG CỦA
+   CHÚNG. Bản trước để thẻ số "vừa đủ nội dung", nên khi màn hẹp đẩy chúng
+   xuống hàng dưới, mỗi thẻ đứng lẻ ở bề ngang ~190px, lệch nhau và bỏ trống
+   nửa màn bên phải. Nay hai thẻ chia đôi một hàng. */
 .rk-filterrow > :first-child {
-    flex: 1 1 320px;
+    /* Hệ số giãn 100 chứ không phải 1: khi CHUNG HÀNG với thẻ số, khối lọc
+       phải lấy gần hết phần thừa — chia đều thì ở 1440px ô tìm kiếm bị bóp
+       còn 30px. Thẻ số chỉ thật sự giãn khi đứng riêng một hàng. */
+    flex: 100 1 320px;
+}
+
+.rk-filterrow > :not(:first-child) {
+    flex: 1 1 12rem;
 }
 
 /* Nhãn mờ: dùng cho danh mục đang ẩn. */
@@ -2904,9 +2937,20 @@ textarea.rk-input {
     outline-offset: 1px;
 }
 
-.rk-datefield__shell .rk-input {
+.rk-datefield__shell .rk-input,
+.rk-datefield__shell .rk-select {
     border: 0;
     background: transparent;
+}
+
+/* Ô chọn tuần: icon lịch bên trái nằm TRONG vỏ, cách mép một khoảng. */
+.rk-weekpick {
+    padding-left: var(--rims-space-3);
+}
+
+.rk-weekpick .rk-select {
+    min-width: 0;
+    min-height: 2.75rem;
 }
 
 .rk-datefield__shell .rk-input:focus-visible {
@@ -4133,11 +4177,7 @@ html {
 .rk-floor__slot.is-overlap > * {
     border-color: var(--rims-alert);
     box-shadow: var(--rims-offset) var(--rims-offset) 0 var(--rims-alert);
-    background-image: repeating-linear-gradient(
-        45deg,
-        transparent 0 6px,
-        rgb(var(--rims-tint-ink) / 12%) 6px 8px
-    );
+    background-image: repeating-linear-gradient(45deg, transparent 0 6px, rgb(var(--rims-tint-ink) / 12%) 6px 8px);
 }
 
 .rk-floor__slot.is-selected > * {

@@ -283,6 +283,40 @@ test.describe('Bố cục', () => {
         expect(problems, problems.join('\n')).toHaveLength(0)
     })
 
+    test('ô lọc không bị bóp ở khổ máy tính bảng', async ({page}) => {
+        // Thanh lọc xếp ngang từ 48rem. Ô tìm kiếm từng có flex-basis 0 nên
+        // chỉ nhận phần thừa và không bao giờ xuống hàng: ở 768px màn Danh mục
+        // nó còn 30px. Khổ 1440 và 375 đều ổn nên không bài nào thấy.
+        await page.setViewportSize({width: 768, height: 900})
+
+        const problems: string[] = []
+        let signedIn: string | null = null
+
+        for (const screen of SCREENS) {
+            signedIn = await visit(page, screen, signedIn)
+
+            const narrow = await page.evaluate(() =>
+                [
+                    ...document.querySelectorAll<HTMLElement>(
+                        '.rk-filterbar input, .rk-filterbar select',
+                    ),
+                ]
+                    .filter((el) => el.offsetParent !== null)
+                    .map((el) => ({
+                        name: el.getAttribute('aria-label') ?? '',
+                        width: Math.round(el.getBoundingClientRect().width),
+                    }))
+                    .filter((field) => field.width < 160),
+            )
+
+            for (const field of narrow) {
+                problems.push(`${screen.name}: «${field.name}» rộng ${field.width}px`)
+            }
+        }
+
+        expect(problems, problems.join(String.fromCharCode(10))).toHaveLength(0)
+    })
+
     test('không chữ nào bị cắt cụt trong khung không cuộn được', async ({page}) => {
         const problems: string[] = []
         let signedIn: string | null = null

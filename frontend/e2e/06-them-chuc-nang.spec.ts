@@ -138,7 +138,45 @@ test.describe('Quản trị · vòng đời món ăn', () => {
 
         // Và phải tìm được trên màn.
         await page.fill('input[type="text"]', name)
-        await expect(page.locator('.rk-dishcard__name', {hasText: name})).toBeVisible()
+        const card = page.locator('.rk-dishcard', {hasText: name})
+        await expect(card).toBeVisible()
+
+        // SỬA GIÁ — bài này mang tên "thêm, sửa giá, rồi xoá" nhưng bản đầu chỉ
+        // thêm. Mỗi lần chạy để lại một "Món kiểm thử" trong thực đơn THẬT, và
+        // mười hai món như vậy đã hiện trên trang chủ công khai.
+        await card.getByRole('button', {name: 'Chỉnh sửa'}).click()
+        await expect(modal).toBeVisible()
+        await modal.locator('#admindishespage-gia-ban-vnd-2').fill('135000')
+        await modal.getByRole('button', {name: /cập nhật/i}).click()
+
+        await expect
+            .poll(
+                async () => {
+                    const dishes = await api(ACCOUNTS.admin, '/admin/dish/all')
+                    return dishes.find((d: {name: string}) => d.name === name)?.price
+                },
+                {timeout: 15_000, message: 'giá mới không được lưu'},
+            )
+            .toBe(135000)
+
+        // Giá mới phải hiện trên thẻ theo luật tiền rút gọn.
+        await expect(card).toContainText('135K')
+
+        // XOÁ — có hỏi lại, vì xoá món là việc không lùi được.
+        await card.getByRole('button', {name: 'Xoá món'}).click()
+        await page.getByRole('button', {name: 'Xoá món ăn'}).click()
+
+        await expect
+            .poll(
+                async () => {
+                    const dishes = await api(ACCOUNTS.admin, '/admin/dish/all')
+                    return dishes.some((d: {name: string}) => d.name === name)
+                },
+                {timeout: 15_000, message: 'món vẫn còn sau khi xoá'},
+            )
+            .toBe(false)
+
+        await expect(card).toHaveCount(0)
     })
 
     test('bật/tắt bán một món đổi trạng thái thật', async ({page}) => {
