@@ -17,6 +17,7 @@ import {useWaiterSocket} from '@/realtime'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
 import {useToast} from '@/app/providers/useToast'
 import {dungAnhThayThe, duongDanAnh} from '@/shared/utils/image'
+import {formatCurrency, formatCurrencyShort} from '@/shared/utils/format'
 
 type ModalType = 'NONE' | 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE'
 
@@ -425,7 +426,7 @@ export default function AdminDishesPage() {
                                         </span>
 
                                         <span className="rk-dishcard__price">
-                                            {dish.price.toLocaleString('vi-VN')}đ
+                                            {formatCurrencyShort(dish.price)}
                                         </span>
                                     </div>
                                 </div>
@@ -510,7 +511,7 @@ export default function AdminDishesPage() {
                                             </span>
                                         </td>
                                         <td className="rk-td--num">
-                                            {dish.price.toLocaleString('vi-VN')}đ
+                                            {formatCurrency(dish.price)}
                                         </td>
                                         <td>
                                             <span
@@ -829,7 +830,7 @@ export default function AdminDishesPage() {
                         <div>
                             <div>
                                 <h3 className="rk-num rk-price">
-                                    {selectedDish.price.toLocaleString('vi-VN')}đ
+                                    {formatCurrency(selectedDish.price)}
                                 </h3>
                                 <hr />
                                 <h4 className="rk-sectiontitle">Mô tả chi tiết</h4>

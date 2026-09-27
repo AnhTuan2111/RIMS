@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest'
 
 import {
     formatCurrency,
+    formatCurrencyShort,
     formatDateForApi,
     formatNumber,
     getWeekEnd,
@@ -11,16 +12,16 @@ import {
 describe('Định dạng hiển thị', () => {
     describe('Tiền', () => {
         it('nhóm hàng nghìn theo kiểu Việt Nam', () => {
-            expect(formatCurrency(150000)).toBe('150.000 đ')
-            expect(formatCurrency(1263000)).toBe('1.263.000 đ')
+            expect(formatCurrency(150000)).toBe('150.000 ₫')
+            expect(formatCurrency(1263000)).toBe('1.263.000 ₫')
         })
 
         it('số 0 vẫn hiện ra chứ không để trống', () => {
-            expect(formatCurrency(0)).toBe('0 đ')
+            expect(formatCurrency(0)).toBe('0 ₫')
         })
 
         it('giá trị thiếu coi như 0, không hiện NaN', () => {
-            expect(formatCurrency(undefined as unknown as number)).toBe('0 đ')
+            expect(formatCurrency(undefined as unknown as number)).toBe('0 ₫')
             expect(formatNumber(null as unknown as number)).toBe('0')
         })
     })
@@ -111,5 +112,36 @@ describe('Định dạng hiển thị', () => {
 
             expect(ngay.getTime()).toBe(truoc)
         })
+    })
+})
+
+describe('formatCurrencyShort — luật tiền rút gọn đã chốt', () => {
+    it('dưới 1.000 thì ghi thẳng, không rút gọn', () => {
+        // "0,5K" vô nghĩa với người đọc hoá đơn.
+        expect(formatCurrencyShort(500)).toBe('500 ₫')
+        expect(formatCurrencyShort(0)).toBe('0 ₫')
+    })
+
+    it('từ nghìn tới dưới triệu dùng K', () => {
+        expect(formatCurrencyShort(45000)).toBe('45K')
+        expect(formatCurrencyShort(189000)).toBe('189K')
+        expect(formatCurrencyShort(485000)).toBe('485K')
+    })
+
+    it('giữ một chữ số thập phân khi nó mang thông tin', () => {
+        expect(formatCurrencyShort(45500)).toBe('45,5K')
+        expect(formatCurrencyShort(18400000)).toBe('18,4tr')
+    })
+
+    it('từ triệu trở lên dùng tr', () => {
+        expect(formatCurrencyShort(1000000)).toBe('1tr')
+        expect(formatCurrencyShort(68430000)).toBe('68,4tr')
+    })
+})
+
+describe('formatCurrency — bản đầy đủ', () => {
+    it('dùng ký hiệu ₫ chứ không dùng chữ đ', () => {
+        // `đ` là một chữ cái; đặt sau con số thì đọc ra như đơn vị tự chế.
+        expect(formatCurrency(189000)).toBe('189.000 ₫')
     })
 })

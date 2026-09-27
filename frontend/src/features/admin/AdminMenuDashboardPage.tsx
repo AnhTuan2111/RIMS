@@ -9,6 +9,7 @@ import {PageCard, PageHeader, StatCard, ViewToggle} from '@/shared/components/ui
 import {useViewMode} from '@/shared/hooks/useViewMode'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {dungAnhThayThe, duongDanAnh} from '@/shared/utils/image'
+import {formatCurrency, formatCurrencyShort} from '@/shared/utils/format'
 
 /**
  * Ảnh thu nhỏ của món.
@@ -359,7 +360,7 @@ export default function AdminMenuDashboardPage() {
                                                 </span>
 
                                                 <span className="rk-dishcard__price">
-                                                    {dish.price.toLocaleString('vi-VN')}đ
+                                                    {formatCurrencyShort(dish.price)}
                                                 </span>
                                             </div>
                                         </div>
@@ -401,7 +402,7 @@ export default function AdminMenuDashboardPage() {
                                                 </td>
 
                                                 <td className="rk-td--num">
-                                                    {dish.price.toLocaleString('vi-VN')}đ
+                                                    {formatCurrency(dish.price)}
                                                 </td>
 
                                                 <td>

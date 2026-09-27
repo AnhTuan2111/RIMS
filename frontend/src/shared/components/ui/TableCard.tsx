@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react'
+import {formatCurrencyShort} from '@/shared/utils/format'
 
 export type TableStatus = 'AVAILABLE' | 'SERVING' | 'RESERVED'
 
@@ -34,8 +35,9 @@ const CHIP_MODIFIER: Record<TableStatus, string> = {
     RESERVED: 'rk-chip--info',
 }
 
+/* Thẻ bàn là "chỗ hẹp" theo luật tiền: rút gọn, không ghi đầy đủ. */
 function formatAmount(value: number) {
-    return `${value.toLocaleString('vi-VN')} đ`
+    return formatCurrencyShort(value)
 }
 
 /**

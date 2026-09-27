@@ -12,6 +12,7 @@ import type {
     WeeklyRevenueChartResponse,
 } from '@/shared/api/admin'
 import {getErrorMessage} from '@/shared/utils/error'
+import {formatCurrencyShort, formatNumber} from '@/shared/utils/format'
 
 interface WeekOption {
     value: string
@@ -180,12 +181,17 @@ function formatWeekRangeLabel(week: WeekOption) {
     return `${formatDisplayDate(week.fromDate)} - ${formatDisplayDate(week.toDate)}`
 }
 
+/*
+ * Ô THỐNG KÊ là "chỗ hẹp" theo luật tiền đã chốt, nên nó rút gọn: 68,4tr chứ
+ * không phải 68.430.000 ₫. Một con số chín chữ số trong một ô 200px thì phải
+ * thu nhỏ cỡ chữ để vừa, và lúc đó nó hết là con số to.
+ *
+ * Hai hàm formatRevenueCurrency và formatNumber trước đây là bản chép lại của
+ * shared/utils/format — đúng thứ CONTRIBUTING cấm, và là lý do cùng một số tiền
+ * hiện ra mỗi màn một kiểu.
+ */
 function formatRevenueCurrency(value?: number | null) {
-    return `${new Intl.NumberFormat('vi-VN').format(value ?? 0)} đ`
-}
-
-function formatNumber(value?: number | null) {
-    return new Intl.NumberFormat('vi-VN').format(value ?? 0)
+    return formatCurrencyShort(value ?? 0)
 }
 
 function formatDecimal(value?: number | null) {
@@ -195,8 +201,9 @@ function formatDecimal(value?: number | null) {
     }).format(value ?? 0)
 }
 
+/* Nhãn trục của biểu đồ cũng là chỗ hẹp — trục dọc chỉ rộng vài chục pixel. */
 function formatRevenueAxis(value: number) {
-    return `${formatNumber(value)} đ`
+    return formatCurrencyShort(value)
 }
 
 function getDishInitial(dishName: string) {

@@ -295,6 +295,20 @@ a {
     filter: brightness(1.08);
 }
 
+/* Mực tô đặc — vai TRUNG TÍNH nhưng quan trọng.
+   design.md ghi biến thể này "chưa có hành động thật nào cần nó". Nay có: nút
+   mở ô đăng nhập ở trang chủ. Nó không phải LÀM (không xác nhận gì) và không
+   phải PHÁ, nên lấy lục hay đỏ đều là nói sai nghĩa; còn nút phụ viền mảnh thì
+   chìm mất trên một hàng nhận diện đầy màu. */
+.rk-btn--ink {
+    background: var(--rims-tablehead);
+    color: var(--rims-ink-on-tablehead);
+}
+
+.rk-btn--ink:hover:not(:disabled) {
+    filter: brightness(1.25);
+}
+
 .rk-btn--lg {
     padding: var(--rims-space-4) var(--rims-space-6);
     font-size: var(--rims-text-lg);
@@ -3428,6 +3442,206 @@ textarea.rk-input {
     width: 100%;
     max-width: 46rem;
     margin-inline: auto;
+}
+
+/* =========================================================================
+   SÁU THỦ PHÁP RETRO — bảng cho phép ở design.md § Sáu thủ pháp retro
+
+   | Thủ pháp        | Công khai | Vận hành | Quản trị | Tốn màu |
+   | Sọc kẻ chéo     | được      | được     | được     | không   |
+   | Chữ nét đôi     | được      | chỉ màn kết quả trả tiền | không | 1 màu |
+   | Số bảng tỉ số   | được      | được     | được     | không   |
+   | Chấm halftone   | được      | không    | không    | 1 màu   |
+   | Tia starburst   | được      | không    | không    | 1 màu   |
+   | Băng chữ chạy   | được      | được     | không    | không   |
+
+   Màn vận hành chỉ dùng ba thủ pháp KHÔNG TỐN MÀU, để dành trọn ngân sách
+   ba màu cho trạng thái.
+
+   Mọi thủ pháp ở đây đều tôn trọng prefers-reduced-motion.
+   ========================================================================= */
+
+/* ---------- 1 · Sọc kẻ chéo ----------
+   Dùng cho: nút vô hiệu, trạng thái rỗng, vùng chưa có dữ liệu.
+   Không tốn màu nào — nó là mực trên giấy. */
+
+.rk-stripe {
+    background-image: repeating-linear-gradient(45deg, transparent 0 6px, rgb(var(--rims-tint-ink) / 12%) 6px 8px);
+}
+
+/* Bản đậm, dùng làm dải phân cách lớn ở trang công khai. */
+.rk-stripe--bold {
+    background-image: repeating-linear-gradient(45deg, var(--rims-brand-fill) 0 10px, transparent 10px 20px);
+}
+
+/* ---------- 2 · Chữ nét đôi ----------
+   Chữ có một bản sao lệch phía sau, đúng cách in lụa lệch bản.
+
+   Dùng paint-order + stroke, KHÔNG dùng text-shadow: text-shadow nhoè theo
+   blur và không giữ được cạnh cứng, mà cạnh cứng mới là cả điểm của hệ này. */
+
+.rk-outline {
+    color: var(--rims-paper);
+    -webkit-text-stroke: 2px var(--rims-ink);
+    paint-order: stroke fill;
+    text-shadow: var(--rims-offset) var(--rims-offset) 0 var(--rims-brand-fill);
+}
+
+/* ---------- 3 · Số kiểu bảng tỉ số ----------
+   Con số đứng trong ô mực, mono, bảng tỉ số — đồng hồ sân vận động.
+   Đã có .rk-num cho tabular-nums; đây là khối. */
+
+.rk-score {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.rk-score__d {
+    display: grid;
+    place-items: center;
+    min-width: 1.1em;
+    padding: 0.08em 0.18em;
+    background: var(--rims-tablehead);
+    color: var(--rims-ink-on-tablehead);
+    font-family: var(--rims-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--rims-weight-bold);
+    line-height: 1;
+}
+
+/* Dấu phân cách (dấu chấm nghìn) không nằm trong ô — nó là mực trần. */
+.rk-score__sep {
+    align-self: end;
+    padding-inline: 1px;
+    color: var(--rims-ink-3);
+    font-family: var(--rims-font-mono);
+    font-weight: var(--rims-weight-bold);
+}
+
+/* ---------- 4 · Chấm halftone ----------
+   Dải chấm thưa dần, kiểu bản in báo cũ. Chỉ ở trang công khai, và chỉ trên
+   khối lớn — trên khối nhỏ nó thành nhiễu. */
+
+.rk-halftone {
+    background-image: radial-gradient(var(--rims-brand-fill) 1.6px, transparent 1.7px);
+    background-size: 10px 10px;
+}
+
+/* Thưa dần về một phía: hai lớp, lớp sau che dần lớp trước. */
+.rk-halftone--fade {
+    background-image:
+        linear-gradient(to right, var(--rims-paper) 10%, transparent 60%),
+        radial-gradient(var(--rims-brand-fill) 1.6px, transparent 1.7px);
+    background-size:
+        100% 100%,
+        10px 10px;
+}
+
+/* ---------- 5 · Tia starburst ----------
+   Tối đa MỘT cái mỗi màn, chỉ trang công khai. Đây là con dấu "giá sốc" của
+   biển hiệu cũ, và hai cái trên một màn thì không cái nào còn là điểm nhấn. */
+
+.rk-burst {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 7.5rem;
+    height: 7.5rem;
+    padding: 0.5rem;
+    color: var(--rims-ink-on-brand);
+    font-family: var(--rims-font-display);
+    font-size: var(--rims-text-sm);
+    font-weight: var(--rims-weight-black);
+    line-height: 1.05;
+    text-align: center;
+    text-transform: uppercase;
+    /* Hai hình vuông chồng lệch 45° cho ra tám tia — cách dựng starburst của
+       bản in, không cần SVG và không cần ảnh. */
+    background: var(--rims-brand-fill);
+    clip-path: polygon(
+        50% 0%,
+        61% 13%,
+        78% 6%,
+        81% 24%,
+        98% 27%,
+        90% 43%,
+        100% 57%,
+        84% 66%,
+        88% 84%,
+        70% 85%,
+        63% 100%,
+        50% 90%,
+        37% 100%,
+        30% 85%,
+        12% 84%,
+        16% 66%,
+        0% 57%,
+        10% 43%,
+        2% 27%,
+        19% 24%,
+        22% 6%,
+        39% 13%
+    );
+}
+
+.rk-burst b {
+    display: block;
+    font-size: var(--rims-text-2xl);
+    line-height: 1;
+}
+
+/* ---------- 6 · Băng chữ chạy ----------
+   Dải mực chạy ngang: thông báo ca, món hết, bếp nghẽn.
+   Không tốn màu, nên màn vận hành dùng được. */
+
+.rk-ticker {
+    display: flex;
+    overflow: hidden;
+    border-block: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-tablehead);
+    color: var(--rims-ink-on-tablehead);
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    letter-spacing: var(--rims-tracking-label);
+    text-transform: uppercase;
+}
+
+.rk-ticker__run {
+    display: flex;
+    flex: none;
+    gap: var(--rims-space-8);
+    padding: var(--rims-space-2) var(--rims-space-4);
+    padding-inline-end: var(--rims-space-8);
+    white-space: nowrap;
+    animation: rk-ticker-run 30s linear infinite;
+}
+
+/* Chạy hết đúng MỘT bản sao rồi lặp. Vì có hai bản sao cạnh nhau, lúc bản đầu
+   rời hết khỏi khung thì bản sau đã ở đúng chỗ nó vừa rời — không có khe hở. */
+@keyframes rk-ticker-run {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+.rk-ticker:hover .rk-ticker__run,
+.rk-ticker:focus-within .rk-ticker__run {
+    animation-play-state: paused;
+}
+
+/* Máy đã nói không muốn chuyển động thì băng đứng yên và cuộn được bằng tay. */
+@media (prefers-reduced-motion: reduce) {
+    .rk-ticker {
+        overflow-x: auto;
+    }
+
+    .rk-ticker__run {
+        animation: none;
+    }
 }
 
 /* ---------- Sơ đồ mặt bằng ----------
