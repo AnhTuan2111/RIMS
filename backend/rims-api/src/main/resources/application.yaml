@@ -81,8 +81,11 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    # Để trống được: bản deploy gửi qua HTTP API (xem app.mail.provider) nên
+    # không cần tài khoản SMTP. Khi provider là smtp mà thiếu hai giá trị này
+    # thì SmtpEmailServiceImpl dừng app lúc khởi động và nói rõ thiếu gì.
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -91,6 +94,20 @@ spring:
             enable: true
 
 app:
+  # ---------- Gửi email ----------
+  # smtp  : qua JavaMailSender. Dùng ở máy phát triển.
+  # brevo : qua HTTP API. Dùng khi deploy, vì nhiều nền tảng lưu trữ miễn phí
+  #         chặn traffic đi ra ở cổng SMTP (Render chặn 25/465/587 trên gói
+  #         free) nên SMTP hỏng hẳn ở đó — và hỏng đúng luồng quên mật khẩu.
+  mail:
+    provider: ${MAIL_PROVIDER:smtp}
+    # Địa chỉ hiện ở ô "From". Với Brevo, địa chỉ này phải được xác minh sẵn
+    # trong Senders & IPs, nếu không mọi lần gửi đều bị từ chối.
+    from-email: ${MAIL_FROM_EMAIL:}
+    from-name: ${MAIL_FROM_NAME:RIMS}
+    brevo:
+      api-key: ${BREVO_API_KEY:}
+
   # Địa chỉ frontend. Dùng cho cả CORS allowed origin lẫn redirect sau khi VNPay
   # trả kết quả về. Khi deploy thật chỉ cần đổi một chỗ này.
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
