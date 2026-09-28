@@ -27,7 +27,9 @@ async function loadLazyImages(page) {
     await page.evaluate(async () => {
         const step = window.innerHeight
         for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
-            window.scrollTo(0, y)
+            // 'instant': trang đặt scroll-behavior: smooth, và cuộn mượt thì
+            // ảnh bị chụp giữa lúc đang trôi — thanh trên và rail lệch xuống.
+            window.scrollTo({top: y, behavior: 'instant'})
             await new Promise((resolve) => setTimeout(resolve, 120))
         }
         // Chờ mọi ảnh ĐÃ BẮT ĐẦU tải xong, tối đa 5 giây. networkidle thôi
@@ -39,8 +41,9 @@ async function loadLazyImages(page) {
             Promise.all(pending.map((img) => img.decode().catch(() => {}))),
             new Promise((resolve) => setTimeout(resolve, 5000)),
         ])
-        window.scrollTo(0, 0)
+        window.scrollTo({top: 0, behavior: 'instant'})
     })
+    await page.waitForFunction(() => window.scrollY === 0).catch(() => {})
     await page.waitForLoadState('networkidle').catch(() => {})
 }
 
