@@ -241,10 +241,17 @@ public class UserServiceImpl implements UserService
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email không tồn tại"));
 
-        if (user.getRole() != RoleType.CUSTOMER)
-        {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Chức năng quên mật khẩu chỉ dành cho khách hàng");
-        }
+        // KHÔNG lọc theo vai. Trước đây chỗ này chặn mọi vai trừ CUSTOMER, và nó
+        // tạo ra một ngõ cụt: resetPassword() từ chối đặt lại mật khẩu cho tài
+        // khoản Quản trị viên kèm lời nhắn "Hãy dùng chức năng Quên mật khẩu qua
+        // email", còn chính luồng đó lại chặn Quản trị viên. Hai nhánh chỉ sang
+        // nhau, nên Quản trị viên quên mật khẩu là mất tài khoản vĩnh viễn —
+        // đặc biệt nguy hiểm khi chạy thật, nơi thường chỉ có đúng một tài khoản
+        // Quản trị viên và gỡ ra được thì phải vào thẳng cơ sở dữ liệu.
+        //
+        // Mở cho mọi vai không hở bảo mật: OTP chỉ gửi tới email đã đăng ký của
+        // chính tài khoản đó, và verifyOtpAndResetPassword() cũng chưa bao giờ
+        // kiểm vai, nên nửa sau của luồng vốn đã sẵn sàng.
 
         String otp = generateOtp();
         otpStore.save(request.getEmail(), otp);

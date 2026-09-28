@@ -214,6 +214,11 @@ biết — **hãy đặt biến này khi chạy thật**. Hệ thống **bắt �
 Quản trị viên không đặt lại được mật khẩu của Quản trị viên khác; tài khoản đó
 dùng luồng **Quên mật khẩu** qua email.
 
+Luồng Quên mật khẩu mở cho **mọi vai**, không riêng khách hàng. Phải vậy, vì
+Quản trị viên không có đường nào khác: không ai đặt lại hộ được, nên nếu luồng
+này cũng chặn thì quên mật khẩu là mất tài khoản vĩnh viễn — mà khi chạy thật
+thì thường chỉ có đúng một tài khoản Quản trị viên.
+
 ### 3.7. VNPay
 
 Cấu hình mặc định trỏ tới **sandbox**. Khi deploy thật cần đổi `vnpay.url`,
