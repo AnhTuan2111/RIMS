@@ -179,7 +179,7 @@ public class CashierServiceImpl implements CashierService
         {
             String preparingNames = items.stream()
                     .filter(item -> item.getStatus() == OrderItemStatus.PREPARING)
-                    .map(item -> item.getDishNameSnapshot() + " x" + item.getQuantity())
+                    .map(item -> item.getDishNameSnapshot() + " ×" + item.getQuantity())
                     .collect(Collectors.joining(", "));
             throw new IllegalArgumentException("Không thể thanh toán, còn món chưa hoàn thành: " + preparingNames);
         }

@@ -35,6 +35,33 @@ const OUT = join(process.cwd(), 'tools', 'shots')
  * <p>`hover` là bộ chọn của thứ đáng xem nhất khi rê chuột trên màn đó. Không
  * có thì bỏ qua bước hover.
  */
+/**
+ * Cuộn hết trang rồi về đầu, để ảnh tải lười (loading="lazy") kịp tải.
+ *
+ * <p>Chụp cả trang mà không cuộn thì mọi ảnh dưới màn đầu tiên hiện thành ô
+ * xám trống — trông y hệt ảnh hỏng, và đã có lúc bị đọc nhầm là lỗi app.
+ */
+async function loadLazyImages(page) {
+    await page.evaluate(async () => {
+        const step = window.innerHeight
+        for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+            window.scrollTo(0, y)
+            await new Promise((resolve) => setTimeout(resolve, 120))
+        }
+        // Chờ mọi ảnh ĐÃ BẮT ĐẦU tải xong, tối đa 5 giây. networkidle thôi
+        // chưa đủ: ảnh tải xong vẫn còn phải giải mã mới vẽ lên được.
+        const pending = [...document.images].filter(
+            (img) => img.loading !== 'lazy' || img.getBoundingClientRect().top < 1e6,
+        )
+        await Promise.race([
+            Promise.all(pending.map((img) => img.decode().catch(() => {}))),
+            new Promise((resolve) => setTimeout(resolve, 5000)),
+        ])
+        window.scrollTo(0, 0)
+    })
+    await page.waitForLoadState('networkidle').catch(() => {})
+}
+
 const ROUTES = [
     {g: 'cong-khai', n: '01-trang-chu', p: '/', hover: '.rk-dish'},
     {g: 'cong-khai', n: '02-dang-nhap', p: '/login', hover: 'button[type="submit"]'},
@@ -213,6 +240,7 @@ for (const scheme of SCHEMES) {
                 console.log(`  ✓ ${tag}`)
             }
 
+            await loadLazyImages(page)
             await page.screenshot({
                 path: join(OUT, `${route.n}__${scheme}__${width}.png`),
                 fullPage: true,

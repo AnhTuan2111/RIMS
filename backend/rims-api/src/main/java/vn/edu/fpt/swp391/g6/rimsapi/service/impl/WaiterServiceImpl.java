@@ -476,7 +476,7 @@ public class WaiterServiceImpl implements WaiterService
         DateTimeFormatter formatter = DateTimeFormatter
                 .ofPattern("HH 'giờ' mm 'phút,' EEEE 'ngày' dd 'tháng' MM 'năm' yyyy", Locale.of("vi", "VN"));
 
-        return "Tạo đơn đặt bàn thành công cho bàn" + table.getTableNumber() + " vào "
+        return "Tạo đơn đặt bàn thành công cho bàn " + table.getTableNumber() + " vào "
                 + request.getReservationTime().format(formatter);
     }
 
