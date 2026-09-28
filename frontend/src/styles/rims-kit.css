@@ -2023,6 +2023,13 @@ textarea.rk-input {
     min-width: 0;
 }
 
+.rk-rowlist__when {
+    display: grid;
+    flex: none;
+    justify-items: start;
+    gap: var(--rims-space-1);
+}
+
 .rk-rowlist__time {
     flex: none;
     min-width: 4.5ch;
@@ -5258,9 +5265,11 @@ a.rk-statcard:focus-visible {
 
 /* Trong một DÒNG DANH SÁCH, các ô thông tin có bề ngang cố định để cột thẳng
    hàng từ dòng này sang dòng khác. Để co theo nội dung thì khối dồn phải và
-   rộng theo độ dài lý do huỷ — cột "Bàn" mỗi dòng đứng một chỗ. Dưới 48rem
-   vẫn xuống hàng tự do như cũ. */
-@media (min-width: 48rem) {
+   rộng theo độ dài lý do huỷ — cột "Bàn" mỗi dòng đứng một chỗ.
+
+   Từ 64rem, không phải 48rem: bốn cột cố định cộng lại ~38rem, cộng tên món
+   thì ở 768px dòng lòi khỏi thẻ 70px. Hẹp hơn vẫn xuống hàng tự do. */
+@media (min-width: 64rem) {
     .rk-rowlist__item > .rk-metarow {
         flex-wrap: nowrap;
     }

@@ -591,15 +591,21 @@ export default function WaiterCreateReservationPage() {
                                             className="rk-rowlist__item"
                                         >
                                             <div className="rk-rowlist__lead">
-                                                <div className="rk-rowlist__time">
-                                                    {time}
-                                                </div>
+                                                {/* Chip nằm DƯỚI giờ, cùng cột: chen
+                                                    ngang giữa giờ và tên thì dòng
+                                                    rộng thêm cả chip và lòi khỏi thẻ
+                                                    ở 375px. */}
+                                                <div className="rk-rowlist__when">
+                                                    <div className="rk-rowlist__time">
+                                                        {time}
+                                                    </div>
 
-                                                {reservation.needsAttention && (
-                                                    <span className="rk-chip rk-chip--alert">
-                                                        Chưa có bàn
-                                                    </span>
-                                                )}
+                                                    {reservation.needsAttention && (
+                                                        <span className="rk-chip rk-chip--alert">
+                                                            Chưa có bàn
+                                                        </span>
+                                                    )}
+                                                </div>
 
                                                 <div className="rk-rowlist__main">
                                                     <h4>{reservation.customerName}</h4>

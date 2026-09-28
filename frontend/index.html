@@ -26,11 +26,29 @@
              /favicon.ico trả về 404. -->
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-        <title>RIMS — Hệ thống quản lý nhà hàng</title>
-        <meta
-            name="description"
-            content="Hệ thống quản lý nhà hàng: đặt bàn, gọi món, bếp và thanh toán."
-        />
+        <!-- Tiêu đề và biểu tượng tab đi theo HỒ SƠ NHÀ HÀNG (DocumentBranding).
+             Hai dòng dưới chỉ là bản dự phòng cho lần mở đầu tiên; từ lần sau
+             đoạn script bên dưới đặt đúng tên và biểu tượng của quán ngay khi
+             tải trang, trước khi React chạy. -->
+        <title>Nhà hàng</title>
+        <meta name="description" content="Thực đơn, đặt bàn và quản lý nhà hàng." />
+        <script>
+            try {
+                var brand = JSON.parse(localStorage.getItem('rims.brand') || 'null')
+                if (brand && brand.name) {
+                    document.title = brand.tagline
+                        ? brand.name + ' — ' + brand.tagline
+                        : brand.name
+                    if (brand.icon) {
+                        var icon = document.querySelector('link[rel="icon"]')
+                        icon.removeAttribute('type')
+                        icon.href = brand.icon
+                    }
+                }
+            } catch (e) {
+                /* không đọc được bộ nhớ đệm thì dùng bản dự phòng */
+            }
+        </script>
 
         <!-- Ba mặt chữ của hệ "Phiếu bếp", cả ba đều có subset vietnamese.
              Archivo: tiêu đề và nhãn nút, luôn IN HOA — thân chữ đặc, in hoa rất chắc.

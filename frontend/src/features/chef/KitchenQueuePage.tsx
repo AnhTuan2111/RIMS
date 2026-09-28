@@ -2,6 +2,7 @@ import {Icon} from '@/shared/components/ui/Icon'
 import {ErrorState, LoadingState} from '@/shared/components/feedback'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useKitchenSocket} from '@/realtime'
+import {setTitleBadge} from '@/app/branding/titleBadge'
 
 import {
     getDishDetail,
@@ -138,8 +139,6 @@ export default function KitchenQueuePage() {
 
     const newOrderMessageTimerRef = useRef<number | null>(null)
 
-    const originalDocumentTitleRef = useRef(document.title)
-
     const playNewOrderSound = useCallback(() => {
         const audioContext = audioContextRef.current
 
@@ -212,7 +211,7 @@ export default function KitchenQueuePage() {
 
         setNewOrderMessage(message)
 
-        document.title = `${newOrderCount} món mới - ` + originalDocumentTitleRef.current
+        setTitleBadge(`${newOrderCount} món mới`)
 
         if (newOrderMessageTimerRef.current !== null) {
             window.clearTimeout(newOrderMessageTimerRef.current)
@@ -221,7 +220,7 @@ export default function KitchenQueuePage() {
         newOrderMessageTimerRef.current = window.setTimeout(() => {
             setNewOrderMessage(null)
 
-            document.title = originalDocumentTitleRef.current
+            setTitleBadge(null)
 
             newOrderMessageTimerRef.current = null
         }, NEW_ORDER_MESSAGE_DURATION_MS)
@@ -306,14 +305,12 @@ export default function KitchenQueuePage() {
     }, [])
 
     useEffect(() => {
-        const originalTitle = originalDocumentTitleRef.current
-
         return () => {
             if (newOrderMessageTimerRef.current !== null) {
                 window.clearTimeout(newOrderMessageTimerRef.current)
             }
 
-            document.title = originalTitle
+            setTitleBadge(null)
 
             audioContextRef.current?.close().catch((requestError) => {
                 console.error('[CHEF_AUDIO_CONTEXT_CLOSE_ERROR]', requestError)

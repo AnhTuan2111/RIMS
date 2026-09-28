@@ -1,17 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-    <rect width="32" height="32" rx="7" fill="#10566b" />
-    <path
-        d="M10 8v7a2.5 2.5 0 0 0 5 0V8M12.5 15v9"
-        stroke="#f4fbfc"
-        stroke-width="2"
-        stroke-linecap="round"
-        fill="none"
-    />
-    <path
-        d="M21 8c-1.5 1.5-2 3-2 5s.7 3 2 3v8"
-        stroke="#f4fbfc"
-        stroke-width="2"
-        stroke-linecap="round"
-        fill="none"
-    />
+    <!-- Dự phòng cho lần mở đầu tiên, trước khi biết tên quán. Màu nhấn của
+         rail (#c8271b); DocumentBranding thay bằng chữ cái đầu tên quán hoặc
+         logo quản trị tải lên. -->
+    <rect width="32" height="32" fill="#c8271b" />
+    <path d="M7 15h18a9 9 0 0 1-18 0Z" fill="#ffffff" />
+    <path d="M12 23.5h8" stroke="#ffffff" stroke-width="2" />
+    <path d="M13 7l2 6M19 7l-2 6" stroke="#ffffff" stroke-width="2" stroke-linecap="square" />
 </svg>
