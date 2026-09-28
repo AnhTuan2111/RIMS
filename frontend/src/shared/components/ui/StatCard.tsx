@@ -59,7 +59,10 @@ export function StatCard({
         </>
     )
 
-    const className = `rk-statcard rk-statcard--${tone}`
+    // Màu của ô là để BÁO một điều cần chú ý. Con số 0 thì không có gì để báo:
+    // "Tạm dừng bán 0" nền hổ phách, "Danh mục ẩn 0" nền đỏ là báo động giả.
+    const isZero = value === 0 || value === '0'
+    const className = `rk-statcard rk-statcard--${isZero ? 'plain' : tone}`
 
     if (to) {
         return (

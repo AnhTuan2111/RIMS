@@ -419,7 +419,6 @@ export function RevenueDashboard({
         <div className="rk-stack">
             <PageCard>
                 <PageHeader
-                    eyebrow="Thống kê"
                     title="Báo cáo tổng doanh thu"
                     description="Tổng quan doanh thu hiện tại."
                 />

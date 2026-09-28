@@ -39,14 +39,13 @@ function formatTableName(tableNumber: string) {
     return `Bàn ${tableNumber}`
 }
 
+/**
+ * Phương thức thanh toán là một THUỘC TÍNH của hoá đơn, không phải trạng thái:
+ * nhãn trung tính, không màu, không dấu. Bản trước dùng chip xanh LÀM kèm dấu
+ * ✓ — mọi dòng tiền mặt đọc ra như "đã hoàn thành" thêm một lần nữa.
+ */
 function PaymentMethodBadge({method}: {method: AdminPaymentMethod}) {
-    const isCash = method === 'CASH'
-
-    return (
-        <span className={`rk-chip ${isCash ? 'rk-chip--ok' : 'rk-chip--info'}`}>
-            {isCash ? 'Tiền mặt' : 'Mã QR'}
-        </span>
-    )
+    return <span className="rk-tag">{method === 'CASH' ? 'Tiền mặt' : 'Mã QR'}</span>
 }
 
 export default function AdminPaymentHistoryPage() {
@@ -213,10 +212,8 @@ export default function AdminPaymentHistoryPage() {
         <div className="rk-stack">
             <PageCard>
                 <PageHeader
-                    eyebrow="Quản trị"
                     title="Lịch sử hoá đơn"
                     description={`${totalItems} hoá đơn đã thanh toán được ghi nhận`}
-                    icon={<Icon name="invoice" className="rk-icon" />}
                 />
             </PageCard>
 

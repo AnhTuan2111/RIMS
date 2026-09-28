@@ -243,19 +243,30 @@ test.describe('Quản trị · tài khoản', () => {
 
         try {
             await chip.click()
-            await dialog.getByRole('button', {name: 'Khoá tài khoản', exact: true}).click()
+            await dialog
+                .getByRole('button', {name: 'Khoá tài khoản', exact: true})
+                .click()
             await expect(
                 page.getByRole('button', {name: `Đã khoá — mở khoá tài khoản ${target}`}),
             ).toBeVisible()
 
-            // Khoá thật ở backend: đăng nhập phải bị từ chối.
+            // Khoá thật ở backend: đăng nhập phải bị từ chối. Chờ bằng poll —
+            // màn đổi trạng thái NGAY rồi mới gọi API, nên hỏi ngay lập tức là
+            // đua với chính request khoá.
             const base = process.env.E2E_API ?? 'http://localhost:8080/rims'
-            const res = await fetch(`${base}/auth/login`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: target, rawPassword: PW}),
-            })
-            expect(res.ok, 'tài khoản đã khoá vẫn đăng nhập được').toBe(false)
+            await expect
+                .poll(
+                    async () =>
+                        (
+                            await fetch(`${base}/auth/login`, {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({username: target, rawPassword: PW}),
+                            })
+                        ).ok,
+                    {timeout: 10_000, message: 'tài khoản đã khoá vẫn đăng nhập được'},
+                )
+                .toBe(false)
         } finally {
             // Mở khoá — không hỏi lại, và trả tài khoản về như cũ.
             const unlock = page.getByRole('button', {

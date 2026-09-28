@@ -565,6 +565,23 @@ a {
     --rims-chip-mark: '\25AB';
 }
 
+/* Dấu theo NGHĨA, độc lập với màu.
+   Mỗi biến thể màu mang sẵn một dấu mặc định, nên cứ chọn màu vì một lý do
+   khác — gấp, cần chú ý — là dấu sai nghĩa theo: món chờ lâu tô đỏ thì hiện
+   "✕ CHỜ 5 GIỜ", đọc ra thành món đã huỷ. Các lớp dưới đè dấu theo đúng bảng
+   đã chốt ở trên, bất kể màu. Đặt SAU các biến thể màu để thắng cùng độ ưu tiên. */
+.rk-chip--m-run {
+    --rims-chip-mark: '\25B8';
+}
+
+.rk-chip--m-held {
+    --rims-chip-mark: '\25AA';
+}
+
+.rk-chip--m-pause {
+    --rims-chip-mark: '\2016';
+}
+
 .rk-chip--ok {
     background: var(--rims-ok-fill);
     color: var(--rims-ink-on-ok);
@@ -659,8 +676,11 @@ button.rk-chip:hover {
     min-width: 72px;
     padding: var(--rims-space-3) var(--rims-space-2);
     border-radius: var(--rims-radius-md);
-    background: var(--rims-brand-fill);
-    color: var(--rims-ink-on-brand);
+    /* Khối MỰC, cùng màu đầu cột của bảng — không phải đỏ. Đỏ trong nội dung
+       là màu BỎ; ô số phần tô đỏ ở cột "Đang làm", cạnh nút "Xong món" màu
+       LÀM, đọc ra như món có vấn đề. */
+    background: var(--rims-tablehead);
+    color: var(--rims-ink-on-tablehead);
 }
 
 .rk-ticket__qty-num {
@@ -2545,6 +2565,18 @@ textarea.rk-input {
 
 .rk-rowlist__item:last-child {
     border-bottom: 0;
+}
+
+/* Dòng có KHỐI THÔNG TIN (Đã xong, Đã huỷ) được xuống hàng khi chật.
+   Đứng ngang cứng thì ở 375px khối tên món bị bóp còn ~30px và overflow-wrap
+   bẻ tên từng chữ cái: "SA / SHI / MI / CÁ / CA / M / HA / MA / CHI". Nay tên
+   món một hàng, khối thông tin xuống hàng dưới. */
+.rk-rowlist__item:has(> .rk-metarow) {
+    flex-wrap: wrap;
+}
+
+.rk-rowlist__item:has(> .rk-metarow) > .rk-media {
+    flex: 1 1 16rem;
 }
 
 .rk-rowlist__main {

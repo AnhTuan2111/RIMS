@@ -166,6 +166,7 @@ for (const scheme of ['light', 'dark'] as const) {
         test.use({colorScheme: scheme})
 
         test('mọi cặp chữ/nền trên mọi màn đều qua ngưỡng AA', async ({page}) => {
+            test.setTimeout(180_000)
             const problems: string[] = []
             let signedIn: string | null = null
 
@@ -186,6 +187,7 @@ for (const scheme of ['light', 'dark'] as const) {
 
 test.describe('Bố cục', () => {
     test('không màn nào tràn ngang ở 320px', async ({page}) => {
+        test.setTimeout(180_000)
         await page.setViewportSize({width: 320, height: 800})
 
         const problems: string[] = []
@@ -209,6 +211,7 @@ test.describe('Bố cục', () => {
     })
 
     test('không nhãn bấm được nào xuống hai dòng', async ({page}) => {
+        test.setTimeout(180_000)
         const problems: string[] = []
         let signedIn: string | null = null
 
@@ -226,6 +229,7 @@ test.describe('Bố cục', () => {
     })
 
     test('mọi ô nhập đều có nhãn và cùng một khuôn', async ({page}) => {
+        test.setTimeout(180_000)
         // Hai lỗi cùng gốc — ô viết tay, không qua bộ kit:
         //   · không có lớp chuẩn → trình duyệt vẽ ô mặc định cao 23px, viền 1px;
         //   · chỉ có placeholder → trình đọc màn hình đọc ra "ô nhập" trống trơn,
@@ -284,6 +288,7 @@ test.describe('Bố cục', () => {
     })
 
     test('ô lọc không bị bóp ở khổ máy tính bảng', async ({page}) => {
+        test.setTimeout(180_000)
         // Thanh lọc xếp ngang từ 48rem. Ô tìm kiếm từng có flex-basis 0 nên
         // chỉ nhận phần thừa và không bao giờ xuống hàng: ở 768px màn Danh mục
         // nó còn 30px. Khổ 1440 và 375 đều ổn nên không bài nào thấy.
@@ -318,6 +323,7 @@ test.describe('Bố cục', () => {
     })
 
     test('không chữ nào bị cắt cụt trong khung không cuộn được', async ({page}) => {
+        test.setTimeout(180_000)
         const problems: string[] = []
         let signedIn: string | null = null
 

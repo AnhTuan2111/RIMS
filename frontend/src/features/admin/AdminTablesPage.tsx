@@ -26,7 +26,8 @@ const STATUS_LABEL: Record<TableStatus, string> = {
 
 /** Chip trạng thái của bộ kit: màu đi kèm chấm dẫn và nhãn chữ. */
 const STATUS_CHIP: Record<TableStatus, string> = {
-    AVAILABLE: 'rk-chip rk-chip--ok',
+    // ▫ rỗng, như trên sơ đồ bàn — ✓ cho bàn trống là sai nghĩa (phiếu 03).
+    AVAILABLE: 'rk-chip rk-chip--ok rk-chip--empty',
     RESERVED: 'rk-chip rk-chip--info',
     SERVING: 'rk-chip rk-chip--busy',
 }
@@ -249,10 +250,8 @@ export default function AdminTablesPage() {
         <div className="rk-stack">
             <PageCard>
                 <PageHeader
-                    eyebrow="Vận hành"
                     title="Quản lý bàn"
                     description={`${stats.active} bàn đang dùng · ${stats.seats} chỗ ngồi. Bàn đã cất vẫn giữ nguyên lịch sử đơn cho báo cáo.`}
-                    icon={<Icon name="table" className="rk-icon" />}
                     actions={
                         <button
                             type="button"
@@ -348,8 +347,8 @@ export default function AdminTablesPage() {
                                                     <span
                                                         className={
                                                             table.active
-                                                                ? 'rk-chip rk-chip--ok'
-                                                                : 'rk-chip'
+                                                                ? 'rk-chip rk-chip--ok rk-chip--m-run'
+                                                                : 'rk-chip rk-chip--idle'
                                                         }
                                                     >
                                                         {table.active

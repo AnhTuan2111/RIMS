@@ -642,7 +642,7 @@ export default function WaiterUpdateOrderPage() {
                                                 )}
 
                                                 {!hasExisting && isUnavailable && (
-                                                    <span className="rk-chip rk-chip--alert">
+                                                    <span className="rk-chip rk-chip--alert rk-chip--m-pause">
                                                         Hết hàng
                                                     </span>
                                                 )}

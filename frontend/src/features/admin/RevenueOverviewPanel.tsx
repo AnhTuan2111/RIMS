@@ -474,7 +474,6 @@ function WeeklyRevenueOverviewDashboard({
                     label="Đơn đã thanh toán"
                     value={`${formatNumber(totalOrders)} đơn`}
                     textValue
-                    tone="ok"
                     icon={<Icon name="invoice" className="rk-icon" />}
                 />
 
@@ -489,7 +488,6 @@ function WeeklyRevenueOverviewDashboard({
                     label="Ca nhiều đơn nhất"
                     value={featuredShift?.displayName ?? 'Chưa có đơn trong ca'}
                     textValue
-                    tone="busy"
                 />
             </div>
 

@@ -68,14 +68,14 @@ function formatWaiting(minutes: number): string {
  */
 function getWaitingChip(minutes: number) {
     if (minutes >= 15) {
-        return 'rk-chip rk-chip--alert'
+        return 'rk-chip rk-chip--alert rk-chip--m-run'
     }
 
     if (minutes >= 10) {
-        return 'rk-chip rk-chip--busy'
+        return 'rk-chip rk-chip--busy rk-chip--m-run'
     }
 
-    return 'rk-chip rk-chip--idle'
+    return 'rk-chip rk-chip--idle rk-chip--m-run'
 }
 
 export default function GroupedKitchenPage() {

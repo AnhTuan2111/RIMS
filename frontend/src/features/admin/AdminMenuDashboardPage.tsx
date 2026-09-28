@@ -180,10 +180,8 @@ export default function AdminMenuDashboardPage() {
         <div className="rk-stack">
             <PageCard>
                 <PageHeader
-                    eyebrow="Quản trị"
                     title="Tổng quan thực đơn"
                     description="Theo dõi nhanh danh mục, món ăn mới cập nhật và các món đang tạm dừng bán."
-                    icon={<Icon name="kitchen" className="rk-icon" />}
                 />
             </PageCard>
 
@@ -249,7 +247,7 @@ export default function AdminMenuDashboardPage() {
                                     <span
                                         className={`rk-chip ${
                                             category.status === 'ACTIVE'
-                                                ? 'rk-chip--ok'
+                                                ? 'rk-chip--ok rk-chip--m-run'
                                                 : 'rk-chip--idle'
                                         }`}
                                     >
@@ -339,7 +337,7 @@ export default function AdminMenuDashboardPage() {
                                             <span
                                                 className={`rk-chip rk-dishcard__flag ${
                                                     dish.status === 'AVAILABLE'
-                                                        ? 'rk-chip--ok'
+                                                        ? 'rk-chip--ok rk-chip--m-run'
                                                         : 'rk-chip--idle'
                                                 }`}
                                             >
@@ -409,7 +407,7 @@ export default function AdminMenuDashboardPage() {
                                                     <span
                                                         className={`rk-chip ${
                                                             dish.status === 'AVAILABLE'
-                                                                ? 'rk-chip--ok'
+                                                                ? 'rk-chip--ok rk-chip--m-run'
                                                                 : 'rk-chip--idle'
                                                         }`}
                                                     >
@@ -454,7 +452,7 @@ export default function AdminMenuDashboardPage() {
                                             </div>
                                         </div>
 
-                                        <span className="rk-chip rk-chip--busy">
+                                        <span className="rk-chip rk-chip--idle">
                                             Tạm ngưng
                                         </span>
                                     </div>

@@ -335,7 +335,6 @@ export default function AdminCategoryPage() {
                         <StatCard
                             label="Tổng món ăn"
                             value={totalDishes}
-                            tone="busy"
                             icon={<Icon name="kitchen" className="rk-icon" />}
                         />
                     </div>
@@ -357,7 +356,7 @@ export default function AdminCategoryPage() {
 
                                         <div className="rk-dishcard__meta">
                                             <span
-                                                className={`rk-chip ${item.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
+                                                className={`rk-chip ${item.isAvailable ? 'rk-chip--ok rk-chip--m-run' : 'rk-chip--idle'}`}
                                             >
                                                 {item.isAvailable ? 'Hoạt động' : 'Đã ẩn'}
                                             </span>
@@ -457,7 +456,7 @@ export default function AdminCategoryPage() {
                                             </td>
                                             <td>
                                                 <span
-                                                    className={`rk-chip ${item.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
+                                                    className={`rk-chip ${item.isAvailable ? 'rk-chip--ok rk-chip--m-run' : 'rk-chip--idle'}`}
                                                 >
                                                     {item.isAvailable
                                                         ? 'Hoạt động'
@@ -625,7 +624,7 @@ export default function AdminCategoryPage() {
                                 <dt className="rk-detailrow__label">Trạng thái</dt>
                                 <dd className="rk-detailrow__value">
                                     <span
-                                        className={`rk-chip ${selectedCategory.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
+                                        className={`rk-chip ${selectedCategory.isAvailable ? 'rk-chip--ok rk-chip--m-run' : 'rk-chip--idle'}`}
                                     >
                                         {selectedCategory.isAvailable
                                             ? 'Đang hoạt động'
@@ -723,7 +722,7 @@ export default function AdminCategoryPage() {
                                                     </td>
                                                     <td>
                                                         <span
-                                                            className={`rk-chip ${dish.isAvailable ? 'rk-chip--ok' : 'rk-chip--idle'}`}
+                                                            className={`rk-chip ${dish.isAvailable ? 'rk-chip--ok rk-chip--m-run' : 'rk-chip--idle'}`}
                                                         >
                                                             {dish.isAvailable
                                                                 ? 'Đang bán'

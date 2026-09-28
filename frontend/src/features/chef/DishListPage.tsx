@@ -239,11 +239,19 @@ export default function DishListPage() {
                     description="Tìm kiếm, lọc và thay đổi trạng thái phục vụ của thực đơn."
                     actions={
                         <div className="rk-actions">
-                            <span className="rk-chip rk-chip--ok">
+                            <span className="rk-chip rk-chip--ok rk-chip--m-run">
                                 {availableCount} món đang bán
                             </span>
 
-                            <span className="rk-chip rk-chip--busy">
+                            {/* ‖ tạm dừng. Tô hổ phách chỉ khi CÓ món tạm hết —
+                                "0 món tạm hết" không phải việc cần chú ý. */}
+                            <span
+                                className={
+                                    unavailableCount > 0
+                                        ? 'rk-chip rk-chip--busy rk-chip--m-pause'
+                                        : 'rk-chip rk-chip--idle'
+                                }
+                            >
                                 {unavailableCount} món tạm hết
                             </span>
 
@@ -397,7 +405,7 @@ export default function DishListPage() {
                                                 <span
                                                     className={
                                                         dishItem.available
-                                                            ? 'rk-chip rk-chip--ok'
+                                                            ? 'rk-chip rk-chip--ok rk-chip--m-run'
                                                             : 'rk-chip rk-chip--idle'
                                                     }
                                                 >

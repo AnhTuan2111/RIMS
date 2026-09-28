@@ -601,7 +601,7 @@ export default function WaiterCreateReservationPage() {
                                                     </div>
 
                                                     {reservation.needsAttention && (
-                                                        <span className="rk-chip rk-chip--alert">
+                                                        <span className="rk-chip rk-chip--busy">
                                                             Chưa có bàn
                                                         </span>
                                                     )}

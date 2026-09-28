@@ -410,7 +410,7 @@ export default function AdminDishesPage() {
                                         className={`rk-chip rk-dishcard__flag ${
                                             dish.isHidden
                                                 ? 'rk-chip--idle'
-                                                : 'rk-chip--ok'
+                                                : 'rk-chip--ok rk-chip--m-run'
                                         }`}
                                     >
                                         {dish.isHidden
@@ -520,7 +520,7 @@ export default function AdminDishesPage() {
                                         </td>
                                         <td>
                                             <span
-                                                className={`rk-chip ${dish.isHidden ? 'rk-chip--idle' : 'rk-chip--ok'}`}
+                                                className={`rk-chip ${dish.isHidden ? 'rk-chip--idle' : 'rk-chip--ok rk-chip--m-run'}`}
                                             >
                                                 {dish.isHidden
                                                     ? 'Đã ẩn khỏi thực đơn'
@@ -826,7 +826,7 @@ export default function AdminDishesPage() {
                                 className={`rk-chip ${
                                     selectedDish.isHidden
                                         ? 'rk-chip--idle'
-                                        : 'rk-chip--ok'
+                                        : 'rk-chip--ok rk-chip--m-run'
                                 }`}
                             >
                                 {selectedDish.isHidden

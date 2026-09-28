@@ -523,8 +523,8 @@ export default function AdminUsersPage() {
                                                 type="button"
                                                 className={`rk-chip ${
                                                     user.isActive
-                                                        ? 'rk-chip--ok'
-                                                        : 'rk-chip--alert'
+                                                        ? 'rk-chip--ok rk-chip--m-run'
+                                                        : 'rk-chip--alert rk-chip--m-pause'
                                                 }`}
                                                 // Khoá phải hỏi lại: một lần bấm nhầm
                                                 // vào cái chip là một nhân viên bị đẩy

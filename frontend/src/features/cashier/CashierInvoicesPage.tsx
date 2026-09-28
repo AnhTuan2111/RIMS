@@ -366,13 +366,9 @@ export default function CashierInvoicesPage() {
                                     </td>
 
                                     <td>
-                                        <span
-                                            className={
-                                                invoice.paymentMethod === 'CASH'
-                                                    ? 'rk-chip rk-chip--ok'
-                                                    : 'rk-chip rk-chip--info'
-                                            }
-                                        >
+                                        {/* Thuộc tính, không phải trạng thái: nhãn
+                                            trung tính như ở màn Hoá đơn quản trị. */}
+                                        <span className="rk-tag">
                                             {methodLabel(invoice.paymentMethod)}
                                         </span>
                                     </td>
@@ -523,7 +519,6 @@ export default function CashierInvoicesPage() {
                                 bold
                                 label="Thành tiền:"
                                 value={`${formatCurrency(selectedInvoice.finalAmount)}`}
-                                tone="alert"
                             />
 
                             <Row

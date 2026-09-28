@@ -167,7 +167,7 @@ export default function PaymentResultManager({
                                 <SummaryRow
                                     label="Điểm tích lũy thêm:"
                                     value={`+${pointsEarned} điểm`}
-                                    tone="busy"
+                                    tone="ok"
                                     bold
                                 />
                             )}

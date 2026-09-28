@@ -151,7 +151,6 @@ export const ICON_MEANING: Record<IconName, string> = {
  * XOÁ dòng tương ứng ở đây.
  */
 export const ICON_PLANNED: Partial<Record<IconName, string>> = {
-    clockAlert: 'P7 — đặt bàn quá giờ, phiếu chờ quá 15 phút',
     sort: 'P7 — sắp xếp ở đầu bảng 11 màn quản trị',
     filter: 'P7 — lọc ở rail lọc và hàng lọc',
     print: 'P7 — nút In hoá đơn ở màn thu ngân',

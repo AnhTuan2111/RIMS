@@ -330,7 +330,7 @@ export default function WaiterCreateOrderPage() {
                                             )}
 
                                             {isUnavailable && (
-                                                <span className="rk-chip rk-chip--alert rk-menucard__flag">
+                                                <span className="rk-chip rk-chip--alert rk-chip--m-pause rk-menucard__flag">
                                                     Hết hàng
                                                 </span>
                                             )}
