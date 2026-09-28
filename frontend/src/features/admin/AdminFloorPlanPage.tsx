@@ -145,7 +145,11 @@ export default function AdminFloorPlanPage() {
 
         // Cỡ ô đọc TỪ DOM chứ không gõ cứng: người dùng có thể đã thu phóng,
         // và một hằng số 40px sẽ làm bàn nhảy sai chỗ ngay khi zoom khác 100%.
-        const cell = box.width / GRID_COLS
+        // Chia cho số cột THẬT của lưới, không chia cho GRID_COLS: lưới chỉ
+        // rộng bằng phần có bàn (tối thiểu 12), chia cho 20 thì bàn chạy
+        // nhanh hơn con trỏ.
+        const columns = getComputedStyle(grid).gridTemplateColumns.split(' ').length
+        const cell = box.width / columns
 
         const move = (pointer: PointerEvent) => {
             place(
@@ -406,6 +410,7 @@ export default function AdminFloorPlanPage() {
                         label="Mặt bằng đang vẽ"
                         tables={view}
                         overlay={<div className="rk-floor__dots" aria-hidden="true" />}
+                        minCols={12}
                         tableProps={(table) => ({
                             className: `rk-floor__slot${
                                 dragging === table.tableId ? ' is-dragging' : ''

@@ -828,13 +828,11 @@ button.rk-chip:hover {
 
 /* Trạng thái tô bằng nền nhạt + viền, không dùng sọc dày một bên. */
 .rk-tablecard--ok {
-    background: var(--rims-ok-soft);
-    border-color: var(--rims-ok-line);
+    --rims-band: var(--rims-ok-solid);
 }
 
 .rk-tablecard--busy {
-    background: var(--rims-busy-soft);
-    border-color: var(--rims-busy-line);
+    --rims-band: var(--rims-busy-solid);
 }
 
 /* ---------- Ô số liệu ----------
@@ -987,13 +985,11 @@ table {
    Đặt bàn là trạng thái đã lên lịch, không phải sự cố — màu đỏ để dành cho
    việc thật sự cần can thiệp (bàn quá giờ, món lỗi). */
 .rk-tablecard--brand {
-    background: var(--rims-brand-soft);
-    border-color: var(--rims-brand-line);
+    --rims-band: var(--rims-alert-solid);
 }
 
 .rk-tablecard--info {
-    background: var(--rims-info-soft);
-    border-color: var(--rims-info-line);
+    --rims-band: var(--rims-info-solid);
 }
 
 /* Ô số liệu khi dùng làm nút chọn báo cáo */
@@ -1018,8 +1014,8 @@ table {
 
 /* Tab đang mở: một màu nhấn duy nhất, không phải bốn màu như trước. */
 .rk-stat--active {
-    background: var(--rims-brand-soft);
-    border-color: var(--rims-brand);
+    background: var(--rims-tablehead);
+    border-color: var(--rims-tablehead);
 }
 
 .rk-stat--active .rk-stat__label {
@@ -1677,8 +1673,8 @@ textarea.rk-input {
 /* Sắc nền cho ô cần nổi hơn phần còn lại. Chữ vẫn là màu mực thường để
    không phải tính lại tương phản cho từng sắc. */
 .rk-statcard--brand {
-    border-color: var(--rims-brand-line);
-    background: var(--rims-brand-soft);
+    --rims-band: var(--rims-alert-solid);
+    --rims-tone: var(--rims-alert);
 }
 
 .rk-statcard--brand .rk-statcard__icon {
@@ -1687,8 +1683,8 @@ textarea.rk-input {
 }
 
 .rk-statcard--ok {
-    border-color: var(--rims-ok-line);
-    background: var(--rims-ok-soft);
+    --rims-band: var(--rims-ok-solid);
+    --rims-tone: var(--rims-ok);
 }
 
 .rk-statcard--ok .rk-statcard__icon {
@@ -1697,8 +1693,8 @@ textarea.rk-input {
 }
 
 .rk-statcard--busy {
-    border-color: var(--rims-busy-line);
-    background: var(--rims-busy-soft);
+    --rims-band: var(--rims-busy-solid);
+    --rims-tone: var(--rims-busy);
 }
 
 .rk-statcard--busy .rk-statcard__icon {
@@ -1707,8 +1703,8 @@ textarea.rk-input {
 }
 
 .rk-statcard--alert {
-    border-color: var(--rims-alert-line);
-    background: var(--rims-alert-soft);
+    --rims-band: var(--rims-alert-solid);
+    --rims-tone: var(--rims-alert);
 }
 
 .rk-statcard--alert .rk-statcard__icon {
@@ -2181,7 +2177,8 @@ textarea.rk-input {
 .rk-bar__fill {
     height: 100%;
     border-radius: inherit;
-    background: var(--rims-brand-fill);
+    /* Thanh tiến độ là THÔNG TIN, không phải cảnh báo: màu chàm, không đỏ. */
+    background: var(--rims-info-solid);
 }
 
 /* ---------- Dấu bắt buộc trong biểu mẫu ---------- */
@@ -3956,9 +3953,12 @@ html {
     --rims-floor-cell: 3rem;
     --rims-floor-cols: 12;
 
+    /* Các khu ĐỨNG CẠNH NHAU khi đủ chỗ, xuống hàng khi chật. */
     display: flex;
-    flex-direction: column;
-    gap: var(--rims-space-5);
+    flex-wrap: wrap;
+    align-items: flex-start;
+    column-gap: var(--rims-space-8);
+    row-gap: var(--rims-space-5);
     overflow: auto;
     overscroll-behavior: contain;
     padding: var(--rims-space-4);
@@ -5485,4 +5485,247 @@ a.rk-statcard:focus-visible {
 
 .rk-attention__who strong {
     color: var(--rims-ink);
+}
+
+
+/* =========================================================================
+   Bộ màu "Mực & Son" — lối trình bày
+   =========================================================================
+
+   Bộ cũ tô NỀN NHẠT theo trạng thái cho cả khối: bạc hà, kem, hồng, xanh nhạt
+   đứng cạnh nhau trên nền giấy be — nhợt, và đá nhau. Nay mọi khối có nền
+   trắng, còn trạng thái là một DẢI MÀU ĐẶC ở đáy, như cuống phiếu. Một ngôn
+   ngữ duy nhất cho cả ô bàn lẫn ô số: dải màu = trạng thái. */
+
+.rk-tablecard,
+.rk-statcard {
+    box-shadow:
+        inset 0 calc(var(--rims-band-size) * -1) 0 var(--rims-band, transparent),
+        var(--rims-shadow-raised);
+}
+
+/* Ô bàn: số bàn và chip nằm trên nền trắng, dải màu ở đáy. */
+.rk-tablecard {
+    padding-bottom: calc(var(--rims-space-4) + var(--rims-band-size));
+}
+
+/* Ô bàn rất nhỏ trên sơ đồ: dải mảnh hơn để còn chỗ cho số bàn. */
+@container rk-tile (max-width: 4.5rem) {
+    .rk-floor__slot > .rk-tablecard {
+        --rims-band-size: 4px;
+    }
+}
+
+/* Ô số mang màu: con số và ô biểu tượng mang màu, nền vẫn trắng. */
+.rk-statcard .rk-stat__value {
+    color: var(--rims-tone, var(--rims-ink));
+}
+
+.rk-statcard[class*='rk-statcard--'] .rk-statcard__icon {
+    background: var(--rims-band, var(--rims-surface-2));
+    color: var(--rims-ink-on-solid);
+}
+
+.rk-statcard--plain .rk-statcard__icon {
+    background: var(--rims-surface-2);
+    color: var(--rims-ink-3);
+}
+
+/* Ô chọn báo cáo đang mở: nền chàm đặc, như băng tab đang chọn. */
+.rk-stat--active .rk-stat__label,
+.rk-stat--active .rk-stat__value {
+    color: var(--rims-ink-on-tablehead);
+}
+
+/* Xếp hạng: một kiểu cho cả năm hạng. Hạng nhất nền chàm đặc; bốn hạng sau
+   nền trắng viền mực — bản cũ năm hạng năm kiểu (đỏ đặc, hồng, viền, xám). */
+.rk-rank {
+    border: var(--rims-border) solid var(--rims-line-strong);
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+}
+
+.rk-rank--1 {
+    background: var(--rims-tablehead);
+    border-color: var(--rims-tablehead);
+    color: var(--rims-ink-on-tablehead);
+}
+
+.rk-rank--2,
+.rk-rank--3 {
+    background: var(--rims-surface);
+    color: var(--rims-ink);
+}
+
+/* Chấm chú giải có viền mảnh: màu nhạt (như "Ngoài giờ ca") vẫn thấy được. */
+.rk-legend__dot {
+    box-shadow: inset 0 0 0 1px rgb(var(--rims-tint-ink) / 35%);
+}
+
+/* Bảng cột có THẺ BÀN (màn thu ngân): ô bàn gọn, xếp lưới trong cột thay vì
+   mỗi bàn một băng dài hết bề ngang cột. */
+.rk-board__body:has(> .rk-tablecard) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    align-content: start;
+}
+
+.rk-board__body > .rk-tablecard {
+    gap: var(--rims-space-2);
+    padding: var(--rims-space-3) var(--rims-space-4) calc(var(--rims-space-3) + var(--rims-band-size));
+}
+
+.rk-board__body > .rk-tablecard .rk-tablecard__no {
+    font-size: var(--rims-text-xl);
+}
+
+/* =========================================================================
+   Mọi khối có bóng đều phản hồi — như nút trong game
+   =========================================================================
+
+   Rê vào: lún NỬA bóng. Nhấn: lún HẾT bóng. Cùng một cử động với nút bấm,
+   cho mọi khối có bóng — thẻ, phiếu, ô bàn, ô số, cột bảng, khung sơ đồ.
+
+   Ba cái bẫy đã tránh:
+   1. Hộp thoại vẽ TẠI CHỖ (không qua portal). Nếu khối bọc ngoài dịch bằng
+      transform, lớp phủ position: fixed bám theo khối thay vì phủ cả màn. Nên
+      khối LỚN (có thể chứa hộp thoại) dịch bằng top/left — không tạo khung
+      chứa mới — và đứng yên khi đang chứa một hộp thoại.
+   2. Nhấn một nút bên trong làm CẢ THẺ lún theo, vì :active lan lên cha. Nên
+      khối chỉ lún khi nhấn vào chính nó, không phải vào điều khiển bên trong.
+   3. Thẻ lồng thẻ: chỉ khối TRONG CÙNG đang được rê mới lún, cha đứng yên. */
+
+:is(
+        .rk-tablecard,
+        .rk-statcard,
+        .rk-ticket,
+        .rk-menucard,
+        .rk-dishcard,
+        .rk-dish,
+        .rk-strip__view,
+        .rk-home__logo,
+        .rk-home__contact,
+        .rk-hero,
+        .rk-card,
+        .rk-auth__card,
+        .rk-board__col,
+        .rk-floor__view,
+        .rk-cart
+    ) {
+    transition:
+        transform var(--rims-dur-short) linear,
+        top var(--rims-dur-short) linear,
+        left var(--rims-dur-short) linear,
+        box-shadow var(--rims-dur-short) linear;
+}
+
+/* Khối LỚN dịch bằng top/left. */
+:is(.rk-card, .rk-auth__card, .rk-board__col, .rk-floor__view):not(.rk-cart) {
+    position: relative;
+}
+
+/* ---- Rê chuột ---- */
+:is(
+        .rk-ticket,
+        .rk-menucard,
+        .rk-dishcard,
+        .rk-dish,
+        .rk-strip__view,
+        .rk-home__logo,
+        .rk-home__contact,
+        .rk-hero
+    ):hover:not(:has(:is(.rk-btn, .rk-card, .rk-ticket, .rk-dish, .rk-strip__link):hover)) {
+    transform: translate(calc(var(--rims-offset) / 2), calc(var(--rims-offset) / 2));
+    box-shadow: var(--rims-shadow-pressed);
+}
+
+:is(.rk-tablecard, .rk-statcard):hover {
+    transform: translate(calc(var(--rims-offset) / 2), calc(var(--rims-offset) / 2));
+    box-shadow:
+        inset 0 calc(var(--rims-band-size) * -1) 0 var(--rims-band, transparent),
+        var(--rims-shadow-pressed);
+}
+
+:is(.rk-card, .rk-auth__card, .rk-board__col, .rk-floor__view):hover:not(
+        :has(
+                :is(
+                        .rk-btn,
+                        .rk-card,
+                        .rk-ticket,
+                        .rk-tablecard,
+                        .rk-statcard,
+                        .rk-menucard,
+                        .rk-dishcard,
+                        .rk-board__col,
+                        .rk-floor__view,
+                        .rk-segment__btn,
+                        .rk-planbtn
+                    ):hover,
+                .rk-modal
+            )
+    ) {
+    top: calc(var(--rims-offset) / 2);
+    left: calc(var(--rims-offset) / 2);
+    box-shadow: var(--rims-shadow-pressed);
+}
+
+/* Giỏ đơn dính ở đáy màn: top/left của một khối sticky là NGƯỠNG dính, nên
+   giỏ chỉ đổi bóng, không dịch. */
+.rk-cart:hover:not(:has(:is(.rk-btn, .rk-cart__toggle):hover)) {
+    box-shadow: var(--rims-shadow-pressed);
+}
+
+/* ---- Nhấn ---- */
+:is(
+        .rk-ticket,
+        .rk-menucard,
+        .rk-dishcard,
+        .rk-dish,
+        .rk-strip__view,
+        .rk-home__logo,
+        .rk-home__contact,
+        .rk-hero
+    ):active:not(:has(:is(button, a, input, select, textarea, label, [tabindex]):active)) {
+    transform: translate(var(--rims-offset), var(--rims-offset));
+    box-shadow: 0 0 0 transparent;
+}
+
+:is(.rk-tablecard, .rk-statcard):active {
+    transform: translate(var(--rims-offset), var(--rims-offset));
+    box-shadow: inset 0 calc(var(--rims-band-size) * -1) 0 var(--rims-band, transparent);
+}
+
+:is(.rk-card, .rk-auth__card, .rk-board__col, .rk-floor__view):active:not(
+        :has(:is(button, a, input, select, textarea, label, [tabindex], .rk-card):active, .rk-modal)
+    ) {
+    top: var(--rims-offset);
+    left: var(--rims-offset);
+    box-shadow: 0 0 0 transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :is(
+            .rk-tablecard,
+            .rk-statcard,
+            .rk-ticket,
+            .rk-menucard,
+            .rk-dishcard,
+            .rk-dish,
+            .rk-strip__view,
+            .rk-home__logo,
+            .rk-home__contact,
+            .rk-hero,
+            .rk-card,
+            .rk-auth__card,
+            .rk-board__col,
+            .rk-floor__view,
+            .rk-cart
+        ) {
+        transition: none;
+    }
+}
+
+/* Hàng bàn chưa xếp luôn chiếm trọn một hàng riêng, dưới các khu. */
+.rk-floor__zone--loose {
+    flex-basis: 100%;
 }

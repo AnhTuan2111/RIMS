@@ -89,7 +89,8 @@ export function buildShiftRows(report: OrderShiftReportResponse | null): ShiftVi
             percentage: (outside / total) * 100,
             // Xám trung tính: không thuộc thang xanh của bốn ca, vì nó không
             // phải một ca.
-            color: 'var(--rims-idle)',
+            // Nhạt: không phải một ca, nên không được lấn át bốn ca thật.
+            color: 'var(--rims-surface-3)',
         })
     }
 

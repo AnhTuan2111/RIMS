@@ -28,6 +28,11 @@ type FloorPlanProps<T extends FloorItem> = {
     tableProps?: (table: T) => Record<string, unknown>
     /** Khối phủ lên toàn mặt bằng, ví dụ lưới chấm lúc đang vẽ. */
     overlay?: ReactNode
+    /**
+     * Số cột tối thiểu mỗi khu. Màn Quản trị cần chỗ trống để kéo bàn sang;
+     * màn Phục vụ thì không — lưới rộng đúng bằng phần có bàn.
+     */
+    minCols?: number
 }
 
 /** Bàn chưa đặt chỗ thì to bằng ô này. */
@@ -39,6 +44,8 @@ const CELL_REM = 2.5
 const GRID_GAP_PX = 2
 const ZOOM_MIN = 50
 const ZOOM_MAX = 160
+/** Dưới mức này thì các khu xếp CHỒNG thay vì đứng cạnh nhau. */
+const SIDE_BY_SIDE_MIN = 90
 const ZOOM_STEP = 15
 
 /**
@@ -62,6 +69,7 @@ export function FloorPlan<T extends FloorItem>({
     label,
     tableProps,
     overlay,
+    minCols = 0,
 }: FloorPlanProps<T>) {
     const [zoom, setZoom] = useState(100)
 
@@ -91,15 +99,23 @@ export function FloorPlan<T extends FloorItem>({
             }
         }
 
-        // Bề ngang lưới = ô xa nhất về bên phải, tối thiểu 12 ô để mặt bằng
-        // trống không co lại thành một cột.
-        const width = placed.reduce(
-            (max, t) => Math.max(max, (t.layoutX ?? 0) + (t.layoutW ?? DEFAULT_W)),
-            12,
-        )
+        // Bề ngang TỪNG KHU = ô xa nhất về bên phải của khu đó. Bản trước dùng
+        // một bề ngang chung tối thiểu 12 ô cho mọi khu, và thu phóng chỉ được
+        // thu nhỏ: ở 1440px bàn dồn một góc trái, còn lại là mảng trống lớn.
+        const entries = [...byZone.entries()].map(([zone, items]) => {
+            const width = items.reduce(
+                (max, t) => Math.max(max, (t.layoutX ?? 0) + (t.layoutW ?? DEFAULT_W)),
+                Math.max(1, minCols),
+            )
+            return {zone, items, cols: width}
+        })
 
-        return {zones: [...byZone.entries()], loose: rest, cols: width}
-    }, [tables])
+        return {
+            zones: entries,
+            loose: rest,
+            cols: entries.map((entry) => entry.cols),
+        }
+    }, [tables, minCols])
 
     /**
      * Tự vừa khung. Sơ đồ là để thấy CẢ QUÁN một lượt: ở 100% trên điện thoại
@@ -117,16 +133,35 @@ export function FloorPlan<T extends FloorItem>({
         }
 
         const fit = () => {
+            if (cols.length === 0) {
+                return
+            }
+
             const cs = getComputedStyle(view)
             const room =
                 view.clientWidth -
                 parseFloat(cs.paddingLeft) -
                 parseFloat(cs.paddingRight)
+            const zoneGap = parseFloat(cs.columnGap) || 0
             const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
-            const cell = (room - (cols - 1) * GRID_GAP_PX) / cols
-            const wanted = Math.floor((cell / (CELL_REM * rem)) * 100)
 
-            setZoom(Math.max(ZOOM_MIN, Math.min(100, wanted)))
+            // Thu phóng để ĐẶT VỪA một số cột trong bề ngang còn lại.
+            const zoomFor = (totalCols: number, zoneCount: number) => {
+                const gaps =
+                    (totalCols - zoneCount) * GRID_GAP_PX + (zoneCount - 1) * zoneGap
+                const cell = (room - gaps) / totalCols
+                return Math.floor((cell / (CELL_REM * rem)) * 100)
+            }
+
+            // Ưu tiên các khu ĐỨNG CẠNH NHAU — mặt bằng lấp đầy bề ngang thay
+            // vì chồng lên nhau và để trống nửa màn. Quá chật thì xếp chồng.
+            const side = zoomFor(
+                cols.reduce((sum, c) => sum + c, 0),
+                cols.length,
+            )
+            const wanted = side >= SIDE_BY_SIDE_MIN ? side : zoomFor(Math.max(...cols), 1)
+
+            setZoom(Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, wanted)))
         }
 
         fit()
@@ -144,7 +179,6 @@ export function FloorPlan<T extends FloorItem>({
 
     const style = {
         '--rims-floor-cell': `${(zoom / 100) * CELL_REM}rem`,
-        '--rims-floor-cols': cols,
     } as React.CSSProperties
 
     return (
@@ -179,11 +213,14 @@ export function FloorPlan<T extends FloorItem>({
                 được trên màn cảm ứng. Nút bấm vẫn phải có: chúng là cách duy
                 nhất dùng được bằng chuột và bàn phím. */}
             <div className="rk-floor__view" style={style} ref={viewRef}>
-                {zones.map(([zone, items]) => (
+                {zones.map(({zone, items, cols: zoneCols}) => (
                     <section className="rk-floor__zone" key={zone || '_'}>
                         {zone && <h3 className="rk-floor__zonename">{zone}</h3>}
 
-                        <div className="rk-floor__grid">
+                        <div
+                            className="rk-floor__grid"
+                            style={{'--rims-floor-cols': zoneCols} as React.CSSProperties}
+                        >
                             {overlay}
 
                             {items.map((table) => (
@@ -204,7 +241,7 @@ export function FloorPlan<T extends FloorItem>({
                 ))}
 
                 {loose.length > 0 && (
-                    <section className="rk-floor__zone">
+                    <section className="rk-floor__zone rk-floor__zone--loose">
                         <h3 className="rk-floor__zonename">Chưa xếp vào mặt bằng</h3>
 
                         <div className="rk-floor__loose">

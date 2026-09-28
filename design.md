@@ -27,7 +27,7 @@ Tên gọi nội bộ của hệ: **Phiếu bếp**.
 tablet cảm ứng, laptop và điện thoại.
 
 Chữ ký: **bo góc 0px tuyệt đối** · **viền 2px** · **bóng offset cứng blur 0** ·
-**hover lún vào bóng của chính nó** · **nhãn in hoa Archivo** · **màu mang nghĩa**.
+**mọi khối có bóng đều lún khi rê và khi nhấn, như nút trong game** · **nhãn in hoa Archivo** · **màu mang nghĩa**.
 
 Tham chiếu đã đọc và trích luật: retro-brutalist UI 2026 (setproduct),
 neo-brutalism web design (theplusaddons). Hai bài đó cảnh báo style này **tệ với
@@ -43,19 +43,31 @@ bảng dữ liệu dày** — RIMS có 11 màn quản trị toàn bảng, nên c
 
 ---
 
-## Bốn màu nghĩa
+## Bộ màu "Mực & Son"
 
-Màu **là** nghĩa. Dùng màu không mang nghĩa là sai luật.
+Đổi ngày 2026-09-28 theo yêu cầu: bộ cũ tô **nền nhạt theo trạng thái** cho cả khối
+(bạc hà, kem, hồng, xanh nhạt trên giấy be) — nhợt và đá nhau. Bộ mới lấy chất Nhật
+của quán: mực tàu, son đỏ, chàm, lá thông, vàng kim.
 
-| Vai | Sáng | Tối (nền tint / chữ) | Nghĩa |
+| Vai | Sáng | Tối (nền tint · chữ/dải) | Nghĩa |
 |---|---|---|---|
-| **LÀM** | `#12703f` | `#167a46` / `#16281d` · `#5fd08e` | xong · lưu · thanh toán · bàn trống |
-| **BỎ** | `#c8271b` | `#c8271b` / `#2b1512` · `#ff8a72` | huỷ · xoá · lỗi · quá hạn |
-| **CHỜ** | `#a15c00` | `#a15c00` / `#2a1f0b` · `#ffc94a` | đang nấu · đang phục vụ · cần chú ý |
-| **TIN** | `#1b5fbf` | `#2069c9` / `#141c2e` · `#7aaaff` | đã đặt trước · chờ thanh toán |
+| **LÀM** | `#1f7a4c` lá thông | `#15291f` · `#6fd39b` | xong · lưu · thanh toán · bàn trống |
+| **BỎ** | `#c9381b` son | `#2e1712` · `#ff8469` | huỷ · xoá · lỗi · quá hạn |
+| **CHỜ** | `#a3650c` vàng kim (chữ `#8a5608`) | `#2b2210` · `#f4c35a` | đang nấu · đang phục vụ · chờ |
+| **TIN** | `#2a4f93` chàm | `#172238` · `#8fb0ff` | đã đặt trước · liên kết · vòng focus |
 
-**Một đỏ duy nhất.** `#c8271b` kiêm cả màu thương hiệu. Phân biệt bằng **vị trí**:
-ở vỏ app (rail đang mở, băng mục con) nó là nhận diện; trên nút nó là phá huỷ.
+Nền và vỏ: giấy `#f6f3ec` · mặt `#ffffff` · mực `#1c1b19` · **rail và đầu bảng chàm
+đêm `#18213a`**, màu nhấn trên rail son `#d13b1f`. Tối: nền `#11141b` · mặt `#181c25` ·
+viền `#6a7386`.
+
+**Dải màu = trạng thái.** Ô bàn và ô số có **nền trắng**; trạng thái là một **dải màu
+đặc 6px ở đáy** như cuống phiếu (token `--rims-*-solid`, sáng ở chế độ tối). Không tô
+nền nhạt cả khối nữa. Ô số có màu thì **con số** mang màu; ô có số 0 không bao giờ
+mang màu báo.
+
+**Một đỏ duy nhất.** Son `#c9381b` kiêm cả màu thương hiệu. Phân biệt bằng **vị trí**:
+ở vỏ app nó là nhận diện; trên nút nó là phá huỷ. Thanh tiến độ và biểu đồ là
+**thông tin** — màu chàm, không đỏ.
 
 ### Sáu luật màu
 
@@ -80,9 +92,11 @@ Màu **là** nghĩa. Dùng màu không mang nghĩa là sai luật.
 
 Đo bằng công thức WCAG, không phỏng. Sàn: **4.5:1** chữ · **3.0:1** khối và viền.
 
-- **Chế độ sáng: 29/29 cặp đạt.**
-- **Chế độ tối: 9/9 cặp đạt** — mực/mặt 14.58 · mực phụ 9.17 · viền/mặt 3.23 ·
-  viền/nền 3.49 · nút chính 8.04 và 8.94 · nút huỷ 7.49 · chip chờ 10.55 và 11.24.
+Bộ "Mực & Son" đo trước khi đưa vào mã, 38/38 cặp đạt — ví dụ mực/giấy 15.53 ·
+mực phụ 3 trên mặt 3 4.58 · trắng trên LÀM 5.32, CHỜ 4.75, BỎ 5.17, TIN 7.96 ·
+son trên rail 3.31 · [tối] viền/mặt 3.58 · [tối] chữ màu trên nền tint 7.02–9.56.
+Bài kiểm `05-giao-dien` (tương phản AA) và `08-hai-hoa` (mọi màu từ token) chạy
+trên app thật ở cả hai chế độ.
 
 ---
 
@@ -91,7 +105,7 @@ Màu **là** nghĩa. Dùng màu không mang nghĩa là sai luật.
 Ba luật, rút từ theme `qlcv-aura` của dự án kpi-manage. Đây là **kỹ thuật**, không
 phải cái vẻ — hình khối, mặt chữ và bóng của RIMS giữ nguyên.
 
-1. **Viền và bóng là trung tính VỪA** (`#6b6b6b`), **không bao giờ trắng.** Viền
+1. **Viền và bóng là trung tính VỪA** (`#6a7386`), **không bao giờ trắng.** Viền
    trắng + bóng trắng trên nền gần-đen làm mỗi nút thành một miếng sticker dán.
 2. **Chip và nút là nền tint tối + chữ màu sáng**, không tô đặc cả khối màu rực.
 3. **Bóng nhẹ hơn bản sáng: 2px** thay vì 4px.
@@ -268,6 +282,12 @@ Không có "đang dọn", không có "bảo trì". Đừng vẽ thẻ bàn cho t
   tin duy nhất** — tablet không có trạng thái rê chuột.
 - Băng ảnh và băng chữ chạy: có nút dừng, dừng khi rê chuột, dừng khi focus bàn
   phím, và **đứng yên ngay từ đầu** nếu hệ thống bật `prefers-reduced-motion`.
+- **Mọi khối có bóng đều phản hồi như nút trong game** (đổi 2026-09-28): rê vào
+  lún **nửa** bóng, nhấn lún **hết** bóng — thẻ, phiếu bếp, ô bàn, ô số, cột bảng,
+  khung sơ đồ, giỏ đơn. Ba luật đi kèm: khối **lớn** (có thể chứa hộp thoại vẽ tại
+  chỗ) dịch bằng `top/left` chứ không bằng `transform`, và đứng yên khi đang chứa
+  hộp thoại; khối chỉ lún khi nhấn vào **chính nó**, không khi nhấn nút bên trong;
+  thẻ lồng thẻ thì chỉ khối **trong cùng** phản hồi. Giỏ đơn dính đáy chỉ đổi bóng.
 
 ---
 

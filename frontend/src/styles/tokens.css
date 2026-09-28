@@ -35,55 +35,55 @@
 :root {
     /* ---------- Nền và bề mặt ---------- */
     /* Giấy ấm. Không trắng tinh — chói khi nhìn suốt ca. */
-    --rims-paper: #f3f1ea;
+    --rims-paper: #f6f3ec;
     --rims-surface: #ffffff;
-    --rims-surface-2: #e8e5db;
-    --rims-surface-3: #d8d4c7;
+    --rims-surface-2: #efebe2;
+    --rims-surface-3: #e1dbcf;
 
     /* Kẻ MẢNH trong lòng bảng và danh sách. Không phải viền component. */
-    --rims-line: #d8d4c7;
+    --rims-line: #ddd6c8;
     /* Viền DÀY 2px của thẻ, nút, ô nhập — mực đặc. Đây là chữ ký của hệ. */
-    --rims-line-strong: #111214;
+    --rims-line-strong: #1c1b19;
 
     /* ---------- Chữ ---------- */
-    --rims-ink: #111214;
-    --rims-ink-2: #3c3e42;
-    --rims-ink-3: #5c5f64;
+    --rims-ink: #1c1b19;
+    --rims-ink-2: #46423c;
+    --rims-ink-3: #655f56;
     --rims-ink-on-brand: #ffffff;
 
     /* Thanh bên luôn tối kể cả ở chế độ sáng. KHÔNG đảo theo chủ đề. */
-    --rims-ink-on-dark: #f3f1ea;
-    --rims-ink-on-dark-2: #b6b2a6;
+    --rims-ink-on-dark: #f4f0e6;
+    --rims-ink-on-dark-2: #b9bfd0;
 
-    --rims-shell: #111214;
-    --rims-shell-2: #1b1b1b;
+    --rims-shell: #18213a;
+    --rims-shell-2: #212b47;
 
     /* Màu nhấn DÙNG TRÊN khung tối. Không đảo theo chủ đề. */
-    --rims-shell-accent: #c8271b;
-    --rims-shell-accent-2: #d63324;
-    --rims-shell-accent-3: #a81f15;
-    --rims-shell-accent-rgb: 200 39 27;
+    --rims-shell-accent: #d13b1f;
+    --rims-shell-accent-2: #dc4a2d;
+    --rims-shell-accent-3: #b3311a;
+    --rims-shell-accent-rgb: 209 59 31;
 
     /* Màn báo thanh toán xong phủ kín màn hình nên tự quyết màu nền. Giữ lục
        vì đây là tín hiệu NGỮ NGHĨA (xong), không phải màu thương hiệu. */
-    --rims-paid: #12703f;
+    --rims-paid: #1f7a4c;
     --rims-ink-on-paid: #ffffff;
 
     /* ---------- Thương hiệu = màu BỎ ----------
        Một đỏ duy nhất. Ở rail và băng mục con nó là nhận diện; trên nút nó là
        phá huỷ. Không bao giờ dùng cho nút chính — nút chính luôn lục. */
-    --rims-brand: #c8271b;
-    --rims-brand-fill: #c8271b;
-    --rims-brand-hover: #b02217;
-    --rims-brand-active: #971d14;
-    --rims-brand-soft: #f7dedb;
-    --rims-brand-line: #e8b5af;
+    --rims-brand: #c9381b;
+    --rims-brand-fill: #c9381b;
+    --rims-brand-hover: #b23117;
+    --rims-brand-active: #9a2a13;
+    --rims-brand-soft: #fae4dc;
+    --rims-brand-line: #efbfae;
 
     /* Nâu đồng: giữ token để không vỡ chỗ đang tham chiếu. Hệ mới không dùng
        vàng làm nét nhấn — gỡ hẳn ở pha dọn dẹp. */
-    --rims-gold: #8a6b3a;
-    --rims-gold-deep: #6b5129;
-    --rims-gold-soft: #f1ece2;
+    --rims-gold: #9a6a1c;
+    --rims-gold-deep: #7a5314;
+    --rims-gold-soft: #f5ecda;
 
     /* ---------- Màu ngữ nghĩa ----------
        -           : màu CHỮ và VIỀN
@@ -91,43 +91,43 @@
        --rims-ink-on-* : màu chữ nằm TRÊN khối đó */
 
     /* LÀM — bàn trống · món xong · nút chính */
-    --rims-ok: #12703f;
-    --rims-ok-fill: #12703f;
-    --rims-ok-hover: #0f6035;
-    --rims-ok-active: #0c4f2b;
-    --rims-ok-soft: #dceee4;
-    --rims-ok-line: #b9d9c7;
+    --rims-ok: #1f7a4c;
+    --rims-ok-fill: #1f7a4c;
+    --rims-ok-hover: #1a6a42;
+    --rims-ok-active: #155937;
+    --rims-ok-soft: #e3f1e8;
+    --rims-ok-line: #b7d8c3;
 
     /* CHỜ — đang phục vụ · đang nấu */
-    --rims-busy: #8a4f00;
-    --rims-busy-fill: #a15c00;
-    --rims-busy-soft: #f6e9d2;
-    --rims-busy-line: #e5cfa4;
+    --rims-busy: #8a5608;
+    --rims-busy-fill: #a3650c;
+    --rims-busy-soft: #f7ebd6;
+    --rims-busy-line: #e6cc9c;
 
     /* BỎ — quá giờ · lỗi · huỷ. Cùng mã với thương hiệu. */
-    --rims-alert: #c8271b;
-    --rims-alert-fill: #c8271b;
-    --rims-alert-soft: #f7dedb;
-    --rims-alert-line: #e8b5af;
+    --rims-alert: #c9381b;
+    --rims-alert-fill: #c9381b;
+    --rims-alert-soft: #fae4dc;
+    --rims-alert-line: #efbfae;
 
     /* Đỏ ĐẬM, chỉ dùng cho CHỮ NẰM TRÊN nền đỏ nhạt.
        Đỏ thương hiệu #c8271b trên #f7dedb đo được 4.37:1 — thiếu 0.13 so với
        ngưỡng 4.5, và trên #e8b5af thì chỉ còn 3.10. Đây không phải màu thứ
        năm: vẫn là BỎ, chỉ là sắc dành cho chữ. #8f1b11 đo được 7.04 và 5.00. */
-    --rims-alert-deep: #8f1b11;
+    --rims-alert-deep: #8e2410;
 
     /* TIN — đã đặt trước · chờ thanh toán · liên kết · vòng focus.
        Vai này trước đây do --rims-brand gánh, nên đổi brand sang đỏ mà không
        tách TIN ra thì mọi liên kết và vòng focus đều đỏ, đọc ra là lỗi. */
-    --rims-info: #1b5fbf;
-    --rims-info-fill: #1b5fbf;
-    --rims-info-soft: #dde6f6;
-    --rims-info-line: #b8cdec;
+    --rims-info: #2a4f93;
+    --rims-info-fill: #2a4f93;
+    --rims-info-soft: #e4eaf6;
+    --rims-info-line: #b9c8e6;
     --rims-ink-on-info: #ffffff;
 
     /* Vòng focus. Viền 2px dễ ăn mất vòng focus nên vòng nằm NGOÀI và dùng
        màu TIN để không lẫn với đỏ phá huỷ. */
-    --rims-focus: #1b5fbf;
+    --rims-focus: #2a4f93;
 
     /* Chữ trên nền chip và nút tô đặc. */
     --rims-ink-on-ok: #ffffff;
@@ -141,35 +141,45 @@
     /* Đầu bảng. KHÔNG dùng --rims-ink làm nền: ở chế độ tối --rims-ink là màu
        SÁNG, nên nền sẽ sáng và chữ trên nó cũng sáng — mất chữ. Ở chế độ tối
        đầu bảng lùi về mặt chìm, vì không sắc tối nào tách nổi 3:1 khỏi nền tối. */
-    --rims-tablehead: #111214;
-    --rims-ink-on-tablehead: #f3f1ea;
+    /* Màu ĐẶC cho dải trạng thái (đáy ô bàn, ô số). Ở chế độ sáng trùng với
+       *-fill; ở chế độ tối *-fill là sắc nền tối nên dải phải lấy màu sáng. */
+    --rims-ok-solid: #1f7a4c;
+    --rims-busy-solid: #a3650c;
+    --rims-alert-solid: #c9381b;
+    --rims-info-solid: #2a4f93;
+    --rims-idle-solid: #8b857a;
+    --rims-ink-on-solid: #ffffff;
+    --rims-band-size: 6px;
+
+    --rims-tablehead: #18213a;
+    --rims-ink-on-tablehead: #f4f0e6;
 
     /* Không hoạt động · thuộc tính (ca, phương thức trả, danh mục, số chỗ).
        Chip xám KHÔNG tiêu ngân sách 3 màu. */
-    --rims-idle: #5c5f64;
-    --rims-idle-fill: #e8e5db;
-    --rims-idle-soft: #e8e5db;
-    --rims-idle-line: #d8d4c7;
+    --rims-idle: #5f5a52;
+    --rims-idle-fill: #efebe2;
+    --rims-idle-soft: #efebe2;
+    --rims-idle-line: #ddd6c8;
 
     /* ---------- Sắc nền của lớp phủ mờ ----------
        Ghi dưới dạng ba số "R G B" để dùng được rgb(var(--x) / 12%). */
-    --rims-tint-ink: 17 18 20;
-    --rims-tint-brand: 200 39 27;
+    --rims-tint-ink: 28 27 25;
+    --rims-tint-brand: 201 56 27;
     --rims-tint-hi: 255 255 255;
-    --rims-tint-gold: 138 107 58;
-    --rims-tint-busy: 161 92 0;
-    --rims-tint-ok: 18 112 63;
-    --rims-tint-alert: 200 39 27;
+    --rims-tint-gold: 154 106 28;
+    --rims-tint-busy: 163 101 12;
+    --rims-tint-ok: 31 122 76;
+    --rims-tint-alert: 201 56 27;
 
     /* ---------- Màu biểu đồ ----------
        Bốn ca trong ngày là bốn mốc NỐI TIẾP nhau, nên dùng thang một sắc đậm
        dần chứ không phải bốn màu rời. Thang lấy màu TIN, không lấy đỏ — biểu
        đồ là thông tin, không phải cảnh báo. */
-    --rims-chart-1: #b8cdec;
-    --rims-chart-2: #7ba0da;
-    --rims-chart-3: #3d76c8;
-    --rims-chart-4: #1b5fbf;
-    --rims-chart-empty: #d8d4c7;
+    --rims-chart-1: #c3d0ea;
+    --rims-chart-2: #8aa3d3;
+    --rims-chart-3: #4f72b5;
+    --rims-chart-4: #2a4f93;
+    --rims-chart-empty: #e1dbcf;
 
     /* ---------- Chữ ----------
        Ràng buộc cứng: giao diện toàn tiếng Việt, mặt chữ phải đủ dấu ở mọi
@@ -363,87 +373,93 @@
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
-        --rims-paper: #131313;
-        --rims-surface: #1b1b1b;
-        --rims-surface-2: #232323;
-        --rims-surface-3: #2e2e2e;
+        --rims-paper: #11141b;
+        --rims-surface: #181c25;
+        --rims-surface-2: #20252f;
+        --rims-surface-3: #2a303c;
 
-        --rims-line: #2e2e2e;
-        --rims-line-strong: #6b6b6b;
+        --rims-line: #2a303c;
+        --rims-line-strong: #6a7386;
 
-        --rims-ink: #ececec;
-        --rims-ink-2: #bdbdbd;
-        --rims-ink-3: #a3a3a3;
+        --rims-ink: #ece9e2;
+        --rims-ink-2: #c2c0ba;
+        --rims-ink-3: #a3a39f;
         /* Trắng, KHÔNG phải đỏ nhạt: ô rail đang mở vẫn là khối đỏ đặc ở
            chế độ tối. Trắng trên #c8271b đo được 5.58:1. */
         --rims-ink-on-brand: #ffffff;
 
-        --rims-ink-on-dark: #ececec;
-        --rims-ink-on-dark-2: #bdbdbd;
+        --rims-ink-on-dark: #ece9e2;
+        --rims-ink-on-dark-2: #b9bfd0;
 
-        --rims-brand: #ff8a72;
-        --rims-brand-fill: #2b1512;
-        --rims-brand-hover: #3a1c18;
-        --rims-brand-active: #47221d;
-        --rims-brand-soft: #2b1512;
-        --rims-brand-line: #ff8a72;
+        --rims-brand: #ff8469;
+        --rims-brand-fill: #2e1712;
+        --rims-brand-hover: #3b1d16;
+        --rims-brand-active: #48241b;
+        --rims-brand-soft: #2e1712;
+        --rims-brand-line: #ff8469;
 
-        --rims-gold: #c8a86a;
-        --rims-gold-deep: #b08f52;
-        --rims-gold-soft: #26210f;
+        --rims-gold: #d9b36a;
+        --rims-gold-deep: #c49a4e;
+        --rims-gold-soft: #262012;
 
-        --rims-ok: #5fd08e;
-        --rims-ok-fill: #16281d;
-        --rims-ok-hover: #1d3427;
-        --rims-ok-active: #244030;
-        --rims-ok-soft: #16281d;
-        --rims-ok-line: #5fd08e;
+        --rims-ok: #6fd39b;
+        --rims-ok-fill: #15291f;
+        --rims-ok-hover: #1b3427;
+        --rims-ok-active: #213f2f;
+        --rims-ok-soft: #15291f;
+        --rims-ok-line: #6fd39b;
 
-        --rims-busy: #ffc94a;
-        --rims-busy-fill: #2a1f0b;
-        --rims-busy-soft: #2a1f0b;
-        --rims-busy-line: #ffc94a;
+        --rims-busy: #f4c35a;
+        --rims-busy-fill: #2b2210;
+        --rims-busy-soft: #2b2210;
+        --rims-busy-line: #f4c35a;
 
-        --rims-alert: #ff8a72;
-        --rims-alert-fill: #2b1512;
-        --rims-alert-soft: #2b1512;
-        --rims-alert-line: #ff8a72;
-        --rims-alert-deep: #ff8a72;
+        --rims-alert: #ff8469;
+        --rims-alert-fill: #2e1712;
+        --rims-alert-soft: #2e1712;
+        --rims-alert-line: #ff8469;
+        --rims-alert-deep: #ff8469;
 
-        --rims-info: #7aaaff;
-        --rims-info-fill: #141c2e;
-        --rims-info-soft: #141c2e;
-        --rims-info-line: #7aaaff;
-        --rims-ink-on-info: #7aaaff;
+        --rims-info: #8fb0ff;
+        --rims-info-fill: #172238;
+        --rims-info-soft: #172238;
+        --rims-info-line: #8fb0ff;
+        --rims-ink-on-info: #8fb0ff;
 
-        --rims-focus: #7aaaff;
+        --rims-focus: #8fb0ff;
 
-        --rims-ink-on-ok: #5fd08e;
-        --rims-ink-on-busy: #ffc94a;
-        --rims-ink-on-alert: #ff8a72;
-        --rims-ink-on-idle: #131313;
+        --rims-ink-on-ok: #6fd39b;
+        --rims-ink-on-busy: #f4c35a;
+        --rims-ink-on-alert: #ff8469;
+        --rims-ink-on-idle: #11141b;
 
-        --rims-tablehead: #232323;
-        --rims-ink-on-tablehead: #ececec;
+        --rims-ok-solid: #6fd39b;
+        --rims-busy-solid: #f4c35a;
+        --rims-alert-solid: #ff8469;
+        --rims-info-solid: #8fb0ff;
+        --rims-idle-solid: #a3a39f;
+        --rims-ink-on-solid: #11141b;
+        --rims-tablehead: #20252f;
+        --rims-ink-on-tablehead: #ece9e2;
 
-        --rims-idle: #a3a3a3;
-        --rims-idle-fill: #232323;
-        --rims-idle-soft: #232323;
-        --rims-idle-line: #2e2e2e;
+        --rims-idle: #a3a39f;
+        --rims-idle-fill: #20252f;
+        --rims-idle-soft: #20252f;
+        --rims-idle-line: #2a303c;
 
         --rims-tint-ink: 0 0 0;
-        --rims-tint-brand: 255 138 114;
-        --rims-tint-hi: 236 236 236;
-        --rims-tint-gold: 200 168 106;
-        --rims-tint-busy: 255 201 74;
-        --rims-tint-ok: 95 208 142;
-        --rims-tint-alert: 255 138 114;
+        --rims-tint-brand: 255 132 105;
+        --rims-tint-hi: 236 233 226;
+        --rims-tint-gold: 217 179 106;
+        --rims-tint-busy: 244 195 90;
+        --rims-tint-ok: 111 211 155;
+        --rims-tint-alert: 255 132 105;
 
-        --rims-chart-1: #1e3050;
-        --rims-chart-2: #3d6bb0;
-        --rims-chart-3: #5b8bd9;
-        --rims-chart-4: #7aaaff;
-        --rims-chart-empty: #2e2e2e;
+        --rims-chart-1: #1f2d4d;
+        --rims-chart-2: #3d5f9e;
+        --rims-chart-3: #6189d6;
+        --rims-chart-4: #8fb0ff;
+        --rims-chart-empty: #2a303c;
 
         /* Bóng nhẹ hơn ở chế độ tối. */
         --rims-offset: 2px;
@@ -451,86 +467,92 @@
 }
 
 :root[data-theme='dark'] {
-    --rims-paper: #131313;
-    --rims-surface: #1b1b1b;
-    --rims-surface-2: #232323;
-    --rims-surface-3: #2e2e2e;
+    --rims-paper: #11141b;
+    --rims-surface: #181c25;
+    --rims-surface-2: #20252f;
+    --rims-surface-3: #2a303c;
 
-    --rims-line: #2e2e2e;
-    --rims-line-strong: #6b6b6b;
+    --rims-line: #2a303c;
+    --rims-line-strong: #6a7386;
 
-    --rims-ink: #ececec;
-    --rims-ink-2: #bdbdbd;
-    --rims-ink-3: #a3a3a3;
+    --rims-ink: #ece9e2;
+    --rims-ink-2: #c2c0ba;
+    --rims-ink-3: #a3a39f;
     /* Xem ghi chú ở khối @media trên. */
     --rims-ink-on-brand: #ffffff;
 
-    --rims-ink-on-dark: #ececec;
-    --rims-ink-on-dark-2: #bdbdbd;
+    --rims-ink-on-dark: #ece9e2;
+    --rims-ink-on-dark-2: #b9bfd0;
 
-    --rims-brand: #ff8a72;
-    --rims-brand-fill: #2b1512;
-    --rims-brand-hover: #3a1c18;
-    --rims-brand-active: #47221d;
-    --rims-brand-soft: #2b1512;
-    --rims-brand-line: #ff8a72;
+    --rims-brand: #ff8469;
+    --rims-brand-fill: #2e1712;
+    --rims-brand-hover: #3b1d16;
+    --rims-brand-active: #48241b;
+    --rims-brand-soft: #2e1712;
+    --rims-brand-line: #ff8469;
 
-    --rims-gold: #c8a86a;
-    --rims-gold-deep: #b08f52;
-    --rims-gold-soft: #26210f;
+    --rims-gold: #d9b36a;
+    --rims-gold-deep: #c49a4e;
+    --rims-gold-soft: #262012;
 
-    --rims-ok: #5fd08e;
-    --rims-ok-fill: #16281d;
-    --rims-ok-hover: #1d3427;
-    --rims-ok-active: #244030;
-    --rims-ok-soft: #16281d;
-    --rims-ok-line: #5fd08e;
+    --rims-ok: #6fd39b;
+    --rims-ok-fill: #15291f;
+    --rims-ok-hover: #1b3427;
+    --rims-ok-active: #213f2f;
+    --rims-ok-soft: #15291f;
+    --rims-ok-line: #6fd39b;
 
-    --rims-busy: #ffc94a;
-    --rims-busy-fill: #2a1f0b;
-    --rims-busy-soft: #2a1f0b;
-    --rims-busy-line: #ffc94a;
+    --rims-busy: #f4c35a;
+    --rims-busy-fill: #2b2210;
+    --rims-busy-soft: #2b2210;
+    --rims-busy-line: #f4c35a;
 
-    --rims-alert: #ff8a72;
-    --rims-alert-fill: #2b1512;
-    --rims-alert-soft: #2b1512;
-    --rims-alert-line: #ff8a72;
-    --rims-alert-deep: #ff8a72;
+    --rims-alert: #ff8469;
+    --rims-alert-fill: #2e1712;
+    --rims-alert-soft: #2e1712;
+    --rims-alert-line: #ff8469;
+    --rims-alert-deep: #ff8469;
 
-    --rims-info: #7aaaff;
-    --rims-info-fill: #141c2e;
-    --rims-info-soft: #141c2e;
-    --rims-info-line: #7aaaff;
-    --rims-ink-on-info: #7aaaff;
+    --rims-info: #8fb0ff;
+    --rims-info-fill: #172238;
+    --rims-info-soft: #172238;
+    --rims-info-line: #8fb0ff;
+    --rims-ink-on-info: #8fb0ff;
 
-    --rims-focus: #7aaaff;
+    --rims-focus: #8fb0ff;
 
-    --rims-ink-on-ok: #5fd08e;
-    --rims-ink-on-busy: #ffc94a;
-    --rims-ink-on-alert: #ff8a72;
-    --rims-ink-on-idle: #131313;
+    --rims-ink-on-ok: #6fd39b;
+    --rims-ink-on-busy: #f4c35a;
+    --rims-ink-on-alert: #ff8469;
+    --rims-ink-on-idle: #11141b;
 
-    --rims-tablehead: #232323;
-    --rims-ink-on-tablehead: #ececec;
+    --rims-ok-solid: #6fd39b;
+    --rims-busy-solid: #f4c35a;
+    --rims-alert-solid: #ff8469;
+    --rims-info-solid: #8fb0ff;
+    --rims-idle-solid: #a3a39f;
+    --rims-ink-on-solid: #11141b;
+    --rims-tablehead: #20252f;
+    --rims-ink-on-tablehead: #ece9e2;
 
-    --rims-idle: #a3a3a3;
-    --rims-idle-fill: #232323;
-    --rims-idle-soft: #232323;
-    --rims-idle-line: #2e2e2e;
+    --rims-idle: #a3a39f;
+    --rims-idle-fill: #20252f;
+    --rims-idle-soft: #20252f;
+    --rims-idle-line: #2a303c;
 
     --rims-tint-ink: 0 0 0;
-    --rims-tint-brand: 255 138 114;
-    --rims-tint-hi: 236 236 236;
-    --rims-tint-gold: 200 168 106;
-    --rims-tint-busy: 255 201 74;
-    --rims-tint-ok: 95 208 142;
-    --rims-tint-alert: 255 138 114;
+    --rims-tint-brand: 255 132 105;
+    --rims-tint-hi: 236 233 226;
+    --rims-tint-gold: 217 179 106;
+    --rims-tint-busy: 244 195 90;
+    --rims-tint-ok: 111 211 155;
+    --rims-tint-alert: 255 132 105;
 
-    --rims-chart-1: #1e3050;
-    --rims-chart-2: #3d6bb0;
-    --rims-chart-3: #5b8bd9;
-    --rims-chart-4: #7aaaff;
-    --rims-chart-empty: #2e2e2e;
+    --rims-chart-1: #1f2d4d;
+    --rims-chart-2: #3d5f9e;
+    --rims-chart-3: #6189d6;
+    --rims-chart-4: #8fb0ff;
+    --rims-chart-empty: #2a303c;
 
     --rims-offset: 2px;
 }
