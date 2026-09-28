@@ -31,7 +31,12 @@ export function RevenueCard({
     return (
         <article className={`rk-stat ${className}`.trim()}>
             <span className="rk-stat__label">{title}</span>
-            <strong className="rk-stat__value">{formatRevenueCurrency(amount)}</strong>
+            {/* null = CHƯA CÓ SỐ (chưa chọn khoảng ngày), khác với 0 ₫ = có số và
+                bằng không. In "0 ₫" khi chưa chọn gì là nói sai rằng khoảng đó
+                không bán được gì. */}
+            <strong className="rk-stat__value">
+                {amount == null ? '—' : formatRevenueCurrency(amount)}
+            </strong>
         </article>
     )
 }

@@ -199,7 +199,7 @@ public class ChefServiceImpl implements ChefService
         {
             cancelAllPreparingItemsOfDish(
                     dish,
-                    "Món đã được Chef đánh dấu hết trong thực đơn");
+                    "Món đã được bếp đánh dấu hết trong thực đơn");
         }
 
         dishRepository.save(dish);

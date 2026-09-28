@@ -5230,6 +5230,32 @@ a.rk-statcard:focus-visible {
     gap: 2px;
 }
 
+/* Trong một DÒNG DANH SÁCH, các ô thông tin có bề ngang cố định để cột thẳng
+   hàng từ dòng này sang dòng khác. Để co theo nội dung thì khối dồn phải và
+   rộng theo độ dài lý do huỷ — cột "Bàn" mỗi dòng đứng một chỗ. Dưới 48rem
+   vẫn xuống hàng tự do như cũ. */
+@media (min-width: 48rem) {
+    .rk-rowlist__item > .rk-metarow {
+        flex-wrap: nowrap;
+    }
+
+    .rk-rowlist__item > .rk-metarow > div:nth-child(1) {
+        width: 4rem;
+    }
+
+    .rk-rowlist__item > .rk-metarow > div:nth-child(2) {
+        width: 5rem;
+    }
+
+    .rk-rowlist__item > .rk-metarow > div:nth-child(3) {
+        width: 9rem;
+    }
+
+    .rk-rowlist__item > .rk-metarow > div:nth-child(4) {
+        width: 16rem;
+    }
+}
+
 .rk-metarow small {
     color: var(--rims-ink-3);
     font-size: var(--rims-text-xs);
