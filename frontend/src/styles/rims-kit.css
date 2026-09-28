@@ -5332,3 +5332,43 @@ a.rk-statcard:focus-visible {
         gap: var(--rims-space-3);
     }
 }
+
+/* ---------- Trang không tồn tại ----------
+   Một thẻ giữa màn trên nền giấy, không vỏ app: người lạc đường chưa chắc đã
+   đăng nhập, và rail của một vai trò là thứ họ không cần lúc này. */
+.rk-notfound {
+    display: grid;
+    place-items: center;
+    min-height: 100dvh;
+    padding: var(--rims-space-4);
+    background: var(--rims-paper);
+}
+
+.rk-notfound__card {
+    display: grid;
+    justify-items: start;
+    gap: var(--rims-space-4);
+    width: min(100%, 32rem);
+}
+
+.rk-notfound__code {
+    font-size: var(--rims-text-3xl, 2.5rem);
+}
+
+.rk-notfound__title {
+    margin: 0;
+    font-size: var(--rims-text-xl);
+    font-weight: var(--rims-weight-black);
+    text-transform: uppercase;
+}
+
+.rk-notfound__text {
+    margin: 0;
+    color: var(--rims-ink-2);
+    overflow-wrap: anywhere;
+}
+
+.rk-notfound__text code {
+    font-family: var(--rims-font-mono);
+    color: var(--rims-ink);
+}

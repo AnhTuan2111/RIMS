@@ -1,7 +1,8 @@
-import {Navigate, Route, Routes} from 'react-router-dom'
+import {Route, Routes} from 'react-router-dom'
 
 import DashboardLayout from '@/shared/components/layout/DashboardLayout'
 import ProfilePage from '@/features/profile/ProfilePage'
+import NotFoundPage from '@/features/notfound/NotFoundPage'
 import {RoleType} from '@/shared/types/auth'
 
 import {ProtectedRoute} from './routes/ProtectedRoute'
@@ -59,7 +60,9 @@ function AppRoutes() {
                 </Route>
             </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Trang "không có trang này" thay cho chuyển hướng lặng lẽ về trang
+                chủ — xem lý do trong NotFoundPage. */}
+            <Route path="*" element={<NotFoundPage />} />
         </Routes>
     )
 }
