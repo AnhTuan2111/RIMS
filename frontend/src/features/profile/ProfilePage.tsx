@@ -4,7 +4,7 @@ import * as meApi from '@/shared/api/me'
 import {useActor} from '@/app/providers/ActorContext'
 import {RoleType} from '@/shared/types/auth'
 import {getErrorMessage, isRequestCanceled} from '@/shared/utils/error'
-import {PasswordInput} from '@/shared/components/ui'
+import {PageHeader, PasswordInput} from '@/shared/components/ui'
 
 type StoredUser = {
     userId: number
@@ -308,26 +308,26 @@ export default function ProfilePage() {
 
     return (
         <div className="rk-card rk-card--pad rk-formpage">
-            <div className="rk-card__head-inline">
-                <div>
-                    <h2>Hồ sơ cá nhân</h2>
-                    <p>
-                        {canEditProfile
-                            ? 'Xem và cập nhật thông tin tài khoản của bạn.'
-                            : 'Thông tin tài khoản của bạn. Cần sửa thì báo Quản trị viên.'}
-                    </p>
-                </div>
-
-                {!isEditing && canEditProfile && (
-                    <button
-                        type="button"
-                        className="rk-btn rk-btn--primary"
-                        onClick={() => setIsEditing(true)}
-                    >
-                        Chỉnh sửa
-                    </button>
-                )}
-            </div>
+            <PageHeader
+                title="Hồ sơ cá nhân"
+                description={
+                    canEditProfile
+                        ? 'Xem và cập nhật thông tin tài khoản của bạn.'
+                        : 'Thông tin tài khoản của bạn. Cần sửa thì báo Quản trị viên.'
+                }
+                actions={
+                    !isEditing &&
+                    canEditProfile && (
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--primary"
+                            onClick={() => setIsEditing(true)}
+                        >
+                            Chỉnh sửa
+                        </button>
+                    )
+                }
+            />
 
             {updateSuccess && (
                 <div className="rk-note rk-note--ok">Đã cập nhật hồ sơ</div>

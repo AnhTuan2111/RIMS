@@ -230,6 +230,38 @@ test.describe('Quản trị · vòng đời món ăn', () => {
 })
 
 test.describe('Hồ sơ', () => {
+    test('khách sửa họ tên, thấy ngay, rồi trả lại như cũ', async ({page}) => {
+        await login(page, ACCOUNTS.customer)
+        await page.goto('/profile')
+        await expectRendered(page)
+
+        const name = page.locator('.rk-idcard__name')
+        const original = (await name.textContent())!.trim()
+        // Họ tên chỉ nhận chữ cái và khoảng trắng — app từ chối dấu ngoặc, đúng luật.
+        const changed = original + ' Kiểm'
+
+        const edit = async (value: string) => {
+            const start = page.getByRole('button', {name: 'Chỉnh sửa'})
+            if (await start.isVisible()) {
+                await start.click()
+            }
+            await page.getByLabel(/họ tên/i).fill(value)
+            await page.getByRole('button', {name: 'Lưu thay đổi'}).click()
+            await expect(page.locator('.rk-note--ok')).toContainText(/đã cập nhật/i)
+            await expect(name).toHaveText(value)
+        }
+
+        try {
+            await edit(changed)
+
+            // Tải lại vẫn còn: đã lưu ở backend chứ không chỉ đổi trên màn.
+            await page.reload()
+            await expect(name).toHaveText(changed)
+        } finally {
+            await edit(original)
+        }
+    })
+
     test('đổi mật khẩu sai thì báo, không im lặng', async ({page}) => {
         await login(page, ACCOUNTS.waiter)
         await page.goto('/profile')
