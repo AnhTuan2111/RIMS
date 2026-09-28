@@ -395,7 +395,12 @@ public class CashierServiceImpl implements CashierService
         vnp_Params.put("vnp_Locale", "vn");
         vnp_Params.put("vnp_IpAddr", ipAddress);
 
-        vnp_Params.put("vnp_ReturnUrl", "http://localhost:8080/rims/cashier/payments/vnpay-callback");
+        // Lấy từ cấu hình (vnpay.return-url), KHÔNG ghi cứng. Trước đây dòng này
+        // ghi thẳng localhost:8080, nên VNPayConfig.vnpReturnUrl đọc cấu hình mà
+        // chẳng ai dùng, và biến môi trường VNPAY_RETURN_URL vô tác dụng. Ở máy
+        // thì không lộ, nhưng khi chạy trên máy chủ thật VNPay sẽ trả khách về
+        // localhost của CHÍNH MÁY KHÁCH — luồng thanh toán QR đứt ở đó.
+        vnp_Params.put("vnp_ReturnUrl", vnpayConfig.getVnpReturnUrl());
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
