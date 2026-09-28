@@ -4078,9 +4078,35 @@ html {
     }
 }
 
-.rk-floor__slot > .rk-tablecard .rk-tablecard__hint,
 .rk-floor__slot > .rk-tablecard .rk-tablecard__amount {
     display: none;
+}
+
+/* Giờ khách đặt: thẻ danh sách đã có câu "Đã đặt lúc 08:00", nên con số riêng
+   chỉ hiện trên SƠ ĐỒ — nơi câu đó không vừa. Với phục vụ, "bàn này giữ cho
+   khách lúc mấy giờ" là điều quan trọng nhất của một bàn đặt trước; bản trước
+   giấu hẳn nó khỏi sơ đồ. */
+.rk-tablecard__time {
+    display: none;
+}
+
+.rk-floor__slot > .rk-tablecard .rk-tablecard__time {
+    display: inline-block;
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-xs);
+    font-weight: var(--rims-weight-bold);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Câu đầy đủ: ẩn khỏi MẮT, không khỏi trình đọc màn hình. */
+.rk-floor__slot > .rk-tablecard .rk-tablecard__hint {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 /* Dòng "Có cập nhật món" thu lại thành một VUÔNG ĐỎ ở góc. Chữ thì không vừa,

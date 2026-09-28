@@ -87,6 +87,15 @@ export function TableCard({
                 {amount != null && amount > 0 && (
                     <span className="rk-tablecard__amount">{formatAmount(amount)}</span>
                 )}
+
+                {/* Chỉ CON SỐ giờ, cho ô bàn trên sơ đồ — câu "Đã đặt lúc 08:00"
+                    không vừa ô nhỏ. aria-hidden: câu đầy đủ bên dưới vẫn nằm
+                    trong cây trợ năng, đọc hai lần là thừa. */}
+                {upcomingTime && (
+                    <span className="rk-tablecard__time" aria-hidden="true">
+                        {upcomingTime}
+                    </span>
+                )}
             </span>
 
             {upcomingTime && (

@@ -218,8 +218,10 @@ export default function WaiterReservationDetailPage() {
 
                         <div className="rk-detailrow">
                             <span className="rk-detailrow__label">Thời gian</span>
+                            {/* Giờ trước, ngày dd/mm/yyyy như cả app — bản trước in
+                                ngày kiểu máy "2026-09-28". */}
                             <strong className="rk-detailrow__value">
-                                {date} — {time}
+                                {time} · {date.split('-').reverse().join('/')}
                             </strong>
                         </div>
 
