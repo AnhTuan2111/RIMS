@@ -209,7 +209,7 @@ Trạng thái hiện tại (đã dọn sạch giao dịch):
 | Danh mục / Món | 9 / 43 — đủ ảnh, không món nào bị ẩn hay hết hàng |
 | Bàn | 14 (B01–B14), tất cả `AVAILABLE` |
 | Đơn / Hoá đơn / Thanh toán | **0** |
-| Lượt đặt bàn | 34 còn lại (29 huỷ, 4 chờ, 1 xong) |
+| Lượt đặt bàn | **0** |
 
 Dọn lại phần giao dịch bất cứ lúc nào — thứ tự đã theo đúng khoá ngoại:
 
@@ -220,19 +220,24 @@ DELETE FROM payments;
 DELETE FROM invoices;
 DELETE FROM order_items;
 DELETE FROM orders;
--- Bàn đang SERVING là vì có đơn. Xoá đơn mà quên dòng này thì bàn kẹt vĩnh viễn:
--- sơ đồ báo có khách, mở ra không có đơn nào.
+DELETE FROM reservations;
+
+-- Bàn chuyển sang SERVING là vì có đơn, sang RESERVED là vì có lượt đặt sắp
+-- tới giờ. Xoá hai thứ đó mà quên dòng này thì bàn kẹt vĩnh viễn: sơ đồ báo
+-- có khách hoặc đã được giữ, mà mở ra chẳng có gì đứng sau.
 UPDATE restaurant_tables SET status = 'AVAILABLE', updated_at = LOCALTIMESTAMP
 WHERE status <> 'AVAILABLE';
--- Đánh số lại cho gọn (chỉ chạy khi bảng đã rỗng).
-ALTER TABLE orders      ALTER COLUMN order_id      RESTART WITH 1;
-ALTER TABLE order_items ALTER COLUMN order_item_id RESTART WITH 1;
-ALTER TABLE invoices    ALTER COLUMN invoice_id    RESTART WITH 1;
-ALTER TABLE payments    ALTER COLUMN payment_id    RESTART WITH 1;
+
+-- Đánh số lại cho gọn (chỉ chạy khi các bảng đã rỗng).
+ALTER TABLE orders       ALTER COLUMN order_id       RESTART WITH 1;
+ALTER TABLE order_items  ALTER COLUMN order_item_id  RESTART WITH 1;
+ALTER TABLE invoices     ALTER COLUMN invoice_id     RESTART WITH 1;
+ALTER TABLE payments     ALTER COLUMN payment_id     RESTART WITH 1;
+ALTER TABLE reservations ALTER COLUMN reservation_id RESTART WITH 1;
 COMMIT;
 ```
 
-Muốn xoá cả lượt đặt bàn thì thêm `DELETE FROM reservations;` trước `COMMIT`.
+Giữ nguyên tài khoản, bàn, danh mục và món — chỉ quét sạch phần giao dịch.
 
 ---
 
