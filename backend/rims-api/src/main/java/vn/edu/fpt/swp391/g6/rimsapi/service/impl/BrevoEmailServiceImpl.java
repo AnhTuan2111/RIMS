@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 import vn.edu.fpt.swp391.g6.rimsapi.service.EmailService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.RestaurantProfileService;
 
 /**
  * Gửi email OTP qua HTTP API của Brevo.
@@ -43,16 +44,25 @@ public class BrevoEmailServiceImpl implements EmailService
 
     private static final String ENDPOINT = "https://api.brevo.com/v3/smtp/email";
 
-    private static final String TIEU_DE = "[RIMS] Mã OTP đặt lại mật khẩu";
-
     private final RestClient restClient;
     private final String senderEmail;
+
+    /**
+     * Tên hiện ở ô "From" và trong lời chào cuối thư.
+     *
+     * <p>Để trống thì lấy tên nhà hàng trong hồ sơ. Trước đây chỗ này mặc định
+     * là "RIMS" — tên dự án — nên khách nhận thư ký tên một phần mềm họ chưa
+     * nghe bao giờ, và ai mang mã nguồn về dựng cho quán khác cũng dính.
+     */
     private final String senderName;
+
+    private final RestaurantProfileService restaurantProfileService;
 
     public BrevoEmailServiceImpl(
             @Value("${app.mail.brevo.api-key:}") String apiKey,
             @Value("${app.mail.from-email:}") String senderEmail,
-            @Value("${app.mail.from-name:RIMS}") String senderName)
+            @Value("${app.mail.from-name:}") String senderName,
+            RestaurantProfileService restaurantProfileService)
     {
         // Dừng ngay lúc khởi động thay vì để lỗi nổ ra ở lần đầu có người bấm
         // "Quên mật khẩu" — lúc đó thì không ai còn nối được nguyên nhân với
@@ -82,6 +92,7 @@ public class BrevoEmailServiceImpl implements EmailService
 
         this.senderEmail = senderEmail;
         this.senderName = senderName;
+        this.restaurantProfileService = restaurantProfileService;
 
         // Dựng thẳng bằng RestClient.builder() thay vì nhận RestClient.Builder
         // qua constructor: bean đó không phải lúc nào cũng có sẵn, mà ở đây chỉ
@@ -96,11 +107,13 @@ public class BrevoEmailServiceImpl implements EmailService
     @Override
     public void sendOtp(String toEmail, String otp)
     {
+        String tenQuan = tenHienThi();
+
         Map<String, Object> payload = Map.of(
-                "sender", Map.of("name", senderName, "email", senderEmail),
+                "sender", Map.of("name", tenQuan, "email", senderEmail),
                 "to", List.of(Map.of("email", toEmail)),
-                "subject", TIEU_DE,
-                "textContent", noiDung(otp));
+                "subject", "[" + tenQuan + "] Mã OTP đặt lại mật khẩu",
+                "textContent", noiDung(otp, tenQuan));
 
         try
         {
@@ -130,12 +143,28 @@ public class BrevoEmailServiceImpl implements EmailService
         }
     }
 
-    private static String noiDung(String otp)
+    /**
+     * Ưu tiên MAIL_FROM_NAME nếu người triển khai đặt tường minh, còn lại lấy
+     * tên nhà hàng. Đọc mỗi lần gửi chứ không nhớ sẵn, để chủ quán đổi tên
+     * trong màn Cấu hình là thư gửi sau đó mang tên mới ngay.
+     */
+    private String tenHienThi()
+    {
+        if (senderName != null && !senderName.isBlank())
+        {
+            return senderName;
+        }
+
+        String ten = restaurantProfileService.getProfile().getName();
+        return ten == null || ten.isBlank() ? "Nhà hàng" : ten;
+    }
+
+    private static String noiDung(String otp, String tenQuan)
     {
         return "Xin chào,\n\n"
                 + "Mã OTP của bạn để đặt lại mật khẩu là: " + otp + "\n\n"
                 + "Mã có hiệu lực trong 5 phút.\n\n"
                 + "Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.\n\n"
-                + "Trân trọng,\nRIMS System";
+                + "Trân trọng,\n" + tenQuan;
     }
 }

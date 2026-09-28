@@ -96,7 +96,10 @@ app:
     # Địa chỉ hiện ở ô "From". Phải được XÁC MINH sẵn trong Brevo, nếu không
     # mọi lần gửi đều bị từ chối.
     from-email: ${MAIL_FROM_EMAIL:}
-    from-name: ${MAIL_FROM_NAME:RIMS}
+    # Để trống thì lấy tên nhà hàng trong hồ sơ (màn Cấu hình nhà hàng), nên
+    # đổi tên quán là thư gửi sau đó mang tên mới ngay. Chỉ đặt biến này khi
+    # muốn tên người gửi khác tên quán.
+    from-name: ${MAIL_FROM_NAME:}
     brevo:
       api-key: ${BREVO_API_KEY:}
 

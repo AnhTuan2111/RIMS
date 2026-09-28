@@ -8,7 +8,7 @@ import {useRestaurant} from '@/app/providers/useRestaurant'
 
 export default function LoginPage() {
     const {profile} = useRestaurant()
-    const restaurantName = profile?.name ?? 'RIMS'
+    const restaurantName = profile?.name ?? 'Nhà hàng'
 
     // Một lần đăng nhập nay nằm ở useLoginSubmit, dùng chung với ô đăng nhập ở
     // trang chủ. Hai chỗ đăng nhập mà hai đoạn mã thì chúng sẽ lệch nhau.

@@ -38,6 +38,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TechnicalException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.*;
 import vn.edu.fpt.swp391.g6.rimsapi.service.CashierService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.RestaurantProfileService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.AccountDefaults;
 import vn.edu.fpt.swp391.g6.rimsapi.util.PaymentCalculator;
 import vn.edu.fpt.swp391.g6.rimsapi.util.WebSocketBroadcaster;
@@ -57,6 +58,42 @@ public class CashierServiceImpl implements CashierService
     private final WebSocketBroadcaster webSocketBroadcaster;
     private final PasswordEncoder passwordEncoder;
     private final AccountDefaults accountDefaults;
+
+    /** Nguồn tên nhà hàng hiện ra trên trang thanh toán VNPay. */
+    private final RestaurantProfileService restaurantProfileService;
+
+    /**
+     * Tên nhà hàng do Quản trị viên đặt trong màn Cấu hình nhà hàng.
+     *
+     * <p>Đọc mỗi lần tạo giao dịch chứ không nhớ sẵn, để đổi tên là lần thanh
+     * toán kế tiếp đã mang tên mới.
+     */
+    private String tenQuan()
+    {
+        String ten = restaurantProfileService.getProfile().getName();
+        return ten == null || ten.isBlank() ? "Nha hang" : ten;
+    }
+
+    /**
+     * Bóc dấu tiếng Việt, chỉ giữ chữ cái, chữ số và vài dấu câu an toàn.
+     *
+     * <p>vnp_OrderInfo đi vào chuỗi ký và chuỗi query của VNPay. Ký tự có dấu
+     * làm lệch chữ ký hoặc hiện ra loạn trên trang thanh toán, nên chuỗi cũ cố
+     * ý viết "Thanh toan don hang" không dấu. Giờ tên quán lấy từ cấu hình mà
+     * tên quán thì thường có dấu, nên phải bóc ở đây — nếu không, đổi tên thành
+     * "Nhà hàng Phở" là hỏng thanh toán.
+     */
+    private static String khongDau(String chuoi)
+    {
+        // NFD tách chữ cái khỏi dấu thanh, rồi bộ lọc ở dưới loại nốt dấu vì
+        // chúng không nằm trong danh sách ký tự cho phép. Riêng đ/Đ không có
+        // dạng tách nên phải đổi tay.
+        String tach = java.text.Normalizer.normalize(chuoi, java.text.Normalizer.Form.NFD)
+                .replace('đ', 'd')
+                .replace('Đ', 'D');
+
+        return tach.replaceAll("[^A-Za-z0-9 ._-]", "").trim();
+    }
 
     // Dashboard sơ đồ bàn cho Cashier: bàn nào đang có order SERVING/LOCKED -> hiển thị "đang phục vụ", còn lại "trống"
     @Override
@@ -380,7 +417,7 @@ public class CashierServiceImpl implements CashierService
 
         long amountVND = finalAmount.setScale(0, RoundingMode.HALF_UP).longValue() * 100;
 
-        String vnp_TxnRef = "RIMS_" + order.getId() + "_" + System.currentTimeMillis();
+        String vnp_TxnRef = "DH" + order.getId() + "_" + System.currentTimeMillis();
         String ipAddress = "127.0.0.1";
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -390,7 +427,7 @@ public class CashierServiceImpl implements CashierService
         vnp_Params.put("vnp_Amount", String.valueOf(amountVND));
         vnp_Params.put("vnp_CurrCode", "VND");
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang RIMS ID " + order.getId());
+        vnp_Params.put("vnp_OrderInfo", khongDau("Thanh toan " + tenQuan() + " - don hang " + order.getId()));
         vnp_Params.put("vnp_OrderType", "other");
         vnp_Params.put("vnp_Locale", "vn");
         vnp_Params.put("vnp_IpAddr", ipAddress);

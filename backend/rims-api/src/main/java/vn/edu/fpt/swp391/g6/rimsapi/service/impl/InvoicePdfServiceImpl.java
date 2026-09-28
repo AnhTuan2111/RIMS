@@ -1,6 +1,7 @@
 package vn.edu.fpt.swp391.g6.rimsapi.service.impl;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import vn.edu.fpt.swp391.g6.rimsapi.dto.response.restaurant.RestaurantProfileResponse;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Invoice;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.Order;
 import vn.edu.fpt.swp391.g6.rimsapi.entity.OrderItem;
@@ -25,6 +27,7 @@ import vn.edu.fpt.swp391.g6.rimsapi.exception.ResourceNotFoundException;
 import vn.edu.fpt.swp391.g6.rimsapi.exception.TechnicalException;
 import vn.edu.fpt.swp391.g6.rimsapi.repository.InvoiceRepository;
 import vn.edu.fpt.swp391.g6.rimsapi.service.InvoicePdfService;
+import vn.edu.fpt.swp391.g6.rimsapi.service.RestaurantProfileService;
 import vn.edu.fpt.swp391.g6.rimsapi.util.PaymentCalculator;
 
 @Service
@@ -33,6 +36,16 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
 {
 
     private final InvoiceRepository invoiceRepository;
+
+    /**
+     * Nguồn của tên, địa chỉ và điện thoại in trên hoá đơn.
+     *
+     * <p>Trước đây ba thứ đó ghi thẳng trong mã nguồn — "NHÀ HÀNG RIMS", địa chỉ
+     * Đại học FPT và hai số điện thoại bịa. Nghĩa là mọi hoá đơn khách cầm về
+     * đều mang tên dự án và địa chỉ của một nơi không phải nhà hàng, còn muốn
+     * dựng bản cài cho quán khác thì phải sửa mã nguồn rồi build lại.
+     */
+    private final RestaurantProfileService restaurantProfileService;
 
     @Override
     @Transactional
@@ -50,10 +63,24 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             PdfWriter.getInstance(document, out);
             document.open();
 
-            // front tiếng việt
+            // Font tiếng Việt, nhúng vào PDF để máy nào mở cũng hiện đúng dấu.
+            //
+            // ĐỌC THEO LUỒNG, KHÔNG LẤY ĐƯỜNG DẪN TỆP. Trước đây chỗ này gọi
+            // fontResource.getFile() — chỉ chạy khi tài nguyên nằm rời trên đĩa,
+            // tức là lúc chạy bằng mvn spring-boot:run hay trong IDE. Khi đóng
+            // gói thành jar để deploy thì font nằm BÊN TRONG jar, không có
+            // đường dẫn tệp nào trỏ tới được, và getFile() ném
+            // FileNotFoundException — nên xuất hoá đơn PDF hỏng hẳn trên máy
+            // chủ trong khi ở máy phát triển vẫn chạy ngon.
             ClassPathResource fontResource = new ClassPathResource("fonts/times.ttf");
-            String fontPath = fontResource.getFile().getAbsolutePath();
-            BaseFont bf = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            byte[] fontBytes;
+            try (InputStream fontStream = fontResource.getInputStream())
+            {
+                fontBytes = fontStream.readAllBytes();
+            }
+            BaseFont bf = BaseFont.createFont(
+                    "times.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED,
+                    BaseFont.CACHED, fontBytes, null);
 
             Font fontTitle = new Font(bf, 13, Font.BOLD);
             Font fontHeader = new Font(bf, 11, Font.BOLD);
@@ -61,15 +88,31 @@ public class InvoicePdfServiceImpl implements InvoicePdfService
             Font fontNormal = new Font(bf, 9, Font.NORMAL);
             Font fontItalic = new Font(bf, 9, Font.ITALIC);
 
-            Paragraph restaurantName = new Paragraph("NHÀ HÀNG RIMS", fontTitle);
+            RestaurantProfileResponse quan = restaurantProfileService.getProfile();
+
+            Paragraph restaurantName = new Paragraph(
+                    quan.getName() == null ? "" : quan.getName().toUpperCase(), fontTitle);
             restaurantName.setAlignment(Element.ALIGN_CENTER);
             document.add(restaurantName);
 
-            Paragraph address = new Paragraph(
-                    "Đại học FPT, Khu Công Nghệ Cao Hòa Lạc, Thạch Thất, Hà Nội\nĐT: 0987.654.321 - 0123.456.789\n",
-                    fontNormal);
-            address.setAlignment(Element.ALIGN_CENTER);
-            document.add(address);
+            // Bỏ qua dòng nào chủ quán chưa điền, thay vì in một dòng trống hay
+            // chữ "null" giữa hoá đơn.
+            StringBuilder lienHe = new StringBuilder();
+            if (quan.getAddress() != null && !quan.getAddress().isBlank())
+            {
+                lienHe.append(quan.getAddress()).append(System.lineSeparator());
+            }
+            if (quan.getPhone() != null && !quan.getPhone().isBlank())
+            {
+                lienHe.append("ĐT: ").append(quan.getPhone()).append(System.lineSeparator());
+            }
+
+            if (!lienHe.isEmpty())
+            {
+                Paragraph address = new Paragraph(lienHe.toString(), fontNormal);
+                address.setAlignment(Element.ALIGN_CENTER);
+                document.add(address);
+            }
 
             Paragraph receiptTitle = new Paragraph("HÓA ĐƠN THANH TOÁN", fontHeader);
             receiptTitle.setAlignment(Element.ALIGN_CENTER);
