@@ -4,7 +4,7 @@ import {useNavigate, useParams} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
 import type {OrderDetailResponse} from '@/shared/api/waiter'
-import {BackArrow, fmtPrice} from './components'
+import {BackArrow, fmtPrice, useTableNumber} from './components'
 import {useWaiterSocket} from '@/realtime'
 import {isRequestCanceled} from '@/shared/utils/error'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
@@ -14,6 +14,10 @@ export default function WaiterOrderDetailPage() {
     const {tableId} = useParams()
 
     const tableIdNumber = Number.parseInt(tableId ?? '0', 10)
+
+    // Số bàn thật, kể cả khi bàn CHƯA có đơn nào để lấy số từ đó — bản trước
+    // rơi về khoá chính và tiêu đề ghi "Bàn 1".
+    const tableNumber = useTableNumber(tableIdNumber)
 
     const [servingOrders, setServingOrders] = useState<OrderDetailResponse[]>([])
 
@@ -124,19 +128,34 @@ export default function WaiterOrderDetailPage() {
                     {/* SỐ BÀN, không phải khoá chính. `tableIdNumber` là id
                         trong CSDL; ngoài đời không có cái bàn nào mang số đó. */}
                     <h2 className="rk-sectiontitle">
-                        Bàn {servingOrders[0]?.tableNumber ?? tableIdNumber ?? '—'}
+                        Bàn {servingOrders[0]?.tableNumber ?? tableNumber ?? '—'}
                     </h2>
 
-                    <button
-                        type="button"
-                        className="rk-btn rk-btn--primary"
-                        disabled={!tableIdNumber}
-                        onClick={() =>
-                            navigate(`/waiter/tables/${tableIdNumber}/order/edit`)
-                        }
-                    >
-                        Cập nhật đơn hàng
-                    </button>
+                    {/* Bàn chưa có đơn thì không có gì để "cập nhật": nút dẫn
+                        thẳng sang gọi món mới. */}
+                    {!isLoading && !error && orderItems.length === 0 ? (
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--primary"
+                            disabled={!tableIdNumber}
+                            onClick={() =>
+                                navigate(`/waiter/tables/${tableIdNumber}/order/new`)
+                            }
+                        >
+                            Gọi món
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            className="rk-btn rk-btn--primary"
+                            disabled={!tableIdNumber || isLoading}
+                            onClick={() =>
+                                navigate(`/waiter/tables/${tableIdNumber}/order/edit`)
+                            }
+                        >
+                            Cập nhật đơn hàng
+                        </button>
+                    )}
                 </div>
 
                 <div className="rk-card rk-card--pad">

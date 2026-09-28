@@ -4922,16 +4922,22 @@ html {
 }
 
 /* Chấm chú giải theo trạng thái bàn: khỏi phải tô màu trong JSX. */
+/* Chấm chú giải mang VIỀN màu trạng thái, như chính ô bàn nó giải thích.
+   Ở chế độ tối các token *-fill là sắc nền rất tối (#16281d trên #131313), nên
+   chấm chỉ có nền thì gần như biến mất — ba chấm chú giải đọc ra ba ô trống. */
 .rk-legend__dot--ok {
     background: var(--rims-ok-fill);
+    border: var(--rims-border) solid var(--rims-ok);
 }
 
 .rk-legend__dot--busy {
     background: var(--rims-busy-fill);
+    border: var(--rims-border) solid var(--rims-busy);
 }
 
 .rk-legend__dot--brand {
     background: var(--rims-brand-fill);
+    border: var(--rims-border) solid var(--rims-brand);
 }
 
 /* TIN — đã đặt trước, chờ thanh toán. Thiếu biến thể này nên màn Sơ đồ bàn
@@ -4939,6 +4945,7 @@ html {
    một trạng thái. */
 .rk-legend__dot--info {
     background: var(--rims-info-fill);
+    border: var(--rims-border) solid var(--rims-info);
 }
 
 /* Giá trị chỉ đọc trong hồ sơ: nhạt hơn để phân biệt với ô nhập được. */
