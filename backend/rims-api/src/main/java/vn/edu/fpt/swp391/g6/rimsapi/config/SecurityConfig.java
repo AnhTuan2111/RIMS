@@ -92,9 +92,25 @@ public class SecurityConfig
                         .requestMatchers("/rims/cashier/**").hasRole("CASHIER")
                         .requestMatchers("/rims/customer/**").hasRole("CUSTOMER")
 
-                        // Đường dẫn mới thêm mà quên khai báo thì mặc định là phải
-                        // đăng nhập, chứ không phải mở cho tất cả.
-                        .anyRequest().authenticated())
+                        // Đường dẫn /rims mới thêm mà quên khai báo thì mặc định
+                        // là phải đăng nhập, chứ không phải mở cho tất cả. Mọi API
+                        // đều nằm dưới /rims nên lưới an toàn này vẫn phủ hết.
+                        .requestMatchers("/rims/**").authenticated()
+
+                        // Phần còn lại là VỎ ỨNG DỤNG React do chính backend phục
+                        // vụ: index.html, /assets/**, /image/**, và mọi đường dẫn
+                        // của React Router.
+                        //
+                        // Phải mở, vì trình duyệt xin những tệp này bằng thẻ
+                        // <script>/<img> nên không đính kèm được header
+                        // Authorization. Để .anyRequest().authenticated() thì mọi
+                        // tệp tĩnh trả về JSON 401 và người dùng nhìn thấy trang
+                        // trắng.
+                        //
+                        // Mở cũng không lộ gì: đây là HTML, JavaScript và ảnh —
+                        // thứ mà ai tải trang cũng nhận được. Dữ liệu thật vẫn nằm
+                        // sau /rims/** ở trên.
+                        .anyRequest().permitAll())
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 

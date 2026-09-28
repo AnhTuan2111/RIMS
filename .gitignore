@@ -47,3 +47,7 @@ frontend/tools/_*
 # chỉ có nghĩa với đúng lần chạy đó.
 frontend/test-results/
 frontend/playwright-report/
+
+# Bản build React do Dockerfile chép vào đây để Spring Boot phục vụ. Là sản
+# phẩm build, dựng lại được từ frontend/ — không phải mã nguồn.
+backend/rims-api/src/main/resources/static/

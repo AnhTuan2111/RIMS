@@ -1,0 +1,47 @@
+# Những gì KHÔNG gửi sang Docker lúc build.
+#
+# Không có tệp này thì node_modules/ và target/ — cộng lại hàng trăm megabyte —
+# bị nhồi vào build context ở mỗi lần build. Chậm, mà cuối cùng cũng bị ghi đè:
+# tầng 1 tự chạy "npm ci", tầng 2 tự chạy "mvn package".
+
+# Thư viện và sản phẩm build: dựng lại trong ảnh
+**/node_modules/
+**/target/
+**/dist/
+
+# Lịch sử git: ảnh không cần
+.git/
+.gitattributes
+.git-blame-ignore-revs
+
+# BÍ MẬT. Quan trọng nhất trong tệp này: mật khẩu CSDL, App Password Gmail,
+# khoá ký JWT, hash secret VNPay. Lọt vào ảnh là nằm lại vĩnh viễn trong một
+# tầng, ai kéo được ảnh là đọc được. Cấu hình khi chạy đi bằng biến môi trường.
+.env
+.env.*
+!.env.example
+
+# Kết quả kiểm thử và ảnh chụp: sinh lại được
+frontend/test-results/
+frontend/playwright-report/
+frontend/tools/shots/
+frontend/tools/look/
+frontend/tools/_*
+frontend/e2e/
+
+# LƯU Ý: KHÔNG loại cả thư mục frontend/tools — vite.config.ts có
+# import ./tools/mock-api-plugin.mjs, thiếu tệp đó là build đứt ngay.
+
+# Công cụ lập trình và tài liệu: không dự phần vào lúc chạy
+.idea/
+.vscode/
+.claude/
+CLAUDE.md
+docs/
+*.md
+!README.md
+
+# Linh tinh
+**/*.log
+.DS_Store
+Thumbs.db
