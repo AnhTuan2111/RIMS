@@ -24,7 +24,7 @@ Hệ thống quản lý nhà hàng gồm 2 phần:
 | Node.js    | 20.19+ hoặc 22+ (Vite 8 yêu cầu)                     |
 | npm        | đi kèm Node.js                                       |
 | PostgreSQL | 16+ (port 5432)                                      |
-| SMTP Gmail | tài khoản dùng để gửi mail (OTP, thông báo...)       |
+| Gửi email  | tài khoản Gmail (SMTP), chỉ dùng cho OTP quên mật khẩu |
 
 ## 2. Cấu trúc thư mục chính
 
@@ -128,16 +128,21 @@ không phải mã nguồn, nên không phải build lại.
 
 ### 3.3. Tài khoản quản trị đầu tiên
 
-Repo **không** chứa tài khoản nào. Trước lần chạy đầu, đặt mật khẩu quản trị
-trong `.env`:
+Repo **không** chứa tài khoản nào. Trước lần chạy đầu, đặt hai biến này trong
+`.env`:
 
 ```
 RIMS_ADMIN_PASSWORD=<mật khẩu bạn chọn>
+RIMS_ADMIN_EMAIL=<email của bạn>
 ```
 
-Bảng `users` còn rỗng mà thiếu biến này thì app **dừng ngay lúc khởi động** và
-in ra hướng dẫn. Cố tình như vậy: hệ thống có quản trị viên mà không ai biết mật
-khẩu thì vô dụng, còn hệ thống tự đặt mật khẩu đoán được thì nguy hiểm.
+Email là bắt buộc vì nó là đường lấy lại mật khẩu duy nhất — OTP chỉ gửi qua
+email, còn tin nhắn thương hiệu thì đòi giấy phép kinh doanh.
+
+Bảng `users` còn rỗng mà thiếu một trong hai biến thì app **dừng ngay lúc khởi
+động** và nói rõ thiếu biến nào. Cố tình như vậy: hệ thống có quản trị viên mà
+không ai biết mật khẩu thì vô dụng, còn hệ thống tự đặt mật khẩu đoán được thì
+nguy hiểm.
 
 Tài khoản tạo ra tên `admin` (đổi bằng `RIMS_ADMIN_USERNAME`) và bị bắt đổi mật
 khẩu ngay lần đăng nhập đầu — mật khẩu đặt qua biến môi trường vẫn nằm trong
@@ -263,11 +268,75 @@ trong `frontend/tools/walk-fixtures.mjs` — cùng bảng mà công cụ chụp 
 đọc, nên bấm Lưu sẽ không lưu gì.
 5. Đăng nhập/đăng ký thử để kiểm tra luồng Auth → Order → Payment → Realtime (WebSocket).
 
-## 6. Công nghệ sử dụng
+## 6. Đóng gói để deploy
+
+`Dockerfile` ở gốc repo dựng **một ảnh duy nhất chứa cả hai nửa**: nó build
+React, chép `frontend/dist` vào thư mục tài nguyên tĩnh của Spring Boot, rồi
+đóng gói thành jar.
+
+```bash
+docker build -t rims .
+
+# Chạy thử ở máy. Lưu ý DB_URL: trong container thì "localhost" là chính
+# container đó, không phải máy bạn — phải trỏ qua host.docker.internal thì mới
+# gặp được PostgreSQL đang chạy trên máy.
+docker run --rm -p 8080:8080 --env-file .env -e DB_URL=jdbc:postgresql://host.docker.internal:5432/rims_db rims
+```
+
+Không bắt buộc phải build được ở máy: nền tảng deploy sẽ tự build từ
+`Dockerfile` này. Build ở máy chỉ để biết sớm nếu có gì sai.
+
+Vì sao gộp chứ không tách hai dịch vụ: cùng một tên miền thì `baseURL: '/rims'`
+và endpoint `/ws-rims` ở frontend chạy nguyên không phải sửa, không có CORS, và
+WebSocket nối thẳng — không vướng giới hạn "rewrite của static site không proxy
+được WebSocket" mà một số nền tảng mắc phải.
+
+Đường dẫn của React Router (ví dụ F5 ngay tại `/admin/dishes`) được
+`SpaResourceConfig` trả về `index.html`. Lớp đó cố ý **không** đụng tới
+`/rims/**` và `/ws-rims/**`, để gọi sai một API vẫn nhận JSON 404 như cũ chứ
+không nhận HTML kèm mã 200.
+
+### 6.1. Biến môi trường khi chạy thật
+
+Ngoài các biến ở mục 3.1, khi deploy cần thêm:
+
+| Biến | Vì sao |
+| --- | --- |
+| `DB_URL` | Trỏ sang CSDL thật. Dịch vụ có quản lý hầu như luôn đòi `?sslmode=require` |
+| `FRONTEND_URL` | Chính là URL của dịch vụ này (vì backend phục vụ luôn frontend). Dùng cho CORS và cho chỗ VNPay trả khách về |
+| `VNPAY_RETURN_URL` | `https://<tên-miền>/rims/cashier/payments/vnpay-callback`, và phải khai lại bên VNPay |
+| `JWT_SIGNER_KEY` | **Sinh khoá mới**, đừng dùng lại khoá của máy phát triển |
+| `RIMS_DEFAULT_PASSWORD` | Không đặt thì dùng mặc định trong `application.yaml` — mà ai đọc repo cũng biết |
+| `MAIL_PROVIDER=brevo` + `BREVO_API_KEY` + `MAIL_FROM_EMAIL` | Khi nền tảng chặn cổng SMTP |
+
+Cổng thì **không cần khai**: `Dockerfile` đã tự nghe theo biến `PORT` mà nền
+tảng cấp, và lui về 8080 khi chạy ở máy.
+
+### 6.2. Lưu ý với gói miễn phí
+
+- Dịch vụ ngủ sau một quãng không có ai truy cập, và **cả 5 tác vụ
+  `@Scheduled` ngừng chạy trong lúc ngủ**:
+
+  | Nhịp | Việc |
+  | --- | --- |
+  | 60 giây | `autoUpdateTableStatusToReserved` — đánh dấu bàn `RESERVED` khi sắp tới giờ khách đến |
+  | 60 giây | `autoCancelReservation` — tự huỷ lượt đặt quá hạn |
+  | 5 phút | `autoUnlockStaleOrders` — mở khoá đơn kẹt ở trạng thái `LOCKED` |
+  | 1 giờ | `cleanupStaleCancelledOrders` — dọn đơn bị huỷ sạch món |
+  | 1 giờ | `cleanupRevokedTokens` — dọn token đã thu hồi |
+
+  Vì dùng `fixedRate`, trạng thái sẽ hội tụ lại ở nhịp đầu tiên sau khi thức
+  dậy — mất thời gian thực chứ không mất dữ liệu.
+- CSDL kiểu serverless tính giờ compute. Các job 60 giây truy vấn liên tục nên
+  **hễ backend thức là CSDL cũng thức** — đừng ping giữ app thức 24/7 nếu hạn
+  mức giờ compute không cho phép. Giữ thức trong giờ mở cửa (08:00–20:00) là
+  vừa đủ, vì ngoài khung đó hệ thống cũng không nhận đặt bàn.
+
+## 7. Công nghệ sử dụng
 
 **Backend**: Java 21, Spring Boot 4, Spring Data JPA, Spring Security (JWT),
-WebSocket (STOMP), PostgreSQL, VNPay, Spring Mail. Test: JUnit 5 + Mockito +
-AssertJ.
+WebSocket (STOMP), PostgreSQL, VNPay. Gửi email qua Spring Mail (SMTP) hoặc
+HTTP API của Brevo. Test: JUnit 5 + Mockito + AssertJ.
 
 **Frontend**: React 19, TypeScript, Vite 8, React Router 7, Axios,
 SockJS + StompJS (realtime). Test: Vitest. ESLint + Prettier.
