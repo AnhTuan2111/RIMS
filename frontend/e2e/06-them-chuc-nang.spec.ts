@@ -503,3 +503,63 @@ test.describe('Thu ngân · bàn chưa thu được', () => {
             .toBe('AVAILABLE')
     })
 })
+
+test.describe('Bếp · gom món', () => {
+    test('xong cả nhóm phải hỏi lại, rồi mọi phần trong nhóm đều xong', async ({
+        page,
+    }) => {
+        // Hai bàn gọi cùng một món, không ghi chú → gom thành một nhóm.
+        const tables = await api(ACCOUNTS.waiter, '/waiter/tables')
+        const free = tables
+            .filter((t: {status: string}) => t.status === 'AVAILABLE')
+            .slice(0, 2)
+        expect(free.length, 'cần hai bàn trống').toBe(2)
+
+        const menu = await api(ACCOUNTS.waiter, '/waiter/menu')
+        const dish = menu.filter((d: {available: boolean}) => d.available).at(-1)
+
+        for (const table of free) {
+            await api(ACCOUNTS.waiter, '/waiter/orders', {
+                method: 'POST',
+                body: JSON.stringify({
+                    tableId: table.tableId,
+                    items: [{dishId: dish.dishId, quantity: 1}],
+                }),
+            })
+        }
+
+        await login(page, ACCOUNTS.chef)
+        await page.goto('/chef/grouped-orders')
+        await expectRendered(page)
+
+        // textContent không bị text-transform, nên so với tên gốc.
+        const group = page.locator('article', {hasText: dish.name}).first()
+        await group.getByRole('button', {name: 'Xong cả nhóm'}).click()
+
+        // Hỏi lại, và nêu đủ các bàn sẽ bị ảnh hưởng.
+        const dialog = page.getByRole('dialog')
+        for (const table of free) {
+            await expect(dialog).toContainText(table.tableNumber)
+        }
+        await dialog.getByRole('button', {name: 'Hoàn thành cả nhóm'}).click()
+        await expect(page.locator('.rk-toast')).toContainText(/đã xong/i)
+
+        // Không còn phần nào của món đó ở hai bàn trong hàng đợi.
+        await expect
+            .poll(
+                async () => {
+                    const queue = await api(ACCOUNTS.chef, '/chef/orders')
+                    return queue.filter(
+                        (item: {tableNumber: string; dishName: string}) =>
+                            item.dishName === dish.name &&
+                            free.some(
+                                (t: {tableNumber: string}) =>
+                                    t.tableNumber === item.tableNumber,
+                            ),
+                    ).length
+                },
+                {timeout: 15_000},
+            )
+            .toBe(0)
+    })
+})

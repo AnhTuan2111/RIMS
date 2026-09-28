@@ -8,7 +8,7 @@ import {
 } from '@/shared/api/chef'
 import {useKitchenSocket} from '@/realtime'
 import {EmptyState, ErrorState, LoadingState} from '@/shared/components/feedback'
-import {PageCard, PageHeader, Pagination} from '@/shared/components/ui'
+import {ConfirmDialog, PageCard, PageHeader, Pagination} from '@/shared/components/ui'
 import {useToast} from '@/app/providers/useToast'
 
 const ITEMS_PER_PAGE = 6
@@ -81,6 +81,14 @@ function getWaitingChip(minutes: number) {
 export default function GroupedKitchenPage() {
     const {notify} = useToast()
 
+    // Nhóm đang chờ xác nhận hoàn thành. Hoàn thành MỘT món ở màn Cần chế biến
+    // thì có hỏi lại ("không hoàn tác được"), còn hoàn thành CẢ NHÓM — nhiều
+    // phần, nhiều bàn một lúc — thì bấm là xong: việc lớn hơn lại được bảo vệ
+    // ít hơn.
+    const [pendingGroup, setPendingGroup] = useState<GroupedKitchenOrderResponse | null>(
+        null,
+    )
+
     const [groups, setGroups] = useState<GroupedKitchenOrderResponse[]>([])
 
     const [searchText, setSearchText] = useState('')
@@ -152,6 +160,8 @@ export default function GroupedKitchenPage() {
             )
 
             await loadGroups(false, true)
+
+            notify(`Đã xong ${group.totalQuantity} phần ${group.dishName}.`)
         } catch (requestError) {
             console.error(requestError)
 
@@ -499,13 +509,7 @@ export default function GroupedKitchenPage() {
                                             disabled={
                                                 completingGroupKey === group.groupKey
                                             }
-                                            onClick={() => {
-                                                handleCompleteGroup(group).catch(
-                                                    (requestError) => {
-                                                        console.error(requestError)
-                                                    },
-                                                )
-                                            }}
+                                            onClick={() => setPendingGroup(group)}
                                         >
                                             {completingGroupKey === group.groupKey
                                                 ? 'Đang cập nhật...'
@@ -528,6 +532,28 @@ export default function GroupedKitchenPage() {
                     />
                 </>
             )}
+            <ConfirmDialog
+                open={pendingGroup !== null}
+                title={`Hoàn thành ${pendingGroup?.totalQuantity ?? 0} phần "${pendingGroup?.dishName ?? ''}"?`}
+                description={
+                    pendingGroup
+                        ? [
+                              `Bàn ${[...new Set(pendingGroup.items.map((item) => item.tableNumber))].join(', ')}`,
+                              'Tất cả chuyển sang đã hoàn thành và không hoàn tác được.',
+                          ].join(' · ')
+                        : undefined
+                }
+                confirmLabel="Hoàn thành cả nhóm"
+                busy={completingGroupKey !== null}
+                onConfirm={() => {
+                    const group = pendingGroup
+                    setPendingGroup(null)
+                    if (group) {
+                        void handleCompleteGroup(group)
+                    }
+                }}
+                onCancel={() => setPendingGroup(null)}
+            />
         </div>
     )
 }
