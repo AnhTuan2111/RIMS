@@ -26,6 +26,26 @@ spring:
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD}
 
+    # Chỉnh cho CSDL kiểu "serverless" (Neon, Supabase): máy chủ TỰ NGẮT kết nối
+    # nhàn rỗi rồi treo cả compute sau vài phút vắng. Hikari mà giữ một kết nối
+    # lâu hơn ngưỡng đó thì lần sau nó đưa ra một kết nối đã chết, và request
+    # đầu tiên sau mỗi quãng vắng khách sẽ lỗi "connection closed".
+    hikari:
+      # Nhỏ thôi: gói miễn phí giới hạn số kết nối, và container chỉ có 512 MB
+      # nên mỗi kết nối thừa là bộ nhớ mất không.
+      maximum-pool-size: ${DB_POOL_MAX:5}
+      # 0 để bể co về rỗng lúc vắng. Nhờ vậy CSDL mới treo được compute, và
+      # không đốt hạn mức giờ tính toán của gói miễn phí.
+      minimum-idle: ${DB_POOL_MIN:0}
+      # Buông kết nối nhàn rỗi sau 1 phút...
+      idle-timeout: 60000
+      # ...và không giữ kết nối nào quá 4 phút, ngắn hơn ngưỡng 5 phút Neon treo
+      # compute, nên kết nối luôn được thay trước khi bị cắt từ đầu kia.
+      max-lifetime: 240000
+      # Rộng tay hơn mặc định: lần gọi đầu sau khi CSDL ngủ dậy phải chờ compute
+      # khởi động lại.
+      connection-timeout: ${DB_CONNECTION_TIMEOUT:30000}
+
   # schema.sql và data.sql trong thư mục này là nguồn thật của lược đồ và dữ
   # liệu khởi tạo. Cả hai chạy lại được nhiều lần: mọi câu đều kiểm tra trước
   # khi tạo hoặc chèn, nên khởi động lần thứ hai không lỗi và không mất gì.
