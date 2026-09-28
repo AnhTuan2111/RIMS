@@ -563,3 +563,147 @@ test.describe('Bếp · gom món', () => {
             .toBe(0)
     })
 })
+
+test.describe('Thực đơn · chỉ gọi được món đang bán', () => {
+    // Trước đây backend tạo đơn không kiểm gì: nút "+" bị khoá ở giao diện,
+    // nhưng gọi thẳng API thì món hết hàng vẫn vào bếp. Và ẩn cả danh mục thì
+    // phục vụ vẫn thấy, vẫn gọi được món trong đó.
+
+    async function rawPost(path: string, body: unknown) {
+        const base = process.env.E2E_API ?? 'http://localhost:8080/rims'
+        const auth = await fetch(`${base}/auth/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: ACCOUNTS.waiter, rawPassword: PW}),
+        })
+        const {accessToken} = await auth.json()
+        return fetch(base + path, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(body),
+        })
+    }
+
+    test('backend từ chối gọi món đã hết hàng', async () => {
+        const menu = await api(ACCOUNTS.waiter, '/waiter/menu')
+        const dish = menu.find((d: {available: boolean}) => d.available)
+        const tables = await api(ACCOUNTS.waiter, '/waiter/tables')
+        const free = tables.find((t: {status: string}) => t.status === 'AVAILABLE')
+
+        await api(ACCOUNTS.chef, `/chef/dishes/${dish.dishId}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({available: false}),
+        })
+
+        try {
+            const res = await rawPost('/waiter/orders', {
+                tableId: free.tableId,
+                items: [{dishId: dish.dishId, quantity: 1}],
+            })
+            expect(res.status).toBe(400)
+            expect(await res.text()).toMatch(/không phục vụ/)
+
+            // Bàn không được chuyển sang đang phục vụ vì một đơn bị từ chối.
+            const after = await api(ACCOUNTS.waiter, '/waiter/tables')
+            expect(
+                after.find((t: {tableId: number}) => t.tableId === free.tableId).status,
+            ).toBe('AVAILABLE')
+        } finally {
+            await api(ACCOUNTS.chef, `/chef/dishes/${dish.dishId}/status`, {
+                method: 'PUT',
+                body: JSON.stringify({available: true}),
+            })
+        }
+    })
+
+    test('ẩn danh mục thì món trong đó biến khỏi thực đơn phục vụ và trang chủ', async () => {
+        const categories = await api(ACCOUNTS.admin, '/admin/category/all')
+        const target = categories.find(
+            (c: {name: string; isAvailable: boolean}) =>
+                c.name === 'Tráng miệng' && c.isAvailable,
+        )
+        expect(target, 'không thấy danh mục Tráng miệng đang hiện').toBeTruthy()
+
+        const setAvailable = (isAvailable: boolean) =>
+            api(ACCOUNTS.admin, `/admin/category/${target.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    name: target.name,
+                    description: target.description ?? '',
+                    isAvailable,
+                }),
+            })
+
+        const inWaiterMenu = async () =>
+            (await api(ACCOUNTS.waiter, '/waiter/menu')).some(
+                (d: {categoryName: string}) => d.categoryName === target.name,
+            )
+
+        const publicMenu = async () =>
+            (
+                await fetch(
+                    `${process.env.E2E_API ?? 'http://localhost:8080/rims'}/public/menu`,
+                )
+            ).text()
+
+        expect(await inWaiterMenu(), 'danh mục chưa ẩn mà phục vụ đã không thấy').toBe(
+            true,
+        )
+        expect(await publicMenu(), 'danh mục chưa ẩn mà trang chủ đã không có').toContain(
+            `"${target.name}"`,
+        )
+
+        await setAvailable(false)
+
+        try {
+            expect(await inWaiterMenu(), 'phục vụ vẫn thấy món của danh mục đã ẩn').toBe(
+                false,
+            )
+
+            expect(await publicMenu()).not.toContain(`"${target.name}"`)
+        } finally {
+            await setAvailable(true)
+        }
+
+        expect(await inWaiterMenu(), 'bật lại danh mục mà món không trở lại').toBe(true)
+    })
+
+    test('bớt hết món đang nấu thì đơn rỗng được đóng, không để lại đơn mồ côi', async () => {
+        const menu = await api(ACCOUNTS.waiter, '/waiter/menu')
+        const dish = menu.find((d: {available: boolean}) => d.available)
+        const tables = await api(ACCOUNTS.waiter, '/waiter/tables')
+        const free = tables.find((t: {status: string}) => t.status === 'AVAILABLE')
+
+        await api(ACCOUNTS.waiter, '/waiter/orders', {
+            method: 'POST',
+            body: JSON.stringify({
+                tableId: free.tableId,
+                items: [{dishId: dish.dishId, quantity: 1}],
+            }),
+        })
+
+        const [order] = await api(ACCOUNTS.waiter, `/waiter/detail/${free.tableId}`)
+        const line = order.orderItems[0]
+
+        await api(ACCOUNTS.waiter, `/waiter/orders/${order.orderId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                items: [
+                    {orderItemId: line.orderItemId, dishId: dish.dishId, quantity: 0},
+                ],
+            }),
+        })
+
+        const after = await api(ACCOUNTS.waiter, '/waiter/tables')
+        expect(
+            after.find((t: {tableId: number}) => t.tableId === free.tableId).status,
+        ).toBe('AVAILABLE')
+
+        // Đơn cũ không còn là đơn đang mở của bàn.
+        const serving = await api(ACCOUNTS.waiter, `/waiter/detail/${free.tableId}`)
+        expect(serving, 'đơn rỗng vẫn còn mở').toHaveLength(0)
+    })
+})

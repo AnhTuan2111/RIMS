@@ -102,6 +102,44 @@ public class WaiterServiceImpl implements WaiterService
         return tableDetailResponses;
     }
 
+    /**
+     * Món có đang được BÁN không: chưa bị ẩn, chưa hết hàng, và danh mục của nó
+     * chưa bị ẩn.
+     *
+     * <p>Trước đây tạo đơn không kiểm gì cả — nút "+" bị khoá ở giao diện, nhưng
+     * gọi thẳng API thì món hết hàng vẫn vào bếp. Và ẩn cả danh mục thì hộp thoại
+     * hứa "các món thuộc nó sẽ không còn hiện trong thực đơn", trong khi phục vụ
+     * vẫn gọi được.
+     */
+    private static boolean isOrderable(Dish dish)
+    {
+        return !dish.isHidden() && dish.isAvailable() && dish.getCategory() != null
+                && dish.getCategory().isAvailable();
+    }
+
+    private Dish requireOrderableDish(Integer dishId)
+    {
+        Dish dish = dishRepository.findById(dishId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy món với ID: " + dishId));
+
+        if (!isOrderable(dish))
+        {
+            throw new IllegalArgumentException("Món \"" + dish.getName()
+                    + "\" hiện không phục vụ — đã hết hàng hoặc đã ẩn khỏi thực đơn.");
+        }
+
+        return dish;
+    }
+
+    private static void requireOrderableForMore(OrderItem existedItem)
+    {
+        if (!isOrderable(existedItem.getDish()))
+        {
+            throw new IllegalArgumentException("Món \"" + existedItem.getDishNameSnapshot()
+                    + "\" hiện không phục vụ, không gọi thêm được. Bớt hoặc giữ nguyên thì vẫn được.");
+        }
+    }
+
     @Override
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest request, Integer waiterId)
@@ -133,9 +171,7 @@ public class WaiterServiceImpl implements WaiterService
 
         for (OrderItemRequest itemReq : request.getItems())
         {
-            Dish dish = dishRepository.findById(itemReq.getDishId())
-                    .orElseThrow(
-                            () -> new IllegalArgumentException("Không tìm thấy món với ID: " + itemReq.getDishId()));
+            Dish dish = requireOrderableDish(itemReq.getDishId());
 
             BigDecimal unitPrice = BigDecimal.valueOf(dish.getPrice());
             BigDecimal subTotal = unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
@@ -277,6 +313,8 @@ public class WaiterServiceImpl implements WaiterService
                                 + " đã hoàn thành, không thể giảm số lượng");
                     } else if (itemRequest.getQuantity() > existedItem.getQuantity())
                     {
+                        requireOrderableForMore(existedItem);
+
                         // tạo order item mới đế không bị nhầm lẫn với order item khác
                         OrderItem orderItem = new OrderItem();
                         orderItem.setDish(existedItem.getDish());
@@ -299,9 +337,21 @@ public class WaiterServiceImpl implements WaiterService
                             RestaurantTable table = order.getTable();
                             table.setStatus(TableStatus.AVAILABLE);
                             restaurantTableRepository.save(table);
+
+                            // Đóng luôn đơn rỗng. Trước đây bàn được trả về trống
+                            // nhưng đơn vẫn SERVING với 0 món — một đơn mồ côi,
+                            // và lần sau bàn đó được gọi món sẽ có HAI đơn đang
+                            // mở. Dùng lại COMPLETED không kèm hoá đơn, như nhánh
+                            // "mọi món đã huỷ" ở quầy thu ngân.
+                            order.setStatus(OrderStatus.COMPLETED);
                         }
                     } else
                     {
+                        if (itemRequest.getQuantity() > existedItem.getQuantity())
+                        {
+                            requireOrderableForMore(existedItem);
+                        }
+
                         existedItem.setQuantity(itemRequest.getQuantity());
                         existedItem.setSubTotal(
                                 existedItem.getUnitPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
@@ -310,9 +360,7 @@ public class WaiterServiceImpl implements WaiterService
                 }
             } else // món mới khi gửi đi sẽ có orderitem id là null
             {
-                Dish dish = dishRepository.findById(itemRequest.getDishId())
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Không tìm thấy món ăn với ID: " + itemRequest.getDishId()));
+                Dish dish = requireOrderableDish(itemRequest.getDishId());
 
                 OrderItem orderItem = new OrderItem();
                 orderItem.setDish(dish);
@@ -365,7 +413,11 @@ public class WaiterServiceImpl implements WaiterService
     @Transactional(readOnly = true)
     public List<MenuItemResponse> getMenu()
     {
+        // Bỏ cả món thuộc DANH MỤC đã ẩn — hộp thoại ẩn danh mục hứa đúng như vậy.
+        // Món hết hàng thì vẫn giữ trong thực đơn (available=false) để phục vụ
+        // thấy và báo lại khách, chỉ không gọi được.
         return dishRepository.findByIsHiddenFalse().stream()
+                .filter(dish -> dish.getCategory() != null && dish.getCategory().isAvailable())
                 .map(dish -> MenuItemResponse.builder()
                         .dishId(dish.getId())
                         .name(dish.getName())
