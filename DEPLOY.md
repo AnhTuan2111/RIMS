@@ -32,7 +32,6 @@ hai đều có quãng chờ.
   Chọn region khác thì mỗi truy vấn đội thêm hàng trăm mili giây.
 - [x] Ở Connection Details, chọn kiểu **Java / JDBC**.
 - [x] Dùng endpoint **direct**, KHÔNG dùng bản đuôi `-pooler`. HikariCP trong app
-
   đã gộp kết nối sẵn, chồng thêm một lớp nữa chỉ thêm rắc rối.
 - [x] Tách thành **ba** biến riêng, đừng nhét user/password vào URL:
   ```
@@ -58,12 +57,10 @@ HTTP API của Brevo — kể cả khi chạy ở máy. Thiếu khoá thì backe
 Làm sớm: tài khoản mới đôi khi phải chờ Brevo duyệt thủ công mới gửi được.
 
 - [ ] Tạo tài khoản tại [https://www.brevo.com](https://www.brevo.com).
-- [ ] **Senders, Domains &amp; Dedicated IPs → Senders → Add a sender**: thêm địa chỉ
-
+- [ ] **Senders, Domains & Dedicated IPs → Senders → Add a sender**: thêm địa chỉ
   đứng tên gửi. Brevo gửi mã 6 số về chính hộp thư đó. **Không cần sở hữu tên
   miền** — địa chỉ Gmail dùng được.
-- [ ] **SMTP &amp; API → API Keys → Generate a new API key**. Copy ngay, chỉ hiện một
-
+- [ ] **SMTP & API → API Keys → Generate a new API key**. Copy ngay, chỉ hiện một
   lần.
 - [ ] Ghi lại:
   ```
@@ -103,7 +100,6 @@ Làm sớm: tài khoản mới đôi khi phải chờ Brevo duyệt thủ công 
 - [ ] Điền biến môi trường (bảng dưới).
 - [ ] **Create Web Service**, rồi xem log build.
 - [ ] Log lần đầu phải thấy: tạo bảng → nạp dữ liệu mẫu → `Đã tạo tài khoản quản
-
   trị đầu tiên "admin"`→`Tomcat started`.
 
 > **Vòng gà-và-trứng**: `FRONTEND_URL` và `VNPAY_RETURN_URL` cần biết URL dịch
@@ -172,7 +168,6 @@ RIMS_API=https://<name>.onrender.com/rims node tools/seed-demo.mjs <mật-khẩu
 - [ ] Đặt bàn → gọi món → thanh toán **tiền mặt** → xem hoá đơn.
 - [ ] Thanh toán **VNPay**: phải trả đúng về app, không về `localhost`.
 - [ ] **Realtime**: mở hai tab, một vai Bếp một vai Phục vụ. Gọi món ở tab phục
-
   vụ, màn bếp phải tự nhảy mà không cần F5.
 - [ ] **F5 ở màn sâu**: đang ở `/admin/dishes` bấm F5 → phải dựng lại đúng màn.
 
