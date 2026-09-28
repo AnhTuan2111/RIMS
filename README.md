@@ -24,7 +24,7 @@ Hệ thống quản lý nhà hàng gồm 2 phần:
 | Node.js    | 20.19+ hoặc 22+ (Vite 8 yêu cầu)                     |
 | npm        | đi kèm Node.js                                       |
 | PostgreSQL | 16+ (port 5432)                                      |
-| Gửi email  | tài khoản Gmail (SMTP), chỉ dùng cho OTP quên mật khẩu |
+| Gửi email  | tài khoản Brevo (HTTP API), chỉ dùng cho OTP quên mật khẩu |
 
 ## 2. Cấu trúc thư mục chính
 
@@ -72,10 +72,20 @@ Năm giá trị bắt buộc — thiếu là backend không khởi động đư�
 | Biến | Là gì | Lấy ở đâu |
 |---|---|---|
 | `DB_PASSWORD` | Mật khẩu PostgreSQL | Bạn đặt khi cài PostgreSQL (username mặc định là `postgres`) |
-| `MAIL_USERNAME` | Email gửi OTP | Tài khoản Gmail của bạn |
-| `MAIL_PASSWORD` | App Password 16 ký tự | [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) — phải bật xác thực 2 bước trước. Không dùng mật khẩu đăng nhập thường. |
+| `BREVO_API_KEY` | Khoá gửi email OTP | [brevo.com](https://www.brevo.com) → SMTP & API → API Keys |
+| `MAIL_FROM_EMAIL` | Địa chỉ đứng tên gửi | Phải xác minh trước ở Brevo → Senders. Không cần tên miền riêng, Gmail dùng được |
 | `JWT_SIGNER_KEY` | Khoá ký JWT, tối thiểu 32 ký tự | Tự sinh: `openssl rand -base64 48` |
 | `VNPAY_HASH_SECRET` | Khoá ký giao dịch VNPay | Trong tài khoản sandbox VNPay |
+
+> **Vì sao không dùng Gmail/SMTP như trước:** nhiều nền tảng lưu trữ chặn
+> traffic đi ra ở cổng 25, 465 và 587 để máy chủ của họ không bị dùng phát tán
+> thư rác — Render chặn trên gói miễn phí. Ở đó `JavaMailSender` không phải
+> chạy chậm mà **không bao giờ kết nối được**, và hỏng đúng luồng quên mật khẩu.
+> Brevo đi qua HTTPS cổng 443 nên không vướng, bản miễn phí 300 thư/ngày.
+>
+> Cố ý **không** giữ đường SMTP dự phòng cho môi trường phát triển: hai đường
+> nghĩa là test ở máy một đường rồi deploy bằng đường khác, và luồng thật sự
+> chạy trên máy chủ lại là luồng chưa ai thử.
 
 Ngoài ra `VITE_API_BASE_URL` cho frontend biết backend chạy ở đâu (mặc định
 `http://localhost:8080`). Các biến còn lại đều có giá trị mặc định trong
@@ -307,7 +317,7 @@ Ngoài các biến ở mục 3.1, khi deploy cần thêm:
 | `VNPAY_RETURN_URL` | `https://<tên-miền>/rims/cashier/payments/vnpay-callback`, và phải khai lại bên VNPay |
 | `JWT_SIGNER_KEY` | **Sinh khoá mới**, đừng dùng lại khoá của máy phát triển |
 | `RIMS_DEFAULT_PASSWORD` | Không đặt thì dùng mặc định trong `application.yaml` — mà ai đọc repo cũng biết |
-| `MAIL_PROVIDER=brevo` + `BREVO_API_KEY` + `MAIL_FROM_EMAIL` | Khi nền tảng chặn cổng SMTP |
+| — | (email đã khai ở mục 3.1, không cần thêm gì) |
 
 Cổng thì **không cần khai**: `Dockerfile` đã tự nghe theo biến `PORT` mà nền
 tảng cấp, và lui về 8080 khi chạy ở máy.
@@ -335,8 +345,8 @@ tảng cấp, và lui về 8080 khi chạy ở máy.
 ## 7. Công nghệ sử dụng
 
 **Backend**: Java 21, Spring Boot 4, Spring Data JPA, Spring Security (JWT),
-WebSocket (STOMP), PostgreSQL, VNPay. Gửi email qua Spring Mail (SMTP) hoặc
-HTTP API của Brevo. Test: JUnit 5 + Mockito + AssertJ.
+WebSocket (STOMP), PostgreSQL, VNPay. Gửi email OTP qua HTTP API của Brevo.
+Test: JUnit 5 + Mockito + AssertJ.
 
 **Frontend**: React 19, TypeScript, Vite 8, React Router 7, Axios,
 SockJS + StompJS (realtime). Test: Vitest. ESLint + Prettier.

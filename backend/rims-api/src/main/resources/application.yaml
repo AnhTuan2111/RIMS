@@ -78,31 +78,23 @@ spring:
     open-in-view: false
     show-sql: false
 
-  mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    # Để trống được: bản deploy gửi qua HTTP API (xem app.mail.provider) nên
-    # không cần tài khoản SMTP. Khi provider là smtp mà thiếu hai giá trị này
-    # thì SmtpEmailServiceImpl dừng app lúc khởi động và nói rõ thiếu gì.
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
 
 app:
   # ---------- Gửi email ----------
-  # smtp  : qua JavaMailSender. Dùng ở máy phát triển.
-  # brevo : qua HTTP API. Dùng khi deploy, vì nhiều nền tảng lưu trữ miễn phí
-  #         chặn traffic đi ra ở cổng SMTP (Render chặn 25/465/587 trên gói
-  #         free) nên SMTP hỏng hẳn ở đó — và hỏng đúng luồng quên mật khẩu.
+  # Chỉ một đường duy nhất: HTTP API của Brevo (cổng 443). KHÔNG dùng SMTP, vì
+  # nhiều nền tảng lưu trữ chặn traffic đi ra ở cổng 25/465/587 — Render chặn
+  # trên gói free — nên SMTP không bao giờ kết nối được ở đó, mà lại hỏng đúng
+  # luồng quên mật khẩu.
+  #
+  # Cố ý không để đường dự phòng SMTP cho môi trường phát triển: giữ hai đường
+  # nghĩa là test ở máy một đường rồi deploy bằng đường khác, và luồng thật sự
+  # chạy trên máy chủ lại là luồng chưa ai thử.
+  #
+  # Cả hai giá trị dưới đây đều bắt buộc. Để trống thì BrevoEmailServiceImpl
+  # dừng ứng dụng ngay lúc khởi động và nói rõ thiếu biến nào.
   mail:
-    provider: ${MAIL_PROVIDER:smtp}
-    # Địa chỉ hiện ở ô "From". Với Brevo, địa chỉ này phải được xác minh sẵn
-    # trong Senders & IPs, nếu không mọi lần gửi đều bị từ chối.
+    # Địa chỉ hiện ở ô "From". Phải được XÁC MINH sẵn trong Brevo, nếu không
+    # mọi lần gửi đều bị từ chối.
     from-email: ${MAIL_FROM_EMAIL:}
     from-name: ${MAIL_FROM_NAME:RIMS}
     brevo:

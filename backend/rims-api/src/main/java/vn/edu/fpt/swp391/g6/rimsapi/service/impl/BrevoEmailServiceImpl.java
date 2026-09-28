@@ -5,7 +5,6 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -17,27 +16,34 @@ import org.springframework.web.server.ResponseStatusException;
 import vn.edu.fpt.swp391.g6.rimsapi.service.EmailService;
 
 /**
- * Gửi OTP qua HTTP API của Brevo, dùng khi deploy.
+ * Gửi email OTP qua HTTP API của Brevo.
  *
- * <p>VÌ SAO KHÔNG DÙNG SMTP Ở ĐÂY: các gói lưu trữ miễn phí thường chặn traffic
- * đi ra ở cổng 25, 465 và 587 để máy chủ của họ không bị dùng làm nơi phát tán
- * thư rác. Render nói rõ điều này cho gói free. Hệ quả là
- * {@link SmtpEmailServiceImpl} sẽ hỏng ở đó, và hỏng đúng vào luồng quên mật
- * khẩu — thứ người dùng chỉ cần đến khi đã không vào được tài khoản.
+ * <p>VÌ SAO KHÔNG DÙNG SMTP: các nền tảng lưu trữ miễn phí chặn traffic đi ra ở
+ * cổng 25, 465 và 587 để máy chủ của họ không bị dùng làm nơi phát tán thư rác
+ * — Render nói rõ điều này cho gói free. Ở đó {@code JavaMailSender} không phải
+ * chạy chậm hay chập chờn, mà <b>không bao giờ kết nối được</b>. Và hỏng đúng
+ * vào luồng quên mật khẩu, tức là thứ người dùng chỉ tìm đến khi đã không vào
+ * được tài khoản.
  *
- * <p>API này chỉ là một request HTTPS tới cổng 443 nên không vướng gì. Gói miễn
- * phí của Brevo cho 300 thư/ngày và cho phép xác minh một địa chỉ gửi bằng mã
- * 6 số gửi vào chính hộp thư đó, nên không cần sở hữu tên miền.
+ * <p>API này chỉ là một request HTTPS tới cổng 443 — thứ không nền tảng nào
+ * chặn, vì chặn nó là chặn luôn cả web.
  *
- * <p>Bật bằng {@code app.mail.provider=brevo}.
+ * <p>Trước đây dự án có thêm một bản cài đặt chạy SMTP qua Gmail cho môi trường
+ * phát triển, chọn bằng {@code app.mail.provider}. Đã bỏ: giữ hai đường nghĩa
+ * là test ở máy một đường rồi deploy bằng một đường khác, nên luồng thật sự
+ * chạy trên máy chủ lại là luồng chưa ai thử. Giờ chỉ còn một đường duy nhất.
+ *
+ * <p>Gói miễn phí của Brevo cho 300 thư/ngày và cho phép xác minh địa chỉ gửi
+ * bằng mã 6 số gửi vào chính hộp thư đó, nên không cần sở hữu tên miền.
  */
 @Service
-@ConditionalOnProperty(name = "app.mail.provider", havingValue = "brevo")
 @Slf4j
 public class BrevoEmailServiceImpl implements EmailService
 {
 
     private static final String ENDPOINT = "https://api.brevo.com/v3/smtp/email";
+
+    private static final String TIEU_DE = "[RIMS] Mã OTP đặt lại mật khẩu";
 
     private final RestClient restClient;
     private final String senderEmail;
@@ -54,24 +60,29 @@ public class BrevoEmailServiceImpl implements EmailService
         if (apiKey == null || apiKey.isBlank())
         {
             throw new IllegalStateException("""
-                    Đã chọn app.mail.provider=brevo nhưng chưa có khoá API.
+                    Chưa có khoá API để gửi email.
 
                     Đặt biến môi trường BREVO_API_KEY rồi khởi động lại.
-                    Lấy khoá tại: Brevo > SMTP & API > API Keys.""");
+                    Lấy khoá tại: Brevo > SMTP & API > API Keys.
+
+                    Ứng dụng gửi email qua HTTP API chứ không qua SMTP, vì nhiều
+                    nền tảng lưu trữ chặn cổng SMTP đi ra.""");
         }
 
         if (senderEmail == null || senderEmail.isBlank())
         {
             throw new IllegalStateException("""
-                    Đã chọn app.mail.provider=brevo nhưng chưa có địa chỉ gửi.
+                    Chưa có địa chỉ email đứng tên gửi.
 
                     Đặt biến môi trường MAIL_FROM_EMAIL rồi khởi động lại.
-                    Địa chỉ này phải được XÁC MINH sẵn trong Brevo (Senders & IPs >
-                    Senders), nếu không Brevo từ chối mọi lần gửi.""");
+                    Địa chỉ này phải được XÁC MINH sẵn trong Brevo (Senders,
+                    Domains & Dedicated IPs > Senders), nếu không Brevo từ chối
+                    mọi lần gửi.""");
         }
 
         this.senderEmail = senderEmail;
         this.senderName = senderName;
+
         // Dựng thẳng bằng RestClient.builder() thay vì nhận RestClient.Builder
         // qua constructor: bean đó không phải lúc nào cũng có sẵn, mà ở đây chỉ
         // gọi đúng một API bên ngoài nên cũng chẳng cần cấu hình dùng chung.
@@ -88,8 +99,8 @@ public class BrevoEmailServiceImpl implements EmailService
         Map<String, Object> payload = Map.of(
                 "sender", Map.of("name", senderName, "email", senderEmail),
                 "to", List.of(Map.of("email", toEmail)),
-                "subject", OtpEmailTemplate.SUBJECT,
-                "textContent", OtpEmailTemplate.body(otp));
+                "subject", TIEU_DE,
+                "textContent", noiDung(otp));
 
         try
         {
@@ -117,5 +128,14 @@ public class BrevoEmailServiceImpl implements EmailService
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "Không gửi được email lúc này. Vui lòng thử lại sau ít phút.");
         }
+    }
+
+    private static String noiDung(String otp)
+    {
+        return "Xin chào,\n\n"
+                + "Mã OTP của bạn để đặt lại mật khẩu là: " + otp + "\n\n"
+                + "Mã có hiệu lực trong 5 phút.\n\n"
+                + "Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.\n\n"
+                + "Trân trọng,\nRIMS System";
     }
 }
