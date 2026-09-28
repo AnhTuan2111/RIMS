@@ -86,6 +86,18 @@ public class WaiterController
         return ResponseEntity.ok(waiterService.viewReservationsByDate(date == null ? LocalDate.now() : date));
     }
 
+    /**
+     * Lượt đặt tới giờ mà chưa xếp được bàn — phục vụ cần xử lý.
+     *
+     * <p>Đường dẫn chữ ("/attention") được Spring ưu tiên hơn mẫu
+     * "/reservations/{reservationId}", nên hai cái không đè nhau.
+     */
+    @GetMapping("/reservations/attention")
+    public ResponseEntity<List<ReservationDetailResponse>> getReservationsNeedingAttention()
+    {
+        return ResponseEntity.ok(waiterService.viewReservationsNeedingAttention());
+    }
+
     @GetMapping("/reservation/{tableId}/{date}")
     public ResponseEntity<List<ReservationDetailResponse>> getAllReservationsByTableAndDate(@PathVariable int tableId,
             @PathVariable LocalDate date)

@@ -595,6 +595,12 @@ export default function WaiterCreateReservationPage() {
                                                     {time}
                                                 </div>
 
+                                                {reservation.needsAttention && (
+                                                    <span className="rk-chip rk-chip--alert">
+                                                        Chưa có bàn
+                                                    </span>
+                                                )}
+
                                                 <div className="rk-rowlist__main">
                                                     <h4>{reservation.customerName}</h4>
 

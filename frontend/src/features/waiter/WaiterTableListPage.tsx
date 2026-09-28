@@ -6,7 +6,7 @@ import {useNavigate} from 'react-router-dom'
 
 import * as waiterApi from '@/shared/api/waiter'
 import type {ReservationResponse, TableDetailResponse} from '@/shared/api/waiter'
-import {WaiterTableCard} from './components'
+import {ReservationAttention, WaiterTableCard} from './components'
 import {FloorPlan} from '@/shared/components/ui'
 import {useWaiterSocket} from '@/realtime'
 import {isRequestCanceled} from '@/shared/utils/error'
@@ -442,6 +442,10 @@ export default function WaiterTableListPage() {
     return (
         <div className="rk-stack">
             <div className="rk-stack">
+                {/* Lượt đặt tới giờ mà chưa có bàn: đặt TRÊN CÙNG, vì đó là việc
+                    có hạn chót — khách đang trên đường tới. */}
+                <ReservationAttention tables={tables} />
+
                 <div className="rk-legend">
                     <span className="rk-legend__item">
                         <span className="rk-legend__dot rk-legend__dot--ok" />

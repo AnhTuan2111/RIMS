@@ -90,6 +90,8 @@ export type ReservationResponse = {
     tableNumber?: string
     reservationTime: string
     status?: ReservationStatus
+    /** Tới giờ mà chưa xếp được bàn — phục vụ cần xử lý. */
+    needsAttention?: boolean
 }
 
 // API calls
@@ -133,6 +135,10 @@ export const createReservation = (data: CreateReservationRequest) =>
  * giờ nào. Nhưng câu hỏi thường gặp hơn là "tối nay ai đặt", và trả lời nó
  * bằng cách mở lần lượt mười bốn bàn thì không ai làm.
  */
+/** Lượt đặt tới giờ mà chưa xếp được bàn, sớm nhất trước. */
+export const getReservationsNeedingAttention = (signal?: AbortSignal) =>
+    apiClient.get<ReservationResponse[]>('/waiter/reservations/attention', {signal})
+
 export const getReservationsByDate = (date: string, signal?: AbortSignal) =>
     apiClient.get<ReservationResponse[]>('/waiter/reservations', {
         params: {date},

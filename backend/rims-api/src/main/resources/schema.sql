@@ -108,3 +108,6 @@ alter table restaurant_tables add column if not exists layout_w integer;
 alter table restaurant_tables add column if not exists layout_h integer;
 
 alter table restaurant_tables add column if not exists zone varchar(50);
+
+-- Lượt đặt tới giờ mà không xếp được bàn: báo phục vụ thay vì huỷ lặng lẽ.
+alter table reservations add column if not exists needs_attention boolean not null default false;

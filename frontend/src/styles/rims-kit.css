@@ -5398,3 +5398,50 @@ a.rk-statcard:focus-visible {
     font-family: var(--rims-font-mono);
     color: var(--rims-ink);
 }
+
+/* ---------- Lượt đặt chưa có bàn ----------
+   Dải báo đầu màn sơ đồ. Mỗi lượt một hàng: GIỜ đứng trước (hạn chót), rồi
+   khách và bàn, rồi ba lối xử lý. */
+.rk-attention__body {
+    display: grid;
+    flex: 1 1 auto;
+    gap: var(--rims-space-2);
+    min-width: 0;
+}
+
+.rk-attention__list {
+    display: grid;
+    gap: var(--rims-space-2);
+    margin: var(--rims-space-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rk-attention__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--rims-space-2) var(--rims-space-4);
+    padding: var(--rims-space-3);
+    border: var(--rims-border) solid var(--rims-alert);
+    background: var(--rims-surface);
+}
+
+.rk-attention__time {
+    font-family: var(--rims-font-mono);
+    font-size: var(--rims-text-lg);
+    font-weight: var(--rims-weight-bold);
+    font-variant-numeric: tabular-nums;
+}
+
+.rk-attention__who {
+    display: grid;
+    flex: 1 1 12rem;
+    min-width: 0;
+    color: var(--rims-ink-2);
+    font-size: var(--rims-text-sm);
+}
+
+.rk-attention__who strong {
+    color: var(--rims-ink);
+}

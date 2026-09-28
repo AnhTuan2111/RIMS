@@ -44,6 +44,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>
     List<Reservation> findByReservationTimeBetweenAndStatusInOrderByReservationTimeAsc(
             LocalDateTime start, LocalDateTime end, List<ReservationStatus> statuses);
 
+    /** Lượt đặt chưa xếp được bàn, sớm nhất trước — cho dải báo của phục vụ. */
+    List<Reservation> findByStatusAndNeedsAttentionTrueOrderByReservationTimeAsc(ReservationStatus status);
+
     List<Reservation> findByStatusAndReservationTimeBetween(
             ReservationStatus status,
             LocalDateTime from,

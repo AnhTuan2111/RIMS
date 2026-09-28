@@ -45,6 +45,17 @@ public class Reservation
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
+    /**
+     * Tới giờ giữ bàn mà KHÔNG xếp được bàn: bàn đã đặt còn khách (hoặc đang
+     * giữ cho lượt khác) và không còn bàn trống nào đủ chỗ.
+     *
+     * <p>Trước đây trường hợp này bị HUỶ lặng lẽ — khách đến nơi mới biết mình
+     * không còn lượt. Nay lượt đặt vẫn giữ, được đánh dấu, và phục vụ được báo
+     * để xử lý: đổi bàn, đổi giờ, gọi báo khách, hoặc chờ bàn trống.
+     */
+    @Column(name = "needs_attention", nullable = false)
+    private boolean needsAttention = false;
+
     @ManyToOne
     @JoinColumn(name = "table_id")
     private RestaurantTable table;

@@ -20,4 +20,6 @@ public class ReservationDetailResponse
     private Integer tableId;
     private ReservationStatus status;
     private LocalDateTime reservationTime;
+    /** Tới giờ mà chưa xếp được bàn — phục vụ cần xử lý. */
+    private boolean needsAttention;
 }

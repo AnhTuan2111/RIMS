@@ -598,7 +598,19 @@ public class WaiterServiceImpl implements WaiterService
                 .tableId(reservation.getTable().getId())
                 .status(reservation.getStatus())
                 .reservationTime(reservation.getReservationTime())
+                .needsAttention(reservation.isNeedsAttention())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReservationDetailResponse> viewReservationsNeedingAttention()
+    {
+        return reservationRepository
+                .findByStatusAndNeedsAttentionTrueOrderByReservationTimeAsc(ReservationStatus.QUEUED)
+                .stream()
+                .map(this::toReservationResponse)
+                .toList();
     }
 
     @Override
@@ -611,7 +623,12 @@ public class WaiterServiceImpl implements WaiterService
         RestaurantTable table = restaurantTableRepository.findByIdForUpdate(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bàn với ID: " + request.getTableId()));
 
-        if (request.getReservationTime().isBefore(LocalDateTime.now()))
+        // Chỉ bắt "giờ phải ở tương lai" khi ĐỔI giờ. Lượt cần xử lý thường đã
+        // tới hoặc quá giờ một chút; phục vụ chuyển nó sang bàn vừa trống mà vẫn
+        // giữ nguyên giờ thì không được chặn vì giờ đó "đã qua".
+        boolean timeChanged = !request.getReservationTime().equals(reservation.getReservationTime());
+
+        if (timeChanged && request.getReservationTime().isBefore(LocalDateTime.now()))
         {
             throw new IllegalArgumentException("Thời gian đặt bàn phải ở trong tương lai.");
         }
@@ -656,13 +673,48 @@ public class WaiterServiceImpl implements WaiterService
                     "Bàn đã được đặt trong khoảng thời gian này, các đơn phải cách nhau ít nhất 2.5 tiếng.");
         }
 
+        boolean tableChanged = !Objects.equals(reservation.getTable().getId(), table.getId());
+        boolean tablesChanged = false;
+
+        // Lượt ĐANG GIỮ BÀN mà đổi bàn hay đổi giờ: nhả bàn cũ và đưa lượt về
+        // hàng chờ để xếp lại. Trước đây bàn cũ kẹt ở "Đã đặt trước" mãi mãi,
+        // còn bàn mới thì không được giữ.
+        if (reservation.getStatus() == ReservationStatus.WAITING && (tableChanged || timeChanged))
+        {
+            RestaurantTable oldTable = restaurantTableRepository.findByIdForUpdate(reservation.getTable().getId())
+                    .orElse(null);
+            if (oldTable != null && oldTable.getStatus() == TableStatus.RESERVED)
+            {
+                oldTable.setStatus(TableStatus.AVAILABLE);
+            }
+            reservation.setStatus(ReservationStatus.QUEUED);
+            tablesChanged = true;
+        }
+
         reservation.setCustomerName(request.getCustomerName());
         reservation.setPhone(request.getPhone());
         reservation.setNote(request.getNote());
         reservation.setReservationTime(request.getReservationTime());
         reservation.setTable(table);
+        // Phục vụ vừa xử lý: bỏ dấu. Nếu vẫn không xếp được, bước dưới (hoặc bộ
+        // lập lịch phút sau) sẽ đánh dấu lại.
+        reservation.setNeedsAttention(false);
+
+        // Đã vào cửa sổ giữ bàn thì xếp NGAY, không bắt phục vụ chờ bộ lập lịch.
+        LocalDateTime now = LocalDateTime.now();
+        if (reservation.getStatus() == ReservationStatus.QUEUED && isInHoldWindow(reservation, now))
+        {
+            tryHoldTable(reservation);
+            tablesChanged = true;
+        }
 
         reservationRepository.save(reservation);
+
+        if (tablesChanged)
+        {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
+        }
+
         return "Cập nhật đặt bàn thành công";
     }
 
@@ -694,15 +746,93 @@ public class WaiterServiceImpl implements WaiterService
             }
         }
 
+        boolean wasFlagged = reservation.isNeedsAttention();
         reservation.setStatus(ReservationStatus.CANCELLED);
+        reservation.setNeedsAttention(false);
         reservationRepository.save(reservation);
 
-        if (tableReleased)
+        if (tableReleased || wasFlagged)
         {
             webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
         }
 
         return "Hủy đặt bàn thành công";
+    }
+
+    /** Giữ bàn từ 30 phút trước giờ đặt. */
+    static final int HOLD_AHEAD_MINUTES = 30;
+
+    /**
+     * Khách trễ tối đa 15 phút thì vẫn giữ bàn — cùng hạn với autoCancelReservation.
+     * Bộ lập lịch cũng nhìn lùi 15 phút: bàn trống ra muộn hơn giờ đặt một chút
+     * thì lượt đó vẫn được xếp, thay vì bị bỏ quên ở hàng chờ.
+     */
+    static final int HOLD_GRACE_MINUTES = 15;
+
+    enum HoldResult
+    {
+        /** Giữ đúng bàn đã đặt. */
+        HELD,
+        /** Bàn đã đặt không trống — giữ một bàn khác đủ chỗ. */
+        MOVED,
+        /** Không còn bàn nào đủ chỗ — phục vụ cần xử lý. */
+        NEEDS_ATTENTION
+    }
+
+    private static boolean isInHoldWindow(Reservation reservation, LocalDateTime now)
+    {
+        LocalDateTime time = reservation.getReservationTime();
+        return !time.isBefore(now.minusMinutes(HOLD_GRACE_MINUTES))
+                && !time.isAfter(now.plusMinutes(HOLD_AHEAD_MINUTES));
+    }
+
+    /**
+     * Thử giữ bàn cho một lượt QUEUED đã vào cửa sổ giữ bàn.
+     *
+     * <p>Dùng chung cho bộ lập lịch và cho thao tác sửa lượt đặt, để hai nơi
+     * không bao giờ quyết định khác nhau về cùng một tình huống.
+     */
+    HoldResult tryHoldTable(Reservation reservation)
+    {
+        RestaurantTable booked = restaurantTableRepository.findByIdForUpdate(reservation.getTable().getId())
+                .orElse(null);
+
+        if (booked != null && booked.getStatus() == TableStatus.AVAILABLE)
+        {
+            hold(reservation, booked);
+            return HoldResult.HELD;
+        }
+
+        // Bàn đã đặt còn khách, hoặc đang giữ cho một lượt khác. Trước đây
+        // trường hợp "đang giữ cho lượt khác" bị bỏ qua hẳn: lượt đặt nằm ở
+        // hàng chờ mãi mà không ai biết.
+        int required = booked != null && booked.getCapacity() != null ? booked.getCapacity() : 0;
+
+        List<RestaurantTable> alternatives = new ArrayList<>(restaurantTableRepository
+                .findByActiveTrueAndStatusAndCapacityGreaterThanEqual(TableStatus.AVAILABLE, required));
+        alternatives.removeIf(t -> Objects.equals(t.getId(), reservation.getTable().getId()));
+
+        if (!alternatives.isEmpty())
+        {
+            RestaurantTable other = alternatives.stream()
+                    .min(Comparator.comparingInt(t -> t.getCapacity() != null ? t.getCapacity() : 0))
+                    .get();
+            reservation.setTable(other);
+            hold(reservation, other);
+            return HoldResult.MOVED;
+        }
+
+        // Không còn chỗ. KHÔNG huỷ: huỷ lặng lẽ thì khách đến nơi mới biết mình
+        // không còn lượt. Giữ lượt đặt, đánh dấu, và để phục vụ quyết định.
+        reservation.setNeedsAttention(true);
+        return HoldResult.NEEDS_ATTENTION;
+    }
+
+    private static void hold(Reservation reservation, RestaurantTable table)
+    {
+        reservation.setStatus(ReservationStatus.WAITING);
+        reservation.setNeedsAttention(false);
+        table.setStatus(TableStatus.RESERVED);
     }
 
     @Scheduled(fixedRate = 60000)
@@ -711,52 +841,37 @@ public class WaiterServiceImpl implements WaiterService
     {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Reservation> reservations = reservationRepository
-                .findByStatusAndReservationTimeBetween(ReservationStatus.QUEUED, now, now.plusMinutes(30));
+        List<Reservation> reservations = reservationRepository.findByStatusAndReservationTimeBetween(
+                ReservationStatus.QUEUED,
+                now.minusMinutes(HOLD_GRACE_MINUTES),
+                now.plusMinutes(HOLD_AHEAD_MINUTES));
 
-        boolean changed = false;
+        boolean tablesChanged = false;
+        boolean newAttention = false;
 
         for (Reservation res : reservations)
         {
-            RestaurantTable currentTable = restaurantTableRepository.findByIdForUpdate(res.getTable().getId())
-                    .orElse(null);
-            if (currentTable == null)
-                continue;
+            boolean alreadyFlagged = res.isNeedsAttention();
 
-            if (currentTable.getStatus() == TableStatus.AVAILABLE)
+            if (tryHoldTable(res) == HoldResult.NEEDS_ATTENTION)
             {
-                res.setStatus(ReservationStatus.WAITING);
-                currentTable.setStatus(TableStatus.RESERVED);
-                changed = true;
-            } else if (currentTable.getStatus() == TableStatus.SERVING)
+                // Chỉ báo LẦN ĐẦU. Bộ lập lịch chạy mỗi phút; báo lại mỗi phút cho
+                // cùng một việc là tiếng chuông không ai nghe nữa.
+                newAttention |= !alreadyFlagged;
+            } else
             {
-                int requiredCapacity = currentTable.getCapacity() != null ? currentTable.getCapacity() : 0;
-
-                List<RestaurantTable> alternatives = restaurantTableRepository
-                        .findByActiveTrueAndStatusAndCapacityGreaterThanEqual(
-                                TableStatus.AVAILABLE, requiredCapacity);
-
-                alternatives.removeIf(t -> Objects.equals(t.getId(), currentTable.getId()));
-
-                if (!alternatives.isEmpty())
-                {
-                    RestaurantTable newTable = alternatives.stream()
-                            .min(Comparator.comparingInt(t -> t.getCapacity() != null ? t.getCapacity() : 0)).get();
-
-                    res.setTable(newTable);
-                    res.setStatus(ReservationStatus.WAITING);
-                    newTable.setStatus(TableStatus.RESERVED);
-                    changed = true;
-                } else
-                {
-                    res.setStatus(ReservationStatus.CANCELLED);
-                }
+                tablesChanged = true;
             }
         }
 
-        if (changed)
+        if (tablesChanged || newAttention)
         {
             webSocketBroadcaster.broadcastAfterCommit("/topic/tables", "TABLE_UPDATED");
+        }
+
+        if (newAttention)
+        {
+            webSocketBroadcaster.broadcastAfterCommit("/topic/waiter", "RESERVATION_ATTENTION");
         }
     }
 
@@ -767,7 +882,7 @@ public class WaiterServiceImpl implements WaiterService
         LocalDateTime now = LocalDateTime.now();
 
         List<Reservation> expiredReservations = reservationRepository
-                .findByStatusAndReservationTimeBefore(ReservationStatus.WAITING, now.minusMinutes(15));
+                .findByStatusAndReservationTimeBefore(ReservationStatus.WAITING, now.minusMinutes(HOLD_GRACE_MINUTES));
 
         boolean changed = false;
 

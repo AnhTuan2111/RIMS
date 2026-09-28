@@ -166,6 +166,7 @@ public class CustomerServiceImpl implements CustomerService
         }
 
         reservation.setStatus(ReservationStatus.CANCELLED);
+        reservation.setNeedsAttention(false);
         reservationRepository.save(reservation);
 
         if (tableReleased)

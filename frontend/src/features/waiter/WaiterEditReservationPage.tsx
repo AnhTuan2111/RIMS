@@ -104,10 +104,30 @@ export default function WaiterEditReservationPage() {
         [profile?.reservationHours],
     )
 
-    const availableTimeSlots = useMemo(
-        () => getAvailableTimeSlots(resForm.date, blockedRanges, reservationWindow),
-        [resForm.date, blockedRanges, reservationWindow],
-    )
+    // Giờ ĐÃ LƯU của lượt đặt, để luôn còn trong danh sách chọn.
+    const [savedSlot, setSavedSlot] = useState<{date: string; time: string} | null>(null)
+
+    const availableTimeSlots = useMemo(() => {
+        const slots = getAvailableTimeSlots(
+            resForm.date,
+            blockedRanges,
+            reservationWindow,
+        )
+
+        // Giờ đã lưu luôn nằm trong danh sách, kể cả khi đã qua hay lệch khung.
+        // Không có dòng này thì hiệu ứng bên dưới TỰ ĐỔI giờ sang khung trống
+        // đầu tiên: phục vụ mở một lượt vừa tới giờ chỉ để chuyển sang bàn khác,
+        // bấm Lưu, và lượt đặt bị dời giờ mà không ai hay.
+        if (
+            savedSlot &&
+            savedSlot.date === resForm.date &&
+            !slots.includes(savedSlot.time)
+        ) {
+            return [...slots, savedSlot.time].sort()
+        }
+
+        return slots
+    }, [resForm.date, blockedRanges, reservationWindow, savedSlot])
 
     // Tương tự trang tạo mới: tự chuyển sang slot khả dụng đầu tiên nếu
     // giờ đang chọn không còn hợp lệ (đã qua giờ hoặc bị chặn).
@@ -271,6 +291,7 @@ export default function WaiterEditReservationPage() {
             }
 
             setResForm(nextForm)
+            setSavedSlot({date, time})
 
             await loadReservations(signal, true, {
                 tableId: nextForm.tableId,
