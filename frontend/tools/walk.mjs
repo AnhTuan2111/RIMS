@@ -234,6 +234,50 @@ const ROUTES = [
         mo: (page) => page.locator('button.rk-btn--primary').first().click(),
     },
 
+    // Bốn báo cáo của màn Thống kê là bốn TAB chứ không phải bốn đường dẫn,
+    // nhưng tài liệu đặc tả từng cái như một màn riêng nên phải chụp riêng.
+    {
+        g: 'quan-tri',
+        n: '07b-doanh-thu',
+        p: '/admin/statistics',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: /Tổng doanh thu/}).first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '07c-ban-chay-danh-muc',
+        p: '/admin/statistics',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: /Bán chạy theo danh mục/}).first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '07d-mon-ban-chay',
+        p: '/admin/statistics',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: /Món bán chạy/}).first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '07e-don-theo-ca',
+        p: '/admin/statistics',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: /Đơn hàng theo ca/}).first().click(),
+    },
+
+    {
+        g: 'vo',
+        n: '05b-sua-ho-so',
+        p: '/profile',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: 'CHỈNH SỬA'}).first().click(),
+    },
+
     {
         g: 'bep',
         n: '17b-chi-tiet-mon',
