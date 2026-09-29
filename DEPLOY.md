@@ -1,122 +1,281 @@
 # Deploy RIMS
 
-Bản đang chạy: **<https://yamazato.onrender.com>**
+Hướng dẫn đưa RIMS lên máy chủ thật, **miễn phí hoàn toàn**, không cắt bớt chức
+năng nào. Làm từ đầu đến cuối mất khoảng một tiếng.
 
-Kiến trúc: **một dịch vụ duy nhất** trên Render (backend phục vụ luôn giao diện),
-cơ sở dữ liệu **Neon**, email **Brevo**. Lý do chọn vậy nằm ở mục 6 của
-`README.md`.
+Bản mẫu đang chạy: <https://yamazato.onrender.com>
 
 ---
 
-## Đã xong
+## Kiến trúc
 
-| Bước | Kết quả thật |
+```
+                    ┌──────────────────────────────┐
+   Trình duyệt ───► │  Render — MỘT dịch vụ Docker │
+                    │  Spring Boot + React trong   │
+                    │  cùng một jar                │
+                    └───┬──────────┬───────────┬───┘
+                        │          │           │
+                   Neon │    Brevo │     VNPay │
+              PostgreSQL│  email   │  thanh toán
+```
+
+**Một dịch vụ, không phải hai.** `Dockerfile` ở gốc repo build React rồi chép
+`frontend/dist` vào thư mục tĩnh của Spring Boot trước khi đóng jar. Cùng một
+tên miền nghĩa là:
+
+- `baseURL: '/rims'` và endpoint `/ws-rims` ở frontend chạy nguyên, không sửa gì
+- không có CORS giữa hai nửa
+- WebSocket nối thẳng — không vướng giới hạn "rewrite của static site không
+  proxy được WebSocket" mà nhiều nền tảng mắc phải
+
+Tách làm hai dịch vụ thì mất cả ba điều trên, đổi lại chẳng được gì.
+
+---
+
+## Cần chuẩn bị
+
+| Việc | Ở đâu | Mất bao lâu |
+| --- | --- | --- |
+| Tài khoản GitHub, đã đẩy mã nguồn lên | [github.com](https://github.com) | — |
+| Tài khoản Neon (cơ sở dữ liệu) | [neon.tech](https://neon.tech) | 2 phút |
+| Tài khoản Brevo (gửi email) | [brevo.com](https://www.brevo.com) | 5 phút |
+| Tài khoản VNPay sandbox | [sandbox.vnpayment.vn](https://sandbox.vnpayment.vn) | 10 phút |
+| Tài khoản Render (máy chủ) | [render.com](https://render.com) | 2 phút |
+
+Tất cả đều có gói miễn phí đủ dùng. Không cần thẻ tín dụng.
+
+---
+
+## Bước 1 — Cơ sở dữ liệu trên Neon
+
+Neon là PostgreSQL chạy theo kiểu serverless: ngủ khi không ai dùng, tính tiền
+theo giờ compute thay vì theo máy chủ dựng sẵn. Gói miễn phí cho **0,5 GB dung
+lượng và 100 CU-hours mỗi tháng** — thừa cho một đồ án.
+
+1. Tạo project mới. **Region chọn gần người dùng nhất** (Singapore cho Việt
+   Nam) — độ trễ mỗi truy vấn phụ thuộc vào đây.
+2. Đặt tên database, ví dụ `rims_db`.
+3. Vào **Connection Details**, copy chuỗi kết nối.
+
+Neon cho hai dạng địa chỉ và **phải chọn đúng**:
+
+| Dạng | Ví dụ | Dùng khi nào |
+| --- | --- | --- |
+| Direct | `ep-xxx.region.aws.neon.tech` | ✅ Dùng cái này |
+| Pooled | `ep-xxx-pooler.region.aws.neon.tech` | Khi ứng dụng mở rất nhiều kết nối ngắn |
+
+RIMS dùng HikariCP nên **tự giữ sẵn một nhóm kết nối** — thêm một lớp gộp nữa ở
+phía Neon chỉ chồng chéo. Chọn direct.
+
+Đổi chuỗi Neon cho ra sang dạng JDBC:
+
+```
+jdbc:postgresql://ep-xxx.ap-southeast-1.aws.neon.tech/rims_db?sslmode=require
+```
+
+> `?sslmode=require` là **bắt buộc**. Thiếu là Neon từ chối kết nối ngay.
+
+Không phải tạo bảng bằng tay. Lần khởi động đầu, backend tự chạy `schema.sql`
+(12 bảng, khoá ngoại, ràng buộc) và `data.sql` (14 bàn, 9 danh mục, 43 món).
+Cả hai đều chạy lại được nhiều lần nên khởi động lần sau không lỗi và không ghi
+đè dữ liệu đang có.
+
+> **Ảnh món ăn** lưu bằng đường dẫn URL, không lưu tệp. Không cần bật object
+> storage của Neon.
+
+---
+
+## Bước 2 — Gửi email qua Brevo
+
+Ứng dụng gửi OTP quên mật khẩu qua **HTTP API của Brevo**, không qua SMTP.
+
+> **Vì sao không dùng Gmail/SMTP.** Nhiều nền tảng lưu trữ chặn traffic đi ra ở
+> cổng 25, 465 và 587 để máy chủ của họ không bị dùng phát tán thư rác — Render
+> chặn trên gói miễn phí. Ở đó `JavaMailSender` không phải chạy chậm mà **không
+> bao giờ kết nối được**, và hỏng đúng luồng quên mật khẩu. Brevo đi qua HTTPS
+> cổng 443 nên không vướng.
+>
+> Dự án cố ý **không** giữ đường SMTP dự phòng: hai đường nghĩa là test ở máy
+> một đường rồi deploy bằng đường khác, và luồng thật sự chạy trên máy chủ lại
+> là luồng chưa ai thử.
+
+1. Đăng ký Brevo. Gói miễn phí **300 thư/ngày**.
+2. **Senders, Domains & Dedicated IPs → Senders → Add a sender.** Điền tên và
+   địa chỉ email, rồi bấm xác minh trong hộp thư. Phải thấy trạng thái
+   **Verified** mới dùng được.
+   - Không cần sở hữu tên miền riêng. Một địa chỉ Gmail là đủ.
+3. **SMTP & API → API Keys → Generate a new API key.** Copy ngay, Brevo chỉ
+   hiện một lần.
+
+Giữ lại hai giá trị: **API key** và **địa chỉ người gửi đã xác minh**.
+
+---
+
+## Bước 3 — VNPay sandbox
+
+Đăng ký tài khoản merchant thử nghiệm ở <https://sandbox.vnpayment.vn>, lấy
+**`vnp_TmnCode`** và **`vnp_HashSecret`**.
+
+Chưa cần khai địa chỉ trả về ở bước này — phải có URL của Render trước đã, sẽ
+quay lại ở bước 5.
+
+> Bỏ qua bước này cũng deploy được, chỉ là luồng thanh toán bằng mã QR sẽ không
+> chạy. Thu tiền mặt vẫn bình thường.
+
+---
+
+## Bước 4 — Dựng dịch vụ trên Render
+
+**New → Web Service → Build and deploy from a Git repository**, chọn repo của
+bạn.
+
+| Ô | Điền gì |
 | --- | --- |
-| **0 · Docker ở máy** | WSL2 + Docker Desktop chạy được → phụ lục B |
-| **1 · Neon** | Project ở **Singapore**, PostgreSQL **18.6**, endpoint direct |
-| **2 · Brevo** | Sender `rims <tuandev2111@gmail.com>` đã **Verified** |
-| **3 · GitHub** | Đã merge `develop` → `main`, Render build từ `main` |
-| **4 · Render** | Service **`yamazato`**, Docker, Singapore, gói Free |
+| **Name** | Tên dịch vụ — quyết định URL `https://<name>.onrender.com` |
+| **Language** | **Docker** |
+| **Branch** | `main` |
+| **Region** | Cùng region với Neon (Singapore) |
+| **Root Directory** | *(để trống)* |
+| **Dockerfile Path** | `Dockerfile` |
+| **Docker Build Context** | `.` |
+| **Instance Type** | Free — 0,1 CPU, 512 MB |
+| **Docker Command** / **Pre-Deploy** | *(để trống)* |
+| **Auto-Deploy** | On Commit |
+| **Health Check Path** | ⚠️ **Để trống** |
 
-Kiểm lại trên bản thật sau khi lên: `/` và deep link `/admin/dishes` trả HTML,
-`/rims/public/restaurant` trả JSON, `/ws-rims/info` sống, `/rims/<sai>` trả JSON
-401 chứ không bị SPA nuốt.
+> **Vì sao Health Check Path phải để trống.** Ứng dụng không có `/healthz`,
+> cũng không có Spring Actuator. Nhưng điền `/healthz` vào thì Render vẫn nhận
+> **200 OK** — vì `SpaResourceConfig` thấy đường dẫn không có dấu chấm và không
+> thuộc `/rims` nên trả về `index.html`. Đó là 200 giả: Render sẽ báo "healthy"
+> kể cả khi cơ sở dữ liệu sập hoàn toàn, vì file HTML tĩnh thì lúc nào chẳng đọc
+> được.
+>
+> Để trống thì Render chỉ kiểm cổng có mở không — ít thông tin hơn nhưng thành
+> thật. Cũng đừng trỏ vào `/rims/public/restaurant`: mỗi lần kiểm là một truy
+> vấn xuống Neon, mà ngân sách compute của Neon là thứ chật nhất trong cả kế
+> hoạch này.
 
-## Còn lại
-
-- [ ] **Bước 5** — dựng tài khoản nhân viên
-- [ ] **Bước 6** — kiểm thử trên bản thật
-- [ ] **Bước 7** — cron giữ cho chạy ổn
+**Không cần đặt `SERVER_PORT`** — `Dockerfile` tự nghe theo biến `PORT` mà
+Render cấp, và lui về 8080 khi chạy ở máy.
 
 ---
 
-## Bước 5 — Dựng tài khoản nhân viên
+## Bước 5 — Biến môi trường
 
-Neon hiện **chỉ có một tài khoản `admin`**. Bàn, danh mục và 43 món thì
-`data.sql` đã nạp sẵn lúc khởi động.
+Render cho dán nguyên nội dung file qua ô **Add from .env**. Nhưng `.env` ở máy
+**cố ý thiếu vài biến** vì chúng là cấu hình của nơi deploy chứ không phải của
+máy phát triển.
 
-- [ ] Đăng nhập `admin`, mật khẩu là `RIMS_ADMIN_PASSWORD` trong `.env`.
-      Tài khoản đang mang cờ bắt đổi mật khẩu nên sẽ bị đẩy thẳng sang màn đổi;
-      đổi xong phải **đăng nhập lại** vì cờ nằm trong chữ ký của token.
-- [ ] Tạo nhân viên. Hai cách:
+### Bắt buộc
 
-**Cách A — tự tạo trong màn Quản lý tài khoản.**
+| Biến | Giá trị |
+| --- | --- |
+| `DB_URL` | Chuỗi JDBC của Neon ở bước 1, kèm `?sslmode=require` |
+| `DB_USERNAME` | Tên đăng nhập Neon cấp |
+| `DB_PASSWORD` | Mật khẩu Neon cấp |
+| `JWT_SIGNER_KEY` | **Sinh khoá mới**: `openssl rand -base64 48` |
+| `BREVO_API_KEY` | Khoá ở bước 2 |
+| `MAIL_FROM_EMAIL` | Địa chỉ đã xác minh ở bước 2 |
+| `RIMS_ADMIN_PASSWORD` | Mật khẩu tài khoản quản trị đầu tiên |
+| `RIMS_ADMIN_EMAIL` | Email của bạn — đường lấy lại mật khẩu duy nhất |
+| `FRONTEND_URL` | `https://<name>.onrender.com` |
+| `VNPAY_RETURN_URL` | `https://<name>.onrender.com/rims/cashier/payments/vnpay-callback` |
+| `VNPAY_TMN_CODE` | Mã merchant ở bước 3 |
+| `VNPAY_HASH_SECRET` | Khoá bí mật ở bước 3 |
+| `RIMS_DEFAULT_PASSWORD` | Mật khẩu cấp cho tài khoản mới tạo |
 
-**Cách B — chạy công cụ seed, trỏ sang server:**
+> **`JWT_SIGNER_KEY` phải là khoá mới**, đừng dùng lại khoá của máy phát triển.
+> Ai có khoá là tự ký được token giả cho bất kỳ vai nào, kể cả quản trị viên.
+
+> **Hai biến dễ quên nhất là `FRONTEND_URL` và `VNPAY_RETURN_URL`.** Thiếu
+> chúng thì app **vẫn chạy** nhưng hỏng âm thầm: CORS cho nhầm origin, và VNPay
+> trả khách về `localhost` của chính máy khách.
+
+> **`RIMS_DEFAULT_PASSWORD`** không đặt thì rơi về giá trị mặc định ghi trong
+> `application.yaml` — mà ai đọc repo cũng biết.
+
+### Tuỳ chọn
+
+| Biến | Khi nào cần |
+| --- | --- |
+| `RESTAURANT_NAME`, `RESTAURANT_TAGLINE`, `RESTAURANT_DESCRIPTION`, `RESTAURANT_ADDRESS`, `RESTAURANT_PHONE`, `RESTAURANT_EMAIL` | Nhận diện nhà hàng cho lần khởi động đầu. Sau đó **cơ sở dữ liệu là nguồn thật** — sửa trong màn Cấu hình nhà hàng, đổi biến về sau không ghi đè |
+| `DB_POOL_MAX`, `DB_POOL_MIN`, `DB_CONNECTION_TIMEOUT` | Chỉnh nhóm kết nối. Mặc định đã hợp với Neon |
+
+### Đừng đặt
+
+| Biến | Vì sao |
+| --- | --- |
+| `MAIL_FROM_NAME` | Để trống thì tên người gửi tự lấy theo hồ sơ nhà hàng. Đặt cứng thì đổi tên quán mà thư vẫn ký tên cũ |
+| `VITE_API_BASE_URL` | Biến của frontend lúc build ở máy, backend không đọc |
+| `SERVER_PORT` | Render tự cấp qua `PORT` |
+
+Sau khi lưu biến, Render tự build lại. Lần build đầu mất khoảng **8–12 phút**.
+
+---
+
+## Bước 6 — Tài khoản đầu tiên
+
+Repo **không chứa tài khoản nào**. Lần khởi động đầu, khi bảng `users` còn rỗng,
+app tạo một tài khoản `admin` từ `RIMS_ADMIN_PASSWORD` và `RIMS_ADMIN_EMAIL`.
+
+> Thiếu một trong hai biến trên một cơ sở dữ liệu rỗng thì app **dừng ngay lúc
+> khởi động** và nói rõ thiếu biến nào. Cố ý như vậy: hệ thống có quản trị viên
+> mà không ai biết mật khẩu thì vô dụng, còn hệ thống tự đặt mật khẩu đoán được
+> thì nguy hiểm.
+
+1. Đăng nhập `admin`. Tài khoản mang cờ bắt đổi mật khẩu nên sẽ bị đẩy thẳng
+   sang màn đổi mật khẩu.
+2. Đổi xong phải **đăng nhập lại** — cờ nằm trong chữ ký của access token nên
+   chỉ token mới mới sạch cờ.
+3. Tạo nhân viên. Hai cách:
+
+**Cách A** — tự tạo trong màn *Quản lý tài khoản*.
+
+**Cách B** — chạy công cụ seed, trỏ thẳng sang server:
 
 ```bash
 cd frontend
-RIMS_API=https://yamazato.onrender.com/rims node tools/seed-demo.mjs <mật-khẩu-admin-mới>
+RIMS_API=https://<name>.onrender.com/rims node tools/seed-demo.mjs <mật-khẩu-admin-mới>
 ```
 
-Script này chỉ dựng **tài khoản và sơ đồ mặt bằng** — không sinh đơn, lượt đặt
-hay hoá đơn nào. Tài khoản đã tồn tại thì nó báo 409 rồi đi tiếp, chạy lại được
+Script chỉ dựng **tài khoản và sơ đồ mặt bằng** — không sinh đơn, lượt đặt hay
+hoá đơn nào. Tài khoản đã tồn tại thì nó báo 409 rồi đi tiếp, chạy lại được
 nhiều lần.
 
-Mật khẩu cấp cho tài khoản mới là giá trị `RIMS_DEFAULT_PASSWORD`, và người nhận
-bị bắt đổi ở lần đăng nhập đầu.
+Người nhận tài khoản mới bị bắt đổi mật khẩu ở lần đăng nhập đầu.
+
+> **Lỡ gõ sai `RIMS_ADMIN_EMAIL`?** Biến này bị đóng đinh ở lần khởi động đầu;
+> sửa lại biến rồi deploy lại cũng không ăn thua, vì bước tạo admin chỉ chạy khi
+> bảng `users` rỗng. Phải `UPDATE` thẳng trong cơ sở dữ liệu.
 
 ---
 
-## Bước 6 — Kiểm thử trên bản thật
+## Bước 7 — Kiểm thử trên bản thật
 
-- [ ] Mở URL. Nếu dịch vụ đang ngủ thì **chờ tới 3 phút** — xem ghi chú ở Bước 7.
+Bản chạy ở máy **không** thay thế được bước này — xem phụ lục B để biết vì sao.
+
+- [ ] Mở URL. Dịch vụ đang ngủ thì **chờ tới 3 phút**.
 - [ ] Đăng nhập từng vai, xem đúng màn của vai đó.
 - [ ] **Quên mật khẩu** — phép thử đường Brevo. Nhớ ngó cả hộp Spam.
 - [ ] Đặt bàn → gọi món → thanh toán **tiền mặt** → xem hoá đơn.
 - [ ] **Tải hoá đơn PDF.** Đáng thử nhất: chỗ này từng hỏng hẳn khi chạy bằng
-      jar mà ở máy vẫn chạy ngon (xem phụ lục C).
+      jar mà ở máy vẫn chạy ngon.
 - [ ] Thanh toán **VNPay** — phải trả đúng về app, không về `localhost`.
 - [ ] **Realtime**: hai tab, một vai Bếp một vai Phục vụ. Gọi món ở tab phục vụ,
       màn bếp phải tự nhảy mà không cần F5.
 - [ ] **F5 ở màn sâu**: đang ở `/admin/dishes` bấm F5 → phải dựng lại đúng màn.
+- [ ] Gọi một API sai, ví dụ `/rims/khong-co-that` → phải trả **JSON 401/404**,
+      không phải HTML.
 - [ ] Vào **Cấu hình nhà hàng** điền địa chỉ và điện thoại — hoá đơn PDF lấy
       thẳng từ đó, để trống thì hoá đơn chỉ có mỗi tên quán.
 
 ---
 
-## Bước 7 — Giữ cho chạy ổn
+## Bước 8 — Giữ cho chạy ổn
 
-- [ ] Tạo cron ngoài (<https://cron-job.org> hoặc UptimeRobot) ping
-      `https://yamazato.onrender.com/rims/public/restaurant`:
-
-      Nhịp       mỗi 10 phút
-      Khung giờ  07:00 – 20:00 giờ Việt Nam
-      Ngày       tất cả các ngày
-
-      Ping đúng đường dẫn trên, đừng ping `/`. Trang chủ trả `index.html`
-      của React từ file tĩnh trong jar: 3,5 KB và **không chạm vào cơ sở dữ
-      liệu**, nên Neon chết mà cron vẫn báo 200 OK. `/rims/public/restaurant`
-      trả 344 byte JSON và có đọc DB thật.
-
-> **Cú ping đầu tiên mỗi sáng sẽ báo lỗi, và như vậy là bình thường.**
-> cron-job.org chờ phản hồi tối đa 30 giây, còn khởi động lạnh mất gần 3
-> phút — không đời nào kịp. Nhưng chính cú ping đó đánh thức dịch vụ, nên
-> lần ping sau (10 phút sau) sẽ xanh.
->
-> Đó là lý do khung giờ bắt đầu lúc **07:00** chứ không phải 07:30: hai cú
-> ping đầu dùng để hâm nóng, tới 07:30 mở cửa là app đã sẵn sàng. Vẫn đúng
-> 13 tiếng/ngày nên không đụng hạn mức Neon.
->
-> Nhớ **tắt thông báo lỗi** cho job này, hoặc bỏ tuỳ chọn tự vô hiệu hoá khi
-> lỗi liên tiếp — nếu không cron-job.org sẽ tự tắt job sau vài sáng.
-
-- [ ] Vài ngày đầu ngó **Neon → Usage** xem compute tiêu bao nhiêu.
-
-> **Khởi động lạnh mất gần 3 phút, không phải 1 phút.** Log lần deploy đầu ghi
-> `Started RimsApplication in 161.098 seconds` — gói Free chỉ có 0.1 CPU. Khách
-> mở trang lúc app đang ngủ sẽ đợi chừng đó. Trong giờ mở cửa mà để nó ngủ là
-> mất khách, nên cron ở trên không phải tuỳ chọn.
-
-> **Tuyệt đối đừng ping 24/7.** Neon miễn phí có 100 CU-hours ≈ **400 giờ
-> compute/tháng**. Thức 24/7 là 730 giờ — vượt gần gấp đôi, và hết hạn mức thì
-> compute bị treo tới đầu tháng sau, app mất cơ sở dữ liệu giữa chừng. Các job
-> 60 giây trong app truy vấn liên tục nên hễ backend thức là Neon cũng thức.
->
-> Khung 07:30–20:30 là **13 giờ/ngày ≈ 395 giờ/tháng** — vừa khít, mà cũng đúng
-> nhu cầu: hệ thống chỉ nhận đặt bàn trong 08:00–20:00.
-
-Lúc dịch vụ ngủ, **cả 5 tác vụ `@Scheduled` ngừng chạy**:
+Gói Free của Render **ngủ sau 15 phút không ai truy cập**. Lúc ngủ, cả 5 tác vụ
+nền cũng ngừng:
 
 | Nhịp | Việc |
 | --- | --- |
@@ -127,105 +286,94 @@ Lúc dịch vụ ngủ, **cả 5 tác vụ `@Scheduled` ngừng chạy**:
 | 1 giờ | `cleanupRevokedTokens` — dọn token đã thu hồi |
 
 Vì dùng `fixedRate`, trạng thái hội tụ lại ở nhịp đầu tiên sau khi thức dậy —
-mất thời gian thực, không mất dữ liệu.
+mất thời gian thực, **không mất dữ liệu**.
 
----
+> **Khởi động lạnh mất gần 3 phút, không phải 1 phút.** Log lần deploy đầu ghi
+> `Started RimsApplication in 161.098 seconds` — gói Free chỉ có 0,1 CPU. Khách
+> mở trang lúc app đang ngủ sẽ đợi chừng đó.
 
-## Phụ lục A — Cấu hình Render đã dùng
+Dựng một cron ngoài ([cron-job.org](https://cron-job.org) hoặc UptimeRobot):
 
-| Ô | Giá trị |
-| --- | --- |
-| Name | `yamazato` → quyết định URL `https://yamazato.onrender.com` |
-| Language | Docker |
-| Branch | `main` |
-| Region | Singapore |
-| Root Directory | *(trống)* |
-| Dockerfile Path | `Dockerfile` |
-| Docker Build Context | `.` |
-| Instance Type | Free — 0.1 CPU, 512 MB |
-| Docker Command / Pre-Deploy | *(trống)* |
-| Auto-Deploy | On Commit |
-| **Health Check Path** | ***(để trống)*** |
+```
+URL        https://<name>.onrender.com/rims/public/restaurant
+Nhịp       mỗi 10 phút
+Khung giờ  07:00 – 20:00
+Ngày       tất cả các ngày
+```
 
-> **Vì sao Health Check Path phải để trống.** App không có `/healthz`, cũng
-> không có Spring Actuator. Nhưng điền `/healthz` vào thì Render vẫn báo
-> **200 OK** — vì `SpaResourceConfig` thấy đường dẫn không có dấu chấm và không
-> thuộc `/rims`, nên trả về `index.html`. Đó là 200 giả: Render sẽ báo "healthy"
-> kể cả khi Neon sập hoàn toàn, vì file HTML tĩnh thì lúc nào chẳng đọc được.
+**Ping đúng đường dẫn trên, đừng ping `/`.** Trang chủ trả `index.html` của
+React từ file tĩnh trong jar: 3,5 KB và **không chạm vào cơ sở dữ liệu**, nên
+cơ sở dữ liệu chết mà cron vẫn báo 200 OK. `/rims/public/restaurant` trả 344
+byte JSON và có đọc thật.
+
+> **Cú ping đầu tiên mỗi sáng sẽ báo lỗi, và như vậy là bình thường.**
+> cron-job.org chờ phản hồi tối đa 30 giây, còn khởi động lạnh mất gần 3 phút —
+> không đời nào kịp. Nhưng chính cú ping đó đánh thức dịch vụ, nên lần ping sau
+> (10 phút sau) sẽ xanh.
 >
-> Để trống thì Render chỉ kiểm cổng có mở không — ít thông tin hơn nhưng thành
-> thật. Không dùng `/rims/public/restaurant` vì mỗi lần kiểm là một truy vấn
-> xuống Neon, mà ngân sách compute của Neon là thứ chật nhất trong cả kế hoạch.
+> Đó là lý do khung giờ bắt đầu lúc **07:00** chứ không phải 07:30: hai cú ping
+> đầu dùng để hâm nóng, tới giờ mở cửa là app đã sẵn sàng.
+>
+> Nhớ **tắt thông báo lỗi** cho job này, hoặc bỏ tuỳ chọn tự vô hiệu hoá khi lỗi
+> liên tiếp — nếu không cron-job.org sẽ tự tắt job sau vài sáng.
 
-### Biến môi trường
+> ⚠️ **Tuyệt đối đừng ping 24/7.** Neon miễn phí có 100 CU-hours ≈ **400 giờ
+> compute/tháng**. Thức 24/7 là 730 giờ — vượt gần gấp đôi, và hết hạn mức thì
+> compute bị treo tới đầu tháng sau, app mất cơ sở dữ liệu giữa chừng.
+>
+> Khung 07:00–20:00 là **13 giờ/ngày ≈ 395 giờ/tháng** — vừa khít, mà cũng đúng
+> nhu cầu: hệ thống chỉ nhận đặt bàn trong 08:00–20:00.
 
-Render nhận **dán nguyên nội dung `.env`** qua ô *Add from .env*. Nhưng `.env`
-thiếu hai biến, vì ở máy chúng rơi về mặc định localhost — **phải thêm tay**:
-
-```
-FRONTEND_URL=https://yamazato.onrender.com
-VNPAY_RETURN_URL=https://yamazato.onrender.com/rims/cashier/payments/vnpay-callback
-```
-
-Thiếu chúng thì app **vẫn chạy** nhưng hỏng âm thầm: CORS cho nhầm origin, và
-VNPay trả khách về `localhost` của chính máy khách.
-
-Hai chỗ cần sửa so với `.env` ở máy:
-
-| | |
-| --- | --- |
-| `JWT_SIGNER_KEY` | **Sinh khoá mới** (`openssl rand -base64 48`). Ai có khoá là tự ký được token giả cho bất kỳ vai nào, kể cả ADMIN |
-| `MAIL_FROM_NAME` | **Bỏ đi.** Để trống thì tên người gửi tự lấy theo hồ sơ nhà hàng; đặt cứng thì đổi tên quán mà thư vẫn ký tên cũ |
-
-`VNPAY_TMN_CODE` không có trong `.env` cũng không sao — `application.yaml` có
-sẵn mặc định `D90AVGT4` cho sandbox. `VITE_API_BASE_URL` thì kệ nó, đó là biến
-của frontend, backend không đọc.
-
-Không cần đặt `SERVER_PORT`: `Dockerfile` tự nghe theo biến `PORT` của Render.
+Vài ngày đầu ngó **Neon → Usage** xem compute tiêu bao nhiêu.
 
 ---
 
-## Phụ lục B — Docker ở máy
+## Phụ lục A — Thử bằng Docker ở máy
 
-Ghi lại để lần sau khỏi mò:
-
-- Tính năng Windows `Microsoft-Windows-Subsystem-Linux` đang **Disabled** → đã bật.
-- Sau reboot vẫn lỗi `Wsl/CallMsi/ERROR_FILE_NOT_FOUND` vì bản MSI 2.6.3.0 đăng
-  ký dở dang. Sửa bằng `winget install --id Microsoft.WSL --force` → **2.7.13.0**.
-- **Không cần cài Ubuntu** — Docker Desktop dùng distro `docker-desktop` riêng.
-
-Build và chạy lại (cần PostgreSQL ở máy đang bật):
+Không bắt buộc — Render tự build từ `Dockerfile`. Làm ở máy chỉ để biết sớm nếu
+có gì sai, và **đáng làm**, vì vài lỗi chỉ lộ ra khi đóng gói (phụ lục B).
 
 ```bash
-cd /x/IdeaProjects/RIMS
 docker build -t rims .
+
+# Trong container, "localhost" là chính container đó chứ không phải máy bạn —
+# phải trỏ qua host.docker.internal mới gặp được PostgreSQL đang chạy ở máy.
 docker run --rm -p 8081:8080 --env-file .env \
   -e DB_URL=jdbc:postgresql://host.docker.internal:5432/rims_db \
   rims
 ```
 
-Cổng 8081 để không đụng backend dev ở 8080. Ảnh ra **426 MB**; chạy dưới giới
-hạn 512 MB thì dùng 352 MB sau 200 request nặng, không bị OOM.
+Cổng 8081 để không đụng backend dev ở 8080. Ảnh ra khoảng **426 MB**; chạy dưới
+giới hạn 512 MB thì dùng ~352 MB sau 200 request nặng, không bị OOM.
 
-> Nếu thêm thư viện mới mà `npm ci` đứt kiểu `Missing: ... from lock file`:
-> lockfile sinh trên Windows thiếu gói tuỳ chọn mà Linux cần, mà npm trên
+**Windows cần WSL2 + Docker Desktop.** Nếu `wsl --install` lỗi
+`Wsl/CallMsi/ERROR_FILE_NOT_FOUND` thì bản MSI đăng ký dở dang, sửa bằng:
+
+```bash
+winget install --id Microsoft.WSL --force
+```
+
+Không cần cài Ubuntu — Docker Desktop dùng distro `docker-desktop` riêng.
+
+> **Thêm thư viện mới mà `npm ci` đứt kiểu `Missing: ... from lock file`?**
+> Lockfile sinh trên Windows thiếu gói tuỳ chọn mà Linux cần, mà npm trên
 > Windows vẫn coi là "đồng bộ" nên `npm install` ở máy không phát hiện ra. Sinh
 > lại lockfile **bên trong container Linux**:
 >
 > ```bash
-> MSYS_NO_PATHCONV=1 docker run --rm -v "X:\IdeaProjects\RIMS\frontend:/src" \
->   node:22-alpine sh -c 'mkdir /t && cp /src/package*.json /t/ && cd /t \
+> docker run --rm -v "$(pwd)/frontend:/src" node:22-alpine \
+>   sh -c 'mkdir /t && cp /src/package*.json /t/ && cd /t \
 >   && npm install --package-lock-only && cp package-lock.json /src/'
 > ```
 
-> ⚠️ **Đừng dựng lại PostgreSQL bằng Docker.** Đã từng có container
-> `rims-postgres` với `restart: unless-stopped`; mỗi lần bật Docker là nó sống
-> dậy, chiếm cổng 5432 và che mất PostgreSQL portable — `localhost:5432` trỏ vào
-> một cơ sở dữ liệu rỗng khác, nhìn y như mất sạch dữ liệu. Container đó đã xoá.
+> ⚠️ **Đừng dựng PostgreSQL cho dev bằng Docker kèm `restart: unless-stopped`.**
+> Mỗi lần bật Docker là container sống dậy, chiếm cổng 5432 và che mất
+> PostgreSQL cài sẵn — `localhost:5432` trỏ vào một cơ sở dữ liệu rỗng khác,
+> nhìn y như mất sạch dữ liệu.
 
 ---
 
-## Phụ lục C — Những lỗi chỉ lộ ra khi deploy
+## Phụ lục B — Những lỗi chỉ lộ ra khi deploy
 
 Bốn lỗi tìm được trong quá trình này, đều **không** nhìn thấy khi chạy
 `mvn spring-boot:run` ở máy:
@@ -235,36 +383,35 @@ Bốn lỗi tìm được trong quá trình này, đều **không** nhìn thấy
 | `npm ci` đứt vì thiếu `@emnapi/*` | Lockfile sinh trên Windows thiếu gói Linux cần; npm trên Windows vẫn báo "đồng bộ" |
 | Hoá đơn PDF chết | `fontResource.getFile()` chỉ chạy khi font nằm rời trên đĩa. Đóng thành jar thì font nằm trong jar, không có đường dẫn tệp nào trỏ tới |
 | VNPay trả khách về `localhost` | Địa chỉ trả về bị ghi cứng trong mã, biến `VNPAY_RETURN_URL` hoàn toàn vô tác dụng |
-| Quản trị viên quên mật khẩu là mất tài khoản | `resetPassword` bảo "dùng chức năng Quên mật khẩu", mà chính luồng đó lại chặn Quản trị viên — hai nhánh chỉ sang nhau |
+| Quản trị viên quên mật khẩu là mất tài khoản | `resetPassword` bảo "dùng chức năng Quên mật khẩu", mà chính luồng đó lại chặn quản trị viên — hai nhánh chỉ sang nhau |
 
 Bài học: **thử bằng jar hoặc bằng container**, đừng chỉ thử bằng
 `mvn spring-boot:run`.
 
 ---
 
-## Phụ lục D — Hỏng thì xem đâu
+## Phụ lục C — Hỏng thì xem đâu
 
 | Triệu chứng | Nhiều khả năng là |
 | --- | --- |
-| Trang trắng, F12 thấy 401 ở `/assets/*.js` | `SecurityConfig` bị sửa lại thành `.anyRequest().authenticated()` |
+| Trang trắng, F12 thấy 401 ở `/assets/*.js` | `SecurityConfig` bị sửa thành `.anyRequest().authenticated()` |
 | F5 ở màn sâu ra 404 | `SpaResourceConfig` không được nạp, hoặc `dist` chưa vào `resources/static` |
 | `Schema-validation: missing table` | `SQL_INIT_MODE` bị đặt thành `never` |
-| `connection closed` ở request đầu sau lúc vắng | `max-lifetime` của Hikari bị nới dài hơn ngưỡng Neon cắt |
+| `connection closed` ở request đầu sau lúc vắng | `max-lifetime` của Hikari bị nới dài hơn ngưỡng Neon cắt kết nối |
 | Quên mật khẩu trả 503 | `BREVO_API_KEY` sai, `MAIL_FROM_EMAIL` chưa xác minh, hoặc hết hạn mức 300 thư/ngày. Log ghi nguyên văn lý do Brevo trả về |
+| `Invalid CORS request` | `FRONTEND_URL` không khớp URL thật. `CorsConfig` chỉ cho đúng **một** origin |
 | App dừng lúc khởi động, log nói thiếu biến | Đúng như log nói — mọi chốt đều in ra tên biến còn thiếu |
 | VNPay trả về `localhost` | `VNPAY_RETURN_URL` chưa đặt, hoặc chưa khai lại bên VNPay |
-| Email admin sai mà sửa biến không ăn thua | `RIMS_ADMIN_EMAIL` bị đóng đinh ở lần khởi động đầu. Phải `UPDATE` thẳng trong cơ sở dữ liệu |
-| Lượt đặt bàn không tự đổi trạng thái | Dịch vụ đang ngủ — xem Bước 7 |
-| Ở máy: dữ liệu "biến mất" | Có Postgres thứ hai chiếm cổng 5432 — xem cảnh báo ở phụ lục B |
+| Email admin sai mà sửa biến không ăn thua | Xem ghi chú ở bước 6 |
+| Lượt đặt bàn không tự đổi trạng thái | Dịch vụ đang ngủ — xem bước 8 |
+| Build Render lỗi ở `npm ci` | Xem ghi chú lockfile ở phụ lục A |
 
 ---
 
-## Phụ lục E — Dọn dữ liệu
+## Phụ lục D — Dọn dữ liệu
 
-Trạng thái hiện tại của Neon: **1 tài khoản `admin`**, 14 bàn, 9 danh mục,
-43 món, **0** đơn / hoá đơn / thanh toán / lượt đặt.
-
-Quét sạch phần giao dịch bất cứ lúc nào — thứ tự đã theo đúng khoá ngoại:
+Quét sạch phần giao dịch, giữ nguyên tài khoản, bàn, danh mục và món. Thứ tự đã
+theo đúng khoá ngoại:
 
 ```sql
 BEGIN;
@@ -290,35 +437,10 @@ ALTER TABLE reservations ALTER COLUMN reservation_id RESTART WITH 1;
 COMMIT;
 ```
 
-Giữ nguyên tài khoản, bàn, danh mục và món — chỉ quét sạch phần giao dịch.
-
----
-
-## Phụ lục F — Lệnh hay dùng ở máy
+Nối vào Neon để chạy:
 
 ```bash
-# PostgreSQL portable — phải chạy lại sau mỗi lần khởi động máy
-MSYS_NO_PATHCONV=1 /c/Users/pc/pgsql-dl/out/pgsql/bin/pg_ctl \
-  -D C:/Users/pc/pgsql-data -l C:/Users/pc/pgsql-data/server.log start
-
-# Nối vào cơ sở dữ liệu ở máy
-PGPASSWORD=<mật khẩu> /c/Users/pc/pgsql-dl/out/pgsql/bin/psql \
-  -U postgres -h localhost -d rims_db
-
-# Nối vào Neon
-PGPASSWORD=<mật khẩu Neon> /c/Users/pc/pgsql-dl/out/pgsql/bin/psql \
-  "host=<host>.neon.tech port=5432 dbname=neondb user=neondb_owner sslmode=require"
-
-# Backend  (thư mục backend/rims-api)
-./mvnw spring-boot:run
-
-# Frontend (thư mục frontend)
-npm run dev
-
-# Test
-./mvnw test        # backend, 108 test
-npx vitest run     # frontend, 45 test
-
-# Chụp lại một màn để đưa vào tài liệu
-node tools/look.mjs /admin/dishes admin sáng 1440
+psql "postgresql://<user>:<mật-khẩu>@ep-xxx.region.aws.neon.tech/rims_db?sslmode=require"
 ```
+
+Hoặc dùng thẳng **SQL Editor** trên giao diện web của Neon.

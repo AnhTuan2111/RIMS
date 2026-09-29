@@ -144,14 +144,221 @@ const ROUTES = [
 
     {g: 'khach', n: '29-khach-dat-ban', p: '/customer/reservations', as: 'kh001'},
 
-    {g: 'phuc-vu', n: '22b-dat-ban-cua-ban', p: '/waiter/tables/1/reservation', as: 'waiter01'},
+    // Màn này chỉ mở được khi bàn đang ở trạng thái RESERVED — tức là có lượt
+    // đặt sắp tới giờ và bộ lập lịch 60 giây đã đánh dấu. Muốn chụp thì phải
+    // dựng sẵn một lượt đặt cách hiện tại dưới 30 phút cho đúng bàn này.
+    {g: 'phuc-vu', n: '22b-dat-ban-cua-ban', p: '/waiter/tables/6/reservation', as: 'waiter01'},
     {g: 'phuc-vu', n: '22c-sua-dat-ban', p: '/waiter/reservations/2/edit', as: 'waiter01'},
 
     {g: 'thu-ngan', n: '23b-thanh-toan-ok', p: '/payment-success?invoiceId=1', as: 'cashier01'},
     {g: 'thu-ngan', n: '23c-thanh-toan-loi', p: '/payment-failed', as: 'cashier01'},
 
     {g: 'vo', n: '24-doi-mat-khau', p: '/change-password', as: 'admin'},
+
+    // ── Panel và hộp thoại ────────────────────────────────────────────────
+    // Tài liệu đặc tả từng thứ này như một màn riêng, nhưng trong app chúng
+    // không có route: phải bấm mới hiện. Chỉ chụp ở 1440 (xem ghi chú ở
+    // vòng lặp bên dưới).
+    {
+        g: 'quan-tri',
+        n: '10b-danh-muc-them',
+        p: '/admin/categories',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: 'THÊM DANH MỤC'}).first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '10c-danh-muc-chi-tiet',
+        p: '/admin/categories',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.locator('button[title="Xem chi tiết"]').first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '10d-danh-muc-sua',
+        p: '/admin/categories',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.locator('button[title="Chỉnh sửa"]').first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '11b-mon-them',
+        p: '/admin/dishes',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: 'THÊM MÓN ĂN'}).first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '11c-mon-chi-tiet',
+        p: '/admin/dishes',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.locator('button[title="Xem chi tiết"]').first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '11d-mon-sua',
+        p: '/admin/dishes',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.locator('button[title="Chỉnh sửa"]').first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '12b-tai-khoan-chi-tiet',
+        p: '/admin/users',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.locator('button[title="Xem chi tiết"]').first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '12c-tai-khoan-sua',
+        p: '/admin/users',
+        as: 'admin',
+        chiRong: 1440,
+        mo: (page) => page.locator('button[title="Chỉnh sửa"]').first().click(),
+    },
+    {
+        g: 'quan-tri',
+        n: '12d-tai-khoan-them',
+        p: '/admin/users',
+        as: 'admin',
+        chiRong: 1440,
+        // Nhãn thật là "+ THÊM NHÂN VIÊN"; khớp theo tên hiển thị không ăn,
+        // nên bám vào lớp — trên màn này chỉ có đúng một nút chính.
+        mo: (page) => page.locator('button.rk-btn--primary').first().click(),
+    },
+
+    {
+        g: 'bep',
+        n: '17b-chi-tiet-mon',
+        p: '/chef/orders',
+        as: 'chef01',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: 'CHI TIẾT'}).first().click(),
+    },
+
+    {
+        g: 'khach',
+        n: '29b-luot-dat-cua-toi',
+        p: '/customer/reservations',
+        as: 'kh001',
+        chiRong: 1440,
+        mo: (page) => page.getByRole('button', {name: 'Lượt đặt của tôi'}).first().click(),
+    },
 ]
+
+/** Bấm vào bàn đang phục vụ để mở panel chi tiết đơn của thu ngân. */
+const moBanDangPhucVu = async (page) => {
+    await page.locator('button.rk-tablecard--busy').first().click()
+    await page.waitForSelector('text=Chi tiết đơn hàng', {timeout: 8000})
+}
+
+/**
+ * Mở panel của một bàn THU TIỀN ĐƯỢC, không phải bàn đầu danh sách.
+ *
+ * <p>Nút "Thanh toán" bị khoá chừng nào bếp chưa báo xong hết món, nên bàn nào
+ * còn món đang làm thì mọi bước sau đều treo. Duyệt lần lượt các bàn đang phục
+ * vụ cho tới khi gặp bàn mở được nút.
+ */
+const moBanThanhToanDuoc = async (page) => {
+    const the = page.locator('button.rk-tablecard--busy')
+    const soThe = await the.count()
+
+    for (let i = 0; i < soThe; i++) {
+        await the.nth(i).click()
+        await page.waitForSelector('text=Chi tiết đơn hàng', {timeout: 8000})
+
+        const nut = page.getByRole('button', {name: 'Thanh toán'}).first()
+        if (await nut.isEnabled().catch(() => false)) return nut
+    }
+
+    throw new Error('không có bàn nào thu tiền được — bếp còn món chưa xong')
+}
+
+ROUTES.push(
+    {
+        g: 'thu-ngan',
+        n: '27b-chi-tiet-don',
+        p: '/cashier/payments',
+        as: 'cashier01',
+        chiRong: 1440,
+        mo: moBanDangPhucVu,
+    },
+    {
+        g: 'thu-ngan',
+        n: '27c-tich-diem',
+        p: '/cashier/payments',
+        as: 'cashier01',
+        chiRong: 1440,
+        mo: async (page) => {
+            await moBanDangPhucVu(page)
+            // Số của khách đã có trong CSDL: panel phải tìm ra và hiện điểm.
+            await page.fill('input[aria-label="Số điện thoại khách hàng"]', '0901000001')
+            await page.waitForTimeout(1200)
+        },
+    },
+    {
+        g: 'thu-ngan',
+        n: '27d-khach-moi',
+        p: '/cashier/payments',
+        as: 'cashier01',
+        chiRong: 1440,
+        mo: async (page) => {
+            await moBanDangPhucVu(page)
+            // Số chưa có: panel phải chuyển sang mời đăng ký khách mới.
+            await page.fill('input[aria-label="Số điện thoại khách hàng"]', '0938887766')
+            await page.waitForTimeout(1200)
+        },
+    },
+    {
+        g: 'thu-ngan',
+        n: '27e-chon-phuong-thuc',
+        p: '/cashier/payments',
+        as: 'cashier01',
+        chiRong: 1440,
+        mo: async (page) => {
+            const nut = await moBanThanhToanDuoc(page)
+            await nut.click()
+            await page.waitForSelector('.rk-choicegrid', {timeout: 8000})
+        },
+    },
+    {
+        g: 'thu-ngan',
+        n: '27f-tien-mat',
+        p: '/cashier/payments',
+        as: 'cashier01',
+        chiRong: 1440,
+        mo: async (page) => {
+            const nut = await moBanThanhToanDuoc(page)
+            await nut.click()
+            await page.waitForSelector('.rk-choicegrid', {timeout: 8000})
+            await page.getByRole('button', {name: /Tiền mặt/}).first().click()
+            await page.waitForTimeout(500)
+        },
+    },
+    {
+        g: 'thu-ngan',
+        n: '27g-vnpay',
+        p: '/cashier/payments',
+        as: 'cashier01',
+        chiRong: 1440,
+        mo: async (page) => {
+            const nut = await moBanThanhToanDuoc(page)
+            await nut.click()
+            await page.waitForSelector('.rk-choicegrid', {timeout: 8000})
+            // Backend trả phương thức là QRCODE nên nút hiện chữ "MÃ QR",
+            // không phải "VNPay" như tên gọi trong tài liệu.
+            await page.getByRole('button', {name: 'MÃ QR'}).first().click()
+            await page.waitForTimeout(500)
+        },
+    },
+)
 
 const args = Object.fromEntries(
     process.argv.slice(2).map((a) => {
@@ -229,8 +436,26 @@ for (const scheme of SCHEMES) {
                 signedIn = route.as ?? null
             }
 
+            // Pop-up và panel chỉ chụp ở cỡ rộng: tài liệu dùng ảnh máy tính,
+            // và mỗi lần mở lại là một lần đụng vào dữ liệu thật (khoá đơn,
+            // tìm khách) — chạy sáu lượt thì trạng thái trôi mất.
+            if (route.chiRong && width !== route.chiRong) continue
+
             await page.goto(BASE + route.p, {waitUntil: 'networkidle'}).catch(() => {})
             await page.waitForTimeout(700)
+
+            // `mo` bấm vào đúng chỗ để mở panel hoặc hộp thoại trước khi chụp.
+            // Hỏng thì phải kêu lên: ảnh chụp được vẫn là màn nền, nhìn qua
+            // tưởng đúng mà thực ra thiếu hẳn thứ cần minh hoạ.
+            if (route.mo) {
+                try {
+                    await route.mo(page)
+                    await page.waitForTimeout(500)
+                } catch (e) {
+                    problems.push(`MỞ HỎNG — ${route.n} · ${String(e).slice(0, 90)}`)
+                    console.log(`  ! ${route.n}  mở hỏng: ${String(e).slice(0, 60)}`)
+                }
+            }
 
             const nodes = await page
                 .evaluate(
