@@ -890,12 +890,6 @@ button.rk-chip:hover {
     gap: var(--rims-space-5);
 }
 
-.rk-grid {
-    display: grid;
-    gap: var(--rims-space-4);
-    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-}
-
 /* ---------- Icon ----------
    Toàn bộ icon lấy từ bảng ICONS, cùng một nét vẽ. Không dùng emoji. */
 
@@ -1927,32 +1921,6 @@ textarea.rk-input {
     border-bottom: 1px solid var(--rims-line);
 }
 
-.rk-card__title {
-    margin: 0;
-    color: var(--rims-ink);
-    font-size: var(--rims-text-lg);
-    font-weight: var(--rims-weight-bold);
-}
-
-.rk-card__desc {
-    margin: var(--rims-space-1) 0 0;
-    color: var(--rims-ink-2);
-    font-size: var(--rims-text-sm);
-}
-
-.rk-card__body {
-    padding: var(--rims-space-6);
-}
-
-.rk-card__foot {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--rims-space-2);
-    padding: var(--rims-space-4) var(--rims-space-6);
-    border-top: 1px solid var(--rims-line);
-}
-
 /* ---------- Tiêu đề một mục bên trong thẻ ---------- */
 
 .rk-sectiontitle {
@@ -2470,19 +2438,6 @@ textarea.rk-input {
     border: 1px solid var(--rims-alert-line);
     border-radius: var(--rims-radius-md);
     background: var(--rims-alert-soft);
-}
-
-.rk-dangerzone__title {
-    margin: 0 0 var(--rims-space-1);
-    color: var(--rims-alert);
-    font-size: var(--rims-text-sm);
-    font-weight: var(--rims-weight-bold);
-}
-
-.rk-dangerzone__desc {
-    margin: 0 0 var(--rims-space-3);
-    color: var(--rims-ink-2);
-    font-size: var(--rims-text-xs);
 }
 
 /* ---------- Hàng tỉ lệ có nhãn ----------
@@ -5486,7 +5441,6 @@ a.rk-statcard:focus-visible {
 .rk-attention__who strong {
     color: var(--rims-ink);
 }
-
 
 /* =========================================================================
    Bộ màu "Mực & Son" — lối trình bày
