@@ -95,6 +95,7 @@ const ROUTES = [
         hover: '.rk-planbtn',
     },
     {g: 'quan-tri', n: '15-nha-hang', p: '/admin/restaurant', as: 'admin'},
+    {g: 'quan-tri', n: '15b-chi-tiet-hoa-don', p: '/admin/invoices/1', as: 'admin'},
 
     {g: 'bep', n: '16-bep-tong-quan', p: '/chef/dashboard', as: 'chef01'},
     {
@@ -142,6 +143,14 @@ const ROUTES = [
     {g: 'thu-ngan', n: '28-thu-ngan-hoa-don', p: '/cashier/invoices', as: 'cashier01'},
 
     {g: 'khach', n: '29-khach-dat-ban', p: '/customer/reservations', as: 'kh001'},
+
+    {g: 'phuc-vu', n: '22b-dat-ban-cua-ban', p: '/waiter/tables/1/reservation', as: 'waiter01'},
+    {g: 'phuc-vu', n: '22c-sua-dat-ban', p: '/waiter/reservations/2/edit', as: 'waiter01'},
+
+    {g: 'thu-ngan', n: '23b-thanh-toan-ok', p: '/payment-success?invoiceId=1', as: 'cashier01'},
+    {g: 'thu-ngan', n: '23c-thanh-toan-loi', p: '/payment-failed', as: 'cashier01'},
+
+    {g: 'vo', n: '24-doi-mat-khau', p: '/change-password', as: 'admin'},
 ]
 
 const args = Object.fromEntries(

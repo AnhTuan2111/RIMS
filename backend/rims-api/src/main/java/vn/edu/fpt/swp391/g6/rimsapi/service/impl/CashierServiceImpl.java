@@ -116,7 +116,23 @@ public class CashierServiceImpl implements CashierService
         return tables.stream()
                 .map(t -> {
                     Order order = tableOrderMap.get(t.getId());
-                    TableStatus cashierStatus = (order != null) ? TableStatus.SERVING : TableStatus.AVAILABLE;
+
+                    // Có đơn đang mở thì chắc chắn là đang phục vụ. Không có đơn
+                    // thì PHẢI đọc trạng thái thật của bàn, chứ không mặc định là
+                    // trống: bàn đang được giữ cho một lượt đặt sắp tới cũng không
+                    // có đơn nào, mà báo nó trống thì màn Sơ đồ bàn nói sai, và
+                    // cột "Đã đặt trước" ngay cạnh đó không bao giờ có gì để hiện.
+                    TableStatus cashierStatus;
+                    if (order != null)
+                    {
+                        cashierStatus = TableStatus.SERVING;
+                    } else if (t.getStatus() == TableStatus.RESERVED)
+                    {
+                        cashierStatus = TableStatus.RESERVED;
+                    } else
+                    {
+                        cashierStatus = TableStatus.AVAILABLE;
+                    }
                     return TableDashboardResponse.builder()
                             .tableId(t.getId())
                             .tableNumber(t.getTableNumber())
