@@ -81,8 +81,25 @@ bị bắt đổi ở lần đăng nhập đầu.
       `https://yamazato.onrender.com/rims/public/restaurant`:
 
       Nhịp       mỗi 10 phút
-      Khung giờ  07:30 – 20:30 giờ Việt Nam
+      Khung giờ  07:00 – 20:00 giờ Việt Nam
       Ngày       tất cả các ngày
+
+      Ping đúng đường dẫn trên, đừng ping `/`. Trang chủ trả `index.html`
+      của React từ file tĩnh trong jar: 3,5 KB và **không chạm vào cơ sở dữ
+      liệu**, nên Neon chết mà cron vẫn báo 200 OK. `/rims/public/restaurant`
+      trả 344 byte JSON và có đọc DB thật.
+
+> **Cú ping đầu tiên mỗi sáng sẽ báo lỗi, và như vậy là bình thường.**
+> cron-job.org chờ phản hồi tối đa 30 giây, còn khởi động lạnh mất gần 3
+> phút — không đời nào kịp. Nhưng chính cú ping đó đánh thức dịch vụ, nên
+> lần ping sau (10 phút sau) sẽ xanh.
+>
+> Đó là lý do khung giờ bắt đầu lúc **07:00** chứ không phải 07:30: hai cú
+> ping đầu dùng để hâm nóng, tới 07:30 mở cửa là app đã sẵn sàng. Vẫn đúng
+> 13 tiếng/ngày nên không đụng hạn mức Neon.
+>
+> Nhớ **tắt thông báo lỗi** cho job này, hoặc bỏ tuỳ chọn tự vô hiệu hoá khi
+> lỗi liên tiếp — nếu không cron-job.org sẽ tự tắt job sau vài sáng.
 
 - [ ] Vài ngày đầu ngó **Neon → Usage** xem compute tiêu bao nhiêu.
 
