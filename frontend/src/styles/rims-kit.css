@@ -1484,59 +1484,6 @@ textarea.rk-input {
     filter: brightness(1.08);
 }
 
-/* ---------- Nút chuyển chế độ hiển thị ----------
-   Nằm trong thanh bên, vốn luôn tối, nên dùng bộ màu trên nền tối. */
-
-.rk-themetoggle {
-    /* Nằm dưới vùng menu cuộn được. Không co lại, để mục menu cuối không bị
-       trông như bị cắt cụt. */
-    flex: none;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    margin-top: var(--rims-space-4);
-    padding: 3px;
-    border: 1px solid rgb(var(--rims-tint-hi) / 12%);
-    border-radius: var(--rims-radius-md);
-    background: rgb(var(--rims-tint-hi) / 5%);
-}
-
-.rk-themetoggle__btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding: var(--rims-space-2) 2px;
-    border: 0;
-    border-radius: var(--rims-radius-sm);
-    background: transparent;
-    color: var(--rims-ink-on-dark-2);
-    font: inherit;
-    font-size: var(--rims-text-xs);
-    cursor: pointer;
-    transition: background var(--rims-dur-short) var(--rims-ease-out);
-}
-
-.rk-themetoggle__btn:hover {
-    background: rgb(var(--rims-tint-hi) / 8%);
-    color: var(--rims-ink-on-dark);
-}
-
-.rk-themetoggle__btn[aria-pressed='true'] {
-    background: rgb(var(--rims-tint-hi) / 14%);
-    color: var(--rims-ink-on-dark);
-}
-
-.rk-themetoggle__btn:focus-visible {
-    outline: var(--rims-focus-ring) solid var(--rims-gold);
-    outline-offset: 1px;
-}
-
-.rk-themetoggle__label {
-    line-height: 1.2;
-    white-space: nowrap;
-}
-
 /* ---------- Bảng dữ liệu ----------
 
    Bốn màn Quản trị từng dựng bảng riêng với gần như cùng một bộ quy tắc, chỉ
@@ -5304,7 +5251,6 @@ a.rk-statcard:focus-visible {
     .rk-iconbtn,
     .rk-segment__btn,
     .rk-tabs__btn,
-    .rk-themetoggle__btn,
     .rk-pager__btn,
     .rk-qty__btn,
     .rk-stepper__btn,

@@ -2,8 +2,8 @@ import {useLocation} from 'react-router-dom'
 
 import {matchMenu} from '@/app/config/roleMenus'
 import {useActor} from '@/app/providers/ActorContext'
-import {useTheme} from '@/app/providers/useTheme'
 import {Icon} from '@/shared/components/ui/Icon'
+import {ThemeToggle} from '@/shared/components/ui/ThemeToggle'
 import {useShiftClock} from '@/shared/hooks/useShiftClock'
 
 type DashboardTopbarProps = {
@@ -28,7 +28,6 @@ export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
     const location = useLocation()
     const {entry, item} = matchMenu(actor, location.pathname)
     const clock = useShiftClock()
-    const {preference, setPreference, resolved} = useTheme()
 
     return (
         <header className="rk-top">
@@ -61,39 +60,7 @@ export function DashboardTopbar({onLogout, onOpenMenu}: DashboardTopbarProps) {
                     <span className="rk-clock__time">{clock.time}</span>
                 </span>
 
-                <button
-                    type="button"
-                    className="rk-iconbtn"
-                    // Ba trạng thái quay vòng: theo máy -> sáng -> tối -> theo máy.
-                    // Một nút thay cho ba, vì hàng này phải sống được ở 375px.
-                    aria-label={
-                        preference === 'auto'
-                            ? 'Chế độ theo máy, bấm để chuyển sang sáng'
-                            : preference === 'light'
-                              ? 'Chế độ sáng, bấm để chuyển sang tối'
-                              : 'Chế độ tối, bấm để theo máy'
-                    }
-                    onClick={() =>
-                        setPreference(
-                            preference === 'auto'
-                                ? 'light'
-                                : preference === 'light'
-                                  ? 'dark'
-                                  : 'auto',
-                        )
-                    }
-                >
-                    <Icon
-                        name={
-                            preference === 'auto'
-                                ? 'contrast'
-                                : resolved === 'dark'
-                                  ? 'moon'
-                                  : 'sun'
-                        }
-                        className="rk-icon"
-                    />
-                </button>
+                <ThemeToggle />
 
                 <button
                     id="btn-logout"
