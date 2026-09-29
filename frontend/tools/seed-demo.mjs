@@ -1,14 +1,31 @@
 /**
- * Dựng dữ liệu vận hành để XEM ĐƯỢC các màn.
+ * Dựng những thứ data.sql cố ý không dựng: TÀI KHOẢN và SƠ ĐỒ MẶT BẰNG.
  *
- * <p>data.sql cố ý không seed tài khoản nào ngoài admin, và không seed đơn
- * hàng nào. Đúng cho một kho mã nguồn — nhưng nghĩa là mọi màn vận hành đều ở
- * trạng thái rỗng, và không thể nhìn ra thiết kế đúng hay sai từ một màn rỗng.
+ * <p>Phân công rõ ràng:
+ * <ul>
+ *   <li>data.sql lo dữ liệu danh mục — 14 bàn, 9 danh mục, 43 món. Nó chạy tự
+ *       động lúc khởi động nên không cần ai gọi.</li>
+ *   <li>Script này lo phần còn lại: tài khoản nhân viên, tài khoản khách, và
+ *       toạ độ các bàn trên sơ đồ.</li>
+ * </ul>
  *
- * <p>Script này gọi ĐÚNG API thật, không chèn thẳng vào cơ sở dữ liệu: nếu một
- * endpoint hỏng thì nó hỏng ở đây, chứ không phải lúc đang chụp màn.
+ * <p>VÌ SAO data.sql KHÔNG SEED TÀI KHOẢN: commit một chuỗi băm mật khẩu vào
+ * kho mã nguồn nghĩa là ai đọc được repo cũng đăng nhập được trước chủ quán.
+ * Tài khoản quản trị đầu tiên do BootstrapAdmin tạo từ biến môi trường, còn
+ * nhân viên thì tạo qua đúng API thật ở đây.
  *
- * Dùng:  node tools/seed-demo.mjs <mật-khẩu-admin>
+ * <p>KHÔNG dựng đơn hàng, lượt đặt bàn hay hoá đơn. Trước đây script này có
+ * thêm bốn bước làm những việc đó cho đẹp màn hình lúc chụp ảnh, nhưng chạy
+ * nó lên một bản cài thật là bẩn dữ liệu ngay — mà gỡ ra thì phải xoá tay
+ * từng bảng theo đúng thứ tự khoá ngoại. Muốn có dữ liệu vận hành để xem thì
+ * thao tác trên giao diện như người dùng thật.
+ *
+ * <p>Gọi ĐÚNG API thật chứ không chèn thẳng vào cơ sở dữ liệu: nếu một endpoint
+ * hỏng thì nó hỏng ở đây, chứ không phải lúc đang demo.
+ *
+ * Dùng:
+ *   node tools/seed-demo.mjs <mật-khẩu-admin>
+ *   RIMS_API=https://yamazato.onrender.com/rims node tools/seed-demo.mjs <mk>
  */
 
 const API = process.env.RIMS_API ?? 'http://localhost:8080/rims'
@@ -188,158 +205,8 @@ async function main() {
         console.log('   ·', String(error.message).slice(0, 120))
     }
 
-    console.log('5 · đăng nhập phục vụ và gọi món')
-    await loginReady('waiter01', INIT_PW, STAFF_PW)
-
-    const tables = await call('GET', '/waiter/tables')
-    const menu = await call('GET', '/waiter/menu')
-
-    console.log(`   ${tables.length} bàn · ${menu.length} món trong thực đơn`)
-
-    const free = tables.filter((t) => t.status === 'AVAILABLE')
-
-    // Bốn đơn ở bốn bàn khác nhau, mỗi đơn vài món — đủ để màn bếp có phiếu,
-    // màn thu ngân có bàn đang phục vụ, và bảng ba cột có gì để xếp.
-    const plans = [
-        {tableIndex: 0, picks: [0, 5, 10], note: 'Không wasabi'},
-        {tableIndex: 1, picks: [11, 12, 20], note: ''},
-        {tableIndex: 2, picks: [15, 16, 25, 30], note: 'Ít cay, thêm gừng'},
-        {tableIndex: 4, picks: [2, 34, 38], note: ''},
-    ]
-
-    const orders = []
-
-    for (const plan of plans) {
-        const table = free[plan.tableIndex]
-
-        if (!table) continue
-
-        const items = plan.picks
-            .map((i) => menu[i])
-            .filter(Boolean)
-            .map((dish, k) => ({
-                dishId: dish.dishId,
-                quantity: 1 + (k % 3),
-                note: k === 0 ? plan.note : undefined,
-            }))
-
-        try {
-            const order = await call('POST', '/waiter/orders', {
-                tableId: table.tableId,
-                items,
-            })
-            orders.push(order)
-            console.log(`   + đơn bàn ${table.tableNumber}: ${items.length} món`)
-        } catch (error) {
-            console.log(
-                '   ·',
-                table.tableNumber,
-                '—',
-                String(error.message).slice(0, 90),
-            )
-        }
-    }
-
-    console.log('6 · đặt bàn trước')
-    const remaining = tables.filter((t) => t.status === 'AVAILABLE').slice(-3)
-    const now = new Date()
-
-    for (const [i, table] of remaining.entries()) {
-        const when = new Date(now)
-        when.setDate(now.getDate() + 1)
-        when.setHours(18 + i, 30, 0, 0)
-
-        try {
-            await call('POST', '/waiter/reservations', {
-                customerName: ['Nguyễn Văn An', 'Trần Thị Bích', 'Đặng Quốc Cường'][
-                    i % 3
-                ],
-                phone: `09123450${10 + i}`,
-                note: i === 1 ? 'Sinh nhật, cần bánh và nến' : undefined,
-                tableId: table.tableId,
-                reservationTime: when.toISOString().slice(0, 19),
-            })
-            console.log('   + đặt bàn', table.tableNumber)
-        } catch (error) {
-            console.log(
-                '   ·',
-                table.tableNumber,
-                '—',
-                String(error.message).slice(0, 90),
-            )
-        }
-    }
-
-    console.log('7 · bếp làm xong vài món')
-    await loginReady('chef01', INIT_PW, STAFF_PW)
-
-    const queue = await call('GET', '/chef/orders')
-    console.log(`   ${queue.length} món trong hàng đợi`)
-
-    for (const item of queue.slice(0, 3)) {
-        try {
-            await call('PUT', `/chef/orders/${item.orderItemId}/status`, {
-                status: 'COMPLETED',
-            })
-            console.log('   ✓', item.dishName)
-        } catch (error) {
-            console.log('   ·', item.dishName, '—', String(error.message).slice(0, 90))
-        }
-    }
-
-    for (const item of queue.slice(3, 4)) {
-        try {
-            await call('PUT', `/chef/orders/${item.orderItemId}/cancel`, {
-                reason: 'Hết nguyên liệu',
-            })
-            console.log('   ✗', item.dishName, '(huỷ)')
-        } catch (error) {
-            console.log('   ·', item.dishName, '—', String(error.message).slice(0, 90))
-        }
-    }
-
-    console.log('8 · thu ngân thanh toán một bàn')
-    await loginReady('cashier01', INIT_PW, STAFF_PW)
-
-    const cashierTables = await call('GET', '/cashier/tables')
-    const serving = cashierTables.filter((t) => t.status === 'SERVING')
-    console.log(`   ${serving.length} bàn đang phục vụ`)
-
-    if (serving.length > 0) {
-        const target = serving[0]
-
-        try {
-            const detail = await call('GET', `/cashier/orders/${target.orderId}`)
-
-            const amountPaid = Math.ceil(detail.finalAmount / 10000) * 10000
-
-            // HAI BƯỚC, không phải một. `/payment` chỉ KHOÁ đơn để số tiền
-            // không đổi giữa chừng; `/complete-cash` mới thật sự thu tiền và
-            // sinh hoá đơn. Bản đầu của script chỉ gọi bước một rồi in ra "đã
-            // thu" — nên màn Lịch sử hoá đơn trống trơn mà không ai biết vì sao.
-            await call('POST', `/cashier/orders/${target.orderId}/payment`, {
-                paymentMethod: 'CASH',
-                amountPaid,
-            })
-
-            const paid = await call(
-                'POST',
-                `/cashier/orders/${target.orderId}/complete-cash`,
-                {paymentMethod: 'CASH', amountPaid},
-            )
-
-            console.log(
-                '   ✓ đã thu bàn',
-                target.tableNumber,
-                '· hoá đơn',
-                paid.invoiceId,
-            )
-        } catch (error) {
-            console.log('   ·', String(error.message).slice(0, 140))
-        }
-    }
-
     console.log('\nXong. Mật khẩu mọi tài khoản:', STAFF_PW)
+    console.log('Bàn, danh mục và món ăn do data.sql lo — script này không đụng tới.')
 }
 
 main().catch((error) => {
