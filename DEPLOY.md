@@ -56,13 +56,13 @@ HTTP API của Brevo — kể cả khi chạy ở máy. Thiếu khoá thì backe
 
 Làm sớm: tài khoản mới đôi khi phải chờ Brevo duyệt thủ công mới gửi được.
 
-- [ ] Tạo tài khoản tại [https://www.brevo.com](https://www.brevo.com).
-- [ ] **Senders, Domains & Dedicated IPs → Senders → Add a sender**: thêm địa chỉ
+- [x] Tạo tài khoản tại [https://www.brevo.com](https://www.brevo.com).
+- [x] **Senders, Domains & Dedicated IPs → Senders → Add a sender**: thêm địa chỉ
   đứng tên gửi. Brevo gửi mã 6 số về chính hộp thư đó. **Không cần sở hữu tên
   miền** — địa chỉ Gmail dùng được.
-- [ ] **SMTP & API → API Keys → Generate a new API key**. Copy ngay, chỉ hiện một
+- [x] **SMTP & API → API Keys → Generate a new API key**. Copy ngay, chỉ hiện một
   lần.
-- [ ] Ghi lại:
+- [x] Ghi lại:
   ```
   BREVO_API_KEY    xkeysib-xxxxxxxx
   MAIL_FROM_EMAIL  <địa chỉ vừa xác minh>
@@ -76,17 +76,17 @@ Làm sớm: tài khoản mới đôi khi phải chờ Brevo duyệt thủ công 
 
 ## Bước 3 — Đẩy code lên GitHub
 
-- [ ] Quyết định Render deploy từ nhánh nào — `develop` hay `main`.
-- [ ] `git push origin develop`
-- [ ] Nếu chọn `main` thì merge `develop` sang `main` rồi đẩy tiếp.
+- [x] Quyết định Render deploy từ nhánh nào — `develop` hay `main`.
+- [x] `git push origin develop`
+- [x] Nếu chọn `main` thì merge `develop` sang `main` rồi đẩy tiếp.
 
 ---
 
 ## Bước 4 — Dịch vụ trên Render
 
-- [ ] Tạo tài khoản [https://render.com](https://render.com) bằng GitHub.
-- [ ] **New → Web Service** → chọn repo `AnhTuan2111/RIMS`.
-- [ ] Điền:
+- [x] Tạo tài khoản [https://render.com](https://render.com) bằng GitHub.
+- [x] **New → Web Service** → chọn repo `AnhTuan2111/RIMS`.
+- [x] Điền:
   ```
   Name             rims-app         ← quyết định luôn URL, xem ghi chú dưới
   Language         Docker
@@ -97,9 +97,9 @@ Làm sớm: tài khoản mới đôi khi phải chờ Brevo duyệt thủ công 
   Instance Type    Free
   ```
 
-- [ ] Điền biến môi trường (bảng dưới).
-- [ ] **Create Web Service**, rồi xem log build.
-- [ ] Log lần đầu phải thấy: tạo bảng → nạp dữ liệu mẫu → `Đã tạo tài khoản quản
+- [x] Điền biến môi trường (bảng dưới).
+- [x] **Create Web Service**, rồi xem log build.
+- [x] Log lần đầu phải thấy: tạo bảng → nạp dữ liệu mẫu → `Đã tạo tài khoản quản
   trị đầu tiên "admin"`→`Tomcat started`.
 
 > **Vòng gà-và-trứng**: `FRONTEND_URL` và `VNPAY_RETURN_URL` cần biết URL dịch
@@ -138,7 +138,7 @@ SMTP nên không có biến nào khác.
 Neon sẽ chỉ có **một** tài khoản `admin` do app tự tạo. Bàn, danh mục và món thì
 `data.sql` đã nạp sẵn. Còn thiếu nhân viên và khách.
 
-- [ ] Đăng nhập `admin` bằng `RIMS_ADMIN_PASSWORD` → bị bắt đổi mật khẩu → đổi.
+- [x] Đăng nhập `admin` bằng `RIMS_ADMIN_PASSWORD` → bị bắt đổi mật khẩu → đổi.
 - [ ] Tạo nhân viên. **Hai cách:**
 
 **Cách A — tự tạo trong màn Quản lý tài khoản.** Chậm hơn nhưng chỉ tạo đúng thứ

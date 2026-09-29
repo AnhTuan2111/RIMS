@@ -16,7 +16,7 @@ export interface ThemeContextValue {
 }
 
 export const ThemeContext = createContext<ThemeContextValue>({
-    preference: 'auto',
+    preference: 'light',
     resolved: 'light',
     setPreference: () => {},
 })
@@ -25,11 +25,20 @@ export function useTheme() {
     return useContext(ThemeContext)
 }
 
+/** Chưa từng chọn thì dùng chế độ sáng. Xem {@link readStoredPreference}. */
+export const MAC_DINH: ThemePreference = 'light'
+
 /**
  * Đọc lựa chọn đã lưu.
  *
+ * <p>Chưa chọn lần nào thì trả về `light`, KHÔNG phải `auto`. Nhà hàng là nơi
+ * nhiều người dùng chung một máy, và máy nào cài sẵn chế độ tối sẽ làm khách
+ * mở thực đơn ra thấy nền đen — không ai chọn thế, chỉ là thừa hưởng cài đặt
+ * của người trước. Mặc định sáng là thứ đoán trước được; ai muốn tối thì tự
+ * đổi, và lựa chọn đó được nhớ.
+ *
  * <p>Ở chế độ riêng tư hoặc khi trình duyệt chặn lưu trữ, việc đọc có thể ném
- * lỗi — lúc đó cứ chạy theo cài đặt hệ điều hành.
+ * lỗi — lúc đó cũng rơi về mặc định.
  */
 export function readStoredPreference(): ThemePreference {
     try {
@@ -42,7 +51,7 @@ export function readStoredPreference(): ThemePreference {
         // không đọc được thì coi như chưa từng chọn
     }
 
-    return 'auto'
+    return MAC_DINH
 }
 
 /**

@@ -10,6 +10,7 @@ import {
 } from '@/shared/api/public'
 import {Icon} from '@/shared/components/ui/Icon'
 import {formatCurrencyShort} from '@/shared/utils/format'
+import {ThemeToggle} from '@/shared/components/ui/ThemeToggle'
 import {duongDanAnh, dungAnhThayThe} from '@/shared/utils/image'
 
 import {DishStrip, type StripDish} from './DishStrip'
@@ -140,7 +141,13 @@ export default function HomePage() {
                         </span>
                     </Link>
 
-                    <HomeAuthPanel />
+                    <div className="rk-home__actions">
+                        {/* Khách cũng cần đổi được, không chỉ nhân viên đã đăng
+                            nhập: trang chủ là màn duy nhất người chưa có tài
+                            khoản nhìn thấy. */}
+                        <ThemeToggle />
+                        <HomeAuthPanel />
+                    </div>
                 </div>
 
                 {/* Băng danh mục DÍNH ngay dưới hàng nhận diện. Thực đơn dài hơn

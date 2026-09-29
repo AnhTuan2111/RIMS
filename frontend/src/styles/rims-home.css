@@ -52,6 +52,17 @@
     padding: var(--rims-space-4) var(--rims-space-6);
 }
 
+/* Công tắc chế độ hiển thị đứng cạnh khối đăng nhập, cùng một cụm bên phải.
+   Cho phép xuống dòng vì ở 375px hai thứ này không nằm vừa một hàng. */
+.rk-home__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--rims-space-3);
+    min-width: 0;
+}
+
 .rk-home__brand {
     display: flex;
     align-items: center;
